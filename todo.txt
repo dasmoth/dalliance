@@ -1,0 +1,181 @@
+Bugs!
+-----
+
+ - FRAME RESIZE: should be able to adjust Known Space.
+ - Zoom slider doesn't get updated in all the places it should.
+ - Validate jumps
+
+Performance
+-----------
+
+ - Performance must stay at least as good as r310
+     + Good way of measuring this?
+ - Browser support:
+     + Mozilla (FF3.5, Camino???)
+     + Safari (3.1 or later)
+     + Chrome.
+     + Does anyone care about Opera?
+     + Not IE<9.  Can we try IE9 developer version?
+     + Could do with a better error message for unsupported browsers.
+ 
+Publishable prototype:
+----------------------
+     
+ - Clean up the rendering pathway, remove isPrototypeOf nastiness.
+ - At least minimal stylesheet support.  
+     + As of r412, we have a simple type -> colour map.  Is that good enough?
+ - Test against ProServer (MyDas?  Others?)
+ - Enable/disable tiers (would a hardwired list be acceptable?)
+     + Disabling now done.  Is the UI okay?
+     + Enabling -- works in principle but needs better UI.
+     + Minimal registry queries?
+ - Configuration of quantitative tracks.
+     + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
+     + Switch between bars/colourways? [Leave this for now]
+ - Slightly more choice in rendering style.  Line graphs?  Non-rectangular glyphs in BoxRenderer?
+     + Line graphs done in r412
+ - At least slightly better state-persistance.
+     + Use localStorage?
+ - Mobile Safari support. 
+     + ??? Not a priority for now due to slow delivery of touch events.
+
+Nice to have
+------------
+
+ - Separate concepts of Known Space and Drawn Space.
+ - Ability to re-bump w/o re-fetching all the data
+     + Should allow more aggressive spec-fetching?
+     + Allow fetches that add to the working set, rather than replacing it.
+  - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
+       think anyone else is doing this, but I'd use it!)
+ - Graphical navigation?
+     + Pop-over with chromosome ideograms?
+ - Other navigation stuff:
+     + Sensible support of DAS feature-by-ID stuff (has anyone done this before?!)
+     + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
+     + Any reason not to just hack the server to do this?
+ - DASSTYLE support
+     + If we implement all the E! extensions, this almost looks useful now.
+ - Registry browser.
+ - Support for a more compact encoding for quantitative tracks.
+     + Will need some server suppport.  
+     + Adding a new encoding to Dazzle shouldn't be too painful.
+     + Any chance at all of getting into DAS/1.6?
+ - User-uploaded data
+     + Round-tripped in via Dastard?
+     + Also interesting to do LOCAL data additions?
+ - Page embedding
+     + Allow multiple browser instances in a given page (i.e. remove all static state).
+     + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
+       How much state to share? 
+ - State persistance between sessions
+     + Use localStorage instead of cookies?
+     + Caching on server?
+     + Add a "make URL" button?
+     + How does this play with browsers that are just one object in a complex page?
+  - Tier groups
+     + Should yZoom together.
+     + Other quantitative stuff?  If we support colourway switching then probably.
+     + Do they have any meaning for non-quant tracks?
+     + Drag together when re-ordering????
+     + How are these defined?  DASSTYLE is hopeless.  Extended <sources> document?
+     
+Blue sky
+--------
+
+ - How to play with the DAS registry?
+    + Could run our own?  With SvgDAS-friendly stylesheets attached?
+    
+ - Tourist mode
+    + Fast movement between POIs.
+ 
+ - Real-time collaborative features
+    + i.e. multiple users viewing a browser with shared state.
+    + Annotation (Using DAS writeback protocols?)
+    + View synchronization?
+       must be fast.  Comet, I suppose.
+    + Chat (presumably something off-the-shelf we can use)
+    
+ - Navigate by blatting user sequences to the genome
+    + How to do this in a DASish world?
+    + Relationship with tourist mode?
+    
+ - How quick can we make getting a new genome up?
+    + Competitive with GBrowse?  Faster would be nice.
+    + Trivial if an E! database exists.
+    + Bee went pretty smoothly.
+    + Substantially a Dazzle/plugins question.
+    
+ - Flip into vertical orientation (AceDB-like!)
+    + How much of the rendering code would end up ori-dependent?
+ 
+ - MultiContigView equivalent?
+ 
+ - Coord-system mapping?
+
+
+The Server Side
+---------------
+ 
+ - Get Ensembl-DAS ready to handle production loads.
+    + Find the connection leak!!!!
+    + Better cache management?
+
+ - Are we better off using JKDBs to serve sequence?
+    + A JKDB-based sequence server could also usefully compute GC composition, etc., etc., on the fly. [done now]
+    
+ - big*-backed servers?
+
+ - BAM-backed servers. 
+    + Done using Picard.  Potential scalability issues in the future but working for now.
+ 
+ - Dazzle replacement (i.e. fast, scalable, DAS middleware).
+    + MyDAS: nope.
+    + Genometry: no way.
+    + Any ideas from Cadastral worth following up?
+    + If I write a new one, would I still do it in Java?
+        * BioJava 1.4?  "BioJava 3"?  New API?
+    + Alternatively... do a "Dazzle 1.5" major update
+        * possible to keep the decent bits while re-doing the plugin API?
+ 
+ - DAS3? :-)
+ 
+
+Open questions
+--------------
+ - Balance between "one true genome browser" and supporting small scale deployments.
+
+ - Originally, the plan was that browsing within Known Space should never trigger
+   a hard refresh.  However, now that we're sending maxbins, that's no longer
+   appropriate since the resolution of quantitative tracks varies depending on
+   scale.
+   
+   Currently we HAVE to do some binning on high-res quantitative data, otherwise
+   the renderers will never keep up.
+   
+   Doing all the binning client side is an option, but it does cause excess network
+   traffic, and might cause performance issues as well.
+   
+   Doing a hard refresh after every zoom (current behaviour) also seems a little
+   hard on the network, and the refreshes are noticable.  Otherwise works well, though.
+   
+   Limited client-side binning coupled by hard refreshses after a big change
+   in resolution might be the nicest option, but more work to code and test.
+   
+   Is it worth trying to identify quantitative tracks (from stylesheets?) and
+   only send maxbins values for tracks where we think it's appropriate?  Then
+   we'd only need to refresh quantitative tracks after a zoom, which will be
+   visually nicer than the current behavious (especially since quantitative tracks
+   are never bumped, and usually fixed-height).  Not obvious where to get the
+   appropriate metadata, though :-(.
+   
+   [UPDATE: DAS1.6 servers should be sending the maxbins/1.0 capability iff they
+   support maxbins.  Dazzle does this now]
+
+ - To what extent do we care about being Good DAS Citizens?
+    + Try to do everything via DAS vs. building our own protocols?
+    + To what extent can we extend DAS1.6
+    + If we do build our own, do we still call it DAS?
+    + Worth participating in future iterations of DAS?  DAS2.0 experience says no.
+    
+ - Is it worth trying to do CS transformations on the client side?
