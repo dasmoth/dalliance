@@ -1071,6 +1071,24 @@ function EPMenuItem(entryPoint) {
     this.nums = stringToNumbersArray(entryPoint.name);
 }
 
+function stringifyObject(o)
+{
+    var s = null;
+    for (k in o) {
+	var v = o[k];
+	if (s) {
+	    s = s + ', ' + k + ':' + v;
+	} else {
+	    s = '{' + k + ':' + v;
+	}
+    }
+    if (s == null) {
+	return '{}';
+    } else {
+	return s + '}';
+    }
+}
+
 function init() 
 {
     //alert(localStorage.getItem('foo'));
@@ -1118,7 +1136,30 @@ function init()
         viewStart = mid - 25000;
         viewEnd = mid + 25000;
     }
-    
+
+    //
+    // Prefetch stylesheets (factor out so it can be done on newly-added tracks?)
+    //
+ 
+    for (var t = 0; t < sources.length; ++t) {
+	var source = sources[t];
+	new DASSource(source.uri).stylesheet(function(stylesheet) {
+	    var sss = '';
+	    var ss = stylesheet.lowZoomStyles;
+	    for (var tt in ss) {
+		sss += tt + ':' + stringifyObject(ss[tt]);
+	    }
+	    alert(sss);
+	},
+	function() {
+	    alert('no SS for ' + source.name);
+	});
+    }
+
+    //
+    // Set up the UI (factor out?)
+    //
+           
     svg = $('#svgHolder').svg().svg('get');
     var svgRoot = svg.root();
     svgRoot.setAttribute('width', '860px');

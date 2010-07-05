@@ -240,6 +240,63 @@ DASSource.prototype.features = function(segment, options, callback) {
     });
 }
 
+function DASStylesheet() {
+    this.highZoomStyles = new Object();
+    this.mediumZoomStyles = new Object();
+    this.lowZoomStyles = new Object();
+}
+
+DASStylesheet.prototype.pushStyle = function(type, zoom, style) {
+    if (!zoom) {
+	this.highZoomStyles[type] = style;
+	this.mediumZoomStyles[type] = style;
+	this.lowZoomStyles[type] = style;
+    } else if (zoom == 'high') {
+	this.highZoomStyles[type] = style;
+    } else if (zoom == 'medium') {
+	this.mediumZoomStyles[type] = style;
+    } else if (zoom == 'low') {
+	this.lowZoomStyles[type] = style;
+    }
+}
+
+function DASStyle() {
+}
+
+DASSource.prototype.stylesheet = function(successCB, failureCB) {
+    var dasURI = this.uri + 'stylesheet';
+    doCrossDomainRequest(dasURI, function(responseXML) {
+	if (!responseXML && failureCB) {
+	    failureCB();
+	}
+	var stylesheet = new DASStylesheet();
+	var typeXMLs = responseXML.getElementsByTagName('TYPE');
+	for (var i = 0; i < typeXMLs.length; ++i) {
+	    var typeStyle = typeXMLs[i];
+	    var type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
+	    var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
+	    for (var gi = 0; gi < glyphXMLs.length; ++gi) {
+		var glyphXML = glyphXMLs[gi];
+		var zoom = glyphXML.getAttribute('zoom');
+		var glyph = childElementOf(glyphXML);
+		var style = new DASStyle();
+		style.glyph = glyph.localName;
+		var child = glyph.firstChild;
+	
+		while (child) {
+		    if (child.nodeType == Node.ELEMENT_NODE) {
+			// alert(child.localName);
+			style[child.localName] = child.firstChild.nodeValue;
+		    }
+		    child = child.nextSibling;
+		}
+		stylesheet.pushStyle(type, zoom, style);
+	    }
+	}
+	successCB(stylesheet);
+    });
+}
+
 //
 // Utility functions
 //
@@ -252,6 +309,20 @@ function elementValue(element, tag)
     } else {
         return null;
     }
+}
+
+function childElementOf(element)
+{
+    if (element.hasChildNodes()) {
+	var child = element.firstChild;
+	do {
+	    if (child.nodeType == Node.ELEMENT_NODE) {
+		return child;
+	    } 
+	    child = child.nextSibling;
+	} while (child != null);
+    }
+    return null;
 }
 
 
