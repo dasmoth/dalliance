@@ -4,6 +4,7 @@ Bugs!
  - FRAME RESIZE: should be able to adjust Known Space.
  - Zoom slider doesn't get updated in all the places it should.
  - Validate jumps
+ - No real visual indication of failed vs. pending track loads.
 
 Performance
 -----------
@@ -38,6 +39,12 @@ Publishable prototype:
      + Use localStorage?
  - Try alternate approaches to bumped track expand/collapse [Tim].
  - Cache server capabilities in the DAS layer (i.e. maxbins!)
+ - Find a way to access secure DAS servers
+     + Will XMLHttpRequest.withCredentials do what we want?
+     + Likely to need server support as well.
+     + Credentialed requests will fail with Allow-Origin: *
+     + ...so need to only set withCredentials when authn is required?
+     + More complex request-cycle management?
 
 Nice to have
 ------------
