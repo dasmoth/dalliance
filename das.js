@@ -9,6 +9,33 @@ var dasLibErrorHandler = function(errMsg) {
 }
 var dasLibRequestQueue = new Array();
 
+function doCrossDomainRequest(url, handler) {
+    // TODO: explicit error handlers?
+
+    if (window.XDomainRequest) {
+	var req = new XDomainRequest();
+	req.onload = function() {
+	    var dom = new ActiveXObject("Microsoft.XMLDOM");
+	    dom.async = false;
+	    dom.loadXML(req.responseText);
+	    handler(dom);
+	}
+	req.open("get", url);
+	req.send('');
+    } else {
+	var req = new XMLHttpRequest();
+	req.onreadystatechange = function() {
+	    if (req.readyState == 4) {
+              if (req.status == 200 || req.status == 0) {
+		  handler(req.responseXML);
+	      }
+            }
+	};
+	req.open("get", url, true);
+	req.send('');
+    }
+}
+
 function DASSegment(name, start, end, description) {
     this.name = name;
     this.start = start;
@@ -48,13 +75,10 @@ function DASSource(uri, options) {
 
 DASSource.prototype.entryPoints = function(callback) {
     var dasURI = this.uri + 'entry_points';
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-        if (req.readyState == 4) {
-            if (req.status == 200) {
+    doCrossDomainRequest(dasURI, function(responseXML) {
                 var entryPoints = new Array();
                 
-                var segs = req.responseXML.getElementsByTagName('SEGMENT');
+                var segs = responseXML.getElementsByTagName('SEGMENT');
                 for (var i = 0; i < segs.length; ++i) {
                     var seg = segs[i];
                     var segId = seg.getAttribute('id');
@@ -72,17 +96,9 @@ DASSource.prototype.entryPoints = function(callback) {
                         segDesc = seg.firstChild.nodeValue;
                     }
                     entryPoints.push(new DASSegment(segId, segMin, segMax, segDesc));
-                }
-                
-                callback(entryPoints);
-            } else {
-                alert('Request processed:' + req.status);
-            }
-        }
-    }
-    dasLibRequestQueue.push(req);
-    req.open('GET', dasURI, true);
-    req.send('');
+                }          
+               callback(entryPoints);
+    });		
 }
 
 //
@@ -100,13 +116,10 @@ function DASSequence(name, start, end, alpha, seq) {
 
 DASSource.prototype.sequence = function(segment, callback) {
     var dasURI = this.uri + 'sequence?' + segment.toDASQuery();
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-        if (req.readyState == 4) {
-            if (req.status == 200) {
+    doCrossDomainRequest(dasURI, function(responseXML) {
                 var seqs = new Array();
                 
-                var segs = req.responseXML.getElementsByTagName('SEQUENCE');
+                var segs = responseXML.getElementsByTagName('SEQUENCE');
                 for (var i = 0; i < segs.length; ++i) {
                     var seg = segs[i];
                     var segId = seg.getAttribute('id');
@@ -133,14 +146,7 @@ DASSource.prototype.sequence = function(segment, callback) {
                 }
                 
                 callback(seqs);
-            } else {
-                alert('Request processed:' + req.status);
-            }
-        }
-    }
-    dasLibRequestQueue.push(req);
-    req.open('GET', dasURI, true);
-    req.send('');
+    });
 }
 
 //
@@ -183,13 +189,10 @@ DASSource.prototype.features = function(segment, options, callback) {
     //alert(dasURI);
     // Feature/group-by-ID stuff?
     
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-        if (req.readyState == 4) {
-            if (req.status == 200 || req.status == 0) { // HACK for static.
+    doCrossDomainRequest(dasURI, function(responseXML) {
                 var features = new Array();
                 
-                var featureXMLs = req.responseXML.getElementsByTagName("FEATURE");
+                var featureXMLs = responseXML.getElementsByTagName("FEATURE");
                 for (var i = 0; i < featureXMLs.length; ++i) {
                     var feature = featureXMLs[i];
                     var dasFeature = new DASFeature();
@@ -234,15 +237,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 }
                 
                 callback(features);
-            } else {
-                alert('Request processed:' + req.status);
-            }
-        }
-    }
-//    alert(dasURI);
-    dasLibRequestQueue.push(req);
-    req.open('GET', dasURI, true);
-    req.send('');
+    });
 }
 
 //

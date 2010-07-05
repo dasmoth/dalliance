@@ -15,7 +15,7 @@ Performance
      + Safari (3.1 or later)
      + Chrome.
      + Does anyone care about Opera?
-     + Not IE<9.  Can we try IE9 developer version?
+     + Not IE<9.  UI and DAS-fetching work in IE9dp2.
      + Could do with a better error message for unsupported browsers.
  
 Publishable prototype:
@@ -24,6 +24,7 @@ Publishable prototype:
  - Clean up the rendering pathway, remove isPrototypeOf nastiness.
  - At least minimal stylesheet support.  
      + As of r412, we have a simple type -> colour map.  Is that good enough?
+     + DASSTYLE+E! extensions in progress now (along with renderer cleanup).
  - Test against ProServer (MyDas?  Others?)
  - Enable/disable tiers (would a hardwired list be acceptable?)
      + Disabling now done.  Is the UI okay?
@@ -32,12 +33,11 @@ Publishable prototype:
  - Configuration of quantitative tracks.
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
- - Slightly more choice in rendering style.  Line graphs?  Non-rectangular glyphs in BoxRenderer?
-     + Line graphs done in r412
+     + Increase/decrease viewed height of quant tracks?
  - At least slightly better state-persistance.
      + Use localStorage?
- - Mobile Safari support. 
-     + ??? Not a priority for now due to slow delivery of touch events.
+ - Try alternate approaches to bumped track expand/collapse [Tim].
+ - Cache server capabilities in the DAS layer (i.e. maxbins!)
 
 Nice to have
 ------------
@@ -80,6 +80,8 @@ Nice to have
      + Drag together when re-ordering????
      + How are these defined?  DASSTYLE is hopeless.  Extended <sources> document?
      
+  - Dedicated configuration/persistance language?
+
 Blue sky
 --------
 
@@ -93,8 +95,8 @@ Blue sky
     + i.e. multiple users viewing a browser with shared state.
     + Annotation (Using DAS writeback protocols?)
     + View synchronization?
-       must be fast.  Comet, I suppose.
-    + Chat (presumably something off-the-shelf we can use)
+    + Chat 
+    + Websockets work nicely for this.  Prototype at DAS Workshop '10.
     
  - Navigate by blatting user sequences to the genome
     + How to do this in a DASish world?
