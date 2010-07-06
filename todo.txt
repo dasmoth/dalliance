@@ -16,7 +16,12 @@ Performance
      + Safari (3.1 or later)
      + Chrome.
      + Does anyone care about Opera?
-     + Not IE<9.  UI and DAS-fetching work in IE9dp2.
+     + Not IE<9. 
+     + IE9 is looking doable:
+          * UI draws correctly (IE9dp2).
+          * DAS-fetching can be made to work (requires dedicated code path using XDomainRequest)
+	  * Currently no features displaying
+	  * Probably transform and/or clipping problems.
      + Could do with a better error message for unsupported browsers.
  
 Publishable prototype:
@@ -24,21 +29,17 @@ Publishable prototype:
      
  - Clean up the rendering pathway, remove isPrototypeOf nastiness.
  - At least minimal stylesheet support.  
-     + As of r412, we have a simple type -> colour map.  Is that good enough?
      + DASSTYLE+E! extensions in progress now (along with renderer cleanup).
  - Test against ProServer (MyDas?  Others?)
  - Enable/disable tiers (would a hardwired list be acceptable?)
-     + Disabling now done.  Is the UI okay?
+     + Disabling now done.  Is the UI okay?  Highlight the dustbin while draggins?
      + Enabling -- works in principle but needs better UI.
+         * Will work better once stylesheet support is in.
      + Minimal registry queries?
- - Configuration of quantitative tracks.
-     + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
-     + Switch between bars/colourways? [Leave this for now]
-     + Increase/decrease viewed height of quant tracks?
- - At least slightly better state-persistance.
+ - Better state-persistance.
      + Use localStorage?
+     + Remember active tier-set?
  - Try alternate approaches to bumped track expand/collapse [Tim].
- - Cache server capabilities in the DAS layer (i.e. maxbins!)
  - Find a way to access secure DAS servers
      + Will XMLHttpRequest.withCredentials do what we want?
      + Likely to need server support as well.
@@ -46,14 +47,30 @@ Publishable prototype:
      + ...so need to only set withCredentials when authn is required?
      + More complex request-cycle management?
 
+After the paper
+---------------
+
+ - Cache server capabilities in the DAS layer (i.e. maxbins!)
+     + Most code is in, currently doesn't work because of missing Access-Control-Expose-Headers support.
+     + https://bugs.webkit.org/show_bug.cgi?id=41210
+     + May be able to do something with DAS/1.6 sources since these *should* list caps in the sources document???
+ - Better configuration of quantitative tracks.
+     + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
+     + Switch between bars/colourways? [Leave this for now]
+     + Increase/decrease viewed height of quant tracks?
+ - Separate concepts of Known Space and Drawn Space.
+ - Page embedding
+     + Allow multiple browser instances in a given page (i.e. remove all static state).
+     + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
+       How much state to share? 
+
 Nice to have
 ------------
 
- - Separate concepts of Known Space and Drawn Space.
  - Ability to re-bump w/o re-fetching all the data
      + Should allow more aggressive spec-fetching?
      + Allow fetches that add to the working set, rather than replacing it.
-  - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
+ - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
        think anyone else is doing this, but I'd use it!)
  - Graphical navigation?
      + Pop-over with chromosome ideograms?
@@ -61,8 +78,6 @@ Nice to have
      + Sensible support of DAS feature-by-ID stuff (has anyone done this before?!)
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
      + Any reason not to just hack the server to do this?
- - DASSTYLE support
-     + If we implement all the E! extensions, this almost looks useful now.
  - Registry browser.
  - Support for a more compact encoding for quantitative tracks.
      + Will need some server suppport.  
@@ -71,10 +86,6 @@ Nice to have
  - User-uploaded data
      + Round-tripped in via Dastard?
      + Also interesting to do LOCAL data additions?
- - Page embedding
-     + Allow multiple browser instances in a given page (i.e. remove all static state).
-     + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
-       How much state to share? 
  - State persistance between sessions
      + Use localStorage instead of cookies?
      + Caching on server?
@@ -86,14 +97,10 @@ Nice to have
      + Do they have any meaning for non-quant tracks?
      + Drag together when re-ordering????
      + How are these defined?  DASSTYLE is hopeless.  Extended <sources> document?
-     
   - Dedicated configuration/persistance language?
 
 Blue sky
 --------
-
- - How to play with the DAS registry?
-    + Could run our own?  With SvgDAS-friendly stylesheets attached?
     
  - Tourist mode
     + Fast movement between POIs.
