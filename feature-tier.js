@@ -248,7 +248,7 @@ function drawFeatureGroup(featureGroupElement, y, features, bumpMatrix, label, r
 	}
 
 
-	if (labels && label != null && label != "" && type != 'read' && type != 'cpg-meth' && type != 'cpg-unmeth') {
+	if (label != null && label != "" && type != 'read' && type != 'cpg-meth' && type != 'cpg-unmeth') {
 	    var labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
 	    labelText.setAttribute("x", gmin);
 	    labelText.setAttribute("y", y + 25);

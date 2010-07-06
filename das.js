@@ -187,14 +187,17 @@ DASSource.prototype.features = function(segment, options, callback) {
     }
    
     // alert(dasURI);
+
     // Feature/group-by-ID stuff?
     
     doCrossDomainRequest(dasURI, function(responseXML, req) {
 	if (req) {
+	    /*
 	    var caps = req.getResponseHeader('X-DAS-Capabilties');
 	    if (caps) {
 		alert(caps);
 	    }
+	    */
 	}
 
                 var features = new Array();

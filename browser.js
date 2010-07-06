@@ -5,7 +5,6 @@ var tagLine = "...do we run or do we stumble?";
 
 var sources = new Array();
 var tiers = new Array();
-var types = ['transcript', 'translation'];
 
 // parental configuration
 
@@ -47,8 +46,6 @@ var styleOracle = {
 
 // Experimental feature toggles
 
-var labels = true;
-var liveZoom = true;
 var defaultBumpStatus = false;
 
 function Range(min, max)
@@ -431,18 +428,6 @@ function makeQuantConfigButton(labelGroup, tier, ypos) {
     }, false);
 }
 
-function dasRequestStateChangeHandler(tier)
-{
-    if (tier.req.readyState == 4) {
-        if (tier.req.status == 200 || tier.req.status == 0) {
-            // (status=0 to allow file:// URIs to work for debug mode)
-            dasRequestComplete(tier);
-        } else {
-            alert("Request processed: " + req.status);
-        }
-    }
-}
-
 function updateRegion()
 {
     var regionDisplay = "chr: " + chr + " start: " + Math.round(viewStart) + " end: " + Math.round(viewEnd);
@@ -512,12 +497,11 @@ function refreshTier(tier)
         var maxBins = 1 + (((knownEnd - knownStart) / scaledQuantRes) | 0);
 
 	if (fetchTypes.length > 0) {
-	    alert(fetchTypes);
+	    // alert(fetchTypes);
             tier.source.dasSource.features(
 		new DASSegment(chr, knownStart, knownEnd),
 		{type: fetchTypes, maxbins: maxBins},
 		function(features) {
-		    alert('got features');
                     tier.currentFeatures = features;
                     dasRequestComplete(tier);
 		}
@@ -723,15 +707,17 @@ function init()
     //
  
     for (var t = 0; t < sources.length; ++t) {
-	var source = sources[t];
-	source.dasSource = new DASSource(source.uri);
-	source.dasSource.stylesheet(function(stylesheet) {
-	    source.stylesheet = stylesheet;
-	    // refreshTier(...);
-	},
-	function() {
-	    // alert('no SS for ' + source.name);
-	});
+	// truly hideous attempt to fake let.
+	function tmp(source) {
+	    source.dasSource = new DASSource(source.uri);
+	    source.dasSource.stylesheet(function(stylesheet) {
+		source.stylesheet = stylesheet;
+		// refreshTier(...);
+	    },
+	    function() {
+		// alert('no SS for ' + source.name);
+	    });
+	}; tmp(sources[t]);
     }
 
     //
