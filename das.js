@@ -27,7 +27,7 @@ function doCrossDomainRequest(url, handler) {
 	req.onreadystatechange = function() {
 	    if (req.readyState == 4) {
               if (req.status == 200 || req.status == 0) {
-		  handler(req.responseXML);
+		  handler(req.responseXML, req);
 	      }
             }
 	};
@@ -186,10 +186,17 @@ DASSource.prototype.features = function(segment, options, callback) {
         dasURI = this.uri;
     }
    
-    //alert(dasURI);
+    // alert(dasURI);
     // Feature/group-by-ID stuff?
     
-    doCrossDomainRequest(dasURI, function(responseXML) {
+    doCrossDomainRequest(dasURI, function(responseXML, req) {
+	if (req) {
+	    var caps = req.getResponseHeader('X-DAS-Capabilties');
+	    if (caps) {
+		alert(caps);
+	    }
+	}
+
                 var features = new Array();
                 
                 var featureXMLs = responseXML.getElementsByTagName("FEATURE");

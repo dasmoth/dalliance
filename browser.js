@@ -69,6 +69,18 @@ function DataSource(name, uri, bumped, renderer, opts)
     this.opts = opts;
 }
 
+DataSource.prototype.styles = function(scale) {
+    if (this.stylesheet == null) {
+	return null;
+    } else if (scale > 1) {
+	return this.stylesheet.highZoomStyles;
+    } else if (scale > 0.05) {
+	return this.stylesheet.mediumZoomStyles;
+    } else {
+	return this.stylesheet.lowZoomStyles;
+    }
+}
+
 function DasTier(source, viewport, background)
 {
     this.source = source;
@@ -478,7 +490,7 @@ function refreshTier(tier)
 {	    
     if (SeqRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
         if (scale >= 1) {
-            new DASSource(tier.source.uri).sequence(
+            tier.source.dasSource.sequence(
                 new DASSegment(chr, knownStart, knownEnd),
                 function(seqs) {
                     drawSeqTier(tier, seqs[0]);  // FIXME: check array.
@@ -488,31 +500,33 @@ function refreshTier(tier)
             drawSeqTier(tier);
         }
     } else {
+	var stylesheet = tier.source.styles(scale);
+	var fetchTypes = [];
+	if (stylesheet) {
+	    for (tt in stylesheet) {
+		fetchTypes.push(tt);
+	    }
+	}
+	
         var scaledQuantRes = targetQuantRes / scale;
         var maxBins = 1 + (((knownEnd - knownStart) / scaledQuantRes) | 0);
-        var fetchTypes = tier.source.opts.types;
-        if (!fetchTypes) {
-	    fetchTypes = types;
-	}
 
-	if (tier.source.opts.zoomThreshold) {
-	    if (scale > tier.source.opts.zoomThreshold) {
-		fetchTypes = tier.source.opts.largeTypes;
-	    } else {
-		fetchTypes = tier.source.opts.smallTypes;
-            }
-        }
-
-        
-        new DASSource(tier.source.uri).features(
-            new DASSegment(chr, knownStart, knownEnd),
-            {type: fetchTypes, maxbins: maxBins},
-            function(features) {
-                tier.currentFeatures = features;
-                dasRequestComplete(tier);
-            }
-        );
+	if (fetchTypes.length > 0) {
+	    alert(fetchTypes);
+            tier.source.dasSource.features(
+		new DASSegment(chr, knownStart, knownEnd),
+		{type: fetchTypes, maxbins: maxBins},
+		function(features) {
+		    alert('got features');
+                    tier.currentFeatures = features;
+                    dasRequestComplete(tier);
+		}
+            );
+	} else {
+	    tier.currentFeatures = [];
+	    dasRequestComplete(tier);
 	}
+    }
 }
 
 var originX;
@@ -710,13 +724,10 @@ function init()
  
     for (var t = 0; t < sources.length; ++t) {
 	var source = sources[t];
-	new DASSource(source.uri).stylesheet(function(stylesheet) {
-	    // var sss = '';
-	    // var ss = stylesheet.lowZoomStyles;
-	   // for (var tt in ss) {
-	//	sss += tt + ':' + stringifyObject(ss[tt]);
-	    // }
-	    // alert(sss);
+	source.dasSource = new DASSource(source.uri);
+	source.dasSource.stylesheet(function(stylesheet) {
+	    source.stylesheet = stylesheet;
+	    // refreshTier(...);
 	},
 	function() {
 	    // alert('no SS for ' + source.name);
@@ -1013,7 +1024,7 @@ function init()
     
     // Low-priority stuff
     
-    new DASSource(sources[0].uri).entryPoints(
+    sources[0].dasSource.entryPoints(
         function(ep) {
             entryPoints = ep;
             for (var epi = 0; epi < entryPoints.length; ++epi) {
