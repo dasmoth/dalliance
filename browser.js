@@ -34,6 +34,9 @@ var svg;
 var entryPoints = null;
 var currentSeqMax = -1; // init once EPs are fetched.
 
+var highlight;
+var highlightMin = -1, highlightMax = - 1;
+
 var popupHolder;
 var hPopupHolder;
 
@@ -1105,12 +1108,13 @@ function init()
 	}
 	
 	if (qMax < qMin) {
-		qMax = qMin + 100000;
-		$.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
+		qMax = qMin + 10000;
+		// $.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
 	}
 
     if (qChr && qMin && qMax) {
         chr = qChr; viewStart = qMin; viewEnd = qMax;
+	highlightMin = qMin;  highlightMax = qMax;
     }
     
     if ((viewEnd - viewStart) > 50000) {
@@ -1119,6 +1123,13 @@ function init()
         viewEnd = mid + 25000;
     }
     
+    origin = ((viewStart + viewEnd) / 2) | 0;
+    scale = featurePanelWidth / (viewEnd - viewStart);
+    var width = viewEnd - viewStart + 1;
+    var minExtraW = (width * minExtra) | 0;
+    var maxExtraW = (width * maxExtra) | 0;
+    knownStart = Math.max(1, viewStart - maxExtraW); knownEnd = viewEnd + maxExtraW;
+
     svg = $('#svgHolder').svg().svg('get');
     var svgRoot = svg.root();
     svgRoot.setAttribute('width', '860px');
@@ -1145,6 +1156,9 @@ function init()
       
     var dasTierHolder = svg.group(main, {clipPath: 'url(#featureClip)'}); 
     svg.group(dasTierHolder, 'dasTiers');
+    if (highlightMin > 0) {
+	highlight = svg.rect(dasTierHolder, (highlightMin - origin) * scale, 0, (highlightMax - highlightMin + 1) * scale, 10000, {id: 'highlight', stroke: 'none', fill: 'red', fillOpacity: 0.2});
+    }
     var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
     svg.group(dasLabelHolder, 'dasLabels');
     
@@ -1157,13 +1171,6 @@ function init()
     var bhtmlRoot = document.getElementById("browser_html");
     removeChildren(bhtmlRoot);
     bhtmlRoot.appendChild(document.createTextNode(tagLine));
-    
-    origin = ((viewStart + viewEnd) / 2) | 0;
-    scale = featurePanelWidth / (viewEnd - viewStart);
-    var width = viewEnd - viewStart + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
-    knownStart = Math.max(1, viewStart - maxExtraW); knownEnd = viewEnd + maxExtraW;
     
     // set up zoom thumb
     document.getElementById("sliderHandle").setAttribute("x", zoomTrackMin + (zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase)));
@@ -1513,6 +1520,16 @@ function xfrmTiers(x, xs)
     for (ti in tiers) {
         xfrmTier(tiers[ti], x, xs);
     }
+    if (highlight) {
+	var axs = xs;
+	if (axs < 0) {
+            axs = scale;
+	}
+	var xfrm = 'translate(' + x + ',0)';
+	highlight.setAttribute('transform', xfrm);
+	highlight.setAttribute('x', (highlightMin - origin) * scale);
+	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
+    } 
 }
 
 function xfrmTier(tier, x , xs)
