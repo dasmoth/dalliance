@@ -1088,6 +1088,8 @@ function init()
         }
     }
     
+    var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
+
     var qChr = $.query.get('chr');
     var qMin = $.query.get('min');
     var qMax = $.query.get('max');
@@ -1097,8 +1099,6 @@ function init()
 		if (regstr == '') {
 			regstr = $.query.get('segment');
 		}
-		
-		region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
 		var match = regstr.match(region_exp);
 		if ((regstr != '') && match) {
 			qChr = match[1];
@@ -1112,9 +1112,18 @@ function init()
 		// $.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
 	}
 
+    var histr = $.query.get('h');
+    var match = histr.match(region_exp);
+    if (match) {
+	highlightMin = match[2]|0;
+	highlightMax = match[3]|0;
+    }
+
     if (qChr && qMin && qMax) {
         chr = qChr; viewStart = qMin; viewEnd = qMax;
-	highlightMin = qMin;  highlightMax = qMax;
+	if (highlightMin < 0) {
+	    highlightMin = qMin;  highlightMax = qMax;
+	}
     }
     
     if ((viewEnd - viewStart) > 50000) {
