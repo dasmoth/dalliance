@@ -86,43 +86,45 @@ function drawFeatureTier(tier)
 
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {
-	    featureGroupElement.removeChild(featureGroupElement.firstChild);
-	}
-	featureGroupElement.appendChild(tier.background);
+	featureGroupElement.removeChild(featureGroupElement.firstChild);
+    }
+    featureGroupElement.appendChild(tier.background);
 	
-	var offset = 5;
-	var lh = tier.source.renderer.height() + 5;
-	var bumpMatrix = null;
-	if (tier.bumped) {
-	    bumpMatrix = new Array(0);
-	}
+    var offset = 5;
+    var lh = tier.source.renderer.height() + 5;
+    var bumpMatrix = null;
+    if (tier.bumped) {
+	bumpMatrix = new Array(0);
+    }
 	
-	// for (var pgid = 0; pgid < ungroupedFeatures.length; ++pgid) {
-	//     lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ungroupedFeatures[pgid]), bumpMatrix, "", tier.source.renderer));
-	// }
+    for (var uft in tier.ungroupedFeatures) {
+	var ufl = tier.ungroupedFeatures[uft];
+	for (var pgid = 0; pgid < ufl.length; ++pgid) {
+	     lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ufl[pgid]), bumpMatrix, "", tier.source.renderer));
+	}
+    }
 
-	var gl = new Array();
-	for (var gid in tier.groupedFeatures) {
-	    gl.push(gid);
-	}
-	gl.sort(function(g1, g2) {
-	    var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
-	    if (d > 0) {
-	       return -1;
-            } else if (d = 0) {
-	       return 0;
-            } else {
-	       return 1;
-            }
-        });
-	// alert(gl[0]);
-	for (var gx in gl) {
-	    var gid = gl[gx];
-	    lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, tier.groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, tier.groups[gid]));
-	}
-	tier.layoutHeight=lh;
-	tier.background.setAttribute("height", lh);
-	tier.scale = 1;
+    var gl = new Array();
+    for (var gid in tier.groupedFeatures) {
+	gl.push(gid);
+    }
+    gl.sort(function(g1, g2) {
+	var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
+	if (d > 0) {
+	    return -1;
+        } else if (d = 0) {
+	    return 0;
+        } else {
+	    return 1;
+        }
+    });
+    for (var gx in gl) {
+	var gid = gl[gx];
+	lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, tier.groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, tier.groups[gid]));
+    }
+    tier.layoutHeight=lh;
+    tier.background.setAttribute("height", lh);
+    tier.scale = 1;
 }
 
 function bump(bm, range)
