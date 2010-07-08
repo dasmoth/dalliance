@@ -41,8 +41,49 @@ function drawLineTier(tier)
     tier.scale = 1;
 }
 
+function pusho(obj, k, v) {
+    if (obj[k]) {
+	obj[k].push(v);
+    } else {
+	obj[k] = new Array(v);
+    }
+}
+
+function sortFeatures(tier)
+{
+    var ungroupedFeatures = {};
+    var groupedFeatures = {};
+    var groups = {};
+    
+    for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
+	var f = tier.currentFeatures[fi];
+	var wasGrouped = false;
+	if (f.groups) {
+	    for (var gi = 0; gi < f.groups.length; ++gi) {
+	        var g = f.groups[gi];
+	        if (g.type == 'transcript' || g.type=='CDS' || g.type == 'read') {
+	            var gid = g.id;
+		    pusho(groupedFeatures, gid, f);
+	            groups[gid] = g;
+		    wasGrouped = true;
+	        }
+	    }
+	}
+
+	if (!wasGrouped) {
+	    pusho(ungroupedFeatures, f.type, f);
+	}
+    }
+
+    tier.ungroupedFeatures = ungroupedFeatures;
+    tier.groupedFeatures = groupedFeatures;
+    tier.groups = groups;
+}
+
 function drawFeatureTier(tier)
 {
+    sortFeatures(tier);
+
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {
 	    featureGroupElement.removeChild(featureGroupElement.firstChild);
@@ -56,44 +97,16 @@ function drawFeatureTier(tier)
 	    bumpMatrix = new Array(0);
 	}
 	
-	var ungroupedFeatures = new Array();
-	var groupedFeatures = {};
-	var groups = {};
-	
-	for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
-	    var f = tier.currentFeatures[fi];
-	    var gid = null;
-	    if (f.groups) {
-	        for (var gi = 0; gi < f.groups.length; ++gi) {
-	            var g = f.groups[gi];
-	            if (g.type == 'transcript' || g.type=='CDS' || g.type == 'read' || g.type=='cpg-meth' || g.type=='cpg-unmeth') {
-	                gid = g.id;
-	                groups[gid] = g;
-	            }
-	        }
-	    }
-	    if (gid != null) {
-	        if (groupedFeatures[gid]) {
-	            groupedFeatures[gid].push(f);
-	        } else {
-	            groupedFeatures[gid] = new Array(f);
-	        }
-	    } else {
-	        ungroupedFeatures.push(f);
-	    }
-	}
-	
-	for (var pgid = 0; pgid < ungroupedFeatures.length; ++pgid) {
-	    lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ungroupedFeatures[pgid]), bumpMatrix, "", tier.source.renderer));
-	}
+	// for (var pgid = 0; pgid < ungroupedFeatures.length; ++pgid) {
+	//     lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ungroupedFeatures[pgid]), bumpMatrix, "", tier.source.renderer));
+	// }
+
 	var gl = new Array();
-	for (var gid in groupedFeatures) {
-	    // alert('pushing ' + gid);
+	for (var gid in tier.groupedFeatures) {
 	    gl.push(gid);
 	}
-	// alert(gl);
 	gl.sort(function(g1, g2) {
-	    var d = groupedFeatures[g1][0].score - groupedFeatures[g2][0].score;
+	    var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
 	    if (d > 0) {
 	       return -1;
             } else if (d = 0) {
@@ -105,8 +118,7 @@ function drawFeatureTier(tier)
 	// alert(gl[0]);
 	for (var gx in gl) {
 	    var gid = gl[gx];
-	    // alert('drawing ' + gid);
-	    lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, groups[gid]));
+	    lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, tier.groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, tier.groups[gid]));
 	}
 	tier.layoutHeight=lh;
 	tier.background.setAttribute("height", lh);

@@ -1,3 +1,10 @@
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2010
+//
+// browser.js: browser setup and UI.
+//
+
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
@@ -67,6 +74,17 @@ function DataSource(name, uri, bumped, renderer, opts)
     this.bumped = bumped;
     this.renderer = renderer;
     this.opts = opts;
+}
+
+DataSource.prototype.init = function() {
+    this.dasSource = new DASSource(this.uri);
+    var source = this;
+    this.dasSource.stylesheet(function(stylesheet) {
+	source.stylesheet = stylesheet;
+	// refreshTier(...);
+    }, function() {
+	// alert('no SS for ' + source.name);
+    });
 }
 
 DataSource.prototype.styles = function(scale) {
@@ -161,16 +179,6 @@ function rangeOrder(a, b)
 }
 
 
-function dasRequestComplete(tier)
-{
-    if (LineRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
-	drawLineTier(tier);
-    } else {
-	drawFeatureTier(tier);
-    }
-    arrangeTiers();
-    setLoadingStatus();
-}
 
 function arrangeTiers() {
 	var labelGroup = document.getElementById("dasLabels");
@@ -719,18 +727,8 @@ function init()
     // Prefetch stylesheets (factor out so it can be done on newly-added tracks?)
     //
  
-    for (var t = 0; t < sources.length; ++t) {
-	// truly hideous attempt to fake let.
-	function tmp(source) {
-	    source.dasSource = new DASSource(source.uri);
-	    source.dasSource.stylesheet(function(stylesheet) {
-		source.stylesheet = stylesheet;
-		// refreshTier(...);
-	    },
-	    function() {
-		// alert('no SS for ' + source.name);
-	    });
-	}; tmp(sources[t]);
+   for (var t = 0; t < sources.length; ++t) {
+       sources[t].init();
     }
 
     //
