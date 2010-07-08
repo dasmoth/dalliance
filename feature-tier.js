@@ -5,40 +5,29 @@
 // feature-tier.js: renderers for glyphic data
 //
 
-function drawLineTier(tier)
+function drawLine(featureGroupElement, features, style, tier)
 {
-    var featureGroupElement = tier.viewport;
-    while (featureGroupElement.childNodes.length > 0) {
-	    featureGroupElement.removeChild(featureGroupElement.firstChild);
-    }
-    featureGroupElement.appendChild(tier.background);
-
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("fill", "none");
     path.setAttribute("stroke-width", "1");
     var pathOps = '';
+    var height = 20;
+    var yscale = 1;
 
-    // FIXME: sort first?
-    for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
-	var f = tier.currentFeatures[fi];
+    for (var fi = 0; fi < features.length; ++fi) {
+	var f = features[fi];
 
 	var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
-        var sc = (f.score * tier.source.renderer.scale)|0;
-	var py = 0 + tier.source.renderer.height() - sc;
+        var sc = (f.score * yscale)|0;
+	var py = 0 + height - sc;
 	if (fi == 0) {
 	    pathOps = 'M ' + px + ' ' + py;
 	} else {
 	    pathOps += ' L ' + px + ' ' + py;
 	}	
     }
-    // alert(pathOps);
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
-
-    var lh = tier.source.renderer.height();
-    tier.layoutHeight=lh;
-    tier.background.setAttribute("height", lh);
-    tier.scale = 1;
 }
 
 function pusho(obj, k, v) {
@@ -96,11 +85,18 @@ function drawFeatureTier(tier)
     if (tier.bumped) {
 	bumpMatrix = new Array(0);
     }
+    var styles = tier.source.styles(scale);
 	
     for (var uft in tier.ungroupedFeatures) {
 	var ufl = tier.ungroupedFeatures[uft];
-	for (var pgid = 0; pgid < ufl.length; ++pgid) {
-	     lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ufl[pgid]), bumpMatrix, "", tier.source.renderer));
+	var style = styles[uft];
+	if (!style) continue;
+	if (style.glyph == 'LINEPLOT') {
+	    drawLine(featureGroupElement, ufl, style, tier);
+	} else {
+	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
+		lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ufl[pgid]), bumpMatrix, "", tier.source.renderer));
+	    }
 	}
     }
 
