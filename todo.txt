@@ -27,10 +27,11 @@ Performance
 Publishable prototype:
 ----------------------
      
- - Clean up the rendering pathway, remove isPrototypeOf nastiness.
- - At least minimal stylesheet support.  
-     + DASSTYLE+E! extensions in progress now (along with renderer cleanup).
- - Test against ProServer (MyDas?  Others?)
+ - Test against other servers:
+     + Proserver
+     + Ensembl? (currently no CORS)
+     + MyDAS?
+ - Tune specfetch thresholds, check for unnecessary refetches.
  - Enable/disable tiers (would a hardwired list be acceptable?)
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while draggins?
      + Enabling -- works in principle but needs better UI.
@@ -63,6 +64,13 @@ After the paper
      + Allow multiple browser instances in a given page (i.e. remove all static state).
      + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
        How much state to share? 
+
+Styling
+-------
+ - Still missing some unusual glyphtypes
+ - Support ZINDEX?
+ - Rainbowed LINEPLOT glyphs?
+ - Attach external SSs?
 
 Nice to have
 ------------
