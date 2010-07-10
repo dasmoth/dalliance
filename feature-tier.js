@@ -7,6 +7,39 @@
 
 var MIN_FEATURE_PX = 5;   
 
+function DColour(red, green, blue, name) {
+    this.red = red|0;
+    this.green = green|0;
+    this.blue = blue|0;
+    if (name) {
+	this.name = name;
+    }
+}
+
+DColour.prototype.toSvgString = function() {
+    if (!this.name) {
+	this.name = "rgb(" + this.red + "," + this.green + "," + this.blue + ")";
+    }
+
+    return this.name;
+}
+
+var palette = {
+    red: new DColour(255, 0, 0, 'red'),
+    green: new DColour(0, 255, 0, 'green'),
+    blue: new DColour(0, 0, 255, 'blue'),
+    white: new DColour(255, 255, 255, 'white'),
+    black: new DColour(0, 0, 0, 'black'),
+};
+
+function dasColourForName(name) {
+    var c = palette[name];
+    if (!c) {
+	alert("couldn't handle color: " + name);
+    }
+    return c;
+}
+
 function drawLine(featureGroupElement, features, style, tier)
 {
     var height = style.HEIGHT || 30;
@@ -190,11 +223,52 @@ function glyphForFeature(feature, y, style)
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || 'green';
 	var height = style.HEIGHT || 12;
-
+	
         if (maxPos - minPos < MIN_FEATURE_PX) {
             minPos = (maxPos + minPos - MIN_FEATURE_PX) / 2;
             maxPos = minPos + MIN_FEATURE_PX;
         }
+
+	if (gtype == 'HISTOGRAM' || gtype == 'GRADIENT' && score && style.COLOR2) {
+	    var smin = style.MIN || 0;
+	    var smax = style.MAX || 100;
+	    if ((1.0 * score) < smin) {
+		score = smin;
+	    }
+	    if ((1.0 * score) > smax) {
+		score = smax;
+	    }
+	    var relScore = ((1.0 * score) - smin) / (smax-smin);
+
+	    var loc, hic, frac;
+	    if (style.COLOR3) {
+		if (relScore < 0.5) {
+		    loc = dasColourForName(style.COLOR1);
+		    hic = dasColourForName(style.COLOR2);
+		    frac = relScore * 2;
+		} else {
+		    loc = dasColourForName(style.COLOR2);
+		    hic = dasColourForName(style.COLOR3);
+		    frac = (relScore * 2.0) - 1.0;
+		}
+	    } else {
+		loc = dasColourForName(style.COLOR1);
+		hic = dasColourForName(style.COLOR2);
+		frac = relScore;
+	    }
+
+	    fill = new DColour(
+		((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
+		((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
+		((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
+	    ).toSvgString();
+
+	    if (gtype == 'HISTOGRAM') {
+		var bh = (height * relScore)|0;
+		y = y + (height - bh);
+		height = bh;
+	    }
+	}
  
         var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", minPos);

@@ -191,6 +191,11 @@ DASSource.prototype.features = function(segment, options, callback) {
     // Feature/group-by-ID stuff?
     
     doCrossDomainRequest(dasURI, function(responseXML, req) {
+
+	if (!responseXML) {
+	    alert('Failed req: ' + dasURI);
+	    callback([]);
+	}
 	if (req) {
 	    /*
 	    var caps = req.getResponseHeader('X-DAS-Capabilties');
