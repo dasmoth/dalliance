@@ -5,14 +5,21 @@
 // feature-tier.js: renderers for glyphic data
 //
 
+var MIN_FEATURE_PX = 5;   
+
 function drawLine(featureGroupElement, features, style, tier)
 {
+    var height = style.HEIGHT || 30;
+    var min = style.MIN || 0, max = style.MAX || 100;
+    var yscale = ((1.0 * height) / (max - min));
+    var width = style.LINEWIDTH || 1;
+    var color = style.COLOR || style.COLOR1 || 'black';
+
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("fill", "none");
-    path.setAttribute("stroke-width", "1");
+    path.setAttribute('stroke', color);
+    path.setAttribute("stroke-width", width);
     var pathOps = '';
-    var height = 20;
-    var yscale = 1;
 
     for (var fi = 0; fi < features.length; ++fi) {
 	var f = features[fi];
@@ -28,6 +35,8 @@ function drawLine(featureGroupElement, features, style, tier)
     }
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
+   
+    return height;
 }
 
 function pusho(obj, k, v) {
@@ -88,14 +97,19 @@ function drawFeatureTier(tier)
     var styles = tier.source.styles(scale);
 	
     for (var uft in tier.ungroupedFeatures) {
+//	alert('style=' + uft + ' count=' + tier.ungroupedFeatures[uft].length);
 	var ufl = tier.ungroupedFeatures[uft];
 	var style = styles[uft];
 	if (!style) continue;
 	if (style.glyph == 'LINEPLOT') {
-	    drawLine(featureGroupElement, ufl, style, tier);
+	    lh = Math.max(drawLine(featureGroupElement, ufl, style, tier));
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
-		lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ufl[pgid]), bumpMatrix, "", tier.source.renderer));
+		var g = glyphForFeature(ufl[pgid], offset /* FIXME */, style);
+		if (g) {
+		    featureGroupElement.appendChild(g);
+		}
+		// lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, new Array(ufl[pgid]), bumpMatrix, "", tier.source.renderer));
 	    }
 	}
     }
@@ -149,6 +163,53 @@ function bump(bm, range)
     bm.push(occupants);
     return mt;
 }
+
+
+function glyphForFeature(feature, y, style)
+{
+    var gtype = style.glyph || 'BOX';
+    var glyph;
+
+    var min = feature.min;
+    var max = feature.max;
+    var type = feature.type;
+    var strand = feature.orientation;
+    var score = feature.score;
+    var label = feature.label;
+
+    var minPos = (min - origin) * scale;
+    var maxPos = (max - origin) * scale;
+
+    if (gtype == 'HIDDEN') {
+	glyph = null;
+    } else if (gtype == 'CROSS') {
+	glyph = null;
+    } else {
+	// BOX (or variants?)
+    
+	var stroke = style.FGCOLOR || 'none';
+	var fill = style.BGCOLOR || 'green';
+	var height = style.HEIGHT || 12;
+
+        if (maxPos - minPos < MIN_FEATURE_PX) {
+            minPos = (maxPos + minPos - MIN_FEATURE_PX) / 2;
+            maxPos = minPos + MIN_FEATURE_PX;
+        }
+ 
+        var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", minPos);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", maxPos - minPos);
+        rect.setAttribute("height", height);
+	rect.setAttribute('stroke', stroke);
+	rect.setAttribute('fill', fill);
+	
+	glyph = rect;
+    }
+
+    return glyph;
+}
+
 
 function drawFeatureGroup(featureGroupElement, y, features, bumpMatrix, label, renderer, groupElement)
 {
