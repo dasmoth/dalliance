@@ -1117,13 +1117,13 @@ function zoom(factor)
         // document.getElementById("dasTiers").setAttribute("transform", "translate(" + ((-1.0 * (viewStart - origin)) * scale) + ",0), scale(" + (scale / scaleAtLastRedraw) + ",1)");
         xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
         
-        var labels = document.getElementsByClassName("label-text");
-        for (var li in labels) {
-            var label = labels[li];
-            var x = label.getAttribute("x");
-            var xfrm = "scale(" + (scaleAtLastRedraw/scale) + ",1), translate( " + ((x*scale - x*scaleAtLastRedraw) /scaleAtLastRedraw) +",0)";
-            label.setAttribute("transform", xfrm);
-        }
+    var labels = document.getElementsByClassName("label-text");
+    for (var li = 0; li < labels.length; ++li) {
+        var label = labels[li];
+        var x = label.getAttribute("x");
+        var xfrm = "scale(" + (scaleAtLastRedraw/scale) + ",1), translate( " + ((x*scale - x*scaleAtLastRedraw) /scaleAtLastRedraw) +",0)";
+        label.setAttribute("transform", xfrm);
+    }
 }
 
 

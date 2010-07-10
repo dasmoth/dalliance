@@ -214,7 +214,7 @@ function glyphForFeature(feature, y, style)
 
     if (gtype == 'HIDDEN') {
 	glyph = null;
-    } else if (gtype == 'CROSS' || gtype == 'EX') {
+    } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'DOT') {
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'none';
 	var height = style.HEIGHT || 12;
@@ -243,7 +243,26 @@ function glyphForFeature(feature, y, style)
 			      ' L ' + (mid+hh) + ' ' + (y+height) + 
 			      ' M ' + (mid+hh) + ' ' + (y) +
 			      ' L ' + (mid-hh) + ' ' + (y+height));  
-	}
+	} else if (gtype == 'SPAN') {
+	    mark = document.createElementNS(NS_SVG, 'path');
+	    mark.setAttribute('fill', 'none');
+	    mark.setAttribute('stroke', stroke);
+	    mark.setAttribute('stroke-width', 1);
+	    mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+			      ' L ' + maxPos + ' ' + (y+hh) +
+			      ' M ' + minPos + ' ' + y +
+			      ' L ' + minPos + ' ' + (y + height) +
+			      ' M ' + maxPos + ' ' + y +
+			      ' L ' + maxPos + ' ' + (y + height));
+	} else if (gtype == 'DOT') {
+	    mark = document.createElementNS(NS_SVG, 'circle');
+	    mark.setAttribute('fill', stroke);   // yes, really...
+	    mark.setAttribute('stroke', 'none');
+	    mark.setAttribute('cx', mid);
+	    mark.setAttribute('cy', (y+hh));
+	    mark.setAttribute('r', hh);
+	} 
+
 
 
 	if (fill == 'none') {
