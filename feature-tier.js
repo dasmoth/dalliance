@@ -162,7 +162,8 @@ function drawFeatureTier(tier)
     });
     for (var gx in gl) {
 	var gid = gl[gx];
-	lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, tier.groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, tier.groups[gid]));
+	featureGroupElement.appendChild(glyphsForGroup(tier.groupedFeatures[gid], offset, styles));
+	// lh = Math.max(lh, drawFeatureGroup(featureGroupElement, offset, tier.groupedFeatures[gid], bumpMatrix, gid, tier.source.renderer, tier.groups[gid]));
     }
     tier.layoutHeight=lh;
     tier.background.setAttribute("height", lh);
@@ -196,6 +197,21 @@ function bump(bm, range)
     return mt;
 }
 
+function glyphsForGroup(features, y, stylesheet) {
+    var glyphGroup = document.createElementNS(NS_SVG, 'g');
+    for (var i = 0; i < features.length; ++i) {
+	var feature = features[i];
+	var style = stylesheet[feature.type];
+	if (!style) {
+	    continue;
+	}
+	var glyph = glyphForFeature(feature, y, style);
+	if (glyph) {
+	    glyphGroup.appendChild(glyph);
+	}
+    }
+    return glyphGroup;
+}
 
 function glyphForFeature(feature, y, style)
 {
@@ -262,7 +278,6 @@ function glyphForFeature(feature, y, style)
 	    mark.setAttribute('cy', (y+hh));
 	    mark.setAttribute('r', hh);
 	} 
-
 
 
 	if (fill == 'none') {
@@ -419,6 +434,29 @@ function glyphForFeature(feature, y, style)
 	rect.setAttribute('fill', fill);
 	
 	glyph = rect;
+    }
+
+    // is this the right place for labelling?  prolly not...
+    if (style.LABEL && feature.label) {
+	var label = feature.label || feature.id || 'unknown';
+	var labelText = document.createElementNS(NS_SVG, 'text');
+	labelText.setAttribute("x", minPos);
+	labelText.setAttribute("y", y + 25);
+	labelText.setAttribute("stroke-width", "0");
+	labelText.setAttribute("fill", "black");
+	labelText.setAttribute("class", "label-text");
+	var lt = label;
+	if (feature.orientation == '+') {
+	    lt = label + '>';
+	} else if (strand == '-') {
+	    lt = '<' + label;
+        }
+	labelText.appendChild(document.createTextNode(lt));
+
+	var g = document.createElementNS(NS_SVG, 'g');
+	g.appendChild(glyph);
+	g.appendChild(labelText);
+	glyph = g;
     }
 
     return glyph;
