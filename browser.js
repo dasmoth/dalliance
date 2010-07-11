@@ -48,15 +48,13 @@ var hPopupHolder;
 
 var tierBackgroundColors = ["cornsilk", "wheat"];
 
-function DataSource(name, uri, bumped, renderer, opts)
+function DataSource(name, uri, opts)
 {
     if (!opts) {
 	opts = {};
     }
     this.name = name;
     this.uri = uri;
-    this.bumped = bumped;
-    this.renderer = renderer;
     this.opts = opts;
 }
 
@@ -67,10 +65,15 @@ function DasTier(source, viewport, background)
     this.viewport = viewport;
     this.background = background;
     this.req = null;
-    this.layoutHeight = 200;
+    this.layoutHeight = 100;
     this.bumped = false; // until we've decided what to do about tier-collapsing...
     this.y = 0;
-    this.scale = 1;
+
+    if (source.opts.tier_type == 'sequence') {
+	this.refreshTier = refreshTier_sequence;
+    } else {
+	this.refreshTier = refreshTier_features;
+    }
 }
 
 DasTier.prototype.init = function() {
@@ -137,16 +140,6 @@ function SeqRenderer()
 {
     this.height = function() {
         return 50;
-    }
-}
-
-function getValue(element, tag)
-{
-    var children = element.getElementsByTagName(tag);
-    if (children.length > 0) {
-        return children[0].firstChild.nodeValue;
-    } else {
-        return "n/a";
     }
 }
 
@@ -266,8 +259,6 @@ function setupTierDrag(element, ti) {
         } else if (targetTier == ti) {
             // setViewerStatus('Nothing to do');
         } else {
-            // setViewerStatus('Re-ordering ' + ti + '->' + targetTier);
-            
             var newTiers = new Array();
             
             var fromCnt = 0;
@@ -307,6 +298,8 @@ function setupTierDrag(element, ti) {
 }
 
 function makeToggleButton(labelGroup, tier, ypos) {
+/*
+
     var bumpToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
     svg.rect(bumpToggle, 85, ypos + 12, 8, 8);
     svg.line(bumpToggle, 85, ypos + 16, 93, ypos + 16);
@@ -321,10 +314,15 @@ function makeToggleButton(labelGroup, tier, ypos) {
 	    tier.bumped = !tier.bumped; 
 	    dasRequestComplete(tier);   // is there a more abstract way to do this?
 	}, false);
+
+*/
 }
 
 function makeQuantConfigButton(labelGroup, tier, ypos) {
-    var quantToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
+ 
+/*
+
+   var quantToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
     svg.circle(quantToggle, 88, ypos + 16, 4, {strokeWidth: 2});
     svg.line(quantToggle, 85.1, ypos + 18.9, 78, ypos + 25, {strokeWidth: 3});
     quantToggle.addEventListener('mouseover', function(ev) {quantToggle.setAttribute('stroke', 'red');}, false);
@@ -407,6 +405,9 @@ function makeQuantConfigButton(labelGroup, tier, ypos) {
 	                    removeAllPopups();
 	            }, false); 
     }, false);
+
+*/
+
 }
 
 function updateRegion()
@@ -841,22 +842,16 @@ function init()
 	                position: 'absolute', 
 	                top: (my - 10), 
 	                left:  (mx - 10),
-	                width: 500,
+	                width: 600,
 	                backgroundColor: 'white',
 	                borderColor: 'black',
 	                borderWidth: 1,
 	                borderStyle: 'solid',
 	                padding: 2,
-	      }).html(/* '<form id="addform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
-	                    'Start:<input name="min" value="' + (viewStart|0) + '"></input><br>' + 
-	                    'End:<input name="max" value="' + (viewEnd|0) + '"></input>' + 
-	                    '<input type="submit" value="Go"></form>'  */
-	                    
-	               '<form id="addform">' +
-	               '  URL:<input name="dasuri" value="http://.../"></input><br>' +
+	      }).html('<form id="addform">' +
+	               '  URL:<input size="100" name="dasuri" value="http://.../"></input><br>' +
 	               '  <input type="submit" value="Add...">' +
 	               '</form>'
-	               
 	            ).get(0);
 	            $(popup).hide();
 	            hPopupHolder.appendChild(popup);
