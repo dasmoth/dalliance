@@ -22,20 +22,25 @@ DasTier.prototype.refreshTier = function()
     } else {
 	var stylesheet = this.styles(scale);
 	var fetchTypes = [];
+	var inclusive = false;
 	if (stylesheet) {
 	    for (tt in stylesheet) {
-		fetchTypes.push(tt);
+		if (tt == 'default') {
+		    inclusive = true;
+		} else {
+		    fetchTypes.push(tt);
+		}
 	    }
 	}
 	
         var scaledQuantRes = targetQuantRes / scale;
         var maxBins = 1 + (((knownEnd - knownStart) / scaledQuantRes) | 0);
 
-	if (fetchTypes.length > 0) {
+	if (inclusive || fetchTypes.length > 0) {
 	    var tier = this;
             this.dasSource.features(
 		new DASSegment(chr, knownStart, knownEnd),
-		{type: fetchTypes, maxbins: maxBins},
+		{type: (inclusive ? null : fetchTypes), maxbins: maxBins},
 		function(features) {
                     tier.currentFeatures = features;
                     dasRequestComplete(tier);

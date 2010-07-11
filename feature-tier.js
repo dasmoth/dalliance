@@ -32,6 +32,7 @@ var palette = {
     red: new DColour(255, 0, 0, 'red'),
     green: new DColour(0, 255, 0, 'green'),
     blue: new DColour(0, 0, 255, 'blue'),
+    yellow: new DColour(255, 255, 0, 'yellow'),
     white: new DColour(255, 255, 255, 'white'),
     black: new DColour(0, 0, 0, 'black'),
 };
@@ -176,7 +177,7 @@ function drawFeatureTier(tier)
 	
     for (var uft in tier.ungroupedFeatures) {
 	var ufl = tier.ungroupedFeatures[uft];
-	var style = styles[uft];
+	var style = styles[uft] || styles['default'];
 	if (!style) continue;
 	if (style.glyph == 'LINEPLOT') {
 	    lh = Math.max(drawLine(featureGroupElement, ufl, style, tier));

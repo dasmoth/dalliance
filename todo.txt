@@ -27,15 +27,10 @@ Performance
 Publishable prototype:
 ----------------------
      
- - Test against other servers:
-     + Proserver
-     + Ensembl? (currently no CORS)
-     + MyDAS?
  - Tune specfetch thresholds, check for unnecessary refetches.
  - Enable/disable tiers (would a hardwired list be acceptable?)
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while draggins?
-     + Enabling -- works in principle but needs better UI.
-         * Will work better once stylesheet support is in.
+     + Enabling -- working but needs UI work.
      + Minimal registry queries?
  - Better state-persistance.
      + Use localStorage?
@@ -64,6 +59,9 @@ After the paper
      + Allow multiple browser instances in a given page (i.e. remove all static state).
      + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
        How much state to share? 
+ - Other DAS servers? (probably mostly server work):
+     + Ensembl: requires CORS, in contact...
+     + MyDAS: requires CORS.  Is this used for anything except Uniprot?
 
 Styling
 -------
