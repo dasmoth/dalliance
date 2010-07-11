@@ -40,11 +40,9 @@ Publishable prototype:
  - Try alternate approaches to bumped track expand/collapse [Tim].
      + Semi-related: any way to avoid duplicating gene labels?  Would save a tonne of ySpace...
  - Find a way to access secure DAS servers
-     + Will XMLHttpRequest.withCredentials do what we want?
-     + Likely to need server support as well.
-     + Credentialed requests will fail with Allow-Origin: *
-     + ...so need to only set withCredentials when authn is required?
-     + More complex request-cycle management?
+     + Access-Control-Allow-Credentials is usable.
+     + Working now with slightly-hacked Dazzle
+     + Currently requires {credentials: true} in the source configuration.  Can we auto-detect?
 
 After the paper
 ---------------

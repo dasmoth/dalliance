@@ -9,32 +9,7 @@ var dasLibErrorHandler = function(errMsg) {
 }
 var dasLibRequestQueue = new Array();
 
-function doCrossDomainRequest(url, handler) {
-    // TODO: explicit error handlers?
 
-    if (window.XDomainRequest) {
-	var req = new XDomainRequest();
-	req.onload = function() {
-	    var dom = new ActiveXObject("Microsoft.XMLDOM");
-	    dom.async = false;
-	    dom.loadXML(req.responseText);
-	    handler(dom);
-	}
-	req.open("get", url);
-	req.send('');
-    } else {
-	var req = new XMLHttpRequest();
-	req.onreadystatechange = function() {
-	    if (req.readyState == 4) {
-              if (req.status == 200 || req.status == 0) {
-		  handler(req.responseXML, req);
-	      }
-            }
-	};
-	req.open("get", url, true);
-	req.send('');
-    }
-}
 
 function DASSegment(name, start, end, description) {
     this.name = name;
@@ -75,7 +50,7 @@ function DASSource(uri, options) {
 
 DASSource.prototype.entryPoints = function(callback) {
     var dasURI = this.uri + 'entry_points';
-    doCrossDomainRequest(dasURI, function(responseXML) {
+    this.doCrossDomainRequest(dasURI, function(responseXML) {
                 var entryPoints = new Array();
                 
                 var segs = responseXML.getElementsByTagName('SEGMENT');
@@ -116,7 +91,7 @@ function DASSequence(name, start, end, alpha, seq) {
 
 DASSource.prototype.sequence = function(segment, callback) {
     var dasURI = this.uri + 'sequence?' + segment.toDASQuery();
-    doCrossDomainRequest(dasURI, function(responseXML) {
+    this.doCrossDomainRequest(dasURI, function(responseXML) {
                 var seqs = new Array();
                 
                 var segs = responseXML.getElementsByTagName('SEQUENCE');
@@ -190,7 +165,7 @@ DASSource.prototype.features = function(segment, options, callback) {
 
     // Feature/group-by-ID stuff?
     
-    doCrossDomainRequest(dasURI, function(responseXML, req) {
+    this.doCrossDomainRequest(dasURI, function(responseXML, req) {
 
 	if (!responseXML) {
 	    alert('Failed req: ' + dasURI);
@@ -280,7 +255,7 @@ function DASStyle() {
 
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
     var dasURI = this.uri + 'stylesheet';
-    doCrossDomainRequest(dasURI, function(responseXML) {
+    this.doCrossDomainRequest(dasURI, function(responseXML) {
 	if (!responseXML && failureCB) {
 	    failureCB();
 	}
@@ -353,4 +328,36 @@ function dasLinksOf(element)
     }
     
     return links;
+}
+
+
+DASSource.prototype.doCrossDomainRequest = function(url, handler) {
+    // TODO: explicit error handlers?
+
+    if (window.XDomainRequest) {
+	var req = new XDomainRequest();
+	req.onload = function() {
+	    var dom = new ActiveXObject("Microsoft.XMLDOM");
+	    dom.async = false;
+	    dom.loadXML(req.responseText);
+	    handler(dom);
+	}
+	req.open("get", url);
+	req.send('');
+    } else {
+	var req = new XMLHttpRequest();
+
+	req.onreadystatechange = function() {
+	    if (req.readyState == 4) {
+              if (req.status == 200 || req.status == 0) {
+		  handler(req.responseXML, req);
+	      }
+            }
+	};
+	req.open("get", url, true);
+	if (this.credentials) {
+	    req.withCredentials = true;
+	}
+	req.send('');
+    }
 }
