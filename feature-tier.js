@@ -153,6 +153,8 @@ function sortFeatures(tier)
     tier.groups = groups;
 }
 
+var clipIdSeed = 0;
+
 function drawFeatureTier(tier)
 {
     sortFeatures(tier);
@@ -250,8 +252,72 @@ function drawFeatureTier(tier)
 	lh += st.height + 4; //padding
     }
 
-    tier.layoutHeight=lh + 4;
-    tier.background.setAttribute("height", lh);
+    lh = Math.max(20, lh); // for sanity's sake.
+
+    if (!tier.layoutWasDone) {
+	tier.layoutHeight = lh + 4;
+	tier.background.setAttribute("height", lh);
+	if (glyphs.length > 0) {
+	    tier.layoutWasDone = true;
+	}
+	tier.placard = null;
+    } else {
+	if (tier.layoutHeight != (lh + 4)) {
+	    var spandPlacard = document.createElementNS(NS_SVG, 'g');
+	    var frame = document.createElementNS(NS_SVG, 'rect');
+	    var ori = (viewStart - origin) * scale;
+	    frame.setAttribute('x', 0);
+	    frame.setAttribute('y', -20);
+	    frame.setAttribute('width', 120);
+	    frame.setAttribute('height', 20);
+	    frame.setAttribute('stroke', 'red');
+	    frame.setAttribute('stroke-width', 1);
+	    frame.setAttribute('fill', 'white');
+	    spandPlacard.appendChild(frame);
+	    var spand = document.createElementNS(NS_SVG, 'text');
+	    spand.setAttribute('stroke', 'none');
+	    spand.setAttribute('fill', 'red');
+	    spand.appendChild(document.createTextNode('Show ' + (tier.layoutHeight < (lh+4) ? 'more' : 'less')));
+	    spand.setAttribute('x', 10);
+	    spand.setAttribute('y', -6);
+	    spandPlacard.appendChild(spand);
+	    var arrow = document.createElementNS(NS_SVG, 'path');
+	    arrow.setAttribute('fill', 'red');
+	    arrow.setAttribute('stroke', 'none');
+	    if (tier.layoutHeight < (lh+4)) {
+		arrow.setAttribute('d', 'M ' +  100 + ' ' + -16 +
+				   ' L ' + 112 + ' ' + -16 +
+				   ' L ' + 106 + ' ' + -4 + ' Z');
+	    } else {
+		arrow.setAttribute('d', 'M ' +  100 + ' ' + -4 +
+				   ' L ' + 112 + ' ' + -4 +
+				   ' L ' + 106 + ' ' + -16 + ' Z');
+	    }
+	    spandPlacard.appendChild(arrow);
+	    
+	    spandPlacard.addEventListener('mousedown', function(ev) {
+		tier.layoutWasDone = false;
+		drawFeatureTier(tier);
+		arrangeTiers();
+	    }, false);
+	    tier.placard = spandPlacard;
+	} else {
+	    tier.placard = null;
+	}
+    }
+
+    var clipId = 'tier_clip_' + (++clipIdSeed);
+    var clip = document.createElementNS(NS_SVG, 'clipPath');
+    clip.setAttribute('id', clipId);
+    var clipRect = document.createElementNS(NS_SVG, 'rect');
+    clipRect.setAttribute('x', -100000);
+    clipRect.setAttribute('y', 0);
+    clipRect.setAttribute('width', 200000);
+    clipRect.setAttribute('height', tier.layoutHeight - 4);
+    clip.appendChild(clipRect);
+    featureGroupElement.appendChild(clip);
+    featureGroupElement.setAttribute('clip-path', 'url(#' + clipId + ')');
+	    
     tier.scale = 1;
 }
 

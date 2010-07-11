@@ -74,6 +74,8 @@ function DasTier(source, viewport, background)
     } else {
 	this.refreshTier = refreshTier_features;
     }
+
+    this.layoutWasDone = false;
 }
 
 DasTier.prototype.init = function() {
@@ -100,50 +102,15 @@ DasTier.prototype.styles = function(scale) {
 }
 
 
-
-function SeqTier(source, viewport, background)
-{
-    this.source = source;
-    this.viewport = viewport;
-    this.background = background;
-    this.seq = null;
-}
-
-function LineRenderer(x, scale)
-{
-    this.scale = scale;
-    this.height = function() {
-	return x;
-    }
-}
-
-function BoxRenderer(x)
-{
-    if (!x) x=40;
-    this.height = function() {
-        return x;
-    }
-}
-
-function BarRenderer(x, scale) {
-    if (!scale) {
-        scale = 1;
-    }
-    
-    this.height = function() {
-        return x;
-    }
-    this.scale = scale;
-}
-
-function SeqRenderer()
-{
-    this.height = function() {
-        return 50;
-    }
-}
+var placards = [];
 
 function arrangeTiers() {
+    var browserSvg = document.getElementById('browser_svg');
+    for (var p = 0; p < placards.length; ++p) {
+	browserSvg.removeChild(placards[p]);
+    }
+    placards = [];
+
 	var labelGroup = document.getElementById("dasLabels");
 	removeChildren(labelGroup);
 	
@@ -171,14 +138,21 @@ function arrangeTiers() {
 	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
 	    labelGroup.appendChild(labelText);
 	    
+/*
 	    if (tier.source.bumped) {
 	        makeToggleButton(labelGroup, tier, clh);
 	    } else if (BarRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
 	        makeQuantConfigButton(labelGroup, tier, clh);
-	    }
+	    }*/
 	    
 	    xfrmTier(tier, 100 - ((1.0 * (viewStart - origin)) * scale), -1);
 	    
+	    if (tier.placard) {
+		tier.placard.setAttribute('transform', 'translate(100, ' + (clh + tier.layoutHeight - 4) + ')');
+		browserSvg.appendChild(tier.placard);
+		placards.push(tier.placard);
+	    }
+
 	    clh += tiers[ti].layoutHeight;
 	}
 	

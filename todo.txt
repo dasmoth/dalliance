@@ -28,14 +28,17 @@ Publishable prototype:
 ----------------------
      
  - Tune specfetch thresholds, check for unnecessary refetches.
- - Enable/disable tiers (would a hardwired list be acceptable?)
+ - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while draggins?
      + Enabling -- working but needs UI work.
      + Minimal registry queries?
+        * dasregistry.org currently not doing CORS.
+	* worth running a mirror?
  - Better state-persistance.
      + Use localStorage?
      + Remember active tier-set?
  - Try alternate approaches to bumped track expand/collapse [Tim].
+     + Semi-related: any way to avoid duplicating gene labels?  Would save a tonne of ySpace...
  - Find a way to access secure DAS servers
      + Will XMLHttpRequest.withCredentials do what we want?
      + Likely to need server support as well.
@@ -54,6 +57,7 @@ After the paper
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
+     + How does this interact with/override SS?
  - Separate concepts of Known Space and Drawn Space.
  - Page embedding
      + Allow multiple browser instances in a given page (i.e. remove all static state).
@@ -62,10 +66,11 @@ After the paper
  - Other DAS servers? (probably mostly server work):
      + Ensembl: requires CORS, in contact...
      + MyDAS: requires CORS.  Is this used for anything except Uniprot?
+ - Publication-quality SVG export.
 
 Styling
 -------
- - Still missing some unusual glyphtypes
+ - Still missing a few glyphs (LINE, TEXT, TRIANGLE, TOOMANY).
  - Support ZINDEX?
  - Rainbowed LINEPLOT glyphs?
  - Attach external SSs?
