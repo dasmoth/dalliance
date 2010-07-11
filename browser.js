@@ -58,11 +58,7 @@ var styleOracle = {
 
 var defaultBumpStatus = false;
 
-function Range(min, max)
-{
-    this.min = min;
-    this.max = max;
-}
+
 
 function DataSource(name, uri, bumped, renderer, opts)
 {
@@ -162,23 +158,6 @@ function getValue(element, tag)
         return "n/a";
     }
 }
-
-function rangeOrder(a, b)
-{
-    if (a.min < b.min) {
-        return -1;
-    } else if (a.min > b.min) {
-        return 1;
-    } else if (a.max < b.max) {
-        return -1;
-    } else if (b.max > a.max) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
 
 function arrangeTiers() {
 	var labelGroup = document.getElementById("dasLabels");
