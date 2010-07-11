@@ -257,12 +257,17 @@ function drawFeatureTier(tier)
 }
 
 function glyphsForGroup(features, y, stylesheet) {
-    var min = 100000000, max = -100000000, height=1;
+    var height=1;
     var label;
+    var spans = null;
+    var strand = null;
     
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
+	if (feature.orientation && strand==null) {
+	    strand = feature.orientation;
+	}
 	var style = stylesheet[feature.type];
 	if (!style) {
 	    continue;
@@ -270,15 +275,40 @@ function glyphsForGroup(features, y, stylesheet) {
 	var glyph = glyphForFeature(feature, y, style);
 	if (glyph && glyph.glyph) {
 	    glyphGroup.appendChild(glyph.glyph);
-	    min = Math.min(min, glyph.min);
-	    max = Math.max(max, glyph.max);
+	    var gspan = new Range(glyph.min, glyph.max);
+	    if (spans == null) {
+		spans = gspan;
+	    } else {
+		spans = union(spans, gspan);
+	    }
 	    height = Math.max(height, glyph.height);
 	    if (!label && glyph.label) {
 		label = glyph.label;
 	    }
 	}
     }
-    var dg = new DGlyph(glyphGroup, min, max, height);
+
+    var blockList = spans.ranges();
+    for (var i = 1; i < blockList.length; ++i) {
+	var lmin = (blockList[i - 1].max() - origin) * scale;
+	var lmax = (blockList[i].min() - origin) * scale;
+
+	var path = document.createElementNS(NS_SVG, 'path');
+	path.setAttribute('fill', 'none');
+	path.setAttribute('stroke-width', '1');
+	    
+	if (strand == "+" || strand == "-") {
+	    var lmid = (lmin + lmax) / 2;
+	    var lmidy = (strand == "-") ? y + 12 : y;
+	    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+	} else {
+	    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
+	}
+	    
+	glyphGroup.appendChild(path);
+    }
+
+    var dg = new DGlyph(glyphGroup, spans.min(), spans.max(), height);
     dg.bump = true; // grouped features always bumped.
     if (label) {
 	dg.label = label;
@@ -720,24 +750,7 @@ function drawFeatureGroup(featureGroupElement, y, features, bumpMatrix, label, r
 	blockList.sort(rangeOrder);
 	
 	if (!elideTents) {
-	for (var i = 1; i < blockList.length; ++i) {
-	    var lmin = blockList[i - 1].max;
-	    var lmax = blockList[i].min;
-	    
-	    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-	    path.setAttribute("fill", "none");
-	    path.setAttribute("stroke-width", "1");
-	    
-	    if (strand == "+" || strand == "-") {
-	        var lmid = (lmin + lmax) / 2;
-	        var lmidy = (strand == "-") ? y + 12 : y;
-	        path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
-	    } else {
-	        path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
-	    }
-	    
-	    g.appendChild(path);
-	}
+
         }
 
 	var tier = bump(bumpMatrix, new Range(gmin - 2, gmax + 2));

@@ -9,10 +9,11 @@ DasTier.prototype.refreshTier = function()
 {	    
     if (SeqRenderer.prototype.isPrototypeOf(this.source.renderer)) { // FIXME: need a better way of IDing seq tiers!
         if (scale >= 1) {
-            this.source.dasSource.sequence(
+	    var tier = this;
+            this.dasSource.sequence(
                 new DASSegment(chr, knownStart, knownEnd),
                 function(seqs) {
-                    drawSeqTier(this, seqs[0]);  // FIXME: check array.
+                    drawSeqTier(tier, seqs[0]);  // FIXME: check array.
                 }
             );
         } else {
