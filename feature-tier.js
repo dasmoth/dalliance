@@ -162,7 +162,7 @@ function drawFeatureTier(tier)
     }
     featureGroupElement.appendChild(tier.background);
 	
-    var offset = 5;
+    var offset = 2;
     var lh = 2;
     var bumpMatrix = null;
     if (tier.bumped) {
@@ -210,8 +210,6 @@ function drawFeatureTier(tier)
 	glyphs.push(g);
     }
 
-
-
     var unbumpedST = new DSubTier();
     var bumpedSTs = [];
     
@@ -251,7 +249,7 @@ function drawFeatureTier(tier)
 	lh += st.height + 4; //padding
     }
 
-    tier.layoutHeight=lh;
+    tier.layoutHeight=lh + 4;
     tier.background.setAttribute("height", lh);
     tier.scale = 1;
 }
