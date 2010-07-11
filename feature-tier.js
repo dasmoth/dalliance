@@ -168,7 +168,7 @@ function drawFeatureTier(tier)
     if (tier.bumped) {
 	bumpMatrix = new Array(0);
     }
-    var styles = tier.source.styles(scale);
+    var styles = tier.styles(scale);
 
     var glyphs = [];
 

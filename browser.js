@@ -48,12 +48,6 @@ var hPopupHolder;
 
 var tierBackgroundColors = ["cornsilk", "wheat"];
 
-var styleOracle = {
-    'repeat': 'orange',
-    'tandem_repeat': 'gray',
-    'Dust': 'gray'
-};
-
 // Experimental feature toggles
 
 var defaultBumpStatus = false;
@@ -72,28 +66,6 @@ function DataSource(name, uri, bumped, renderer, opts)
     this.opts = opts;
 }
 
-DataSource.prototype.init = function() {
-    this.dasSource = new DASSource(this.uri);
-    var source = this;
-    this.dasSource.stylesheet(function(stylesheet) {
-	source.stylesheet = stylesheet;
-	// refreshTier(...);
-    }, function() {
-	// alert('no SS for ' + source.name);
-    });
-}
-
-DataSource.prototype.styles = function(scale) {
-    if (this.stylesheet == null) {
-	return null;
-    } else if (scale > 1) {
-	return this.stylesheet.highZoomStyles;
-    } else if (scale > 0.05) {
-	return this.stylesheet.mediumZoomStyles;
-    } else {
-	return this.stylesheet.lowZoomStyles;
-    }
-}
 
 function DasTier(source, viewport, background)
 {
@@ -106,6 +78,31 @@ function DasTier(source, viewport, background)
     this.y = 0;
     this.scale = 1;
 }
+
+DasTier.prototype.init = function() {
+    this.dasSource = new DASSource(this.source.uri);
+    var tier = this;
+    this.dasSource.stylesheet(function(stylesheet) {
+	tier.stylesheet = stylesheet;
+	tier.refreshTier();
+    }, function() {
+	// alert('no SS for ' + source.name);
+    });
+}
+
+DasTier.prototype.styles = function(scale) {
+    if (this.stylesheet == null) {
+	return null;
+    } else if (scale > 1) {
+	return this.stylesheet.highZoomStyles;
+    } else if (scale > 0.05) {
+	return this.stylesheet.mediumZoomStyles;
+    } else {
+	return this.stylesheet.lowZoomStyles;
+    }
+}
+
+
 
 function SeqTier(source, viewport, background)
 {
@@ -457,51 +454,10 @@ function refresh()
 {
     scaleAtLastRedraw = scale;
     for (var t = 0; t < tiers.length; ++t) {
-	    refreshTier(tiers[t]);
+	tiers[t].refreshTier();
     }
 }
 
-function refreshTier(tier)
-{	    
-    if (SeqRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
-        if (scale >= 1) {
-            tier.source.dasSource.sequence(
-                new DASSegment(chr, knownStart, knownEnd),
-                function(seqs) {
-                    drawSeqTier(tier, seqs[0]);  // FIXME: check array.
-                }
-            );
-        } else {
-            drawSeqTier(tier);
-        }
-    } else {
-	var stylesheet = tier.source.styles(scale);
-	var fetchTypes = [];
-	if (stylesheet) {
-	    for (tt in stylesheet) {
-		fetchTypes.push(tt);
-	    }
-	}
-	
-        var scaledQuantRes = targetQuantRes / scale;
-        var maxBins = 1 + (((knownEnd - knownStart) / scaledQuantRes) | 0);
-
-	if (fetchTypes.length > 0) {
-	    // alert(fetchTypes);
-            tier.source.dasSource.features(
-		new DASSegment(chr, knownStart, knownEnd),
-		{type: fetchTypes, maxbins: maxBins},
-		function(features) {
-                    tier.currentFeatures = features;
-                    dasRequestComplete(tier);
-		}
-            );
-	} else {
-	    tier.currentFeatures = [];
-	    dasRequestComplete(tier);
-	}
-    }
-}
 
 var originX;
 
@@ -700,14 +656,6 @@ function init()
         var mid = ((viewEnd + viewStart) / 2)|0;
         viewStart = mid - 25000;
         viewEnd = mid + 25000;
-    }
-
-    //
-    // Prefetch stylesheets (factor out so it can be done on newly-added tracks?)
-    //
- 
-   for (var t = 0; t < sources.length; ++t) {
-       sources[t].init();
     }
 
     //
@@ -952,24 +900,28 @@ function init()
     tierHolder = document.getElementById("dasTiers");
     tiers = new Array();	  
     for (var t = 0; t < sources.length; ++t) {
-	    var source = sources[t];
-	    var viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
-	    var viewportBackground = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-	    var col = tierBackgroundColors[t % tierBackgroundColors.length];
-	    viewportBackground.setAttribute("fill", col);
-	    viewportBackground.setAttribute("x", "-1000000");
-	    viewportBackground.setAttribute("y", "0");
-	    viewportBackground.setAttribute("width", "2000000");
-	    viewportBackground.setAttribute("height", "200");
-	    viewportBackground.setAttribute("stroke-width", "0");
-	    viewport.appendChild(viewportBackground);
-	    viewport.setAttribute("transform", "translate(200, " + ((t * 200) + 50) + ")");
-	    tierHolder.appendChild(viewport);
-	    tiers.push(new DasTier(source, viewport, viewportBackground));
+	var source = sources[t];
+	var viewport = document.createElementNS(NS_SVG, "g");
+	var viewportBackground = document.createElementNS(NS_SVG, "rect");
+	var col = tierBackgroundColors[t % tierBackgroundColors.length];
+	viewportBackground.setAttribute("fill", col);
+	viewportBackground.setAttribute("x", "-1000000");
+	viewportBackground.setAttribute("y", "0");
+	viewportBackground.setAttribute("width", "2000000");
+	viewportBackground.setAttribute("height", "200");
+	viewportBackground.setAttribute("stroke-width", "0");
+	viewport.appendChild(viewportBackground);
+	viewport.setAttribute("transform", "translate(200, " + ((t * 200) + 50) + ")");
+	tierHolder.appendChild(viewport);
+	
+	var tier = new DasTier(source, viewport, viewportBackground);
+	tier.init(); // fetches stylesheet
+	tiers.push(tier);
     }
     
     move(0);
-    refresh();
+    refresh(); // FIXME do we still want to be doing this?
+
     document.getElementById("sliderHandle").addEventListener("mousedown", sliderMouseDownHandler, true);
     document.getElementById("main").addEventListener("mousedown", mouseDownHandler, false);
     document.getElementById('main').addEventListener('touchstart', touchStartHandler, false);
@@ -980,8 +932,6 @@ function init()
     // document.getElementById('main').addEventListener('MozTouchMove', mozTouchMoveHandler, false);
     // document.getElementById('main').addEventListener('MozTouchRelease', mozTouchEndHandler, false);
     document.addEventListener('mousewheel', function(ev) {
-	
-	// setViewerStatus('wheelDeltaX=' + ev.wheelDeltaX);
 	if (!ev.wheelDeltaX) {
 	    return;
 	}
@@ -1003,7 +953,7 @@ function init()
     
     // Low-priority stuff
     
-    sources[0].dasSource.entryPoints(
+    tiers[0].dasSource.entryPoints(
         function(ep) {
             entryPoints = ep;
             for (var epi = 0; epi < entryPoints.length; ++epi) {
