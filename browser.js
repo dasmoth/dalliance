@@ -48,12 +48,6 @@ var hPopupHolder;
 
 var tierBackgroundColors = ["cornsilk", "wheat"];
 
-// Experimental feature toggles
-
-var defaultBumpStatus = false;
-
-
-
 function DataSource(name, uri, bumped, renderer, opts)
 {
     if (!opts) {
@@ -74,7 +68,7 @@ function DasTier(source, viewport, background)
     this.background = background;
     this.req = null;
     this.layoutHeight = 200;
-    this.bumped = source.bumped ? defaultBumpStatus : false;
+    this.bumped = false; // until we've decided what to do about tier-collapsing...
     this.y = 0;
     this.scale = 1;
 }
@@ -886,10 +880,10 @@ function init()
                         viewport.appendChild(viewportBackground);
                         viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
                         tierHolder.appendChild(viewport);
-                        tiers.push(new DasTier(nds, viewport, viewportBackground));
-                        
-                        // Can we get away with a softer refresh???
-                        refresh();
+
+		       var tier = new DasTier(nds, viewport, viewportBackground)
+                       tiers.push(tier);
+		       tier.init();
 	                    
 	                    removeAllPopups();
 	                    return false;
@@ -928,9 +922,6 @@ function init()
     document.getElementById('main').addEventListener('touchmove', touchMoveHandler, false);
     document.getElementById('main').addEventListener('touchend', touchEndHandler, false);
     document.getElementById('main').addEventListener('touchcancel', touchCancelHandler, false);
-    // document.getElementById('main').addEventListener('MozTouchDown', mozTouchStartHandler, false);
-    // document.getElementById('main').addEventListener('MozTouchMove', mozTouchMoveHandler, false);
-    // document.getElementById('main').addEventListener('MozTouchRelease', mozTouchEndHandler, false);
     document.addEventListener('mousewheel', function(ev) {
 	if (!ev.wheelDeltaX) {
 	    return;
