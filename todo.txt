@@ -5,6 +5,7 @@ Bugs!
  - Zoom slider doesn't get updated in all the places it should.
  - Validate jumps
  - No real visual indication of failed vs. pending track loads.
+ - Origin needs to be rebased from time to time!
 
 Performance
 -----------

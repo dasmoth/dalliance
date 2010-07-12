@@ -8,7 +8,7 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var tagLine = "...do we run or do we stumble?";
+var tagLine = "...we're not unreasonable, no-one's gonna eat your eyes.";
 
 var sources = new Array();
 var tiers = new Array();
@@ -445,7 +445,7 @@ function mouseDownHandler(ev)
 
 function mouseUpHandler(ev)
 {
-    ev.stopPropagation(); ev.preventDefault();
+     ev.stopPropagation(); ev.preventDefault();
 
     document.removeEventListener("mousemove", mouseMoveHandler, true);
     document.removeEventListener("mouseup", mouseUpHandler, true);
@@ -835,10 +835,11 @@ function init()
 	            hPopupHolder.appendChild(popup);
 	            $(popup).fadeIn(500);
 	            
-	           $('#addform').submit(function() {
+	           $('#addform').submit(function(ev) {
+		       ev.stopPropagation(); ev.preventDefault();
 	                    var nuri = $('input:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-	                    
-	                    var nds = new DataSource('added', nuri, false, new BoxRenderer());
+
+	                    var nds = new DataSource('added', nuri);
 	                    sources.push(nds);
 	                    // this should be factored out.
 	                    var viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -859,7 +860,7 @@ function init()
 		       tier.init();
 	                    
 	                    removeAllPopups();
-	                    return false;
+	                    return true;
 	            });
 	}, false);
 	

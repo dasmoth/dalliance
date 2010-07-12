@@ -5,7 +5,8 @@
 // feature-tier.js: renderers for glyphic data
 //
 
-var MIN_FEATURE_PX = 5;   
+var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires making
+                        // drawing of joined-up groups a bit smarter.   
 
 //
 // Colour handling
@@ -265,10 +266,10 @@ function drawFeatureTier(tier)
 	if (tier.layoutHeight != (lh + 4)) {
 	    var spandPlacard = document.createElementNS(NS_SVG, 'g');
 	    var frame = document.createElementNS(NS_SVG, 'rect');
-	    var ori = (viewStart - origin) * scale;
 	    frame.setAttribute('x', 0);
 	    frame.setAttribute('y', -20);
-	    frame.setAttribute('width', 120);
+	    // frame.setAttribute('width', 120);
+	    frame.setAttribute('width', featurePanelWidth);
 	    frame.setAttribute('height', 20);
 	    frame.setAttribute('stroke', 'red');
 	    frame.setAttribute('stroke-width', 1);
@@ -278,7 +279,8 @@ function drawFeatureTier(tier)
 	    spand.setAttribute('stroke', 'none');
 	    spand.setAttribute('fill', 'red');
 	    spand.appendChild(document.createTextNode('Show ' + (tier.layoutHeight < (lh+4) ? 'more' : 'less')));
-	    spand.setAttribute('x', 10);
+	    // spand.setAttribute('x', 10);
+	    spand.setAttribute('x', (featurePanelWidth - 60) / 2);
 	    spand.setAttribute('y', -6);
 	    spandPlacard.appendChild(spand);
 	    var arrow = document.createElementNS(NS_SVG, 'path');
@@ -378,15 +380,41 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
     // FIXME: is this really the place?
     //
     if (groupElement && groupElement.links) {
-	glyphGroup.addEventListener('mouseover', function(ev) {
-	    var link = '';
-	    for (var li = 0; li < groupElement.links.length; ++li) {
-	        var dasLink = groupElement.links[li];
-	        link += ' <a href="' + dasLink.uri + '">(' + dasLink.desc + ')</a>';
-	    }
+	var timeoutID = null;
+	glyphGroup.addEventListener('mousedown', function(ev) {
+	    if (timeoutID) {
+		clearTimeout(timeoutID);
+		viewStart = ((1.0 *spans.min()) - 2000)|0;
+		viewEnd = ((1.0 * spans.max()) + 2000)|0;
+		scale = featurePanelWidth / (viewEnd - viewStart)
+		updateRegion();
+		refresh();
+	    } else {
+		var link = '';
+		for (var li = 0; li < groupElement.links.length; ++li) {
+	            var dasLink = groupElement.links[li];
+	            // link += ' <a href="' + dasLink.uri + '">(' + dasLink.desc + ')</a>';
+		}
+		var mx = ev.clientX, my = ev.clientY;
+		// alert('doGenePopup("' + label + '", "' + link + '", ' + mx + ', ' + my + ');');
+		timeoutID = setTimeout('doGenePopup("' + label + '", "' + link + '", ' + mx + ', ' + my + ');', 500);
+	    } 
 	    	            
+
+	}, true); 
+    }
+
+    var dg = new DGlyph(glyphGroup, spans.min(), spans.max(), height);
+    dg.strand = strand;
+    dg.bump = true; // grouped features always bumped.
+    if (label) {
+	dg.label = label;
+    }
+    return dg;
+}
+
+function doGenePopup(label, link, mx, my) {
 	    removeAllPopups();
-	    var mx =  ev.clientX, my = ev.clientY;
 	    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
 	    my +=  document.documentElement.scrollTop || document.body.scrollTop;
 	    var popup = $('#popupTest').clone().css({
@@ -404,6 +432,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
 	    hPopupHolder.appendChild(popup);
 	    $(popup).fadeIn(500);
 	            
+/*
 	    popup.addEventListener('mouseout', function(ev2) {
 	        var rel = ev2.relatedTarget;
 	        while (rel) {
@@ -413,16 +442,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
 	            rel = rel.parentNode;
 	        }
 	        removeAllPopups();
-	    }, false);
-	}, true);
-    }
-
-    var dg = new DGlyph(glyphGroup, spans.min(), spans.max(), height);
-    dg.bump = true; // grouped features always bumped.
-    if (label) {
-	dg.label = label;
-    }
-    return dg;
+	    }, false); */
 }
 
 function glyphForFeature(feature, y, style)
@@ -635,7 +655,7 @@ function glyphForFeature(feature, y, style)
 
 	    if (gtype == 'HISTOGRAM') {
 		height = (height * relScore)|0;
-		y = y + (requiredHeight - bh);
+		y = y + (requiredHeight - height);
 	    }
 	}
  
@@ -645,6 +665,7 @@ function glyphForFeature(feature, y, style)
         rect.setAttribute("width", maxPos - minPos);
         rect.setAttribute("height", height);
 	rect.setAttribute('stroke', stroke);
+        rect.setAttribute('stroke-width', 1);
 	rect.setAttribute('fill', fill);
 	
 	glyph = rect;
