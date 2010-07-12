@@ -85,11 +85,13 @@ DasTier.prototype.init = function() {
 	this.dasSource.credentials = true;
     }
     var tier = this;
+    tier.status = 'Fetching stylesheet';
     this.dasSource.stylesheet(function(stylesheet) {
 	tier.stylesheet = stylesheet;
 	tier.refreshTier();
     }, function() {
-	// alert('no SS for ' + source.name);
+	tier.error = 'No stylesheet';
+	tier.refreshTier();
     });
 }
 
@@ -946,9 +948,17 @@ function resizeViewer() {
     if (oldFPW != featurePanelWidth) {
         var viewWidth = viewEnd - viewStart;
         viewEnd = viewStart + (viewWidth * featurePanelWidth) / oldFPW;
-        // should do a Known Space check.
-        // should also fix the zoom slider...
+        // FIXME: should do a Known Space check.
+        // FIXME: should also fix the zoom slider...
         updateRegion();
+    }
+
+    for (var pi = 0; pi < placards.length; ++pi) {
+	var placard = placards[pi];
+	var rects = placard.getElementsByTagName('rect');
+	if (rects.length > 0) {
+	    rects[0].setAttribute('width', featurePanelWidth);
+	}
     }
 }
 

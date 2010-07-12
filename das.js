@@ -168,8 +168,7 @@ DASSource.prototype.features = function(segment, options, callback) {
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
 
 	if (!responseXML) {
-	    alert('Failed req: ' + dasURI);
-	    callback([]);
+	    callback([], 'Failed request: ' + dasURI);     // FIXME response code here?
 	}
 	if (req) {
 	    /*
@@ -256,8 +255,11 @@ function DASStyle() {
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
     var dasURI = this.uri + 'stylesheet';
     this.doCrossDomainRequest(dasURI, function(responseXML) {
-	if (!responseXML && failureCB) {
-	    failureCB();
+	if (!responseXML) {
+	    if (failureCB) {
+		failureCB();
+	    } 
+	    return;
 	}
 	var stylesheet = new DASStylesheet();
 	var typeXMLs = responseXML.getElementsByTagName('TYPE');

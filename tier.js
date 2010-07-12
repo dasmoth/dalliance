@@ -33,6 +33,10 @@ function refreshTier_features()
 		fetchTypes.push(tt);
 	    }
 	}
+    } else {
+	this.currentFeatures = [];
+	dasRequestComplete(this); // FIXME isn't this daft?
+	return;
     }
     
     var scaledQuantRes = targetQuantRes / scale;
@@ -40,15 +44,23 @@ function refreshTier_features()
 
     if (inclusive || fetchTypes.length > 0) {
 	var tier = this;
+	this.status = 'Fetching features';
+
         this.dasSource.features(
 	    new DASSegment(chr, knownStart, knownEnd),
 	    {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
-	    function(features) {
+	    function(features, status) {
+		if (status) {
+		    tier.error = status;
+		} else {
+		    tier.error = null; tier.status = null;
+		}
                 tier.currentFeatures = features;
                 dasRequestComplete(tier);
 	    }
         );
     } else {
+	this.status = 'Nothing to show at this zoom level';
 	this.currentFeatures = [];
 	dasRequestComplete(this);
     }
