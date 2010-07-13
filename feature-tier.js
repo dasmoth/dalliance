@@ -251,12 +251,23 @@ function drawFeatureTier(tier)
 
     for (var sg in tier.superGroups) {
 	var sgg = tier.superGroups[sg];
+	var sgGlyphs = [];
+	var sgMin = 10000000000;
+	var sgMax = -10000000000;
 	for (var sgi = 0; sgi < sgg.length; ++sgi) {
 	    var gg = groupGlyphs[sgg[sgi]];
 	    groupGlyphs[sgg[sgi]] = null;
 	    if (gg) {
-		glyphs.push(gg);
+		sgGlyphs.push(gg);
+		sgMin = Math.min(sgMin, gg.min);
+		sgMax = Math.max(sgMax, gg.max);
 	    }
+	}
+	for (var sgi = 0; sgi < sgGlyphs.length; ++sgi) {
+	    var gg = sgGlyphs[sgi];
+	    gg.min = sgMin;
+	    gg.max = sgMax;
+	    glyphs.push(gg);
 	}
     }
     for (var g in groupGlyphs) {

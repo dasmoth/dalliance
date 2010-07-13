@@ -3,8 +3,6 @@ Bugs!
 
  - FRAME RESIZE: should be able to adjust Known Space.
  - Zoom slider doesn't get updated in all the places it should.
- - Validate jumps
- - Origin needs to be rebased from time to time!
 
 Performance
 -----------
@@ -29,7 +27,7 @@ Publishable prototype:
      
  - Tune specfetch thresholds, check for unnecessary refetches.
  - Enable/disable tiers
-     + Disabling now done.  Is the UI okay?  Highlight the dustbin while draggins?
+     + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
      + Minimal registry queries?
         * dasregistry.org currently not doing CORS.
@@ -37,8 +35,10 @@ Publishable prototype:
  - Better state-persistance.
      + Use localStorage?
      + Remember active tier-set?
- - Try alternate approaches to bumped track expand/collapse [Tim].
  - Supergrouping
+     * Test current impl.
+     * Intelligent gene-collapsing.
+     * Better way to get the metadata across?
  - Find a way to access secure DAS servers
      + Access-Control-Allow-Credentials is usable.
      + Working now with slightly-hacked Dazzle

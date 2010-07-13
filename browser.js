@@ -427,6 +427,7 @@ function setLoadingStatus()
 
 function refresh()
 {
+    origin = (viewStart + viewEnd) / 2;
     scaleAtLastRedraw = scale;
     for (var t = 0; t < tiers.length; ++t) {
 	tiers[t].refreshTier();
@@ -693,8 +694,7 @@ function init()
     document.getElementById("region").addEventListener('mousedown', function(ev) {
              ev.stopPropagation(); ev.preventDefault();
              if (entryPoints == null) {
-                 // should growl a warning?
-                 return;
+                 alert("entry_points aren't currently available for this genome");
              }
              
             	var mx =  ev.clientX, my = ev.clientY;
@@ -741,48 +741,49 @@ function init()
                             ++idx;
                         }
                 });
-	            
-	            var epMenuOptions = '';
+
+	var epsByChrName = {};
+	        var epMenuOptions = '';
                 for (var epi = 0; epi < entryPoints.length; ++epi) {
-                     var ep = epMenuItems[epi].entryPoint;
-                     epMenuOptions += '<option value="' + ep.name + '">' + ep.toString() +'</option>';
+                    var ep = epMenuItems[epi].entryPoint;
+		    epsByChrName[ep.name] = ep;
+                    epMenuOptions += '<option value="' + ep.name + '">' + ep.toString() +'</option>';
                 }
                 $('#chrMenu').html(epMenuOptions).attr({value: chr});
-	            
-	            $('#navform').submit(function() {
-	                    var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-	                    var nmin = $('input:eq(0)').val();
-	                    var nmax = $('input:eq(1)').val();
+	            $('#navform').submit(function(ev) {
+			ev.stopPropagation();
+			ev.preventDefault();
+
+	                var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
+	                var nmin = $('input:eq(0)').val()|0;
+	                var nmax = $('input:eq(1)').val()|0;    
+			var nwid = nmax - nmin + 1;
+
+			var ep = epsByChrName[nchr];
+			if (nmin < 1) {
+	                    nmin = 1;   
+			    nmax = Math.min(nmin + nwid - 1, ep.end);
+	                }
+			if (nmax > ep.end) {
+			    nmax = ep.end;
+			    nmin = Math.max(1, nmax - nwid + 1);
+			}
+			
+	                if (nwid < 100 || nwid > 1000000) {
+	                    var nmid = (nmin + nmax) / 2;
+	                    nmin = nmid - 10000;
+	                    nmax = nmid + 9999;
+	                }
 	                    
-	                    if (nmin < 1) {
-	                        nmin = 1;
-	                    }
+	                // would be nice to factor this stuff out.
+	                // also update zoom slider!
 	                    
-	                    var nwid = nmax - nmin + 1;
-	                    if (nwid < 100 || nwid > 1000000) {
-	                        var nmid = (nmin + nmax) / 2;
-	                        nmin = nmid - 10000;
-	                        nmax = nmid + 9999;
-	                    }
-	                    
-	                    // would be nice to factor this stuff out.
-	                    // also update zoom slider!
-	                    
-	                    viewStart = nmin | 0;
-	                    viewEnd = nmax | 0;
-	                    chr = nchr;
-	                    scale = featurePanelWidth / (viewEnd - viewStart);
+	                viewStart = nmin | 0;
+	                viewEnd = nmax | 0;
+	                chr = nchr;
+	                scale = featurePanelWidth / (viewEnd - viewStart);
                         
-	                    currentSeqMax = -1;
-	                    for (var epi = 0; epi < entryPoints.length; ++epi) {
-	                        if (entryPoints[epi].name == chr) {
-	                            currentSeqMax = entryPoints[epi].end;
-	                            break;
-	                        }
-	                    }
-	                    if (currentSeqMax < 0) {
-	                        alert("Couldn't match entrypoint");
-	                    }
+	                currentSeqMax = ep.end;
 	                    
                         // xfrmTiers((-1.0 * (viewStart - origin)) * scale, 1);
                         updateRegion();
