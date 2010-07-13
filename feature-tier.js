@@ -241,10 +241,29 @@ function drawFeatureTier(tier)
 	    return 1;
         }
     });
+
+    var groupGlyphs = {};
     for (var gx in gl) {
 	var gid = gl[gx];
 	var g = glyphsForGroup(tier.groupedFeatures[gid], offset, styles, tier.groups[gid], tier);
-	glyphs.push(g);
+	groupGlyphs[gid] = g;
+    }
+
+    for (var sg in tier.superGroups) {
+	var sgg = tier.superGroups[sg];
+	for (var sgi = 0; sgi < sgg.length; ++sgi) {
+	    var gg = groupGlyphs[sgg[sgi]];
+	    groupGlyphs[sgg[sgi]] = null;
+	    if (gg) {
+		glyphs.push(gg);
+	    }
+	}
+    }
+    for (var g in groupGlyphs) {
+	var gg = groupGlyphs[g];
+	if (gg) {
+	    glyphs.push(gg);
+	}
     }
 
     var unbumpedST = new DSubTier();
@@ -389,7 +408,6 @@ function drawFeatureTier(tier)
 	tier.placard = statusPlacard;
     }
 
-
     var clipId = 'tier_clip_' + (++clipIdSeed);
     var clip = document.createElementNS(NS_SVG, 'clipPath');
     clip.setAttribute('id', clipId);
@@ -480,7 +498,6 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier) {
 		updateRegion();
 		refresh();
 	    } else {
-
 		var mx = ev.clientX, my = ev.clientY;
 		timeoutID = setTimeout(function() {
 		    timeoutID = null;
