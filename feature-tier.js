@@ -119,7 +119,21 @@ function pusho(obj, k, v) {
     if (obj[k]) {
 	obj[k].push(v);
     } else {
-	obj[k] = new Array(v);
+	obj[k] = [v];
+    }
+}
+
+function pushnewo(obj, k, v) {
+    var a = obj[k];
+    if (a) {
+	for (var i = 0; i < a.length; ++i) {    // indexOf requires JS16 :-(.
+	    if (a[i] == v) {
+		return;
+	    }
+	}
+	a.push(v);
+    } else {
+	obj[k] = [v];
     }
 }
 
@@ -128,30 +142,46 @@ function sortFeatures(tier)
     var ungroupedFeatures = {};
     var groupedFeatures = {};
     var groups = {};
+    var superGroups = {};
+    var groupsToSupers = {};
     
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
 	var f = tier.currentFeatures[fi];
-	var wasGrouped = false;
+	var fGroups = [];
+	var fSuperGroup = null;
 	if (f.groups) {
 	    for (var gi = 0; gi < f.groups.length; ++gi) {
 	        var g = f.groups[gi];
-	        if (g.type == 'transcript' || g.type=='CDS' || g.type == 'read') {
-	            var gid = g.id;
+		var gid = g.id;
+		if (g.type == 'gene') {
+		    // Like a super-grouper...
+		    fSuperGroup = gid; 
+		} else if (g.type == 'translation') {
+		    // have to ignore this to get sensible results from bj-e :-(.
+		} else {
 		    pusho(groupedFeatures, gid, f);
 	            groups[gid] = g;
-		    wasGrouped = true;
+		    fGroups.push(gid);
 	        }
 	    }
 	}
 
-	if (!wasGrouped) {
+	if (fGroups.length == 0) {
 	    pusho(ungroupedFeatures, f.type, f);
-	}
+	} else if (fSuperGroup) {
+	    for (var g = 0; g < fGroups.length; ++g) {
+		var gid = fGroups[g];
+		pushnewo(superGroups, fSuperGroup, gid);
+		groupsToSupers[gid] = fSuperGroup;
+	    } 
+	}	
     }
 
     tier.ungroupedFeatures = ungroupedFeatures;
     tier.groupedFeatures = groupedFeatures;
     tier.groups = groups;
+    tier.superGroups = superGroups;
+    tier.groupsToSupers = groupsToSupers;
 }
 
 var clipIdSeed = 0;
@@ -213,7 +243,7 @@ function drawFeatureTier(tier)
     });
     for (var gx in gl) {
 	var gid = gl[gx];
-	var g = glyphsForGroup(tier.groupedFeatures[gid], offset, styles, tier.groups[gid]);
+	var g = glyphsForGroup(tier.groupedFeatures[gid], offset, styles, tier.groups[gid], tier);
 	glyphs.push(g);
     }
 
@@ -375,7 +405,7 @@ function drawFeatureTier(tier)
     tier.scale = 1;
 }
 
-function glyphsForGroup(features, y, stylesheet, groupElement) {
+function glyphsForGroup(features, y, stylesheet, groupElement, tier) {
     var height=1;
     var label;
     var links = null;
@@ -465,6 +495,12 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
     dg.bump = true; // grouped features always bumped.
     if (label) {
 	dg.label = label;
+	var sg = tier.groupsToSupers[groupElement.id];
+	if (sg) {
+	    if (groupElement.id != tier.superGroups[sg][0]) {
+	    	dg.label = null;
+	    }
+	}
     }
     return dg;
 }
