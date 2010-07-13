@@ -200,9 +200,8 @@ DASSource.prototype.features = function(segment, options, callback) {
                         dasFeature.orientation = ori;
                     }
                     dasFeature.score = elementValue(feature, "SCORE");
-                    
                     dasFeature.links = dasLinksOf(feature);
-                    // Notes
+                    dasFeature.notes = dasNotesOf(feature);
                     
                     var groups = feature.getElementsByTagName("GROUP");
                     for (var gi  = 0; gi < groups.length; ++gi) {
@@ -211,13 +210,12 @@ DASSource.prototype.features = function(segment, options, callback) {
                         dasGroup.type = groupXML.getAttribute('type');
                         dasGroup.id = groupXML.getAttribute('id');
                         dasGroup.links = dasLinksOf(groupXML);
+			dasGroup.notes = dasNotesOf(groupXML);
                         if (!dasFeature.groups) {
                             dasFeature.groups = new Array(dasGroup);
                         } else {
                             dasFeature.groups.push(dasGroup);
                         }
-                        
-                        // processing of per-group links/notes.
                     }
                     
                     // Also handle DAS/1.6 part/parent?
@@ -332,6 +330,15 @@ function dasLinksOf(element)
     return links;
 }
 
+function dasNotesOf(element)
+{
+    var notes = [];
+    var maybeNotes = element.getElementsByTagName('NOTE');
+    for (var ni = 0; ni < maybeNotes.length; ++ni) {
+	notes.push(maybeNotes[ni].firstChild.nodeValue);
+    }
+    return notes;
+}
 
 DASSource.prototype.doCrossDomainRequest = function(url, handler) {
     // TODO: explicit error handlers?

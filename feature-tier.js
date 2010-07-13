@@ -378,6 +378,8 @@ function drawFeatureTier(tier)
 function glyphsForGroup(features, y, stylesheet, groupElement) {
     var height=1;
     var label;
+    var links = null;
+    var notes = null;
     var spans = null;
     var strand = null;
     
@@ -386,6 +388,12 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
 	var feature = features[i];
 	if (feature.orientation && strand==null) {
 	    strand = feature.orientation;
+	}
+	if (feature.notes && notes==null) {
+	    notes = feature.notes;
+	}
+	if (feature.links && links==null) {
+	    links = feature.links;
 	}
 	var style = stylesheet[feature.type];
 	if (!style) {
@@ -442,17 +450,13 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
 		updateRegion();
 		refresh();
 	    } else {
-		var link = '';
-		for (var li = 0; li < groupElement.links.length; ++li) {
-	            var dasLink = groupElement.links[li];
-	            // link += ' <a href="' + dasLink.uri + '">(' + dasLink.desc + ')</a>';
-		}
-		var mx = ev.clientX, my = ev.clientY;
-		// alert('doGenePopup("' + label + '", "' + link + '", ' + mx + ', ' + my + ');');
-		timeoutID = setTimeout('doGenePopup("' + label + '", "' + link + '", ' + mx + ', ' + my + ');', 500);
-	    } 
-	    	            
 
+		var mx = ev.clientX, my = ev.clientY;
+		timeoutID = setTimeout(function() {
+		    timeoutID = null;
+		    doGenePopup(groupElement, label, notes, links, mx, my);
+		}, 200);
+	    }
 	}, true); 
     }
 
@@ -465,36 +469,45 @@ function glyphsForGroup(features, y, stylesheet, groupElement) {
     return dg;
 }
 
-function doGenePopup(label, link, mx, my) {
-	    removeAllPopups();
-	    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	    my +=  document.documentElement.scrollTop || document.body.scrollTop;
+function doGenePopup(group, label, fNotes, fLinks, mx, my) {
+    if (!label) {
+	label = group.label || group.id;
+    }
+
+    var notes = '';
+    fNotes = fNotes.concat(group.notes);
+    for (var ni = 0; ni < fNotes.length; ++ni) {
+	notes += '<p>' + fNotes[ni] + '</p>';      // FIXME do we really want to be feeding this into innerHTML???
+    }
+
+    var link = '';
+    fLinks = fLinks.concat(group.links);
+    for (var li = 0; li < fLinks.length; ++li) {
+	var dasLink = fLinks[li];
+	link += ' <a href="' + dasLink.uri + '">(' + dasLink.desc + ')</a>';
+    }
+
+    removeAllPopups();
+    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+    my +=  document.documentElement.scrollTop || document.body.scrollTop;
+    if (mx > (featurePanelWidth-150)) {
+	mx = featurePanelWidth-150;
+    }
+
 	    var popup = $('#popupTest').clone().css({
 	        position: 'absolute', 
-	        top: (my - 10), 
-	        left:  (mx - 10),
-	        width: 200,
+	        top: (my + 30), 
+	        left:  (mx - 30),
+	        width: (notes.length > 0 ? 300 : 200),
 	        backgroundColor: 'white',
 	        borderColor: 'black',
 	        borderWidth: 1,
 	        borderStyle: 'solid',
 	        padding: 2,
-	    }).html('Gene: ' + label + link).get(0);
+	    }).html('Gene: <b>' + label + '</b>' + notes + link).get(0);
 	    $(popup).hide();
 	    hPopupHolder.appendChild(popup);
-	    $(popup).fadeIn(500);
-	            
-/*
-	    popup.addEventListener('mouseout', function(ev2) {
-	        var rel = ev2.relatedTarget;
-	        while (rel) {
-	            if (rel == popup) {
-	                return;
-	            }
-	            rel = rel.parentNode;
-	        }
-	        removeAllPopups();
-	    }, false); */
+    $(popup).show();
 }
 
 function glyphForFeature(feature, y, style)
