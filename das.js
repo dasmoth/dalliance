@@ -144,7 +144,20 @@ function DASLink(desc, uri) {
 DASSource.prototype.features = function(segment, options, callback) {
     var dasURI;
     if (this.uri.indexOf('http://') == 0) {
-        dasURI = this.uri + 'features?' + segment.toDASQuery();
+        dasURI = this.uri + 'features?';
+
+	if (segment) {
+	    dasURI += segment.toDASQuery();
+	} else if (options.group) {
+	    var g = options.group;
+	    if (typeof g == 'string') {
+		dasURI += ';group_id=' + g;
+	    } else {
+		for (var gi = 0; gi < g.length; ++gi) {
+		    dasURI += ';group_id=' + g[gi];
+		}
+	    }
+	}
         if (options.type) {
             if (typeof options.type == 'string') {
                 dasURI += ';type=' + options.type;
@@ -154,6 +167,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 }
             }
         }
+	
         if (options.maxbins) {
             dasURI += ';maxbins=' + options.maxbins;
         }
@@ -179,13 +193,18 @@ DASSource.prototype.features = function(segment, options, callback) {
 	    */
 	}
 
-                var features = new Array();
-                
-                var featureXMLs = responseXML.getElementsByTagName("FEATURE");
+        var features = new Array();
+	var segs = responseXML.getElementsByTagName('SEGMENT');
+	for (var si = 0; si < segs.length; ++si) {
+            var segmentXML = segs[si];
+	    var segmentID = segmentXML.getAttribute('id');
+	    
+                var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
                 for (var i = 0; i < featureXMLs.length; ++i) {
                     var feature = featureXMLs[i];
                     var dasFeature = new DASFeature();
                     
+		    dasFeature.segment = segmentID;
                     dasFeature.id = feature.getAttribute('id');
                     dasFeature.label = feature.getAttribute('label');
                     dasFeature.min = elementValue(feature, "START");
@@ -222,8 +241,9 @@ DASSource.prototype.features = function(segment, options, callback) {
                     
                     features.push(dasFeature);
                 }
+	}
                 
-                callback(features);
+        callback(features);
     });
 }
 

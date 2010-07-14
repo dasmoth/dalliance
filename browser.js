@@ -19,6 +19,7 @@ var chr;
 var viewStart;
 var viewEnd;
 var cookieKey = 'browser';
+var searchEndpoint;
 
 // state
 
@@ -37,6 +38,7 @@ var zoomTrackMax = 746;
 var zoomBase = 50;
 var zoomExpt = 30;
 var svg;
+var dasTierHolder;
 var entryPoints = null;
 var currentSeqMax = -1; // init once EPs are fetched.
 
@@ -563,6 +565,17 @@ function stringifyObject(o)
     }
 }
 
+function makeHighlight() {
+    if (highlight) {
+	dasTierHolder.removeChild(highlight);
+	highlight = null;
+    }
+
+    if (highlightMin > 0) {
+	highlight = svg.rect(dasTierHolder, (highlightMin - origin) * scale, 0, (highlightMax - highlightMin + 1) * scale, 10000, {id: 'highlight', stroke: 'none', fill: 'red', fillOpacity: 0.2});
+    }
+}
+
 function init() 
 {
     //alert(localStorage.getItem('foo'));
@@ -654,21 +667,20 @@ function init()
       svg.rect(clip, 100, 50, 750, 440, {id: 'featureClipRect'});
     var clip = svg.other(main, 'clipPath', {id: 'labelClip'});
       svg.rect(clip, 10, 50, 90, 440, {id: 'labelClipRect'});
-      
-      
-    var dasTierHolder = svg.group(main, {clipPath: 'url(#featureClip)'}); 
+        
+    dasTierHolder = svg.group(main, {clipPath: 'url(#featureClip)'}); 
     svg.group(dasTierHolder, 'dasTiers');
-    if (highlightMin > 0) {
-	highlight = svg.rect(dasTierHolder, (highlightMin - origin) * scale, 0, (highlightMax - highlightMin + 1) * scale, 10000, {id: 'highlight', stroke: 'none', fill: 'red', fillOpacity: 0.2});
-    }
+
+    makeHighlight();
+
     var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
     svg.group(dasLabelHolder, 'dasLabels');
     
     svg.path(main, "M 500 35 L 750 35 L 750 15", {id: 'sliderTrack', stroke: 'none', fill: 'grey'});
     svg.rect(main, 600, 10, 8, 30, {id: 'sliderHandle', stroke: 'none', fill: 'blue', fillOpacity: 0.5});
-    svg.text(main, 800, 50, '1kb', {strokeWidth: 0});
-    svg.text(main, 900, 50, '10kb', {strokeWidth: 0});
-    svg.text(main, 1000, 50, '100kb', {strokeWidth: 0});
+//    svg.text(main, 800, 50, '1kb', {strokeWidth: 0});
+//    svg.text(main, 900, 50, '10kb', {strokeWidth: 0});
+//    svg.text(main, 1000, 50, '100kb', {strokeWidth: 0});
     
     popupHolder = svg.group(main);    
     hPopupHolder = $('#hPopups').get(0);
@@ -700,10 +712,12 @@ function init()
 	                borderWidth: 1,
 	                borderStyle: 'solid',
 	                padding: 2,
-	            }).html('<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
+	            }).html('<p>Jump to...</p>' +
+			    '<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
 	                    'Start:<input name="min" value="' + (viewStart|0) + '"></input><br>' + 
 	                    'End:<input name="max" value="' + (viewEnd|0) + '"></input>' + 
-	                    '<input type="submit" value="Go"></form>'
+	                    '<input type="submit" value="Go"></form>' +
+			    (searchEndpoint ? '<p>Or search for...</p><form id="gene_nav">Gene:<input name="gene" value=""></input><br><input type="submit" value="Go"></form>' : '')
 	            ).get(0);
 	            $(popup).hide();
 	            hPopupHolder.appendChild(popup);
@@ -740,6 +754,52 @@ function init()
                     epMenuOptions += '<option value="' + ep.name + '">' + ep.toString() +'</option>';
                 }
                 $('#chrMenu').html(epMenuOptions).attr({value: chr});
+	
+	$('#gene_nav').submit(function(ev) {
+	    ev.stopPropagation();
+	    ev.preventDefault();
+	    var g = $('input:eq(3)').val(); // ughugh.
+	    removeAllPopups();
+
+	    if (!g || g.length == 0) {
+		return false;
+	    }
+
+	    searchEndpoint.features(null, {group: g, type: 'transcript' /* HAXX */}, function(found) {
+		if (!found || found.length == 0) {
+		    alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+		} else {
+		    var min = 500000000, max = -100000000;
+		    var nchr = null;
+		    for (var fi = 0; fi < found.length; ++fi) {
+			var f = found[fi];
+			if (nchr == null) {
+			    nchr = f.segment;
+			}
+			min = Math.min(min, f.min);
+			max = Math.max(max, f.max);
+		    }
+		    chr = nchr;
+		    viewStart = min - 5000;
+		    viewEnd = max + 5000;
+		    highlightMin = min;
+		    highlightMax = max;
+		    makeHighlight();
+
+		    scale = featurePanelWidth / (viewEnd - viewStart);
+	            currentSeqMax = epsByChrName[nchr].end;
+                    updateRegion();
+                        
+                    knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
+                    knownEnd = Math.round(viewEnd) + maxExtraW;
+		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);
+                    refresh();
+		}
+	    });
+
+	    return false;
+	});
+
 	            $('#navform').submit(function(ev) {
 			ev.stopPropagation();
 			ev.preventDefault();
