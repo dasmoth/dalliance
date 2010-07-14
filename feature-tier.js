@@ -283,7 +283,7 @@ function drawFeatureTier(tier)
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
 	var g = glyphs[i];
-	g = labelGlyph(g);
+	g = labelGlyph(g, featureGroupElement);
 	if (g.bump) {
 	    for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
 		var st = bumpedSTs[sti];
@@ -859,7 +859,7 @@ function glyphForFeature(feature, y, style)
     return dg;
 }
 
-function labelGlyph(dglyph) {
+function labelGlyph(dglyph, featureTier) {
     if (dglyph.glyph && dglyph.label) {
 	var label = dglyph.label;
 	var labelText = document.createElementNS(NS_SVG, 'text');
@@ -868,12 +868,18 @@ function labelGlyph(dglyph) {
 	labelText.setAttribute('stroke-width', 0);
 	labelText.setAttribute('fill', 'black');
 	labelText.setAttribute('class', 'label-text');
+	labelText.setAttribute('font-family', 'helvetica');
+	labelText.setAttribute('font-size', '10pt');
 	if (dglyph.strand == '+') {
 	    label = label + '>';
 	} else if (dglyph.strand == '-') {
 	    label = '<' + label;
         }
 	labelText.appendChild(document.createTextNode(label));
+
+	featureTier.appendChild(labelText);
+	var width = labelText.getBBox().width;
+	featureTier.removeChild(labelText);
 
 	var g;
 	if (dglyph.glyph.localName == 'g') {
@@ -885,6 +891,11 @@ function labelGlyph(dglyph) {
 	g.appendChild(labelText);
 	dglyph.glyph = g;
 	dglyph.height = dglyph.height + 20;
+	
+	var textMax = dglyph.min + ((width + 10) / scale)
+	if (textMax > dglyph.max) {
+	    dglyph.max = textMax;
+	}
     }
     return dglyph;
 }
