@@ -540,19 +540,6 @@ function removeAllPopups()
     removeChildren(hPopupHolder);
 }
 
-
-var NUM_REGEXP = new RegExp('[0-9]+');
-
-function stringToNumbersArray(str) {
-    var nums = new Array();
-    var m;
-    while (m = NUM_REGEXP(str)) {
-        nums.push(m[0]);
-        str=str.substring(m.index + (m[0].length));
-    }
-    return nums;
-}
-
 function EPMenuItem(entryPoint) {
     this.entryPoint = entryPoint;
     this.nums = stringToNumbersArray(entryPoint.name);
@@ -679,6 +666,9 @@ function init()
     
     svg.path(main, "M 500 35 L 750 35 L 750 15", {id: 'sliderTrack', stroke: 'none', fill: 'grey'});
     svg.rect(main, 600, 10, 8, 30, {id: 'sliderHandle', stroke: 'none', fill: 'blue', fillOpacity: 0.5});
+    svg.text(main, 800, 50, '1kb', {strokeWidth: 0});
+    svg.text(main, 900, 50, '10kb', {strokeWidth: 0});
+    svg.text(main, 1000, 50, '100kb', {strokeWidth: 0});
     
     popupHolder = svg.group(main);    
     hPopupHolder = $('#hPopups').get(0);
@@ -755,8 +745,11 @@ function init()
 			ev.preventDefault();
 
 	                var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-	                var nmin = $('input:eq(0)').val()|0;
-	                var nmax = $('input:eq(1)').val()|0;    
+	                var nmin = stringToInt($('input:eq(0)').val());
+	                var nmax = stringToInt($('input:eq(1)').val());    
+			if (!nchr || !nmin || !nmax) {
+			    return false;
+			}
 			var nwid = nmax - nmin + 1;
 
 			var ep = epsByChrName[nchr];
@@ -792,8 +785,8 @@ function init()
                         knownEnd = Math.round(viewEnd) + maxExtraW;
                         refresh();
 	                    
-	                    removeAllPopups();
-	                    return false;
+	                removeAllPopups();
+	                return false;
 	            });
 	            
 	            /*
