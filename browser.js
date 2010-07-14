@@ -429,9 +429,12 @@ function setLoadingStatus()
 
 function refresh()
 {
-    origin = (viewStart + viewEnd) / 2;
+    var newOrigin = (viewStart + viewEnd) / 2;
+    var oh = newOrigin - origin;
+    origin = newOrigin;
     scaleAtLastRedraw = scale;
     for (var t = 0; t < tiers.length; ++t) {
+	tiers[t].originHaxx = oh;
 	tiers[t].refreshTier();
     }
 }
@@ -1104,6 +1107,12 @@ function xfrmTiers(x, xs)
 
 function xfrmTier(tier, x , xs)
 {
+    if (tier.originHaxx && tier.originHaxx != 0) {
+	// alert(tier.originHaxx);
+	x -= ((1.0 * tier.originHaxx) * scale);
+    }
+
+   
     var axs = xs;
     if (axs < 0) {
         axs = tier.scale;

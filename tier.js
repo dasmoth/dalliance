@@ -13,6 +13,7 @@ function refreshTier_sequence()
             new DASSegment(chr, knownStart, knownEnd),
             function(seqs) {
                 drawSeqTier(tier, seqs[0]);  // FIXME: check array.
+		tier.originHaxx = 0;
             }
         );
     } else {
@@ -70,6 +71,7 @@ function refreshTier_features()
 function dasRequestComplete(tier)
 {
     drawFeatureTier(tier);
+    tier.originHaxx = 0;
     arrangeTiers();
     setLoadingStatus();
 }
