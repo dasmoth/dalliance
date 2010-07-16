@@ -8,7 +8,7 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var tagLine = "...we're not unreasonable, no-one's gonna eat your eyes.";
+var tagLine = "...just some gills and some wings and a few extra thumbs.";
 
 var sources = new Array();
 var tiers = new Array();
@@ -48,7 +48,7 @@ var highlightMin = -1, highlightMax = - 1;
 var popupHolder;
 var hPopupHolder;
 
-var tierBackgroundColors = ["cornsilk", "wheat"];
+var tierBackgroundColors = ["rgb(255,245,215)", "rgb(255,254,240)"];
 
 function DataSource(name, uri, opts)
 {
@@ -434,6 +434,9 @@ function refresh()
     origin = newOrigin;
     scaleAtLastRedraw = scale;
     for (var t = 0; t < tiers.length; ++t) {
+	if (tiers[t].originHaxx) {
+	    oh += tiers[t].originHaxx;
+	}
 	tiers[t].originHaxx = oh;
 	tiers[t].refreshTier();
     }

@@ -3,6 +3,7 @@ Bugs!
 
  - FRAME RESIZE: should be able to adjust Known Space.
  - Zoom slider doesn't get updated in all the places it should.
+ - Not possible to trigger onclicks for features under the highlight.
 
 Performance
 -----------
@@ -44,6 +45,8 @@ Publishable prototype:
      + Working now with slightly-hacked Dazzle
      + Currently requires {credentials: true} in the source configuration.  Can we auto-detect?
  - Linkouts to other browsers.
+ - Clean up tierTabs
+ - Experiment with guideline systems.
 
 After the paper
 ---------------
@@ -77,7 +80,7 @@ Nice to have
 ------------
 
  - More stylesheet stuff
-   + Still missing a few glyphs (TEXT is missing, TOOMANY currently drawn the same as BOX).
+   + Still missing a few glyphs (TEXT and TOOMANY currently drawn the same as BOX).
    + Direction is ignore for ARROW.
    + Support ZINDEX?
    + Rainbowed LINEPLOT glyphs?
@@ -91,8 +94,8 @@ Nice to have
        think anyone else is doing this, but I'd use it!)
  - Graphical navigation?
      + Pop-over with chromosome ideograms?
- - Other navigation stuff:
-     + Sensible support of DAS feature-by-ID stuff (has anyone done this before?!)
+ - Gene search:
+     + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
      + Any reason not to just hack the server to do this?
  - Registry browser.

@@ -18,6 +18,7 @@ function refreshTier_sequence()
         );
     } else {
         drawSeqTier(this);
+	this.originHaxx = 0;
     }
 }
 
