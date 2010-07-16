@@ -762,8 +762,7 @@ function init()
                 $('#chrMenu').html(epMenuOptions).attr({value: chr});
 	
 	$('#gene_nav').submit(function(ev) {
-	    ev.stopPropagation();
-	    ev.preventDefault();
+	    ev.stopPropagation(); ev.preventDefault();
 	    var g = $('input:eq(3)').val(); // ughugh.
 	    removeAllPopups();
 
@@ -785,90 +784,35 @@ function init()
 			min = Math.min(min, f.min);
 			max = Math.max(max, f.max);
 		    }
-		    chr = nchr;
-		    viewStart = min - 5000;
-		    viewEnd = max + 5000;
 		    highlightMin = min;
 		    highlightMax = max;
 		    makeHighlight();
 
-		    scale = featurePanelWidth / (viewEnd - viewStart);
-	            currentSeqMax = epsByChrName[nchr].end;
-                    updateRegion();
-                        
-                    knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
-                    knownEnd = Math.round(viewEnd) + maxExtraW;
-		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);
-                    refresh();
+		    var padding = Math.min(2500, (0.2 * (max - min + 1))|0);
+		    setLocation(min - padding, max + padding);
+		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
 		}
 	    });
 
 	    return false;
 	});
 
-	            $('#navform').submit(function(ev) {
-			ev.stopPropagation();
-			ev.preventDefault();
+	$('#navform').submit(function(ev) {
+	    ev.stopPropagation(); ev.preventDefault();
 
-	                var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-	                var nmin = stringToInt($('input:eq(0)').val());
-	                var nmax = stringToInt($('input:eq(1)').val());    
-			if (!nchr || !nmin || !nmax) {
-			    return false;
-			}
-			var nwid = nmax - nmin + 1;
+	    var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
+	    var nmin = stringToInt($('input:eq(0)').val());
+	    var nmax = stringToInt($('input:eq(1)').val());    
+	    removeAllPopups();
 
-			var ep = epsByChrName[nchr];
-			if (nmin < 1) {
-	                    nmin = 1;   
-			    nmax = Math.min(nmin + nwid - 1, ep.end);
-	                }
-			if (nmax > ep.end) {
-			    nmax = ep.end;
-			    nmin = Math.max(1, nmax - nwid + 1);
-			}
-			
-	                if (nwid < 100 || nwid > 1000000) {
-	                    var nmid = (nmin + nmax) / 2;
-	                    nmin = nmid - 10000;
-	                    nmax = nmid + 9999;
-	                }
-	                    
-	                // would be nice to factor this stuff out.
-	                // also update zoom slider!
-	                    
-	                viewStart = nmin | 0;
-	                viewEnd = nmax | 0;
-	                chr = nchr;
-	                scale = featurePanelWidth / (viewEnd - viewStart);
-                        
-	                currentSeqMax = ep.end;
-	                    
-                        // xfrmTiers((-1.0 * (viewStart - origin)) * scale, 1);
-                        updateRegion();
-                        
-                        knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
-                        knownEnd = Math.round(viewEnd) + maxExtraW;
-                        refresh();
-	                    
-	                removeAllPopups();
-	                return false;
-	            });
-	            
-	            /*
-	            
-	            popup.addEventListener('mouseout', function(ev2) {
-	                    var rel = ev2.relatedTarget;
-	                    while (rel) {
-	                        if (rel == popup) {
-	                            return;
-	                        }
-	                        rel = rel.parentNode;
-	                    }
-	                    removeAllPopups();
-	            }, false);
-	            
-	            */
+	    if (nchr && nmin && nmax) {
+		setLocation(nmin, nmax, nchr);
+	    } else {
+		alert('Must specify min and max');
+	    }
+
+	    return false;
+	});
     }, false);
     
     // set up the track-adder
@@ -1022,6 +966,52 @@ function resizeViewer() {
     }
 }
 
+
+
+
+function xfrmTiers(x, xs)
+{
+    for (ti in tiers) {
+        xfrmTier(tiers[ti], x, xs);
+    }
+    if (highlight) {
+	var axs = xs;
+	if (axs < 0) {
+            axs = scale;
+	}
+	var xfrm = 'translate(' + x + ',0)';
+	highlight.setAttribute('transform', xfrm);
+	highlight.setAttribute('x', (highlightMin - origin) * scale);
+	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
+    } 
+}
+
+function xfrmTier(tier, x , xs)
+{
+    if (tier.originHaxx && tier.originHaxx != 0) {
+	// alert(tier.originHaxx);
+	x -= ((1.0 * tier.originHaxx) * scale);
+    }
+
+   
+    var axs = xs;
+    if (axs < 0) {
+        axs = tier.scale;
+    } else {
+        tier.scale = xs;
+    }
+    var xfrm = 'translate(' + x + ',' + tier.y + ')';
+    if (axs != 1) {
+        xfrm += ', scale(' + axs + ',1)';
+    }
+    // setViewerStatus(xfrm);
+    tiers[ti].viewport.setAttribute('transform', xfrm);
+}
+
+//
+// Navigation prims.
+//
+
 function move(pos)
 {
     var wid = viewEnd - viewStart;
@@ -1090,45 +1080,59 @@ function zoom(factor)
     }
 }
 
-
-function xfrmTiers(x, xs)
+function setLocation(newMin, newMax, newChr)
 {
-    for (ti in tiers) {
-        xfrmTier(tiers[ti], x, xs);
-    }
-    if (highlight) {
-	var axs = xs;
-	if (axs < 0) {
-            axs = scale;
+    newMin = newMin|0;
+    newMax = newMax|0;
+
+    if (newChr && (newChr != chr)) {
+	if (!entryPoints) {
+	    return;
 	}
-	var xfrm = 'translate(' + x + ',0)';
-	highlight.setAttribute('transform', xfrm);
-	highlight.setAttribute('x', (highlightMin - origin) * scale);
-	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
-    } 
+	var ep = null;
+	for (var epi = 0; epi < entryPoints.length; ++epi) {
+	    if (entryPoints[epi].name == newChr) {
+		ep = entryPoints[epi];
+		break;
+	    }
+	}
+	if (!ep) {
+	    return;
+	}
+
+	chr = newChr;
+	currentSeqMax = ep.end;
+    }
+
+    if (newMin < 1) {
+	var wid = newMax - newMin + 1;
+	newMin = 1;
+	newMax = Math.min(newMin + wid - 1, currentSeqMax);
+    }
+    if (newMax > currentSeqMax) {
+	var wid = newMax - newMin + 1;
+	newMax = currentSeqMax;
+	newMin = Math.max(1, newMax - wid + 1);
+    }
+
+    viewStart = newMin|0;
+    viewEnd = newMax|0;
+    scale = featurePanelWidth / (viewEnd - viewStart);
+
+    // Update scale slider!
+
+    // TODO: Factor out KS updates.
+    
+    var width = viewEnd - viewStart + 1;
+    var minExtraW = (width * minExtra) | 0;
+    var maxExtraW = (width * maxExtra) | 0;
+    knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
+    knownEnd = Math.round(viewEnd) + maxExtraW;
+
+    updateRegion();
+    refresh();
 }
 
-function xfrmTier(tier, x , xs)
-{
-    if (tier.originHaxx && tier.originHaxx != 0) {
-	// alert(tier.originHaxx);
-	x -= ((1.0 * tier.originHaxx) * scale);
-    }
-
-   
-    var axs = xs;
-    if (axs < 0) {
-        axs = tier.scale;
-    } else {
-        tier.scale = xs;
-    }
-    var xfrm = 'translate(' + x + ',' + tier.y + ')';
-    if (axs != 1) {
-        xfrm += ', scale(' + axs + ',1)';
-    }
-    // setViewerStatus(xfrm);
-    tiers[ti].viewport.setAttribute('transform', xfrm);
-}
 
 function storeStatus()
 {
