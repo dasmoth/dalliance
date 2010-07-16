@@ -593,7 +593,7 @@ function glyphForFeature(feature, y, style)
 
     if (gtype == 'HIDDEN') {
 	glyph = null;
-    } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'DOT' || gtype == 'TRIANGLE') {
+    } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'LINE' || gtype == 'DOT' || gtype == 'TRIANGLE') {
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'none';
 	var height = style.HEIGHT || 12;
@@ -633,6 +633,27 @@ function glyphForFeature(feature, y, style)
 			      ' L ' + minPos + ' ' + (y + height) +
 			      ' M ' + maxPos + ' ' + y +
 			      ' L ' + maxPos + ' ' + (y + height));
+	} else if (gtype == 'LINE') {
+	    var lstyle = style.STYLE || 'solid';
+	    mark = document.createElementNS(NS_SVG, 'path');
+	    mark.setAttribute('fill', 'none');
+	    mark.setAttribute('stroke', stroke);
+	    mark.setAttribute('stroke-width', 1);
+	    if (lstyle == 'hat') {
+		var dip = 0;
+		if (feature.orientation == '-') {
+		    dip = height;
+		}
+		mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+				  ' L ' + ((maxPos + minPos) / 2) + ' ' + (y+dip) +
+				  ' L ' + maxPos + ' ' + (y+hh));
+	    } else {
+		mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+				  ' L ' + maxPos + ' ' + (y+hh));
+	    }
+	    if (lstyle == 'dashed') {
+		mark.setAttribute('stroke-dasharray', '3');
+	    }
 	} else if (gtype == 'DOT') {
 	    mark = document.createElementNS(NS_SVG, 'circle');
 	    mark.setAttribute('fill', stroke);   // yes, really...
@@ -782,7 +803,8 @@ function glyphForFeature(feature, y, style)
 
 	glyph = path;
     } else {
-	// BOX (plus some other rectangular stuff...)
+	// BOX plus other rectangular stuff
+	// Also handles HISTOGRAM, GRADIENT, and TOOMANY.
     
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || 'green';

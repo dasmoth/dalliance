@@ -43,9 +43,11 @@ Publishable prototype:
      + Access-Control-Allow-Credentials is usable.
      + Working now with slightly-hacked Dazzle
      + Currently requires {credentials: true} in the source configuration.  Can we auto-detect?
+ - Linkouts to other browsers.
 
 After the paper
 ---------------
+
 
  - Cache server capabilities in the DAS layer (i.e. maxbins!)
      + Most code is in, currently doesn't work because of missing Access-Control-Expose-Headers support.
@@ -67,6 +69,7 @@ After the paper
  - Publication-quality SVG export.
  - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
+ - DAS on geneID coords.
 
 
 
@@ -74,12 +77,13 @@ Nice to have
 ------------
 
  - More stylesheet stuff
-   + Still missing a few glyphs (LINE, TEXT, TOOMANY).
+   + Still missing a few glyphs (TEXT is missing, TOOMANY currently drawn the same as BOX).
+   + Direction is ignore for ARROW.
    + Support ZINDEX?
    + Rainbowed LINEPLOT glyphs?
    + More thought about how how to combine LINEPLOT with other glyphs in the same tier.
    + Attach external SSs?
- - Add a track removal button the error placards?
+ - Add a track removal button to error placards?
  - Ability to re-bump w/o re-fetching all the data
      + Should allow more aggressive spec-fetching?
      + Allow fetches that add to the working set, rather than replacing it.
