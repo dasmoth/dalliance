@@ -1,8 +1,3 @@
-Bugs!
------
-
- - Not possible to trigger onclicks for features under the highlight.
-
 Performance
 -----------
 
@@ -34,16 +29,12 @@ Publishable prototype:
      + Use localStorage?
      + Remember active tier-set?
  - Supergrouping
-     * Test current impl.
      * Intelligent gene-collapsing.
      * Better way to get the metadata across?
- - Find a way to access secure DAS servers
-     + Access-Control-Allow-Credentials is usable.
-     + Working now with slightly-hacked Dazzle
-     + Currently requires {credentials: true} in the source configuration.  Can we auto-detect?
  - Linkouts to other browsers.
  - Clean up tierTabs
  - Experiment with guideline systems.
+ - Better label placement.
 
 After the paper
 ---------------
@@ -70,7 +61,7 @@ After the paper
  - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
  - DAS on geneID coords.
-
+ - Auto-detection of credentialed servers?
 
 
 Nice to have
@@ -153,6 +144,8 @@ The Server Side
  - Get Ensembl-DAS ready to handle production loads.
     + Find the connection leak!!!!
     + Better cache management?
+
+ - Tidy up the Allow-Credentials support in Dazzle.
 
  - Are we better off using JKDBs to serve sequence?
     + A JKDB-based sequence server could also usefully compute GC composition, etc., etc., on the fly. [done now]

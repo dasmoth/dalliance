@@ -557,7 +557,16 @@ function makeHighlight() {
     }
 
     if (highlightMin > 0) {
-	highlight = svg.rect(dasTierHolder, (highlightMin - origin) * scale, 0, (highlightMax - highlightMin + 1) * scale, 10000, {id: 'highlight', stroke: 'none', fill: 'red', fillOpacity: 0.2});
+	highlight = document.createElementNS(NS_SVG, 'rect');
+	highlight.setAttribute('x', (highlightMin - origin) * scale);
+	highlight.setAttribute('y', 0);
+	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
+	highlight.setAttribute('height', 10000);
+	highlight.setAttribute('stroke', 'none');
+	highlight.setAttribute('fill', 'red');
+	highlight.setAttribute('fill-opacity', 0.2);
+	highlight.setAttribute('pointer-events', 'none');
+	dasTierHolder.appendChild(highlight);
     }
 }
 
