@@ -33,20 +33,24 @@ var zoomFactor = 1.0;
 var origin = 0;
 var targetQuantRes = 5.0;
 var featurePanelWidth = 750;
-var zoomTrackMin = 496;
-var zoomTrackMax = 746;
 var zoomBase = 50;
 var zoomExpt = 30;
-var svg;
-var dasTierHolder;
+
 var entryPoints = null;
 var currentSeqMax = -1; // init once EPs are fetched.
 
 var highlight;
 var highlightMin = -1, highlightMax = - 1;
 
+// UI components
+
+var svg;
+var dasTierHolder;
+var zoomSlider;
 var popupHolder;
 var hPopupHolder;
+
+// Visual config.
 
 var tierBackgroundColors = ["rgb(255,245,215)", "rgb(255,254,240)"];
 
@@ -554,8 +558,10 @@ function makeHighlight() {
 
 function init() 
 {
-    //alert(localStorage.getItem('foo'));
-    localStorage.setItem('foo', 'bar');
+    //
+    // Configuration processing
+    //
+
     if (cookieKey) {
         var cookieView = $.cookie(cookieKey + '-svgdas-view');
         if (cookieView != null) {
@@ -652,10 +658,14 @@ function init()
     var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
     svg.group(dasLabelHolder, 'dasLabels');
     
-    // FIXME zoom slider creation here
-    var zoomSlider = new DSlider(200);
-    zoomSlider.setValue(100);
-    zoomSlider.svg.setAttribute('transform', 'translate(500, 5)');
+    zoomSlider = new DSlider(250);
+    zoomSlider.onchange = function(zoomVal, released) {
+	zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
+	if (released) {
+	    refresh();
+	    storeStatus();
+	}
+    };
     main.appendChild(zoomSlider.svg);
     
     popupHolder = svg.group(main);    
@@ -889,6 +899,7 @@ function init()
     window.addEventListener("resize", function(ev) {
             resizeViewer();
     }, false);
+    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
     
     // Low-priority stuff
     
@@ -912,6 +923,8 @@ function resizeViewer() {
     document.getElementById("background").setAttribute('width', width - 30);
     document.getElementById("featureClipRect").setAttribute('width', width - 140);
 
+
+    zoomSlider.svg.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 40) + ', 0)');
 // FIXME: should move the zoomer.
 //    document.getElementById('sliderTrack').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
 //    document.getElementById('sliderHandle').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
