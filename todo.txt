@@ -2,7 +2,6 @@ Bugs!
 -----
 
  - FRAME RESIZE: should be able to adjust Known Space.
- - Zoom slider doesn't get updated in all the places it should.
  - Not possible to trigger onclicks for features under the highlight.
 
 Performance

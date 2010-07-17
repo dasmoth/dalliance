@@ -768,7 +768,7 @@ function init()
 		    makeHighlight();
 
 		    var padding = Math.min(2500, (0.2 * (max - min + 1))|0);
-		    setLocation(min - padding, max + padding);
+		    setLocation(min - padding, max + padding, nchr);
 		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
 		}
 	    });
@@ -1101,6 +1101,7 @@ function setLocation(newMin, newMax, newChr)
     viewStart = newMin|0;
     viewEnd = newMax|0;
     scale = featurePanelWidth / (viewEnd - viewStart);
+    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
 
     // Update scale slider!
 
