@@ -505,36 +505,6 @@ function touchCancelHandler(ev) {
     setViewerStatus('cancelledTouching');
 }
 
-var sliderDeltaX;
-var mouseDownCount = 0;
-
-function sliderMouseDownHandler(ev)
-{
-    removeAllPopups();
-    ev.stopPropagation(); ev.preventDefault();
-    sliderDeltaX = document.getElementById("sliderHandle").getAttribute("x") - ev.clientX;
-    document.addEventListener("mousemove", sliderMouseMoveHandler, true);
-    document.addEventListener("mouseup", sliderMouseUpHandler, true);
-}
-
-function sliderMouseUpHandler(ev)
-{
-    ev.stopPropagation(); ev.preventDefault();
-    document.removeEventListener("mousemove", sliderMouseMoveHandler, true);
-    document.removeEventListener("mouseup", sliderMouseUpHandler, true);
-    // document.getElementById("dasTiers").setAttribute("transform", "translate(" + ((-1.0 * (viewStart - origin)) * scale) + ",0)");
-    storeStatus();
-    refresh()
-}
-
-function sliderMouseMoveHandler(ev)
-{
-    ev.stopPropagation(); ev.preventDefault();
-    var sliderX = Math.max(zoomTrackMin, Math.min(ev.clientX + sliderDeltaX, zoomTrackMax));
-    document.getElementById("sliderHandle").setAttribute("x", sliderX);
-    zoom(Math.exp((1.0 * (sliderX - zoomTrackMin)) / zoomExpt));
-}
-
 function removeChildren(node)
 {
     while (node.childNodes.length > 0) {
@@ -682,11 +652,11 @@ function init()
     var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
     svg.group(dasLabelHolder, 'dasLabels');
     
-    svg.path(main, "M 500 35 L 750 35 L 750 15", {id: 'sliderTrack', stroke: 'none', fill: 'grey'});
-    svg.rect(main, 600, 10, 8, 30, {id: 'sliderHandle', stroke: 'none', fill: 'blue', fillOpacity: 0.5});
-//    svg.text(main, 800, 50, '1kb', {strokeWidth: 0});
-//    svg.text(main, 900, 50, '10kb', {strokeWidth: 0});
-//    svg.text(main, 1000, 50, '100kb', {strokeWidth: 0});
+    // FIXME zoom slider creation here
+    var zoomSlider = new DSlider(200);
+    zoomSlider.setValue(100);
+    zoomSlider.svg.setAttribute('transform', 'translate(500, 5)');
+    main.appendChild(zoomSlider.svg);
     
     popupHolder = svg.group(main);    
     hPopupHolder = $('#hPopups').get(0);
@@ -695,8 +665,7 @@ function init()
     removeChildren(bhtmlRoot);
     bhtmlRoot.appendChild(document.createTextNode(tagLine));
     
-    // set up zoom thumb
-    document.getElementById("sliderHandle").setAttribute("x", zoomTrackMin + (zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase)));
+
     
     // set up the navigator
     document.getElementById("region").addEventListener('mousedown', function(ev) {
@@ -896,7 +865,6 @@ function init()
     move(0);
     refresh(); // FIXME do we still want to be doing this?
 
-    document.getElementById("sliderHandle").addEventListener("mousedown", sliderMouseDownHandler, true);
     document.getElementById("main").addEventListener("mousedown", mouseDownHandler, false);
     document.getElementById('main').addEventListener('touchstart', touchStartHandler, false);
     document.getElementById('main').addEventListener('touchmove', touchMoveHandler, false);
@@ -943,8 +911,10 @@ function resizeViewer() {
     document.getElementById("browser_svg").setAttribute('width', width - 30);
     document.getElementById("background").setAttribute('width', width - 30);
     document.getElementById("featureClipRect").setAttribute('width', width - 140);
-    document.getElementById('sliderTrack').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
-    document.getElementById('sliderHandle').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
+
+// FIXME: should move the zoomer.
+//    document.getElementById('sliderTrack').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
+//    document.getElementById('sliderHandle').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
     
     var oldFPW = featurePanelWidth;
     featurePanelWidth = (width - 140)|0;
@@ -1131,6 +1101,7 @@ function setLocation(newMin, newMax, newChr)
 
     updateRegion();
     refresh();
+    storeStatus();
 }
 
 
