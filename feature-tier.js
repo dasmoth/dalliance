@@ -503,9 +503,11 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier) {
 	glyphGroup.addEventListener('mousedown', function(ev) {
 	    if (timeoutID) {
 		clearTimeout(timeoutID);
-		var padding = Math.min(2500, 0.2 * (spans.max() - spans.min() + 1));
-		// alert('' + ((spans.min()|0) - padding) + '..' +  ((spans.max()|0) + padding));
+		var padding = Math.max(2500, 0.3 * (spans.max() - spans.min() + 1));
+//		highlightMin = spans.min()|0;
+//		highlightMax = spans.max()|0;
 		setLocation((spans.min()|0) - padding, (spans.max()|0) + padding);
+//		makeHighlight();
 	    } else {
 		var mx = ev.clientX, my = ev.clientY;
 		timeoutID = setTimeout(function() {

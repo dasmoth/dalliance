@@ -617,25 +617,13 @@ function init()
 	highlightMax = match[3]|0;
     }
 
-    if (qChr && qMin && qMax) {
-        chr = qChr; viewStart = qMin; viewEnd = qMax;
-	if (highlightMin < 0) {
-	    highlightMin = qMin;  highlightMax = qMax;
-	}
-    }
-    
-    if ((viewEnd - viewStart) > 50000) {
-        var mid = ((viewEnd + viewStart) / 2)|0;
-        viewStart = mid - 25000;
-        viewEnd = mid + 25000;
-    }
+
 
     //
     // Set up the UI (factor out?)
     //
            
-    origin = ((viewStart + viewEnd) / 2) | 0;
-    scale = featurePanelWidth / (viewEnd - viewStart);
+
 
     svg = $('#svgHolder').svg().svg('get');
     var svgRoot = svg.root();
@@ -777,7 +765,7 @@ function init()
 		    highlightMax = max;
 		    makeHighlight();
 
-		    var padding = Math.min(2500, (0.2 * (max - min + 1))|0);
+		    var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
 		    setLocation(min - padding, max + padding, nchr);
 		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
 		}
@@ -882,9 +870,43 @@ function init()
 	tiers.push(tier);
     }
     
+    //
+    // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
+    //
+
+    resizeViewer();
+    window.addEventListener("resize", function(ev) {
+            resizeViewer();
+    }, false);
+
+    //
+    // Finalize initial viewable region, and kick off a fetch.
+    //
+
+    if (qChr && qMin && qMax) {
+        chr = qChr; viewStart = qMin; viewEnd = qMax;
+	if (highlightMin < 0) {
+	    highlightMin = qMin;  highlightMax = qMax;
+	}
+    }
+    
+    if ((viewEnd - viewStart) > 50000) {
+        var mid = ((viewEnd + viewStart) / 2)|0;
+        viewStart = mid - 25000;
+        viewEnd = mid + 25000;
+    }
+
+    origin = ((viewStart + viewEnd) / 2) | 0;
+    scale = featurePanelWidth / (viewEnd - viewStart);
+    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
+
     move(0);
     refresh(); // FIXME do we still want to be doing this?
 
+    // 
+    // Set up interactivity handlers
+    //
+    
     document.getElementById("main").addEventListener("mousedown", mouseDownHandler, false);
     document.getElementById('main').addEventListener('touchstart', touchStartHandler, false);
     document.getElementById('main').addEventListener('touchmove', touchMoveHandler, false);
@@ -904,12 +926,6 @@ function init()
             move(ev.detail);
         }
     }, false);
-
-    resizeViewer();
-    window.addEventListener("resize", function(ev) {
-            resizeViewer();
-    }, false);
-    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
     
     // Low-priority stuff
     
