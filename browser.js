@@ -23,8 +23,8 @@ var searchEndpoint;
 
 // state
 
-var maxExtra = 1;
-var minExtra = 0.25;
+var maxExtra = 1.5;
+var minExtra = 0.2;
 var knownStart;
 var knownEnd;
 var scale;
@@ -433,6 +433,11 @@ function setLoadingStatus()
 
 function refresh()
 {
+    var width = (viewEnd - viewStart) + 1;
+    var maxExtraW = (width * maxExtra) | 0;
+    knownStart = Math.max(1, viewStart - maxExtraW)|0;
+    knownEnd = Math.min(viewEnd + maxExtraW, (currentSeqMax > 0 ? currentSeqMax : 1000000000))|0;
+
     var newOrigin = (viewStart + viewEnd) / 2;
     var oh = newOrigin - origin;
     origin = newOrigin;
@@ -622,10 +627,6 @@ function init()
            
     origin = ((viewStart + viewEnd) / 2) | 0;
     scale = featurePanelWidth / (viewEnd - viewStart);
-    var width = viewEnd - viewStart + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
-    knownStart = Math.max(1, viewStart - maxExtraW); knownEnd = viewEnd + maxExtraW;
 
     svg = $('#svgHolder').svg().svg('get');
     var svgRoot = svg.root();
@@ -935,9 +936,9 @@ function resizeViewer() {
     if (oldFPW != featurePanelWidth) {
         var viewWidth = viewEnd - viewStart;
         viewEnd = viewStart + (viewWidth * featurePanelWidth) / oldFPW;
-        // FIXME: should do a Known Space check.
         // FIXME: should also fix the zoom slider...
         updateRegion();
+	spaceCheck();
     }
 
     for (var pi = 0; pi < placards.length; ++pi) {
@@ -975,7 +976,6 @@ function xfrmTier(tier, x , xs)
 	// alert(tier.originHaxx);
 	x -= ((1.0 * tier.originHaxx) * scale);
     }
-
    
     var axs = xs;
     if (axs < 0) {
@@ -995,6 +995,17 @@ function xfrmTier(tier, x , xs)
 // Navigation prims.
 //
 
+function spaceCheck()
+{
+    var width = (viewEnd - viewStart) + 1;
+    var minExtraW = (width * minExtra) | 0;
+    var maxExtraW = (width * maxExtra) | 0;
+    if (knownStart > Math.max(1, viewStart - minExtraW) || knownEnd < Math.min(viewEnd + minExtraW, (currentSeqMax > 0 ? currentSeqMax : 1000000000))) {
+//	alert('triggering refresh, knownStart=' + knownStart + ', knownEnd=' + knownEnd);
+	refresh();
+    }
+}
+
 function move(pos)
 {
     var wid = viewEnd - viewStart;
@@ -1012,14 +1023,7 @@ function move(pos)
     xfrmTiers((100 - (1.0 * (viewStart - origin)) * scale), 1);
     updateRegion();
     
-    var width = viewEnd - viewStart + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
-    if (knownStart > Math.max(1, viewStart - minExtraW) || knownEnd - viewEnd < minExtraW) {
-        knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
-        knownEnd = Math.round(viewEnd) + maxExtraW;
-        refresh();
-    }
+    spaceCheck();
 }
 
 function zoom(factor)
@@ -1102,16 +1106,6 @@ function setLocation(newMin, newMax, newChr)
     viewEnd = newMax|0;
     scale = featurePanelWidth / (viewEnd - viewStart);
     zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
-
-    // Update scale slider!
-
-    // TODO: Factor out KS updates.
-    
-    var width = viewEnd - viewStart + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
-    knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
-    knownEnd = Math.round(viewEnd) + maxExtraW;
 
     updateRegion();
     refresh();

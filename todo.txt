@@ -1,7 +1,6 @@
 Bugs!
 -----
 
- - FRAME RESIZE: should be able to adjust Known Space.
  - Not possible to trigger onclicks for features under the highlight.
 
 Performance
@@ -25,7 +24,6 @@ Publishable prototype:
 ----------------------
 
  - Meaningful error for old/unsupport browser.     
- - Tune specfetch thresholds, check for unnecessary refetches.
  - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
