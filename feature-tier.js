@@ -228,7 +228,7 @@ function drawFeatureTier(tier)
 
     // Merge supergroups
     
-    if (true) {
+    if (tier.source.opts.collapseSuperGroups && !tier.bumped) {
 	for (var sg in tier.superGroups) {
 	    var sgg = tier.superGroups[sg];
 	    var featsByType = {};
@@ -963,9 +963,12 @@ function labelGlyph(dglyph, featureTier) {
 	dglyph.glyph = g;
 	dglyph.height = dglyph.height + 20;
 	
-	var textMax = dglyph.min + ((width + 10) / scale)
+	var textMax = (dglyph.min|0) + ((width + 10) / scale)
 	if (textMax > dglyph.max) {
-	    dglyph.max = textMax;
+	    // alert('Extending ' + dglyph.max + ' -> ' + (textMax|0));
+	    dglyph.max = textMax|0;
+	} else {
+	    // alert('Seems okay ' + dglyph.max + ' < ' + textMax);
 	}
     }
     return dglyph;

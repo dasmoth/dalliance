@@ -150,9 +150,13 @@ function arrangeTiers() {
 	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
 	    labelGroup.appendChild(labelText);
 	    
-/*
-	    if (tier.source.bumped) {
-	        makeToggleButton(labelGroup, tier, clh);
+
+	    if (tier.source.opts.collapseSuperGroups) {
+		makeToggleButton(labelGroup, tier, clh);
+	    } 
+
+		/* {
+	        
 	    } else if (BarRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
 	        makeQuantConfigButton(labelGroup, tier, clh);
 	    }*/
@@ -284,7 +288,6 @@ function setupTierDrag(element, ti) {
 }
 
 function makeToggleButton(labelGroup, tier, ypos) {
-/*
 
     var bumpToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
     svg.rect(bumpToggle, 85, ypos + 12, 8, 8);
@@ -300,8 +303,6 @@ function makeToggleButton(labelGroup, tier, ypos) {
 	    tier.bumped = !tier.bumped; 
 	    dasRequestComplete(tier);   // is there a more abstract way to do this?
 	}, false);
-
-*/
 }
 
 function makeQuantConfigButton(labelGroup, tier, ypos) {
