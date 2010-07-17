@@ -156,6 +156,7 @@ function sortFeatures(tier)
 		if (g.type == 'gene') {
 		    // Like a super-grouper...
 		    fSuperGroup = gid; 
+		    groups[gid] = g;
 		} else if (g.type == 'translation') {
 		    // have to ignore this to get sensible results from bj-e :-(.
 		} else {
@@ -223,6 +224,54 @@ function drawFeatureTier(tier)
 		glyphs.push(g);
 	    }
 	}
+    }
+
+    // Merge supergroups
+    
+    if (true) {
+	for (var sg in tier.superGroups) {
+	    var sgg = tier.superGroups[sg];
+	    var featsByType = {};
+	    for (var g = 0; g < sgg.length; ++g) {
+		var gf = tier.groupedFeatures[sgg[g]];
+		for (var fi = 0; fi < gf.length; ++fi) {
+		    var f = gf[fi];
+		    pusho(featsByType, f.type, f);
+		}
+		delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
+	    }
+
+	    for (var t in featsByType) {
+		var feats = featsByType[t];
+		var template = feats[0];
+		var loc = null;
+		for (var fi = 0; fi < feats.length; ++fi) {
+		    var f = feats[fi];
+		    var fl = new Range(f.min, f.max);
+		    if (!loc) {
+			loc = fl;
+		    } else {
+			loc = union(loc, fl);
+		    }
+		}
+		var mergedRanges = loc.ranges();
+		for (var si = 0; si < mergedRanges.length; ++si) {
+		    var newf = new DASFeature();
+		    for (k in template) {
+			newf[k] = template[k];
+		    }
+		    newf.min = mergedRanges[si].min();
+		    newf.max = mergedRanges[si].max();
+		    if (newf.label && sgg.length > 1) {
+			newf.label += ' (' + sgg.length + ' vars)';
+		    }
+		    pusho(tier.groupedFeatures, sg, newf);
+		    // supergroups are already in tier.groups.
+		}
+	    }
+
+	    delete tier.superGroups[sg]; // Do we want this?
+	}	
     }
 
     // Glyphify groups.
