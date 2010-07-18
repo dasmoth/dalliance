@@ -5,34 +5,69 @@
 // sequence-tier.js: renderers for sequence-related data
 //
 
+var MIN_TILE = 75;
 var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
+var steps = [1,2,5];
+
+function tileSizeForScale(scale)
+{
+    function ts(p) {
+	return steps[p % steps.length] * Math.pow(10, (p / steps.length)|0);
+    }
+    var pow = steps.length;
+    while (scale * ts(pow) < MIN_TILE) {
+	++pow;
+    }
+    return ts(pow);
+}
+
+function drawGuidelines(featureGroupElement)
+{
+    if (!guidelines) {
+	return;
+    }
+
+    var tile = tileSizeForScale(scale);
+    var pos = Math.max(0, ((knownStart / tile)|0) * tile);
+
+    var seqTierMax = knownEnd;
+    if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
+	seqTierMax = currentSeqMax;
+    }
+
+    for (var glpos = pos; glpos <= seqTierMax; glpos += tile) {
+	var guideline = document.createElementNS(NS_SVG, 'line');
+	guideline.setAttribute('x1', (glpos - origin) * scale);
+	guideline.setAttribute('y1', 0);
+	guideline.setAttribute('x2', (glpos - origin) * scale);
+	guideline.setAttribute('y2', 1000);
+	guideline.setAttribute('stroke', 'black');
+	guideline.setAttribute('stroke-opacity', 0.2);
+	guideline.setAttribute('stroke-width', 1);
+	featureGroupElement.appendChild(guideline);
+    }
+}
+
 
 function drawSeqTier(tier, seq)
 {
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {
-	    featureGroupElement.removeChild(featureGroupElement.firstChild);
-	}
-	featureGroupElement.appendChild(tier.background);
+	featureGroupElement.removeChild(featureGroupElement.firstChild);
+    }
+    featureGroupElement.appendChild(tier.background);
+    drawGuidelines(featureGroupElement);
     
-	var steps = [1,2,5];
-	function ts(p) {
-	    return steps[p % steps.length] * Math.pow(10, (p / steps.length)|0);
-	}
-	var pow = steps.length;
-	while (scale * ts(pow) < 50) {
-	    ++pow;
-	}
-	var tile = ts(pow);
-	var pos = Math.max(0, ((knownStart / tile)|0) * tile);
+    var tile = tileSizeForScale(scale);
+    var pos = Math.max(0, ((knownStart / tile)|0) * tile);
+
+    var seqTierMax = knownEnd;
+    if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
+	seqTierMax = currentSeqMax;
+    }
 	
-	var seqTierMax = knownEnd;
-	if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
-	    seqTierMax = currentSeqMax;
-	}
-	
-	while (pos <= seqTierMax) {
+    while (pos <= seqTierMax) {
         var rect = document.createElementNS(NS_SVG, "rect");
         rect.setAttribute('x', (pos - origin) * scale);
         rect.setAttribute('y', 5);

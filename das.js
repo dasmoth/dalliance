@@ -92,6 +92,10 @@ function DASSequence(name, start, end, alpha, seq) {
 DASSource.prototype.sequence = function(segment, callback) {
     var dasURI = this.uri + 'sequence?' + segment.toDASQuery();
     this.doCrossDomainRequest(dasURI, function(responseXML) {
+	if (!responseXML) {
+	    callback([]);
+	    return;
+	} else {
                 var seqs = new Array();
                 
                 var segs = responseXML.getElementsByTagName('SEQUENCE');
@@ -121,6 +125,7 @@ DASSource.prototype.sequence = function(segment, callback) {
                 }
                 
                 callback(seqs);
+	}
     });
 }
 

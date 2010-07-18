@@ -179,6 +179,7 @@ function drawFeatureTier(tier)
 	featureGroupElement.removeChild(featureGroupElement.firstChild);
     }
     featureGroupElement.appendChild(tier.background);
+    drawGuidelines(featureGroupElement);
 	
     var lh = MIN_PADDING;
     var bumpMatrix = null;

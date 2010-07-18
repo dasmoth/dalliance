@@ -47,6 +47,7 @@ var highlight;
 var highlightMin = -1, highlightMax = - 1;
 
 var autoSizeTiers = false;
+var guidelines = false;
 
 // UI components
 
@@ -613,6 +614,7 @@ function init()
     var qChr = $.query.get('chr');
     var qMin = $.query.get('min');
     var qMax = $.query.get('max');
+    guidelines = $.query.get('guidelines') || false;
 
 	if (qChr == '') {
 		regstr = $.query.get('r');
