@@ -24,10 +24,6 @@ Publishable prototype:
      + Enabling -- working but needs UI work.
      + Minimal registry queries?
         * dasregistry.org currently not doing CORS.
-	* worth running a mirror?
- - Better state-persistance.
-     + Use localStorage?
-     + Remember active tier-set?
  - Better label placement.
 
 After the paper

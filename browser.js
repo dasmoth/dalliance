@@ -268,6 +268,7 @@ function setupTierDrag(element, ti) {
             }
             
             arrangeTiers();
+	    storeStatus();
         } else if (targetTier == ti) {
             // setViewerStatus('Nothing to do');
         } else {
@@ -293,6 +294,7 @@ function setupTierDrag(element, ti) {
                 tiers[nti].background.setAttribute("fill", tierBackgroundColors[nti % tierBackgroundColors.length]);
             }
             arrangeTiers();
+	    storeStatus();
         }
     }
     
@@ -595,42 +597,56 @@ function makeHighlight() {
 
 function init() 
 {
+    var overrideSources;
+    var reset = $.query.get('reset');
+    var qChr = null, qMin = null, qMax = null;
+    
     //
     // Configuration processing
     //
 
-    if (cookieKey && localStorage['dalliance.' + cookieKey + '.view-chr']) {
-        chr = localStorage['dalliance.' + cookieKey + '.view-chr'];
-        viewStart = localStorage['dalliance.' + cookieKey + '.view-start']|0;
-        viewEnd = localStorage['dalliance.' + cookieKey + '.view-end']|0;
+    if (cookieKey && localStorage['dalliance.' + cookieKey + '.view-chr'] && !reset) {
+        qChr = localStorage['dalliance.' + cookieKey + '.view-chr'];
+        qMin = localStorage['dalliance.' + cookieKey + '.view-start']|0;
+        qMax = localStorage['dalliance.' + cookieKey + '.view-end']|0;
     } else {
 //	alert('naive init');
+    }
+
+    if (cookieKey) {
+	var maybeSourceConfig = localStorage['dalliance.' + cookieKey + '.sources'];
+	if (maybeSourceConfig && !reset) {
+	    overrideSources = eval(maybeSourceConfig);
+	}
     }
     
     var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
 
-    var qChr = $.query.get('chr');
-    var qMin = $.query.get('min');
-    var qMax = $.query.get('max');
+    if ($.query.get('chr')) {
+	var qChr = $.query.get('chr');
+	var qMin = $.query.get('min');
+	var qMax = $.query.get('max');
+    }
+
     guidelines = $.query.get('guidelines') || false;
 
-	if (qChr == '') {
-		regstr = $.query.get('r');
-		if (regstr == '') {
-			regstr = $.query.get('segment');
-		}
-		var match = regstr.match(region_exp);
-		if ((regstr != '') && match) {
-			qChr = match[1];
-			qMin = match[2] | 0;
-			qMax = match[3] | 0;
-		}
+    if (qChr == '') {
+	regstr = $.query.get('r');
+	if (regstr == '') {
+	    regstr = $.query.get('segment');
 	}
+	var match = regstr.match(region_exp);
+	if ((regstr != '') && match) {
+	    qChr = match[1];
+	    qMin = match[2] | 0;
+	    qMax = match[3] | 0;
+	}
+    }
 	
-	if (qMax < qMin) {
-		qMax = qMin + 10000;
-		// $.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
-	}
+    if (qMax < qMin) {
+	qMax = qMin + 10000;
+	// $.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
+    }
 
     var histr = $.query.get('h');
     var match = histr.match(region_exp);
@@ -880,17 +896,21 @@ function init()
 		       var tier = new DasTier(nds, viewport, viewportBackground)
                        tiers.push(tier);
 		       tier.init();
+		       storeStatus();
 	                    
-	                    removeAllPopups();
-	                    return true;
+	               removeAllPopups();
+	               return true;
 	            });
 	}, false);
 	
 	
     tierHolder = document.getElementById("dasTiers");
-    tiers = new Array();	  
-    for (var t = 0; t < sources.length; ++t) {
-	var source = sources[t];
+    tiers = new Array();
+    if (!overrideSources) {
+	overrideSources = sources;
+    }
+    for (var t = 0; t < overrideSources.length; ++t) {
+	var source = overrideSources[t];
 	var viewport = document.createElementNS(NS_SVG, "g");
 	var viewportBackground = document.createElementNS(NS_SVG, "rect");
 	var col = tierBackgroundColors[t % tierBackgroundColors.length];
@@ -1180,9 +1200,49 @@ function setLocation(newMin, newMax, newChr)
 
 function storeStatus()
 {
-//    $.cookie('' + cookieKey + '-svgdas-view', '' + chr + ':' + (viewStart|0) + ':' + (viewEnd|0), {expires: 14});
+    if (!cookieKey) {
+	return;
+    }
 
     localStorage['dalliance.' + cookieKey + '.view-chr'] = chr;
     localStorage['dalliance.' + cookieKey + '.view-start'] = viewStart|0;
     localStorage['dalliance.' + cookieKey + '.view-end'] = viewEnd|0
+
+    var currentSourceList = [];
+    for (var t = 0; t < tiers.length; ++t) {
+	currentSourceList.push(tiers[t].source);
+    }
+    localStorage['dalliance.' + cookieKey + '.sources'] = miniJSONify(currentSourceList);
+}
+
+//
+// WARNING: not for general use!
+//
+
+function miniJSONify(o) {
+    if (typeof o == 'string') {
+	return "'" + o + "'";
+    } else if (typeof o == 'number') {
+	return "" + o;
+    } else if (typeof o == 'boolean') {
+	return "" + o;
+    } else if (typeof o == 'object') {
+	if (o instanceof Array) {
+	    var s = null;
+	    for (var i = 0; i < o.length; ++i) {
+		s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
+	    }
+	    return '[' + (s?s:'') + ']';
+	} else {
+	    var s = null;
+	    for (var k in o) {
+		if (k != undefined) {
+		    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
+		}
+	    }
+	    return '{' + (s?s:'') + '}';
+	}
+    } else {
+	return (typeof o);
+    }
 }
