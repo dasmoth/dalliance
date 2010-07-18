@@ -599,14 +599,12 @@ function init()
     // Configuration processing
     //
 
-    if (cookieKey) {
-        var cookieView = $.cookie(cookieKey + '-svgdas-view');
-        if (cookieView != null) {
-            var cookieViewToks = cookieView.split(':');
-            chr = cookieViewToks[0];
-            viewStart = cookieViewToks[1] | 0;
-            viewEnd = cookieViewToks[2] | 0;
-        }
+    if (cookieKey && localStorage['dalliance.' + cookieKey + '.view-chr']) {
+        chr = localStorage['dalliance.' + cookieKey + '.view-chr'];
+        viewStart = localStorage['dalliance.' + cookieKey + '.view-start']|0;
+        viewEnd = localStorage['dalliance.' + cookieKey + '.view-end']|0;
+    } else {
+//	alert('naive init');
     }
     
     var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
@@ -1182,5 +1180,9 @@ function setLocation(newMin, newMax, newChr)
 
 function storeStatus()
 {
-    $.cookie('' + cookieKey + '-svgdas-view', '' + chr + ':' + (viewStart|0) + ':' + (viewEnd|0), {expires: 14});
+//    $.cookie('' + cookieKey + '-svgdas-view', '' + chr + ':' + (viewStart|0) + ':' + (viewEnd|0), {expires: 14});
+
+    localStorage['dalliance.' + cookieKey + '.view-chr'] = chr;
+    localStorage['dalliance.' + cookieKey + '.view-start'] = viewStart|0;
+    localStorage['dalliance.' + cookieKey + '.view-end'] = viewEnd|0
 }
