@@ -61,6 +61,11 @@ var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
 // var tierBackgroundColors = ["red", "blue"];
 var minTierHeight = 25;
 
+var browserLinks = {
+    Ensembl: 'http://may2009.archive.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+    UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
+}
+
 function DataSource(name, uri, opts)
 {
     if (!opts) {
@@ -304,10 +309,10 @@ function setupTierDrag(element, ti) {
 function makeToggleButton(labelGroup, tier, ypos) {
 
     var bumpToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
-    svg.rect(bumpToggle, 85, ypos + 12, 8, 8);
-    svg.line(bumpToggle, 85, ypos + 16, 93, ypos + 16);
+    svg.rect(bumpToggle, 85, ypos + 8, 8, 8);
+    svg.line(bumpToggle, 85, ypos + 12, 93, ypos + 12);
     if (!tier.bumped) {
-        svg.line(bumpToggle, 89, ypos + 12, 89, ypos + 20);
+        svg.line(bumpToggle, 89, ypos + 8, 89, ypos + 16);
     }
     bumpToggle.addEventListener('mouseover', function(ev) {bumpToggle.setAttribute('stroke', 'red');}, false);
     bumpToggle.addEventListener('mouseout', function(ev) {
@@ -692,11 +697,26 @@ function init()
     
     // set up the navigator
     document.getElementById("region").addEventListener('mousedown', function(ev) {
-             ev.stopPropagation(); ev.preventDefault();
-             if (entryPoints == null) {
-                 alert("entry_points aren't currently available for this genome");
-             }
+        ev.stopPropagation(); ev.preventDefault();
+        if (entryPoints == null) {
+            alert("entry_points aren't currently available for this genome");
+        }
              
+	var linkouts = '';
+	for (l in browserLinks) {
+	    linkouts += '<li><a href="' + browserLinks[l].replace(new RegExp('\\${([a-z]+)}', 'g'), function(s, p1) {
+		if (p1 == 'chr') {
+		    return chr;
+		} else if (p1 == 'start') {
+		    return viewStart;
+		} else if (p1 == 'end') {
+		    return viewEnd;
+		} else {
+		    return '';
+		}
+	    }) + '" target="_new">' + l + '</a></li>';
+	}
+
             	var mx =  ev.clientX, my = ev.clientY;
 	            mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
 	            my +=  document.documentElement.scrollTop || document.body.scrollTop;
@@ -710,7 +730,8 @@ function init()
 	                borderWidth: 1,
 	                borderStyle: 'solid',
 	                padding: 2,
-	            }).html('<p>Jump to...</p>' +
+	            }).html((linkouts.length > 0 ? ('<p>Link to this region in...</p><ul>' + linkouts + '</ul>') : '') + 
+			    '<p>Jump to...</p>' +
 			    '<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
 	                    'Start:<input name="min" value="' + (viewStart|0) + '"></input><br>' + 
 	                    'End:<input name="max" value="' + (viewEnd|0) + '"></input>' + 

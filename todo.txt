@@ -28,8 +28,6 @@ Publishable prototype:
  - Better state-persistance.
      + Use localStorage?
      + Remember active tier-set?
- - Linkouts to other browsers.
- - Clean up tierTabs
  - Experiment with guideline systems.
  - Better label placement.
 
