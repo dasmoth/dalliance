@@ -46,6 +46,8 @@ var currentSeqMax = -1; // init once EPs are fetched.
 var highlight;
 var highlightMin = -1, highlightMax = - 1;
 
+var autoSizeTiers = false;
+
 // UI components
 
 var svg;
@@ -698,6 +700,8 @@ function init()
     // set up the navigator
     document.getElementById("region").addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
+	removeAllPopups(); 
+
         if (entryPoints == null) {
             alert("entry_points aren't currently available for this genome");
         }
@@ -708,9 +712,9 @@ function init()
 		if (p1 == 'chr') {
 		    return chr;
 		} else if (p1 == 'start') {
-		    return viewStart;
+		    return viewStart|0;
 		} else if (p1 == 'end') {
-		    return viewEnd;
+		    return viewEnd|0;
 		} else {
 		    return '';
 		}

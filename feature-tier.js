@@ -99,12 +99,13 @@ function drawLine(featureGroupElement, features, style, tier)
     path.setAttribute("stroke-width", width);
     var pathOps = '';
 
+    var lastPointWasDrawn = false;
     for (var fi = 0; fi < features.length; ++fi) {
 	var f = features[fi];
 
 	var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
         var sc = (f.score * yscale)|0;
-	var py = 0 + height - sc;
+	var py = MIN_PADDING + (height - sc);
 	if (fi == 0) {
 	    pathOps = 'M ' + px + ' ' + py;
 	} else {
@@ -114,7 +115,7 @@ function drawLine(featureGroupElement, features, style, tier)
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
    
-    return height;
+    return height|0 + MIN_PADDING;
 }
 
 
@@ -367,7 +368,7 @@ function drawFeatureTier(tier)
 	}
     }				
 
-    if (!tier.layoutWasDone) {
+    if (!tier.layoutWasDone || autoSizeTiers) {
 	tier.layoutHeight = lh;
 	tier.background.setAttribute("height", lh);
 	if (glyphs.length > 0 || specials) {
@@ -392,7 +393,7 @@ function drawFeatureTier(tier)
 	    spand.setAttribute('font-family', 'helvetica');
 	    spand.setAttribute('font-size', '10pt');
 
-	    if (tier.layoutHeight < (lh+4)) { 
+	    if (tier.layoutHeight < lh) { 
 		var dispST = 0;
 		while ((tier.layoutHeight - 20) >= stBoundaries[dispST]) { // NB allowance for placard!
 		    ++dispST;
@@ -408,7 +409,7 @@ function drawFeatureTier(tier)
 	    var arrow = document.createElementNS(NS_SVG, 'path');
 	    arrow.setAttribute('fill', 'red');
 	    arrow.setAttribute('stroke', 'none');
-	    if (tier.layoutHeight < (lh+4)) {
+	    if (tier.layoutHeight < lh) {
 		arrow.setAttribute('d', 'M ' +  30 + ' ' + -16 +
 				   ' L ' + 42 + ' ' + -16 +
 				   ' L ' + 36 + ' ' + -4 + ' Z');
@@ -424,6 +425,22 @@ function drawFeatureTier(tier)
 		drawFeatureTier(tier);
 		arrangeTiers();
 	    }, false);
+
+	    var dismiss = document.createElementNS(NS_SVG, 'text');
+	    dismiss.setAttribute('stroke', 'none');
+	    dismiss.setAttribute('fill', 'red');
+	    dismiss.setAttribute('font-family', 'helvetica');
+	    dismiss.setAttribute('font-size', '10pt');
+	    dismiss.appendChild(document.createTextNode("(Auto grow-shrink)"));
+	    dismiss.setAttribute('x', 750);
+	    dismiss.setAttribute('y', -6);
+	    dismiss.addEventListener('mousedown', function(ev) {
+		ev.preventDefault(); ev.stopPropagation();
+		autoSizeTiers = true;
+		refresh();
+	    }, false);
+	    spandPlacard.appendChild(dismiss);
+
 	    tier.placard = spandPlacard;
 	} 
     }
