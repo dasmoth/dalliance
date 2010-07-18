@@ -27,3 +27,26 @@ function stringToInt(str) {
     }
     return str|0;
 }
+
+
+function pusho(obj, k, v) {
+    if (obj[k]) {
+	obj[k].push(v);
+    } else {
+	obj[k] = [v];
+    }
+}
+
+function pushnewo(obj, k, v) {
+    var a = obj[k];
+    if (a) {
+	for (var i = 0; i < a.length; ++i) {    // indexOf requires JS16 :-(.
+	    if (a[i] == v) {
+		return;
+	    }
+	}
+	a.push(v);
+    } else {
+	obj[k] = [v];
+    }
+}

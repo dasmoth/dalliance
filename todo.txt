@@ -28,9 +28,6 @@ Publishable prototype:
  - Better state-persistance.
      + Use localStorage?
      + Remember active tier-set?
- - Supergrouping
-     * Intelligent gene-collapsing.
-     * Better way to get the metadata across?
  - Linkouts to other browsers.
  - Clean up tierTabs
  - Experiment with guideline systems.
@@ -62,7 +59,7 @@ After the paper
  - Think about cancelling long-running XHRs if they're no longer needed?
  - DAS on geneID coords.
  - Auto-detection of credentialed servers?
-
+ - Undo
 
 Nice to have
 ------------

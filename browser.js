@@ -13,6 +13,10 @@ var tagLine = "...just some gills and some wings and a few extra thumbs.";
 var sources = new Array();
 var tiers = new Array();
 
+// Limit stops
+
+MAX_VIEW_SIZE=500000;
+
 // parental configuration
 
 var chr;
@@ -52,7 +56,10 @@ var hPopupHolder;
 
 // Visual config.
 
-var tierBackgroundColors = ["rgb(255,245,215)", "rgb(255,254,240)"];
+//  var tierBackgroundColors = ["rgb(255,245,215)", "rgb(255,254,240)"];
+var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
+// var tierBackgroundColors = ["red", "blue"];
+var minTierHeight = 25;
 
 function DataSource(name, uri, opts)
 {
@@ -131,7 +138,14 @@ function arrangeTiers() {
 	    var tier = tiers[ti];
 	    tier.y = clh;
 	    
-	    var viewportBackground = document.createElementNS(NS_SVG, "rect");
+	    var labelWidth = 100;
+	    var viewportBackground = document.createElementNS(NS_SVG, 'path');
+	    viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
+					    ' L 10 ' + (clh+7) +
+					    ' L 10 ' + (clh + 18) +
+					    ' L 15 ' + (clh + 22) +
+					    ' L ' + (10 + labelWidth) + ' ' + (clh+22) +
+					    ' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
 	    viewportBackground.setAttribute("fill", tierBackgroundColors[ti % tierBackgroundColors.length]);
 	    viewportBackground.setAttribute("x", "10");
 	    viewportBackground.setAttribute("y", clh + 5);
@@ -143,8 +157,8 @@ function arrangeTiers() {
 	    setupTierDrag(viewportBackground, ti);
 	    
 	    var labelText = document.createElementNS(NS_SVG, "text");
-	    labelText.setAttribute("x", 15);
-	    labelText.setAttribute("y", clh + 20);
+	    labelText.setAttribute("x", 20);
+	    labelText.setAttribute("y", clh + 17);
 	    labelText.setAttribute("stroke-width", "0");
 	    labelText.setAttribute("fill", "black");
 	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
@@ -768,7 +782,6 @@ function init()
 
 		    var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
 		    setLocation(min - padding, max + padding, nchr);
-		    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
 		}
 	    });
 
@@ -891,10 +904,10 @@ function init()
 	}
     }
     
-    if ((viewEnd - viewStart) > 50000) {
+    if ((viewEnd - viewStart) > MAX_VIEW_SIZE) {
         var mid = ((viewEnd + viewStart) / 2)|0;
-        viewStart = mid - 25000;
-        viewEnd = mid + 25000;
+        viewStart = mid - (MAX_VIEW_SIZE/2);
+        viewEnd = mid + (MAX_VIEW_SIZE/2) - 1;
     }
 
     origin = ((viewStart + viewEnd) / 2) | 0;
@@ -1135,6 +1148,7 @@ function setLocation(newMin, newMax, newChr)
 
     updateRegion();
     refresh();
+    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
     storeStatus();
 }
 

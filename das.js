@@ -183,6 +183,7 @@ DASSource.prototype.features = function(segment, options, callback) {
 
 	if (!responseXML) {
 	    callback([], 'Failed request: ' + dasURI);     // FIXME response code here?
+	    return;
 	}
 	if (req) {
 	    /*

@@ -8,6 +8,8 @@
 var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires making
                         // drawing of joined-up groups a bit smarter.   
 
+var MIN_PADDING = 4;
+
 //
 // Colour handling
 //
@@ -115,27 +117,6 @@ function drawLine(featureGroupElement, features, style, tier)
     return height;
 }
 
-function pusho(obj, k, v) {
-    if (obj[k]) {
-	obj[k].push(v);
-    } else {
-	obj[k] = [v];
-    }
-}
-
-function pushnewo(obj, k, v) {
-    var a = obj[k];
-    if (a) {
-	for (var i = 0; i < a.length; ++i) {    // indexOf requires JS16 :-(.
-	    if (a[i] == v) {
-		return;
-	    }
-	}
-	a.push(v);
-    } else {
-	obj[k] = [v];
-    }
-}
 
 function sortFeatures(tier)
 {
@@ -198,8 +179,7 @@ function drawFeatureTier(tier)
     }
     featureGroupElement.appendChild(tier.background);
 	
-    var offset = 2;
-    var lh = 2;
+    var lh = MIN_PADDING;
     var bumpMatrix = null;
     if (tier.bumped) {
 	bumpMatrix = new Array(0);
@@ -220,7 +200,7 @@ function drawFeatureTier(tier)
 	    specials = true;
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
-		var g = glyphForFeature(ufl[pgid], offset, style);
+		var g = glyphForFeature(ufl[pgid], 0, style);
 		glyphs.push(g);
 	    }
 	}
@@ -294,7 +274,7 @@ function drawFeatureTier(tier)
     var groupGlyphs = {};
     for (var gx in gl) {
 	var gid = gl[gx];
-	var g = glyphsForGroup(tier.groupedFeatures[gid], offset, styles, tier.groups[gid], tier);
+	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier);
 	groupGlyphs[gid] = g;
     }
 
@@ -366,11 +346,11 @@ function drawFeatureTier(tier)
 		featureGroupElement.appendChild(g.glyph);
 	    }
 	}
-	lh += st.height + 4; //padding
+	lh += st.height + MIN_PADDING;
 	stBoundaries.push(lh);
     }
 
-    lh = Math.max(20, lh); // for sanity's sake.
+    lh = Math.max(minTierHeight, lh); // for sanity's sake.
     if (stBoundaries.length < 2) {
 	var bumped = false;
 	var minHeight = lh;
@@ -388,14 +368,14 @@ function drawFeatureTier(tier)
     }				
 
     if (!tier.layoutWasDone) {
-	tier.layoutHeight = lh + 4;
+	tier.layoutHeight = lh;
 	tier.background.setAttribute("height", lh);
 	if (glyphs.length > 0 || specials) {
 	    tier.layoutWasDone = true;
 	}
 	tier.placard = null;
     } else {
-	if (tier.layoutHeight != (lh + 4)) {
+	if (tier.layoutHeight != lh) {
 	    var spandPlacard = document.createElementNS(NS_SVG, 'g');
 	    var frame = document.createElementNS(NS_SVG, 'rect');
 	    frame.setAttribute('x', 0);
@@ -409,6 +389,8 @@ function drawFeatureTier(tier)
 	    var spand = document.createElementNS(NS_SVG, 'text');
 	    spand.setAttribute('stroke', 'none');
 	    spand.setAttribute('fill', 'red');
+	    spand.setAttribute('font-family', 'helvetica');
+	    spand.setAttribute('font-size', '10pt');
 
 	    if (tier.layoutHeight < (lh+4)) { 
 		var dispST = 0;
@@ -461,6 +443,8 @@ function drawFeatureTier(tier)
 	var status = document.createElementNS(NS_SVG, 'text');
 	status.setAttribute('stroke', 'none');
 	status.setAttribute('fill', 'red');
+	status.setAttribute('font-family', 'helvetica');
+	status.setAttribute('font-size', '10pt');
 	status.setAttribute('x', 80);
 	status.setAttribute('y', -6);
 	status.appendChild(document.createTextNode(statusMsg));
@@ -475,7 +459,7 @@ function drawFeatureTier(tier)
     clipRect.setAttribute('x', -500000);
     clipRect.setAttribute('y', 0);
     clipRect.setAttribute('width', 1000000);
-    clipRect.setAttribute('height', tier.layoutHeight - 4);
+    clipRect.setAttribute('height', tier.layoutHeight);
     clip.appendChild(clipRect);
     featureGroupElement.appendChild(clip);
     featureGroupElement.setAttribute('clip-path', 'url(#' + clipId + ')');
