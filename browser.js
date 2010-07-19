@@ -8,7 +8,7 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var tagLine = "...just some gills and some wings and a few extra thumbs.";
+var tagLine = "...I can see the lights in the distance.";
 
 var sources = new Array();
 var tiers = new Array();
@@ -37,8 +37,8 @@ var zoomFactor = 1.0;
 var origin = 0;
 var targetQuantRes = 5.0;
 var featurePanelWidth = 750;
-var zoomBase = 50;
-var zoomExpt = 30;
+var zoomBase = 100;
+var zoomExpt = 30; // Now gets clobbered.
 
 var entryPoints = null;
 var currentSeqMax = -1; // init once EPs are fetched.
@@ -957,6 +957,9 @@ function init()
 
     origin = ((viewStart + viewEnd) / 2) | 0;
     scale = featurePanelWidth / (viewEnd - viewStart);
+
+    zoomExpt = 250 / Math.log(MAX_VIEW_SIZE / zoomBase);
+
     zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
 
     move(0);
