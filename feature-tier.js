@@ -276,7 +276,8 @@ function drawFeatureTier(tier)
     var groupGlyphs = {};
     for (var gx in gl) {
 	var gid = gl[gx];
-	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier);
+	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier,
+			       (tier.source.opts.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
 	groupGlyphs[gid] = g;
     }
 
@@ -485,7 +486,7 @@ function drawFeatureTier(tier)
     tier.scale = 1;
 }
 
-function glyphsForGroup(features, y, stylesheet, groupElement, tier) {
+function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorType) {
     var height=1;
     var label;
     var links = null;
@@ -530,19 +531,43 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier) {
 	var lmin = (blockList[i - 1].max() - origin) * scale;
 	var lmax = (blockList[i].min() - origin) * scale;
 
-	var path = document.createElementNS(NS_SVG, 'path');
-	path.setAttribute('fill', 'none');
-	path.setAttribute('stroke-width', '1');
+	if (connectorType == 'collapsed_gene') {
+	    var path = document.createElementNS(NS_SVG, 'path');
+	    path.setAttribute('fill', 'none');
+	    path.setAttribute('stroke-width', '1');
 	    
-	if (strand == "+" || strand == "-") {
-	    var lmid = (lmin + lmax) / 2;
-	    var lmidy = (strand == "-") ? y + 12 : y;
-	    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+	    var pathops = "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6);
+	    if (lmax - lmin > 8) {
+		var lmid = (0.5*lmax) + (0.5*lmin);
+		if (strand == '+') {
+		    pathops += ' M ' + (lmid - 2) + ' ' + (y+6-4) +
+			' L ' + (lmid + 2) + ' ' + (y+6) +
+			' L ' + (lmid - 2) + ' ' + (y+6+4); 
+		} else if (strand == '-') {
+		    pathops += ' M ' + (lmid + 2) + ' ' + (y+6-4) +
+			' L ' + (lmid - 2) + ' ' + (y+6) +
+			' L ' + (lmid + 2) + ' ' + (y+6+4); 
+		}
+	    }
+	    path.setAttribute('d', pathops);
+	    
+	    glyphGroup.appendChild(path);
 	} else {
-	    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
-	}
+	    var path = document.createElementNS(NS_SVG, 'path');
+	    path.setAttribute('fill', 'none');
+	    path.setAttribute('stroke', 'red');
+	    path.setAttribute('stroke-width', '1');
 	    
-	glyphGroup.appendChild(path);
+	    if (strand == "+" || strand == "-") {
+		var lmid = (lmin + lmax) / 2;
+		var lmidy = (strand == "-") ? y + 12 : y;
+		path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+	    } else {
+		path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
+	    }
+	    
+	    glyphGroup.appendChild(path);
+	}
     }
 
     //
