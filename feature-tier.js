@@ -220,6 +220,11 @@ function drawFeatureTier(tier)
 		    var f = gf[fi];
 		    pusho(featsByType, f.type, f);
 		}
+
+		if (tier.groups[sg] && !tier.groups[sg].links || tier.groups[sg].links.length == 0) {
+		    tier.groups[sg].links = tier.groups[sgg[0]].links;
+		}
+
 		delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
 	    }
 
@@ -493,7 +498,20 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var notes = null;
     var spans = null;
     var strand = null;
-    
+
+/*
+    features = features.sort(function(f1, f2) {
+	if (f1.min < f2.min) {
+	    return -1;
+	} else if (f1.min > f2.min) {
+	    return 1;
+	} else {
+	    return 0;
+	}
+    });
+  
+*/
+  
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
@@ -555,7 +573,6 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	} else {
 	    var path = document.createElementNS(NS_SVG, 'path');
 	    path.setAttribute('fill', 'none');
-	    path.setAttribute('stroke', 'red');
 	    path.setAttribute('stroke-width', '1');
 	    
 	    if (strand == "+" || strand == "-") {

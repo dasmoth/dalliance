@@ -672,7 +672,8 @@ function init()
     svg.rect(main, 0, 0, 860, 500, {id: 'background', fill: 'white'});
     svg.text(main, 40, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
     svg.text(main, 300, 30, 'Add track...', {id: 'addTrack', strokeWidth: 0});
-    svg.text(main, 400, 30, 'Initializing', {id: 'status', strokeWidth: 0});
+    svg.text(main, 400, 30, 'Reset', {id: 'resetButton', strokeWidth: 0});
+    svg.text(main, 500, 30, 'Initializing', {id: 'status', strokeWidth: 0});
     
     var bin = svg.group(main, 'bin', {stroke: 'gray', strokeWidth: '0.05cm', fill: 'white'});
     svg.path(bin, 'M 10 15 L 12 35 L 25 35 L 27 15 L 10 15');
@@ -846,6 +847,7 @@ function init()
 	    return false;
 	});
     }, false);
+
     
     // set up the track-adder
     document.getElementById("addTrack").addEventListener('mousedown', function(ev) {
@@ -903,6 +905,12 @@ function init()
 	            });
 	}, false);
 	
+
+    // set up the track-adder
+    document.getElementById('resetButton').addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+	window.location.assign('?reset=true');
+    }, false);
 	
     tierHolder = document.getElementById("dasTiers");
     tiers = new Array();
@@ -983,9 +991,11 @@ function init()
 	move (-ev.wheelDeltaX/5);
     }, false);
     document.addEventListener('MozMousePixelScroll', function(ev) {
-	ev.stopPropagation(); ev.preventDefault();
-	if (ev.axis == 1 && ev.detail != 0) {
-            move(ev.detail);
+	if (ev.axis == 1) {
+	    ev.stopPropagation(); ev.preventDefault();
+	    if (ev.detail != 0) {
+		move(ev.detail);
+	    }
         }
     }, false);
     

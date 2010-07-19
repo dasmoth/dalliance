@@ -7,8 +7,8 @@
 
 function Range(min, max)
 {
-    this._min = min;
-    this._max = max;
+    this._min = min|0;
+    this._max = max|0;
 }
 
 Range.prototype.min = function() {

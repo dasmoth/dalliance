@@ -361,7 +361,9 @@ function dasNotesOf(element)
     var notes = [];
     var maybeNotes = element.getElementsByTagName('NOTE');
     for (var ni = 0; ni < maybeNotes.length; ++ni) {
-	notes.push(maybeNotes[ni].firstChild.nodeValue);
+	if (maybeNotes[ni].firstChild) {
+	    notes.push(maybeNotes[ni].firstChild.nodeValue);
+	}
     }
     return notes;
 }
