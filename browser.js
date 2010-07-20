@@ -629,8 +629,6 @@ function init()
         qChr = localStorage['dalliance.' + cookieKey + '.view-chr'];
         qMin = localStorage['dalliance.' + cookieKey + '.view-start']|0;
         qMax = localStorage['dalliance.' + cookieKey + '.view-end']|0;
-    } else {
-//	alert('naive init');
     }
 
     if (cookieKey) {
@@ -642,10 +640,12 @@ function init()
     
     var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
 
+    var queryRegion = false;
     if ($.query.get('chr')) {
 	var qChr = $.query.get('chr');
 	var qMin = $.query.get('min');
 	var qMax = $.query.get('max');
+	queryRegion = true;
     }
 
     guidelineConfig = $.query.get('guidelines') || 'none';
@@ -658,7 +658,7 @@ function init()
 	guidelineStyle = guidelineConfig;
     }
 
-    if (qChr == '') {
+    if (!queryRegion) {
 	regstr = $.query.get('r');
 	if (regstr == '') {
 	    regstr = $.query.get('segment');
@@ -669,6 +669,7 @@ function init()
 	    qMin = match[2] | 0;
 	    qMax = match[3] | 0;
 	}
+	queryRegion = true;
     }
 	
     if (qMax < qMin) {
