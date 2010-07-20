@@ -243,15 +243,32 @@ function drawFeatureTier(tier)
 		}
 		var mergedRanges = loc.ranges();
 		for (var si = 0; si < mergedRanges.length; ++si) {
+		    var r = mergedRanges[si];
+
+		    // begin coverage-counting
+		    var posCoverage = ((r.max()|0) - (r.min()|0) + 1) * sgg.length;
+		    var actCoverage = 0;
+		    for (var fi = 0; fi < feats.length; ++fi) {
+			var f = feats[fi];
+			if ((f.min|0) <= r.max() && (f.max|0) >= r.min()) {
+			    var umin = Math.max(f.min|0, r.min());
+			    var umax = Math.min(f.max|0, r.max());
+			    actCoverage += (umax - umin + 1);
+			}
+		    }
+		    var visualWeight = ((1.0 * actCoverage) / posCoverage);
+		    // end coverage-counting
+
 		    var newf = new DASFeature();
 		    for (k in template) {
 			newf[k] = template[k];
 		    }
-		    newf.min = mergedRanges[si].min();
-		    newf.max = mergedRanges[si].max();
+		    newf.min = r.min();
+		    newf.max = r.max();
 		    if (newf.label && sgg.length > 1) {
 			newf.label += ' (' + sgg.length + ' vars)';
 		    }
+		    newf.visualWeight = ((1.0 * actCoverage) / posCoverage);
 		    pusho(tier.groupedFeatures, sg, newf);
 		    // supergroups are already in tier.groups.
 		}
@@ -594,6 +611,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     if (groupElement && groupElement.links) {
 	var timeoutID = null;
 	glyphGroup.addEventListener('mousedown', function(ev) {
+	    ev.stopPropagation(); ev.preventDefault();
 	    if (timeoutID) {
 		clearTimeout(timeoutID);
 		var padding = Math.max(2500, 0.3 * (spans.max() - spans.min() + 1));
@@ -958,10 +976,17 @@ function glyphForFeature(feature, y, style)
         rect.setAttribute('stroke-width', 1);
 	rect.setAttribute('fill', fill);
 	
+	if (feature.visualWeight && feature.visualWeight < 1.0) {
+	    rect.setAttribute('fill-opacity', feature.visualWeight);
+	    if (stroke != 'none') {
+		rect.setAttribute('stroke-opacity', feature.visualWeight);
+	    }
+	}
+	
 	glyph = rect;
     }
 
-
+    glyph.dalliance_feature = feature;
     var dg = new DGlyph(glyph, min, max, requiredHeight);
     if (style.LABEL && feature.label) {
 	dg.label = feature.label;
@@ -979,7 +1004,7 @@ function labelGlyph(dglyph, featureTier) {
 	var label = dglyph.label;
 	var labelText = document.createElementNS(NS_SVG, 'text');
 	labelText.setAttribute('x', (dglyph.min - origin) * scale);
-	labelText.setAttribute('y', dglyph.height + 20);
+	labelText.setAttribute('y', dglyph.height + 15);
 	labelText.setAttribute('stroke-width', 0);
 	labelText.setAttribute('fill', 'black');
 	labelText.setAttribute('class', 'label-text');
@@ -1009,10 +1034,12 @@ function labelGlyph(dglyph, featureTier) {
 	
 	var textMax = (dglyph.min|0) + ((width + 10) / scale)
 	if (textMax > dglyph.max) {
-	    // alert('Extending ' + dglyph.max + ' -> ' + (textMax|0));
-	    dglyph.max = textMax|0;
+	    var adj = (textMax - dglyph.max)/2;
+	    var nmin = ((dglyph.min - adj - origin) * scale) + 5;
+	    labelText.setAttribute('x', nmin)
+	    dglyph.min = ((nmin/scale)+origin)|0;
+	    dglyph.max = (textMax-adj)|0;
 	} else {
-	    // alert('Seems okay ' + dglyph.max + ' < ' + textMax);
 	}
     }
     return dglyph;

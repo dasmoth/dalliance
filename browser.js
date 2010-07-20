@@ -47,7 +47,9 @@ var highlight;
 var highlightMin = -1, highlightMax = - 1;
 
 var autoSizeTiers = false;
-var guidelines = false;
+var guidelineStyle = 'none';
+var guidelineSpacing = 75;
+var fgGuide;
 
 // UI components
 
@@ -478,14 +480,32 @@ function refresh()
 
 
 var originX;
+var dcTimeoutID = null;
 
 function mouseDownHandler(ev)
 {
     removeAllPopups();
     ev.stopPropagation(); ev.preventDefault();
-    originX = ev.clientX;
-    document.addEventListener("mousemove", mouseMoveHandler, true);
-    document.addEventListener("mouseup", mouseUpHandler, true);
+
+    var target = document.elementFromPoint(ev.clientX, ev.clientY);
+    if (target && target.dalliance_feature) {
+	if (dcTimeoutID) {
+	    clearTimeout(dcTimeoutID);
+	    dcTimeoutID = null;
+	    var width = viewEnd - viewStart;
+	    var newMid = (((target.dalliance_feature.min|0) + (target.dalliance_feature.max|0)))/2;
+	    setLocation(newMid - (width/2), newMid + (width/2));
+	} else {
+	    dcTimeoutID = setTimeout(function() {
+		dcTimeoutID = null;
+//		alert('clicked on a ' + target.dalliance_feature.type);
+	    }, 200);
+	}
+    } else {
+	originX = ev.clientX;
+	document.addEventListener("mousemove", mouseMoveHandler, true);
+	document.addEventListener("mouseup", mouseUpHandler, true);
+    }
 }
 
 function mouseUpHandler(ev)
@@ -628,7 +648,15 @@ function init()
 	var qMax = $.query.get('max');
     }
 
-    guidelines = $.query.get('guidelines') || false;
+    guidelineConfig = $.query.get('guidelines') || 'none';
+    if (guidelineConfig == 'true') {
+	guidelineStyle = 'background';
+    } else if (STRICT_NUM_REGEXP.test(guidelineConfig)) {
+	guidelineStyle = 'background';
+	guidelineSpacing = guidelineConfig|0;
+    } else {
+	guidelineStyle = guidelineConfig;
+    }
 
     if (qChr == '') {
 	regstr = $.query.get('r');
@@ -712,7 +740,17 @@ function init()
     removeChildren(bhtmlRoot);
     bhtmlRoot.appendChild(document.createTextNode(tagLine));
     
-
+    if (guidelineStyle == 'foreground') {
+	fgGuide = document.createElementNS(NS_SVG, 'line');
+	fgGuide.setAttribute('x1', 500);
+	fgGuide.setAttribute('y1', 50);
+	fgGuide.setAttribute('x2', 500);
+	fgGuide.setAttribute('y2', 10000);
+	fgGuide.setAttribute('stroke', 'red');
+	fgGuide.setAttribute('stroke-width', 1);
+	fgGuide.setAttribute('pointer-events', 'none');
+	main.appendChild(fgGuide);
+    }
     
     // set up the navigator
     document.getElementById("region").addEventListener('mousedown', function(ev) {
@@ -750,7 +788,7 @@ function init()
 	                borderColor: 'black',
 	                borderWidth: 1,
 	                borderStyle: 'solid',
-	                padding: 2,
+	                padding: 2
 	            }).html((linkouts.length > 0 ? ('<p>Link to this region in...</p><ul>' + linkouts + '</ul>') : '') + 
 			    '<p>Jump to...</p>' +
 			    '<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
@@ -865,7 +903,7 @@ function init()
 	                borderColor: 'black',
 	                borderWidth: 1,
 	                borderStyle: 'solid',
-	                padding: 2,
+	                padding: 2
 	      }).html('<form id="addform">' +
 	               '  URL:<input size="100" name="dasuri" value="http://.../"></input><br>' +
 	               '  <input type="submit" value="Add...">' +
@@ -1032,11 +1070,31 @@ function resizeViewer() {
     
     if (oldFPW != featurePanelWidth) {
         var viewWidth = viewEnd - viewStart;
-        viewEnd = viewStart + (viewWidth * featurePanelWidth) / oldFPW;
-        // FIXME: should also fix the zoom slider...
-        updateRegion();
+	var nve = viewStart + (viewWidth * featurePanelWidth) / oldFPW;
+	var delta = nve - viewEnd;
+	viewStart = viewStart - (delta/2);
+	viewEnd = viewEnd + (delta/2);
+
+	var wid = viewEnd - viewStart;
+	if (currentSeqMax > 0 && viewEnd > currentSeqMax) {
+            viewEnd = currentSeqMax;
+            viewStart = viewEnd - wid;
+	}
+	if (viewStart < 1) {
+            viewStart = 1;
+            viewEnd = viewStart + wid;
+	}
+    
+	xfrmTiers((100 - (1.0 * (viewStart - origin)) * scale), 1);
+	updateRegion();
 	spaceCheck();
     }
+
+    if (fgGuide) {
+	fgGuide.setAttribute('x1', (featurePanelWidth/2) + 100);
+	fgGuide.setAttribute('x2', (featurePanelWidth/2) + 100);
+    }
+	
 
     for (var pi = 0; pi < placards.length; ++pi) {
 	var placard = placards[pi];

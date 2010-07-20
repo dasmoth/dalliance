@@ -10,13 +10,17 @@ var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
 var steps = [1,2,5];
 
-function tileSizeForScale(scale)
+function tileSizeForScale(scale, min)
 {
+    if (!min) {
+	min = MIN_TILE;
+    }
+
     function ts(p) {
 	return steps[p % steps.length] * Math.pow(10, (p / steps.length)|0);
     }
     var pow = steps.length;
-    while (scale * ts(pow) < MIN_TILE) {
+    while (scale * ts(pow) < min) {
 	++pow;
     }
     return ts(pow);
@@ -24,11 +28,11 @@ function tileSizeForScale(scale)
 
 function drawGuidelines(featureGroupElement)
 {
-    if (!guidelines) {
+    if (guidelineStyle != 'background') {
 	return;
     }
 
-    var tile = tileSizeForScale(scale);
+    var tile = tileSizeForScale(scale, guidelineSpacing);
     var pos = Math.max(0, ((knownStart / tile)|0) * tile);
 
     var seqTierMax = knownEnd;
