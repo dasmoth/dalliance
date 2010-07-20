@@ -635,7 +635,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     if (label) {
 	dg.label = label;
 	var sg = tier.groupsToSupers[groupElement.id];
-	if (sg) {
+	if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
 	    if (groupElement.id != tier.superGroups[sg][0]) {
 	    	dg.label = null;
 	    }
