@@ -310,8 +310,60 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
 	    }
 	}
 	successCB(stylesheet);
+    }, false);
+}
+
+//
+// sources command
+// 
+
+function DASRegistry(uri, opts)
+{
+    opts = opts || {};
+    this.uri = uri;
+    this.opts = opts;   
+}
+
+DASRegistry.prototype.sources = function(callback, failure, opts)
+{
+    doCrossDomainRequest(this.uri, function(responseXML) {
+	if (!responseXML && failure) {
+	    failure();
+	    return;
+	}
+
+	var sources = [];	
+	var sourceXMLs = responseXML.getElementsByTagName('SOURCE');
+	for (var si = 0; si < sourceXMLs.length; ++si) {
+	    var sourceXML = sourceXMLs[si];
+	    var versionXMLs = sourceXML.getElementsByTagName('VERSION');
+	    if (versionXMLs.length < 1) {
+		continue;
+	    }
+	    var versionXML = versionXMLs[0];
+
+	    var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
+	    var uri;
+	    for (var ci = 0; ci < capXMLs.length; ++ci) {
+		var capXML = capXMLs[ci];
+		if (capXML.getAttribute('type') == 'das1:features') {
+		    var fep = capXML.getAttribute('query_uri');
+		    uri = fep.substring(0, fep.length - ('features'.length));
+		}
+	    }
+	    
+	    if (uri) {
+		var source = new DASSource(uri);
+		source.title = sourceXML.getAttribute('title');
+		source.desc = sourceXML.getAttribute('description');
+		sources.push(source);
+	    }
+	}
+	
+	callback(sources);
     });
 }
+
 
 //
 // Utility functions
@@ -368,7 +420,7 @@ function dasNotesOf(element)
     return notes;
 }
 
-DASSource.prototype.doCrossDomainRequest = function(url, handler) {
+function doCrossDomainRequest(url, handler, credentials) {
     // TODO: explicit error handlers?
 
     if (window.XDomainRequest) {
@@ -392,9 +444,13 @@ DASSource.prototype.doCrossDomainRequest = function(url, handler) {
             }
 	};
 	req.open("get", url, true);
-	if (this.credentials) {
+	if (credentials) {
 	    req.withCredentials = true;
 	}
 	req.send('');
     }
+}
+
+DASSource.prototype.doCrossDomainRequest = function(url, handler) {
+    return doCrossDomainRequest(url, handler, this.credentials);
 }
