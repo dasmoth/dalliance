@@ -25,6 +25,9 @@ Publishable prototype:
      + Minimal registry queries?
         * dasregistry.org currently not doing CORS.
  - Better label placement.
+ - Tidy up top bar.
+ - Restore at least minimal yZoom support for quant. tiers.
+ - Display of feature coordinates.
 
 After the paper
 ---------------
@@ -52,6 +55,7 @@ After the paper
  - Think about cancelling long-running XHRs if they're no longer needed?
  - DAS on geneID coords.
  - Auto-detection of credentialed servers?
+ - Indicator of where we are on the chromosome
  - Undo
 
 Nice to have
@@ -68,6 +72,7 @@ Nice to have
  - Ability to re-bump w/o re-fetching all the data
      + Should allow more aggressive spec-fetching?
      + Allow fetches that add to the working set, rather than replacing it.
+     + Try to respect existing feature placements when scrolling.
  - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
        think anyone else is doing this, but I'd use it!)
  - Graphical navigation?
@@ -96,6 +101,7 @@ Nice to have
      + Drag together when re-ordering????
      + How are these defined?  DASSTYLE is hopeless.  Extended <sources> document?
   - Dedicated configuration/persistance language?
+  - Distance between a pair of features.
 
 Blue sky
 --------
