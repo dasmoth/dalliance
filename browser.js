@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
@@ -70,6 +72,10 @@ var browserLinks = {
     Ensembl: 'http://may2009.archive.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
     UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
 }
+
+// Registry
+
+var availableSources;
 
 function DataSource(name, uri, opts)
 {
@@ -887,10 +893,97 @@ function init()
 	});
     }, false);
 
-    
+  
+    document.getElementById('addTrack').addEventListener('mousedown', function(ev) {
+	ev.stopPropagation(); ev.preventDefault();
+	removeAllPopups();
+
+        var mx =  ev.clientX, my = ev.clientY;
+	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+	my +=  document.documentElement.scrollTop || document.body.scrollTop;
+
+	var popup = document.createElement('div');
+        popup.style.position = 'absolute';
+        popup.style.top = '' + (my - 10) + 'px';
+        popup.style.left = '' + (mx - 10) + 'px';
+        popup.style.width = '600px';
+        popup.style.height = '500px';
+        popup.style.backgroundColor = 'white';
+        popup.style.borderWidth = '1px';
+        popup.style.borderColor = 'black'
+        popup.style.borderStyle = 'solid';
+        
+        var asform = document.createElement('form');
+        {
+            var label = document.createElement('p');
+            label.appendChild(document.createTextNode('Add tracks'));
+            asform.appendChild(label);
+
+            var stabHolder = document.createElement('div');
+            stabHolder.style.position = 'relative';
+            stabHolder.style.overflow = 'auto';
+            stabHolder.style.height = '400px';
+            var stab = document.createElement('table');
+            stab.style.width='100%';
+            for (var i = 0; i < availableSources.length; ++i) {
+                var r = document.createElement('tr');
+                r.style.backgroundColor = tierBackgroundColors[i % tierBackgroundColors.length];
+
+                var bd = document.createElement('td');
+                var b = document.createElement('input');
+                b.type = 'checkbox';
+                b.dalliance_source = availableSources[i];
+                bd.appendChild(b);
+                r.appendChild(bd);
+                var ld = document.createElement('td');
+                ld.appendChild(document.createTextNode(availableSources[i].title));
+                r.appendChild(ld);
+                stab.appendChild(r);
+            }
+            stabHolder.appendChild(stab);
+
+            asform.appendChild(stabHolder);
+
+            var addButton = document.createElement('span');
+            addButton.style.backgroundColor = 'rgb(230,230,250)';
+            addButton.style.borderStyle = 'solid';
+            addButton.style.borderColor = 'blue';
+            addButton.style.borderWidth = '3px';
+            addButton.style.padding = '2px';
+            addButton.style.margin = '10px';
+            addButton.style.width = '150px';
+            addButton.style.float = 'left';
+            addButton.appendChild(document.createTextNode('Add'));
+            asform.appendChild(addButton);
+
+            var canButton = document.createElement('span');
+            canButton.style.backgroundColor = 'rgb(230,230,250)';
+            canButton.style.borderStyle = 'solid';
+            canButton.style.borderColor = 'blue';
+            canButton.style.borderWidth = '3px';
+            canButton.style.padding = '2px';
+            canButton.style.margin = '10px';
+            canButton.style.width = '150px';
+            canButton.style.float = 'left';
+            canButton.appendChild(document.createTextNode('Cancel'))
+            asform.appendChild(canButton);
+        }
+        popup.appendChild(asform);
+        hPopupHolder.appendChild(popup);
+    }, false);
+			              
+/*
+
     // set up the track-adder
     document.getElementById("addTrack").addEventListener('mousedown', function(ev) {
-         ev.stopPropagation(); ev.preventDefault();
+        ev.stopPropagation(); ev.preventDefault();
+	removeAllPopups();
+
+	var regSources = '';
+	for (var i = 0; i < availableSources.length; ++i) {
+	    regSources += '<tr><td><input type="checkbox"></td><td>' + availableSources[i].title + '</td></tr>';
+	}
+	alert(regSources);
 
          var mx =  ev.clientX, my = ev.clientY;
 	     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -900,20 +993,25 @@ function init()
 	                top: (my - 10), 
 	                left:  (mx - 10),
 	                width: 600,
+	                height: 500,
 	                backgroundColor: 'white',
 	                borderColor: 'black',
 	                borderWidth: 1,
 	                borderStyle: 'solid',
-	                padding: 2
-	      }).html('<form id="addform">' +
-	               '  URL:<input size="100" name="dasuri" value="http://.../"></input><br>' +
-	               '  <input type="submit" value="Add...">' +
-	               '</form>'
-	            ).get(0);
-	            $(popup).hide();
-	            hPopupHolder.appendChild(popup);
-	            $(popup).fadeIn(500);
+	     padding: 2,
+	     overflow: 'auto'
+	 }).html('<table>' + regSources + '</table>').get(0);
+	
+	$(popup).hide();
+	hPopupHolder.appendChild(popup);
+	$(popup).fadeIn(500);
 	            
+*/
+	
+
+
+/*
+
 	           $('#addform').submit(function(ev) {
 		       ev.stopPropagation(); ev.preventDefault();
 	                    var nuri = $('input:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
@@ -942,10 +1040,16 @@ function init()
 	               removeAllPopups();
 	               return true;
 	            });
-	}, false);
-	
 
-    // set up the track-adder
+*/
+
+
+/*
+	}, false);
+
+*/	
+
+    // set up the resetter
     document.getElementById('resetButton').addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 	window.location.assign('?reset=true');
@@ -1051,6 +1155,13 @@ function init()
             }
         }
     );
+
+    new DASRegistry('http://www.dasregistry.org/das/sources?species=9606').sources(function(sources) {
+	if (!sources) {
+	    alert('Warning: registry query failed');
+	}
+	availableSources = sources;
+    });
 }
 
 function resizeViewer() {
