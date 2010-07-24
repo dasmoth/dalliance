@@ -10,7 +10,7 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var tagLine = "...I can see the lights in the distance.";
+var tagLine = "...everyone generalizes from one example.  Or at least, I do.";
 
 var sources = new Array();
 var tiers = new Array();
@@ -913,11 +913,17 @@ function init()
         popup.style.borderColor = 'black'
         popup.style.borderStyle = 'solid';
         
+        var addButtons = [];
         var asform = document.createElement('form');
         {
             var label = document.createElement('p');
             label.appendChild(document.createTextNode('Add tracks'));
             asform.appendChild(label);
+
+            var currentURIs = {};
+            for (var i = 0; i < tiers.length; ++i) {
+                currentURIs[tiers[i].source.uri] = true;
+            }
 
             var stabHolder = document.createElement('div');
             stabHolder.style.position = 'relative';
@@ -925,20 +931,36 @@ function init()
             stabHolder.style.height = '400px';
             var stab = document.createElement('table');
             stab.style.width='100%';
+            var idx = 0;
             for (var i = 0; i < availableSources.length; ++i) {
+                var source = availableSources[i];
+                if (!source.coords || source.coords.length == 0) {
+                    continue;
+                }
+                var coords = source.coords[0];
+                if (coords.taxon != '9606' || coords.auth != 'NCBI' || coords.version != '36') {
+                    continue;
+                }
+
                 var r = document.createElement('tr');
-                r.style.backgroundColor = tierBackgroundColors[i % tierBackgroundColors.length];
+                r.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
 
                 var bd = document.createElement('td');
-                var b = document.createElement('input');
-                b.type = 'checkbox';
-                b.dalliance_source = availableSources[i];
-                bd.appendChild(b);
+                if (currentURIs[source.uri]) {
+                    bd.appendChild(document.createTextNode('X'));
+                } else if (source.props.cors) {
+                    var b = document.createElement('input');
+                    b.type = 'checkbox';
+                    b.dalliance_source = availableSources[i];
+                    bd.appendChild(b);
+                    addButtons.push(b);
+                }
                 r.appendChild(bd);
                 var ld = document.createElement('td');
                 ld.appendChild(document.createTextNode(availableSources[i].title));
                 r.appendChild(ld);
                 stab.appendChild(r);
+                ++idx;
             }
             stabHolder.appendChild(stab);
 
@@ -955,71 +977,16 @@ function init()
             addButton.style.float = 'left';
             addButton.appendChild(document.createTextNode('Add'));
             asform.appendChild(addButton);
+            addButton.addEventListener('mousedown', function(ev) {
+                ev.stopPropagation(); ev.preventDefault();
 
-            var canButton = document.createElement('span');
-            canButton.style.backgroundColor = 'rgb(230,230,250)';
-            canButton.style.borderStyle = 'solid';
-            canButton.style.borderColor = 'blue';
-            canButton.style.borderWidth = '3px';
-            canButton.style.padding = '2px';
-            canButton.style.margin = '10px';
-            canButton.style.width = '150px';
-            canButton.style.float = 'left';
-            canButton.appendChild(document.createTextNode('Cancel'))
-            asform.appendChild(canButton);
-        }
-        popup.appendChild(asform);
-        hPopupHolder.appendChild(popup);
-    }, false);
-			              
-/*
-
-    // set up the track-adder
-    document.getElementById("addTrack").addEventListener('mousedown', function(ev) {
-        ev.stopPropagation(); ev.preventDefault();
-	removeAllPopups();
-
-	var regSources = '';
-	for (var i = 0; i < availableSources.length; ++i) {
-	    regSources += '<tr><td><input type="checkbox"></td><td>' + availableSources[i].title + '</td></tr>';
-	}
-	alert(regSources);
-
-         var mx =  ev.clientX, my = ev.clientY;
-	     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	     my +=  document.documentElement.scrollTop || document.body.scrollTop;
-         var popup = $('#popupTest').clone().css({
-	                position: 'absolute', 
-	                top: (my - 10), 
-	                left:  (mx - 10),
-	                width: 600,
-	                height: 500,
-	                backgroundColor: 'white',
-	                borderColor: 'black',
-	                borderWidth: 1,
-	                borderStyle: 'solid',
-	     padding: 2,
-	     overflow: 'auto'
-	 }).html('<table>' + regSources + '</table>').get(0);
-	
-	$(popup).hide();
-	hPopupHolder.appendChild(popup);
-	$(popup).fadeIn(500);
-	            
-*/
-	
-
-
-/*
-
-	           $('#addform').submit(function(ev) {
-		       ev.stopPropagation(); ev.preventDefault();
-	                    var nuri = $('input:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-
-	                    var nds = new DataSource('added', nuri);
-	                    sources.push(nds);
-	                    // this should be factored out.
-	                    var viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                for (var bi = 0; bi < addButtons.length; ++bi) {
+                    var b = addButtons[bi];
+                    if (b.checked) {
+                        var nds = new DataSource(b.dalliance_source.title, b.dalliance_source.uri);
+	                sources.push(nds);
+	                // this should be factored out.
+	                var viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
                         var viewportBackground = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                         var col = tierBackgroundColors[tiers.length % tierBackgroundColors.length];
                         viewportBackground.setAttribute("fill", col);
@@ -1032,22 +999,35 @@ function init()
                         viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
                         tierHolder.appendChild(viewport);
 
-		       var tier = new DasTier(nds, viewport, viewportBackground)
-                       tiers.push(tier);
-		       tier.init();
-		       storeStatus();
-	                    
-	               removeAllPopups();
-	               return true;
-	            });
+		        var tier = new DasTier(nds, viewport, viewportBackground)
+                        tiers.push(tier);
+		        tier.init();
+		        storeStatus();
+                    }
+                }
 
-*/
+                removeAllPopups();
+            }, false);
 
-
-/*
-	}, false);
-
-*/	
+            var canButton = document.createElement('span');
+            canButton.style.backgroundColor = 'rgb(230,230,250)';
+            canButton.style.borderStyle = 'solid';
+            canButton.style.borderColor = 'blue';
+            canButton.style.borderWidth = '3px';
+            canButton.style.padding = '2px';
+            canButton.style.margin = '10px';
+            canButton.style.width = '150px';
+            canButton.style.float = 'left';
+            canButton.appendChild(document.createTextNode('Cancel'))
+            asform.appendChild(canButton);
+            canButton.addEventListener('mousedown', function(ev) {
+                ev.stopPropagation(); ev.preventDefault();
+                removeAllPopups();
+            }, false);
+        }
+        popup.appendChild(asform);
+        hPopupHolder.appendChild(popup);
+    }, false);
 
     // set up the resetter
     document.getElementById('resetButton').addEventListener('mousedown', function(ev) {

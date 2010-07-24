@@ -1,8 +1,11 @@
-// DAS-in-Javascript library
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2010
 //
-// Gradually being refactored from the backend bits of SvgDAS!
+// das.js: queries and low-level data model.
 //
-// @author Thomas Down
 
 var dasLibErrorHandler = function(errMsg) {
     alert(errMsg);
@@ -42,6 +45,11 @@ function DASSource(uri, options) {
         options = new Object();
     }
     this.options = options;
+    this.coords = [];
+    this.props = {};
+}
+
+function DASCoords() {
 }
 
 //
@@ -342,6 +350,17 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 	    }
 	    var versionXML = versionXMLs[0];
 
+	    var coordXMLs = versionXML.getElementsByTagName('COORDINATES');
+	    var coords = [];
+	    for (var ci = 0; ci < coordXMLs.length; ++ci) {
+		var coordXML = coordXMLs[ci];
+		var coord = new DASCoords();
+		coord.auth = coordXML.getAttribute('authority');
+		coord.taxon = coordXML.getAttribute('taxid');
+		coord.version = coordXML.getAttribute('version');
+		coords.push(coord);
+	    }
+	    
 	    var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
 	    var uri;
 	    for (var ci = 0; ci < capXMLs.length; ++ci) {
@@ -351,11 +370,19 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 		    uri = fep.substring(0, fep.length - ('features'.length));
 		}
 	    }
+
+	    var props = {};
+	    var propXMLs = versionXML.getElementsByTagName('PROP');
+	    for (var pi = 0; pi < propXMLs.length; ++pi) {
+		pusho(props, propXMLs[pi].getAttribute('name'), propXMLs[pi].getAttribute('value'));
+	    }
 	    
 	    if (uri) {
 		var source = new DASSource(uri);
 		source.title = sourceXML.getAttribute('title');
 		source.desc = sourceXML.getAttribute('description');
+		source.coords = coords;
+		source.props = props;
 		sources.push(source);
 	    }
 	}
