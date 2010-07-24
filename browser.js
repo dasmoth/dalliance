@@ -49,7 +49,7 @@ var highlight;
 var highlightMin = -1, highlightMax = - 1;
 
 var autoSizeTiers = false;
-var guidelineStyle = 'none';
+var guidelineStyle = 'foreground';
 var guidelineSpacing = 75;
 var fgGuide;
 
@@ -654,7 +654,7 @@ function init()
 	queryRegion = true;
     }
 
-    guidelineConfig = $.query.get('guidelines') || 'none';
+    guidelineConfig = $.query.get('guidelines') || 'foreground';
     if (guidelineConfig == 'true') {
 	guidelineStyle = 'background';
     } else if (STRICT_NUM_REGEXP.test(guidelineConfig)) {

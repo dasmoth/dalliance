@@ -22,8 +22,6 @@ Publishable prototype:
  - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
-     + Minimal registry queries?
-        * dasregistry.org currently not doing CORS.
  - Better label placement.
  - Tidy up top bar.
  - Restore at least minimal yZoom support for quant. tiers.

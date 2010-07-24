@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
@@ -541,7 +543,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	if (feature.links && links==null) {
 	    links = feature.links;
 	}
-	var style = stylesheet[feature.type];
+	var style = stylesheet[feature.type] || stylesheet['default'];
 	if (!style) {
 	    continue;
 	}
@@ -561,46 +563,48 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	}
     }
 
-    var blockList = spans.ranges();
-    for (var i = 1; i < blockList.length; ++i) {
-	var lmin = (blockList[i - 1].max() - origin) * scale;
-	var lmax = (blockList[i].min() - origin) * scale;
+    if (spans) {
+	var blockList = spans.ranges();
+	for (var i = 1; i < blockList.length; ++i) {
+	    var lmin = (blockList[i - 1].max() - origin) * scale;
+	    var lmax = (blockList[i].min() - origin) * scale;
 
-	if (connectorType == 'collapsed_gene') {
-	    var path = document.createElementNS(NS_SVG, 'path');
-	    path.setAttribute('fill', 'none');
-	    path.setAttribute('stroke-width', '1');
-	    
-	    var pathops = "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6);
-	    if (lmax - lmin > 8) {
-		var lmid = (0.5*lmax) + (0.5*lmin);
-		if (strand == '+') {
-		    pathops += ' M ' + (lmid - 2) + ' ' + (y+6-4) +
-			' L ' + (lmid + 2) + ' ' + (y+6) +
-			' L ' + (lmid - 2) + ' ' + (y+6+4); 
-		} else if (strand == '-') {
-		    pathops += ' M ' + (lmid + 2) + ' ' + (y+6-4) +
-			' L ' + (lmid - 2) + ' ' + (y+6) +
-			' L ' + (lmid + 2) + ' ' + (y+6+4); 
+	    if (connectorType == 'collapsed_gene') {
+		var path = document.createElementNS(NS_SVG, 'path');
+		path.setAttribute('fill', 'none');
+		path.setAttribute('stroke-width', '1');
+		
+		var pathops = "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6);
+		if (lmax - lmin > 8) {
+		    var lmid = (0.5*lmax) + (0.5*lmin);
+		    if (strand == '+') {
+			pathops += ' M ' + (lmid - 2) + ' ' + (y+6-4) +
+			    ' L ' + (lmid + 2) + ' ' + (y+6) +
+			    ' L ' + (lmid - 2) + ' ' + (y+6+4); 
+		    } else if (strand == '-') {
+			pathops += ' M ' + (lmid + 2) + ' ' + (y+6-4) +
+			    ' L ' + (lmid - 2) + ' ' + (y+6) +
+			    ' L ' + (lmid + 2) + ' ' + (y+6+4); 
+		    }
 		}
-	    }
-	    path.setAttribute('d', pathops);
-	    
-	    glyphGroup.appendChild(path);
-	} else {
-	    var path = document.createElementNS(NS_SVG, 'path');
-	    path.setAttribute('fill', 'none');
-	    path.setAttribute('stroke-width', '1');
-	    
-	    if (strand == "+" || strand == "-") {
-		var lmid = (lmin + lmax) / 2;
-		var lmidy = (strand == "-") ? y + 12 : y;
-		path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+		path.setAttribute('d', pathops);
+		
+		glyphGroup.appendChild(path);
 	    } else {
-		path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
+		var path = document.createElementNS(NS_SVG, 'path');
+		path.setAttribute('fill', 'none');
+		path.setAttribute('stroke-width', '1');
+		
+		if (strand == "+" || strand == "-") {
+		    var lmid = (lmin + lmax) / 2;
+		    var lmidy = (strand == "-") ? y + 12 : y;
+		    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+		} else {
+		    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
+		}
+		
+		glyphGroup.appendChild(path);
 	    }
-	    
-	    glyphGroup.appendChild(path);
 	}
     }
 
