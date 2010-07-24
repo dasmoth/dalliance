@@ -399,7 +399,7 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 function elementValue(element, tag)
 {
     var children = element.getElementsByTagName(tag);
-    if (children.length > 0) {
+    if (children.length > 0 && children[0].firstChild) {
         return children[0].firstChild.nodeValue;
     } else {
         return null;
