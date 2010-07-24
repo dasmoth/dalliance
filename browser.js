@@ -119,7 +119,13 @@ DasTier.prototype.init = function() {
 	tier.stylesheet = stylesheet;
 	tier.refreshTier();
     }, function() {
-	tier.error = 'No stylesheet';
+	// tier.error = 'No stylesheet';
+        tier.stylesheet = new DASStylesheet();
+        var defStyle = new DASStyle();
+        defStyle.glyph = 'BOX';
+        defStyle.BGCOLOR = 'blue';
+        defStyle.FGCOLOR = 'black';
+        tier.stylesheet.pushStyle('default', null, defStyle);
 	tier.refreshTier();
     });
 }
