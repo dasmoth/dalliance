@@ -285,7 +285,13 @@ function DASStyle() {
 }
 
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
-    var dasURI = this.uri + 'stylesheet';
+    var dasURI;
+    if (this.endpoint_stylesheet) {
+        dasURI = this.endpoint_stylesheet;
+    } else {
+        dasURI = this.uri + 'stylesheet';
+    }
+
     this.doCrossDomainRequest(dasURI, function(responseXML) {
 	if (!responseXML) {
 	    if (failureCB) {

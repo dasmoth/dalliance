@@ -110,8 +110,10 @@ function DasTier(source, viewport, background)
 DasTier.prototype.init = function() {
     this.dasSource = new DASSource(this.source.uri);
     if (this.source.opts.credentials) {
-	// alert('will try credentials for ' + this.source.name);
 	this.dasSource.credentials = true;
+    }
+    if (this.source.opts.stylesheet) {
+        this.dasSource.endpoint_stylesheet = this.source.opts.stylesheet;
     }
     var tier = this;
     tier.status = 'Fetching stylesheet';
