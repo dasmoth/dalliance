@@ -124,7 +124,7 @@ function makeElement(tag, children, attribs)
 
 function makeElementNS(namespace, tag, children, attribs)
 {
-    var ele = document.createElement(namespace, tag);
+    var ele = document.createElementNS(namespace, tag);
     if (children) {
         if (! (children instanceof Array)) {
             children = [children];

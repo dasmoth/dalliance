@@ -68,6 +68,8 @@ var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
 // var tierBackgroundColors = ["red", "blue"];
 var minTierHeight = 25;
 
+var tabMargin = 100;
+
 var browserLinks = {
     Ensembl: 'http://may2009.archive.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
     UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
@@ -171,17 +173,13 @@ function arrangeTiers() {
 					    ' L ' + (10 + labelWidth) + ' ' + (clh+22) +
 					    ' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
 	    viewportBackground.setAttribute("fill", tierBackgroundColors[ti % tierBackgroundColors.length]);
-	    viewportBackground.setAttribute("x", "10");
-	    viewportBackground.setAttribute("y", clh + 5);
-	    viewportBackground.setAttribute("width", "100");
-	    viewportBackground.setAttribute("height", "25");
 	    viewportBackground.setAttribute("stroke", "none");
 	    labelGroup.appendChild(viewportBackground);
 	    
 	    setupTierDrag(viewportBackground, ti);
 	    
 	    var labelText = document.createElementNS(NS_SVG, "text");
-	    labelText.setAttribute("x", 20);
+	    labelText.setAttribute("x", 15);
 	    labelText.setAttribute("y", clh + 17);
 	    labelText.setAttribute("stroke-width", "0");
 	    labelText.setAttribute("fill", "black");
@@ -192,6 +190,26 @@ function arrangeTiers() {
 	    if (tier.source.opts.collapseSuperGroups) {
 		makeToggleButton(labelGroup, tier, clh);
 	    } 
+
+            if (tier.isQuantitative) {
+                var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min);
+                minQ.setAttribute('x', 80);
+                minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + 3);
+                minQ.setAttribute('stroke-width', '0');
+                minQ.setAttribute('fill', 'black');
+                minQ.setAttribute('font-size', '8pt');
+                labelGroup.appendChild(minQ);
+                minQ.setAttribute('x', tabMargin - minQ.getBBox().width - 3);
+                    
+                var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max);
+                maxQ.setAttribute('x', 80);
+                maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + 13);
+                maxQ.setAttribute('stroke-width', '0');
+                maxQ.setAttribute('fill', 'black');
+                maxQ.setAttribute('font-size', '8pt');
+                labelGroup.appendChild(maxQ);
+                maxQ.setAttribute('x', tabMargin - maxQ.getBBox().width - 3);
+            }
 
 		/* {
 	        
@@ -1031,7 +1049,7 @@ function init()
         var addButtons = [];
         var asform = document.createElement('form');
         {
-            var label = document.createElement('p');
+            var label = document.createElement('div');
             label.appendChild(document.createTextNode('Add tracks'));
             asform.appendChild(label);
 
@@ -1089,9 +1107,8 @@ function init()
             addButton.style.padding = '2px';
             addButton.style.margin = '10px';
             addButton.style.width = '150px';
-            addButton.style.float = 'left';
+            // addButton.style.float = 'left';
             addButton.appendChild(document.createTextNode('Add'));
-            asform.appendChild(addButton);
             addButton.addEventListener('mousedown', function(ev) {
                 ev.stopPropagation(); ev.preventDefault();
 
@@ -1132,13 +1149,16 @@ function init()
             canButton.style.padding = '2px';
             canButton.style.margin = '10px';
             canButton.style.width = '150px';
-            canButton.style.float = 'left';
+            // canButton.style.float = 'left';
             canButton.appendChild(document.createTextNode('Cancel'))
-            asform.appendChild(canButton);
             canButton.addEventListener('mousedown', function(ev) {
                 ev.stopPropagation(); ev.preventDefault();
                 removeAllPopups();
             }, false);
+
+            var buttonHolder = makeElement('div', [addButton, canButton]);
+            buttonHolder.style.margin = '10px';
+            asform.appendChild(buttonHolder);
         }
         popup.appendChild(asform);
         hPopupHolder.appendChild(popup);

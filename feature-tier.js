@@ -117,6 +117,12 @@ function drawLine(featureGroupElement, features, style, tier)
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
    
+    tier.isQuantitative = true;
+    tier.min = min;
+    tier.max = max;
+    tier.clientMin = height;
+    tier.clientMax = 0;
+
     return height|0 + MIN_PADDING;
 }
 
