@@ -25,7 +25,6 @@ Publishable prototype:
  - Better label placement.
  - Tidy up top bar.
  - Restore at least minimal yZoom support for quant. tiers.
- - Display of feature coordinates.
 
 After the paper
 ---------------
@@ -80,7 +79,6 @@ Nice to have
      + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
      + Any reason not to just hack the server to do this?
- - Registry browser.
  - Support for a more compact encoding for quantitative tracks.
      + Will need some server suppport.  
      + Adding a new encoding to Dazzle shouldn't be too painful.

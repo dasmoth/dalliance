@@ -502,8 +502,12 @@ function mouseDownHandler(ev)
     ev.stopPropagation(); ev.preventDefault();
 
     var target = document.elementFromPoint(ev.clientX, ev.clientY);
-    if (target && target.dalliance_feature) {
-	if (dcTimeoutID) {
+    while (target && !target.dalliance_feature && !target.dalliance_group) {
+        target = target.parentNode;
+    }
+
+    if (target && (target.dalliance_feature || target.dalliance_group)) {
+	if (dcTimeoutID && target.dalliance_feature) {
 	    clearTimeout(dcTimeoutID);
 	    dcTimeoutID = null;
 	    var width = viewEnd - viewStart;
@@ -512,7 +516,7 @@ function mouseDownHandler(ev)
 	} else {
 	    dcTimeoutID = setTimeout(function() {
 		dcTimeoutID = null;
-//		alert('clicked on a ' + target.dalliance_feature.type);
+		featurePopup(ev, target.dalliance_feature, target.dalliance_group);
 	    }, 200);
 	}
     } else {
@@ -520,6 +524,107 @@ function mouseDownHandler(ev)
 	document.addEventListener("mousemove", mouseMoveHandler, true);
 	document.addEventListener("mouseup", mouseUpHandler, true);
     }
+}
+
+
+var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
+
+function featurePopup(ev, feature, group)
+{
+    if (!feature) feature = {};
+    if (!group) group = {};
+
+    removeAllPopups();
+
+    var mx =  ev.clientX, my = ev.clientY;
+    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+    my +=  document.documentElement.scrollTop || document.body.scrollTop;
+    
+    var popup = makeElement('div');
+    var winWidth = window.innerWidth;
+    popup.style.position = 'absolute';
+    popup.style.top = '' + (my + 30) + 'px';
+    popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
+    popup.style.width = '400px';
+    popup.style.backgroundColor = 'white';
+    popup.style.borderWidth = '1px';
+    popup.style.borderColor = 'black'
+    popup.style.borderStyle = 'solid';
+    popup.style.padding = '2px';
+
+    var table = makeElement('table', null);
+    table.style.width = '100%';
+    var idx = 0;
+    {
+        var row = makeElement('tr', [
+            makeElement('th', pick(group.type, feature.type)),
+            makeElement('td', pick(group.label, feature.label, group.id, feature.id))
+        ]);
+        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        table.appendChild(row);
+        ++idx;
+    }
+    {
+        var loc;
+        if (group.segment) {
+            loc = group;
+        } else {
+            loc = feature;
+        }
+        var row = makeElement('tr', [
+            makeElement('th', 'Location'),
+            makeElement('td', loc.segment + ':' + loc.min + '-' + loc.max)
+        ]);
+        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        table.appendChild(row);
+        ++idx;
+    }
+    if (feature.score && feature.score != '-') {
+        var row = makeElement('tr', [
+            makeElement('th', 'Score'),
+            makeElement('td', feature.score)
+        ]);
+        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        table.appendChild(row);
+        ++idx;
+    }
+    {
+        var links = maybeConcat(group.links, feature.links);
+        if (links && links.length > 0) {
+            var row = makeElement('tr', [
+                makeElement('th', 'Links'),
+                makeElement('td', links.map(function(l) {
+                    return makeElement('div', makeElement('a', l.desc, {href: l.uri, target: '_new'}));
+                }))
+            ]);
+            row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+            table.appendChild(row);
+            ++idx;
+        }
+    }
+    {
+        var notes = maybeConcat(group.notes, feature.notes);
+        for (var ni = 0; ni < notes.length; ++ni) {
+            var k = 'Note';
+            var v = notes[ni];
+            var m = v.match(TAGVAL_NOTE_RE);
+            if (m) {
+                k = m[1];
+                v = m[2];
+            }
+
+            var row = makeElement('tr', [
+                makeElement('th', k),
+                makeElement('td', v)
+            ]);
+            row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+            table.appendChild(row);
+            ++idx;
+        }
+    }
+    popup.appendChild(table);
+
+    hPopupHolder.appendChild(popup);
 }
 
 function mouseUpHandler(ev)
@@ -631,6 +736,8 @@ function makeHighlight() {
 
 function init() 
 {
+
+
     var overrideSources;
     var reset = $.query.get('reset');
     var qChr = null, qMin = null, qMax = null;

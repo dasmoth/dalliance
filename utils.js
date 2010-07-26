@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
@@ -49,4 +51,97 @@ function pushnewo(obj, k, v) {
     } else {
 	obj[k] = [v];
     }
+}
+
+
+function pick(a, b, c, d)
+{
+    if (a) {
+        return a;
+    } else if (b) {
+        return b;
+    } else if (c) {
+        return c;
+    } else if (d) {
+        return d;
+    }
+}
+
+function pushnew(l, o)
+{
+    for (var i = 0; i < l.length; ++i) {
+        if (l[i] == o) {
+            return;
+        }
+    }
+    l.push(o);
+}
+
+function maybeConcat(a, b) {
+    var l = [];
+    if (a) {
+        for (var i = 0; i < a.length; ++i) {
+            pushnew(l, a[i]);
+        }
+    }
+    if (b) {
+        for (var i = 0; i < b.length; ++i) {
+            pushnew(l, b[i]);
+        }
+    }
+    return l;
+}
+
+
+//
+// DOM utilities
+//
+
+
+function makeElement(tag, children, attribs)
+{
+    var ele = document.createElement(tag);
+    if (children) {
+        if (! (children instanceof Array)) {
+            children = [children];
+        }
+        for (var i = 0; i < children.length; ++i) {
+            var c = children[i];
+            if (typeof c == 'string') {
+                c = document.createTextNode(c);
+            }
+            ele.appendChild(c);
+        }
+    }
+    
+    if (attribs) {
+        for (var l in attribs) {
+            ele[l] = attribs[l];
+        }
+    }
+    return ele;
+}
+
+function makeElementNS(namespace, tag, children, attribs)
+{
+    var ele = document.createElement(namespace, tag);
+    if (children) {
+        if (! (children instanceof Array)) {
+            children = [children];
+        }
+        for (var i = 0; i < children.length; ++i) {
+            var c = children[i];
+            if (typeof c == 'string') {
+                c = document.createTextNode(c);
+            }
+            ele.appendChild(c);
+        }
+    }
+    
+    if (attribs) {
+        for (var l in attribs) {
+            ele[l] = attribs[l];
+        }
+    }
+    return ele;
 }

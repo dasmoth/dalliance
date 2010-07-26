@@ -517,21 +517,9 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var notes = null;
     var spans = null;
     var strand = null;
-
-/*
-    features = features.sort(function(f1, f2) {
-	if (f1.min < f2.min) {
-	    return -1;
-	} else if (f1.min > f2.min) {
-	    return 1;
-	} else {
-	    return 0;
-	}
-    });
-  
-*/
   
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
+    glyphGroup.dalliance_group = groupElement;
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
 	if (feature.orientation && strand==null) {
@@ -549,6 +537,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	}
 	var glyph = glyphForFeature(feature, y, style);
 	if (glyph && glyph.glyph) {
+            glyph.glyph.dalliance_group = groupElement;
 	    glyphGroup.appendChild(glyph.glyph);
 	    var gspan = new Range(glyph.min, glyph.max);
 	    if (spans == null) {
@@ -569,8 +558,9 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	    var lmin = (blockList[i - 1].max() - origin) * scale;
 	    var lmax = (blockList[i].min() - origin) * scale;
 
+            var path;
 	    if (connectorType == 'collapsed_gene') {
-		var path = document.createElementNS(NS_SVG, 'path');
+		path = document.createElementNS(NS_SVG, 'path');
 		path.setAttribute('fill', 'none');
 		path.setAttribute('stroke-width', '1');
 		
@@ -588,10 +578,8 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 		    }
 		}
 		path.setAttribute('d', pathops);
-		
-		glyphGroup.appendChild(path);
 	    } else {
-		var path = document.createElementNS(NS_SVG, 'path');
+		path = document.createElementNS(NS_SVG, 'path');
 		path.setAttribute('fill', 'none');
 		path.setAttribute('stroke-width', '1');
 		
@@ -602,35 +590,16 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 		} else {
 		    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
 		}
-		
-		glyphGroup.appendChild(path);
 	    }
+	    glyphGroup.appendChild(path);
 	}
     }
 
-    //
-    // popup code ported from old renderer.
-    // FIXME: is this really the place?
-    //
-    if (groupElement && groupElement.links) {
-	var timeoutID = null;
-	glyphGroup.addEventListener('mousedown', function(ev) {
-	    ev.stopPropagation(); ev.preventDefault();
-	    if (timeoutID) {
-		clearTimeout(timeoutID);
-		var padding = Math.max(2500, 0.3 * (spans.max() - spans.min() + 1));
-//		highlightMin = spans.min()|0;
-//		highlightMax = spans.max()|0;
-		setLocation((spans.min()|0) - padding, (spans.max()|0) + padding);
-//		makeHighlight();
-	    } else {
-		var mx = ev.clientX, my = ev.clientY;
-		timeoutID = setTimeout(function() {
-		    timeoutID = null;
-		    doGenePopup(groupElement, label, notes, links, mx, my);
-		}, 200);
-	    }
-	}, true); 
+    groupElement.segment = features[0].segment;
+    groupElement.min = spans.min();
+    groupElement.max = spans.max();
+    if (notes && !groupElement.notes || groupElement.notes.length==0) {
+        groupElement.notes = notes;
     }
 
     var dg = new DGlyph(glyphGroup, spans.min(), spans.max(), height);
@@ -646,47 +615,6 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	}
     }
     return dg;
-}
-
-function doGenePopup(group, label, fNotes, fLinks, mx, my) {
-    if (!label) {
-	label = group.label || group.id;
-    }
-
-    var notes = '';
-    fNotes = fNotes.concat(group.notes);
-    for (var ni = 0; ni < fNotes.length; ++ni) {
-	notes += '<p>' + fNotes[ni] + '</p>';      // FIXME do we really want to be feeding this into innerHTML???
-    }
-
-    var link = '';
-    fLinks = fLinks.concat(group.links);
-    for (var li = 0; li < fLinks.length; ++li) {
-	var dasLink = fLinks[li];
-	link += ' <a href="' + dasLink.uri + '">(' + dasLink.desc + ')</a>';
-    }
-
-    removeAllPopups();
-    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-    my +=  document.documentElement.scrollTop || document.body.scrollTop;
-    if (mx > (featurePanelWidth-150)) {
-	mx = featurePanelWidth-150;
-    }
-
-	    var popup = $('#popupTest').clone().css({
-	        position: 'absolute', 
-	        top: (my + 30), 
-	        left:  (mx - 30),
-	        width: (notes.length > 0 ? 300 : 200),
-	        backgroundColor: 'white',
-	        borderColor: 'black',
-	        borderWidth: 1,
-	        borderStyle: 'solid',
-	        padding: 2,
-	    }).html('Gene: <b>' + label + '</b>' + notes + link).get(0);
-	    $(popup).hide();
-	    hPopupHolder.appendChild(popup);
-    $(popup).show();
 }
 
 function glyphForFeature(feature, y, style)
