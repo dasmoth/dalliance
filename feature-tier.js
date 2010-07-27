@@ -87,7 +87,7 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 
 
 
-function drawLine(featureGroupElement, features, style, tier)
+function drawLine(featureGroupElement, features, style, tier, y)
 {
     var height = style.HEIGHT || 30;
     var min = style.MIN || 0, max = style.MAX || 100;
@@ -95,19 +95,18 @@ function drawLine(featureGroupElement, features, style, tier)
     var width = style.LINEWIDTH || 1;
     var color = style.COLOR || style.COLOR1 || 'black';
 
-    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var path = document.createElementNS(NS_SVG, 'path');
     path.setAttribute("fill", "none");
     path.setAttribute('stroke', color);
     path.setAttribute("stroke-width", width);
     var pathOps = '';
 
-    var lastPointWasDrawn = false;
     for (var fi = 0; fi < features.length; ++fi) {
 	var f = features[fi];
 
 	var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
         var sc = (f.score * yscale)|0;
-	var py = MIN_PADDING + (height - sc);
+	var py = y + (height - sc);
 	if (fi == 0) {
 	    pathOps = 'M ' + px + ' ' + py;
 	} else {
@@ -116,12 +115,24 @@ function drawLine(featureGroupElement, features, style, tier)
     }
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
+
+    var clipId = 'line_clip_' + (++clipIdSeed);
+    var clip = document.createElementNS(NS_SVG, 'clipPath');
+    clip.setAttribute('id', clipId);
+    var clipRect = document.createElementNS(NS_SVG, 'rect');
+    clipRect.setAttribute('x', -500000);
+    clipRect.setAttribute('y', y);
+    clipRect.setAttribute('width', 1000000);
+    clipRect.setAttribute('height', height);
+    clip.appendChild(clipRect);
+    featureGroupElement.appendChild(clip);
+    path.setAttribute('clip-path', 'url(#' + clipId + ')');
    
     tier.isQuantitative = true;
     tier.min = min;
     tier.max = max;
-    tier.clientMin = height;
-    tier.clientMax = 0;
+    tier.clientMin = y|0 + height;
+    tier.clientMax = y;
 
     return height|0 + MIN_PADDING;
 }
@@ -206,11 +217,11 @@ function drawFeatureTier(tier)
 	var style = styles[uft] || styles['default'];
 	if (!style) continue;
 	if (style.glyph == 'LINEPLOT') {
-	    lh = Math.max(drawLine(featureGroupElement, ufl, style, tier));
+	    lh += Math.max(drawLine(featureGroupElement, ufl, style, tier, lh));
 	    specials = true;
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
-		var g = glyphForFeature(ufl[pgid], 0, style);
+		var g = glyphForFeature(ufl[pgid], 0, style, tier);
 		glyphs.push(g);
 	    }
 	}
@@ -379,6 +390,15 @@ function drawFeatureTier(tier)
 		featureGroupElement.appendChild(g.glyph);
 	    }
 	}
+        
+        if (g.quant) {
+            tier.isQuantitative = true;
+            tier.min = g.quant.min;
+            tier.max = g.quant.max;
+            tier.clientMin = lh + st.height;
+            tier.clientMax = lh;
+        }
+
 	lh += st.height + MIN_PADDING;
 	stBoundaries.push(lh);
     }
@@ -541,7 +561,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	if (!style) {
 	    continue;
 	}
-	var glyph = glyphForFeature(feature, y, style);
+	var glyph = glyphForFeature(feature, y, style, tier);
 	if (glyph && glyph.glyph) {
             glyph.glyph.dalliance_group = groupElement;
 	    glyphGroup.appendChild(glyph.glyph);
@@ -623,7 +643,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     return dg;
 }
 
-function glyphForFeature(feature, y, style)
+function glyphForFeature(feature, y, style, tier)
 {
     var gtype = style.glyph || 'BOX';
     var glyph;
@@ -639,6 +659,7 @@ function glyphForFeature(feature, y, style)
     var maxPos = (max - origin) * scale;
 
     var requiredHeight;
+    var quant;
 
     if (gtype == 'HIDDEN') {
 	glyph = null;
@@ -902,6 +923,11 @@ function glyphForFeature(feature, y, style)
 	    if (gtype == 'HISTOGRAM') {
 		height = (height * relScore)|0;
 		y = y + (requiredHeight - height);
+                
+                quant = {
+                    min: smin,
+                    max: smax
+                };
 	    }
 	}
  
@@ -933,6 +959,9 @@ function glyphForFeature(feature, y, style)
 	dg.bump = true;
     }
     dg.strand = feature.orientation || '0';
+    if (quant) {
+        dg.quant = quant;
+    }
 
     return dg;
 }

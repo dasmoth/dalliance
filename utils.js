@@ -98,7 +98,7 @@ function maybeConcat(a, b) {
 //
 
 
-function makeElement(tag, children, attribs)
+function makeElement(tag, children, attribs, styles)
 {
     var ele = document.createElement(tag);
     if (children) {
@@ -117,6 +117,11 @@ function makeElement(tag, children, attribs)
     if (attribs) {
         for (var l in attribs) {
             ele[l] = attribs[l];
+        }
+    }
+    if (styles) {
+        for (var l in styles) {
+            ele.style[l] = styles[l];
         }
     }
     return ele;
@@ -138,10 +143,37 @@ function makeElementNS(namespace, tag, children, attribs)
         }
     }
     
+    setAttrs(ele, attribs);
+    return ele;
+}
+
+var attr_name_cache = {};
+
+function setAttr(node, key, value)
+{
+    var attr = attr_name_cache[key];
+    if (!attr) {
+        var _attr = '';
+        for (var c = 0; c < key.length; ++c) {
+            var cc = key.substring(c, c+1);
+            var lcc = cc.toLowerCase();
+            if (lcc != cc) {
+                _attr = _attr + '-' + lcc;
+            } else {
+                _attr = _attr + cc;
+            }
+        }
+        attr_name_cache[key] = _attr;
+        attr = _attr;
+    }
+    node.setAttribute(attr, value);
+}
+
+function setAttrs(node, attribs)
+{
     if (attribs) {
         for (var l in attribs) {
-            ele[l] = attribs[l];
+            setAttr(node, l, attribs[l]);
         }
     }
-    return ele;
 }

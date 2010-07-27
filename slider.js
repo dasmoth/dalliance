@@ -28,6 +28,7 @@ function DSlider(width, opts) {
 			         ' L ' + width + ' 35' +
 			         ' L ' + width + ' 15 Z');
     this.svg.appendChild(this.track);
+
     this.handle = document.createElementNS(NS_SVG, 'rect');
     this.handle.setAttribute('x', -4);
     this.handle.setAttribute('y', 10);

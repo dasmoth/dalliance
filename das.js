@@ -251,6 +251,24 @@ DASSource.prototype.features = function(segment, options, callback) {
                         }
                     }
                     
+
+                    if (dasFeature.notes) {
+                        for (var ni = 0; ni < dasFeature.notes.length; ++ni) {
+                            var n = dasFeature.notes[ni];
+                            if (n.indexOf('Genename=') == 0) {
+                                var gg = new DASGroup();
+                                gg.type='gene';
+                                gg.id = n.substring(9);
+                                if (!dasFeature.groups) {
+                                    dasFeature.groups = new Array(gg);
+                                } else {
+                                    dasFeature.groups.push(gg);
+                                }
+                            }
+                        }
+                    }
+                    
+
                     // Also handle DAS/1.6 part/parent?
                     
                     features.push(dasFeature);

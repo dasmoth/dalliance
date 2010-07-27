@@ -58,6 +58,7 @@ var fgGuide;
 var svg;
 var dasTierHolder;
 var zoomSlider;
+var zoomWidget;
 var popupHolder;
 var hPopupHolder;
 
@@ -192,23 +193,58 @@ function arrangeTiers() {
 	    } 
 
             if (tier.isQuantitative) {
-                var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min);
-                minQ.setAttribute('x', 80);
-                minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + 3);
-                minQ.setAttribute('stroke-width', '0');
-                minQ.setAttribute('fill', 'black');
-                minQ.setAttribute('font-size', '8pt');
+                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                    x1: tabMargin,
+                    y1: clh + (tier.clientMin|0),
+                    x2: tabMargin,
+                    y2: clh + (tier.clientMax|0),
+                    strokeWidth: 1
+                }));
+                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                    x1: tabMargin -5 ,
+                    y1: clh + (tier.clientMin|0),
+                    x2: tabMargin,
+                    y2: clh + (tier.clientMin|0),
+                    strokeWidth: 1
+                }));
+                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                    x1: tabMargin -3 ,
+                    y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
+                    x2: tabMargin,
+                    y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
+                    strokeWidth: 1
+                }));
+                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                    x1: tabMargin -5 ,
+                    y1: clh + (tier.clientMax|0),
+                    x2: tabMargin,
+                    y2: clh + (tier.clientMax|0),
+                    strokeWidth: 1
+                }));
+                var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min, {
+                    x: 80,
+                    y: (clh|0) + (tier.clientMin|0),
+                    strokeWidth: 0,
+                    fill: 'black',
+                    fontSize: '8pt'
+                });
                 labelGroup.appendChild(minQ);
-                minQ.setAttribute('x', tabMargin - minQ.getBBox().width - 3);
+                var mqbb = minQ.getBBox();
+                minQ.setAttribute('x', tabMargin - mqbb.width - 7);
+                minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
                     
-                var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max);
-                maxQ.setAttribute('x', 80);
-                maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + 13);
-                maxQ.setAttribute('stroke-width', '0');
-                maxQ.setAttribute('fill', 'black');
-                maxQ.setAttribute('font-size', '8pt');
+                var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max, {
+                    x: 80,
+                    y: (clh|0) + (tier.clientMax|0),
+                    strokeWidth: 0,
+                    fill: 'black',
+                    fontSize: '8pt'
+                });
                 labelGroup.appendChild(maxQ);
                 maxQ.setAttribute('x', tabMargin - maxQ.getBBox().width - 3);
+                mqbb = maxQ.getBBox();
+                maxQ.setAttribute('x', tabMargin - mqbb.width - 7);
+                maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
             }
 
 		/* {
@@ -357,10 +393,11 @@ function makeToggleButton(labelGroup, tier, ypos) {
     bumpToggle.addEventListener('mouseout', function(ev) {
         bumpToggle.setAttribute('stroke', 'gray');
     }, false);
-	bumpToggle.addEventListener('mousedown', function(ev) {
-	    tier.bumped = !tier.bumped; 
-	    dasRequestComplete(tier);   // is there a more abstract way to do this?
-	}, false);
+    bumpToggle.addEventListener('mousedown', function(ev) {
+	tier.bumped = !tier.bumped; 
+	dasRequestComplete(tier);   // is there a more abstract way to do this?
+    }, false);
+    makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
 }
 
 function makeQuantConfigButton(labelGroup, tier, ypos) {
@@ -468,11 +505,12 @@ function updateRegion()
 
 function setViewerStatus(msg)
 {
+/*
     var statusElement = document.getElementById("status");
     while (statusElement.childNodes.length > 0) {
 	    statusElement.removeChild(statusElement.firstChild);
     }
-    statusElement.appendChild(document.createTextNode(msg));
+    statusElement.appendChild(document.createTextNode(msg)); */
 }
 
 function setLoadingStatus()
@@ -754,7 +792,7 @@ function makeHighlight() {
 
 function init() 
 {
-
+    var icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons.svg');
 
     var overrideSources;
     var reset = $.query.get('reset');
@@ -838,18 +876,31 @@ function init()
     svgRoot.setAttribute('id', 'browser_svg');
     var main = svg.group('main', {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
     svg.rect(main, 0, 0, 860, 500, {id: 'background', fill: 'white'});
-    svg.text(main, 40, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
-    svg.text(main, 300, 30, 'Add track...', {id: 'addTrack', strokeWidth: 0});
-    svg.text(main, 400, 30, 'Reset', {id: 'resetButton', strokeWidth: 0});
-    svg.text(main, 500, 30, 'Initializing', {id: 'status', strokeWidth: 0});
-    
+
+     svg.text(main, 40, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
+
+    var addButton = icons.createButton('add-track', main, 30, 30);
+    addButton.setAttribute('transform', 'translate(300, 10)');
+    makeTooltip(addButton, 'Add tracks from the DAS registry');
+    main.appendChild(addButton);
+
+    var linkButton = icons.createButton('link', main, 30, 30);
+    linkButton.setAttribute('transform', 'translate(340, 10)');
+    makeTooltip(linkButton, 'Link to other genome browsers');
+    main.appendChild(linkButton);
+
+    var resetButton = icons.createButton('reset', main, 30, 30);
+    resetButton.setAttribute('transform', 'translate(380, 10)');
+    makeTooltip(resetButton, 'Reset the browser to a default state');
+    main.appendChild(resetButton);
+
     var bin = svg.group(main, 'bin', {stroke: 'gray', strokeWidth: '0.05cm', fill: 'white'});
     svg.path(bin, 'M 10 15 L 12 35 L 25 35 L 27 15 L 10 15');
     svg.line(bin, 11, 18, 26, 25);
     svg.line(bin, 11, 25, 26, 18);
     svg.line(bin, 11, 28, 26, 35);
     svg.line(bin, 11, 35, 26, 28);
-    
+
     var clip = svg.other(main, 'clipPath', {id: 'featureClip'});
       svg.rect(clip, 100, 50, 750, 440, {id: 'featureClipRect'});
     var clip = svg.other(main, 'clipPath', {id: 'labelClip'});
@@ -863,15 +914,24 @@ function init()
     var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
     svg.group(dasLabelHolder, 'dasLabels');
     
-    zoomSlider = new DSlider(250);
-    zoomSlider.onchange = function(zoomVal, released) {
-	zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
-	if (released) {
-	    refresh();
-	    storeStatus();
-	}
-    };
-    main.appendChild(zoomSlider.svg);
+    {
+        var plusIcon = icons.createIcon('magnifier-plus', main);
+        var minusIcon = icons.createIcon('magnifier-minus', main);
+        zoomSlider = new DSlider(250);
+        zoomSlider.onchange = function(zoomVal, released) {
+	    zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
+	    if (released) {
+	        refresh();
+	        storeStatus();
+	    }
+        };
+        plusIcon.setAttribute('transform', 'translate(0,15)');
+        zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
+        minusIcon.setAttribute('transform', 'translate(285,15)');
+        zoomWidget = makeElementNS(NS_SVG, 'g', [plusIcon, zoomSlider.svg, minusIcon]);
+        makeTooltip(zoomWidget, 'Drag to zoom');
+        main.appendChild(zoomWidget);
+    }
     
     popupHolder = svg.group(main);    
     hPopupHolder = $('#hPopups').get(0);
@@ -892,14 +952,11 @@ function init()
 	main.appendChild(fgGuide);
     }
     
-    // set up the navigator
-    document.getElementById("region").addEventListener('mousedown', function(ev) {
+    // set up the linker
+
+    linkButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups(); 
-
-        if (entryPoints == null) {
-            alert("entry_points aren't currently available for this genome");
-        }
              
 	var linkouts = '';
 	for (l in browserLinks) {
@@ -916,6 +973,55 @@ function init()
 	    }) + '" target="_new">' + l + '</a></li>';
 	}
 
+        var mx =  ev.clientX, my = ev.clientY;
+	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+	my +=  document.documentElement.scrollTop || document.body.scrollTop;
+        
+        var popup = makeElement('div', makeElement('p', 'Link to this region in...'));
+        var winWidth = window.innerWidth;
+        popup.style.position = 'absolute';
+        popup.style.top = '' + (my + 30) + 'px';
+        popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
+        popup.style.width = '200px';
+        popup.style.backgroundColor = 'white';
+        popup.style.borderWidth = '1px';
+        popup.style.borderColor = 'black'
+        popup.style.borderStyle = 'solid';
+        popup.style.padding = '2px';
+        
+        var linkList = makeElement('ul');
+        for (l in browserLinks) {
+            linkList.appendChild(makeElement('li', makeElement('a', l, {
+                href: browserLinks[l].replace(new RegExp('\\${([a-z]+)}', 'g'), function(s, p1) {
+		    if (p1 == 'chr') {
+		        return chr;
+		    } else if (p1 == 'start') {
+		        return viewStart|0;
+		    } else if (p1 == 'end') {
+		        return viewEnd|0;
+		    } else {
+		        return '';
+		    }
+	        }),
+                target: '_new'
+            })));
+        }
+        popup.appendChild(linkList);
+
+	hPopupHolder.appendChild(popup);
+    }, false);
+
+    // set up the navigator
+
+
+    document.getElementById("region").addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+	removeAllPopups(); 
+
+        if (entryPoints == null) {
+            alert("entry_points aren't currently available for this genome");
+        }
+
             	var mx =  ev.clientX, my = ev.clientY;
 	            mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
 	            my +=  document.documentElement.scrollTop || document.body.scrollTop;
@@ -929,8 +1035,7 @@ function init()
 	                borderWidth: 1,
 	                borderStyle: 'solid',
 	                padding: 2
-	            }).html((linkouts.length > 0 ? ('<p>Link to this region in...</p><ul>' + linkouts + '</ul>') : '') + 
-			    '<p>Jump to...</p>' +
+	            }).html('<p>Jump to...</p>' +
 			    '<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
 	                    'Start:<input name="min" value="' + (viewStart|0) + '"></input><br>' + 
 	                    'End:<input name="max" value="' + (viewEnd|0) + '"></input>' + 
@@ -1027,7 +1132,7 @@ function init()
     }, false);
 
   
-    document.getElementById('addTrack').addEventListener('mousedown', function(ev) {
+    addButton.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups();
 
@@ -1165,7 +1270,7 @@ function init()
     }, false);
 
     // set up the resetter
-    document.getElementById('resetButton').addEventListener('mousedown', function(ev) {
+    resetButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 	window.location.assign('?reset=true');
     }, false);
@@ -1287,7 +1392,7 @@ function resizeViewer() {
     document.getElementById("featureClipRect").setAttribute('width', width - 140);
 
 
-    zoomSlider.svg.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 40) + ', 0)');
+    zoomWidget.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 100) + ', 0)');
 // FIXME: should move the zoomer.
 //    document.getElementById('sliderTrack').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
 //    document.getElementById('sliderHandle').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
@@ -1383,7 +1488,6 @@ function spaceCheck()
     var minExtraW = (width * minExtra) | 0;
     var maxExtraW = (width * maxExtra) | 0;
     if (knownStart > Math.max(1, viewStart - minExtraW) || knownEnd < Math.min(viewEnd + minExtraW, (currentSeqMax > 0 ? currentSeqMax : 1000000000))) {
-//	alert('triggering refresh, knownStart=' + knownStart + ', knownEnd=' + knownEnd);
 	refresh();
     }
 }

@@ -23,7 +23,6 @@ Publishable prototype:
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
  - Better label placement.
- - Tidy up top bar.
  - Restore at least minimal yZoom support for quant. tiers.
 
 After the paper
