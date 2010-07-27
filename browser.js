@@ -941,6 +941,12 @@ function init()
     karyo = new Karyoscape(new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'));
     // now updated via setLocation.
     karyo.svg.setAttribute('transform', 'translate(500, 15)');
+    karyo.onchange = function(pos) {
+        var width = viewEnd - viewStart + 1;
+        var newStart = ((pos * currentSeqMax) - (width/2))|0;
+        var newEnd = newStart + width - 1;
+        setLocation(newStart, newEnd);
+    };
     main.appendChild(karyo.svg);
     
     popupHolder = svg.group(main);    

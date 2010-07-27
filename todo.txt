@@ -71,9 +71,6 @@ Nice to have
      + Try to respect existing feature placements when scrolling.
  - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
        think anyone else is doing this, but I'd use it!)
- - Graphical navigation?
-     + Pop-over with chromosome ideograms?
-     + bj-e features?type=karyotype works nicely.
  - Gene search:
      + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID

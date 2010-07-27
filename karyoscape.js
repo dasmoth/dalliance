@@ -110,12 +110,41 @@ Karyoscape.prototype.redraw = function() {
     });
     this.svg.appendChild(this.thumb);
     this.setThumb();
+
+    var thisKaryo = this;
+    var sliderDeltaX;
+
+    var moveHandler = function(ev) {
+	ev.stopPropagation(); ev.preventDefault();
+	var sliderX = Math.max(-4, Math.min(ev.clientX + sliderDeltaX, thisKaryo.width - 4));
+	thisKaryo.thumb.setAttribute('x', sliderX);
+//	if (thisSlider.onchange) {
+//	    thisSlider.onchange(value, false);
+//	}
+    }
+    var upHandler = function(ev) {
+    	ev.stopPropagation(); ev.preventDefault();
+	if (thisKaryo.onchange) {
+	    thisKaryo.onchange((1.0 * ((thisKaryo.thumb.getAttribute('x')|0) + 4)) / thisKaryo.width, true);
+	}
+	document.removeEventListener('mousemove', moveHandler, true);
+	document.removeEventListener('mouseup', upHandler, true);
+    }
+    
+
+    this.thumb.addEventListener('mousedown', function(ev) {
+	ev.stopPropagation(); ev.preventDefault();
+	sliderDeltaX = thisKaryo.thumb.getAttribute('x') - ev.clientX;
+	document.addEventListener('mousemove', moveHandler, true);
+	document.addEventListener('mouseup', upHandler, true);
+    }, false);
+    
 }
 
 Karyoscape.prototype.setThumb = function() {
     var pos = ((this.start|0) + (this.end|0)) / 2
     var gpos = ((1.0 * pos)/this.chrLen) * this.width;
-    this.thumb.setAttribute('x', gpos);
+    this.thumb.setAttribute('x', gpos - 4);
 }
 	    
 
