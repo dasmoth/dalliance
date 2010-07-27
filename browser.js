@@ -61,6 +61,7 @@ var zoomSlider;
 var zoomWidget;
 var popupHolder;
 var hPopupHolder;
+var karyo;
 
 // Visual config.
 
@@ -736,6 +737,10 @@ function touchCancelHandler(ev) {
 
 function removeChildren(node)
 {
+    if (!node || !node.childNodes) {
+        return;
+    }
+
     while (node.childNodes.length > 0) {
         node.removeChild(node.firstChild);
     }
@@ -877,20 +882,20 @@ function init()
     var main = svg.group('main', {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
     svg.rect(main, 0, 0, 860, 500, {id: 'background', fill: 'white'});
 
-     svg.text(main, 40, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
+     svg.text(main, 220, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
 
     var addButton = icons.createButton('add-track', main, 30, 30);
-    addButton.setAttribute('transform', 'translate(300, 10)');
+    addButton.setAttribute('transform', 'translate(100, 10)');
     makeTooltip(addButton, 'Add tracks from the DAS registry');
     main.appendChild(addButton);
 
     var linkButton = icons.createButton('link', main, 30, 30);
-    linkButton.setAttribute('transform', 'translate(340, 10)');
+    linkButton.setAttribute('transform', 'translate(140, 10)');
     makeTooltip(linkButton, 'Link to other genome browsers');
     main.appendChild(linkButton);
 
     var resetButton = icons.createButton('reset', main, 30, 30);
-    resetButton.setAttribute('transform', 'translate(380, 10)');
+    resetButton.setAttribute('transform', 'translate(180, 10)');
     makeTooltip(resetButton, 'Reset the browser to a default state');
     main.appendChild(resetButton);
 
@@ -932,6 +937,11 @@ function init()
         makeTooltip(zoomWidget, 'Drag to zoom');
         main.appendChild(zoomWidget);
     }
+
+    karyo = new Karyoscape(new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'));
+    // now updated via setLocation.
+    karyo.svg.setAttribute('transform', 'translate(500, 15)');
+    main.appendChild(karyo.svg);
     
     popupHolder = svg.group(main);    
     hPopupHolder = $('#hPopups').get(0);
@@ -1508,7 +1518,7 @@ function move(pos)
     
     xfrmTiers((100 - (1.0 * (viewStart - origin)) * scale), 1);
     updateRegion();
-    
+    karyo.update(chr, viewStart, viewEnd);
     spaceCheck();
 }
 
@@ -1594,6 +1604,7 @@ function setLocation(newMin, newMax, newChr)
     zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
 
     updateRegion();
+    karyo.update(chr, viewStart, viewEnd);
     refresh();
     xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
     storeStatus();
