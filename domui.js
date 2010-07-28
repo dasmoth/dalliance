@@ -62,6 +62,10 @@ function IconSet(uri)
 IconSet.prototype.createIcon = function(name, parent)
 {
     var master = this.icons.getElementById(name);
+    if (!master) {
+        alert("couldn't find " + name);
+        return;
+    }
     var copy = document.importNode(master, true);
     parent.appendChild(copy);
     var bbox = copy.getBBox();

@@ -22,7 +22,6 @@ Publishable prototype:
  - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
- - Better label placement.
  - Restore at least minimal yZoom support for quant. tiers.
 
 After the paper
@@ -45,13 +44,13 @@ After the paper
        How much state to share? 
  - Other DAS servers? (probably mostly server work):
      + Ensembl: requires CORS, in contact...
+     + UCSC: requires CORS, in progress.
      + MyDAS: requires CORS.  Is this used for anything except Uniprot?
  - Publication-quality SVG export.
  - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
  - DAS on geneID coords.
  - Auto-detection of credentialed servers?
- - Indicator of where we are on the chromosome
  - Undo
 
 Nice to have
@@ -94,6 +93,8 @@ Nice to have
      + How are these defined?  DASSTYLE is hopeless.  Extended <sources> document?
   - Dedicated configuration/persistance language?
   - Distance between a pair of features.
+  - Jiggle labels so they're always visible
+     + For genes, try to keep them attached to exons.
 
 Blue sky
 --------

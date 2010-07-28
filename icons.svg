@@ -51,4 +51,13 @@
       <path d='M 15 15 L 25 15 L 25 12 L 30 17 L 25 22 L 25 19 L 15 19 Z' fill='red' stroke='none'/>
     </g>
   </g>
+  <g transform='translate(30,60)'>
+    <g id='bin' stroke='gray' stroke-width='0.05cm' fill='white'>
+      <path d='M 10 15 L 12 35 L 25 35 L 27 15 L 10 15' />
+      <line x1='11' y1='18' x2='26' y2='25' />
+      <line x1='11' y1='25' x2='26' y2='18' />
+      <line x1='11' y1='28' x2='26' y2='35' />
+      <line x1='11' y1='35' x2='26' y2='28' />
+    </g>
+  </g>
 </svg>

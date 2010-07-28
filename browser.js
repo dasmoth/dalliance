@@ -392,12 +392,13 @@ function setupTierDrag(element, ti) {
 
 function makeToggleButton(labelGroup, tier, ypos) {
 
-    var bumpToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
-    svg.rect(bumpToggle, 85, ypos + 8, 8, 8);
-    svg.line(bumpToggle, 85, ypos + 12, 93, ypos + 12);
+    var bumpToggle = makeElementNS(NS_SVG, 'g', null, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: 85, y: ypos + 8, width: 8, height: 8}));
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: 85, y1: ypos + 12, x2: 93, y2: ypos+12}));
     if (!tier.bumped) {
-        svg.line(bumpToggle, 89, ypos + 8, 89, ypos + 16);
+        bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: 89, y1: ypos+8, x2: 89, y2: ypos+16}));
     }
+    labelGroup.appendChild(bumpToggle);
     bumpToggle.addEventListener('mouseover', function(ev) {bumpToggle.setAttribute('stroke', 'red');}, false);
     bumpToggle.addEventListener('mouseout', function(ev) {
         bumpToggle.setAttribute('stroke', 'gray');
@@ -713,7 +714,7 @@ function makeHighlight() {
 
 function init() 
 {
-    var icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons.svg');
+    var icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg');
 
     var overrideSources;
     var reset = false;
@@ -803,17 +804,27 @@ function init()
     // Set up the UI (factor out?)
     //
            
+    var svgHolder = document.getElementById('svgHolder');
+    var svgRoot = makeElementNS(NS_SVG, 'svg', null, {
+        version: '1.1',
+        width: '860px',
+        height: '500px',
+        id: 'browser_svg'
+    });
+    svgHolder.appendChild(svgRoot);
 
+    var main = makeElementNS(NS_SVG, 'g',
+                             makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'}),
+                             {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
+    svgRoot.appendChild(main);
 
-    svg = $('#svgHolder').svg().svg('get');
-    var svgRoot = svg.root();
-    svgRoot.setAttribute('width', '860px');
-    svgRoot.setAttribute('height', '500px');
-    svgRoot.setAttribute('id', 'browser_svg');
-    var main = svg.group('main', {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
-    svg.rect(main, 0, 0, 860, 500, {id: 'background', fill: 'white'});
-
-    var regionLabel = svg.text(main, 240, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
+    var regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
+        x: 240,
+        y: 30,
+        id: 'region',   // FIXME id
+        strokeWidth: 0
+    });
+    main.appendChild(regionLabel);
     makeTooltip(regionLabel, 'Click to jump to a new location or gene');
 
     var addButton = icons.createButton('add-track', main, 30, 30);
@@ -831,25 +842,36 @@ function init()
     makeTooltip(resetButton, 'Reset the browser to a default state');
     main.appendChild(resetButton);
 
-    var bin = svg.group(main, 'bin', {stroke: 'gray', strokeWidth: '0.05cm', fill: 'white'});
-    svg.path(bin, 'M 10 15 L 12 35 L 25 35 L 27 15 L 10 15');
-    svg.line(bin, 11, 18, 26, 25);
-    svg.line(bin, 11, 25, 26, 18);
-    svg.line(bin, 11, 28, 26, 35);
-    svg.line(bin, 11, 35, 26, 28);
-
-    var clip = svg.other(main, 'clipPath', {id: 'featureClip'});
-      svg.rect(clip, 100, 50, 750, 440, {id: 'featureClipRect'});
-    var clip = svg.other(main, 'clipPath', {id: 'labelClip'});
-      svg.rect(clip, 10, 50, 90, 440, {id: 'labelClipRect'});
-        
-    dasTierHolder = svg.group(main, {clipPath: 'url(#featureClip)'}); 
-    svg.group(dasTierHolder, 'dasTiers');
+    var bin = icons.createIcon('bin', main);
+    bin.setAttribute('transform', 'translate(10, 18)');
+    main.appendChild(bin);
+    
+    var featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
+        x: 100,      // FIXME tabMargin
+        y: 50,
+        width: 750,
+        height: 440,
+        id: 'featureClipRect'
+    });
+    main.appendChild(makeElementNS(NS_SVG, 'clipPath', featureClipRect, {id: 'featureClip'}));
+    var labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
+        x: 10,      // FIXME tabMargin
+        y: 50,
+        width: 90,
+        height: 440,
+        id: 'labelClipRect'
+    });
+    main.appendChild(makeElementNS(NS_SVG, 'clipPath', labelClipRect, {id: 'labelClip'}));
+      
+    dasTierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)'});
+    main.appendChild(dasTierHolder);
+    var dasTiers = makeElementNS(NS_SVG, 'g', null, {id: 'dasTiers'});
+    dasTierHolder.appendChild(dasTiers);
 
     makeHighlight();
-
-    var dasLabelHolder = svg.group(main, {clipPath: 'url(#labelClip)'}); 
-    svg.group(dasLabelHolder, 'dasLabels');
+    
+    var dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip)'}); 
+    main.appendChild(dasLabelHolder);
     
     {
         var plusIcon = icons.createIcon('magnifier-plus', main);
@@ -881,8 +903,11 @@ function init()
     };
     main.appendChild(karyo.svg);
     
-    popupHolder = svg.group(main);    
-    hPopupHolder = document.getElementById('hPopups');
+    popupHolder = makeElementNS(NS_SVG, 'g');
+    main.appendChild(popupHolder);
+    // hPopupHolder = document.getElementById('hPopups');
+    hPopupHolder = makeElement('div');
+    svgHolder.appendChild(hPopupHolder);
     
     var bhtmlRoot = document.getElementById("browser_html");
     removeChildren(bhtmlRoot);
@@ -1309,11 +1334,11 @@ function init()
     // Set up interactivity handlers
     //
     
-    document.getElementById("main").addEventListener("mousedown", mouseDownHandler, false);
-    document.getElementById('main').addEventListener('touchstart', touchStartHandler, false);
-    document.getElementById('main').addEventListener('touchmove', touchMoveHandler, false);
-    document.getElementById('main').addEventListener('touchend', touchEndHandler, false);
-    document.getElementById('main').addEventListener('touchcancel', touchCancelHandler, false);
+    main.addEventListener('mousedown', mouseDownHandler, false);
+    main.addEventListener('touchstart', touchStartHandler, false);
+    main.addEventListener('touchmove', touchMoveHandler, false);
+    main.addEventListener('touchend', touchEndHandler, false);
+    main.addEventListener('touchcancel', touchCancelHandler, false);
     document.addEventListener('mousewheel', function(ev) {
 	if (!ev.wheelDeltaX) {
 	    return;
