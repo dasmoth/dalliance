@@ -289,7 +289,7 @@ function setupTierDrag(element, ti) {
     var targetTier;
     
     var moveHandler = function(ev) {
-        var cly = ((ev.clientY - dragOriginY) | 0) - 50;
+        var cly = ((ev.clientY + window.scrollY - dragOriginY) | 0) - 50;
         var destTier = 0;
         while (destTier < tiers.length && cly > tiers[destTier].layoutHeight) {
             cly -= tiers[destTier].layoutHeight;
@@ -315,11 +315,11 @@ function setupTierDrag(element, ti) {
     }
     
     var upHandler = function(ev) {
-        svg.root().removeEventListener('mousemove', moveHandler, true);
-        svg.root().removeEventListener('mouseup', upHandler, true);
+        window.removeEventListener('mousemove', moveHandler, true);
+        window.removeEventListener('mouseup', upHandler, true);
         bin.removeEventListener('mouseover', binEnterHandler, true);
         bin.removeEventListener('mouseout', binLeaveHandler, true);
-        svg.remove(dragFeedbackRect);
+        popupHolder.removeChild(dragFeedbackRect);
         bin.setAttribute('stroke', 'gray');
         
         if (binned) {
@@ -370,15 +370,23 @@ function setupTierDrag(element, ti) {
     }
     
     element.addEventListener('mousedown', function(ev) {
-            ev.stopPropagation(); ev.preventDefault();
-            var origin = $('#svgHolder').offset();
-            dragOriginX = origin.left; dragOriginY = origin.top;
-            svg.root().addEventListener('mousemove', moveHandler, true);
-            svg.root().addEventListener('mouseup', upHandler, true);
-            bin.addEventListener('mouseover', binEnterHandler, true);
-            bin.addEventListener('mouseout', binLeaveHandler, true);
-            targetTier = ti;
-            dragFeedbackRect = svg.rect(popupHolder, 100, offsetForTier(targetTier) - 2, featurePanelWidth, 4, {fill: 'red', stroke: 'none'});
+        ev.stopPropagation(); ev.preventDefault();
+        var origin = document.getElementById('svgHolder').getBoundingClientRect();
+        dragOriginX = origin.left + window.scrollX; dragOriginY = origin.top + window.scrollY;
+        window.addEventListener('mousemove', moveHandler, true);
+        window.addEventListener('mouseup', upHandler, true);
+        bin.addEventListener('mouseover', binEnterHandler, true);
+        bin.addEventListener('mouseout', binLeaveHandler, true);
+        targetTier = ti;
+        dragFeedbackRect = makeElementNS(NS_SVG, 'rect', null, {
+            x: 100,    // FIXME tabMargin
+            y: offsetForTier(targetTier) - 2,
+            width: featurePanelWidth,
+            height: 4,
+            fill: 'red',
+            stroke: 'none'
+        });
+        popupHolder.appendChild(dragFeedbackRect);
     },true);
 }
 
@@ -399,98 +407,6 @@ function makeToggleButton(labelGroup, tier, ypos) {
 	dasRequestComplete(tier);   // is there a more abstract way to do this?
     }, false);
     makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
-}
-
-function makeQuantConfigButton(labelGroup, tier, ypos) {
- 
-/*
-
-   var quantToggle = svg.group(labelGroup, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
-    svg.circle(quantToggle, 88, ypos + 16, 4, {strokeWidth: 2});
-    svg.line(quantToggle, 85.1, ypos + 18.9, 78, ypos + 25, {strokeWidth: 3});
-    quantToggle.addEventListener('mouseover', function(ev) {quantToggle.setAttribute('stroke', 'red');}, false);
-    quantToggle.addEventListener('mouseout', function(ev) {
-        quantToggle.setAttribute('stroke', 'gray');
-    }, false);
-    quantToggle.addEventListener('mousedown', function(ev) {
-            ev.stopPropagation(); ev.preventDefault();
-            	var mx =  ev.clientX, my = ev.clientY;
-	            mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	            my +=  document.documentElement.scrollTop || document.body.scrollTop;
-	            var popup = $('#popupTest').clone().css({
-	                position: 'absolute', 
-	                top: (my - 10), 
-	                left:  (mx - 10),
-	                width: 80,
-	                height: 200,
-	                backgroundColor: 'white',
-	                borderColor: 'black',
-	                borderWidth: 1,
-	                borderStyle: 'solid',
-	                padding: 2,
-	            }).html('Scale <span id="scaler_readout">' + tier.source.renderer.scale + '</span><div id="scaler_popup"></div>').get(0);
-	            
-	            // $(popup).hide();
-	            hPopupHolder.appendChild(popup);
-
-	            var popSvg = $(popup).svg().svg('get');
-                var popSvgRoot = popSvg.root();
-                popSvgRoot.setAttribute('width', '200px');
-                popSvgRoot.setAttribute('height', '200px');
-                var scalerGroup = popSvg.group('scaler_popup');
-
-                popSvg.path(scalerGroup, "M 30 50 L 50 50 L 30 150", {stroke: 'none', fill: 'grey'});
-                popSvg.rect(scalerGroup, 25, 100, 30, 8, {id: 'scalerHandle', stroke: 'none', fill: 'red', fillOpacity: 0.5});
-                var scalerHandle = document.getElementById('scalerHandle');
-                
-                var scalerDeltaY = -1;
-                
-                var scalerMouseUpHandler = function (ev) {
-                    ev.stopPropagation(); ev.preventDefault();
-                    document.removeEventListener("mousemove", scalerMouseMoveHandler, true);
-                    document.removeEventListener("mouseup", scalerMouseUpHandler, true);
-                }
-                
-                var scalerMouseMoveHandler = function(ev)
-                {
-                    ev.stopPropagation(); ev.preventDefault();
-                    var sliderY = Math.max(46, Math.min(ev.clientY + scalerDeltaY, 146));
-                    scalerHandle.setAttribute("y", sliderY);
-                    
-                    var scale = (100 - (sliderY - 46)) / 100;
-                    
-                    $('#scaler_readout').html('' + scale);
-                    
-                    tier.source.renderer.scale = scale;
-                    dasRequestComplete(tier);
-                }
-
-                var scalerMouseDownHandler = function(ev) {
-                    ev.stopPropagation(); ev.preventDefault();
-                    scalerDeltaY = scalerHandle.getAttribute("y") - ev.clientY;
-                    document.addEventListener("mousemove", scalerMouseMoveHandler, true);
-                    document.addEventListener("mouseup", scalerMouseUpHandler, true);
-                }
-                scalerHandle.addEventListener('mousedown', scalerMouseDownHandler, false);
-
-                
-	            $(popup).fadeIn(500);
-	            
-	            
-	            popup.addEventListener('mouseout', function(ev2) {
-	                    var rel = ev2.relatedTarget;
-	                    while (rel) {
-	                        if (rel == popup) {
-	                            return;
-	                        }
-	                        rel = rel.parentNode;
-	                    }
-	                    removeAllPopups();
-	            }, false); 
-    }, false);
-
-*/
-
 }
 
 function updateRegion()
@@ -800,12 +716,28 @@ function init()
     var icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons.svg');
 
     var overrideSources;
-    var reset = $.query.get('reset');
+    var reset = false;
     var qChr = null, qMin = null, qMax = null;
     
     //
     // Configuration processing
     //
+
+    var queryDict = {};
+    if (location.search) {
+        var query = location.search.substring(1);
+        var queries = query.split(new RegExp('[&;]'));
+        for (var qi = 0; qi < queries.length; ++qi) {
+            var kv = queries[qi].split('=');
+            var k = decodeURIComponent(kv[0]), v=null;
+            if (kv.length > 1) {
+                v = decodeURIComponent(kv[1]);
+            }
+            queryDict[k] = v;
+        }
+        
+        reset = queryDict.reset;
+    }
 
     if (cookieKey && localStorage['dalliance.' + cookieKey + '.view-chr'] && !reset) {
         qChr = localStorage['dalliance.' + cookieKey + '.view-chr'];
@@ -823,14 +755,14 @@ function init()
     var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
 
     var queryRegion = false;
-    if ($.query.get('chr')) {
-	var qChr = $.query.get('chr');
-	var qMin = $.query.get('min');
-	var qMax = $.query.get('max');
+    if (queryDict.chr) {
+	var qChr = queryDict.chr;
+	var qMin = queryDict.min;
+	var qMax = queryDict.max;
 	queryRegion = true;
     }
 
-    guidelineConfig = $.query.get('guidelines') || 'foreground';
+    guidelineConfig = queryDict.guidelines || 'foreground';
     if (guidelineConfig == 'true') {
 	guidelineStyle = 'background';
     } else if (STRICT_NUM_REGEXP.test(guidelineConfig)) {
@@ -841,9 +773,9 @@ function init()
     }
 
     if (!queryRegion) {
-	regstr = $.query.get('r');
-	if (regstr == '') {
-	    regstr = $.query.get('segment');
+	regstr = queryDict.r;
+	if (!regstr) {
+	    regstr = queryDict.segment || '';
 	}
 	var match = regstr.match(region_exp);
 	if ((regstr != '') && match) {
@@ -856,10 +788,9 @@ function init()
 	
     if (qMax < qMin) {
 	qMax = qMin + 10000;
-	// $.jGrowl("WARNING: max < min coord! Will present 1KB downstream from min coord.", { life: 5000 });
     }
 
-    var histr = $.query.get('h');
+    var histr = queryDict.h || '';
     var match = histr.match(region_exp);
     if (match) {
 	highlightMin = match[2]|0;
@@ -882,7 +813,8 @@ function init()
     var main = svg.group('main', {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
     svg.rect(main, 0, 0, 860, 500, {id: 'background', fill: 'white'});
 
-     svg.text(main, 220, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
+    var regionLabel = svg.text(main, 240, 30, 'ChrXYZZY', {id: 'region', strokeWidth: 0});
+    makeTooltip(regionLabel, 'Click to jump to a new location or gene');
 
     var addButton = icons.createButton('add-track', main, 30, 30);
     addButton.setAttribute('transform', 'translate(100, 10)');
@@ -950,7 +882,7 @@ function init()
     main.appendChild(karyo.svg);
     
     popupHolder = svg.group(main);    
-    hPopupHolder = $('#hPopups').get(0);
+    hPopupHolder = document.getElementById('hPopups');
     
     var bhtmlRoot = document.getElementById("browser_html");
     removeChildren(bhtmlRoot);
@@ -1037,104 +969,77 @@ function init()
         if (entryPoints == null) {
             alert("entry_points aren't currently available for this genome");
         }
-
-            	var mx =  ev.clientX, my = ev.clientY;
-	            mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	            my +=  document.documentElement.scrollTop || document.body.scrollTop;
-	            var popup = $('#popupTest').clone().css({
-	                position: 'absolute', 
-	                top: (my - 10), 
-	                left:  (mx - 10),
-	                width: 200,
-	                backgroundColor: 'white',
-	                borderColor: 'black',
-	                borderWidth: 1,
-	                borderStyle: 'solid',
-	                padding: 2
-	            }).html('<p>Jump to...</p>' +
-			    '<form id="navform">Chr:<select id="chrMenu" name="seq" value="' + chr + '"><option value="1">1</option><option value="2">2</option></select><br>' +
-	                    'Start:<input name="min" value="' + (viewStart|0) + '"></input><br>' + 
-	                    'End:<input name="max" value="' + (viewEnd|0) + '"></input>' + 
-	                    '<input type="submit" value="Go"></form>' +
-			    (searchEndpoint ? '<p>Or search for...</p><form id="gene_nav">Gene:<input name="gene" value=""></input><br><input type="submit" value="Go"></form>' : '')
-	            ).get(0);
-	            $(popup).hide();
-	            hPopupHolder.appendChild(popup);
-	            $(popup).fadeIn(500);
-
-                var epMenuItems = new Array();
-                for (var epi = 0; epi < entryPoints.length; ++epi) {
-                    epMenuItems.push(new EPMenuItem(entryPoints[epi]));
+        var epMenuItems = [], epsByChrName = {};
+        for (var epi = 0; epi < entryPoints.length; ++epi) {
+            epMenuItems.push(new EPMenuItem(entryPoints[epi]));
+        }
+        epMenuItems = epMenuItems.sort(function(epmi0, epmi1) {
+            var n0 = epmi0.nums;
+            var n1 = epmi1.nums;
+            var idx = 0;
+            while (true) {
+                if (idx >= n0.length) {
+                    return -1;
+                } else if (idx >= n1.length) {
+                    return 1;
+                } else {
+                    var dif = n0[idx] - n1[idx];
+                    if (dif != 0) {
+                        return dif;
+                    } 
                 }
-                epMenuItems = epMenuItems.sort(function(epmi0, epmi1) {
-                        var n0 = epmi0.nums;
-                        var n1 = epmi1.nums;
-                        var idx = 0;
-                        while (true) {
-                            if (idx >= n0.length) {
-                                return -1;
-                            } else if (idx >= n1.length) {
-                                return 1;
-                            } else {
-                                var dif = n0[idx] - n1[idx];
-                                if (dif != 0) {
-                                    return dif;
-                                } 
-                            }
-                            ++idx;
-                        }
-                });
+                ++idx;
+            }
+        });
 
-	var epsByChrName = {};
-	        var epMenuOptions = '';
-                for (var epi = 0; epi < entryPoints.length; ++epi) {
-                    var ep = epMenuItems[epi].entryPoint;
-		    epsByChrName[ep.name] = ep;
-                    epMenuOptions += '<option value="' + ep.name + '">' + ep.toString() +'</option>';
-                }
-                $('#chrMenu').html(epMenuOptions).attr({value: chr});
-	
-	$('#gene_nav').submit(function(ev) {
-	    ev.stopPropagation(); ev.preventDefault();
-	    var g = $('input:eq(3)').val(); // ughugh.
-	    removeAllPopups();
+        var mx =  ev.clientX, my = ev.clientY;
+	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+	my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
-	    if (!g || g.length == 0) {
-		return false;
-	    }
+        var popup = makeElement('div');
+        var winWidth = window.innerWidth;
+        popup.style.position = 'absolute';
+        popup.style.top = '' + (my + 30) + 'px';
+        popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
+        popup.style.width = '200px';
+        popup.style.backgroundColor = 'white';
+        popup.style.borderWidth = '1px';
+        popup.style.borderColor = 'black'
+        popup.style.borderStyle = 'solid';
+        popup.style.padding = '2px';
 
-	    searchEndpoint.features(null, {group: g, type: 'transcript' /* HAXX */}, function(found) {
-		if (!found || found.length == 0) {
-		    alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
-		} else {
-		    var min = 500000000, max = -100000000;
-		    var nchr = null;
-		    for (var fi = 0; fi < found.length; ++fi) {
-			var f = found[fi];
-			if (nchr == null) {
-			    nchr = f.segment;
-			}
-			min = Math.min(min, f.min);
-			max = Math.max(max, f.max);
-		    }
-		    highlightMin = min;
-		    highlightMax = max;
-		    makeHighlight();
+        popup.appendChild(makeElement('p'), 'Jump to...');
+        var form = makeElement('form');
+        form.appendChild(document.createTextNode('Chr:'));
+        var selectChr = makeElement('select', null);
+        for (var epi = 0; epi < entryPoints.length; ++epi) {
+            var ep = epMenuItems[epi].entryPoint;
+	    epsByChrName[ep.name] = ep;
+            selectChr.appendChild(makeElement('option', ep.toString(), {value: ep.name}));
+        }
+        selectChr.value = chr;
+        form.appendChild(selectChr);
+        form.appendChild(makeElement('br'));
+        form.appendChild(document.createTextNode('Start:'));
+        var minPosInput = makeElement('input', null, {value: (viewStart|0)});
+        form.appendChild(minPosInput);
+        form.appendChild(makeElement('br'));
+        form.appendChild(document.createTextNode('End:'));
+        var maxPosInput = makeElement('input', null, {value: (viewEnd|0)});
+        form.appendChild(maxPosInput);
+        form.appendChild(makeElement('br'));
+        form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
+        popup.appendChild(form);
 
-		    var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-		    setLocation(min - padding, max + padding, nchr);
-		}
-	    });
+        hPopupHolder.appendChild(popup);
 
-	    return false;
-	});
 
-	$('#navform').submit(function(ev) {
+	form.addEventListener('submit', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
 
-	    var nchr = $('select:eq(0)').val();    // ugh!  But couldn't get selection on input names working.
-	    var nmin = stringToInt($('input:eq(0)').val());
-	    var nmax = stringToInt($('input:eq(1)').val());    
+	    var nchr = selectChr.value;    // ugh!  But couldn't get selection on input names working.
+	    var nmin = stringToInt(minPosInput.value);
+	    var nmax = stringToInt(maxPosInput.value);    
 	    removeAllPopups();
 
 	    if (nchr && nmin && nmax) {
@@ -1144,7 +1049,55 @@ function init()
 	    }
 
 	    return false;
-	});
+	}, false);
+
+        if (searchEndpoint) {
+            var geneForm = makeElement('form');
+            geneForm.appendChild(makeElement('p', 'Or search for...'))
+            geneForm.appendChild(document.createTextNode('Gene:'));
+            var geneInput = makeElement('input', null, {value: ''});
+            geneForm.appendChild(geneInput);
+            geneForm.appendChild(makeElement('br'));
+            geneForm.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
+            popup.appendChild(geneForm);
+        
+	
+	    geneForm.addEventListener('submit', function(ev) {
+	        ev.stopPropagation(); ev.preventDefault();
+	        var g = geneInput.value;
+	        removeAllPopups();
+
+	        if (!g || g.length == 0) {
+		    return false;
+	        }
+
+	        searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
+		    if (!found || found.length == 0) {
+		        alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+		    } else {
+		        var min = 500000000, max = -100000000;
+		        var nchr = null;
+		        for (var fi = 0; fi < found.length; ++fi) {
+			    var f = found[fi];
+			    if (nchr == null) {
+			        nchr = f.segment;
+			    }
+			    min = Math.min(min, f.min);
+			    max = Math.max(max, f.max);
+		        }
+		        highlightMin = min;
+		        highlightMax = max;
+		        makeHighlight();
+
+		        var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
+		        setLocation(min - padding, max + padding, nchr);
+		    }
+	        });
+                
+	        return false;
+	    });
+        }
+
     }, false);
 
   
