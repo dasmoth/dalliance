@@ -145,9 +145,16 @@ function sortFeatures(tier)
     var groups = {};
     var superGroups = {};
     var groupsToSupers = {};
+    var nonPositional = [];
     
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
 	var f = tier.currentFeatures[fi];
+
+        if (!f.min || !f.max) {
+            nonPositional.push(f);
+            continue;
+        }    
+
 	var fGroups = [];
 	var fSuperGroup = null;
 	if (f.groups) {

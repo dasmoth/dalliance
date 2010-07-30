@@ -10,8 +10,6 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var tagLine = "...everyone generalizes from one example.  Or at least, I do.";
-
 var sources = new Array();
 var tiers = new Array();
 
@@ -26,6 +24,15 @@ var viewStart;
 var viewEnd;
 var cookieKey = 'browser';
 var searchEndpoint;
+var karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
+var registry = 'http://www.dasregistry.org/das/sources';
+var coordSystem = {
+    speciesName: 'Human',
+    taxon: 9606,
+    auth: 'NCBI',
+    version: '36'
+};
+
 
 // state
 
@@ -892,7 +899,7 @@ function init()
         main.appendChild(zoomWidget);
     }
 
-    karyo = new Karyoscape(new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'));
+    karyo = new Karyoscape(karyoEndpoint);
     // now updated via setLocation.
     karyo.svg.setAttribute('transform', 'translate(500, 15)');
     karyo.onchange = function(pos) {
@@ -911,7 +918,7 @@ function init()
     
     var bhtmlRoot = document.getElementById("browser_html");
     removeChildren(bhtmlRoot);
-    bhtmlRoot.appendChild(document.createTextNode(tagLine));
+    bhtmlRoot.appendChild(document.createTextNode(VERSION));
     
     if (guidelineStyle == 'foreground') {
 	fgGuide = document.createElementNS(NS_SVG, 'line');
@@ -1170,7 +1177,7 @@ function init()
                     continue;
                 }
                 var coords = source.coords[0];
-                if (coords.taxon != '9606' || coords.auth != 'NCBI' || coords.version != '36') {
+                if (coords.taxon != coordSystem.taxon || coords.auth != coordSystem.auth || coords.version != coordSystem.version) {
                     continue;
                 }
 
@@ -1370,7 +1377,7 @@ function init()
         }
     );
 
-    new DASRegistry('http://www.dasregistry.org/das/sources?species=9606').sources(function(sources) {
+    new DASRegistry(registry).sources(function(sources) {
 	if (!sources) {
 	    alert('Warning: registry query failed');
 	}

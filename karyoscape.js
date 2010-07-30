@@ -48,6 +48,9 @@ var karyo_palette = {
 
 Karyoscape.prototype.redraw = function() {
     removeChildren(this.svg);
+    this.karyos = this.karyos.sort(function(k1, k2) {
+        return (k1.min|0) - (k2.min|0);
+    });
     var chrLen = this.karyos[this.karyos.length - 1].max;
     this.chrLen = chrLen;
     var bandspans = null;
