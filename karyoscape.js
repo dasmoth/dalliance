@@ -38,7 +38,9 @@ Karyoscape.prototype.update = function(chr, start, end) {
 var karyo_palette = {
     gneg: 'white',
     gpos25: 'rgb(200,200,200)',
+    gpos33: 'rgb(180,180,180)',
     gpos50: 'rgb(128,128,128)',
+    gpos66: 'rgb(100,100,100)',
     gpos75: 'rgb(64,64,64)',
     gpos100: 'rgb(0,0,0)',
     gvar: 'rgb(100,100,100)',

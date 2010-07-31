@@ -80,7 +80,7 @@ var minTierHeight = 25;
 var tabMargin = 100;
 
 var browserLinks = {
-    Ensembl: 'http://may2009.archive.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+    Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
     UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
 }
 
@@ -105,7 +105,7 @@ function DasTier(source, viewport, background)
     this.viewport = viewport;
     this.background = background;
     this.req = null;
-    this.layoutHeight = 100;
+    this.layoutHeight = 50;
     this.bumped = false; // until we've decided what to do about tier-collapsing...
     this.y = 0;
 
@@ -812,6 +812,7 @@ function init()
     //
            
     var svgHolder = document.getElementById('svgHolder');
+    removeChildren(svgHolder);
     var svgRoot = makeElementNS(NS_SVG, 'svg', null, {
         version: '1.1',
         width: '860px',
@@ -915,10 +916,9 @@ function init()
     // hPopupHolder = document.getElementById('hPopups');
     hPopupHolder = makeElement('div');
     svgHolder.appendChild(hPopupHolder);
-    
-    var bhtmlRoot = document.getElementById("browser_html");
-    removeChildren(bhtmlRoot);
-    bhtmlRoot.appendChild(document.createTextNode(VERSION));
+  
+    bhtmlRoot = makeElement('div', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]);
+    svgHolder.appendChild(bhtmlRoot);
     
     if (guidelineStyle == 'foreground') {
 	fgGuide = document.createElementNS(NS_SVG, 'line');
@@ -937,21 +937,6 @@ function init()
     linkButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups(); 
-             
-	var linkouts = '';
-	for (l in browserLinks) {
-	    linkouts += '<li><a href="' + browserLinks[l].replace(new RegExp('\\${([a-z]+)}', 'g'), function(s, p1) {
-		if (p1 == 'chr') {
-		    return chr;
-		} else if (p1 == 'start') {
-		    return viewStart|0;
-		} else if (p1 == 'end') {
-		    return viewEnd|0;
-		} else {
-		    return '';
-		}
-	    }) + '" target="_new">' + l + '</a></li>';
-	}
 
         var mx =  ev.clientX, my = ev.clientY;
 	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -1000,6 +985,7 @@ function init()
 
         if (entryPoints == null) {
             alert("entry_points aren't currently available for this genome");
+            return;
         }
         var epMenuItems = [], epsByChrName = {};
         for (var epi = 0; epi < entryPoints.length; ++epi) {
@@ -1365,17 +1351,28 @@ function init()
     
     // Low-priority stuff
     
-    tiers[0].dasSource.entryPoints(
-        function(ep) {
-            entryPoints = ep;
-            for (var epi = 0; epi < entryPoints.length; ++epi) {
-                if (entryPoints[epi].name == chr) {
-                    currentSeqMax = entryPoints[epi].end;
-                    break;
+
+    var epSource;
+    for (var ti = 0; ti < tiers.length; ++ti) {
+        var s = tiers[ti].source;
+        if (s.opts && s.opts.tier_type && s.opts.tier_type == 'sequence') {
+            epSource = tiers[ti].dasSource;
+            break;
+        }
+    }
+    if (epSource) {
+        epSource.entryPoints(
+            function(ep) {
+                entryPoints = ep;
+                for (var epi = 0; epi < entryPoints.length; ++epi) {
+                    if (entryPoints[epi].name == chr) {
+                        currentSeqMax = entryPoints[epi].end;
+                        break;
+                    }
                 }
             }
-        }
-    );
+        );
+    }
 
     new DASRegistry(registry).sources(function(sources) {
 	if (!sources) {
