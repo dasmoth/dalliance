@@ -70,6 +70,7 @@ var zoomTickMarks;
 var popupHolder;
 var hPopupHolder;
 var karyo;
+var icons;
 
 // Visual config.
 
@@ -254,14 +255,10 @@ function arrangeTiers() {
                 mqbb = maxQ.getBBox();
                 maxQ.setAttribute('x', tabMargin - mqbb.width - 7);
                 maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
+
+                makeQuantConfigButton(labelGroup, tier, clh);
             }
 
-		/* {
-	        
-	    } else if (BarRenderer.prototype.isPrototypeOf(tier.source.renderer)) {
-	        makeQuantConfigButton(labelGroup, tier, clh);
-	    }*/
-	    
 	    xfrmTier(tier, 100 - ((1.0 * (viewStart - origin)) * scale), -1);
 	    
 	    if (tier.placard) {
@@ -722,7 +719,7 @@ function makeHighlight() {
 
 function init() 
 {
-    var icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg');
+    icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg');
 
     var overrideSources;
     var reset = false;

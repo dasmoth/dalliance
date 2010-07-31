@@ -21,7 +21,6 @@ Publishable prototype:
  - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
- - Restore at least minimal yZoom support for quant. tiers.
 
 Real Soon Now
 -------------

@@ -90,7 +90,7 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 function drawLine(featureGroupElement, features, style, tier, y)
 {
     var height = style.HEIGHT || 30;
-    var min = style.MIN || 0, max = style.MAX || 100;
+    var min = tier.forceMin || style.MIN || 0, max = tier.forceMax || style.MAX || 100;
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
     var color = style.COLOR || style.COLOR1 || 'black';
@@ -105,7 +105,7 @@ function drawLine(featureGroupElement, features, style, tier, y)
 	var f = features[fi];
 
 	var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
-        var sc = (f.score * yscale)|0;
+        var sc = ((f.score - (1.0*min)) * yscale)|0;
 	var py = y + (height - sc);
 	if (fi == 0) {
 	    pathOps = 'M ' + px + ' ' + py;
@@ -893,39 +893,42 @@ function glyphForFeature(feature, y, style, tier)
             maxPos = minPos + MIN_FEATURE_PX;
         }
 
-	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score && style.COLOR2) {
-	    var smin = style.MIN || 0;
-	    var smax = style.MAX || 100;
-	    if ((1.0 * score) < smin) {
+	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
+	    var smin = tier.forceMin || style.MIN || 0;
+	    var smax = tier.forceMax || style.MAX || 100;
+	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }
-	    if ((1.0 * score) > smax) {
+	    if ((1.0 * score) > (1.0 * smax)) {
 		score = smax;
 	    }
 	    var relScore = ((1.0 * score) - smin) / (smax-smin);
+            alert(relScore);
 
-	    var loc, hic, frac;
-	    if (style.COLOR3) {
-		if (relScore < 0.5) {
+            if (style.COLOR2) {
+	        var loc, hic, frac;
+	        if (style.COLOR3) {
+		    if (relScore < 0.5) {
+		        loc = dasColourForName(style.COLOR1);
+		        hic = dasColourForName(style.COLOR2);
+		        frac = relScore * 2;
+		    } else {
+		        loc = dasColourForName(style.COLOR2);
+		        hic = dasColourForName(style.COLOR3);
+		        frac = (relScore * 2.0) - 1.0;
+		    }
+	        } else {
 		    loc = dasColourForName(style.COLOR1);
 		    hic = dasColourForName(style.COLOR2);
-		    frac = relScore * 2;
-		} else {
-		    loc = dasColourForName(style.COLOR2);
-		    hic = dasColourForName(style.COLOR3);
-		    frac = (relScore * 2.0) - 1.0;
-		}
-	    } else {
-		loc = dasColourForName(style.COLOR1);
-		hic = dasColourForName(style.COLOR2);
-		frac = relScore;
-	    }
+		    frac = relScore;
+	        }
 
-	    fill = new DColour(
-		((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
-		((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
-		((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
-	    ).toSvgString();
+	        fill = new DColour(
+		    ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
+		    ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
+		    ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
+	        ).toSvgString();
+            } 
 
 	    if (gtype == 'HISTOGRAM') {
 		height = (height * relScore)|0;
