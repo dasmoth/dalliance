@@ -66,6 +66,7 @@ var svg;
 var dasTierHolder;
 var zoomSlider;
 var zoomWidget;
+var zoomTickMarks;
 var popupHolder;
 var hPopupHolder;
 var karyo;
@@ -884,6 +885,7 @@ function init()
     {
         var plusIcon = icons.createIcon('magnifier-plus', main);
         var minusIcon = icons.createIcon('magnifier-minus', main);
+        zoomTickMarks = makeElementNS(NS_SVG, 'g');
         zoomSlider = new DSlider(250);
         zoomSlider.onchange = function(zoomVal, released) {
 	    zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
@@ -895,12 +897,10 @@ function init()
         plusIcon.setAttribute('transform', 'translate(0,15)');
         zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
         minusIcon.setAttribute('transform', 'translate(285,15)');
-        zoomWidget = makeElementNS(NS_SVG, 'g', [plusIcon, zoomSlider.svg, minusIcon]);
+        zoomWidget = makeElementNS(NS_SVG, 'g', [zoomTickMarks, plusIcon, zoomSlider.svg, minusIcon]);
 
         makeTooltip(zoomWidget, 'Drag to zoom');
         main.appendChild(zoomWidget);
-
-
     }
 
     karyo = new Karyoscape(karyoEndpoint);
@@ -1296,7 +1296,8 @@ function init()
 
     resizeViewer();
     window.addEventListener("resize", function(ev) {
-            resizeViewer();
+        resizeViewer();
+        // makeZoomerTicks();
     }, false);
 
     //
@@ -1330,43 +1331,7 @@ function init()
     // Tick-marks on the zoomer
     //
 
-    var makeSliderMark = function(markSig) {
-        var markPos = zoomExpt * Math.log(markSig/zoomBase);
-        if (markPos < 0 || markPos > 250) {
-            return;
-        }
-        var smark = makeElementNS(NS_SVG, 'line', null, {
-            x1: 29 + markPos,
-            y1: 35,
-            x2: 29 + markPos,
-            y2: 38,
-            strokeWidth: 1
-        });
-        var markText;
-        if (markSig > 1500) {
-            markText = '' + (markSig/1000) + 'kb';
-        } else {
-            markText= '' + markSig + 'bp';
-        }
-        var slabel = makeElementNS(NS_SVG, 'text', markText, {
-            x: 29 + markPos,
-            y: 48,
-            fontSize: '8pt',
-            stroke: 'none'
-        });
-        zoomWidget.appendChild(smark);
-        zoomWidget.appendChild(slabel);
-        slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
-    }
-
-    makeSliderMark(1000000);
-    makeSliderMark(500000);
-    makeSliderMark(100000);
-    makeSliderMark(20000);
-    makeSliderMark(4000);
-    makeSliderMark(800);
-    makeSliderMark(200);
-    makeSliderMark(50);
+    makeZoomerTicks();
 
     // 
     // Set up interactivity handlers
@@ -1426,6 +1391,50 @@ function init()
 	availableSources = sources;
     });
 }
+
+function makeZoomerTicks() {
+    removeChildren(zoomTickMarks);
+
+    var makeSliderMark = function(markSig) {
+        var markPos = zoomExpt * Math.log(markSig/zoomBase);
+        if (markPos < 0 || markPos > 250) {
+            return;
+        }
+        var smark = makeElementNS(NS_SVG, 'line', null, {
+            x1: 30 + markPos,
+            y1: 35,
+            x2: 30 + markPos,
+            y2: 38,
+            stroke: 'gray',
+            strokeWidth: 1
+        });
+        var markText;
+        if (markSig > 1500) {
+            markText = '' + (markSig/1000) + 'kb';
+        } else {
+            markText= '' + markSig + 'bp';
+        }
+        var slabel = makeElementNS(NS_SVG, 'text', markText, {
+            x: 30 + markPos,
+            y: 48,
+            fontSize: '8pt',
+            stroke: 'none'
+        });
+        zoomTickMarks.appendChild(smark);
+        zoomTickMarks.appendChild(slabel);
+        slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
+    }
+
+    makeSliderMark(1000000);
+    makeSliderMark(500000);
+    makeSliderMark(100000);
+    makeSliderMark(20000);
+    makeSliderMark(4000);
+    makeSliderMark(500);
+    makeSliderMark(100);
+    makeSliderMark(50);
+}
+
 
 function resizeViewer() {
     var width = window.innerWidth;

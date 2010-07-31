@@ -23,10 +23,12 @@ function DSlider(width, opts) {
     this.svg = document.createElementNS(NS_SVG, 'g');
     this.track = document.createElementNS(NS_SVG, 'path');
     this.track.setAttribute('fill', 'grey');
-    this.track.setAttribute('stroke', 'none');
+    this.track.setAttribute('stroke', 'grey');
+    this.track.setAttribute('stroke-width', '1');
     this.track.setAttribute('d', 'M 0 35' +
 			         ' L ' + width + ' 35' +
-			         ' L ' + width + ' 15 Z');
+			         ' L ' + width + ' 15' +
+			         ' L 0 32 Z');
     this.svg.appendChild(this.track);
 
     this.handle = document.createElementNS(NS_SVG, 'rect');
