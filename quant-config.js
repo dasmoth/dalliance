@@ -7,6 +7,8 @@
 // quant-config.js: configuration of quantitatively-scaled tiers
 //
 
+var VALID_BOUND_RE = new RegExp('^-?[0-9]+(\\.[0-9]+)?$');
+
 function makeQuantConfigButton(labelGroup, tier, ypos) {
     var button = icons.createIcon('magnifier', labelGroup);
     button.setAttribute('transform', 'translate(80, ' + (ypos+20) + '), scale(0.6,0.6)');
@@ -63,6 +65,15 @@ function makeQuantConfigButton(labelGroup, tier, ypos) {
 
 	updateButton.addEventListener('mousedown', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
+
+            if (!VALID_BOUND_RE.test(minInput.value)) {
+                alert("Don't understand " + minInput.value);
+                return;
+            }
+            if (!VALID_BOUND_RE.test(maxInput.value)) {
+                alert("Don't understand " + maxInput.value);
+                return;
+            }
 
 	    tier.forceMin = minInput.value;
 	    tier.forceMax = maxInput.value;

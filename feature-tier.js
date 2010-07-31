@@ -903,7 +903,6 @@ function glyphForFeature(feature, y, style, tier)
 		score = smax;
 	    }
 	    var relScore = ((1.0 * score) - smin) / (smax-smin);
-            alert(relScore);
 
             if (style.COLOR2) {
 	        var loc, hic, frac;
