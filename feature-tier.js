@@ -121,9 +121,9 @@ function drawLine(featureGroupElement, features, style, tier, y)
     clip.setAttribute('id', clipId);
     var clipRect = document.createElementNS(NS_SVG, 'rect');
     clipRect.setAttribute('x', -500000);
-    clipRect.setAttribute('y', y);
+    clipRect.setAttribute('y', y - 1);
     clipRect.setAttribute('width', 1000000);
-    clipRect.setAttribute('height', height);
+    clipRect.setAttribute('height', height + 2);
     clip.appendChild(clipRect);
     featureGroupElement.appendChild(clip);
     path.setAttribute('clip-path', 'url(#' + clipId + ')');

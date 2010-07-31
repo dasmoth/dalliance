@@ -896,8 +896,11 @@ function init()
         zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
         minusIcon.setAttribute('transform', 'translate(285,15)');
         zoomWidget = makeElementNS(NS_SVG, 'g', [plusIcon, zoomSlider.svg, minusIcon]);
+
         makeTooltip(zoomWidget, 'Drag to zoom');
         main.appendChild(zoomWidget);
+
+
     }
 
     karyo = new Karyoscape(karyoEndpoint);
@@ -1322,6 +1325,48 @@ function init()
 
     move(0);
     refresh(); // FIXME do we still want to be doing this?
+
+    //
+    // Tick-marks on the zoomer
+    //
+
+    var makeSliderMark = function(markSig) {
+        var markPos = zoomExpt * Math.log(markSig/zoomBase);
+        if (markPos < 0 || markPos > 250) {
+            return;
+        }
+        var smark = makeElementNS(NS_SVG, 'line', null, {
+            x1: 29 + markPos,
+            y1: 35,
+            x2: 29 + markPos,
+            y2: 38,
+            strokeWidth: 1
+        });
+        var markText;
+        if (markSig > 1500) {
+            markText = '' + (markSig/1000) + 'kb';
+        } else {
+            markText= '' + markSig + 'bp';
+        }
+        var slabel = makeElementNS(NS_SVG, 'text', markText, {
+            x: 29 + markPos,
+            y: 48,
+            fontSize: '8pt',
+            stroke: 'none'
+        });
+        zoomWidget.appendChild(smark);
+        zoomWidget.appendChild(slabel);
+        slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
+    }
+
+    makeSliderMark(1000000);
+    makeSliderMark(500000);
+    makeSliderMark(100000);
+    makeSliderMark(20000);
+    makeSliderMark(4000);
+    makeSliderMark(800);
+    makeSliderMark(200);
+    makeSliderMark(50);
 
     // 
     // Set up interactivity handlers

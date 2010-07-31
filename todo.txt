@@ -18,14 +18,13 @@ Performance
 Publishable prototype:
 ----------------------
 
- - Meaningful error for old/unsupport browser.     
  - Enable/disable tiers
      + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
      + Enabling -- working but needs UI work.
  - Restore at least minimal yZoom support for quant. tiers.
 
-After the paper
----------------
+Real Soon Now
+-------------
 
 
  - Cache server capabilities in the DAS layer (i.e. maxbins!)
