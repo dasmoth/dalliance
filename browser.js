@@ -1386,11 +1386,11 @@ function init()
     }
 
     new DASRegistry(registry).sources(function(sources) {
-	if (!sources) {
-	    alert('Warning: registry query failed');
-	}
 	availableSources = sources;
-    });
+    }, function(error) {
+        alert('Warning: registry query failed');
+        availableSources = [];
+    }, coordSystem);
 }
 
 function makeZoomerTicks() {

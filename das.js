@@ -358,7 +358,26 @@ function DASRegistry(uri, opts)
 
 DASRegistry.prototype.sources = function(callback, failure, opts)
 {
-    doCrossDomainRequest(this.uri, function(responseXML) {
+    if (!opts) {
+        opts = {};
+    }
+
+    var filters = [];
+    if (opts.taxon) {
+        filters.push('organism=' + opts.taxon);
+    }
+    if (opts.auth) {
+        filters.push('authority=' + opts.auth);
+    }
+    if (opts.version) {
+        filters.push('version=' + opts.version);
+    }
+    var quri = this.uri;
+    if (filters.length > 0) {
+        quri = quri + '?' + filters.join('&');   // '&' as a separator to hack around dasregistry.org bug.
+    }
+
+    doCrossDomainRequest(quri, function(responseXML) {
 	if (!responseXML && failure) {
 	    failure();
 	    return;
