@@ -10,7 +10,7 @@
 var VERSION = {
     MAJOR: 0,
     MINOR: 3,
-    MICRO: 83
+    MICRO: 84
 }
 
 VERSION.toString = function() {

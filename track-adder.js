@@ -8,8 +8,8 @@
 //
 
 function currentlyActive(source) {
-    for (var i = 0; i < sources.length; ++i) {
-        var ts = sources[i];
+    for (var i = 0; i < tiers.length; ++i) {
+        var ts = tiers[i].source;
         if (ts.uri == source.uri) {
             // Special cases where we might meaningfully want two tiers of the same URI.
             if (ts.opts && ts.opts.tier_type) {
@@ -18,7 +18,7 @@ function currentlyActive(source) {
                 }
             }
             if (ts.opts && ts.opts.stylesheet) {
-                if (!source.opts || !source.opts.stylesheet || source.opts.stylesheet != ts.opts.tier_type) {
+                if (!source.opts || !source.opts.stylesheet || source.opts.stylesheet != ts.opts.stylesheet) {
                     continue;
                 }
             }
