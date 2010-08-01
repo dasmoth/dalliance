@@ -50,6 +50,11 @@ Real Soon Now
  - DAS on geneID coords.
  - Auto-detection of credentialed servers?
  - Undo
+ - Tabmargin cleanup
+    + Wider by default?
+    + Auto-adjust size?
+    + Think about control placement
+    + Way to access textual information about each tier?
 
 Nice to have
 ------------
@@ -75,14 +80,12 @@ Nice to have
  - Support for a more compact encoding for quantitative tracks.
      + Will need some server suppport.  
      + Adding a new encoding to Dazzle shouldn't be too painful.
-     + Any chance at all of getting into DAS/1.6?
+     + DAS/1.6: has been some discussion of CONNEG but nothing finalized.
  - User-uploaded data
      + Round-tripped in via Dastard?
      + Also interesting to do LOCAL data additions?
  - State persistance between sessions
-     + Use localStorage instead of cookies?
      + Add a "make URL" button?
-     + How does this play with browsers that are just one object in a complex page?
   - Tier groups
      + Should yZoom together.
      + Other quantitative stuff?  If we support colourway switching then probably.
@@ -128,10 +131,6 @@ Blue sky
 The Server Side
 ---------------
  
- - Get Ensembl-DAS ready to handle production loads.
-    + Find the connection leak!!!!
-    + Better cache management?
-
  - Tidy up the Allow-Credentials support in Dazzle.
 
  - Are we better off using JKDBs to serve sequence?
@@ -143,8 +142,6 @@ The Server Side
     + Done using Picard.  Potential scalability issues in the future but working for now.
  
  - Dazzle replacement (i.e. fast, scalable, DAS middleware).
-    + MyDAS: nope.
-    + Genometry: no way.
     + Any ideas from Cadastral worth following up?
     + If I write a new one, would I still do it in Java?
         * BioJava 1.4?  "BioJava 3"?  New API?
@@ -152,43 +149,3 @@ The Server Side
         * possible to keep the decent bits while re-doing the plugin API?
  
  - DAS3? :-)
- 
-
-Open questions
---------------
- - Balance between "one true genome browser" and supporting small scale deployments.
-
- - Originally, the plan was that browsing within Known Space should never trigger
-   a hard refresh.  However, now that we're sending maxbins, that's no longer
-   appropriate since the resolution of quantitative tracks varies depending on
-   scale.
-   
-   Currently we HAVE to do some binning on high-res quantitative data, otherwise
-   the renderers will never keep up.
-   
-   Doing all the binning client side is an option, but it does cause excess network
-   traffic, and might cause performance issues as well.
-   
-   Doing a hard refresh after every zoom (current behaviour) also seems a little
-   hard on the network, and the refreshes are noticable.  Otherwise works well, though.
-   
-   Limited client-side binning coupled by hard refreshses after a big change
-   in resolution might be the nicest option, but more work to code and test.
-   
-   Is it worth trying to identify quantitative tracks (from stylesheets?) and
-   only send maxbins values for tracks where we think it's appropriate?  Then
-   we'd only need to refresh quantitative tracks after a zoom, which will be
-   visually nicer than the current behavious (especially since quantitative tracks
-   are never bumped, and usually fixed-height).  Not obvious where to get the
-   appropriate metadata, though :-(.
-   
-   [UPDATE: DAS1.6 servers should be sending the maxbins/1.0 capability iff they
-   support maxbins.  Dazzle does this now]
-
- - To what extent do we care about being Good DAS Citizens?
-    + Try to do everything via DAS vs. building our own protocols?
-    + To what extent can we extend DAS1.6
-    + If we do build our own, do we still call it DAS?
-    + Worth participating in future iterations of DAS?  DAS2.0 experience says no.
-    
- - Is it worth trying to do CS transformations on the client side?

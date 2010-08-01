@@ -359,12 +359,16 @@ function drawFeatureTier(tier)
 
     var unbumpedST = new DSubTier();
     var bumpedSTs = [];
+    var hasBumpedFeatures = false;
     
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
 	var g = glyphs[i];
 	g = labelGlyph(g, featureGroupElement);
-	if (g.bump) {
+        if (g.bump) {
+            hasBumpedFeatures = true;
+        }
+	if (g.bump && (tier.bumped || tier.source.opts.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
 	    for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
 		var st = bumpedSTs[sti];
 		if (st.hasSpaceFor(g)) {
@@ -379,6 +383,8 @@ function drawFeatureTier(tier)
 	    unbumpedST.add(g);
 	}
     }
+
+    tier.hasBumpedFeatures = hasBumpedFeatures;
 
     if (unbumpedST.glyphs.length > 0) {
 	bumpedSTs = [unbumpedST].concat(bumpedSTs);

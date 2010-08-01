@@ -108,7 +108,10 @@ function DasTier(source, viewport, background)
     this.background = background;
     this.req = null;
     this.layoutHeight = 50;
-    this.bumped = false; // until we've decided what to do about tier-collapsing...
+    this.bumped = true; 
+    if (source.opts.collapseSuperGroups) {
+        this.bumped = false;
+    }
     this.y = 0;
 
     if (source.opts.tier_type == 'sequence') {
@@ -198,7 +201,7 @@ function arrangeTiers() {
 	    labelGroup.appendChild(labelText);
 	    
 
-	    if (tier.source.opts.collapseSuperGroups) {
+	    if (tier.source.opts.collapseSuperGroups || tier.hasBumpedFeatures) {
 		makeToggleButton(labelGroup, tier, clh);
 	    } 
 
@@ -409,7 +412,8 @@ function makeToggleButton(labelGroup, tier, ypos) {
         bumpToggle.setAttribute('stroke', 'gray');
     }, false);
     bumpToggle.addEventListener('mousedown', function(ev) {
-	tier.bumped = !tier.bumped; 
+	tier.bumped = !tier.bumped;
+        tier.layoutWasDone = false;   // permits the feature-tier layout code to resize the tier.
 	dasRequestComplete(tier);   // is there a more abstract way to do this?
     }, false);
     makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
