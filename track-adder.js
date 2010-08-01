@@ -45,6 +45,7 @@ function showTrackAdder(ev) {
     popup.style.borderColor = 'black'
     popup.style.borderStyle = 'solid';
 
+    popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
 
     var regButton = makeElement('span', 'Registry');
     regButton.style.backgroundColor = 'rgb(230,230,250)';
@@ -52,7 +53,8 @@ function showTrackAdder(ev) {
     regButton.style.borderColor = 'red';
     regButton.style.borderWidth = '3px';
     regButton.style.padding = '2px';
-    regButton.style.margin = '10px';
+    regButton.style.marginLeft = '10px';
+    regButton.style.marginRight = '10px';
     regButton.style.width = '120px';
     regButton.style.float = 'left';
     
@@ -62,7 +64,8 @@ function showTrackAdder(ev) {
     defButton.style.borderColor = 'blue';
     defButton.style.borderWidth = '3px';
     defButton.style.padding = '2px';
-    defButton.style.margin = '10px';
+    defButton.style.marginLeft = '10px';
+    defButton.style.marginRight = '10px';
     defButton.style.width = '120px';
     defButton.style.float = 'left';
 
@@ -72,12 +75,15 @@ function showTrackAdder(ev) {
     custButton.style.borderColor = 'blue';
     custButton.style.borderWidth = '3px';
     custButton.style.padding = '2px';
-    custButton.style.margin = '10px';
+    custButton.style.marginLeft = '10px';
+    custButton.style.marginRight = '10px';
     custButton.style.width = '120px';
     custButton.style.float = 'left';
 
     var addModeButtons = [regButton, defButton, custButton];
-    popup.appendChild(makeElement('div', addModeButtons));
+    popup.appendChild(makeElement('div', addModeButtons), null);
+    
+    popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
     var custURL, custName;
