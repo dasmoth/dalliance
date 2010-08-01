@@ -10,8 +10,8 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var sources = new Array();
-var tiers = new Array();
+var sources = [];
+var tiers = [];
 
 // Limit stops
 
@@ -89,6 +89,7 @@ var browserLinks = {
 // Registry
 
 var availableSources;
+var defaultSources;
 
 function DataSource(name, uri, opts)
 {
@@ -151,9 +152,9 @@ DasTier.prototype.init = function() {
 DasTier.prototype.styles = function(scale) {
     if (this.stylesheet == null) {
 	return null;
-    } else if (scale > 1) {
+    } else if (scale > 0.2) {
 	return this.stylesheet.highZoomStyles;
-    } else if (scale > 0.05) {
+    } else if (scale > 0.01) {
 	return this.stylesheet.mediumZoomStyles;
     } else {
 	return this.stylesheet.lowZoomStyles;
@@ -723,6 +724,13 @@ function makeHighlight() {
 
 function init() 
 {
+    // Cache away the default sources before anything else
+
+    defaultSources = [];
+    for (var i = 0; i < sources.length; ++i) {
+        defaultSources.push(sources[i]);
+    }
+
     icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg');
 
     var overrideSources;
@@ -891,6 +899,9 @@ function init()
         zoomSlider.onchange = function(zoomVal, released) {
 	    zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
 	    if (released) {
+                for (var t = 0; t < tiers.length; ++t) {
+                    tiers[t].layoutWasDone = false;
+                }
 	        refresh();
 	        storeStatus();
 	    }
@@ -1126,138 +1137,7 @@ function init()
     addButton.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups();
-
-        var mx =  ev.clientX, my = ev.clientY;
-	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	my +=  document.documentElement.scrollTop || document.body.scrollTop;
-
-	var popup = document.createElement('div');
-        popup.style.position = 'absolute';
-        popup.style.top = '' + (my - 10) + 'px';
-        popup.style.left = '' + (mx - 10) + 'px';
-        popup.style.width = '600px';
-        popup.style.height = '500px';
-        popup.style.backgroundColor = 'white';
-        popup.style.borderWidth = '1px';
-        popup.style.borderColor = 'black'
-        popup.style.borderStyle = 'solid';
-        
-        var addButtons = [];
-        var asform = document.createElement('form');
-        {
-            var label = document.createElement('div');
-            label.appendChild(document.createTextNode('Add tracks'));
-            asform.appendChild(label);
-
-            var currentURIs = {};
-            for (var i = 0; i < tiers.length; ++i) {
-                currentURIs[tiers[i].source.uri] = true;
-            }
-
-            var stabHolder = document.createElement('div');
-            stabHolder.style.position = 'relative';
-            stabHolder.style.overflow = 'auto';
-            stabHolder.style.height = '400px';
-            var stab = document.createElement('table');
-            stab.style.width='100%';
-            var idx = 0;
-            for (var i = 0; i < availableSources.length; ++i) {
-                var source = availableSources[i];
-                if (!source.coords || source.coords.length == 0) {
-                    continue;
-                }
-                var coords = source.coords[0];
-                if (coords.taxon != coordSystem.taxon || coords.auth != coordSystem.auth || coords.version != coordSystem.version) {
-                    continue;
-                }
-
-                var r = document.createElement('tr');
-                r.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
-
-                var bd = document.createElement('td');
-                if (currentURIs[source.uri]) {
-                    bd.appendChild(document.createTextNode('X'));
-                } else if (source.props.cors) {
-                    var b = document.createElement('input');
-                    b.type = 'checkbox';
-                    b.dalliance_source = availableSources[i];
-                    bd.appendChild(b);
-                    addButtons.push(b);
-                }
-                r.appendChild(bd);
-                var ld = document.createElement('td');
-                ld.appendChild(document.createTextNode(availableSources[i].title));
-                r.appendChild(ld);
-                stab.appendChild(r);
-                ++idx;
-            }
-            stabHolder.appendChild(stab);
-
-            asform.appendChild(stabHolder);
-
-            var addButton = document.createElement('span');
-            addButton.style.backgroundColor = 'rgb(230,230,250)';
-            addButton.style.borderStyle = 'solid';
-            addButton.style.borderColor = 'blue';
-            addButton.style.borderWidth = '3px';
-            addButton.style.padding = '2px';
-            addButton.style.margin = '10px';
-            addButton.style.width = '150px';
-            // addButton.style.float = 'left';
-            addButton.appendChild(document.createTextNode('Add'));
-            addButton.addEventListener('mousedown', function(ev) {
-                ev.stopPropagation(); ev.preventDefault();
-
-                for (var bi = 0; bi < addButtons.length; ++bi) {
-                    var b = addButtons[bi];
-                    if (b.checked) {
-                        var nds = new DataSource(b.dalliance_source.title, b.dalliance_source.uri);
-	                sources.push(nds);
-	                // this should be factored out.
-	                var viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                        var viewportBackground = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                        var col = tierBackgroundColors[tiers.length % tierBackgroundColors.length];
-                        viewportBackground.setAttribute("fill", col);
-                        viewportBackground.setAttribute("x", "-1000000");
-                        viewportBackground.setAttribute("y", "0");
-                        viewportBackground.setAttribute("width", "2000000");
-                        viewportBackground.setAttribute("height", "200");
-                        viewportBackground.setAttribute("stroke-width", "0");
-                        viewport.appendChild(viewportBackground);
-                        viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
-                        tierHolder.appendChild(viewport);
-
-		        var tier = new DasTier(nds, viewport, viewportBackground)
-                        tiers.push(tier);
-		        tier.init();
-		        storeStatus();
-                    }
-                }
-
-                removeAllPopups();
-            }, false);
-
-            var canButton = document.createElement('span');
-            canButton.style.backgroundColor = 'rgb(230,230,250)';
-            canButton.style.borderStyle = 'solid';
-            canButton.style.borderColor = 'blue';
-            canButton.style.borderWidth = '3px';
-            canButton.style.padding = '2px';
-            canButton.style.margin = '10px';
-            canButton.style.width = '150px';
-            // canButton.style.float = 'left';
-            canButton.appendChild(document.createTextNode('Cancel'))
-            canButton.addEventListener('mousedown', function(ev) {
-                ev.stopPropagation(); ev.preventDefault();
-                removeAllPopups();
-            }, false);
-
-            var buttonHolder = makeElement('div', [addButton, canButton]);
-            buttonHolder.style.margin = '10px';
-            asform.appendChild(buttonHolder);
-        }
-        popup.appendChild(asform);
-        hPopupHolder.appendChild(popup);
+        showTrackAdder(ev);
     }, false);
 
     // set up the resetter
@@ -1268,27 +1148,12 @@ function init()
 	
     tierHolder = document.getElementById("dasTiers");
     tiers = new Array();
-    if (!overrideSources) {
-	overrideSources = sources;
+    if (overrideSources) {
+	sources = overrideSources;
     }
-    for (var t = 0; t < overrideSources.length; ++t) {
-	var source = overrideSources[t];
-	var viewport = document.createElementNS(NS_SVG, "g");
-	var viewportBackground = document.createElementNS(NS_SVG, "rect");
-	var col = tierBackgroundColors[t % tierBackgroundColors.length];
-	viewportBackground.setAttribute("fill", col);
-	viewportBackground.setAttribute("x", "-1000000");
-	viewportBackground.setAttribute("y", "0");
-	viewportBackground.setAttribute("width", "2000000");
-	viewportBackground.setAttribute("height", "200");
-	viewportBackground.setAttribute("stroke-width", "0");
-	viewport.appendChild(viewportBackground);
-	viewport.setAttribute("transform", "translate(200, " + ((t * 200) + 50) + ")");
-	tierHolder.appendChild(viewport);
-	
-	var tier = new DasTier(source, viewport, viewportBackground);
-	tier.init(); // fetches stylesheet
-	tiers.push(tier);
+    for (var t = 0; t < sources.length; ++t) {
+	var source = sources[t];
+        makeTier(source);
     }
     
     //
@@ -1386,12 +1251,48 @@ function init()
     }
 
     new DASRegistry(registry).sources(function(sources) {
-	availableSources = sources;
+	availableSources = [];
+        for (var s = 0; s < sources.length; ++s) {
+            var source = sources[s];
+            if (!source.coords || source.coords.length == 0) {
+                continue;
+            }
+            var coords = source.coords[0];
+            if (coords.taxon != coordSystem.taxon || coords.auth != coordSystem.auth || coords.version != coordSystem.version) {
+                continue;
+            }
+            var ds = new DataSource(sources[s].title, sources[s].uri);
+            ds.description = source.description;
+            if (!source.props || !source.props.cors) {
+                ds.disabled = true;
+            }
+            availableSources.push(ds);
+        }
     }, function(error) {
         alert('Warning: registry query failed');
         availableSources = [];
     }, coordSystem);
 }
+
+function makeTier(source) {
+    var viewport = document.createElementNS(NS_SVG, 'g');
+    var viewportBackground = document.createElementNS(NS_SVG, 'rect');
+    var col = tierBackgroundColors[tiers.length % tierBackgroundColors.length];
+    viewportBackground.setAttribute('fill', col);
+    viewportBackground.setAttribute('x', "-1000000");
+    viewportBackground.setAttribute('y', "0");
+    viewportBackground.setAttribute('width', "2000000");
+    viewportBackground.setAttribute('height', "200");
+    viewportBackground.setAttribute('stroke-width', "0");
+    viewport.appendChild(viewportBackground);
+    viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
+    tierHolder.appendChild(viewport);
+    
+    var tier = new DasTier(source, viewport, viewportBackground);
+    tier.init(); // fetches stylesheet
+    tiers.push(tier);
+}
+
 
 function makeZoomerTicks() {
     removeChildren(zoomTickMarks);

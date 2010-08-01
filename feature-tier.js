@@ -199,6 +199,7 @@ function drawFeatureTier(tier)
 {
     sortFeatures(tier);
     tier.placard = null;
+    tier.isQuantitative = false;         // gets reset later if we have any HISTOGRAMs.
 
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {

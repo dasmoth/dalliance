@@ -55,6 +55,7 @@ Real Soon Now
     + Auto-adjust size?
     + Think about control placement
     + Way to access textual information about each tier?
+    + Rename tiers?
 
 Nice to have
 ------------
