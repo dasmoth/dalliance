@@ -53,7 +53,12 @@ Karyoscape.prototype.redraw = function() {
     this.karyos = this.karyos.sort(function(k1, k2) {
         return (k1.min|0) - (k2.min|0);
     });
-    var chrLen = this.karyos[this.karyos.length - 1].max;
+    var chrLen;
+    if (this.karyos.length > 0) {
+	chrLen = this.karyos[this.karyos.length - 1].max;
+    } else {
+        chrLen = 20000000;
+    }
     this.chrLen = chrLen;
     var bandspans = null;
     for (var i = 0; i < this.karyos.length; ++i) {

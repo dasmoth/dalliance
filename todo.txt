@@ -15,13 +15,6 @@ Performance
 	  * Currently no features displaying
 	  * Probably transform and/or clipping problems.
  
-Publishable prototype:
-----------------------
-
- - Enable/disable tiers
-     + Disabling now done.  Is the UI okay?  Highlight the dustbin while dragging?
-     + Enabling -- working but needs UI work.
-
 Real Soon Now
 -------------
 
