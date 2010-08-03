@@ -86,6 +86,8 @@ var browserLinks = {
     UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
 }
 
+var iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons.svg'
+
 // Registry
 
 var availableSources;
@@ -731,7 +733,7 @@ function init()
         defaultSources.push(sources[i]);
     }
 
-    icons = new IconSet('http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg');
+    icons = new IconSet(iconsURI);
 
     var overrideSources;
     var reset = false;

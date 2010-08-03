@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC
+	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     >
+
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
+<title>Human NCBI36 :: Dalliance</title> 
+<style>
+* {font-family: 'helvetica'}
+</style>
+<script language="javascript" src="dalliance-compiled.js"></script>
+<script language="javascript">
+  chr = "22";
+  viewStart = 30000000;
+  viewEnd = 30030000;
+  cookieKey = 'human';
+
+  sources.push(new DataSource("genome", "http://www.derkholm.net:8080/das/hg18comp/", {tier_type: 'sequence'}));
+  sources.push(new DataSource("e! genes", "http://www.derkholm.net:8080/das/hsa_54_36p/", {collapseSuperGroups: true}));
+  sources.push(new DataSource("repeats",  "http://www.derkholm.net:8080/das/hsa_54_36p/", {stylesheet: 'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'}));
+  sources.push(new DataSource("CpG_o/e", "http://www.derkholm.net:8080/das/hg18comp/", {stylesheet:  'http://www.derkholm.net/dalliance-test/stylesheets/cpg-hist.xml'}));
+  sources.push(new DataSource('MeDIP-seq', 'http://www.derkholm.net:8080/das/medipseq_reads/'));
+  sources.push(new DataSource('+Batman', "http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/"));
+  sources.push(new DataSource("MeDIP-chip", "http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/"));
+
+  searchEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
+</script>
+</head>
+
+<body onload="init();">
+
+<h2>Human NCBI36</h2>
+
+<div id='svgHolder'>
+</div>
+
+</body>
+</html>
+

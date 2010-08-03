@@ -198,14 +198,12 @@ DASSource.prototype.features = function(segment, options, callback) {
 	    callback([], 'Failed request: ' + dasURI);     // FIXME response code here?
 	    return;
 	}
-	if (req) {
-	    /*
+/*	if (req) {
 	    var caps = req.getResponseHeader('X-DAS-Capabilties');
 	    if (caps) {
 		alert(caps);
 	    }
-	    */
-	}
+	} */
 
         var features = new Array();
         var segmentMap = {};

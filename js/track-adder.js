@@ -56,7 +56,7 @@ function showTrackAdder(ev) {
     regButton.style.marginLeft = '10px';
     regButton.style.marginRight = '10px';
     regButton.style.width = '120px';
-    regButton.style.float = 'left';
+    regButton.style['float'] = 'left';
     
     var defButton = makeElement('span', 'Defaults');
     defButton.style.backgroundColor = 'rgb(230,230,250)';
@@ -67,7 +67,7 @@ function showTrackAdder(ev) {
     defButton.style.marginLeft = '10px';
     defButton.style.marginRight = '10px';
     defButton.style.width = '120px';
-    defButton.style.float = 'left';
+    defButton.style['float'] = 'left';
 
     var custButton = makeElement('span', 'Custom');
     custButton.style.backgroundColor = 'rgb(230,230,250)';
@@ -78,7 +78,7 @@ function showTrackAdder(ev) {
     custButton.style.marginLeft = '10px';
     custButton.style.marginRight = '10px';
     custButton.style.width = '120px';
-    custButton.style.float = 'left';
+    custButton.style['float'] = 'left';
 
     var addModeButtons = [regButton, defButton, custButton];
     popup.appendChild(makeElement('div', addModeButtons), null);

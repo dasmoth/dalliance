@@ -24,7 +24,7 @@ Karyoscape.prototype.update = function(chr, start, end) {
 	var kscape = this;
 	this.dsn.features(
 	    new DASSegment(chr),
-	    {type: 'karyotypex'},
+	    {type: 'karyotype'},
 	    function(karyos, err, segmentMap) {
                 if (segmentMap[chr] && segmentMap[chr].max) {
                     kscape.chrLen = segmentMap[chr].max;
