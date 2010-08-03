@@ -208,10 +208,16 @@ DASSource.prototype.features = function(segment, options, callback) {
 	}
 
         var features = new Array();
+        var segmentMap = {};
+
 	var segs = responseXML.getElementsByTagName('SEGMENT');
 	for (var si = 0; si < segs.length; ++si) {
             var segmentXML = segs[si];
 	    var segmentID = segmentXML.getAttribute('id');
+            segmentMap[segmentID] = {
+                min: segmentXML.getAttribute('start'),
+                max: segmentXML.getAttribute('stop')
+            };
 	    
                 var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
                 for (var i = 0; i < featureXMLs.length; ++i) {
@@ -275,7 +281,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 }
 	}
                 
-        callback(features);
+        callback(features, undefined, segmentMap);
     });
 }
 

@@ -24,8 +24,13 @@ Karyoscape.prototype.update = function(chr, start, end) {
 	var kscape = this;
 	this.dsn.features(
 	    new DASSegment(chr),
-	    {type: 'karyotype'},
-	    function(karyos) {
+	    {type: 'karyotypex'},
+	    function(karyos, err, segmentMap) {
+                if (segmentMap[chr] && segmentMap[chr].max) {
+                    kscape.chrLen = segmentMap[chr].max;
+                } else {
+                    kscape.chrLen = null;
+                }
 		kscape.karyos = karyos;
 		kscape.redraw();
 	    }
@@ -53,18 +58,26 @@ Karyoscape.prototype.redraw = function() {
     this.karyos = this.karyos.sort(function(k1, k2) {
         return (k1.min|0) - (k2.min|0);
     });
-    var chrLen;
     if (this.karyos.length > 0) {
-	chrLen = this.karyos[this.karyos.length - 1].max;
+        if (!this.chrLen) {
+	    this.chrLen = this.karyos[this.karyos.length - 1].max;
+        }
     } else {
-        chrLen = 20000000;
+        if (!this.chrLen) {
+            alert('Warning: insufficient data to set up spatial navigator');
+            this.chrLen = 20000000;
+        } 
+        this.karyos.push({
+            min: 1,
+            max: this.chrLen,
+            label: 'gneg'
+        });
     }
-    this.chrLen = chrLen;
     var bandspans = null;
     for (var i = 0; i < this.karyos.length; ++i) {
 	var k = this.karyos[i];
-	var bmin = ((1.0 * k.min) / chrLen) * this.width;
-	var bmax = ((1.0 * k.max) / chrLen) * this.width;
+	var bmin = ((1.0 * k.min) / this.chrLen) * this.width;
+	var bmax = ((1.0 * k.max) / this.chrLen) * this.width;
 	var col = karyo_palette[k.label];
 	if (!col) {
 	    // alert("don't understand " + k.label);
@@ -101,8 +114,8 @@ Karyoscape.prototype.redraw = function() {
 	var r = bandspans.ranges();
 	for (var ri = 0; ri < r.length; ++ri) {
 	    var rr = r[ri];
-	    var bmin = ((1.0 * rr.min()) / chrLen) * this.width;
-	    var bmax = ((1.0 * rr.max()) / chrLen) * this.width;
+	    var bmin = ((1.0 * rr.min()) / this.chrLen) * this.width;
+	    var bmax = ((1.0 * rr.max()) / this.chrLen) * this.width;
 	    this.svg.appendChild(makeElementNS(NS_SVG, 'line', null, {
 		x1: bmin, y1: 0, x2: bmax, y2: 0,
 		stroke: 'black', strokeWidth: 2
