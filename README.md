@@ -3,9 +3,7 @@ Dalliance Genome Explorer
 
 Dalliance is an experimental genome browser that aims to offer a high level of interactivity while working entirely within your web browser. It currently supports recent versions of Firefox, Google Chrome, and Safari.
 
-To try it, visit:
-
-      http://www.derkholm.net/dalliance-test/browser.html
+To try it, visit http://www.biodalliance.org/human/ncbi36/
 
 Development
 -----------
@@ -24,4 +22,4 @@ Dalliance has a nearly-complete implementation of the DAS/1.53 and DAS/1.6 style
 Reporting bugs
 --------------
 
-Dalliance is under active development and we welcome your suggestions.  Right now, probably the best place for bug reports or feature requests is the issue tracker on http://github.com/dasmoth/dalliance
+Dalliance is under active development and we welcome your suggestions.  Right now, probably the best place for bug reports or feature requests is the [Github issue tracker](http://github.com/dasmoth/dalliance).

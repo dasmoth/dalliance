@@ -7,7 +7,6 @@ Performance
      + Mozilla (FF3.5, Camino???)
      + Safari (3.1 or later)
      + Chrome.
-     + Does anyone care about Opera?
      + Not IE<9. 
      + IE9 is looking doable:
           * UI draws correctly (IE9dp2).
@@ -33,10 +32,6 @@ Real Soon Now
      + Allow multiple browser instances in a given page (i.e. remove all static state).
      + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
        How much state to share? 
- - Other DAS servers? (probably mostly server work):
-     + Ensembl: requires CORS, in contact...
-     + UCSC: requires CORS, in progress.
-     + MyDAS: requires CORS.  Is this used for anything except Uniprot?
  - Publication-quality SVG export.
  - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
@@ -65,8 +60,7 @@ Nice to have
      + Should allow more aggressive spec-fetching?
      + Allow fetches that add to the working set, rather than replacing it.
      + Try to respect existing feature placements when scrolling.
- - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't
-       think anyone else is doing this, but I'd use it!)
+ - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't think anyone else is doing this, but I'd use it!)
  - Gene search:
      + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
@@ -95,30 +89,19 @@ Blue sky
 --------
     
  - Tourist mode
-    + Fast movement between POIs.
- 
+    + Fast movement between POIs. 
  - Real-time collaborative features
     + i.e. multiple users viewing a browser with shared state.
     + Annotation (Using DAS writeback protocols?)
     + View synchronization?
     + Chat 
     + Websockets work nicely for this.  Prototype at DAS Workshop '10.
-    
  - Navigate by blatting user sequences to the genome
     + How to do this in a DASish world?
     + Relationship with tourist mode?
-    
- - How quick can we make getting a new genome up?
-    + Competitive with GBrowse?  Faster would be nice.
-    + Trivial if an E! database exists.
-    + Bee went pretty smoothly.
-    + Substantially a Dazzle/plugins question.
-    
  - Flip into vertical orientation (AceDB-like!)
     + How much of the rendering code would end up ori-dependent?
- 
  - MultiContigView equivalent?
- 
  - Coord-system mapping?
 
 
@@ -129,17 +112,15 @@ The Server Side
 
  - Are we better off using JKDBs to serve sequence?
     + A JKDB-based sequence server could also usefully compute GC composition, etc., etc., on the fly. [done now]
-    
  - big*-backed servers?
-
  - BAM-backed servers. 
     + Done using Picard.  Potential scalability issues in the future but working for now.
- 
+
  - Dazzle replacement (i.e. fast, scalable, DAS middleware).
     + Any ideas from Cadastral worth following up?
     + If I write a new one, would I still do it in Java?
         * BioJava 1.4?  "BioJava 3"?  New API?
     + Alternatively... do a "Dazzle 1.5" major update
         * possible to keep the decent bits while re-doing the plugin API?
- 
+
  - DAS3? :-)
