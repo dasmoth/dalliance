@@ -1127,10 +1127,10 @@ function init()
 		        var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
 		        setLocation(min - padding, max + padding, nchr);
 		    }
-	        });
+	        }, false);
                 
 	        return false;
-	    });
+	    }, false);
         }
 
     }, false);
