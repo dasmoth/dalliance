@@ -110,14 +110,20 @@ function showTrackAdder(ev) {
             r.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
 
             var bd = document.createElement('td');
+            bd.style.textAlign = 'center';
             if (currentlyActive(source)) {
                 bd.appendChild(document.createTextNode('X'));
+                makeTooltip(bd, "This data source is already active.");
             } else if (!source.disabled) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
                 bd.appendChild(b);
                 addButtons.push(b);
+                makeTooltip(bd, "Check here then click 'Add' to activate.");
+            } else {
+                bd.appendChild(document.createTextNode('!'));
+                makeTooltip(bd, "This data source isn't accessible because it doesn't support CORS.");
             }
             r.appendChild(bd);
             var ld = document.createElement('td');
