@@ -123,11 +123,14 @@ function showTrackAdder(ev) {
                 makeTooltip(bd, "Check here then click 'Add' to activate.");
             } else {
                 bd.appendChild(document.createTextNode('!'));
-                makeTooltip(bd, "This data source isn't accessible because it doesn't support CORS.");
+                makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
             }
             r.appendChild(bd);
             var ld = document.createElement('td');
             ld.appendChild(document.createTextNode(source.name));
+            if (source.description && source.description.length > 0) {
+                makeTooltip(ld, source.description);
+            }
             r.appendChild(ld);
             stab.appendChild(r);
             ++idx;

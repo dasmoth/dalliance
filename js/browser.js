@@ -192,6 +192,12 @@ function arrangeTiers() {
 	    viewportBackground.setAttribute("fill", tierBackgroundColors[ti % tierBackgroundColors.length]);
 	    viewportBackground.setAttribute("stroke", "none");
 	    labelGroup.appendChild(viewportBackground);
+
+            makeTooltip(viewportBackground, tier.source.description ? 
+                        makeElement('span', [makeElement('b', tier.source.name), makeElement('br'), tier.source.description]) : 
+                        tier.source.name
+            );
+
 	    
 	    setupTierDrag(viewportBackground, ti);
 	    
@@ -201,6 +207,7 @@ function arrangeTiers() {
 	    labelText.setAttribute("stroke-width", "0");
 	    labelText.setAttribute("fill", "black");
 	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
+            labelText.style.pointerEvents = 'none';
 	    labelGroup.appendChild(labelText);
 	    
 
@@ -1264,7 +1271,7 @@ function init()
                 continue;
             }
             var ds = new DataSource(sources[s].title, sources[s].uri);
-            ds.description = source.description;
+            ds.description = source.desc;
             if (!source.props || !source.props.cors) {
                 ds.disabled = true;
             }

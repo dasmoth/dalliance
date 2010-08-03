@@ -20,18 +20,19 @@ function makeTooltip(ele, text)
     };
 
     ele.addEventListener('mouseover', function(ev) {
-        var mx = ev.clientX, my = ev.clientY;
+        var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         if (!timer) {
             timer = setTimeout(function() {
                 var popup = makeElement('div', text, {}, {
                     position: 'absolute',
                     top: '' + (my + 20) + 'px',
-                    left: '' + (mx - 30) + 'px',
+                    left: '' + Math.max(mx - 30, 20) + 'px',
                     backgroundColor: 'rgb(250, 240, 220)',
                     borderWidth: '1px',
                     borderColor: 'black',
                     borderStyle: 'solid',
-                    padding: '2px'
+                    padding: '2px',
+                    maxWidth: '400px'
                 });
                 hPopupHolder.appendChild(popup);
                 var moveHandler;
