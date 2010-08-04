@@ -1172,19 +1172,27 @@ function init()
 	        }
 
 	        searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
-		    if (!found || found.length == 0) {
+                    if (!found) found = [];
+                    var min = 500000000, max = -100000000;
+		    var nchr = null;
+		    for (var fi = 0; fi < found.length; ++fi) {
+			var f = found[fi];
+
+                        if (f.label != g) {
+                            // ...because Dazzle can return spurious overlapping features.
+                            continue;
+                        }
+
+			if (nchr == null) {
+			    nchr = f.segment;
+			}
+			min = Math.min(min, f.min);
+			max = Math.max(max, f.max);
+		    }
+
+		    if (!nchr) {
 		        alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
 		    } else {
-		        var min = 500000000, max = -100000000;
-		        var nchr = null;
-		        for (var fi = 0; fi < found.length; ++fi) {
-			    var f = found[fi];
-			    if (nchr == null) {
-			        nchr = f.segment;
-			    }
-			    min = Math.min(min, f.min);
-			    max = Math.max(max, f.max);
-		        }
 		        highlightMin = min;
 		        highlightMax = max;
 		        makeHighlight();

@@ -10,9 +10,14 @@
 var VERSION = {
     MAJOR: 0,
     MINOR: 4,
-    MICRO: 3
+    MICRO: 3,
+    PATCH: 'a'
 }
 
 VERSION.toString = function() {
-    return '' + this.MAJOR + '.' + this.MINOR + '.' + this.MICRO;
+    var vs = '' + this.MAJOR + '.' + this.MINOR + '.' + this.MICRO;
+    if (this.PATCH) {
+        vs = vs + this.PATCH;
+    }
+    return vs;
 }
