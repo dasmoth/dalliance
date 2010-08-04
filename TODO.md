@@ -23,6 +23,7 @@ Real Soon Now
      + https://bugs.webkit.org/show_bug.cgi?id=41210
      + May be able to do something with DAS/1.6 sources since these *should* list caps in the sources document???
  - Better configuration of quantitative tracks.
+     + Persist changes.
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
@@ -42,7 +43,6 @@ Real Soon Now
     + Wider by default?
     + Auto-adjust size?
     + Think about control placement
-    + Way to access textual information about each tier?
     + Rename tiers?
 
 Nice to have
@@ -54,7 +54,6 @@ Nice to have
    + Support ZINDEX?
    + Rainbowed LINEPLOT glyphs?
    + More thought about how how to combine LINEPLOT with other glyphs in the same tier.
-   + Attach external SSs?
  - Add a track removal button to error placards?
  - Ability to re-bump w/o re-fetching all the data
      + Should allow more aggressive spec-fetching?

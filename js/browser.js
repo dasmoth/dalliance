@@ -59,6 +59,7 @@ var autoSizeTiers = false;
 var guidelineStyle = 'foreground';
 var guidelineSpacing = 75;
 var fgGuide;
+var positionFeedback = false;
 
 // UI components
 
@@ -216,28 +217,38 @@ function arrangeTiers() {
 	    } 
 
             if (tier.isQuantitative) {
-                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                var quantTools = makeElementNS(NS_SVG, 'g');
+                quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
+                    x: tabMargin - 25,
+                    y: clh,
+                    width: 25,
+                    height: tier.layoutHeight,
+                    stroke: 'none',
+                    fill: tierBackgroundColors[ti % tierBackgroundColors.length]
+                }));
+                labelGroup.appendChild(quantTools);
+                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
                     x1: tabMargin,
                     y1: clh + (tier.clientMin|0),
                     x2: tabMargin,
                     y2: clh + (tier.clientMax|0),
                     strokeWidth: 1
                 }));
-                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
                     x1: tabMargin -5 ,
                     y1: clh + (tier.clientMin|0),
                     x2: tabMargin,
                     y2: clh + (tier.clientMin|0),
                     strokeWidth: 1
                 }));
-                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
                     x1: tabMargin -3 ,
                     y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
                     x2: tabMargin,
                     y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
                     strokeWidth: 1
                 }));
-                labelGroup.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
                     x1: tabMargin -5 ,
                     y1: clh + (tier.clientMax|0),
                     x2: tabMargin,
@@ -251,7 +262,7 @@ function arrangeTiers() {
                     fill: 'black',
                     fontSize: '8pt'
                 });
-                labelGroup.appendChild(minQ);
+                quantTools.appendChild(minQ);
                 var mqbb = minQ.getBBox();
                 minQ.setAttribute('x', tabMargin - mqbb.width - 7);
                 minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
@@ -263,13 +274,25 @@ function arrangeTiers() {
                     fill: 'black',
                     fontSize: '8pt'
                 });
-                labelGroup.appendChild(maxQ);
+                quantTools.appendChild(maxQ);
                 maxQ.setAttribute('x', tabMargin - maxQ.getBBox().width - 3);
                 mqbb = maxQ.getBBox();
                 maxQ.setAttribute('x', tabMargin - mqbb.width - 7);
                 maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
 
-                makeQuantConfigButton(labelGroup, tier, clh);
+                var button = icons.createIcon('magnifier', labelGroup);
+                button.setAttribute('transform', 'translate(80, ' + (clh+20) + '), scale(0.6,0.6)');
+
+                // FIXME style-changes don't currently work because of the way icons get grouped.
+                button.addEventListener('mouseover', function(ev) {
+	            button.setAttribute('fill', 'red');
+                }, false);
+                button.addEventListener('mouseout', function(ev) {
+	            button.setAttribute('stroke', 'gray');
+                }, false);
+                
+                quantTools.appendChild(button);
+                makeQuantConfigButton(quantTools, tier, clh);
             }
 
 	    xfrmTier(tier, 100 - ((1.0 * (viewStart - origin)) * scale), -1);
@@ -488,6 +511,7 @@ function refresh()
 
 var originX;
 var dcTimeoutID = null;
+var clickTestTB = null;
 
 function mouseDownHandler(ev)
 {
@@ -516,6 +540,9 @@ function mouseDownHandler(ev)
 	originX = ev.clientX;
 	document.addEventListener("mousemove", mouseMoveHandler, true);
 	document.addEventListener("mouseup", mouseUpHandler, true);
+        clickTestTB = setTimeout(function() {
+            clickTestTB = null;
+        }, 200);
     }
 }
 
@@ -622,7 +649,37 @@ function featurePopup(ev, feature, group)
 
 function mouseUpHandler(ev)
 {
-     ev.stopPropagation(); ev.preventDefault();
+    if (clickTestTB && positionFeedback) {
+        var origin = document.getElementById('svgHolder').getBoundingClientRect();
+        var ppos = ev.clientX - origin.left - tabMargin;
+        var spos = (((1.0*ppos)/scale) + viewStart)|0;
+        
+        var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
+        var popup = makeElement('div', '' + spos, {}, {
+            position: 'absolute',
+            top: '' + (my + 20) + 'px',
+            left: '' + Math.max(mx - 30, 20) + 'px',
+            backgroundColor: 'rgb(250, 240, 220)',
+            borderWidth: '1px',
+            borderColor: 'black',
+            borderStyle: 'solid',
+            padding: '2px',
+            maxWidth: '400px'
+        });
+        hPopupHolder.appendChild(popup);
+        var moveHandler;
+        moveHandler = function(ev) {
+            try {
+                hPopupHolder.removeChild(popup);
+            } catch (e) {
+                // May have been removed by other code which clears the popup layer.
+            }
+            window.removeEventListener('mousemove', moveHandler, false);
+        }
+        window.addEventListener('mousemove', moveHandler, false);
+    }
+    
+    ev.stopPropagation(); ev.preventDefault();
 
     document.removeEventListener("mousemove", mouseMoveHandler, true);
     document.removeEventListener("mouseup", mouseUpHandler, true);
@@ -789,6 +846,7 @@ function init()
 	queryRegion = true;
     }
 
+    positionFeedback = queryDict.positionFeedback || false;
     guidelineConfig = queryDict.guidelines || 'foreground';
     if (guidelineConfig == 'true') {
 	guidelineStyle = 'background';
@@ -831,13 +889,13 @@ function init()
     //
            
     var svgHolder = document.getElementById('svgHolder');
-    removeChildren(svgHolder);
     var svgRoot = makeElementNS(NS_SVG, 'svg', null, {
         version: '1.1',
         width: '860px',
         height: '500px',
         id: 'browser_svg'
     });
+    removeChildren(svgHolder);
     svgHolder.appendChild(svgRoot);
 
     var main = makeElementNS(NS_SVG, 'g',

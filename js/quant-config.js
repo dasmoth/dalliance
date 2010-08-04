@@ -9,19 +9,8 @@
 
 var VALID_BOUND_RE = new RegExp('^-?[0-9]+(\\.[0-9]+)?$');
 
-function makeQuantConfigButton(labelGroup, tier, ypos) {
-    var button = icons.createIcon('magnifier', labelGroup);
-    button.setAttribute('transform', 'translate(80, ' + (ypos+20) + '), scale(0.6,0.6)');
-
-    // FIXME style-changes don't currently work because of the way icons get grouped.
-    button.addEventListener('mouseover', function(ev) {
-	button.setAttribute('fill', 'red');
-    }, false);
-    button.addEventListener('mouseout', function(ev) {
-	button.setAttribute('stroke', 'gray');
-    }, false);
-
-    button.addEventListener('mousedown', function(ev) {
+function makeQuantConfigButton(quantTools, tier, ypos) {
+    quantTools.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups();
 
@@ -83,6 +72,4 @@ function makeQuantConfigButton(labelGroup, tier, ypos) {
 
 	hPopupHolder.appendChild(popup);
     }, false);
-    
-    labelGroup.appendChild(button);
 }

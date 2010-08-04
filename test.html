@@ -40,6 +40,12 @@
   sources.push(new DataSource("MeDIP-chip", "http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/"));
 
   searchEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
+
+  browserLinks = {
+    Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+    UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
+    Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
+  };
 </script>
 </head>
 
