@@ -17,13 +17,17 @@ Performance
 Real Soon Now
 -------------
 
-
+ - Improvements to the config system
+     + Reset without reloading page.
+     + Config. updates in the static HTML should override localstorage.
+       - Store a hash of the static config?
+       - How does this work if multiple pages share a cookieKey?
+     + Multiple sessions + switching.
  - Cache server capabilities in the DAS layer (i.e. maxbins!)
      + Most code is in, currently doesn't work because of missing Access-Control-Expose-Headers support.
      + https://bugs.webkit.org/show_bug.cgi?id=41210
      + May be able to do something with DAS/1.6 sources since these *should* list caps in the sources document???
  - Better configuration of quantitative tracks.
-     + Persist changes.
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?

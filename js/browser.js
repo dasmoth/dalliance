@@ -293,6 +293,7 @@ function arrangeTiers() {
                 
                 quantTools.appendChild(button);
                 makeQuantConfigButton(quantTools, tier, clh);
+                makeTooltip(quantTools, 'Click to adjust how this data is displayed');
             }
 
 	    xfrmTier(tier, 100 - ((1.0 * (viewStart - origin)) * scale), -1);
@@ -930,6 +931,7 @@ function init()
     var bin = icons.createIcon('bin', main);
     bin.setAttribute('transform', 'translate(10, 18)');
     main.appendChild(bin);
+    makeTooltip(bin, 'Drag tracks here to discard');
     
     var featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: 100,      // FIXME tabMargin
@@ -1106,30 +1108,33 @@ function init()
         popup.style.borderWidth = '1px';
         popup.style.borderColor = 'black'
         popup.style.borderStyle = 'solid';
-        popup.style.padding = '2px';
+        popup.style.padding = '5px';
+        popup.style.paddingRight = '9px';
+       
+        {
+            popup.appendChild(makeElement('p', 'Jump to...'));
+            var form = makeElement('form');
+            var tab = makeElement('table');
 
-        popup.appendChild(makeElement('p'), 'Jump to...');
-        var form = makeElement('form');
-        form.appendChild(document.createTextNode('Chr:'));
-        var selectChr = makeElement('select', null);
-        for (var epi = 0; epi < entryPoints.length; ++epi) {
-            var ep = epMenuItems[epi].entryPoint;
-	    epsByChrName[ep.name] = ep;
-            selectChr.appendChild(makeElement('option', ep.toString(), {value: ep.name}));
+            var selectChr = makeElement('select', null);
+            for (var epi = 0; epi < entryPoints.length; ++epi) {
+                var ep = epMenuItems[epi].entryPoint;
+	        epsByChrName[ep.name] = ep;
+                selectChr.appendChild(makeElement('option', ep.toString(), {value: ep.name}));
+            }
+            selectChr.value = chr;
+            tab.appendChild(makeElement('tr', [makeElement('td', 'Chr:'), makeElement('td', selectChr)]));
+
+            var minPosInput = makeElement('input', null, {value: (viewStart|0)});
+            tab.appendChild(makeElement('tr', [makeElement('td', 'Start:'), makeElement('td',  minPosInput)]));
+            
+            var maxPosInput = makeElement('input', null, {value: (viewEnd|0)});
+            tab.appendChild(makeElement('tr', [makeElement('td', 'End:'), makeElement('td',  maxPosInput)]));
+
+            form.appendChild(tab);
+            form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
+            popup.appendChild(form);
         }
-        selectChr.value = chr;
-        form.appendChild(selectChr);
-        form.appendChild(makeElement('br'));
-        form.appendChild(document.createTextNode('Start:'));
-        var minPosInput = makeElement('input', null, {value: (viewStart|0)});
-        form.appendChild(minPosInput);
-        form.appendChild(makeElement('br'));
-        form.appendChild(document.createTextNode('End:'));
-        var maxPosInput = makeElement('input', null, {value: (viewEnd|0)});
-        form.appendChild(maxPosInput);
-        form.appendChild(makeElement('br'));
-        form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
-        popup.appendChild(form);
 
         hPopupHolder.appendChild(popup);
 
