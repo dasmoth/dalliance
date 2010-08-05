@@ -90,7 +90,7 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 function drawLine(featureGroupElement, features, style, tier, y)
 {
     var height = style.HEIGHT || 30;
-    var min = tier.forceMin || style.MIN || 0, max = tier.forceMax || style.MAX || 100;
+    var min = tier.source.opts.forceMin || style.MIN || 0, max = tier.source.opts.forceMax || style.MAX || 100;
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
     var color = style.COLOR || style.COLOR1 || 'black';
@@ -901,8 +901,8 @@ function glyphForFeature(feature, y, style, tier)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-	    var smin = tier.forceMin || style.MIN || 0;
-	    var smax = tier.forceMax || style.MAX || 100;
+	    var smin = tier.source.opts.forceMin || style.MIN || 0;
+	    var smax = tier.source.opts.forceMax || style.MAX || 100;
 	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }

@@ -1301,7 +1301,7 @@ function init()
     }, false);
     
     // Low-priority stuff
-    
+    storeStatus();   // to make sure things like resets are permanent.
 
     var epSource;
     for (var ti = 0; ti < tiers.length; ++ti) {

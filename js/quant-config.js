@@ -30,16 +30,14 @@ function makeQuantConfigButton(quantTools, tier, ypos) {
 	popup.style.borderStyle = 'solid';
 	popup.style.padding = '2px';
 
-	popup.appendChild(document.createTextNode('Configure tier'));
+	popup.appendChild(document.createTextNode('Configure: ' + tier.source.name));
 	
-	var form = makeElement('div');
-	form.appendChild(document.createTextNode('Min:'));
+	var form = makeElement('table');
 	var minInput = makeElement('input', '', {value: tier.min});
-	form.appendChild(minInput);
-	form.appendChild(makeElement('br'));
-	form.appendChild(document.createTextNode('Max:'));
+        form.appendChild(makeElement('tr', [makeElement('td', 'Min:'), makeElement('td', minInput)]));
 	var maxInput = makeElement('input', '', {value: tier.max});
-	form.appendChild(maxInput);
+        form.appendChild(makeElement('tr', [makeElement('td', 'Max:'), makeElement('td', maxInput)]));
+        
 	popup.appendChild(form);
 	
 	var updateButton = makeElement('div', 'Update');
@@ -64,10 +62,11 @@ function makeQuantConfigButton(quantTools, tier, ypos) {
                 return;
             }
 
-	    tier.forceMin = minInput.value;
-	    tier.forceMax = maxInput.value;
+	    tier.source.opts.forceMin = minInput.value;
+	    tier.source.opts.forceMax = maxInput.value;
 	    removeAllPopups();
 	    dasRequestComplete(tier);
+            storeStatus();          // write updated limits to storage.
 	}, false);
 
 	hPopupHolder.appendChild(popup);
