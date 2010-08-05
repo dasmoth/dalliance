@@ -31,7 +31,6 @@ Real Soon Now
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
-     + How does this interact with/override SS?
  - Separate concepts of Known Space and Drawn Space.
  - Page embedding
      + Allow multiple browser instances in a given page (i.e. remove all static state).
@@ -68,6 +67,7 @@ Nice to have
      + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
      + Any reason not to just hack the server to do this?
+     + Suggest-as-you-type?
  - Support for a more compact encoding for quantitative tracks.
      + Will need some server suppport.  
      + Adding a new encoding to Dazzle shouldn't be too painful.
@@ -112,18 +112,15 @@ The Server Side
 ---------------
  
  - Tidy up the Allow-Credentials support in Dazzle.
-
  - Are we better off using JKDBs to serve sequence?
     + A JKDB-based sequence server could also usefully compute GC composition, etc., etc., on the fly. [done now]
- - big*-backed servers?
+ - bigFile-backed servers?
  - BAM-backed servers. 
     + Done using Picard.  Potential scalability issues in the future but working for now.
-
  - Dazzle replacement (i.e. fast, scalable, DAS middleware).
     + Any ideas from Cadastral worth following up?
     + If I write a new one, would I still do it in Java?
         * BioJava 1.4?  "BioJava 3"?  New API?
     + Alternatively... do a "Dazzle 1.5" major update
         * possible to keep the decent bits while re-doing the plugin API?
-
  - DAS3? :-)

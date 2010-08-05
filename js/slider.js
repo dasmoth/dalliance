@@ -82,13 +82,4 @@ function DSlider(width, opts) {
 	document.addEventListener('mousemove', moveHandler, true);
 	document.addEventListener('mouseup', upHandler, true);
     }, false);
-
-    
-
-//    svg.text(main, 800, 50, '1kb', {strokeWidth: 0});
-//    svg.text(main, 900, 50, '10kb', {strokeWidth: 0});
-//    svg.text(main, 1000, 50, '100kb', {strokeWidth: 0});
-
-    // set up zoom thumb
-//    document.getElementById("sliderHandle").setAttribute("x", zoomTrackMin + (zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase)));
 }

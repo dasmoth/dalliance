@@ -64,7 +64,15 @@ var positionFeedback = false;
 // UI components
 
 var svg;
+var svgHolder;
+var svgRoot;
+var svgBackground;
+var dasLabelHolder;
 var dasTierHolder;
+var featureClipRect;
+var labelClipRect;
+var bin;
+var regionLabel;
 var zoomSlider;
 var zoomWidget;
 var zoomTickMarks;
@@ -75,9 +83,7 @@ var icons;
 
 // Visual config.
 
-//  var tierBackgroundColors = ["rgb(255,245,215)", "rgb(255,254,240)"];
 var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
-// var tierBackgroundColors = ["red", "blue"];
 var minTierHeight = 25;
 
 var tabMargin = 100;
@@ -168,13 +174,13 @@ DasTier.prototype.styles = function(scale) {
 var placards = [];
 
 function arrangeTiers() {
-    var browserSvg = document.getElementById('browser_svg');
+    var browserSvg = svgRoot;
     for (var p = 0; p < placards.length; ++p) {
 	browserSvg.removeChild(placards[p]);
     }
     placards = [];
 
-	var labelGroup = document.getElementById("dasLabels");
+	var labelGroup = dasLabelHolder;
 	removeChildren(labelGroup);
 	
 	var clh = 50;
@@ -311,10 +317,10 @@ function arrangeTiers() {
 	    clh = 290;
 	}
 	
-	document.getElementById("browser_svg").setAttribute("height", "" + ((clh | 0) + 10) + "px");
-	document.getElementById("background").setAttribute("height", "" + ((clh | 0) + 10));
-	document.getElementById("featureClipRect").setAttribute("height", "" + ((clh | 0) - 10));
-	document.getElementById("labelClipRect").setAttribute("height", "" + ((clh | 0) - 10));
+	svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
+	svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
+	featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+	labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
 }
 
 function offsetForTier(ti) {
@@ -343,7 +349,6 @@ function setupTierDrag(element, ti) {
         }
     };
     
-    var bin = document.getElementById('bin');
     var binned = false;
     var binEnterHandler = function(ev) {
         bin.setAttribute('stroke', 'red');
@@ -413,7 +418,7 @@ function setupTierDrag(element, ti) {
     
     element.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        var origin = document.getElementById('svgHolder').getBoundingClientRect();
+        var origin = svgHolder.getBoundingClientRect();
         dragOriginX = origin.left + window.scrollX; dragOriginY = origin.top + window.scrollY;
         window.addEventListener('mousemove', moveHandler, true);
         window.addEventListener('mouseup', upHandler, true);
@@ -456,12 +461,8 @@ function makeToggleButton(labelGroup, tier, ypos) {
 function updateRegion()
 {
     var regionDisplay = "chr: " + chr + " start: " + Math.round(viewStart) + " end: " + Math.round(viewEnd);
-    
-    var regionElement = document.getElementById("region");
-    while (regionElement.childNodes.length > 0) {
-	    regionElement.removeChild(regionElement.firstChild);
-    }
-    regionElement.appendChild(document.createTextNode(regionDisplay));
+    removeChildren(regionLabel);
+    regionLabel.appendChild(document.createTextNode(regionDisplay));
 }
 
 function setViewerStatus(msg)
@@ -651,7 +652,7 @@ function featurePopup(ev, feature, group)
 function mouseUpHandler(ev)
 {
     if (clickTestTB && positionFeedback) {
-        var origin = document.getElementById('svgHolder').getBoundingClientRect();
+        var origin = svgHolder.getBoundingClientRect();
         var ppos = ev.clientX - origin.left - tabMargin;
         var spos = (((1.0*ppos)/scale) + viewStart)|0;
         
@@ -889,8 +890,8 @@ function init()
     // Set up the UI (factor out?)
     //
            
-    var svgHolder = document.getElementById('svgHolder');
-    var svgRoot = makeElementNS(NS_SVG, 'svg', null, {
+    svgHolder = document.getElementById('svgHolder');
+    svgRoot = makeElementNS(NS_SVG, 'svg', null, {
         version: '1.1',
         width: '860px',
         height: '500px',
@@ -899,12 +900,13 @@ function init()
     removeChildren(svgHolder);
     svgHolder.appendChild(svgRoot);
 
-    var main = makeElementNS(NS_SVG, 'g',
-                             makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'}),
+    
+    svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'});
+    var main = makeElementNS(NS_SVG, 'g', svgBackground,
                              {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
     svgRoot.appendChild(main);
 
-    var regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
+    regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
         x: 240,
         y: 30,
         id: 'region',   // FIXME id
@@ -928,12 +930,12 @@ function init()
     makeTooltip(resetButton, 'Reset the browser to a default state');
     main.appendChild(resetButton);
 
-    var bin = icons.createIcon('bin', main);
+    bin = icons.createIcon('bin', main);
     bin.setAttribute('transform', 'translate(10, 18)');
     main.appendChild(bin);
     makeTooltip(bin, 'Drag tracks here to discard');
     
-    var featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
+    featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: 100,      // FIXME tabMargin
         y: 50,
         width: 750,
@@ -941,7 +943,7 @@ function init()
         id: 'featureClipRect'
     });
     main.appendChild(makeElementNS(NS_SVG, 'clipPath', featureClipRect, {id: 'featureClip'}));
-    var labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
+    labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: 10,      // FIXME tabMargin
         y: 50,
         width: 90,
@@ -957,7 +959,7 @@ function init()
 
     makeHighlight();
     
-    var dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip)'}); 
+    dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip)'}); 
     main.appendChild(dasLabelHolder);
     
     {
@@ -997,7 +999,6 @@ function init()
     
     popupHolder = makeElementNS(NS_SVG, 'g');
     main.appendChild(popupHolder);
-    // hPopupHolder = document.getElementById('hPopups');
     hPopupHolder = makeElement('div');
     svgHolder.appendChild(hPopupHolder);
   
@@ -1062,8 +1063,7 @@ function init()
 
     // set up the navigator
 
-
-    document.getElementById("region").addEventListener('mousedown', function(ev) {
+    regionLabel.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 	removeAllPopups(); 
 
@@ -1226,7 +1226,7 @@ function init()
 	window.location.assign('?reset=true');
     }, false);
 	
-    tierHolder = document.getElementById("dasTiers");
+    tierHolder = dasTiers;
     tiers = new Array();
     if (overrideSources) {
 	sources = overrideSources;
@@ -1421,16 +1421,11 @@ function makeZoomerTicks() {
 function resizeViewer() {
     var width = window.innerWidth;
     width = Math.max(width, 600);
-    document.getElementById("browser_svg").setAttribute('width', width - 30);
-    document.getElementById("background").setAttribute('width', width - 30);
-    document.getElementById("featureClipRect").setAttribute('width', width - 140);
-
+    svgRoot.setAttribute('width', width - 30);
+    svgBackground.setAttribute('width', width - 30);
+    featureClipRect.setAttribute('width', width - 140);
 
     zoomWidget.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 100) + ', 0)');
-// FIXME: should move the zoomer.
-//    document.getElementById('sliderTrack').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
-//    document.getElementById('sliderHandle').setAttribute('transform', 'translate(' + (width - 190 - 600) + ', 0)');
-    
     var oldFPW = featurePanelWidth;
     featurePanelWidth = (width - 140)|0;
     
@@ -1574,9 +1569,8 @@ function zoom(factor)
         knownEnd = Math.round(viewEnd) + maxExtraW;
     // }
     
-        var scaleRat = (scale / scaleAtLastRedraw);
-        // document.getElementById("dasTiers").setAttribute("transform", "translate(" + ((-1.0 * (viewStart - origin)) * scale) + ",0), scale(" + (scale / scaleAtLastRedraw) + ",1)");
-        xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
+    var scaleRat = (scale / scaleAtLastRedraw);
+    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
         
     var labels = document.getElementsByClassName("label-text");
     for (var li = 0; li < labels.length; ++li) {
