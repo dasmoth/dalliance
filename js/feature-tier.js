@@ -697,6 +697,9 @@ function glyphForFeature(feature, y, style, tier)
 			      ' L ' + (mid+hh) + ' ' + (y+hh) + 
 			      ' M ' + mid + ' ' + y +
 			      ' L ' + mid + ' ' + (y+height));
+            minPos = Math.min(minPos, mid-hh);
+            maxPos = Math.max(maxPos, mid+hh);
+            fill = 'none'
 	} else if (gtype == 'EX') {
 	    mark = document.createElementNS(NS_SVG, 'path');
 	    mark.setAttribute('fill', 'none');
@@ -706,6 +709,8 @@ function glyphForFeature(feature, y, style, tier)
 			      ' L ' + (mid+hh) + ' ' + (y+height) + 
 			      ' M ' + (mid+hh) + ' ' + (y) +
 			      ' L ' + (mid-hh) + ' ' + (y+height));  
+            minPos = Math.min(minPos, mid-hh);
+            maxPos = Math.max(maxPos, mid+hh);
 	} else if (gtype == 'SPAN') {
 	    mark = document.createElementNS(NS_SVG, 'path');
 	    mark.setAttribute('fill', 'none');
@@ -745,6 +750,8 @@ function glyphForFeature(feature, y, style, tier)
 	    mark.setAttribute('cx', mid);
 	    mark.setAttribute('cy', (y+hh));
 	    mark.setAttribute('r', hh);
+            minPos = Math.min(minPos, mid-hh);
+            maxPos = Math.max(maxPos, mid+hh);
 	}  else if (gtype == 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
 	    var width = style.LINEWIDTH || height;
@@ -768,24 +775,23 @@ function glyphForFeature(feature, y, style, tier)
 				  ' L ' + (mid - halfWidth) + ' ' + height +
 				  ' L ' + mid + ' ' + 0 + ' Z');
 	    }
+            minPos = Math.min(minPos, mid-halfWidth);
+            maxPos = Math.max(maxPos, mid+halfWidth);
 	    mark.setAttribute('fill', stroke);
 	    mark.setAttribute('stroke', 'none');
 	}
 
-	if (fill == 'none') {
-	    glyph = mark;
-	} else {
-	    glyph = document.createElementNS(NS_SVG, 'g');
-	    var bg = document.createElementNS(NS_SVG, 'rect');
-	    bg.setAttribute('x', minPos);
-            bg.setAttribute('y', y);
-            bg.setAttribute('width', maxPos - minPos);
-            bg.setAttribute('height', height);
-	    bg.setAttribute('stroke', 'none');
-	    bg.setAttribute('fill', fill);
-	    glyph.appendChild(bg);
-	    glyph.appendChild(mark);
-	}
+	glyph = document.createElementNS(NS_SVG, 'g');
+	var bg = document.createElementNS(NS_SVG, 'rect');
+	bg.setAttribute('x', minPos);
+        bg.setAttribute('y', y);
+        bg.setAttribute('width', maxPos - minPos);
+        bg.setAttribute('height', height);
+	bg.setAttribute('stroke', 'none');
+	bg.setAttribute('fill', fill);
+        bg.setAttribute('pointer-events', 'all');
+	glyph.appendChild(bg);
+	glyph.appendChild(mark);
     } else if (gtype == 'PRIMERS') {
 	var arrowColor = style.FGCOLOR || 'red';
 	var lineColor = style.BGCOLOR || 'black';
