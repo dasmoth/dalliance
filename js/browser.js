@@ -1323,6 +1323,34 @@ function init()
 	    }
         }
     }, false);
+
+    var keyHandler = function(ev) {
+//        alert('key = ' + ev.keyCode + ', char = ' + ev.charCode);
+
+        if (ev.keyCode == 37) {
+            // left
+            ev.stopPropagation(); ev.preventDefault();
+            move(ev.shiftKey ? - 100 : -25);
+        } else if (ev.keyCode == 39) {
+            ev.stopPropagation(); ev.preventDefault();
+            move(ev.shiftKey ? 100 : 25);
+        } else if (ev.charCode == 61) {
+            ev.stopPropagation(); ev.preventDefault();
+            // alert('zoomIn');
+            var wid = ((viewEnd|0) - (viewStart|0) + 1);
+            var mid = ((viewEnd|0) + (viewStart|0))/2;
+            setLocation(mid - (0.33333*wid)|0, mid +  (0.33333*wid)|0);
+        } else if (ev.charCode == 45) {
+            ev.stopPropagation(); ev.preventDefault();
+            //alert('zoomOut');
+            var wid = ((viewEnd|0) - (viewStart|0) + 1);
+            var mid = ((viewEnd|0) + (viewStart|0))/2;
+            setLocation(mid - (0.75*wid)|0, mid +  (0.75*wid)|0);
+        }
+    };
+
+    window.addEventListener('keydown', keyHandler, false);
+    window.addEventListener('keypress', keyHandler, false);
     
     // Low-priority stuff
     storeStatus();   // to make sure things like resets are permanent.
@@ -1623,6 +1651,18 @@ function setLocation(newMin, newMax, newChr)
 	chr = newChr;
 	currentSeqMax = ep.end;
     }
+
+    var newWidth = newMax - newMin + 1;
+    if (newWidth > MAX_VIEW_SIZE) {
+        newMin = ((newMax + newMin - MAX_VIEW_SIZE)/2)|0;
+        newMax = (newMin + MAX_VIEW_SIZE - 1)|0;
+    }
+    if (newWidth < zoomBase) {
+        newMin = ((newMax + newMin - zoomBase)/2)|0;
+        mewMax = (newMin + zoomBase - 1)|0;
+    }
+
+        
 
     if (newMin < 1) {
 	var wid = newMax - newMin + 1;

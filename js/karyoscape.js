@@ -153,7 +153,6 @@ Karyoscape.prototype.redraw = function() {
 	document.removeEventListener('mousemove', moveHandler, true);
 	document.removeEventListener('mouseup', upHandler, true);
     }
-    
 
     this.thumb.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
@@ -161,7 +160,6 @@ Karyoscape.prototype.redraw = function() {
 	document.addEventListener('mousemove', moveHandler, true);
 	document.addEventListener('mouseup', upHandler, true);
     }, false);
-    
 }
 
 Karyoscape.prototype.setThumb = function() {
