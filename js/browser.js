@@ -527,10 +527,29 @@ function mouseDownHandler(ev)
 
     if (target && (target.dalliance_feature || target.dalliance_group)) {
 	if (dcTimeoutID && target.dalliance_feature) {
+/*    Simple solution won't work in WebKit due to https://bugs.webkit.org/show_bug.cgi?id=42815
+            var frect = target.getBoundingClientRect();
+            alert('clientX=' + ev.clientX + ', left=' + frect.left + ', width=' + frect.width); */
+
+            var f = target.dalliance_feature;
+            var org = svgHolder.getBoundingClientRect();
+            var fstart = (((f.min|0) - (viewStart|0)) * scale) + org.left + tabMargin;
+            var fwidth = (((f.max - f.min) + 1) * scale);
+
 	    clearTimeout(dcTimeoutID);
 	    dcTimeoutID = null;
+
+            var newMid = (((target.dalliance_feature.min|0) + (target.dalliance_feature.max|0)))/2;
+            if (fwidth > 10) {
+                var frac = (1.0 * (ev.clientX - fstart)) / fwidth;
+                if (frac < 0.3) {
+                    newMid = (target.dalliance_feature.min|0);
+                } else  if (frac > 0.7) {
+                    newMid = (target.dalliance_feature.max|0);
+                }
+            }
+
 	    var width = viewEnd - viewStart;
-	    var newMid = (((target.dalliance_feature.min|0) + (target.dalliance_feature.max|0)))/2;
 	    setLocation(newMid - (width/2), newMid + (width/2));
 	} else {
 	    dcTimeoutID = setTimeout(function() {
