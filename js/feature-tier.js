@@ -687,6 +687,7 @@ function glyphForFeature(feature, y, style, tier)
 	var hh = height/2;
 
 	var mark;
+        var bMinPos = minPos, bMaxPos = maxPos;
 
 	if (gtype == 'CROSS') {
 	    mark = document.createElementNS(NS_SVG, 'path');
@@ -697,9 +698,8 @@ function glyphForFeature(feature, y, style, tier)
 			      ' L ' + (mid+hh) + ' ' + (y+hh) + 
 			      ' M ' + mid + ' ' + y +
 			      ' L ' + mid + ' ' + (y+height));
-            minPos = Math.min(minPos, mid-hh);
-            maxPos = Math.max(maxPos, mid+hh);
-            fill = 'none'
+            bMinPos = Math.min(minPos, mid-hh);
+            bMaxPos = Math.max(maxPos, mid+hh);
 	} else if (gtype == 'EX') {
 	    mark = document.createElementNS(NS_SVG, 'path');
 	    mark.setAttribute('fill', 'none');
@@ -709,8 +709,8 @@ function glyphForFeature(feature, y, style, tier)
 			      ' L ' + (mid+hh) + ' ' + (y+height) + 
 			      ' M ' + (mid+hh) + ' ' + (y) +
 			      ' L ' + (mid-hh) + ' ' + (y+height));  
-            minPos = Math.min(minPos, mid-hh);
-            maxPos = Math.max(maxPos, mid+hh);
+            bMinPos = Math.min(minPos, mid-hh);
+            bMaxPos = Math.max(maxPos, mid+hh);
 	} else if (gtype == 'SPAN') {
 	    mark = document.createElementNS(NS_SVG, 'path');
 	    mark.setAttribute('fill', 'none');
@@ -750,8 +750,8 @@ function glyphForFeature(feature, y, style, tier)
 	    mark.setAttribute('cx', mid);
 	    mark.setAttribute('cy', (y+hh));
 	    mark.setAttribute('r', hh);
-            minPos = Math.min(minPos, mid-hh);
-            maxPos = Math.max(maxPos, mid+hh);
+            bMinPos = Math.min(minPos, mid-hh);
+            bMaxPos = Math.max(maxPos, mid+hh);
 	}  else if (gtype == 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
 	    var width = style.LINEWIDTH || height;
@@ -775,22 +775,35 @@ function glyphForFeature(feature, y, style, tier)
 				  ' L ' + (mid - halfWidth) + ' ' + height +
 				  ' L ' + mid + ' ' + 0 + ' Z');
 	    }
-            minPos = Math.min(minPos, mid-halfWidth);
-            maxPos = Math.max(maxPos, mid+halfWidth);
+            bMinPos = Math.min(minPos, mid-halfWidth);
+            bMaxPos = Math.max(maxPos, mid+halfWidth);
 	    mark.setAttribute('fill', stroke);
 	    mark.setAttribute('stroke', 'none');
 	}
 
 	glyph = document.createElementNS(NS_SVG, 'g');
-	var bg = document.createElementNS(NS_SVG, 'rect');
-	bg.setAttribute('x', minPos);
-        bg.setAttribute('y', y);
-        bg.setAttribute('width', maxPos - minPos);
-        bg.setAttribute('height', height);
-	bg.setAttribute('stroke', 'none');
-	bg.setAttribute('fill', fill);
-        bg.setAttribute('pointer-events', 'all');
-	glyph.appendChild(bg);
+        if (fill == 'none' || bMinPos < minPos || bMaxPos > maxPos) {
+            var bg = document.createElementNS(NS_SVG, 'rect');
+	    bg.setAttribute('x', bMinPos);
+            bg.setAttribute('y', y);
+            bg.setAttribute('width', bMaxPos - bMinPos);
+            bg.setAttribute('height', height);
+	    bg.setAttribute('stroke', 'none');
+	    bg.setAttribute('fill', 'none');
+            bg.setAttribute('pointer-events', 'all');
+	    glyph.appendChild(bg);
+        }
+        if (fill != 'none') {
+	    var bg = document.createElementNS(NS_SVG, 'rect');
+	    bg.setAttribute('x', minPos);
+            bg.setAttribute('y', y);
+            bg.setAttribute('width', maxPos - minPos);
+            bg.setAttribute('height', height);
+	    bg.setAttribute('stroke', 'none');
+	    bg.setAttribute('fill', fill);
+            bg.setAttribute('pointer-events', 'all');
+	    glyph.appendChild(bg);
+        }
 	glyph.appendChild(mark);
     } else if (gtype == 'PRIMERS') {
 	var arrowColor = style.FGCOLOR || 'red';
