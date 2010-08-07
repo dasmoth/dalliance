@@ -59,6 +59,7 @@ function DGlyph(glyph, min, max, height) {
     this.min = min;
     this.max = max;
     this.height = height;
+    this.zindex = 0;
 }
 
 //
@@ -397,8 +398,13 @@ function drawFeatureTier(tier)
     } 
     for (var bsi = 0; bsi < bumpedSTs.length; ++bsi) {
 	var st = bumpedSTs[bsi];
-	for (var i = 0; i < st.glyphs.length; ++i) {
-	    var g = st.glyphs[i];
+        var stg = st.glyphs;
+        stg = stg.sort(function(g1, g2) {
+            return g1.zindex - g2.zindex;
+        });
+
+	for (var i = 0; i < stg.length; ++i) {
+	    var g = stg[i];
 	    if (g.glyph) {
 		g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
 		featureGroupElement.appendChild(g.glyph);
@@ -560,6 +566,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
   
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     glyphGroup.dalliance_group = groupElement;
+    var featureDGlyphs = [];
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
 	if (feature.orientation && strand==null) {
@@ -576,19 +583,27 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	    continue;
 	}
 	var glyph = glyphForFeature(feature, y, style, tier);
-	if (glyph && glyph.glyph) {
-            glyph.glyph.dalliance_group = groupElement;
-	    glyphGroup.appendChild(glyph.glyph);
-	    var gspan = new Range(glyph.min, glyph.max);
-	    if (spans == null) {
-		spans = gspan;
-	    } else {
-		spans = union(spans, gspan);
-	    }
-	    height = Math.max(height, glyph.height);
-	    if (!label && glyph.label) {
-		label = glyph.label;
-	    }
+        if (glyph && glyph.glyph) {
+            featureDGlyphs.push(glyph);
+        }
+    }
+    featureDGlyphs = featureDGlyphs.sort(function(g1, g2) {
+        return g1.zindex - g2.zindex;
+    });
+    
+    for (var i = 0; i < featureDGlyphs.length; ++i) {
+        var glyph = featureDGlyphs[i];
+        glyph.glyph.dalliance_group = groupElement;
+	glyphGroup.appendChild(glyph.glyph);
+	var gspan = new Range(glyph.min, glyph.max);
+	if (spans == null) {
+	    spans = gspan;
+	} else {
+	    spans = union(spans, gspan);
+	}
+	height = Math.max(height, glyph.height);
+	if (!label && glyph.label) {
+	    label = glyph.label;
 	}
     }
 
@@ -1104,6 +1119,7 @@ function glyphForFeature(feature, y, style, tier)
     if (quant) {
         dg.quant = quant;
     }
+    dg.zindex = style.ZINDEX || 0;
 
     return dg;
 }

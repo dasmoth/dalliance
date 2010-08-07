@@ -51,10 +51,6 @@ Real Soon Now
 Nice to have
 ------------
 
- - More stylesheet stuff
-   + Support ZINDEX?
-   + Rainbowed LINEPLOT glyphs?
-   + More thought about how how to combine LINEPLOT with other glyphs in the same tier.
  - Add a track removal button to error placards?
  - Ability to re-bump w/o re-fetching all the data
      + Should allow more aggressive spec-fetching?
