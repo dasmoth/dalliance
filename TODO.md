@@ -53,7 +53,6 @@ Nice to have
 
  - More stylesheet stuff
    + Still missing a few glyphs (TEXT and TOOMANY currently drawn the same as BOX).
-   + Direction is ignore for ARROW.
    + Support ZINDEX?
    + Rainbowed LINEPLOT glyphs?
    + More thought about how how to combine LINEPLOT with other glyphs in the same tier.

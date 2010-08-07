@@ -1338,12 +1338,18 @@ function init()
             ev.stopPropagation(); ev.preventDefault();
             // alert('zoomIn');
             var wid = ((viewEnd|0) - (viewStart|0) + 1);
+            if (wid <= zoomBase) {
+                return;
+            }
             var mid = ((viewEnd|0) + (viewStart|0))/2;
-            setLocation(mid - (0.33333*wid)|0, mid +  (0.33333*wid)|0);
+            setLocation(mid - (0.3333333*wid)|0, mid +  (0.3333333*wid)|0);
         } else if (ev.charCode == 45) {
             ev.stopPropagation(); ev.preventDefault();
             //alert('zoomOut');
             var wid = ((viewEnd|0) - (viewStart|0) + 1);
+            if (wid >= MAX_VIEW_SIZE) {
+                return;
+            }
             var mid = ((viewEnd|0) + (viewStart|0))/2;
             setLocation(mid - (0.75*wid)|0, mid +  (0.75*wid)|0);
         }

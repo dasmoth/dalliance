@@ -828,17 +828,30 @@ function glyphForFeature(feature, y, style, tier)
 	    		        'M ' + maxPos + ' ' + 0 + ' L ' + maxPos + ' ' + height + ' L ' + (maxPos - height) + ' ' + (height/2) + ' Z');
 	glyph.appendChild(trigs);
     } else if (gtype == 'ARROW') {
+        var parallel = style.PARALLEL ? style.PARALLEL == 'yes' : true;
+        var ne = style.NORTHEAST && style.NORTHEAST == 'yes';
+        var sw = style.SOUTHWEST && style.SOUTHWEST == 'yes';
+
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || 'green';
 	var height = style.HEIGHT || 12;
 	requiredHeight = height = 1.0 * height;
-	var headInset = 0.5 *height;
-	var minLength = height + 2;
-	var instep = 0.333333 * height;
+	var headInset = parallel ? 0.5 *height : 0.25 * height;
+	var midPos = (maxPos + minPos)/2;
+	var instep = parallel ? 0.25 * height : 0.4 * height;
 	
-        if (maxPos - minPos < minLength) {
-            minPos = (maxPos + minPos - minLength) / 2;
-            maxPos = minPos + minLength;
+        if (parallel) {
+            if (ne && (maxPos - midPos < height)) {
+                maxPos = midPos + height;
+            }
+            if (sw && (midPos - minPos < height)) {
+                minPos = midPos - height;
+            }
+        } else {
+            if (maxPos - minPos < (0.75 * height)) {
+                minPos = midPos - (0.375 * height);
+                maxPos = midPos + (0.375 * height);
+            }
         }
 
 	var path = document.createElementNS(NS_SVG, 'path');
@@ -847,18 +860,56 @@ function glyphForFeature(feature, y, style, tier)
 	if (stroke != 'none') {
 	    path.setAttribute('stroke-width', 1);
 	}
-	
-	path.setAttribute('d', 'M ' + ((minPos + headInset)) + ' ' + ((y+instep)) +
-                          ' L ' + ((maxPos - headInset)) + ' ' + ((y+instep)) +
-			  ' L ' + ((maxPos - headInset)) + ' ' + (y) +
-			  ' L ' + (maxPos) + ' ' + ((y+(height/2))) +
-			  ' L ' + ((maxPos - headInset)) + ' ' + ((y+height)) +
-			  ' L ' + ((maxPos - headInset)) + ' ' + ((y + instep + instep)) +
-			  ' L ' + ((minPos + headInset)) + ' ' + ((y + instep + instep)) +
-			  ' L ' + ((minPos + headInset)) + ' ' + ((y + height)) +
-			  ' L ' + (minPos) + ' ' + ((y+(height/2))) +
-			  ' L ' + ((minPos + headInset)) + ' ' + (y) +
-			  ' L ' + ((minPos + headInset)) + ' ' + ((y+instep)));
+
+        var pathops;
+        if (parallel) {
+            pathops = 'M ' + midPos + ' ' + instep;
+            if (ne) {
+                pathops += ' L ' + (maxPos - headInset) + ' ' + instep + 
+                    ' L ' + (maxPos - headInset) + ' 0' +
+                    ' L ' + maxPos + ' ' + (height/2) +
+                    ' L ' + (maxPos - headInset) + ' ' + height +
+                    ' L ' + (maxPos - headInset) + ' ' + (height - instep);
+            } else {
+                pathops += ' L ' + maxPos + ' ' + instep +
+                    ' L ' + maxPos + ' ' + (height - instep);
+            }
+            if (sw) {
+                pathops += ' L ' + (minPos + headInset) + ' ' + (height-instep) +
+                    ' L ' + (minPos + headInset) + ' ' + height + 
+                    ' L ' + minPos + ' ' + (height/2) +
+                    ' L ' + (minPos + headInset) + ' ' + ' 0' +
+                    ' L ' + (minPos + headInset) + ' ' + instep;
+            } else {
+                pathops += ' L ' + minPos + ' ' + (height-instep) +
+                    ' L ' + minPos + ' ' + instep;
+            }
+            pathops += ' Z';
+        } else {
+            pathops = 'M ' + (minPos + instep) + ' ' + (height/2);
+            if (ne) {
+                pathops += ' L ' + (minPos + instep) + ' ' + headInset +
+                    ' L ' + minPos + ' ' + headInset +
+                    ' L ' + midPos + ' 0' +
+                    ' L ' + maxPos + ' ' + headInset +
+                    ' L ' + (maxPos - instep) + ' ' + headInset;
+            } else {
+                pathops += ' L ' + (minPos + instep) + ' 0' +
+                    ' L ' + (maxPos - instep) + ' 0';
+            }
+            if (sw) {
+                pathops += ' L ' + (maxPos - instep) + ' ' + (height - headInset) +
+                    ' L ' + maxPos + ' ' + (height - headInset) +
+                    ' L ' + midPos + ' ' + height + 
+                    ' L ' + minPos + ' ' + (height - headInset) +
+                    ' L ' + (minPos + instep) + ' ' + (height - headInset);
+            } else {
+                pathops += ' L ' + (maxPos - instep) + ' ' + height +
+                    ' L ' + (minPos + instep) + ' ' + height;
+            }
+            pathops += ' Z';
+        }
+	path.setAttribute('d', pathops);
 
 	glyph = path;
     } else if (gtype == 'ANCHORED_ARROW') {
