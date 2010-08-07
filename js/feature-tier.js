@@ -978,7 +978,7 @@ function glyphForFeature(feature, y, style, tier)
         var tstring = style.STRING;
         requiredHeight = height;
         if (!tstring) {
-            glyph == null;
+            glyph = null;
         } else {
             var txt = makeElementNS(NS_SVG, 'text', tstring, {
                 stroke: 'none',
