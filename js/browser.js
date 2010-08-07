@@ -1334,7 +1334,9 @@ function init()
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
             move(ev.shiftKey ? 100 : 25);
-        } else if (ev.charCode == 61) {
+        } /*     Keyboard zooming code works, but disabled for now because we need better latency-hiding.
+
+        else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
             // alert('zoomIn');
             var wid = ((viewEnd|0) - (viewStart|0) + 1);
@@ -1352,7 +1354,7 @@ function init()
             }
             var mid = ((viewEnd|0) + (viewStart|0))/2;
             setLocation(mid - (0.75*wid)|0, mid +  (0.75*wid)|0);
-        }
+        } */
     };
 
     window.addEventListener('keydown', keyHandler, false);
