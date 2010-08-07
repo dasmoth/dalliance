@@ -956,6 +956,47 @@ function glyphForFeature(feature, y, style, tier)
 			  ' L ' + ((minPos + lInset)) + ' ' + ((y+instep)));
 
 	glyph = path;
+    } else if (gtype == 'TEXT') {
+        var textFill = style.FGCOLOR || 'none';
+        var bgFill = style.BGCOLOR || 'none';
+        var height = style.HEIGHT || 12;
+        var tstring = style.STRING;
+        requiredHeight = height;
+        if (!tstring) {
+            glyph == null;
+        } else {
+            var txt = makeElementNS(NS_SVG, 'text', tstring, {
+                stroke: 'none',
+                fill: textFill
+            });
+            tier.viewport.appendChild(txt);
+            var bbox = txt.getBBox();
+            tier.viewport.removeChild(txt);
+            txt.setAttribute('x', (minPos + maxPos - bbox.width)/2);
+            txt.setAttribute('y', height - 2);
+
+            if (bgFill == 'none') {
+                glyph = txt;
+            } else {
+                glyph = makeElementNS(NS_SVG, 'g', [
+                    makeElementNS(NS_SVG, 'rect', null, {
+                        x: minPos,
+                        y: 0,
+                        width: (maxPos - minPos),
+                        height: height,
+                        fill: bgFill,
+                        stroke: 'none'
+                    }),
+                    txt]);
+            }
+
+            if (bbox.width > (maxPos - minPos)) {
+                var tMinPos = (minPos + maxPos - bbox.width)/2;
+                var tMaxPos = minPos + bbox.width;
+                min = ((tMinPos/scale)|0) + origin;
+                max = ((tMaxPos/scale)|0) + origin;
+            }
+        }
     } else {
 	// BOX plus other rectangular stuff
 	// Also handles HISTOGRAM, GRADIENT, and TOOMANY.
@@ -1033,7 +1074,22 @@ function glyphForFeature(feature, y, style, tier)
 	    }
 	}
 	
-	glyph = rect;
+        if (gtype == 'TOOMANY') {
+            var bits = [rect];
+            for (var i = 3; i < height; i += 3) {
+                bits.push(makeElementNS(NS_SVG, 'line', null, {
+                    x1: minPos,
+                    y1: i,
+                    x2: maxPos,
+                    y2: i,
+                    stroke: stroke,
+                    strokeWidth: 0.5
+                }));
+            }
+            glyph = makeElementNS(NS_SVG, 'g', bits);
+        } else {
+	    glyph = rect;
+        }
     }
 
     glyph.dalliance_feature = feature;
