@@ -51,7 +51,8 @@ function refreshTier_features()
 	this.status = 'Fetching features';
 
         if (this.source.opts.mapping) {
-            var mseg = chains.sourceBlocksForRange(chr, knownStart, knownEnd);
+            var mapping = chains[this.source.opts.mapping];
+            var mseg = mapping.sourceBlocksForRange(chr, knownStart, knownEnd);
 
             if (mseg.length == 0) {
                 this.currentFeatures = [];
@@ -71,14 +72,26 @@ function refreshTier_features()
                         var mappedFeatures = [];
                         for (var fi = 0; fi < features.length; ++fi) {
                             var f = features[fi];
-                            var mmin = chains.mapPoint(f.segment, f.min);
-                            var mmax = chains.mapPoint(f.segment, f.max);
+                            var mmin = mapping.mapPoint(f.segment, f.min);
+                            var mmax = mapping.mapPoint(f.segment, f.max);
                             if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
                                 // Discard feature.
                             } else {
                                 f.segment = mmin.seq;
                                 f.min = mmin.pos;
                                 f.max = mmax.pos;
+                                if (f.min > f.max) {
+                                    var tmp = f.max;
+                                    f.max = f.min;
+                                    f.min = tmp;
+                                }
+                                if (mmin.flipped) {
+                                    if (f.orientation == '-') {
+                                        f.orientation = '+';
+                                    } else if (f.orientation == '+') {
+                                        f.orientation = '-';
+                                    }
+                                }
                                 mappedFeatures.push(f);
                             }
                         }

@@ -16,7 +16,7 @@ function Chainset(uri) {
 
 Chainset.prototype.fetchChainsTo = function(chr) {
     var uri = this.uri + 'chr' + chr + '.json';
-    alert('fetching chains: ' + uri);
+//    alert('fetching chains: ' + uri);
     var req = new XMLHttpRequest();
     req.open('get', uri, false);
     req.send();
@@ -38,7 +38,12 @@ Chainset.prototype.mapPoint = function(chr, pos) {
     for (var ci = 0; ci < chains.length; ++ci) {
         var c = chains[ci];
         if (pos >= c.srcMin && pos <= c.srcMax) {
-            var cpos = pos - c.srcMin;
+            var cpos;
+            if (c.srcOri == '-') {
+                cpos = c.srcMax - pos;
+            } else {
+                cpos = pos - c.srcMin;
+            }
             var blocks = c.blocks;
             for (var bi = 0; bi < blocks.length; ++bi) {
                 var b = blocks[bi];
@@ -48,11 +53,15 @@ Chainset.prototype.mapPoint = function(chr, pos) {
                 if (cpos >= bSrc && cpos <= (bSrc + bSize)) {
                     var apos = cpos - bSrc;
 
-                    var dpos = apos + bDest + c.destMin;
-                    return {seq: c.destChr, pos: dpos}
+                    var dpos;
+                    if (c.destOri == '-') {
+                        dpos = c.destMax - bDest - apos;
+                    } else {
+                        dpos = apos + bDest + c.destMin;
+                    }
+                    return {seq: c.destChr, pos: dpos, flipped: (c.srcOri != c.destOri)}
                 }
             }
-            return null;
         }
     }
     return null;
@@ -63,7 +72,13 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
     for (var ci = 0; ci < chains.length; ++ci) {
         var c = chains[ci];
         if (pos >= c.destMin && pos <= c.destMax) {
-            var cpos = pos - c.destMin;
+            var cpos;
+            if (c.srcOri == '-') {
+                cpos = c.destMax - pos;
+            } else {
+                cpos = pos - c.destMin;
+            }    
+            
             var blocks = c.blocks;
             for (var bi = 0; bi < blocks.length; ++bi) {
                 var b = blocks[bi];
@@ -74,7 +89,13 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
                     var apos = cpos - bDest;
 
                     var dpos = apos + bSrc + c.srcMin;
-                    return {seq: c.srcChr, pos: dpos}
+                    var dpos;
+                    if (c.destOri == '-') {
+                        dpos = c.srcMax - bSrc - apos;
+                    } else {
+                        dpos = apos + bSrc + c.srcMin;
+                    }
+                    return {seq: c.srcChr, pos: dpos, flipped: (c.srcOri != c.destOri)}
                 }
             }
             return null;
