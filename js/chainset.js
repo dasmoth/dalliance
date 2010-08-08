@@ -11,7 +11,12 @@ function Chainset(uri) {
     this.uri = uri;
     this.chainsBySrc = {};
     this.chainsByDest = {};
+}
 
+
+Chainset.prototype.fetchChainsTo = function(chr) {
+    var uri = this.uri + 'chr' + chr + '.json';
+    alert('fetching chains: ' + uri);
     var req = new XMLHttpRequest();
     req.open('get', uri, false);
     req.send();
@@ -21,6 +26,10 @@ function Chainset(uri) {
         var c = chains[i];
         pusho(this.chainsBySrc, c.srcChr, c);
         pusho(this.chainsByDest, c.destChr, c);
+    }
+
+    if (!this.chainsByDest[chr]) {
+        this.chainsByDest[chr] = [];    // FIXME: currently needed to prevent duplicate fetches if no chains are available.
     }
 }
 
@@ -75,6 +84,10 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
 }
 
 Chainset.prototype.sourceBlocksForRange = function(chr, min, max) {
+    if (!this.chainsByDest[chr]) {
+        this.fetchChainsTo(chr);
+    }
+
     var mmin = this.unmapPoint(chr, min);
     var mmax = this.unmapPoint(chr, max);
     if (!mmin || !mmax || mmin.seq != mmax.seq) {
