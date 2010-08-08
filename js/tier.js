@@ -50,19 +50,58 @@ function refreshTier_features()
 	var tier = this;
 	this.status = 'Fetching features';
 
-        this.dasSource.features(
-	    new DASSegment(chr, knownStart, knownEnd),
-	    {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
-	    function(features, status) {
-		if (status) {
-		    tier.error = status;
-		} else {
-		    tier.error = null; tier.status = null;
-		}
-                tier.currentFeatures = features;
-                dasRequestComplete(tier);
-	    }
-        );
+        if (this.source.opts.mapping) {
+            var mseg = chains.sourceBlocksForRange(chr, knownStart, knownEnd);
+
+            if (mseg.length == 0) {
+                this.currentFeatures = [];
+                this.status = "No mapping available for this regions";
+                dasRequestComplete(this);
+            } else {
+                this.dasSource.features(
+                    mseg[0],
+                    {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
+	            function(features, status) {
+		        if (status) {
+		            tier.error = status;
+		        } else {
+		            tier.error = null; tier.status = null;
+		        }
+
+                        var mappedFeatures = [];
+                        for (var fi = 0; fi < features.length; ++fi) {
+                            var f = features[fi];
+                            var mmin = chains.mapPoint(f.segment, f.min);
+                            var mmax = chains.mapPoint(f.segment, f.max);
+                            if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
+                                // Discard feature.
+                            } else {
+                                f.segment = mmin.seq;
+                                f.min = mmin.pos;
+                                f.max = mmax.pos;
+                                mappedFeatures.push(f);
+                            }
+                        }
+                        tier.currentFeatures = mappedFeatures;
+                        dasRequestComplete(tier);
+	            }
+                );
+            }
+        } else {        
+            this.dasSource.features(
+	        new DASSegment(chr, knownStart, knownEnd),
+	        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
+	        function(features, status) {
+		    if (status) {
+		        tier.error = status;
+		    } else {
+		        tier.error = null; tier.status = null;
+		    }
+                    tier.currentFeatures = features;
+                    dasRequestComplete(tier);
+	        }
+            );
+        }
     } else {
 	this.status = 'Nothing to show at this zoom level';
 	this.currentFeatures = [];
