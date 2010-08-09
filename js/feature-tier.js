@@ -10,7 +10,7 @@
 var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires making
                         // drawing of joined-up groups a bit smarter.   
 
-var MIN_PADDING = 4;
+var MIN_PADDING = 3;
 
 //
 // Colour handling
@@ -619,17 +619,18 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 		path.setAttribute('fill', 'none');
 		path.setAttribute('stroke-width', '1');
 		
-		var pathops = "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6);
+                var hh = height/2;
+		var pathops = "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh);
 		if (lmax - lmin > 8) {
 		    var lmid = (0.5*lmax) + (0.5*lmin);
 		    if (strand == '+') {
-			pathops += ' M ' + (lmid - 2) + ' ' + (y+6-4) +
-			    ' L ' + (lmid + 2) + ' ' + (y+6) +
-			    ' L ' + (lmid - 2) + ' ' + (y+6+4); 
+			pathops += ' M ' + (lmid - 2) + ' ' + (y+hh-4) +
+			    ' L ' + (lmid + 2) + ' ' + (y+hh) +
+			    ' L ' + (lmid - 2) + ' ' + (y+hh+4); 
 		    } else if (strand == '-') {
-			pathops += ' M ' + (lmid + 2) + ' ' + (y+6-4) +
-			    ' L ' + (lmid - 2) + ' ' + (y+6) +
-			    ' L ' + (lmid + 2) + ' ' + (y+6+4); 
+			pathops += ' M ' + (lmid + 2) + ' ' + (y+hh-4) +
+			    ' L ' + (lmid - 2) + ' ' + (y+hh) +
+			    ' L ' + (lmid + 2) + ' ' + (y+hh+4); 
 		    }
 		}
 		path.setAttribute('d', pathops);
@@ -638,12 +639,19 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 		path.setAttribute('fill', 'none');
 		path.setAttribute('stroke-width', '1');
 		
-		if (strand == "+" || strand == "-") {
+                var vee = true;
+                var gstyle = stylesheet[groupElement.type];
+                if (gstyle && gstyle.STYLE && gstyle.STYLE != 'hat') {
+                    vee = false;
+                }
+
+                var hh = height/2;
+		if (vee && (strand == "+" || strand == "-")) {
 		    var lmid = (lmin + lmax) / 2;
 		    var lmidy = (strand == "-") ? y + 12 : y;
-		    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + 6));
+		    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + hh));
 		} else {
-		    path.setAttribute("d", "M " + lmin + " " + (y + 6) + " L " + lmax + " " + (y + 6));
+		    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh));
 		}
 	    }
 	    glyphGroup.appendChild(path);

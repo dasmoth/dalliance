@@ -86,7 +86,7 @@ var icons;
 var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
 var minTierHeight = 25;
 
-var tabMargin = 100;
+var tabMargin = 120;
 
 var browserLinks = {
     Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -188,7 +188,7 @@ function arrangeTiers() {
 	    var tier = tiers[ti];
 	    tier.y = clh;
 	    
-	    var labelWidth = 100;
+	    var labelWidth = tabMargin;
 	    var viewportBackground = document.createElementNS(NS_SVG, 'path');
 	    viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
 					    ' L 10 ' + (clh+7) +
@@ -204,25 +204,16 @@ function arrangeTiers() {
                         makeElement('span', [makeElement('b', tier.source.name), makeElement('br'), tier.source.description]) : 
                         tier.source.name
             );
-
-	    
 	    setupTierDrag(viewportBackground, ti);
 	    
-	    var labelText = document.createElementNS(NS_SVG, "text");
-	    labelText.setAttribute("x", 15);
-	    labelText.setAttribute("y", clh + 17);
-	    labelText.setAttribute("stroke-width", "0");
-	    labelText.setAttribute("fill", "black");
-	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
-            labelText.style.pointerEvents = 'none';
-	    labelGroup.appendChild(labelText);
-	    
-
+            var hasWidget = false;
 	    if (tier.source.opts.collapseSuperGroups || tier.hasBumpedFeatures) {
+                hasWidget = true;
 		makeToggleButton(labelGroup, tier, clh);
 	    } 
 
             if (tier.isQuantitative) {
+                hasWidget = true;
                 var quantTools = makeElementNS(NS_SVG, 'g');
                 quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
                     x: tabMargin - 25,
@@ -287,7 +278,7 @@ function arrangeTiers() {
                 maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
 
                 var button = icons.createIcon('magnifier', labelGroup);
-                button.setAttribute('transform', 'translate(80, ' + (clh+20) + '), scale(0.6,0.6)');
+                button.setAttribute('transform', 'translate(' + (tabMargin - 18) + ', ' + (clh + (tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
 
                 // FIXME style-changes don't currently work because of the way icons get grouped.
                 button.addEventListener('mouseover', function(ev) {
@@ -302,10 +293,30 @@ function arrangeTiers() {
                 makeTooltip(quantTools, 'Click to adjust how this data is displayed');
             }
 
-	    xfrmTier(tier, 100 - ((1.0 * (viewStart - origin)) * scale), -1);
+            var labelMaxWidth = tabMargin - 20;
+            if (hasWidget) {
+                labelMaxWidth -= 20;
+            }
+            var labelString = tiers[ti].source.name;
+	    var labelText = document.createElementNS(NS_SVG, "text");
+	    labelText.setAttribute("x", 15);
+	    labelText.setAttribute("y", clh + 17);
+	    labelText.setAttribute("stroke-width", "0");
+	    labelText.setAttribute("fill", "black");
+	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
+            labelText.setAttribute('pointer-events', 'none');
+	    labelGroup.appendChild(labelText);
+
+            while (labelText.getBBox().width > labelMaxWidth) {
+                removeChildren(labelText);
+                labelString = labelString.substring(0, labelString.length - 1);
+                labelText.appendChild(document.createTextNode(labelString + '...'));
+            }
+
+	    xfrmTier(tier, tabMargin - ((1.0 * (viewStart - origin)) * scale), -1);
 	    
 	    if (tier.placard) {
-		tier.placard.setAttribute('transform', 'translate(100, ' + (clh + tier.layoutHeight - 4) + ')');
+		tier.placard.setAttribute('transform', 'translate(' + tabMargin + ', ' + (clh + tier.layoutHeight - 4) + ')');
 		browserSvg.appendChild(tier.placard);
 		placards.push(tier.placard);
 	    }
@@ -426,7 +437,7 @@ function setupTierDrag(element, ti) {
         bin.addEventListener('mouseout', binLeaveHandler, true);
         targetTier = ti;
         dragFeedbackRect = makeElementNS(NS_SVG, 'rect', null, {
-            x: 100,    // FIXME tabMargin
+            x: tabMargin,
             y: offsetForTier(targetTier) - 2,
             width: featurePanelWidth,
             height: 4,
@@ -440,10 +451,10 @@ function setupTierDrag(element, ti) {
 function makeToggleButton(labelGroup, tier, ypos) {
 
     var bumpToggle = makeElementNS(NS_SVG, 'g', null, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
-    bumpToggle.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: 85, y: ypos + 8, width: 8, height: 8}));
-    bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: 85, y1: ypos + 12, x2: 93, y2: ypos+12}));
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: tabMargin - 15, y: ypos + 8, width: 8, height: 8}));
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: tabMargin - 15, y1: ypos + 12, x2: tabMargin - 7, y2: ypos+12}));
     if (!tier.bumped) {
-        bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: 89, y1: ypos+8, x2: 89, y2: ypos+16}));
+        bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: tabMargin - 11, y1: ypos+8, x2: tabMargin - 11, y2: ypos+16}));
     }
     labelGroup.appendChild(bumpToggle);
     bumpToggle.addEventListener('mouseover', function(ev) {bumpToggle.setAttribute('stroke', 'red');}, false);
@@ -955,9 +966,9 @@ function init()
     makeTooltip(bin, 'Drag tracks here to discard');
     
     featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
-        x: 100,      // FIXME tabMargin
+        x: tabMargin,      // FIXME tabMargin
         y: 50,
-        width: 750,
+        width: 850 - tabMargin,
         height: 440,
         id: 'featureClipRect'
     });
@@ -965,7 +976,7 @@ function init()
     labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: 10,      // FIXME tabMargin
         y: 50,
-        width: 90,
+        width: tabMargin - 10,
         height: 440,
         id: 'labelClipRect'
     });
@@ -1478,11 +1489,11 @@ function resizeViewer() {
     width = Math.max(width, 600);
     svgRoot.setAttribute('width', width - 30);
     svgBackground.setAttribute('width', width - 30);
-    featureClipRect.setAttribute('width', width - 140);
+    featureClipRect.setAttribute('width', width - tabMargin - 40);
 
     zoomWidget.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 100) + ', 0)');
     var oldFPW = featurePanelWidth;
-    featurePanelWidth = (width - 140)|0;
+    featurePanelWidth = (width - tabMargin - 40)|0;
     
     if (oldFPW != featurePanelWidth) {
         var viewWidth = viewEnd - viewStart;
@@ -1501,14 +1512,14 @@ function resizeViewer() {
             viewEnd = viewStart + wid;
 	}
     
-	xfrmTiers((100 - (1.0 * (viewStart - origin)) * scale), 1);
+	xfrmTiers((tabMargin - (1.0 * (viewStart - origin)) * scale), 1);
 	updateRegion();
 	spaceCheck();
     }
 
     if (fgGuide) {
-	fgGuide.setAttribute('x1', (featurePanelWidth/2) + 100);
-	fgGuide.setAttribute('x2', (featurePanelWidth/2) + 100);
+	fgGuide.setAttribute('x1', (featurePanelWidth/2) + tabMargin);
+	fgGuide.setAttribute('x2', (featurePanelWidth/2) + tabMargin);
     }
 	
 
@@ -1590,7 +1601,7 @@ function move(pos)
         viewEnd = viewStart + wid;
     }
     
-    xfrmTiers((100 - (1.0 * (viewStart - origin)) * scale), 1);
+    xfrmTiers((tabMargin - (1.0 * (viewStart - origin)) * scale), 1);
     updateRegion();
     karyo.update(chr, viewStart, viewEnd);
     spaceCheck();
@@ -1625,7 +1636,7 @@ function zoom(factor)
     // }
     
     var scaleRat = (scale / scaleAtLastRedraw);
-    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
+    xfrmTiers(tabMargin - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
         
     var labels = document.getElementsByClassName("label-text");
     for (var li = 0; li < labels.length; ++li) {
@@ -1691,7 +1702,7 @@ function setLocation(newMin, newMax, newChr)
     updateRegion();
     karyo.update(chr, viewStart, viewEnd);
     refresh();
-    xfrmTiers(100 - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
+    xfrmTiers(tabMargin - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
     storeStatus();
 }
 

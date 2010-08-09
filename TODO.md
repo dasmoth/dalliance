@@ -42,11 +42,6 @@ Real Soon Now
  - DAS on geneID coords.
  - Auto-detection of credentialed servers?
  - Undo
- - Tabmargin cleanup
-    + Wider by default?
-    + Auto-adjust size?
-    + Think about control placement
-    + Rename tiers?
 
 Nice to have
 ------------
@@ -58,7 +53,6 @@ Nice to have
      + Try to respect existing feature placements when scrolling.
  - Expand/collapse per-feature-group (expand transcripts for individual genes?  don't think anyone else is doing this, but I'd use it!)
  - Gene search:
-     + Basic implementation works with E!  Needs more testing.
      + Would be nice if it offered proper keyword search, rather than pure feature-but-ID
      + Any reason not to just hack the server to do this?
      + Suggest-as-you-type?
@@ -81,6 +75,7 @@ Nice to have
   - Distance between a pair of features.
   - Jiggle labels so they're always visible
      + For genes, try to keep them attached to exons.
+  - Rename tiers?
 
 Blue sky
 --------
@@ -99,8 +94,6 @@ Blue sky
  - Flip into vertical orientation (AceDB-like!)
     + How much of the rendering code would end up ori-dependent?
  - MultiContigView equivalent?
- - Coord-system mapping?
-
 
 The Server Side
 ---------------
