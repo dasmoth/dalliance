@@ -283,6 +283,67 @@ DASSource.prototype.features = function(segment, options, callback) {
     });
 }
 
+function DASAlignment(type) {
+    this.type = type;
+    this.objects = {};
+    this.blocks = [];
+}
+
+DASSource.prototype.alignments = function(segment, options, callback) {
+    var dasURI = this.uri + 'alignment?query=' + segment;
+    this.doCrossDomainRequest(dasURI, function(responseXML) {
+        if (!responseXML) {
+            callback([], 'Failed request ' + dasURI);
+            return;
+        }
+
+        var alignments = [];
+        var aliXMLs = responseXML.getElementsByTagName('alignment');
+        for (var ai = 0; ai < aliXMLs.length; ++ai) {
+            var aliXML = aliXMLs[ai];
+            var ali = new DASAlignment(aliXML.getAttribute('alignType'));
+            var objXMLs = aliXML.getElementsByTagName('alignObject');
+            for (var oi = 0; oi < objXMLs.length; ++oi) {
+                var objXML = objXMLs[oi];
+                var obj = {
+                    id:          objXML.getAttribute('intObjectId'),
+                    accession:   objXML.getAttribute('dbAccessionId'),
+                    version:     objXML.getAttribute('objectVersion'),
+                    dbSource:    objXML.getAttribute('dbSource'),
+                    dbVersion:   objXML.getAttribute('dbVersion')
+                };
+                ali.objects[obj.id] = obj;
+            }
+            
+            var blockXMLs = aliXML.getElementsByTagName('block');
+            for (var bi = 0; bi < blockXMLs.length; ++bi) {
+                var blockXML = blockXMLs[bi];
+                var block = {
+                    order:      blockXML.getAttribute('blockOrder'),
+                    segments:   {}
+                };
+                var segXMLs = blockXML.getElementsByTagName('segment');
+                for (var si = 0; si < segXMLs.length; ++si) {
+                    var segXML = segXMLs[si];
+                    var seg = {
+                        object:      segXML.getAttribute('intObjectId'),
+                        min:         segXML.getAttribute('start'),
+                        max:         segXML.getAttribute('end'),
+                        strand:      segXML.getAttribute('strand'),
+                        cigar:       elementValue(segXML, 'cigar')
+                    };
+                    block.segments[seg.object] = seg;
+                }
+                ali.blocks.push(block);
+            }       
+                    
+            alignments.push(ali);
+        }
+        callback(alignments);
+    });
+}
+
+
 function DASStylesheet() {
     this.highZoomStyles = new Object();
     this.mediumZoomStyles = new Object();
