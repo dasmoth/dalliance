@@ -320,7 +320,7 @@ DASSource.prototype.alignments = function(segment, options, callback) {
                 var blockXML = blockXMLs[bi];
                 var block = {
                     order:      blockXML.getAttribute('blockOrder'),
-                    segments:   {}
+                    segments:   []
                 };
                 var segXMLs = blockXML.getElementsByTagName('segment');
                 for (var si = 0; si < segXMLs.length; ++si) {
@@ -332,7 +332,7 @@ DASSource.prototype.alignments = function(segment, options, callback) {
                         strand:      segXML.getAttribute('strand'),
                         cigar:       elementValue(segXML, 'cigar')
                     };
-                    block.segments[seg.object] = seg;
+                    block.segments.push(seg);
                 }
                 ali.blocks.push(block);
             }       

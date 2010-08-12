@@ -7,14 +7,108 @@
 // chainset.js: liftover support
 //
 
-function Chainset(uri) {
+function Chainset(uri, srcTag, destTag) {
     this.uri = uri;
+    this.srcTag = srcTag;
+    this.destTag = destTag;
     this.chainsBySrc = {};
     this.chainsByDest = {};
+    this.postFetchQueues = {};
 }
 
+function parseCigar(cigar)
+{
+    var cigops = [];
+    var CIGAR_REGEXP = new RegExp('([0-9]*)([MID])', 'g');
+    var match;
+    while ((match = CIGAR_REGEXP.exec(cigar)) != null) {
+        var count = match[1];
+        if (count.length == 0) {
+            count = 1;
+        }
+        cigops.push({cnt: count|0, op: match[2]});
+    }
+    return cigops;
+}
 
 Chainset.prototype.fetchChainsTo = function(chr) {
+    if (!this.chainsByDest[chr]) {
+        this.chainsByDest[chr] = []; // prevent re-fetching.
+    }
+    
+    var thisCS = this;
+    new DASSource(this.uri).alignments(chr, {}, function(aligns) {
+        for (var ai = 0; ai < aligns.length; ++ai) {
+            var aln = aligns[ai];
+            for (var bi = 0; bi < aln.blocks.length; ++bi) {
+                var block = aln.blocks[bi];
+                var srcSeg, destSeg;
+                for (var si = 0; si < block.segments.length; ++si) {
+                    var seg = block.segments[si];
+                    var obj = aln.objects[seg.object];
+                    if (obj.dbSource === thisCS.srcTag) {
+                        srcSeg = seg;
+                    } else if (obj.dbSource === thisCS.destTag) {
+                        destSeg = seg;
+                    }
+                }
+                if (srcSeg && destSeg) {
+                    var chain = {
+                        srcChr:     aln.objects[srcSeg.object].accession,
+                        srcMin:     srcSeg.min|0,
+                        srcMax:     srcSeg.max|0,
+                        srcOri:     srcSeg.strand,
+                        destChr:    aln.objects[destSeg.object].accession,
+                        destMin:    destSeg.min|0,
+                        destMax:    destSeg.max|0,
+                        destOri:    destSeg.ori,
+                        blocks:     []
+                    }
+
+                    var srcops = parseCigar(srcSeg.cigar), destops = parseCigar(destSeg.cigar);
+                    var srcOffset = 0, destOffset = 0;
+                    var srci = 0, desti = 0;
+                    while (srci < srcops.length && desti < destops.length) {
+                        if (srcops[srci].op == 'M' && destops[desti].op == 'M') {
+                            var blockLen = Math.min(srcops[srci].cnt, destops[desti].cnt);
+                            chain.blocks.push([srcOffset, destOffset, blockLen]);
+                            if (srcops[srci].cnt == blockLen) {
+                                ++srci;
+                            } else {
+                                srcops[srci].cnt -= blockLen;
+                            }
+                            if (destops[desti].cnt == blockLen) {
+                                ++desti;
+                            } else {
+                                destops[desti] -= blockLen;
+                            }
+                            srcOffset += blockLen;
+                            destOffset += blockLen;
+                        } else if (srcops[srci].op == 'I') {
+                            destOffset += srcops[srci++].cnt;
+                        } else if (destops[desti].op == 'I') {
+                            srcOffset += destops[desti++].cnt;
+                        }
+                    }
+
+                    pusho(thisCS.chainsBySrc, chain.srcChr, chain);
+                    pusho(thisCS.chainsByDest, chain.destChr, chain);
+                }
+            }
+        }
+
+        if (thisCS.postFetchQueues[chr]) {
+            var pfq = thisCS.postFetchQueues[chr];
+            for (var i = 0; i < pfq.length; ++i) {
+                pfq[i]();
+            }
+            thisCS.postFetchQueues[chr] = null;
+        }
+    });
+    
+    
+/*
+
     var uri = this.uri + 'chr' + chr + '.json';
 //    alert('fetching chains: ' + uri);
     var req = new XMLHttpRequest();
@@ -31,6 +125,8 @@ Chainset.prototype.fetchChainsTo = function(chr) {
     if (!this.chainsByDest[chr]) {
         this.chainsByDest[chr] = [];    // FIXME: currently needed to prevent duplicate fetches if no chains are available.
     }
+
+*/
 }
 
 Chainset.prototype.mapPoint = function(chr, pos) {
@@ -104,16 +200,23 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
     return null;
 }
 
-Chainset.prototype.sourceBlocksForRange = function(chr, min, max) {
+Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
     if (!this.chainsByDest[chr]) {
-        this.fetchChainsTo(chr);
-    }
-
-    var mmin = this.unmapPoint(chr, min);
-    var mmax = this.unmapPoint(chr, max);
-    if (!mmin || !mmax || mmin.seq != mmax.seq) {
-        return [];
+        var fetchNeeded = !this.postFetchQueues[chr];
+        var thisCS = this;
+        pusho(this.postFetchQueues, chr, function() {
+            thisCS.sourceBlocksForRange(chr, min, max, callback);
+        });
+        if (fetchNeeded) {
+            this.fetchChainsTo(chr);
+        }
     } else {
-        return [new DASSegment(mmin.seq, mmin.pos, mmax.pos)];
+        var mmin = this.unmapPoint(chr, min);
+        var mmax = this.unmapPoint(chr, max);
+        if (!mmin || !mmax || mmin.seq != mmax.seq) {
+            callback([]);
+        } else {
+            callback([new DASSegment(mmin.seq, mmin.pos, mmax.pos)]);
+        }
     }
 }

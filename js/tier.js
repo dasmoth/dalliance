@@ -52,54 +52,54 @@ function refreshTier_features()
 
         if (this.source.opts.mapping) {
             var mapping = chains[this.source.opts.mapping];
-            var mseg = mapping.sourceBlocksForRange(chr, knownStart, knownEnd);
+            mapping.sourceBlocksForRange(chr, knownStart, knownEnd, function(mseg) {
+                if (mseg.length == 0) {
+                    tier.currentFeatures = [];
+                    tier.status = "No mapping available for this regions";
+                    dasRequestComplete(tier);
+                } else {
+                    tier.dasSource.features(
+                        mseg[0],
+                        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
+	                function(features, status) {
+		            if (status) {
+		                tier.error = status;
+		            } else {
+		                tier.error = null; tier.status = null;
+		            }
 
-            if (mseg.length == 0) {
-                this.currentFeatures = [];
-                this.status = "No mapping available for this regions";
-                dasRequestComplete(this);
-            } else {
-                this.dasSource.features(
-                    mseg[0],
-                    {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
-	            function(features, status) {
-		        if (status) {
-		            tier.error = status;
-		        } else {
-		            tier.error = null; tier.status = null;
-		        }
-
-                        var mappedFeatures = [];
-                        for (var fi = 0; fi < features.length; ++fi) {
-                            var f = features[fi];
-                            var mmin = mapping.mapPoint(f.segment, f.min);
-                            var mmax = mapping.mapPoint(f.segment, f.max);
-                            if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
-                                // Discard feature.
-                            } else {
-                                f.segment = mmin.seq;
-                                f.min = mmin.pos;
-                                f.max = mmax.pos;
-                                if (f.min > f.max) {
-                                    var tmp = f.max;
-                                    f.max = f.min;
-                                    f.min = tmp;
-                                }
-                                if (mmin.flipped) {
-                                    if (f.orientation == '-') {
-                                        f.orientation = '+';
-                                    } else if (f.orientation == '+') {
-                                        f.orientation = '-';
+                            var mappedFeatures = [];
+                            for (var fi = 0; fi < features.length; ++fi) {
+                                var f = features[fi];
+                                var mmin = mapping.mapPoint(f.segment, f.min);
+                                var mmax = mapping.mapPoint(f.segment, f.max);
+                                if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
+                                    // Discard feature.
+                                } else {
+                                    f.segment = mmin.seq;
+                                    f.min = mmin.pos;
+                                    f.max = mmax.pos;
+                                    if (f.min > f.max) {
+                                        var tmp = f.max;
+                                        f.max = f.min;
+                                        f.min = tmp;
                                     }
+                                    if (mmin.flipped) {
+                                        if (f.orientation == '-') {
+                                            f.orientation = '+';
+                                        } else if (f.orientation == '+') {
+                                            f.orientation = '-';
+                                        }
+                                    }
+                                    mappedFeatures.push(f);
                                 }
-                                mappedFeatures.push(f);
                             }
-                        }
-                        tier.currentFeatures = mappedFeatures;
-                        dasRequestComplete(tier);
-	            }
-                );
-            }
+                            tier.currentFeatures = mappedFeatures;
+                            dasRequestComplete(tier);
+	                }
+                    );
+                }
+            });
         } else {        
             this.dasSource.features(
 	        new DASSegment(chr, knownStart, knownEnd),
