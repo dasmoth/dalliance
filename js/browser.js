@@ -32,7 +32,7 @@ var coordSystem = {
     auth: 'NCBI',
     version: '36'
 };
-
+var chains = {};
 
 // state
 
@@ -99,6 +99,7 @@ var iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons.svg'
 
 var availableSources;
 var defaultSources;
+var mappableSources = {};
 
 function DataSource(name, uri, opts)
 {
@@ -1418,6 +1419,36 @@ function init()
         alert('Warning: registry query failed');
         availableSources = [];
     }, coordSystem);
+
+    for (var m in chains) {
+        fetchMappedSources(m);
+    }
+}
+
+function fetchMappedSources(m) {
+    var chainSet = chains[m];
+    new DASRegistry(registry).sources(function(sources) {
+	var availableSources = [];
+        for (var s = 0; s < sources.length; ++s) {
+            var source = sources[s];
+            if (!source.coords || source.coords.length == 0) {
+                continue;
+            }
+            var coords = source.coords[0];
+            if (coords.taxon != chainSet.coords.taxon || coords.auth != chainSet.coords.auth || coords.version != chainSet.coords.version) {
+                continue;
+            }
+            var ds = new DataSource(sources[s].title + '( ' + chainSet.srcTag + ')', sources[s].uri, {mapping: m});
+            ds.description = source.desc;
+            if (!source.props || !source.props.cors) {
+                ds.disabled = true;
+            }
+            availableSources.push(ds);
+        }
+        mappableSources[m] = availableSources;
+    }, function(error) {
+        alert('Warning: registry query failed');
+    }, chainSet.coords);
 }
 
 function makeTier(source) {

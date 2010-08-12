@@ -10,8 +10,8 @@
 var VERSION = {
     MAJOR: 0,
     MINOR: 4,
-    MICRO: 8,
-    PATCH: "-MAPPING"
+    MICRO: 9,
+    PATCH: ''
 }
 
 VERSION.toString = function() {

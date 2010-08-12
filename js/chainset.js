@@ -7,10 +7,11 @@
 // chainset.js: liftover support
 //
 
-function Chainset(uri, srcTag, destTag) {
+function Chainset(uri, srcTag, destTag, coords) {
     this.uri = uri;
     this.srcTag = srcTag;
     this.destTag = destTag;
+    this.coords = coords;
     this.chainsBySrc = {};
     this.chainsByDest = {};
     this.postFetchQueues = {};

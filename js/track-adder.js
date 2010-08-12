@@ -29,6 +29,27 @@ function currentlyActive(source) {
     return false;
 }
 
+function makeButton(name) {
+    var regButton = makeElement('span', name);
+    regButton.style.backgroundColor = 'rgb(230,230,250)';
+    regButton.style.borderStyle = 'solid';
+    regButton.style.borderColor = 'red';
+    regButton.style.borderWidth = '3px';
+    regButton.style.padding = '2px';
+    regButton.style.marginLeft = '10px';
+    regButton.style.marginRight = '10px';
+    regButton.style.width = '100px';
+    regButton.style['float'] = 'left';
+    return regButton;
+}
+
+function activateButton(addModeButtons, which) {
+    for (var i = 0; i < addModeButtons.length; ++i) {
+        var b = addModeButtons[i];
+        b.style.borderColor = (b == which) ? 'red' : 'blue';
+    }
+}
+
 function showTrackAdder(ev) {
     var mx =  ev.clientX, my = ev.clientY;
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -47,40 +68,26 @@ function showTrackAdder(ev) {
 
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
 
-    var regButton = makeElement('span', 'Registry');
-    regButton.style.backgroundColor = 'rgb(230,230,250)';
-    regButton.style.borderStyle = 'solid';
-    regButton.style.borderColor = 'red';
-    regButton.style.borderWidth = '3px';
-    regButton.style.padding = '2px';
-    regButton.style.marginLeft = '10px';
-    regButton.style.marginRight = '10px';
-    regButton.style.width = '120px';
-    regButton.style['float'] = 'left';
-    
-    var defButton = makeElement('span', 'Defaults');
-    defButton.style.backgroundColor = 'rgb(230,230,250)';
-    defButton.style.borderStyle = 'solid';
-    defButton.style.borderColor = 'blue';
-    defButton.style.borderWidth = '3px';
-    defButton.style.padding = '2px';
-    defButton.style.marginLeft = '10px';
-    defButton.style.marginRight = '10px';
-    defButton.style.width = '120px';
-    defButton.style['float'] = 'left';
-
-    var custButton = makeElement('span', 'Custom');
-    custButton.style.backgroundColor = 'rgb(230,230,250)';
-    custButton.style.borderStyle = 'solid';
-    custButton.style.borderColor = 'blue';
-    custButton.style.borderWidth = '3px';
-    custButton.style.padding = '2px';
-    custButton.style.marginLeft = '10px';
-    custButton.style.marginRight = '10px';
-    custButton.style.width = '120px';
-    custButton.style['float'] = 'left';
-
-    var addModeButtons = [regButton, defButton, custButton];
+    var addModeButtons = [];
+    var makeStab;
+    var regButton = makeButton('Registry');
+    addModeButtons.push(regButton);
+    for (var m in mappableSources) {
+        var mf  = function(mm) {
+            var mapButton = makeButton(chains[mm].srcTag);
+            addModeButtons.push(mapButton);
+            mapButton.addEventListener('mousedown', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                activateButton(addModeButtons, mapButton);
+                makeStab(mappableSources[mm], mm);
+            }, false);
+        }; mf(m);
+    }
+    var defButton = makeButton('Defaults');
+    addModeButtons.push(defButton);
+    var custButton = makeButton('Custom');
+    addModeButtons.push(custButton);
+    activateButton(addModeButtons, regButton);
     popup.appendChild(makeElement('div', addModeButtons), null);
     
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
@@ -97,7 +104,7 @@ function showTrackAdder(ev) {
     asform.appendChild(stabHolder);
 
 
-    var makeStab = function(sources) {
+    makeStab = function(sources, mapping) {
         customMode = false;
         addButtons = [];
         removeChildren(stabHolder);
@@ -118,6 +125,9 @@ function showTrackAdder(ev) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
+                if (mapping) {
+                    b.dalliance_mapping = mapping;
+                }
                 bd.appendChild(b);
                 addButtons.push(b);
                 makeTooltip(bd, "Check here then click 'Add' to activate.");
@@ -141,26 +151,17 @@ function showTrackAdder(ev) {
 
     regButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        for (var i = 0; i < addModeButtons.length; ++i) {
-            addModeButtons[i].style.borderColor = 'blue';
-        }
-        regButton.style.borderColor = 'red';
+        activateButton(addModeButtons, regButton);
         makeStab(availableSources);
     }, false);
     defButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        for (var i = 0; i < addModeButtons.length; ++i) {
-            addModeButtons[i].style.borderColor = 'blue';
-        }
-        defButton.style.borderColor = 'red';
+        activateButton(addModeButtons, defButton);
         makeStab(defaultSources);
     }, false);
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        for (var i = 0; i < addModeButtons.length; ++i) {
-            addModeButtons[i].style.borderColor = 'blue';
-        }
-        custButton.style.borderColor = 'red';
+        activateButton(addModeButtons, custButton);
         customMode = true;
 
         removeChildren(stabHolder);
