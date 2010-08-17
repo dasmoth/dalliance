@@ -177,3 +177,50 @@ function setAttrs(node, attribs)
         }
     }
 }
+
+
+
+function removeChildren(node)
+{
+    if (!node || !node.childNodes) {
+        return;
+    }
+
+    while (node.childNodes.length > 0) {
+        node.removeChild(node.firstChild);
+    }
+}
+
+
+
+//
+// WARNING: not for general use!
+//
+
+function miniJSONify(o) {
+    if (typeof o == 'string') {
+	return "'" + o + "'";
+    } else if (typeof o == 'number') {
+	return "" + o;
+    } else if (typeof o == 'boolean') {
+	return "" + o;
+    } else if (typeof o == 'object') {
+	if (o instanceof Array) {
+	    var s = null;
+	    for (var i = 0; i < o.length; ++i) {
+		s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
+	    }
+	    return '[' + (s?s:'') + ']';
+	} else {
+	    var s = null;
+	    for (var k in o) {
+		if (k != undefined) {
+		    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
+		}
+	    }
+	    return '{' + (s?s:'') + '}';
+	}
+    } else {
+	return (typeof o);
+    }
+}

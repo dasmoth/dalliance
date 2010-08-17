@@ -19,7 +19,7 @@ Karyoscape.prototype.update = function(chr, start, end) {
     this.end = end;
     if (!this.chr || chr != this.chr) {
 	this.chr = chr;
-	removeChildren(svg);
+	removeChildren(this.svg);
 
 	var kscape = this;
 	this.dsn.features(
@@ -98,7 +98,7 @@ Karyoscape.prototype.redraw = function() {
 		    bandspans = union(bandspans, br);
 		}
 	    }
-	    makeTooltip(band, k.id);
+	    // makeTooltip(band, k.id);
 	    this.svg.appendChild(band);
 	}
     }

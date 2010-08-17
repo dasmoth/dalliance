@@ -90,6 +90,7 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 
 function drawLine(featureGroupElement, features, style, tier, y)
 {
+    var origin = tier.browser.origin, scale = tier.browser.scale;
     var height = style.HEIGHT || 30;
     var min = tier.source.opts.forceMin || style.MIN || 0, max = tier.source.opts.forceMax || style.MAX || 100;
     var yscale = ((1.0 * height) / (max - min));
@@ -207,14 +208,14 @@ function drawFeatureTier(tier)
 	featureGroupElement.removeChild(featureGroupElement.firstChild);
     }
     featureGroupElement.appendChild(tier.background);
-    drawGuidelines(featureGroupElement);
+    drawGuidelines(tier, featureGroupElement);
 	
     var lh = MIN_PADDING;
     var bumpMatrix = null;
     if (tier.bumped) {
 	bumpMatrix = new Array(0);
     }
-    var styles = tier.styles(scale);
+    var styles = tier.styles(tier.browser.scale);
 
     var glyphs = [];
     var specials = false;
@@ -366,7 +367,7 @@ function drawFeatureTier(tier)
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
 	var g = glyphs[i];
-	g = labelGlyph(g, featureGroupElement);
+	g = labelGlyph(tier, g, featureGroupElement);
         if (g.bump) {
             hasBumpedFeatures = true;
         }
@@ -423,7 +424,7 @@ function drawFeatureTier(tier)
 	stBoundaries.push(lh);
     }
 
-    lh = Math.max(minTierHeight, lh); // for sanity's sake.
+    lh = Math.max(tier.browser.minTierHeight, lh); // for sanity's sake.
     if (stBoundaries.length < 2) {
 	var bumped = false;
 	var minHeight = lh;
@@ -440,7 +441,7 @@ function drawFeatureTier(tier)
 	}
     }				
 
-    if (!tier.layoutWasDone || autoSizeTiers) {
+    if (!tier.layoutWasDone || tier.browser.autoSizeTiers) {
 	tier.layoutHeight = lh;
 	tier.background.setAttribute("height", lh);
 	if (glyphs.length > 0 || specials) {
@@ -453,7 +454,7 @@ function drawFeatureTier(tier)
 	    var frame = document.createElementNS(NS_SVG, 'rect');
 	    frame.setAttribute('x', 0);
 	    frame.setAttribute('y', -20);
-	    frame.setAttribute('width', featurePanelWidth);
+	    frame.setAttribute('width', tier.browser.featurePanelWidth);
 	    frame.setAttribute('height', 20);
 	    frame.setAttribute('stroke', 'red');
 	    frame.setAttribute('stroke-width', 1);
@@ -495,7 +496,7 @@ function drawFeatureTier(tier)
 	    spandPlacard.addEventListener('mousedown', function(ev) {
 		tier.layoutWasDone = false;
 		drawFeatureTier(tier);
-		arrangeTiers();
+		tier.browser.arrangeTiers();
 	    }, false);
 
 	    var dismiss = document.createElementNS(NS_SVG, 'text');
@@ -508,8 +509,8 @@ function drawFeatureTier(tier)
 	    dismiss.setAttribute('y', -6);
 	    dismiss.addEventListener('mousedown', function(ev) {
 		ev.preventDefault(); ev.stopPropagation();
-		autoSizeTiers = true;
-		refresh();
+		tier.browser.autoSizeTiers = true;
+		tier.browser.refresh();
 	    }, false);
 	    spandPlacard.appendChild(dismiss);
 
@@ -523,7 +524,7 @@ function drawFeatureTier(tier)
 	var frame = document.createElementNS(NS_SVG, 'rect');
 	frame.setAttribute('x', 0);
 	frame.setAttribute('y', -20);
-	frame.setAttribute('width', featurePanelWidth);
+	frame.setAttribute('width', tier.browser.featurePanelWidth);
 	frame.setAttribute('height', 20);
 	frame.setAttribute('stroke', 'red');
 	frame.setAttribute('stroke-width', 1);
@@ -557,12 +558,14 @@ function drawFeatureTier(tier)
 }
 
 function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorType) {
+    var scale = tier.browser.scale, origin = tier.browser.origin;
     var height=1;
     var label;
     var links = null;
     var notes = null;
     var spans = null;
     var strand = null;
+    var quant = null;
   
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     glyphGroup.dalliance_group = groupElement;
@@ -605,6 +608,9 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	if (!label && glyph.label) {
 	    label = glyph.label;
 	}
+        if (glyph.quant) {
+            quant = glyph.quant;
+        }
     }
 
     if (spans) {
@@ -677,11 +683,15 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	    }
 	}
     }
+    if (quant) {
+        dg.quant = quant;
+    }
     return dg;
 }
 
 function glyphForFeature(feature, y, style, tier)
 {
+    var scale = tier.browser.scale, origin = tier.browser.origin;
     var gtype = style.glyph || 'BOX';
     var glyph;
 
@@ -1132,7 +1142,9 @@ function glyphForFeature(feature, y, style, tier)
     return dg;
 }
 
-function labelGlyph(dglyph, featureTier) {
+function labelGlyph(tier, dglyph, featureTier) {
+    var scale = tier.browser.scale, origin = tier.browser.origin;
+
     if (dglyph.glyph && dglyph.label) {
 	var label = dglyph.label;
 	var labelText = document.createElementNS(NS_SVG, 'text');

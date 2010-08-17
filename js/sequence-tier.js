@@ -26,18 +26,18 @@ function tileSizeForScale(scale, min)
     return ts(pow);
 }
 
-function drawGuidelines(featureGroupElement)
+function drawGuidelines(tier, featureGroupElement)
 {
-    if (guidelineStyle != 'background') {
+    if (tier.browser.guidelineStyle != 'background') {
 	return;
     }
 
-    var tile = tileSizeForScale(scale, guidelineSpacing);
-    var pos = Math.max(0, ((knownStart / tile)|0) * tile);
+    var tile = tileSizeForScale(tier.browser.scale, teir.browser.guidelineSpacing);
+    var pos = Math.max(0, ((tier.browser.knownStart / tile)|0) * tile);
 
     var seqTierMax = knownEnd;
-    if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
-	seqTierMax = currentSeqMax;
+    if (tier.browser.currentSeqMax > 0 && tier.browser.currentSeqMax < tier.browser.knownEnd) {
+	seqTierMax = tier.browser.currentSeqMax;
     }
 
     for (var glpos = pos; glpos <= seqTierMax; glpos += tile) {
@@ -56,12 +56,17 @@ function drawGuidelines(featureGroupElement)
 
 function drawSeqTier(tier, seq)
 {
+    var scale = tier.browser.scale, knownStart = tier.browser.knownStart, knownEnd = tier.browser.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
+    if (!scale) {
+	return;
+    }
+
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {
 	featureGroupElement.removeChild(featureGroupElement.firstChild);
     }
     featureGroupElement.appendChild(tier.background);
-    drawGuidelines(featureGroupElement);
+    drawGuidelines(tier, featureGroupElement);
     
     var tile = tileSizeForScale(scale);
     var pos = Math.max(0, ((knownStart / tile)|0) * tile);
@@ -70,7 +75,7 @@ function drawSeqTier(tier, seq)
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
 	seqTierMax = currentSeqMax;
     }
-	
+
     while (pos <= seqTierMax) {
         var rect = document.createElementNS(NS_SVG, "rect");
         rect.setAttribute('x', (pos - origin) * scale);
@@ -129,9 +134,9 @@ function drawSeqTier(tier, seq)
             }
         }
     }
-	
+
     tier.layoutHeight = height;
     tier.background.setAttribute("height", height);
     tier.scale = 1;
-    arrangeTiers();
+    tier.browser.arrangeTiers();
 }

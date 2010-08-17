@@ -7,12 +7,72 @@
 // tier.js: (try) to encapsulate the functionality of a browser tier.
 //
 
+function DasTier(browser, source, viewport, background)
+{
+    this.browser = browser;
+    this.source = source;
+    this.viewport = viewport;
+    this.background = background;
+    this.req = null;
+    this.layoutHeight = 50;
+    this.bumped = true; 
+    if (source.opts.collapseSuperGroups) {
+        this.bumped = false;
+    }
+    this.y = 0;
+
+    if (source.opts.tier_type == 'sequence') {
+	this.refreshTier = refreshTier_sequence;
+    } else {
+	this.refreshTier = refreshTier_features;
+    }
+
+    this.layoutWasDone = false;
+}
+
+DasTier.prototype.init = function() {
+    this.dasSource = new DASSource(this.source.uri);
+    if (this.source.opts.credentials) {
+	this.dasSource.credentials = true;
+    }
+    if (this.source.opts.stylesheet) {
+        this.dasSource.endpoint_stylesheet = this.source.opts.stylesheet;
+    }
+    var tier = this;
+    tier.status = 'Fetching stylesheet';
+    this.dasSource.stylesheet(function(stylesheet) {
+	tier.stylesheet = stylesheet;
+	tier.refreshTier();
+    }, function() {
+	// tier.error = 'No stylesheet';
+        tier.stylesheet = new DASStylesheet();
+        var defStyle = new DASStyle();
+        defStyle.glyph = 'BOX';
+        defStyle.BGCOLOR = 'blue';
+        defStyle.FGCOLOR = 'black';
+        tier.stylesheet.pushStyle('default', null, defStyle);
+	tier.refreshTier();
+    });
+}
+
+DasTier.prototype.styles = function(scale) {
+    if (this.stylesheet == null) {
+	return null;
+    } else if (this.browser.scale > 0.2) {
+	return this.stylesheet.highZoomStyles;
+    } else if (this.browser.scale > 0.01) {
+	return this.stylesheet.mediumZoomStyles;
+    } else {
+	return this.stylesheet.lowZoomStyles;
+    }
+}
+
 function refreshTier_sequence()
 {
-    if (scale >= 1) {
+    if (this.browser.scale >= 1) {
 	var tier = this;
         this.dasSource.sequence(
-            new DASSegment(chr, knownStart, knownEnd),
+            new DASSegment(this.browser.chr, this.browser.knownStart, this.browser.knownEnd),
             function(seqs) {
                 drawSeqTier(tier, seqs[0]);  // FIXME: check array.
 		tier.originHaxx = 0;
@@ -25,8 +85,8 @@ function refreshTier_sequence()
 }
 
 function refreshTier_features()
-{	    
-    var stylesheet = this.styles(scale);
+{
+    var stylesheet = this.styles(this.browser.scale);
     var fetchTypes = [];
     var inclusive = false;
     if (stylesheet) {
@@ -43,16 +103,16 @@ function refreshTier_features()
 	return;
     }
     
-    var scaledQuantRes = targetQuantRes / scale;
-    var maxBins = 1 + (((knownEnd - knownStart) / scaledQuantRes) | 0);
+    var scaledQuantRes = this.browser.targetQuantRes / this.browser.scale;
+    var maxBins = 1 + (((this.browser.knownEnd - this.browser.knownStart) / scaledQuantRes) | 0);
 
     if (inclusive || fetchTypes.length > 0) {
 	var tier = this;
 	this.status = 'Fetching features';
 
         if (this.source.opts.mapping) {
-            var mapping = chains[this.source.opts.mapping];
-            mapping.sourceBlocksForRange(chr, knownStart, knownEnd, function(mseg) {
+            var mapping = this.browser.chains[this.source.opts.mapping];
+            mapping.sourceBlocksForRange(this.browser.chr, this.browser.knownStart, this.browser.knownEnd, function(mseg) {
                 if (mseg.length == 0) {
                     tier.currentFeatures = [];
                     tier.status = "No mapping available for this regions";
@@ -73,7 +133,7 @@ function refreshTier_features()
                                 var f = features[fi];
                                 var mmin = mapping.mapPoint(f.segment, f.min);
                                 var mmax = mapping.mapPoint(f.segment, f.max);
-                                if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
+                                if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != tier.browser.chr) {
                                     // Discard feature.
                                 } else {
                                     f.segment = mmin.seq;
@@ -102,7 +162,7 @@ function refreshTier_features()
             });
         } else {        
             this.dasSource.features(
-	        new DASSegment(chr, knownStart, knownEnd),
+	        new DASSegment(this.browser.chr, this.browser.knownStart, this.browser.knownEnd),
 	        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
 	        function(features, status) {
 		    if (status) {
@@ -127,6 +187,5 @@ function dasRequestComplete(tier)
 {
     drawFeatureTier(tier);
     tier.originHaxx = 0;
-    arrangeTiers();
-    setLoadingStatus();
+    tier.browser.arrangeTiers();
 }

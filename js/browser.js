@@ -10,96 +10,85 @@
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
-var sources = [];
-var tiers = [];
-
 // Limit stops
 
 MAX_VIEW_SIZE=500000;
 
-// parental configuration
 
-var chr;
-var viewStart;
-var viewEnd;
-var cookieKey = 'browser';
-var searchEndpoint;
-var karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
-var registry = 'http://www.dasregistry.org/das/sources';
-var coordSystem = {
-    speciesName: 'Human',
-    taxon: 9606,
-    auth: 'NCBI',
-    version: '36'
-};
-var chains = {};
+function Browser() {
+    this.sources = [];
+    this.tiers = [];
 
-// state
+    // parental configuration
 
-var maxExtra = 1.5;
-var minExtra = 0.2;
-var knownStart;
-var knownEnd;
-var scale;
-var scaleAtLastRedraw;
-var zoomFactor = 1.0;
-var origin = 0;
-var targetQuantRes = 5.0;
-var featurePanelWidth = 750;
-var zoomBase = 100;
-var zoomExpt = 30; // Now gets clobbered.
+    // var chr;
+    // var viewStart;
+    // var viewEnd;
+    this.cookieKey = 'browser';
+    // var searchEndpoint;
+    this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
+    this.registry = 'http://www.dasregistry.org/das/sources';
+    this.coordSystem = {
+        speciesName: 'Human',
+        taxon: 9606,
+        auth: 'NCBI',
+        version: '36'
+    };
+    this.chains = {};
 
-var entryPoints = null;
-var currentSeqMax = -1; // init once EPs are fetched.
+    this.pageName = 'svgHolder'
 
-var highlight;
-var highlightMin = -1, highlightMax = - 1;
+    // state
 
-var autoSizeTiers = false;
-var guidelineStyle = 'foreground';
-var guidelineSpacing = 75;
-var fgGuide;
-var positionFeedback = false;
+    this.maxExtra = 1.5;
+    this.minExtra = 0.2;
+    // var knownStart;
+    // var knownEnd;
+    // var scale;
+    // var scaleAtLastRedraw;
+    this.zoomFactor = 1.0;
+    this.origin = 0;
+    this.targetQuantRes = 5.0;
+    this.featurePanelWidth = 750;
+    this.zoomBase = 100;
+    this.zoomExpt = 30; // Now gets clobbered.
 
-// UI components
+    this.entryPoints = null;
+    this.currentSeqMax = -1; // init once EPs are fetched.
 
-var svg;
-var svgHolder;
-var svgRoot;
-var svgBackground;
-var dasLabelHolder;
-var dasTierHolder;
-var featureClipRect;
-var labelClipRect;
-var bin;
-var regionLabel;
-var zoomSlider;
-var zoomWidget;
-var zoomTickMarks;
-var popupHolder;
-var hPopupHolder;
-var karyo;
-var icons;
+    this.highlight = false;
+    this.highlightMin = -1
+    this.highlightMax = - 1;
 
-// Visual config.
+    this.autoSizeTiers = false;
+    this.guidelineStyle = 'foreground';
+    this.guidelineSpacing = 75;
+    this.fgGuide = null;
+    this.positionFeedback = false;
 
-var tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
-var minTierHeight = 25;
 
-var tabMargin = 120;
+    this.placards = [];
 
-var browserLinks = {
-    Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-    UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
+    // Visual config.
+
+    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
+    this.minTierHeight = 25;
+    
+    this.tabMargin = 120;
+
+    this. browserLinks = {
+        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
+    }
+
+    this.iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons.svg'
+
+    // Registry
+
+    this.availableSources = [];
+    this.defaultSources = [];
+    this.mappableSources = {};
 }
-
-var iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons.svg'
-
-// Registry
-
-var availableSources;
-var defaultSources;
-var mappableSources = {};
 
 function DataSource(name, uri, opts)
 {
@@ -112,238 +101,177 @@ function DataSource(name, uri, opts)
 }
 
 
-function DasTier(source, viewport, background)
-{
-    this.source = source;
-    this.viewport = viewport;
-    this.background = background;
-    this.req = null;
-    this.layoutHeight = 50;
-    this.bumped = true; 
-    if (source.opts.collapseSuperGroups) {
-        this.bumped = false;
+Browser.prototype.arrangeTiers = function() {
+    var browserSvg = this.svgRoot;
+    for (var p = 0; p < this.placards.length; ++p) {
+	browserSvg.removeChild(this.placards[p]);
     }
-    this.y = 0;
+    this.placards = [];
 
-    if (source.opts.tier_type == 'sequence') {
-	this.refreshTier = refreshTier_sequence;
-    } else {
-	this.refreshTier = refreshTier_features;
-    }
-
-    this.layoutWasDone = false;
-}
-
-DasTier.prototype.init = function() {
-    this.dasSource = new DASSource(this.source.uri);
-    if (this.source.opts.credentials) {
-	this.dasSource.credentials = true;
-    }
-    if (this.source.opts.stylesheet) {
-        this.dasSource.endpoint_stylesheet = this.source.opts.stylesheet;
-    }
-    var tier = this;
-    tier.status = 'Fetching stylesheet';
-    this.dasSource.stylesheet(function(stylesheet) {
-	tier.stylesheet = stylesheet;
-	tier.refreshTier();
-    }, function() {
-	// tier.error = 'No stylesheet';
-        tier.stylesheet = new DASStylesheet();
-        var defStyle = new DASStyle();
-        defStyle.glyph = 'BOX';
-        defStyle.BGCOLOR = 'blue';
-        defStyle.FGCOLOR = 'black';
-        tier.stylesheet.pushStyle('default', null, defStyle);
-	tier.refreshTier();
-    });
-}
-
-DasTier.prototype.styles = function(scale) {
-    if (this.stylesheet == null) {
-	return null;
-    } else if (scale > 0.2) {
-	return this.stylesheet.highZoomStyles;
-    } else if (scale > 0.01) {
-	return this.stylesheet.mediumZoomStyles;
-    } else {
-	return this.stylesheet.lowZoomStyles;
-    }
-}
-
-
-var placards = [];
-
-function arrangeTiers() {
-    var browserSvg = svgRoot;
-    for (var p = 0; p < placards.length; ++p) {
-	browserSvg.removeChild(placards[p]);
-    }
-    placards = [];
-
-	var labelGroup = dasLabelHolder;
-	removeChildren(labelGroup);
+    var labelGroup = this.dasLabelHolder;
+    removeChildren(labelGroup);
 	
-	var clh = 50;
-	for (ti = 0; ti < tiers.length; ++ti) {
-	    var tier = tiers[ti];
-	    tier.y = clh;
+    var clh = 50;
+    for (ti = 0; ti < this.tiers.length; ++ti) {
+	var tier = this.tiers[ti];
+	tier.y = clh;
 	    
-	    var labelWidth = tabMargin;
-	    var viewportBackground = document.createElementNS(NS_SVG, 'path');
-	    viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
-					    ' L 10 ' + (clh+7) +
-					    ' L 10 ' + (clh + 18) +
-					    ' L 15 ' + (clh + 22) +
-					    ' L ' + (10 + labelWidth) + ' ' + (clh+22) +
-					    ' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
-	    viewportBackground.setAttribute("fill", tierBackgroundColors[ti % tierBackgroundColors.length]);
-	    viewportBackground.setAttribute("stroke", "none");
-	    labelGroup.appendChild(viewportBackground);
+	var labelWidth = this.tabMargin;
+	var viewportBackground = document.createElementNS(NS_SVG, 'path');
+	viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
+					' L 10 ' + (clh+7) +
+					' L 10 ' + (clh + 18) +
+					' L 15 ' + (clh + 22) +
+					' L ' + (10 + labelWidth) + ' ' + (clh+22) +
+					' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
+	viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
+	viewportBackground.setAttribute('stroke', 'none');
+	labelGroup.appendChild(viewportBackground);
 
-            makeTooltip(viewportBackground, tier.source.description ? 
-                        makeElement('span', [makeElement('b', tier.source.name), makeElement('br'), tier.source.description]) : 
-                        tier.source.name
-            );
-	    setupTierDrag(viewportBackground, ti);
+        this.makeTooltip(viewportBackground, tier.source.description ? 
+                    makeElement('span', [makeElement('b', tier.source.name), makeElement('br'), tier.source.description]) : 
+                    tier.source.name
+                   );
+	this.setupTierDrag(viewportBackground, ti);
 	    
-            var hasWidget = false;
-	    if (tier.source.opts.collapseSuperGroups || tier.hasBumpedFeatures) {
-                hasWidget = true;
-		makeToggleButton(labelGroup, tier, clh);
-	    } 
+        var hasWidget = false;
+	if (tier.source.opts.collapseSuperGroups || tier.hasBumpedFeatures) {
+            hasWidget = true;
+	    this.makeToggleButton(labelGroup, tier, clh);
+	} 
 
-            if (tier.isQuantitative) {
-                hasWidget = true;
-                var quantTools = makeElementNS(NS_SVG, 'g');
-                quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
-                    x: tabMargin - 25,
-                    y: clh,
-                    width: 25,
-                    height: tier.layoutHeight,
-                    stroke: 'none',
-                    fill: tierBackgroundColors[ti % tierBackgroundColors.length]
-                }));
-                labelGroup.appendChild(quantTools);
-                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                    x1: tabMargin,
-                    y1: clh + (tier.clientMin|0),
-                    x2: tabMargin,
-                    y2: clh + (tier.clientMax|0),
-                    strokeWidth: 1
-                }));
-                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                    x1: tabMargin -5 ,
-                    y1: clh + (tier.clientMin|0),
-                    x2: tabMargin,
-                    y2: clh + (tier.clientMin|0),
-                    strokeWidth: 1
-                }));
-                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                    x1: tabMargin -3 ,
-                    y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
-                    x2: tabMargin,
-                    y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
-                    strokeWidth: 1
-                }));
-                quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                    x1: tabMargin -5 ,
-                    y1: clh + (tier.clientMax|0),
-                    x2: tabMargin,
-                    y2: clh + (tier.clientMax|0),
-                    strokeWidth: 1
-                }));
-                var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min, {
-                    x: 80,
-                    y: (clh|0) + (tier.clientMin|0),
-                    strokeWidth: 0,
-                    fill: 'black',
-                    fontSize: '8pt'
-                });
-                quantTools.appendChild(minQ);
-                var mqbb = minQ.getBBox();
-                minQ.setAttribute('x', tabMargin - mqbb.width - 7);
-                minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
+        if (tier.isQuantitative) {
+            hasWidget = true;
+            var quantTools = makeElementNS(NS_SVG, 'g');
+            quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
+                x: this.tabMargin - 25,
+                y: clh,
+                width: 25,
+                height: tier.layoutHeight,
+                stroke: 'none',
+                fill: this.tierBackgroundColors[ti % this.tierBackgroundColors.length]
+            }));
+            labelGroup.appendChild(quantTools);
+            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                x1: this.tabMargin,
+                y1: clh + (tier.clientMin|0),
+                x2: this.tabMargin,
+                y2: clh + (tier.clientMax|0),
+                strokeWidth: 1
+            }));
+            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                x1: this.tabMargin -5 ,
+                y1: clh + (tier.clientMin|0),
+                x2: this.tabMargin,
+                y2: clh + (tier.clientMin|0),
+                strokeWidth: 1
+            }));
+            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                x1: this.tabMargin -3 ,
+                y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
+                x2: this.tabMargin,
+                y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
+                strokeWidth: 1
+            }));
+            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+                x1: this.tabMargin -5 ,
+                y1: clh + (tier.clientMax|0),
+                x2: this.tabMargin,
+                y2: clh + (tier.clientMax|0),
+                strokeWidth: 1
+            }));
+            var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min, {
+                x: 80,
+                y: (clh|0) + (tier.clientMin|0),
+                strokeWidth: 0,
+                fill: 'black',
+                fontSize: '8pt'
+            });
+            quantTools.appendChild(minQ);
+            var mqbb = minQ.getBBox();
+            minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+            minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
                     
-                var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max, {
-                    x: 80,
-                    y: (clh|0) + (tier.clientMax|0),
-                    strokeWidth: 0,
-                    fill: 'black',
-                    fontSize: '8pt'
-                });
-                quantTools.appendChild(maxQ);
-                maxQ.setAttribute('x', tabMargin - maxQ.getBBox().width - 3);
-                mqbb = maxQ.getBBox();
-                maxQ.setAttribute('x', tabMargin - mqbb.width - 7);
-                maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
+            var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max, {
+                x: 80,
+                y: (clh|0) + (tier.clientMax|0),
+                strokeWidth: 0,
+                fill: 'black',
+                fontSize: '8pt'
+            });
+            quantTools.appendChild(maxQ);
+            maxQ.setAttribute('x', this.tabMargin - maxQ.getBBox().width - 3);
+            mqbb = maxQ.getBBox();
+            maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+            maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
 
-                var button = icons.createIcon('magnifier', labelGroup);
-                button.setAttribute('transform', 'translate(' + (tabMargin - 18) + ', ' + (clh + (tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
+            var button = this.icons.createIcon('magnifier', labelGroup);
+            button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + (clh + (tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
 
-                // FIXME style-changes don't currently work because of the way icons get grouped.
-                button.addEventListener('mouseover', function(ev) {
-	            button.setAttribute('fill', 'red');
-                }, false);
-                button.addEventListener('mouseout', function(ev) {
-	            button.setAttribute('stroke', 'gray');
-                }, false);
+            // FIXME style-changes don't currently work because of the way icons get grouped.
+            button.addEventListener('mouseover', function(ev) {
+	        button.setAttribute('fill', 'red');
+            }, false);
+            button.addEventListener('mouseout', function(ev) {
+	        button.setAttribute('stroke', 'gray');
+            }, false);
                 
-                quantTools.appendChild(button);
-                makeQuantConfigButton(quantTools, tier, clh);
-                makeTooltip(quantTools, 'Click to adjust how this data is displayed');
-            }
+            quantTools.appendChild(button);
+            makeQuantConfigButton(quantTools, tier, clh);
+            this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
+        }
 
-            var labelMaxWidth = tabMargin - 20;
-            if (hasWidget) {
-                labelMaxWidth -= 20;
-            }
-            var labelString = tiers[ti].source.name;
-	    var labelText = document.createElementNS(NS_SVG, "text");
-	    labelText.setAttribute("x", 15);
-	    labelText.setAttribute("y", clh + 17);
-	    labelText.setAttribute("stroke-width", "0");
-	    labelText.setAttribute("fill", "black");
-	    labelText.appendChild(document.createTextNode(tiers[ti].source.name));
-            labelText.setAttribute('pointer-events', 'none');
-	    labelGroup.appendChild(labelText);
+        var labelMaxWidth = this.tabMargin - 20;
+        if (hasWidget) {
+            labelMaxWidth -= 20;
+        }
+        var labelString = tier.source.name;
+	var labelText = document.createElementNS(NS_SVG, 'text');
+	labelText.setAttribute('x', 15);
+	labelText.setAttribute('y', clh + 17);
+	labelText.setAttribute('stroke-width', 0);
+	labelText.setAttribute('fill', 'black');
+	labelText.appendChild(document.createTextNode(labelString));
+        labelText.setAttribute('pointer-events', 'none');
+	labelGroup.appendChild(labelText);
 
-            while (labelText.getBBox().width > labelMaxWidth) {
-                removeChildren(labelText);
-                labelString = labelString.substring(0, labelString.length - 1);
-                labelText.appendChild(document.createTextNode(labelString + '...'));
-            }
+        while (labelText.getBBox().width > labelMaxWidth) {
+            removeChildren(labelText);
+            labelString = labelString.substring(0, labelString.length - 1);
+            labelText.appendChild(document.createTextNode(labelString + '...'));
+        }
 
-	    xfrmTier(tier, tabMargin - ((1.0 * (viewStart - origin)) * scale), -1);
+	this.xfrmTier(tier, this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), -1);
 	    
-	    if (tier.placard) {
-		tier.placard.setAttribute('transform', 'translate(' + tabMargin + ', ' + (clh + tier.layoutHeight - 4) + ')');
-		browserSvg.appendChild(tier.placard);
-		placards.push(tier.placard);
-	    }
+	if (tier.placard) {
+	    tier.placard.setAttribute('transform', 'translate(' + this.tabMargin + ', ' + (clh + tier.layoutHeight - 4) + ')');
+	    browserSvg.appendChild(tier.placard);
+	    this.placards.push(tier.placard);
+	}
 
-	    clh += tiers[ti].layoutHeight;
-	}
+	clh += tier.layoutHeight;
+    }
 	
-	if (clh < 290) {
-	    clh = 290;
-	}
+    if (clh < 290) {
+	clh = 290;
+    }
 	
-	svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
-	svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
-	featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
-	labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+    this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
+    this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
+    this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+    this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
 }
 
-function offsetForTier(ti) {
+Browser.prototype.offsetForTier = function(ti) {
     var clh = 50;
     for (var t = 0; t < ti; ++t) {
-        clh += tiers[t].layoutHeight;
+        clh += this.tiers[t].layoutHeight;
     }
     return clh;
 }
 
-function setupTierDrag(element, ti) {
+Browser.prototype.setupTierDrag = function(element, ti) {
+    var thisB = this;
     var dragOriginX, dragOriginY;
     var dragFeedbackRect;
     var targetTier;
@@ -351,24 +279,24 @@ function setupTierDrag(element, ti) {
     var moveHandler = function(ev) {
         var cly = ((ev.clientY + window.scrollY - dragOriginY) | 0) - 50;
         var destTier = 0;
-        while (destTier < tiers.length && cly > tiers[destTier].layoutHeight) {
-            cly -= tiers[destTier].layoutHeight;
+        while (destTier < thisB.tiers.length && cly > thisB.tiers[destTier].layoutHeight) {
+            cly -= thisB.tiers[destTier].layoutHeight;
             ++destTier;
         }
         if (destTier != targetTier) {
             targetTier = destTier;
-            dragFeedbackRect.setAttribute('y', offsetForTier(targetTier) - 2);
+            dragFeedbackRect.setAttribute('y', thisB.offsetForTier(targetTier) - 2);
         }
     };
     
     var binned = false;
     var binEnterHandler = function(ev) {
-        bin.setAttribute('stroke', 'red');
+        thisB.bin.setAttribute('stroke', 'red');
         dragFeedbackRect.setAttribute('fill', 'none');
         binned = true;
     }
     var binLeaveHandler = function(ev) {
-        bin.setAttribute('stroke', 'gray');
+        thisB.bin.setAttribute('stroke', 'gray');
         dragFeedbackRect.setAttribute('fill', 'red');
         binned = false;
     }
@@ -376,86 +304,87 @@ function setupTierDrag(element, ti) {
     var upHandler = function(ev) {
         window.removeEventListener('mousemove', moveHandler, true);
         window.removeEventListener('mouseup', upHandler, true);
-        bin.removeEventListener('mouseover', binEnterHandler, true);
-        bin.removeEventListener('mouseout', binLeaveHandler, true);
-        popupHolder.removeChild(dragFeedbackRect);
-        bin.setAttribute('stroke', 'gray');
+        thisB.bin.removeEventListener('mouseover', binEnterHandler, true);
+        thisB.bin.removeEventListener('mouseout', binLeaveHandler, true);
+        thisB.popupHolder.removeChild(dragFeedbackRect);
+        thisB.bin.setAttribute('stroke', 'gray');
         
         if (binned) {
-            var newTiers = new Array();
+            var newTiers = [];
             
-            for (var t = 0; t < tiers.length; ++t) {
+            for (var t = 0; t < thisB.tiers.length; ++t) {
                 if (t != ti) {
-                    newTiers.push(tiers[t]);
+                    newTiers.push(thisB.tiers[t]);
                 }
             }
             
-            tierHolder.removeChild(tiers[ti].viewport);
+            thisB.tierHolder.removeChild(thisB.tiers[ti].viewport);
             
-            tiers = newTiers;
+            thisB.tiers = newTiers;
             for (var nti = 0; nti < tiers.length; ++nti) {
-                tiers[nti].background.setAttribute("fill", tierBackgroundColors[nti % tierBackgroundColors.length]);
+                thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
             }
             
-            arrangeTiers();
-	    storeStatus();
+            thisB.arrangeTiers();
+	    thisB.storeStatus();
         } else if (targetTier == ti) {
-            // setViewerStatus('Nothing to do');
+            // Nothing at all.
         } else {
-            var newTiers = new Array();
+            var newTiers = [];
             
             var fromCnt = 0;
             if (targetTier > ti) {
                 --targetTier;
             }
-            while (newTiers.length < tiers.length) {
+            while (newTiers.length < thisB.tiers.length) {
                 if (newTiers.length == targetTier) {
-                    newTiers.push(tiers[ti]);
+                    newTiers.push(thisB.tiers[ti]);
                 } else {
                     if (fromCnt != ti) {
-                        newTiers.push(tiers[fromCnt]);
+                        newTiers.push(thisB.tiers[fromCnt]);
                     }
                     ++fromCnt;
                 }
             }
             
-            tiers = newTiers;
-            for (var nti = 0; nti < tiers.length; ++nti) {
-                tiers[nti].background.setAttribute("fill", tierBackgroundColors[nti % tierBackgroundColors.length]);
+            thisB.tiers = newTiers;
+            for (var nti = 0; nti < thisB.tiers.length; ++nti) {
+                thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
             }
-            arrangeTiers();
-	    storeStatus();
+            
+            thisB.arrangeTiers();
+	    thisB.storeStatus();
         }
     }
     
     element.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        var origin = svgHolder.getBoundingClientRect();
+        var origin = thisB.svgHolder.getBoundingClientRect();
         dragOriginX = origin.left + window.scrollX; dragOriginY = origin.top + window.scrollY;
         window.addEventListener('mousemove', moveHandler, true);
         window.addEventListener('mouseup', upHandler, true);
-        bin.addEventListener('mouseover', binEnterHandler, true);
-        bin.addEventListener('mouseout', binLeaveHandler, true);
+        thisB.bin.addEventListener('mouseover', binEnterHandler, true);
+        thisB.bin.addEventListener('mouseout', binLeaveHandler, true);
         targetTier = ti;
         dragFeedbackRect = makeElementNS(NS_SVG, 'rect', null, {
-            x: tabMargin,
-            y: offsetForTier(targetTier) - 2,
-            width: featurePanelWidth,
+            x: thisB.tabMargin,
+            y: thisB.offsetForTier(targetTier) - 2,
+            width: thisB.featurePanelWidth,
             height: 4,
             fill: 'red',
             stroke: 'none'
         });
-        popupHolder.appendChild(dragFeedbackRect);
+        thisB.popupHolder.appendChild(dragFeedbackRect);
     },true);
 }
 
-function makeToggleButton(labelGroup, tier, ypos) {
-
+Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
+    var thisB = this;
     var bumpToggle = makeElementNS(NS_SVG, 'g', null, {fill: 'cornsilk', strokeWidth: 1, stroke: 'gray'});
-    bumpToggle.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: tabMargin - 15, y: ypos + 8, width: 8, height: 8}));
-    bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: tabMargin - 15, y1: ypos + 12, x2: tabMargin - 7, y2: ypos+12}));
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: this.tabMargin - 15, y: ypos + 8, width: 8, height: 8}));
+    bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: this.tabMargin - 15, y1: ypos + 12, x2: this.tabMargin - 7, y2: ypos+12}));
     if (!tier.bumped) {
-        bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: tabMargin - 11, y1: ypos+8, x2: tabMargin - 11, y2: ypos+16}));
+        bumpToggle.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: this.tabMargin - 11, y1: ypos+8, x2: this.tabMargin - 11, y2: ypos+16}));
     }
     labelGroup.appendChild(bumpToggle);
     bumpToggle.addEventListener('mouseover', function(ev) {bumpToggle.setAttribute('stroke', 'red');}, false);
@@ -467,69 +396,45 @@ function makeToggleButton(labelGroup, tier, ypos) {
         tier.layoutWasDone = false;   // permits the feature-tier layout code to resize the tier.
 	dasRequestComplete(tier);   // is there a more abstract way to do this?
     }, false);
-    makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
+    this.makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
 }
 
-function updateRegion()
+Browser.prototype.updateRegion = function()
 {
-    var regionDisplay = "chr: " + chr + " start: " + Math.round(viewStart) + " end: " + Math.round(viewEnd);
-    removeChildren(regionLabel);
-    regionLabel.appendChild(document.createTextNode(regionDisplay));
+    var regionDisplay = "chr: " + this.chr + " start: " + (this.viewStart|0) + " end: " + (this.viewEnd|0);
+    removeChildren(this.regionLabel);
+    this.regionLabel.appendChild(document.createTextNode(regionDisplay));
 }
 
-function setViewerStatus(msg)
-{
-/*
-    var statusElement = document.getElementById("status");
-    while (statusElement.childNodes.length > 0) {
-	    statusElement.removeChild(statusElement.firstChild);
-    }
-    statusElement.appendChild(document.createTextNode(msg)); */
-}
-
-function setLoadingStatus()
-{
-    var count = 0;
-    for (var t in tiers) {
-        if (tiers[t].req != null && tiers[t].req.readyState != 4) {
-            ++count;
-        }
-    }
-    if (count > 0) {
-        setViewerStatus("Loading (" + count + ")");
-    } else {
-        setViewerStatus("Idle");
-    }
-}
-
-function refresh()
-{
-    var width = (viewEnd - viewStart) + 1;
-    var maxExtraW = (width * maxExtra) | 0;
-    knownStart = Math.max(1, viewStart - maxExtraW)|0;
-    knownEnd = Math.min(viewEnd + maxExtraW, (currentSeqMax > 0 ? currentSeqMax : 1000000000))|0;
-
-    var newOrigin = (viewStart + viewEnd) / 2;
-    var oh = newOrigin - origin;
-    origin = newOrigin;
-    scaleAtLastRedraw = scale;
-    for (var t = 0; t < tiers.length; ++t) {
-	if (tiers[t].originHaxx) {
-	    oh += tiers[t].originHaxx;
+Browser.prototype.refresh = function() {
+    var width = (this.viewEnd - this.viewStart) + 1;
+    var maxExtraW = (width * this.maxExtra) | 0;
+    this.knownStart = Math.max(1, (this.viewStart|0) - maxExtraW);
+    this.knownEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
+    
+    var newOrigin = (this.viewStart + this.viewEnd) / 2;
+    var oh = newOrigin - this.origin;
+    this.origin = newOrigin;
+    this.scaleAtLastRedraw = this.scale;
+    for (var t = 0; t < this.tiers.length; ++t) {
+        var od = oh;
+	if (this.tiers[t].originHaxx) {
+	    od += this.tiers[t].originHaxx;
 	}
-	tiers[t].originHaxx = oh;
-	tiers[t].refreshTier();
+	this.tiers[t].originHaxx = od;
+	this.tiers[t].refreshTier();
     }
 }
 
 
-var originX;
-var dcTimeoutID = null;
-var clickTestTB = null;
+// var originX;
+// var dcTimeoutID = null;
+// var clickTestTB = null;
 
-function mouseDownHandler(ev)
+Browser.prototype.mouseDownHandler = function(ev)
 {
-    removeAllPopups();
+    var thisB = this;
+    this.removeAllPopups();
     ev.stopPropagation(); ev.preventDefault();
 
     var target = document.elementFromPoint(ev.clientX, ev.clientY);
@@ -538,18 +443,14 @@ function mouseDownHandler(ev)
     }
 
     if (target && (target.dalliance_feature || target.dalliance_group)) {
-	if (dcTimeoutID && target.dalliance_feature) {
-/*    Simple solution won't work in WebKit due to https://bugs.webkit.org/show_bug.cgi?id=42815
-            var frect = target.getBoundingClientRect();
-            alert('clientX=' + ev.clientX + ', left=' + frect.left + ', width=' + frect.width); */
-
+	if (this.dcTimeoutID && target.dalliance_feature) {
             var f = target.dalliance_feature;
-            var org = svgHolder.getBoundingClientRect();
-            var fstart = (((f.min|0) - (viewStart|0)) * scale) + org.left + tabMargin;
-            var fwidth = (((f.max - f.min) + 1) * scale);
+            var org = this.svgHolder.getBoundingClientRect();
+            var fstart = (((f.min|0) - (this.viewStart|0)) * scale) + org.left + this.tabMargin;
+            var fwidth = (((f.max - f.min) + 1) * this.scale);
 
-	    clearTimeout(dcTimeoutID);
-	    dcTimeoutID = null;
+	    clearTimeout(this.dcTimeoutID);
+	    this.dcTimeoutID = null;
 
             var newMid = (((target.dalliance_feature.min|0) + (target.dalliance_feature.max|0)))/2;
             if (fwidth > 10) {
@@ -561,20 +462,20 @@ function mouseDownHandler(ev)
                 }
             }
 
-	    var width = viewEnd - viewStart;
-	    setLocation(newMid - (width/2), newMid + (width/2));
+	    var width = this.viewEnd - this.viewStart;
+	    this.setLocation(newMid - (width/2), newMid + (width/2));
 	} else {
-	    dcTimeoutID = setTimeout(function() {
-		dcTimeoutID = null;
-		featurePopup(ev, target.dalliance_feature, target.dalliance_group);
+	    this.dcTimeoutID = setTimeout(function() {
+		thisB.dcTimeoutID = null;
+		thisB.featurePopup(ev, target.dalliance_feature, target.dalliance_group);
 	    }, 200);
 	}
     } else {
-	originX = ev.clientX;
-	document.addEventListener("mousemove", mouseMoveHandler, true);
-	document.addEventListener("mouseup", mouseUpHandler, true);
-        clickTestTB = setTimeout(function() {
-            clickTestTB = null;
+	this.originX = ev.clientX;
+	document.addEventListener('mousemove', this.__mouseMoveHandler, true);
+	document.addEventListener('mouseup', this.__mouseUpHandler, true);
+        this.clickTestTB = setTimeout(function() {
+            thisB.clickTestTB = null;
         }, 200);
     }
 }
@@ -582,12 +483,11 @@ function mouseDownHandler(ev)
 
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
-function featurePopup(ev, feature, group)
-{
+Browser.prototype.featurePopup = function(ev, feature, group){
     if (!feature) feature = {};
     if (!group) group = {};
 
-    removeAllPopups();
+    this.removeAllPopups();
 
     var mx =  ev.clientX, my = ev.clientY;
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -613,7 +513,7 @@ function featurePopup(ev, feature, group)
             makeElement('th', pick(group.type, feature.type)),
             makeElement('td', pick(group.label, feature.label, group.id, feature.id))
         ]);
-        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -628,7 +528,7 @@ function featurePopup(ev, feature, group)
             makeElement('th', 'Location'),
             makeElement('td', loc.segment + ':' + loc.min + '-' + loc.max)
         ]);
-        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -637,7 +537,7 @@ function featurePopup(ev, feature, group)
             makeElement('th', 'Score'),
             makeElement('td', feature.score)
         ]);
-        row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -650,7 +550,7 @@ function featurePopup(ev, feature, group)
                     return makeElement('div', makeElement('a', l.desc, {href: l.uri, target: '_new'}));
                 }))
             ]);
-            row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+            row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }
@@ -670,22 +570,22 @@ function featurePopup(ev, feature, group)
                 makeElement('th', k),
                 makeElement('td', v)
             ]);
-            row.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+            row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }
     }
     popup.appendChild(table);
-
-    hPopupHolder.appendChild(popup);
+    this.hPopupHolder.appendChild(popup);
 }
 
-function mouseUpHandler(ev)
-{
-    if (clickTestTB && positionFeedback) {
+Browser.prototype.mouseUpHandler = function(ev) {
+    var thisB = this;
+
+    if (this.clickTestTB && this.positionFeedback) {
         var origin = svgHolder.getBoundingClientRect();
-        var ppos = ev.clientX - origin.left - tabMargin;
-        var spos = (((1.0*ppos)/scale) + viewStart)|0;
+        var ppos = ev.clientX - origin.left - this.tabMargin;
+        var spos = (((1.0*ppos)/this.scale) + this.viewStart)|0;
         
         var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         var popup = makeElement('div', '' + spos, {}, {
@@ -699,11 +599,11 @@ function mouseUpHandler(ev)
             padding: '2px',
             maxWidth: '400px'
         });
-        hPopupHolder.appendChild(popup);
+        this.hPopupHolder.appendChild(popup);
         var moveHandler;
         moveHandler = function(ev) {
             try {
-                hPopupHolder.removeChild(popup);
+                thisB.hPopupHolder.removeChild(popup);
             } catch (e) {
                 // May have been removed by other code which clears the popup layer.
             }
@@ -714,25 +614,25 @@ function mouseUpHandler(ev)
     
     ev.stopPropagation(); ev.preventDefault();
 
-    document.removeEventListener("mousemove", mouseMoveHandler, true);
-    document.removeEventListener("mouseup", mouseUpHandler, true);
-    storeStatus();
+    document.removeEventListener('mousemove', this.__mouseMoveHandler, true);
+    document.removeEventListener('mouseup', this.__mouseUpHandler, true);
+    this.storeStatus();
 }
 
-function mouseMoveHandler(ev) 
-{
+Browser.prototype.mouseMoveHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
-    if (ev.clientX != originX) {
-        move(ev.clientX - originX);
-        originX = ev.clientX;
+    if (ev.clientX != this.originX) {
+        this.move(ev.clientX - this.originX);
+        this.originX = ev.clientX;
     }
 }
+
+/*
 
 var touchOriginX;
 
 function touchStartHandler(ev)
 {
-    // setViewerStatus('touching');
     removeAllPopups();
     ev.stopPropagation(); ev.preventDefault();
     
@@ -752,30 +652,19 @@ function touchMoveHandler(ev)
 
 function touchEndHandler(ev)
 {
-    // setViewerStatus('notTouching');
     ev.stopPropagation(); ev.preventDefault();
     storeStatus();
 }
 
 function touchCancelHandler(ev) {
-    setViewerStatus('cancelledTouching');
 }
 
-function removeChildren(node)
-{
-    if (!node || !node.childNodes) {
-        return;
-    }
+*/
 
-    while (node.childNodes.length > 0) {
-        node.removeChild(node.firstChild);
-    }
-}
 
-function removeAllPopups()
-{
-    removeChildren(popupHolder);
-    removeChildren(hPopupHolder);
+Browser.prototype.removeAllPopups = function() {
+    removeChildren(this.popupHolder);
+    removeChildren(this.hPopupHolder);
 }
 
 function EPMenuItem(entryPoint) {
@@ -801,36 +690,36 @@ function stringifyObject(o)
     }
 }
 
-function makeHighlight() {
-    if (highlight) {
-	dasTierHolder.removeChild(highlight);
-	highlight = null;
+Browser.prototype.makeHighlight = function() {
+    if (this.highlight) {
+	this.dasTierHolder.removeChild(this.highlight);
+	this.highlight = null;
     }
 
-    if (highlightMin > 0) {
-	highlight = document.createElementNS(NS_SVG, 'rect');
-	highlight.setAttribute('x', (highlightMin - origin) * scale);
-	highlight.setAttribute('y', 0);
-	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
-	highlight.setAttribute('height', 10000);
-	highlight.setAttribute('stroke', 'none');
-	highlight.setAttribute('fill', 'red');
-	highlight.setAttribute('fill-opacity', 0.2);
-	highlight.setAttribute('pointer-events', 'none');
-	dasTierHolder.appendChild(highlight);
+    if (this.highlightMin > 0) {
+	this.highlight = document.createElementNS(NS_SVG, 'rect');
+	this.highlight.setAttribute('x', (this.highlightMin - this.origin) * this.scale);
+	this.highlight.setAttribute('y', 0);
+	this.highlight.setAttribute('width', (this.highlightMax - this.highlightMin + 1) * this.scale);
+	this.highlight.setAttribute('height', 10000);
+	this.highlight.setAttribute('stroke', 'none');
+	this.highlight.setAttribute('fill', 'red');
+	this.highlight.setAttribute('fill-opacity', 0.15);
+	this.highlight.setAttribute('pointer-events', 'none');
+	this.dasTierHolder.appendChild(this.highlight);
     }
 }
 
-function init() 
-{
+Browser.prototype.init = function() {
+    var thisB = this;
     // Cache away the default sources before anything else
 
-    defaultSources = [];
-    for (var i = 0; i < sources.length; ++i) {
-        defaultSources.push(sources[i]);
+    this.defaultSources = [];
+    for (var i = 0; i < this.sources.length; ++i) {
+        this.defaultSources.push(this.sources[i]);
     }
 
-    icons = new IconSet(iconsURI);
+    this.icons = new IconSet(this.iconsURI);
 
     var overrideSources;
     var reset = false;
@@ -856,14 +745,14 @@ function init()
         reset = queryDict.reset;
     }
 
-    if (cookieKey && localStorage['dalliance.' + cookieKey + '.view-chr'] && !reset) {
-        qChr = localStorage['dalliance.' + cookieKey + '.view-chr'];
-        qMin = localStorage['dalliance.' + cookieKey + '.view-start']|0;
-        qMax = localStorage['dalliance.' + cookieKey + '.view-end']|0;
+    if (this.cookieKey && localStorage['dalliance.' + this.cookieKey + '.view-chr'] && !reset) {
+        qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
+        qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
+        qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
     }
 
-    if (cookieKey) {
-	var maybeSourceConfig = localStorage['dalliance.' + cookieKey + '.sources'];
+    if (this.cookieKey) {
+	var maybeSourceConfig = localStorage['dalliance.' + this.cookieKey + '.sources'];
 	if (maybeSourceConfig && !reset) {
 	    overrideSources = eval(maybeSourceConfig);
 	}
@@ -879,15 +768,15 @@ function init()
 	queryRegion = true;
     }
 
-    positionFeedback = queryDict.positionFeedback || false;
+    this.positionFeedback = queryDict.positionFeedback || false;
     guidelineConfig = queryDict.guidelines || 'foreground';
     if (guidelineConfig == 'true') {
-	guidelineStyle = 'background';
+	this.guidelineStyle = 'background';
     } else if (STRICT_NUM_REGEXP.test(guidelineConfig)) {
-	guidelineStyle = 'background';
-	guidelineSpacing = guidelineConfig|0;
+	this.guidelineStyle = 'background';
+	this.guidelineSpacing = guidelineConfig|0;
     } else {
-	guidelineStyle = guidelineConfig;
+	this.guidelineStyle = guidelineConfig;
     }
 
     if (!queryRegion) {
@@ -911,148 +800,146 @@ function init()
     var histr = queryDict.h || '';
     var match = histr.match(region_exp);
     if (match) {
-	highlightMin = match[2]|0;
-	highlightMax = match[3]|0;
+	this.highlightMin = match[2]|0;
+	this.highlightMax = match[3]|0;
     }
-
-
 
     //
     // Set up the UI (factor out?)
     //
            
-    svgHolder = document.getElementById('svgHolder');
-    svgRoot = makeElementNS(NS_SVG, 'svg', null, {
+    this.svgHolder = document.getElementById(this.pageName);
+    this.svgRoot = makeElementNS(NS_SVG, 'svg', null, {
         version: '1.1',
         width: '860px',
         height: '500px',
         id: 'browser_svg'
     });
-    removeChildren(svgHolder);
-    svgHolder.appendChild(svgRoot);
+    removeChildren(this.svgHolder);
+    this.svgHolder.appendChild(this.svgRoot);
 
-    
-    svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'});
-    var main = makeElementNS(NS_SVG, 'g', svgBackground,
-                             {fillOpacity: 1.0, stroke: 'black', strokeWidth: '0.1cm', fontFamily: 'helvetica', fontSize: '10pt'});
-    svgRoot.appendChild(main);
+    this.svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'});
+    var main = makeElementNS(NS_SVG, 'g', this.svgBackground, {
+        fillOpacity: 1.0, 
+        stroke: 'black', 
+        strokeWidth: '0.1cm', 
+        fontFamily: 'helvetica', 
+        fontSize: '10pt'
+    });
+    this.svgRoot.appendChild(main);
 
-    regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
+    this.regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
         x: 240,
         y: 30,
-        id: 'region',   // FIXME id
         strokeWidth: 0
     });
-    main.appendChild(regionLabel);
-    makeTooltip(regionLabel, 'Click to jump to a new location or gene');
+    main.appendChild(this.regionLabel);
+    this.makeTooltip(this.regionLabel, 'Click to jump to a new location or gene');
 
-    var addButton = icons.createButton('add-track', main, 30, 30);
+    var addButton = this.icons.createButton('add-track', main, 30, 30);
     addButton.setAttribute('transform', 'translate(100, 10)');
-    makeTooltip(addButton, 'Add tracks from the DAS registry');
+    this.makeTooltip(addButton, 'Add tracks from the DAS registry');
     main.appendChild(addButton);
 
-    var linkButton = icons.createButton('link', main, 30, 30);
+    var linkButton = this.icons.createButton('link', main, 30, 30);
     linkButton.setAttribute('transform', 'translate(140, 10)');
-    makeTooltip(linkButton, 'Link to other genome browsers');
+    this.makeTooltip(linkButton, 'Link to other genome browsers');
     main.appendChild(linkButton);
 
-    var resetButton = icons.createButton('reset', main, 30, 30);
+    var resetButton = this.icons.createButton('reset', main, 30, 30);
     resetButton.setAttribute('transform', 'translate(180, 10)');
-    makeTooltip(resetButton, 'Reset the browser to a default state');
+    this.makeTooltip(resetButton, 'Reset the browser to a default state');
     main.appendChild(resetButton);
 
-    bin = icons.createIcon('bin', main);
-    bin.setAttribute('transform', 'translate(10, 18)');
-    main.appendChild(bin);
-    makeTooltip(bin, 'Drag tracks here to discard');
+    this.bin = this.icons.createIcon('bin', main);
+    this.bin.setAttribute('transform', 'translate(10, 18)');
+    main.appendChild(this.bin);
+    this.makeTooltip(this.bin, 'Drag tracks here to discard');
     
-    featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
-        x: tabMargin,      // FIXME tabMargin
+    this.featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
+        x: this.tabMargin,
         y: 50,
-        width: 850 - tabMargin,
-        height: 440,
-        id: 'featureClipRect'
+        width: 850 - this.tabMargin,
+        height: 440
     });
-    main.appendChild(makeElementNS(NS_SVG, 'clipPath', featureClipRect, {id: 'featureClip'}));
-    labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
-        x: 10,      // FIXME tabMargin
+    main.appendChild(makeElementNS(NS_SVG, 'clipPath', this.featureClipRect, {id: 'featureClip-' + this.pageName}));
+    this.labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
+        x: 10,
         y: 50,
-        width: tabMargin - 10,
-        height: 440,
-        id: 'labelClipRect'
+        width: this.tabMargin - 10,
+        height: 440
     });
-    main.appendChild(makeElementNS(NS_SVG, 'clipPath', labelClipRect, {id: 'labelClip'}));
+    main.appendChild(makeElementNS(NS_SVG, 'clipPath', this.labelClipRect, {id: 'labelClip-' + this.pageName}));
       
-    dasTierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)'});
-    main.appendChild(dasTierHolder);
+    this.dasTierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip-' + this.pageName + ')'});   // FIXME needs a unique ID.
+    main.appendChild(this.dasTierHolder);
     var dasTiers = makeElementNS(NS_SVG, 'g', null, {id: 'dasTiers'});
-    dasTierHolder.appendChild(dasTiers);
+    this.dasTierHolder.appendChild(dasTiers);
 
-    makeHighlight();
+    this.makeHighlight();
     
-    dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip)'}); 
-    main.appendChild(dasLabelHolder);
+    this.dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip-' + this.pageName + ')'}); 
+    main.appendChild(this.dasLabelHolder);
     
     {
-        var plusIcon = icons.createIcon('magnifier-plus', main);
-        var minusIcon = icons.createIcon('magnifier-minus', main);
-        zoomTickMarks = makeElementNS(NS_SVG, 'g');
-        zoomSlider = new DSlider(250);
-        zoomSlider.onchange = function(zoomVal, released) {
-	    zoom(Math.exp((1.0 * zoomVal) / zoomExpt));
+        var plusIcon = this.icons.createIcon('magnifier-plus', main);
+        var minusIcon = this.icons.createIcon('magnifier-minus', main);
+        this.zoomTickMarks = makeElementNS(NS_SVG, 'g');
+        this.zoomSlider = new DSlider(250);
+        this.zoomSlider.onchange = function(zoomVal, released) {
+	    thisB.zoom(Math.exp((1.0 * zoomVal) / thisB.zoomExpt));
 	    if (released) {
-                for (var t = 0; t < tiers.length; ++t) {
-                    tiers[t].layoutWasDone = false;
+                for (var t = 0; t < thisB.tiers.length; ++t) {
+                    thisB.tiers[t].layoutWasDone = false;
                 }
-	        refresh();
-	        storeStatus();
+	        thisB.refresh();
+	        thisB.storeStatus();
 	    }
         };
         plusIcon.setAttribute('transform', 'translate(0,15)');
-        zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
+        this.zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
         minusIcon.setAttribute('transform', 'translate(285,15)');
-        zoomWidget = makeElementNS(NS_SVG, 'g', [zoomTickMarks, plusIcon, zoomSlider.svg, minusIcon]);
+        this.zoomWidget = makeElementNS(NS_SVG, 'g', [this.zoomTickMarks, plusIcon, this.zoomSlider.svg, minusIcon]);
 
-        makeTooltip(zoomWidget, 'Drag to zoom');
-        main.appendChild(zoomWidget);
+        this.makeTooltip(this.zoomWidget, 'Drag to zoom');
+        main.appendChild(this.zoomWidget);
     }
 
-    karyo = new Karyoscape(karyoEndpoint);
-    // now updated via setLocation.
-    karyo.svg.setAttribute('transform', 'translate(500, 15)');
-    karyo.onchange = function(pos) {
-        var width = viewEnd - viewStart + 1;
-        var newStart = ((pos * currentSeqMax) - (width/2))|0;
+    this.karyo = new Karyoscape(this.karyoEndpoint);
+    this.karyo.svg.setAttribute('transform', 'translate(500, 15)');
+    this.karyo.onchange = function(pos) {
+        var width = thisB.viewEnd - thisB.viewStart + 1;
+        var newStart = ((pos * thisB.currentSeqMax) - (width/2))|0;
         var newEnd = newStart + width - 1;
-        setLocation(newStart, newEnd);
+        thisB.setLocation(newStart, newEnd);
     };
-    main.appendChild(karyo.svg);
+    main.appendChild(this.karyo.svg);
     
-    popupHolder = makeElementNS(NS_SVG, 'g');
-    main.appendChild(popupHolder);
-    hPopupHolder = makeElement('div');
-    svgHolder.appendChild(hPopupHolder);
+    this.popupHolder = makeElementNS(NS_SVG, 'g');
+    main.appendChild(this.popupHolder);
+    this.hPopupHolder = makeElement('div');
+    this.svgHolder.appendChild(this.hPopupHolder);
   
-    bhtmlRoot = makeElement('div', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]);
-    svgHolder.appendChild(bhtmlRoot);
+    this.bhtmlRoot = makeElement('div', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]);
+    this.svgHolder.appendChild(this.bhtmlRoot);
     
-    if (guidelineStyle == 'foreground') {
-	fgGuide = document.createElementNS(NS_SVG, 'line');
-	fgGuide.setAttribute('x1', 500);
-	fgGuide.setAttribute('y1', 50);
-	fgGuide.setAttribute('x2', 500);
-	fgGuide.setAttribute('y2', 10000);
-	fgGuide.setAttribute('stroke', 'red');
-	fgGuide.setAttribute('stroke-width', 1);
-	fgGuide.setAttribute('pointer-events', 'none');
-	main.appendChild(fgGuide);
+    if (this.guidelineStyle == 'foreground') {
+	this.fgGuide = document.createElementNS(NS_SVG, 'line');
+	this.fgGuide.setAttribute('x1', 500);
+	this.fgGuide.setAttribute('y1', 50);
+	this.fgGuide.setAttribute('x2', 500);
+	this.fgGuide.setAttribute('y2', 10000);
+	this.fgGuide.setAttribute('stroke', 'red');
+	this.fgGuide.setAttribute('stroke-width', 1);
+	this.fgGuide.setAttribute('pointer-events', 'none');
+	main.appendChild(this.fgGuide);
     }
     
     // set up the linker
 
     linkButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-	removeAllPopups(); 
+	thisB.removeAllPopups(); 
 
         var mx =  ev.clientX, my = ev.clientY;
 	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -1071,15 +958,15 @@ function init()
         popup.style.padding = '2px';
         
         var linkList = makeElement('ul');
-        for (l in browserLinks) {
+        for (l in thisB.browserLinks) {
             linkList.appendChild(makeElement('li', makeElement('a', l, {
-                href: browserLinks[l].replace(new RegExp('\\${([a-z]+)}', 'g'), function(s, p1) {
+                href: thisB.browserLinks[l].replace(new RegExp('\\${([a-z]+)}', 'g'), function(s, p1) {
 		    if (p1 == 'chr') {
-		        return chr;
+		        return thisB.chr;
 		    } else if (p1 == 'start') {
-		        return viewStart|0;
+		        return thisB.viewStart|0;
 		    } else if (p1 == 'end') {
-		        return viewEnd|0;
+		        return thisB.viewEnd|0;
 		    } else {
 		        return '';
 		    }
@@ -1089,22 +976,22 @@ function init()
         }
         popup.appendChild(linkList);
 
-	hPopupHolder.appendChild(popup);
+	thisB.hPopupHolder.appendChild(popup);
     }, false);
 
     // set up the navigator
 
-    regionLabel.addEventListener('mousedown', function(ev) {
+    this.regionLabel.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-	removeAllPopups(); 
+	thisB.removeAllPopups(); 
 
-        if (entryPoints == null) {
+        if (thisB.entryPoints == null) {
             alert("entry_points aren't currently available for this genome");
             return;
         }
         var epMenuItems = [], epsByChrName = {};
-        for (var epi = 0; epi < entryPoints.length; ++epi) {
-            epMenuItems.push(new EPMenuItem(entryPoints[epi]));
+        for (var epi = 0; epi < thisB.entryPoints.length; ++epi) {
+            epMenuItems.push(new EPMenuItem(thisB.entryPoints[epi]));
         }
         epMenuItems = epMenuItems.sort(function(epmi0, epmi1) {
             var n0 = epmi0.nums;
@@ -1148,38 +1035,41 @@ function init()
             var tab = makeElement('table');
 
             var selectChr = makeElement('select', null);
-            for (var epi = 0; epi < entryPoints.length; ++epi) {
+            for (var epi = 0; epi < epMenuItems.length; ++epi) {
                 var ep = epMenuItems[epi].entryPoint;
 	        epsByChrName[ep.name] = ep;
                 selectChr.appendChild(makeElement('option', ep.toString(), {value: ep.name}));
             }
-            selectChr.value = chr;
+            selectChr.value = thisB.chr;
             tab.appendChild(makeElement('tr', [makeElement('td', 'Chr:'), makeElement('td', selectChr)]));
 
-            var minPosInput = makeElement('input', null, {value: (viewStart|0)});
+            var minPosInput = makeElement('input', null, {value: (thisB.viewStart|0)});
             tab.appendChild(makeElement('tr', [makeElement('td', 'Start:'), makeElement('td',  minPosInput)]));
             
-            var maxPosInput = makeElement('input', null, {value: (viewEnd|0)});
+            var maxPosInput = makeElement('input', null, {value: (thisB.viewEnd|0)});
             tab.appendChild(makeElement('tr', [makeElement('td', 'End:'), makeElement('td',  maxPosInput)]));
 
             form.appendChild(tab);
             form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
             popup.appendChild(form);
         }
-
-        hPopupHolder.appendChild(popup);
+        thisB.hPopupHolder.appendChild(popup);
 
 
 	form.addEventListener('submit', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
 
-	    var nchr = selectChr.value;    // ugh!  But couldn't get selection on input names working.
+	    var nchr = selectChr.value;
 	    var nmin = stringToInt(minPosInput.value);
 	    var nmax = stringToInt(maxPosInput.value);    
-	    removeAllPopups();
+	    thisB.removeAllPopups();
 
 	    if (nchr && nmin && nmax) {
-		setLocation(nmin, nmax, nchr);
+                if (nchr != thisB.chr) {
+                    thisB.highlightMin = -1;
+                    thisB.highlightMax = -1;
+                }
+		thisB.setLocation(nmin, nmax, nchr);
 	    } else {
 		alert('Must specify min and max');
 	    }
@@ -1187,7 +1077,7 @@ function init()
 	    return false;
 	}, false);
 
-        if (searchEndpoint) {
+        if (thisB.searchEndpoint) {
             var geneForm = makeElement('form');
             geneForm.appendChild(makeElement('p', 'Or search for...'))
             geneForm.appendChild(document.createTextNode('Gene:'));
@@ -1201,13 +1091,13 @@ function init()
 	    geneForm.addEventListener('submit', function(ev) {
 	        ev.stopPropagation(); ev.preventDefault();
 	        var g = geneInput.value;
-	        removeAllPopups();
+	        thisB.removeAllPopups();
 
 	        if (!g || g.length == 0) {
 		    return false;
 	        }
 
-	        searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
+	        thisB.searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
                     if (!found) found = [];
                     var min = 500000000, max = -100000000;
 		    var nchr = null;
@@ -1229,12 +1119,12 @@ function init()
 		    if (!nchr) {
 		        alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
 		    } else {
-		        highlightMin = min;
-		        highlightMax = max;
-		        makeHighlight();
+		        thisB.highlightMin = min;
+		        thisB.highlightMax = max;
+		        thisB.makeHighlight();
 
 		        var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-		        setLocation(min - padding, max + padding, nchr);
+		        thisB.setLocation(min - padding, max + padding, nchr);
 		    }
 	        }, false);
                 
@@ -1247,8 +1137,8 @@ function init()
   
     addButton.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
-	removeAllPopups();
-        showTrackAdder(ev);
+	thisB.removeAllPopups();
+        thisB.showTrackAdder(ev);
     }, false);
 
     // set up the resetter
@@ -1257,24 +1147,23 @@ function init()
 	window.location.assign('?reset=true');
     }, false);
 	
-    tierHolder = dasTiers;
-    tiers = new Array();
+    this.tierHolder = dasTiers;
+    this.tiers = [];
     if (overrideSources) {
-	sources = overrideSources;
+	this.sources = overrideSources;
     }
-    for (var t = 0; t < sources.length; ++t) {
-	var source = sources[t];
-        makeTier(source);
+    for (var t = 0; t < this.sources.length; ++t) {
+	var source = this.sources[t];
+        this.makeTier(source);
     }
     
     //
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
     //
 
-    resizeViewer();
-    window.addEventListener("resize", function(ev) {
-        resizeViewer();
-        // makeZoomerTicks();
+    this.resizeViewer();
+    window.addEventListener('resize', function(ev) {
+        thisB.resizeViewer();
     }, false);
 
     //
@@ -1282,56 +1171,64 @@ function init()
     //
 
     if (qChr && qMin && qMax) {
-        chr = qChr; viewStart = qMin; viewEnd = qMax;
-	if (highlightMin < 0) {
-	    highlightMin = qMin;  highlightMax = qMax;
+        this.chr = qChr; this.viewStart = qMin; this.viewEnd = qMax;
+	if (this.highlightMin < 0) {
+	    this.highlightMin = qMin;  this.highlightMax = qMax;
 	}
     }
     
-    if ((viewEnd - viewStart) > MAX_VIEW_SIZE) {
+    if ((this.viewEnd - this.viewStart) > MAX_VIEW_SIZE) {
         var mid = ((viewEnd + viewStart) / 2)|0;
-        viewStart = mid - (MAX_VIEW_SIZE/2);
-        viewEnd = mid + (MAX_VIEW_SIZE/2) - 1;
+        this.viewStart = mid - (MAX_VIEW_SIZE/2);
+        this.viewEnd = mid + (MAX_VIEW_SIZE/2) - 1;
     }
 
-    origin = ((viewStart + viewEnd) / 2) | 0;
-    scale = featurePanelWidth / (viewEnd - viewStart);
+    this.origin = ((this.viewStart + this.viewEnd) / 2) | 0;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
 
-    zoomExpt = 250 / Math.log(MAX_VIEW_SIZE / zoomBase);
+    this.zoomExpt = 250 / Math.log(MAX_VIEW_SIZE / this.zoomBase);
+    this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
-    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
-
-    move(0);
-    refresh(); // FIXME do we still want to be doing this?
+    this.move(0);
+    this.refresh();
 
     //
     // Tick-marks on the zoomer
     //
 
-    makeZoomerTicks();
+    this.makeZoomerTicks();
 
     // 
     // Set up interactivity handlers
     //
-    
-    main.addEventListener('mousedown', mouseDownHandler, false);
+
+    this.__mouseMoveHandler = function(ev) {
+        return thisB.mouseMoveHandler(ev);
+    }
+    this.__mouseUpHandler = function(ev) {
+        return thisB.mouseUpHandler(ev);
+    }
+    main.addEventListener('mousedown', function(ev) {return thisB.mouseDownHandler(ev)}, false);
+
+/*
     main.addEventListener('touchstart', touchStartHandler, false);
     main.addEventListener('touchmove', touchMoveHandler, false);
     main.addEventListener('touchend', touchEndHandler, false);
-    main.addEventListener('touchcancel', touchCancelHandler, false);
-    document.addEventListener('mousewheel', function(ev) {
+    main.addEventListener('touchcancel', touchCancelHandler, false); */
+
+    this.svgRoot.addEventListener('mousewheel', function(ev) {   // FIXME does this need to be on the document?
 	if (!ev.wheelDeltaX) {
 	    return;
 	}
 
 	ev.stopPropagation(); ev.preventDefault();
-	move (-ev.wheelDeltaX/5);
+	thisB.move(-ev.wheelDeltaX/5);
     }, false);
-    document.addEventListener('MozMousePixelScroll', function(ev) {
+    this.svgRoot.addEventListener('MozMousePixelScroll', function(ev) {
 	if (ev.axis == 1) {
 	    ev.stopPropagation(); ev.preventDefault();
 	    if (ev.detail != 0) {
-		move(ev.detail);
+		thisB.move(ev.detail);
 	    }
         }
     }, false);
@@ -1342,10 +1239,10 @@ function init()
         if (ev.keyCode == 37) {
             // left
             ev.stopPropagation(); ev.preventDefault();
-            move(ev.shiftKey ? - 100 : -25);
+            thisB.move(ev.shiftKey ? - 100 : -25);
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
-            move(ev.shiftKey ? 100 : 25);
+            thisB.move(ev.shiftKey ? 100 : 25);
         } /*     Keyboard zooming code works, but disabled for now because we need better latency-hiding.
 
         else if (ev.charCode == 61) {
@@ -1373,23 +1270,23 @@ function init()
     window.addEventListener('keypress', keyHandler, false);
     
     // Low-priority stuff
-    storeStatus();   // to make sure things like resets are permanent.
+    this.storeStatus();   // to make sure things like resets are permanent.
 
     var epSource;
-    for (var ti = 0; ti < tiers.length; ++ti) {
-        var s = tiers[ti].source;
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var s = this.tiers[ti].source;
         if (s.opts && s.opts.tier_type && s.opts.tier_type == 'sequence') {
-            epSource = tiers[ti].dasSource;
+            epSource = this.tiers[ti].dasSource;
             break;
         }
     }
     if (epSource) {
         epSource.entryPoints(
             function(ep) {
-                entryPoints = ep;
-                for (var epi = 0; epi < entryPoints.length; ++epi) {
-                    if (entryPoints[epi].name == chr) {
-                        currentSeqMax = entryPoints[epi].end;
+                thisB.entryPoints = ep;
+                for (var epi = 0; epi < thisB.entryPoints.length; ++epi) {
+                    if (thisB.entryPoints[epi].name == thisB.chr) {
+                        thisB.currentSeqMax = thisB.entryPoints[epi].end;
                         break;
                     }
                 }
@@ -1397,15 +1294,15 @@ function init()
         );
     }
 
-    new DASRegistry(registry).sources(function(sources) {
-	availableSources = [];
+    new DASRegistry(this.registry).sources(function(sources) {
+	thisB.availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
             var source = sources[s];
             if (!source.coords || source.coords.length == 0) {
                 continue;
             }
             var coords = source.coords[0];
-            if (coords.taxon != coordSystem.taxon || coords.auth != coordSystem.auth || coords.version != coordSystem.version) {
+            if (coords.taxon != thisB.coordSystem.taxon || coords.auth != thisB.coordSystem.auth || coords.version != thisB.coordSystem.version) {
                 continue;
             }
             var ds = new DataSource(sources[s].title, sources[s].uri);
@@ -1413,21 +1310,22 @@ function init()
             if (!source.props || !source.props.cors) {
                 ds.disabled = true;
             }
-            availableSources.push(ds);
+            thisB.availableSources.push(ds);
         }
     }, function(error) {
         alert('Warning: registry query failed');
-        availableSources = [];
-    }, coordSystem);
+        thisB.availableSources = [];
+    }, this.coordSystem);
 
-    for (var m in chains) {
-        fetchMappedSources(m);
+    for (var m in this.chains) {
+        this.fetchMappedSources(m);
     }
 }
 
-function fetchMappedSources(m) {
-    var chainSet = chains[m];
-    new DASRegistry(registry).sources(function(sources) {
+Browser.prototype.fetchMappedSources = function(m) {
+    var thisB = this;
+    var chainSet = this.chains[m];
+    new DASRegistry(this.registry).sources(function(sources) {
 	var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
             var source = sources[s];
@@ -1445,16 +1343,16 @@ function fetchMappedSources(m) {
             }
             availableSources.push(ds);
         }
-        mappableSources[m] = availableSources;
+        thisB.mappableSources[m] = availableSources;
     }, function(error) {
         alert('Warning: registry query failed');
     }, chainSet.coords);
 }
 
-function makeTier(source) {
+Browser.prototype.makeTier = function(source) {
     var viewport = document.createElementNS(NS_SVG, 'g');
     var viewportBackground = document.createElementNS(NS_SVG, 'rect');
-    var col = tierBackgroundColors[tiers.length % tierBackgroundColors.length];
+    var col = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
     viewportBackground.setAttribute('fill', col);
     viewportBackground.setAttribute('x', "-1000000");
     viewportBackground.setAttribute('y', "0");
@@ -1463,19 +1361,20 @@ function makeTier(source) {
     viewportBackground.setAttribute('stroke-width', "0");
     viewport.appendChild(viewportBackground);
     viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
-    tierHolder.appendChild(viewport);
+    this.tierHolder.appendChild(viewport);
     
-    var tier = new DasTier(source, viewport, viewportBackground);
+    var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
-    tiers.push(tier);
+    this.tiers.push(tier);
 }
 
 
-function makeZoomerTicks() {
-    removeChildren(zoomTickMarks);
+Browser.prototype.makeZoomerTicks = function() {
+    var thisB = this;
+    removeChildren(this.zoomTickMarks);
 
     var makeSliderMark = function(markSig) {
-        var markPos = zoomExpt * Math.log(markSig/zoomBase);
+        var markPos = thisB.zoomExpt * Math.log(markSig/thisB.zoomBase);
         if (markPos < 0 || markPos > 250) {
             return;
         }
@@ -1499,8 +1398,8 @@ function makeZoomerTicks() {
             fontSize: '8pt',
             stroke: 'none'
         });
-        zoomTickMarks.appendChild(smark);
-        zoomTickMarks.appendChild(slabel);
+        thisB.zoomTickMarks.appendChild(smark);
+        thisB.zoomTickMarks.appendChild(slabel);
         slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
     }
 
@@ -1515,79 +1414,74 @@ function makeZoomerTicks() {
 }
 
 
-function resizeViewer() {
+Browser.prototype.resizeViewer = function() {
     var width = window.innerWidth;
     width = Math.max(width, 600);
-    svgRoot.setAttribute('width', width - 30);
-    svgBackground.setAttribute('width', width - 30);
-    featureClipRect.setAttribute('width', width - tabMargin - 40);
+    this.svgRoot.setAttribute('width', width - 30);
+    this.svgBackground.setAttribute('width', width - 30);
+    this.featureClipRect.setAttribute('width', width - this.tabMargin - 40);
 
-    zoomWidget.setAttribute('transform', 'translate(' + (width - zoomSlider.width - 100) + ', 0)');
-    var oldFPW = featurePanelWidth;
-    featurePanelWidth = (width - tabMargin - 40)|0;
+    this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
+    var oldFPW = this.featurePanelWidth;
+    this.featurePanelWidth = (width - this.tabMargin - 40)|0;
     
-    if (oldFPW != featurePanelWidth) {
-        var viewWidth = viewEnd - viewStart;
-	var nve = viewStart + (viewWidth * featurePanelWidth) / oldFPW;
-	var delta = nve - viewEnd;
-	viewStart = viewStart - (delta/2);
-	viewEnd = viewEnd + (delta/2);
+    if (oldFPW != this.featurePanelWidth) {
+        var viewWidth = this.viewEnd - this.viewStart;
+	var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
+	var delta = nve - this.viewEnd;
+	this.viewStart = this.viewStart - (delta/2);
+	this.viewEnd = this.viewEnd + (delta/2);
 
-	var wid = viewEnd - viewStart;
-	if (currentSeqMax > 0 && viewEnd > currentSeqMax) {
-            viewEnd = currentSeqMax;
-            viewStart = viewEnd - wid;
+	var wid = this.viewEnd - this.viewStart + 1;
+	if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
+            this.viewEnd = this.currentSeqMax;
+            this.viewStart = this.viewEnd - wid + 1;
 	}
-	if (viewStart < 1) {
-            viewStart = 1;
-            viewEnd = viewStart + wid;
+	if (this.viewStart < 1) {
+            this.viewStart = 1;
+            this.viewEnd = this.viewStart + wid - 1;
 	}
     
-	xfrmTiers((tabMargin - (1.0 * (viewStart - origin)) * scale), 1);
-	updateRegion();
-	spaceCheck();
+	this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
+	this.updateRegion();
+	this.spaceCheck();
     }
 
-    if (fgGuide) {
-	fgGuide.setAttribute('x1', (featurePanelWidth/2) + tabMargin);
-	fgGuide.setAttribute('x2', (featurePanelWidth/2) + tabMargin);
+    if (this.fgGuide) {
+	this.fgGuide.setAttribute('x1', (this.featurePanelWidth/2) + this.tabMargin);
+	this.fgGuide.setAttribute('x2', (this.featurePanelWidth/2) + this.tabMargin);
     }
 	
 
-    for (var pi = 0; pi < placards.length; ++pi) {
-	var placard = placards[pi];
+    for (var pi = 0; pi < this.placards.length; ++pi) {
+	var placard = this.placards[pi];
 	var rects = placard.getElementsByTagName('rect');
 	if (rects.length > 0) {
-	    rects[0].setAttribute('width', featurePanelWidth);
+	    rects[0].setAttribute('width', this.featurePanelWidth);
 	}
     }
 }
 
-
-
-
-function xfrmTiers(x, xs)
-{
-    for (ti in tiers) {
-        xfrmTier(tiers[ti], x, xs);
+Browser.prototype.xfrmTiers = function(x, xs) {
+//    alert('xfrmTiers(' + x + ',' + xs + ')');
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        this.xfrmTier(this.tiers[ti], x, xs);
     }
-    if (highlight) {
+    if (this.highlight) {
 	var axs = xs;
 	if (axs < 0) {
-            axs = scale;
+            axs = this.scale;
 	}
 	var xfrm = 'translate(' + x + ',0)';
-	highlight.setAttribute('transform', xfrm);
-	highlight.setAttribute('x', (highlightMin - origin) * scale);
-	highlight.setAttribute('width', (highlightMax - highlightMin + 1) * scale);
+	this.highlight.setAttribute('transform', xfrm);
+	this.highlight.setAttribute('x', (this.highlightMin - this.origin) * this.scale);
+	this.highlight.setAttribute('width', (this.highlightMax - this.highlightMin + 1) * this.scale);
     } 
 }
 
-function xfrmTier(tier, x , xs)
-{
+Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (tier.originHaxx && tier.originHaxx != 0) {
-	// alert(tier.originHaxx);
-	x -= ((1.0 * tier.originHaxx) * scale);
+	x -= ((1.0 * tier.originHaxx) * this.scale);
     }
    
     var axs = xs;
@@ -1600,106 +1494,105 @@ function xfrmTier(tier, x , xs)
     if (axs != 1) {
         xfrm += ', scale(' + axs + ',1)';
     }
-    // setViewerStatus(xfrm);
-    tiers[ti].viewport.setAttribute('transform', xfrm);
+//    alert(xfrm);
+    tier.viewport.setAttribute('transform', xfrm);
 }
 
 //
 // Navigation prims.
 //
 
-function spaceCheck()
-{
-    var width = (viewEnd - viewStart) + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
-    if (knownStart > Math.max(1, viewStart - minExtraW) || knownEnd < Math.min(viewEnd + minExtraW, (currentSeqMax > 0 ? currentSeqMax : 1000000000))) {
-	refresh();
+Browser.prototype.spaceCheck = function() {
+    var width = ((this.viewEnd - this.viewStart)|0) + 1;
+    var minExtraW = (width * this.minExtra) | 0;
+    var maxExtraW = (width * this.maxExtra) | 0;
+    // alert('sc: ks=' + this.knownStart + ', ke=' + this.knownEnd + ', vs=' + this.viewStart + ', ve= ' + this.viewEnd + ', csm=' + this.currentSeqMax + ', min=' + minExtraW + ', max=' + maxExtraW);
+    if ((this.knownStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.knownEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
+//        alert('refresh');
+	this.refresh();
     }
 }
 
-function move(pos)
+Browser.prototype.move = function(pos)
 {
-    var wid = viewEnd - viewStart;
-    viewStart -= pos / scale;
-    viewEnd = viewStart + wid;
-    if (currentSeqMax > 0 && viewEnd > currentSeqMax) {
-        viewEnd = currentSeqMax;
-        viewStart = viewEnd - wid;
+    var wid = this.viewEnd - this.viewStart;
+    this.viewStart -= pos / this.scale;
+    this.viewEnd = this.viewStart + wid;
+    if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
+        this.viewEnd = currentSeqMax;
+        this.viewStart = this.viewEnd - wid;
     }
-    if (viewStart < 1) {
-        viewStart = 1;
-        viewEnd = viewStart + wid;
+    if (this.viewStart < 1) {
+        this.viewStart = 1;
+        this.viewEnd = this.viewStart + wid;
     }
     
-    xfrmTiers((tabMargin - (1.0 * (viewStart - origin)) * scale), 1);
-    updateRegion();
-    karyo.update(chr, viewStart, viewEnd);
-    spaceCheck();
+    this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
+    this.updateRegion();
+    this.karyo.update(this.chr, this.viewStart, this.viewEnd);
+    this.spaceCheck();
 }
 
-function zoom(factor)
-{
-    zoomFactor = factor;
-    var viewCenter = (viewStart + viewEnd) / 2.0;
-    viewStart = viewCenter - zoomBase * zoomFactor / 2;
-    viewEnd = viewCenter + zoomBase * zoomFactor / 2;
-    if (currentSeqMax > 0 && (viewEnd > currentSeqMax + 5)) {
-        var len = viewEnd - viewStart + 1;
-        viewEnd = currentSeqMax;
-        viewStart = viewEnd - len + 1;
+Browser.prototype.zoom = function(factor) {
+    this.zoomFactor = factor;
+    var viewCenter = (this.viewStart + this.viewEnd) / 2.0;
+    this.viewStart = viewCenter - this.zoomBase * this.zoomFactor / 2;
+    this.viewEnd = viewCenter + this.zoomBase * this.zoomFactor / 2;
+    if (this.currentSeqMax > 0 && (this.viewEnd > this.currentSeqMax + 5)) {
+        var len = this.viewEnd - this.viewStart + 1;
+        this.viewEnd = this.currentSeqMax;
+        this.viewStart = this.viewEnd - len + 1;
     }
-    if (viewStart < 1) {
-        var len = viewEnd - viewStart + 1;
-        viewStart = 1;
-        viewEnd = viewStart + len - 1;
+    if (this.viewStart < 1) {
+        var len = this.viewEnd - this.viewStart + 1;
+        this.viewStart = 1;
+        this.viewEnd = this.viewStart + len - 1;
     }
-    scale = featurePanelWidth / (viewEnd - viewStart)
-    updateRegion();
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
+    this.updateRegion();
     
-    var width = viewEnd - viewStart + 1;
-    var minExtraW = (width * minExtra) | 0;
-    var maxExtraW = (width * maxExtra) | 0;
+    var width = this.viewEnd - this.viewStart + 1;
+    var minExtraW = (width * this.minExtra) | 0;
+    var maxExtraW = (width * this.maxExtra) | 0;
     // Currently, always reset Known Space after a zoom :-(
-    // if (viewStart - knownStart < minExtra || knownEnd - viewEnd < minExtra) {
-        knownStart = Math.max(1, Math.round(viewStart) - maxExtraW);
-        knownEnd = Math.round(viewEnd) + maxExtraW;
-    // }
+    this.knownStart = Math.max(1, Math.round(this.viewStart) - maxExtraW);
+    this.knownEnd = Math.round(this.viewEnd) + maxExtraW;
     
-    var scaleRat = (scale / scaleAtLastRedraw);
-    xfrmTiers(tabMargin - ((1.0 * (viewStart - origin)) * scale),  (scale / scaleAtLastRedraw));
+    var scaleRat = (this.scale / this.scaleAtLastRedraw);
+    this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));
         
-    var labels = document.getElementsByClassName("label-text");
+    var labels = this.svgRoot.getElementsByClassName("label-text");
     for (var li = 0; li < labels.length; ++li) {
         var label = labels[li];
         var x = label.getAttribute("x");
-        var xfrm = "scale(" + (scaleAtLastRedraw/scale) + ",1), translate( " + ((x*scale - x*scaleAtLastRedraw) /scaleAtLastRedraw) +",0)";
+        var xfrm = "scale(" + (this.scaleAtLastRedraw/this.scale) + ",1), translate( " + ((x*this.scale - x*this.scaleAtLastRedraw) /this.scaleAtLastRedraw) +",0)";
         label.setAttribute("transform", xfrm);
     }
 }
 
-function setLocation(newMin, newMax, newChr)
-{
+Browser.prototype.setLocation = function(newMin, newMax, newChr) {
     newMin = newMin|0;
     newMax = newMax|0;
 
-    if (newChr && (newChr != chr)) {
-	if (!entryPoints) {
+    if (newChr && (newChr != this.chr)) {
+	if (!this.entryPoints) {
+            alert('Need entry points');
 	    return;
 	}
 	var ep = null;
-	for (var epi = 0; epi < entryPoints.length; ++epi) {
-	    if (entryPoints[epi].name == newChr) {
-		ep = entryPoints[epi];
+	for (var epi = 0; epi < this.entryPoints.length; ++epi) {
+	    if (this.entryPoints[epi].name == newChr) {
+		ep = this.entryPoints[epi];
 		break;
 	    }
 	}
 	if (!ep) {
+            alert("Couldn't find new chromosome");
 	    return;
 	}
 
-	chr = newChr;
-	currentSeqMax = ep.end;
+	this.chr = newChr;
+	this.currentSeqMax = ep.end;
     }
 
     var newWidth = newMax - newMin + 1;
@@ -1707,82 +1600,47 @@ function setLocation(newMin, newMax, newChr)
         newMin = ((newMax + newMin - MAX_VIEW_SIZE)/2)|0;
         newMax = (newMin + MAX_VIEW_SIZE - 1)|0;
     }
-    if (newWidth < zoomBase) {
-        newMin = ((newMax + newMin - zoomBase)/2)|0;
-        mewMax = (newMin + zoomBase - 1)|0;
+    if (newWidth < this.zoomBase) {
+        newMin = ((newMax + newMin - this.zoomBase)/2)|0;
+        mewMax = (newMin + this.zoomBase - 1)|0;
     }
-
-        
 
     if (newMin < 1) {
 	var wid = newMax - newMin + 1;
 	newMin = 1;
-	newMax = Math.min(newMin + wid - 1, currentSeqMax);
+	newMax = Math.min(newMin + wid - 1, this.currentSeqMax);
     }
-    if (newMax > currentSeqMax) {
+    if (newMax > this.currentSeqMax) {
 	var wid = newMax - newMin + 1;
-	newMax = currentSeqMax;
+	newMax = this.currentSeqMax;
 	newMin = Math.max(1, newMax - wid + 1);
     }
 
-    viewStart = newMin|0;
-    viewEnd = newMax|0;
-    scale = featurePanelWidth / (viewEnd - viewStart);
-    zoomSlider.setValue(zoomExpt * Math.log((viewEnd - viewStart + 1) / zoomBase));
+    this.viewStart = newMin|0;
+    this.viewEnd = newMax|0;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
-    updateRegion();
-    karyo.update(chr, viewStart, viewEnd);
-    refresh();
-    xfrmTiers(tabMargin - ((1.0 * (viewStart - origin)) * scale), 1);   // FIXME currently needed to set the highlight (!)
-    storeStatus();
+    this.updateRegion();
+    this.karyo.update(this.chr, this.viewStart, this.viewEnd);
+    this.refresh();
+    this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), 1);   // FIXME currently needed to set the highlight (!)
+    this.storeStatus();
 }
 
 
-function storeStatus()
-{
-    if (!cookieKey) {
+Browser.prototype.storeStatus = function(){
+    if (!this.cookieKey) {
 	return;
     }
 
-    localStorage['dalliance.' + cookieKey + '.view-chr'] = chr;
-    localStorage['dalliance.' + cookieKey + '.view-start'] = viewStart|0;
-    localStorage['dalliance.' + cookieKey + '.view-end'] = viewEnd|0
+    localStorage['dalliance.' + this.cookieKey + '.view-chr'] = this.chr;
+    localStorage['dalliance.' + this.cookieKey + '.view-start'] = this.viewStart|0;
+    localStorage['dalliance.' + this.cookieKey + '.view-end'] = this.viewEnd|0
 
     var currentSourceList = [];
-    for (var t = 0; t < tiers.length; ++t) {
-	currentSourceList.push(tiers[t].source);
+    for (var t = 0; t < this.tiers.length; ++t) {
+	currentSourceList.push(this.tiers[t].source);
     }
-    localStorage['dalliance.' + cookieKey + '.sources'] = miniJSONify(currentSourceList);
-}
-
-//
-// WARNING: not for general use!
-//
-
-function miniJSONify(o) {
-    if (typeof o == 'string') {
-	return "'" + o + "'";
-    } else if (typeof o == 'number') {
-	return "" + o;
-    } else if (typeof o == 'boolean') {
-	return "" + o;
-    } else if (typeof o == 'object') {
-	if (o instanceof Array) {
-	    var s = null;
-	    for (var i = 0; i < o.length; ++i) {
-		s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
-	    }
-	    return '[' + (s?s:'') + ']';
-	} else {
-	    var s = null;
-	    for (var k in o) {
-		if (k != undefined) {
-		    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
-		}
-	    }
-	    return '{' + (s?s:'') + '}';
-	}
-    } else {
-	return (typeof o);
-    }
+    localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
 }

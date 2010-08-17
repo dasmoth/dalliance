@@ -33,12 +33,12 @@ function parseCigar(cigar)
 }
 
 Chainset.prototype.fetchChainsTo = function(chr) {
-    if (!this.chainsByDest[chr]) {
-        this.chainsByDest[chr] = []; // prevent re-fetching.
-    }
-    
     var thisCS = this;
     new DASSource(this.uri).alignments(chr, {}, function(aligns) {
+        if (!thisCS.chainsByDest[chr]) {
+            thisCS.chainsByDest[chr] = []; // prevent re-fetching.
+        }
+
         for (var ai = 0; ai < aligns.length; ++ai) {
             var aln = aligns[ai];
             for (var bi = 0; bi < aln.blocks.length; ++bi) {

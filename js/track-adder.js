@@ -7,9 +7,9 @@
 // track-adder.js
 //
 
-function currentlyActive(source) {
-    for (var i = 0; i < tiers.length; ++i) {
-        var ts = tiers[i].source;
+Browser.prototype.currentlyActive = function(source) {
+    for (var i = 0; i < this.tiers.length; ++i) {
+        var ts = this.tiers[i].source;
         if (ts.uri == source.uri) {
             // Special cases where we might meaningfully want two tiers of the same URI.
             if (ts.opts && ts.opts.tier_type) {
@@ -50,7 +50,8 @@ function activateButton(addModeButtons, which) {
     }
 }
 
-function showTrackAdder(ev) {
+Browser.prototype.showTrackAdder = function(ev) {
+    var thisB = this;
     var mx =  ev.clientX, my = ev.clientY;
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
@@ -72,14 +73,14 @@ function showTrackAdder(ev) {
     var makeStab;
     var regButton = makeButton('Registry');
     addModeButtons.push(regButton);
-    for (var m in mappableSources) {
+    for (var m in this.mappableSources) {
         var mf  = function(mm) {
-            var mapButton = makeButton(chains[mm].srcTag);
+            var mapButton = makeButton(thisB.chains[mm].srcTag);
             addModeButtons.push(mapButton);
             mapButton.addEventListener('mousedown', function(ev) {
                 ev.preventDefault(); ev.stopPropagation();
                 activateButton(addModeButtons, mapButton);
-                makeStab(mappableSources[mm], mm);
+                makeStab(thisB.mappableSources[mm], mm);
             }, false);
         }; mf(m);
     }
@@ -114,13 +115,13 @@ function showTrackAdder(ev) {
         for (var i = 0; i < sources.length; ++i) {
             var source = sources[i];
             var r = document.createElement('tr');
-            r.style.backgroundColor = tierBackgroundColors[idx % tierBackgroundColors.length];
+            r.style.backgroundColor = thisB.tierBackgroundColors[idx % thisB.tierBackgroundColors.length];
 
             var bd = document.createElement('td');
             bd.style.textAlign = 'center';
-            if (currentlyActive(source)) {
+            if (thisB.currentlyActive(source)) {
                 bd.appendChild(document.createTextNode('X'));
-                makeTooltip(bd, "This data source is already active.");
+                thisB.makeTooltip(bd, "This data source is already active.");
             } else if (!source.disabled) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
@@ -130,16 +131,16 @@ function showTrackAdder(ev) {
                 }
                 bd.appendChild(b);
                 addButtons.push(b);
-                makeTooltip(bd, "Check here then click 'Add' to activate.");
+                thisB.makeTooltip(bd, "Check here then click 'Add' to activate.");
             } else {
                 bd.appendChild(document.createTextNode('!'));
-                makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
+                thisB.makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
             }
             r.appendChild(bd);
             var ld = document.createElement('td');
             ld.appendChild(document.createTextNode(source.name));
             if (source.description && source.description.length > 0) {
-                makeTooltip(ld, source.description);
+                thisB.makeTooltip(ld, source.description);
             }
             r.appendChild(ld);
             stab.appendChild(r);
@@ -147,17 +148,17 @@ function showTrackAdder(ev) {
         }
         stabHolder.appendChild(stab);
     };
-    makeStab(availableSources);
+    makeStab(thisB.availableSources);
 
     regButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, regButton);
-        makeStab(availableSources);
+        makeStab(thisB.availableSources);
     }, false);
     defButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, defButton);
-        makeStab(defaultSources);
+        makeStab(thisB.defaultSources);
     }, false);
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -193,22 +194,22 @@ function showTrackAdder(ev) {
 
         if (customMode) {
             var nds = new DataSource(custName.value, custURL.value);
-            sources.push(nds);
-            makeTier(nds);
-	    storeStatus();
+            thisB.sources.push(nds);
+            thisB.makeTier(nds);
+	    thisB.storeStatus();
         } else {
             for (var bi = 0; bi < addButtons.length; ++bi) {
                 var b = addButtons[bi];
                 if (b.checked) {
                     var nds = b.dalliance_source;
-	            sources.push(nds);
-                    makeTier(nds);
-		    storeStatus();
+	            thisB.sources.push(nds);
+                    thisB.makeTier(nds);
+		    thisB.storeStatus();
                 }
             }
         }
 
-        removeAllPopups();
+        thisB.removeAllPopups();
     }, false);
 
     var canButton = document.createElement('span');
@@ -223,7 +224,7 @@ function showTrackAdder(ev) {
     canButton.appendChild(document.createTextNode('Cancel'))
     canButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        removeAllPopups();
+        thisB.removeAllPopups();
     }, false);
 
     var buttonHolder = makeElement('div', [addButton, canButton]);
@@ -231,5 +232,5 @@ function showTrackAdder(ev) {
     asform.appendChild(buttonHolder);
 
     popup.appendChild(asform);
-    hPopupHolder.appendChild(popup);  
+    this.hPopupHolder.appendChild(popup);  
 }

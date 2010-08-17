@@ -368,14 +368,15 @@ function DASStyle() {
 }
 
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
-    var dasURI;
+    var dasURI, creds = this.credentials;
     if (this.endpoint_stylesheet) {
         dasURI = this.endpoint_stylesheet;
+        creds = false;
     } else {
         dasURI = this.uri + 'stylesheet';
     }
 
-    this.doCrossDomainRequest(dasURI, function(responseXML) {
+    doCrossDomainRequest(dasURI, function(responseXML) {
 	if (!responseXML) {
 	    if (failureCB) {
 		failureCB();
@@ -407,7 +408,7 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
 	    }
 	}
 	successCB(stylesheet);
-    }, false);
+    }, creds);
 }
 
 //

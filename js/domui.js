@@ -7,8 +7,9 @@
 // domui.js: SVG UI components
 //
 
-function makeTooltip(ele, text)
+Browser.prototype.makeTooltip = function(ele, text)
 {
+    var thisB = this;
     var timer = null;
     var outlistener;
     outlistener = function(ev) {
@@ -34,11 +35,11 @@ function makeTooltip(ele, text)
                     padding: '2px',
                     maxWidth: '400px'
                 });
-                hPopupHolder.appendChild(popup);
+                thisB.hPopupHolder.appendChild(popup);
                 var moveHandler;
                 moveHandler = function(ev) {
                     try {
-                        hPopupHolder.removeChild(popup);
+                        thisB.hPopupHolder.removeChild(popup);
                     } catch (e) {
                         // May have been removed by other code which clears the popup layer.
                     }

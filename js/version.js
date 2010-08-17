@@ -10,7 +10,7 @@
 var VERSION = {
     MAJOR: 0,
     MINOR: 4,
-    MICRO: 9,
+    MICRO: 10,
     PATCH: ''
 }
 

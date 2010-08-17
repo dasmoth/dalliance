@@ -1,9 +1,6 @@
-Performance
------------
+Browser support
+---------------
 
- - Performance must stay at least as good as r310
-     + Good way of measuring this?
- - Browser support:
      + Mozilla (FF3.5, Camino???)
      + Safari (3.1 or later)
      + Chrome.
@@ -32,10 +29,6 @@ Real Soon Now
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
  - Separate concepts of Known Space and Drawn Space.
- - Page embedding
-     + Allow multiple browser instances in a given page (i.e. remove all static state).
-     + Also allow instances which *do* share some state? (e.g. coarse and fine views on the same data)?
-       How much state to share? 
  - Publication-quality SVG export.
  - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
