@@ -1417,11 +1417,21 @@ Browser.prototype.makeZoomerTicks = function() {
 Browser.prototype.resizeViewer = function() {
     var width = window.innerWidth;
     width = Math.max(width, 600);
+
+    if (this.forceWidth) {
+        width = this.forceWidth;
+    }
+
     this.svgRoot.setAttribute('width', width - 30);
     this.svgBackground.setAttribute('width', width - 30);
     this.featureClipRect.setAttribute('width', width - this.tabMargin - 40);
 
     this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
+    if (width < 1125) {
+        this.karyo.svg.setAttribute('transform', 'translate(2000, 15)');
+    } else {
+        this.karyo.svg.setAttribute('transform', 'translate(500, 15)');
+    }
     var oldFPW = this.featurePanelWidth;
     this.featurePanelWidth = (width - this.tabMargin - 40)|0;
     

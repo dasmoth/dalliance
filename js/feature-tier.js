@@ -325,7 +325,7 @@ function drawFeatureTier(tier)
     });
 
     var groupGlyphs = {};
-    for (var gx in gl) {
+    for (var gx = 0; gx < gl.length; ++gx) {
 	var gid = gl[gx];
 	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier,
 			       (tier.source.opts.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
