@@ -217,7 +217,7 @@ Browser.prototype.arrangeTiers = function() {
             }, false);
                 
             quantTools.appendChild(button);
-            makeQuantConfigButton(quantTools, tier, clh);
+            this.makeQuantConfigButton(quantTools, tier, clh);
             this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
         }
 

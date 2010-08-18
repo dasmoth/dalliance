@@ -9,10 +9,11 @@
 
 var VALID_BOUND_RE = new RegExp('^-?[0-9]+(\\.[0-9]+)?$');
 
-function makeQuantConfigButton(quantTools, tier, ypos) {
+Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
+    var thisB = this;
     quantTools.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
-	removeAllPopups();
+	thisB.removeAllPopups();
 
 	var mx =  ev.clientX, my = ev.clientY;
 	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -64,11 +65,11 @@ function makeQuantConfigButton(quantTools, tier, ypos) {
 
 	    tier.source.opts.forceMin = minInput.value;
 	    tier.source.opts.forceMax = maxInput.value;
-	    removeAllPopups();
+	    thisB.removeAllPopups();
 	    dasRequestComplete(tier);
-            storeStatus();          // write updated limits to storage.
+            thisB.storeStatus();          // write updated limits to storage.
 	}, false);
 
-	hPopupHolder.appendChild(popup);
+	thisB.hPopupHolder.appendChild(popup);
     }, false);
 }
