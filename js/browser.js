@@ -15,17 +15,15 @@ var NS_HTML = "http://www.w3.org/1999/xhtml"
 MAX_VIEW_SIZE=500000;
 
 
-function Browser() {
+function Browser(opts) {
+    if (!opts) {
+        opts = {};
+    }
+
     this.sources = [];
     this.tiers = [];
 
-    // parental configuration
-
-    // var chr;
-    // var viewStart;
-    // var viewEnd;
     this.cookieKey = 'browser';
-    // var searchEndpoint;
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
     this.registry = 'http://www.dasregistry.org/das/sources';
     this.coordSystem = {
@@ -37,22 +35,14 @@ function Browser() {
     this.chains = {};
 
     this.pageName = 'svgHolder'
-
-    // state
-
     this.maxExtra = 1.5;
     this.minExtra = 0.2;
-    // var knownStart;
-    // var knownEnd;
-    // var scale;
-    // var scaleAtLastRedraw;
     this.zoomFactor = 1.0;
     this.origin = 0;
     this.targetQuantRes = 5.0;
     this.featurePanelWidth = 750;
     this.zoomBase = 100;
     this.zoomExpt = 30; // Now gets clobbered.
-
     this.entryPoints = null;
     this.currentSeqMax = -1; // init once EPs are fetched.
 
@@ -66,7 +56,6 @@ function Browser() {
     this.fgGuide = null;
     this.positionFeedback = false;
 
-
     this.placards = [];
 
     // Visual config.
@@ -76,7 +65,7 @@ function Browser() {
     
     this.tabMargin = 120;
 
-    this. browserLinks = {
+    this.browserLinks = {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
     }
@@ -88,6 +77,13 @@ function Browser() {
     this.availableSources = [];
     this.defaultSources = [];
     this.mappableSources = {};
+
+    for (var k in opts) {
+        this[k] = opts[k];
+    }
+
+    var thisB = this;
+    window.addEventListener('load', function(ev) {thisB.realInit();}, false);
 }
 
 function DataSource(name, uri, opts)
@@ -672,24 +668,6 @@ function EPMenuItem(entryPoint) {
     this.nums = stringToNumbersArray(entryPoint.name);
 }
 
-function stringifyObject(o)
-{
-    var s = null;
-    for (k in o) {
-	var v = o[k];
-	if (s) {
-	    s = s + ', ' + k + ':' + v;
-	} else {
-	    s = '{' + k + ':' + v;
-	}
-    }
-    if (s == null) {
-	return '{}';
-    } else {
-	return s + '}';
-    }
-}
-
 Browser.prototype.makeHighlight = function() {
     if (this.highlight) {
 	this.dasTierHolder.removeChild(this.highlight);
@@ -711,6 +689,14 @@ Browser.prototype.makeHighlight = function() {
 }
 
 Browser.prototype.init = function() {
+    // Just here for backwards compatibility.
+}
+
+Browser.prototype.realInit = function(opts) {
+    if (!opts) {
+        opts = {};
+    }
+
     var thisB = this;
     // Cache away the default sources before anything else
 
@@ -718,6 +704,9 @@ Browser.prototype.init = function() {
     for (var i = 0; i < this.sources.length; ++i) {
         this.defaultSources.push(this.sources[i]);
     }
+    this.defaultChr = this.chr;
+    this.defaultStart = this.viewStart;
+    this.defaultEnd = this.viewEnd;
 
     this.icons = new IconSet(this.iconsURI);
 
@@ -905,7 +894,7 @@ Browser.prototype.init = function() {
         main.appendChild(this.zoomWidget);
     }
 
-    this.karyo = new Karyoscape(this.karyoEndpoint);
+    this.karyo = new Karyoscape(this, this.karyoEndpoint);
     this.karyo.svg.setAttribute('transform', 'translate(500, 15)');
     this.karyo.onchange = function(pos) {
         var width = thisB.viewEnd - thisB.viewStart + 1;
@@ -1144,7 +1133,19 @@ Browser.prototype.init = function() {
     // set up the resetter
     resetButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-	window.location.assign('?reset=true');
+
+        removeChildren(thisB.tierHolder);
+        thisB.tiers = [];
+        thisB.sources = [];
+
+        for (var t = 0; t < thisB.defaultSources.length; ++t) {
+	    var source = thisB.defaultSources[t];
+            thisB.sources.push(source);
+            thisB.makeTier(source);
+        }
+        thisB.arrangeTiers();
+        thisB.highlightMin = thisB.highlightMax = -1;
+        thisB.setLocation(thisB.defaultStart, thisB.defaultEnd, thisB.defaultChr);
     }, false);
 	
     this.tierHolder = dasTiers;
@@ -1265,9 +1266,20 @@ Browser.prototype.init = function() {
             setLocation(mid - (0.75*wid)|0, mid +  (0.75*wid)|0);
         } */
     };
+    var mouseLeaveHandler;
+    mouseLeaveHandler = function(ev) {
+        // alert('leave');
+        window.removeEventListener('keydown', keyHandler, false);
+        window.removeEventListener('keypress', keyHandler, false);
+        thisB.svgRoot.removeEventListener('mouseout', mouseLeaveHandler, false);
+    }
 
-    window.addEventListener('keydown', keyHandler, false);
-    window.addEventListener('keypress', keyHandler, false);
+    this.svgRoot.addEventListener('mouseover', function(ev) {
+        // alert('enter');
+        window.addEventListener('keydown', keyHandler, false);
+        window.addEventListener('keypress', keyHandler, false);
+        thisB.svgRoot.addEventListener('mouseout', mouseLeaveHandler, false);
+    }, false);
     
     // Low-priority stuff
     this.storeStatus();   // to make sure things like resets are permanent.

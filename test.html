@@ -26,32 +26,29 @@
 <script language="javascript" src="js/track-adder.js"></script>
 <script language="javascript" src="js/version.js"></script>
 <script language="javascript">
-  var b = new Browser();
-
-  b.chr = "22";
-  b.viewStart = 30000000;
-  b.viewEnd = 30030000;
-  b.cookieKey = 'human';
-
-  b.sources.push(new DataSource("genome", "http://www.derkholm.net:8080/das/hg18comp/", {tier_type: 'sequence'}));
-  b.sources.push(new DataSource("e! genes", "http://www.derkholm.net:8080/das/hsa_54_36p/", {collapseSuperGroups: true}));
-  b.sources.push(new DataSource("repeats",  "http://www.derkholm.net:8080/das/hsa_54_36p/", {stylesheet: 'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'}));
-  b.sources.push(new DataSource("CpG_o/e", "http://www.derkholm.net:8080/das/hg18comp/", {stylesheet:  'http://www.derkholm.net/dalliance-test/stylesheets/cpg-hist.xml'}));
-  b.sources.push(new DataSource('MeDIP-seq', 'http://www.derkholm.net:8080/das/medipseq_reads/'));
-  b.sources.push(new DataSource('+Batman', "http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/"));
-  b.sources.push(new DataSource("MeDIP-chip", "http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/"));
-
-  b.searchEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
-
-  b.browserLinks = {
-    Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-    UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
-    Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
-  };
+  var b = new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human',
+    sources:     [new DataSource('Genome', 'http://www.derkholm.net:8080/das/hg18comp/', {tier_type: 'sequence'}),
+                  new DataSource('Genes', 'http://www.derkholm.net:8080/das/hsa_54_36p/', {collapseSuperGroups: true}),
+                  new DataSource('Repeats', 'http://www.derkholm.net:8080/das/hsa_54_36p/', {stylesheet: 'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'}),
+                  new DataSource('CpG density', 'http://www.derkholm.net:8080/das/hg18comp/', {stylesheet:  'http://www.derkholm.net/dalliance-test/stylesheets/cpg-hist.xml'}),
+                  new DataSource('MeDIP-seq', 'http://www.derkholm.net:8080/das/medipseq_reads/'),
+                  new DataSource('+Batman', 'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/'),
+                  new DataSource('MeDIP-chip', 'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/')],
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
+    browserLinks: {
+        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
+        Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
+    }
+  });
 </script>
 </head>
 
-<body onload="b.init();">
+<body>
 
 <h2>Human NCBI36</h2>
 

@@ -7,8 +7,9 @@
 // karyoscape.js
 //
 
-function Karyoscape(dsn)
+function Karyoscape(browser, dsn)
 {
+    this.browser = browser; // for tooltips.
     this.dsn = dsn;
     this.svg = makeElementNS(NS_SVG, 'g');
     this.width = 250;
@@ -98,33 +99,45 @@ Karyoscape.prototype.redraw = function() {
 		    bandspans = union(bandspans, br);
 		}
 	    }
-	    // makeTooltip(band, k.id);
+	    this.browser.makeTooltip(band, k.id);
 	    this.svg.appendChild(band);
 	}
     }
-    this.svg.appendChild(makeElementNS(NS_SVG, 'line', null, {
-	x1: 0, y1: 0, x2: 0, y1: 15,
-	stroke: 'black', strokeWidth: 2
-    }));
-    this.svg.appendChild(makeElementNS(NS_SVG, 'line', null, {
-	x1: this.width, y1: 0, x2: this.width, y1: 15,
-	stroke: 'black', strokeWidth: 2
-    }));		    
+
     if (bandspans) {
 	var r = bandspans.ranges();
-	for (var ri = 0; ri < r.length; ++ri) {
-	    var rr = r[ri];
+
+        var pathopsT = 'M 0 10 L 0 0';
+        var pathopsB = 'M 0 5 L 0 15';
+        
+        var curx = 0;
+        for (var ri = 0; ri < r.length; ++ri) {
+            var rr = r[ri];
 	    var bmin = ((1.0 * rr.min()) / this.chrLen) * this.width;
 	    var bmax = ((1.0 * rr.max()) / this.chrLen) * this.width;
-	    this.svg.appendChild(makeElementNS(NS_SVG, 'line', null, {
-		x1: bmin, y1: 0, x2: bmax, y2: 0,
-		stroke: 'black', strokeWidth: 2
-	    }));
-	    this.svg.appendChild(makeElementNS(NS_SVG, 'line', null, {
-		x1: bmin, y1: 15, x2: bmax, y2: 15,
-		stroke: 'black', strokeWidth: 2
-	    }));
-	}
+            if ((bmin - curx > 0.75)) {
+                pathopsT += ' M ' + bmin + ' 0';
+                pathopsB += ' M ' + bmin + ' 15';
+            }
+            pathopsT +=  ' L ' + bmax + ' 0';
+            pathopsB +=  ' L ' + bmax + ' 15';
+            curx = bmax;
+        }
+        if ((this.width - curx) > 0.75) {
+            pathopsT += ' M ' + this.width + ' 0';
+            pathopsB += ' M ' + this.width + ' 15';
+        } else {
+            pathopsT += ' L ' + this.width + ' 0';
+            pathopsB += ' L ' + this.width + ' 15';
+        }
+        pathopsT +=  ' L ' + this.width + ' 10';
+        pathopsB +=  ' L ' + this.width + ' 5';
+        this.svg.appendChild(makeElementNS(NS_SVG, 'path', null, {
+            d: pathopsT + ' ' + pathopsB,
+            stroke: 'black',
+            strokeWidth: 2,
+            fill: 'none'
+        }));
     }
 
     this.thumb = makeElementNS(NS_SVG, 'rect', null, {

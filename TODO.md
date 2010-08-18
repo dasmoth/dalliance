@@ -15,7 +15,6 @@ Real Soon Now
 -------------
 
  - Improvements to the config system
-     + Reset without reloading page.
      + Config. updates in the static HTML should override localstorage.
        - Store a hash of the static config?
        - How does this work if multiple pages share a cookieKey?
