@@ -10,8 +10,8 @@
 var VERSION = {
     MAJOR: 0,
     MINOR: 4,
-    MICRO: 10,
-    PATCH: 'd'
+    MICRO: 11,
+    PATCH: ''
 }
 
 VERSION.toString = function() {

@@ -1244,38 +1244,38 @@ Browser.prototype.realInit = function(opts) {
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
             thisB.move(ev.shiftKey ? 100 : 25);
-        } /*     Keyboard zooming code works, but disabled for now because we need better latency-hiding.
+        } 
 
         else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
-            // alert('zoomIn');
-            var wid = ((viewEnd|0) - (viewStart|0) + 1);
-            if (wid <= zoomBase) {
-                return;
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz - 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
             }
-            var mid = ((viewEnd|0) + (viewStart|0))/2;
-            setLocation(mid - (0.3333333*wid)|0, mid +  (0.3333333*wid)|0);
         } else if (ev.charCode == 45) {
             ev.stopPropagation(); ev.preventDefault();
-            //alert('zoomOut');
-            var wid = ((viewEnd|0) - (viewStart|0) + 1);
-            if (wid >= MAX_VIEW_SIZE) {
-                return;
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz + 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
             }
-            var mid = ((viewEnd|0) + (viewStart|0))/2;
-            setLocation(mid - (0.75*wid)|0, mid +  (0.75*wid)|0);
-        } */
+        } 
     };
     var mouseLeaveHandler;
     mouseLeaveHandler = function(ev) {
-        // alert('leave');
         window.removeEventListener('keydown', keyHandler, false);
         window.removeEventListener('keypress', keyHandler, false);
         thisB.svgRoot.removeEventListener('mouseout', mouseLeaveHandler, false);
     }
 
     this.svgRoot.addEventListener('mouseover', function(ev) {
-        // alert('enter');
         window.addEventListener('keydown', keyHandler, false);
         window.addEventListener('keypress', keyHandler, false);
         thisB.svgRoot.addEventListener('mouseout', mouseLeaveHandler, false);
@@ -1665,4 +1665,19 @@ Browser.prototype.storeStatus = function(){
 	currentSourceList.push(this.tiers[t].source);
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
+}
+
+Browser.prototype.scheduleRefresh = function(time) {
+    if (!time) {
+        time = 500;
+    }
+    var thisB = this;
+
+    if (this.refreshTB) {
+        clearTimeout(this.refreshTB);
+    }
+    this.refreshTB = setTimeout(function() {
+        thisB.refreshTB = null;
+        thisB.refresh();
+    }, time);
 }
