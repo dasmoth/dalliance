@@ -214,7 +214,7 @@ function miniJSONify(o) {
 	} else {
 	    var s = null;
 	    for (var k in o) {
-		if (k != undefined) {
+		if (k != undefined && typeof(o[k]) != 'function') {
 		    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
 		}
 	    }

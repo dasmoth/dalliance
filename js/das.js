@@ -35,18 +35,32 @@ DASSegment.prototype.toDASQuery = function() {
 }
 
 
-function DASSource(uri, options) {
-    // if (!uri.endsWith('/')) {
-    //     uri = uri + '/';
-    // }
-    
-    this.uri = uri;
-    if (!options) {
-        options = new Object();
+function DASSource(a1, a2) {
+    var options;
+    if (typeof a1 == 'string') {
+        this.uri = a1;
+        options = a2 || {};
+    } else {
+        options = a1 || {};
     }
-    this.options = options;
-    this.coords = [];
-    this.props = {};
+    for (var k in options) {
+        if (typeof(options[k]) != 'function') {
+            this[k] = options[k];
+        }
+    }
+    if (!this.uri || this.uri.length == 0) {
+        throw "URIRequired";
+    }
+    if (this.uri.substr(this.uri.length - 1) != '/') {
+        this.uri = this.uri + '/';
+    }
+
+    if (!this.coords) {
+        this.coords = [];
+    }
+    if (!this.props) {
+        this.props = {};
+    }
 }
 
 function DASCoords() {
@@ -369,8 +383,8 @@ function DASStyle() {
 
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
     var dasURI, creds = this.credentials;
-    if (this.endpoint_stylesheet) {
-        dasURI = this.endpoint_stylesheet;
+    if (this.stylesheet_uri) {
+        dasURI = this.stylesheet_uri;
         creds = false;
     } else {
         dasURI = this.uri + 'stylesheet';
@@ -487,11 +501,12 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 	    }
 	    
 	    if (uri) {
-		var source = new DASSource(uri);
-		source.title = sourceXML.getAttribute('title');
-		source.desc = sourceXML.getAttribute('description');
-		source.coords = coords;
-		source.props = props;
+		var source = new DASSource(uri, {
+                    name:  sourceXML.getAttribute('title'),
+                    desc:  sourceXML.getAttribute('description'),
+                    coords: coords,
+                    props: props
+                });
 		sources.push(source);
 	    }
 	}

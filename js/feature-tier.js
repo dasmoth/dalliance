@@ -92,7 +92,7 @@ function drawLine(featureGroupElement, features, style, tier, y)
 {
     var origin = tier.browser.origin, scale = tier.browser.scale;
     var height = style.HEIGHT || 30;
-    var min = tier.source.opts.forceMin || style.MIN || 0, max = tier.source.opts.forceMax || style.MAX || 100;
+    var min = tier.dasSource.forceMin || style.MIN || 0, max = tier.dasSource.forceMax || style.MAX || 100;
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
     var color = style.COLOR || style.COLOR1 || 'black';
@@ -239,7 +239,7 @@ function drawFeatureTier(tier)
 
     // Merge supergroups
     
-    if (tier.source.opts.collapseSuperGroups && !tier.bumped) {
+    if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
 	for (var sg in tier.superGroups) {
 	    var sgg = tier.superGroups[sg];
 	    var featsByType = {};
@@ -328,7 +328,7 @@ function drawFeatureTier(tier)
     for (var gx = 0; gx < gl.length; ++gx) {
 	var gid = gl[gx];
 	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier,
-			       (tier.source.opts.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
+			       (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
 	groupGlyphs[gid] = g;
     }
 
@@ -371,7 +371,7 @@ function drawFeatureTier(tier)
         if (g.bump) {
             hasBumpedFeatures = true;
         }
-	if (g.bump && (tier.bumped || tier.source.opts.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
+	if (g.bump && (tier.bumped || tier.dasSource.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
 	    for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
 		var st = bumpedSTs[sti];
 		if (st.hasSpaceFor(g)) {
@@ -1045,8 +1045,8 @@ function glyphForFeature(feature, y, style, tier)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-	    var smin = tier.source.opts.forceMin || style.MIN || 0;
-	    var smax = tier.source.opts.forceMax || style.MAX || 100;
+	    var smin = tier.dasSource.forceMin || style.MIN || 0;
+	    var smax = tier.dasSource.forceMax || style.MAX || 100;
 	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }

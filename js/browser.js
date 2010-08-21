@@ -86,16 +86,6 @@ function Browser(opts) {
     window.addEventListener('load', function(ev) {thisB.realInit();}, false);
 }
 
-function DataSource(name, uri, opts)
-{
-    if (!opts) {
-	opts = {};
-    }
-    this.name = name;
-    this.uri = uri;
-    this.opts = opts;
-}
-
 
 Browser.prototype.arrangeTiers = function() {
     var browserSvg = this.svgRoot;
@@ -124,14 +114,14 @@ Browser.prototype.arrangeTiers = function() {
 	viewportBackground.setAttribute('stroke', 'none');
 	labelGroup.appendChild(viewportBackground);
 
-        this.makeTooltip(viewportBackground, tier.source.description ? 
-                    makeElement('span', [makeElement('b', tier.source.name), makeElement('br'), tier.source.description]) : 
-                    tier.source.name
+        this.makeTooltip(viewportBackground, tier.dasSource.desc ? 
+                    makeElement('span', [makeElement('b', tier.dasSource.name), makeElement('br'), tier.dasSource.desc]) : 
+                    tier.dasSource.name
                    );
 	this.setupTierDrag(viewportBackground, ti);
 	    
         var hasWidget = false;
-	if (tier.source.opts.collapseSuperGroups || tier.hasBumpedFeatures) {
+	if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
             hasWidget = true;
 	    this.makeToggleButton(labelGroup, tier, clh);
 	} 
@@ -221,7 +211,7 @@ Browser.prototype.arrangeTiers = function() {
         if (hasWidget) {
             labelMaxWidth -= 20;
         }
-        var labelString = tier.source.name;
+        var labelString = tier.dasSource.name;
 	var labelText = document.createElementNS(NS_SVG, 'text');
 	labelText.setAttribute('x', 15);
 	labelText.setAttribute('y', clh + 17);
@@ -693,6 +683,7 @@ Browser.prototype.init = function() {
 }
 
 Browser.prototype.realInit = function(opts) {
+//    alert(miniJSONify(this.karyoEndpoint));
     if (!opts) {
         opts = {};
     }
@@ -1286,8 +1277,8 @@ Browser.prototype.realInit = function(opts) {
 
     var epSource;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var s = this.tiers[ti].source;
-        if (s.opts && s.opts.tier_type && s.opts.tier_type == 'sequence') {
+        var s = this.tiers[ti].dasSource;
+        if (s.tier_type == 'sequence') {
             epSource = this.tiers[ti].dasSource;
             break;
         }
@@ -1317,12 +1308,7 @@ Browser.prototype.realInit = function(opts) {
             if (coords.taxon != thisB.coordSystem.taxon || coords.auth != thisB.coordSystem.auth || coords.version != thisB.coordSystem.version) {
                 continue;
             }
-            var ds = new DataSource(sources[s].title, sources[s].uri);
-            ds.description = source.desc;
-            if (!source.props || !source.props.cors) {
-                ds.disabled = true;
-            }
-            thisB.availableSources.push(ds);
+            thisB.availableSources.push(source);
         }
     }, function(error) {
         alert('Warning: registry query failed');
@@ -1348,12 +1334,7 @@ Browser.prototype.fetchMappedSources = function(m) {
             if (coords.taxon != chainSet.coords.taxon || coords.auth != chainSet.coords.auth || coords.version != chainSet.coords.version) {
                 continue;
             }
-            var ds = new DataSource(sources[s].title + '( ' + chainSet.srcTag + ')', sources[s].uri, {mapping: m});
-            ds.description = source.desc;
-            if (!source.props || !source.props.cors) {
-                ds.disabled = true;
-            }
-            availableSources.push(ds);
+            availableSources.push(source);
         }
         thisB.mappableSources[m] = availableSources;
     }, function(error) {
@@ -1662,7 +1643,7 @@ Browser.prototype.storeStatus = function(){
 
     var currentSourceList = [];
     for (var t = 0; t < this.tiers.length; ++t) {
-	currentSourceList.push(this.tiers[t].source);
+	currentSourceList.push(this.tiers[t].dasSource);
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
 }

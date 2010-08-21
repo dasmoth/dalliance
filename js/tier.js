@@ -10,18 +10,18 @@
 function DasTier(browser, source, viewport, background)
 {
     this.browser = browser;
-    this.source = source;
+    this.dasSource = new DASSource(source);
     this.viewport = viewport;
     this.background = background;
     this.req = null;
     this.layoutHeight = 50;
     this.bumped = true; 
-    if (source.opts.collapseSuperGroups) {
+    if (this.dasSource.collapseSuperGroups) {
         this.bumped = false;
     }
     this.y = 0;
 
-    if (source.opts.tier_type == 'sequence') {
+    if (this.dasSource.tier_type == 'sequence') {
 	this.refreshTier = refreshTier_sequence;
     } else {
 	this.refreshTier = refreshTier_features;
@@ -31,13 +31,6 @@ function DasTier(browser, source, viewport, background)
 }
 
 DasTier.prototype.init = function() {
-    this.dasSource = new DASSource(this.source.uri);
-    if (this.source.opts.credentials) {
-	this.dasSource.credentials = true;
-    }
-    if (this.source.opts.stylesheet) {
-        this.dasSource.endpoint_stylesheet = this.source.opts.stylesheet;
-    }
     var tier = this;
     tier.status = 'Fetching stylesheet';
     this.dasSource.stylesheet(function(stylesheet) {
@@ -110,8 +103,8 @@ function refreshTier_features()
 	var tier = this;
 	this.status = 'Fetching features';
 
-        if (this.source.opts.mapping) {
-            var mapping = this.browser.chains[this.source.opts.mapping];
+        if (this.dasSource.mapping) {
+            var mapping = this.browser.chains[this.dasSource.mapping];
             mapping.sourceBlocksForRange(this.browser.chr, this.browser.knownStart, this.browser.knownEnd, function(mseg) {
                 if (mseg.length == 0) {
                     tier.currentFeatures = [];

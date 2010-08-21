@@ -31,7 +31,7 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
 	popup.style.borderStyle = 'solid';
 	popup.style.padding = '2px';
 
-	popup.appendChild(document.createTextNode('Configure: ' + tier.source.name));
+	popup.appendChild(document.createTextNode('Configure: ' + tier.dasSource.name));
 	
 	var form = makeElement('table');
 	var minInput = makeElement('input', '', {value: tier.min});
@@ -63,8 +63,8 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
                 return;
             }
 
-	    tier.source.opts.forceMin = minInput.value;
-	    tier.source.opts.forceMax = maxInput.value;
+	    tier.dasSource.forceMin = minInput.value;
+	    tier.dasSource.forceMax = maxInput.value;
 	    thisB.removeAllPopups();
 	    dasRequestComplete(tier);
             thisB.storeStatus();          // write updated limits to storage.

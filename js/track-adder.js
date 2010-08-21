@@ -9,16 +9,16 @@
 
 Browser.prototype.currentlyActive = function(source) {
     for (var i = 0; i < this.tiers.length; ++i) {
-        var ts = this.tiers[i].source;
+        var ts = this.tiers[i].dasSource;
         if (ts.uri == source.uri) {
             // Special cases where we might meaningfully want two tiers of the same URI.
-            if (ts.opts && ts.opts.tier_type) {
-                if (!source.opts || !source.opts.tier_type || source.opts.tier_type != ts.opts.tier_type) {
+            if (ts.tier_type) {
+                if (!source.tier_type || source.tier_type != ts.tier_type) {
                     continue;
                 }
             }
-            if (ts.opts && ts.opts.stylesheet) {
-                if (!source.opts || !source.opts.stylesheet || source.opts.stylesheet != ts.opts.stylesheet) {
+            if (ts.stylesheet) {
+                if (!source.stylesheet || source.stylesheet != ts.stylesheet) {
                     continue;
                 }
             }
@@ -122,7 +122,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             if (thisB.currentlyActive(source)) {
                 bd.appendChild(document.createTextNode('X'));
                 thisB.makeTooltip(bd, "This data source is already active.");
-            } else if (!source.disabled) {
+            } else if (source.props && source.props.cors) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
@@ -139,8 +139,8 @@ Browser.prototype.showTrackAdder = function(ev) {
             r.appendChild(bd);
             var ld = document.createElement('td');
             ld.appendChild(document.createTextNode(source.name));
-            if (source.description && source.description.length > 0) {
-                thisB.makeTooltip(ld, source.description);
+            if (source.description && source.desc.length > 0) {
+                thisB.makeTooltip(ld, source.desc);
             }
             r.appendChild(ld);
             stab.appendChild(r);
@@ -193,7 +193,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (customMode) {
-            var nds = new DataSource(custName.value, custURL.value);
+            var nds = new DASSource({name: custName.value, uri: custURL.value});
             thisB.sources.push(nds);
             thisB.makeTier(nds);
 	    thisB.storeStatus();
