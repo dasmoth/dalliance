@@ -53,6 +53,33 @@ Browser.prototype.makeTooltip = function(ele, text)
     }, false);
 }
 
+Browser.prototype.popit = function(ev, name, ele, opts)
+{
+    if (!opts) {
+        opts = {};
+    }
+
+    var mx =  ev.clientX, my = ev.clientY;
+    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+    my +=  document.documentElement.scrollTop || document.body.scrollTop;
+
+    var popup = makeElement('div');
+    var winWidth = window.innerWidth;
+    popup.style.position = 'absolute';
+    popup.style.top = '' + (my + 30) + 'px';
+    popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
+    popup.style.width = '200px';
+    popup.style.backgroundColor = 'white';
+    popup.style.borderWidth = '1px';
+    popup.style.borderColor = 'black'
+    popup.style.borderStyle = 'solid';
+    popup.style.padding = '2px';
+
+    popup.appendChild(ele);
+
+    this.hPopupHolder.appendChild(popup);
+}
+
 function IconSet(uri)
 {
     var req = new XMLHttpRequest();

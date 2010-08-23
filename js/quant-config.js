@@ -15,32 +15,12 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
 	ev.stopPropagation(); ev.preventDefault();
 	thisB.removeAllPopups();
 
-	var mx =  ev.clientX, my = ev.clientY;
-	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	my +=  document.documentElement.scrollTop || document.body.scrollTop;
-	
-	var popup = makeElement('div');
-	var winWidth = window.innerWidth;
-	popup.style.position = 'absolute';
-	popup.style.top = '' + (my + 30) + 'px';
-	popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
-	popup.style.width = '200px';
-	popup.style.backgroundColor = 'white';
-	popup.style.borderWidth = '1px';
-	popup.style.borderColor = 'black'
-	popup.style.borderStyle = 'solid';
-	popup.style.padding = '2px';
-
-	popup.appendChild(document.createTextNode('Configure: ' + tier.dasSource.name));
-	
 	var form = makeElement('table');
 	var minInput = makeElement('input', '', {value: tier.min});
         form.appendChild(makeElement('tr', [makeElement('td', 'Min:'), makeElement('td', minInput)]));
 	var maxInput = makeElement('input', '', {value: tier.max});
         form.appendChild(makeElement('tr', [makeElement('td', 'Max:'), makeElement('td', maxInput)]));
         
-	popup.appendChild(form);
-	
 	var updateButton = makeElement('div', 'Update');
         updateButton.style.backgroundColor = 'rgb(230,230,250)';
         updateButton.style.borderStyle = 'solid';
@@ -49,7 +29,6 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
         updateButton.style.padding = '2px';
         updateButton.style.margin = '10px';
         updateButton.style.width = '150px';
-	popup.appendChild(updateButton);
 
 	updateButton.addEventListener('mousedown', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
@@ -70,6 +49,6 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
             thisB.storeStatus();          // write updated limits to storage.
 	}, false);
 
-	thisB.hPopupHolder.appendChild(popup);
+        thisB.popit(ev, "Config", makeElement('div', ['Configure: ' + tier.dasSource.name, form, updateButton]));
     }, false);
 }
