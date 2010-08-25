@@ -62,16 +62,20 @@ DasTier.prototype.styles = function(scale) {
 
 function refreshTier_sequence()
 {
+    var fetchStart = this.browser.knownStart;
+    var fetchEnd = this.browser.knownEnd;
     if (this.browser.scale >= 1) {
 	var tier = this;
         this.dasSource.sequence(
-            new DASSegment(this.browser.chr, this.browser.knownStart, this.browser.knownEnd),
+            new DASSegment(this.browser.chr, fetchStart, fetchEnd),
             function(seqs) {
+                tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
                 drawSeqTier(tier, seqs[0]);  // FIXME: check array.
 		tier.originHaxx = 0;
             }
         );
     } else {
+        this.knownStart = fetchStart; this.knownEnd = fetchEnd;
         drawSeqTier(this);
 	this.originHaxx = 0;
     }
@@ -98,6 +102,8 @@ function refreshTier_features()
     
     var scaledQuantRes = this.browser.targetQuantRes / this.browser.scale;
     var maxBins = 1 + (((this.browser.knownEnd - this.browser.knownStart) / scaledQuantRes) | 0);
+    var fetchStart = this.browser.knownStart;
+    var fetchEnd = this.browser.knownEnd;
 
     if (inclusive || fetchTypes.length > 0) {
 	var tier = this;
@@ -105,7 +111,7 @@ function refreshTier_features()
 
         if (this.dasSource.mapping) {
             var mapping = this.browser.chains[this.dasSource.mapping];
-            mapping.sourceBlocksForRange(this.browser.chr, this.browser.knownStart, this.browser.knownEnd, function(mseg) {
+            mapping.sourceBlocksForRange(this.browser.chr, fetchStart, fetchEnd, function(mseg) {
                 if (mseg.length == 0) {
                     tier.currentFeatures = [];
                     tier.status = "No mapping available for this regions";
@@ -148,6 +154,7 @@ function refreshTier_features()
                                 }
                             }
                             tier.currentFeatures = mappedFeatures;
+                            tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
                             dasRequestComplete(tier);
 	                }
                     );
@@ -155,7 +162,7 @@ function refreshTier_features()
             });
         } else {        
             this.dasSource.features(
-	        new DASSegment(this.browser.chr, this.browser.knownStart, this.browser.knownEnd),
+	        new DASSegment(this.browser.chr, fetchStart, fetchEnd),
 	        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
 	        function(features, status) {
 		    if (status) {
@@ -164,6 +171,7 @@ function refreshTier_features()
 		        tier.error = null; tier.status = null;
 		    }
                     tier.currentFeatures = features;
+                    tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
                     dasRequestComplete(tier);
 	        }
             );

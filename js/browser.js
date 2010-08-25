@@ -101,6 +101,11 @@ Browser.prototype.arrangeTiers = function() {
     for (ti = 0; ti < this.tiers.length; ++ti) {
 	var tier = this.tiers[ti];
 	tier.y = clh;
+
+        if (tier.knownStart) {
+            tier.background.setAttribute('x', (tier.knownStart - this.origin) * this.scale);
+            tier.background.setAttribute('width', (tier.knownEnd - tier.knownStart + 1) * this.scale);
+        }
 	    
 	var labelWidth = this.tabMargin;
 	var viewportBackground = document.createElementNS(NS_SVG, 'path');
