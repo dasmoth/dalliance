@@ -703,7 +703,7 @@ function glyphForFeature(feature, y, style, tier)
     var label = feature.label;
 
     var minPos = (min - origin) * scale;
-    var maxPos = (max - origin) * scale;
+    var maxPos = ((max - origin + 1) * scale) - 1;
 
     var requiredHeight;
     var quant;

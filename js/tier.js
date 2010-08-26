@@ -71,12 +71,14 @@ function refreshTier_sequence()
             function(seqs) {
                 tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
                 drawSeqTier(tier, seqs[0]);  // FIXME: check array.
+                tier.setBackground();
 		tier.originHaxx = 0;
             }
         );
     } else {
         this.knownStart = fetchStart; this.knownEnd = fetchEnd;
         drawSeqTier(this);
+        this.setBackground();
 	this.originHaxx = 0;
     }
 }
@@ -183,10 +185,17 @@ function refreshTier_features()
     }
 }
 
+DasTier.prototype.setBackground = function() {            
+    if (this.knownStart) {
+        this.background.setAttribute('x', (this.knownStart - this.browser.origin) * this.browser.scale);
+        this.background.setAttribute('width', (this.knownEnd - this.knownStart + 1) * this.browser.scale);
+    }    
+}
 
 function dasRequestComplete(tier)
 {
     drawFeatureTier(tier);
     tier.originHaxx = 0;
+    tier.setBackground();
     tier.browser.arrangeTiers();
 }
