@@ -243,6 +243,8 @@ Browser.prototype.arrangeTiers = function() {
 	clh += tier.layoutHeight;
     }
 	
+    this.featureBackground.setAttribute('height', ((clh | 0) - 50));
+
     if (clh < 290) {
 	clh = 290;
     }
@@ -312,7 +314,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             thisB.tierHolder.removeChild(thisB.tiers[ti].viewport);
             
             thisB.tiers = newTiers;
-            for (var nti = 0; nti < tiers.length; ++nti) {
+            for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
             }
             
@@ -437,7 +439,7 @@ Browser.prototype.mouseDownHandler = function(ev)
 	if (this.dcTimeoutID && target.dalliance_feature) {
             var f = target.dalliance_feature;
             var org = this.svgHolder.getBoundingClientRect();
-            var fstart = (((f.min|0) - (this.viewStart|0)) * scale) + org.left + this.tabMargin;
+            var fstart = (((f.min|0) - (this.viewStart|0)) * this.scale) + org.left + this.tabMargin;
             var fwidth = (((f.max - f.min) + 1) * this.scale);
 
 	    clearTimeout(this.dcTimeoutID);
@@ -688,7 +690,6 @@ Browser.prototype.init = function() {
 }
 
 Browser.prototype.realInit = function(opts) {
-//    alert(miniJSONify(this.karyoEndpoint));
     if (!opts) {
         opts = {};
     }
@@ -803,7 +804,32 @@ Browser.prototype.realInit = function(opts) {
     removeChildren(this.svgHolder);
     this.svgHolder.appendChild(this.svgRoot);
 
-    this.svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white'});
+    {
+        var patdata = '';
+         for (var i = -90; i <= 90; i += 20) {
+             patdata = patdata + 'M ' + (Math.max(0, i) - 2) + ' ' + (Math.max(-i, 0) - 2) + ' L ' + (Math.min(100 + i, 100) + 2) + ' ' + (Math.min(100 - i, 100) + 2) + ' ';
+             patdata = patdata + 'M ' + Math.max(i, 0) + ' ' + Math.min(i + 100, 100) + ' L ' + Math.min(i + 100, 100) + ' ' + Math.max(i, 0) + ' ';
+        }
+        var pat =  makeElementNS(NS_SVG, 'pattern',
+                                 makeElementNS(NS_SVG, 'path', null, {
+                                     stroke: 'lightgray',
+                                     strokeWidth: 2,
+                                     d: patdata
+                                     // d: 'M 0 90 L 10 100 M 0 70 L 30 100 M 0 50 L 50 100 M 0 30 L 70 100 M 0 10 L 90 100 M 10 0 L 100 90 M 30 0 L 100 70 M 50 0 L 100 50 M 70 0 L 100 30 M 90 0 L 100 10'
+                                     // 'M 0 90 L 90 0 M 0 70 L 70 0'
+                                 }),
+                                 {
+                                     id: 'bgpattern-' + this.pageName,
+                                     x: 0,
+                                     y: 0,
+                                     width: 100,
+                                     height: 100
+                                 });
+        pat.setAttribute('patternUnits', 'userSpaceOnUse');
+        this.svgRoot.appendChild(pat);
+    }
+
+    this.svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white' /*'url(#bgpattern-' + this.pageName + ')' */});
     var main = makeElementNS(NS_SVG, 'g', this.svgBackground, {
         fillOpacity: 1.0, 
         stroke: 'black', 
@@ -855,7 +881,17 @@ Browser.prototype.realInit = function(opts) {
         height: 440
     });
     main.appendChild(makeElementNS(NS_SVG, 'clipPath', this.labelClipRect, {id: 'labelClip-' + this.pageName}));
-      
+    
+    this.featureBackground = makeElementNS(NS_SVG, 'rect', null, {
+        x: this.tabMargin,
+        y: 50,
+        width: 850 - this.tabMargin,
+        height: 440,
+        stroke: 'none',
+        fill: 'url(#bgpattern-' + this.pageName + ')'
+    });
+    main.appendChild(this.featureBackground);
+
     this.dasTierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip-' + this.pageName + ')'});   // FIXME needs a unique ID.
     main.appendChild(this.dasTierHolder);
     var dasTiers = makeElementNS(NS_SVG, 'g', null, {id: 'dasTiers'});
@@ -1423,6 +1459,7 @@ Browser.prototype.resizeViewer = function() {
     this.svgRoot.setAttribute('width', width - 30);
     this.svgBackground.setAttribute('width', width - 30);
     this.featureClipRect.setAttribute('width', width - this.tabMargin - 40);
+    this.featureBackground.setAttribute('width', width - this.tabMargin - 40);
 
     this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
     if (width < 1125) {
