@@ -616,7 +616,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     if (spans) {
 	var blockList = spans.ranges();
 	for (var i = 1; i < blockList.length; ++i) {
-	    var lmin = (blockList[i - 1].max() - origin) * scale;
+	    var lmin = ((blockList[i - 1].max() + 1 - origin) * scale) - 1;
 	    var lmax = (blockList[i].min() - origin) * scale;
 
             var path;

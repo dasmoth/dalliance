@@ -448,12 +448,18 @@ Browser.prototype.mouseDownHandler = function(ev)
                 if (frac < 0.3) {
                     newMid = (target.dalliance_feature.min|0);
                 } else  if (frac > 0.7) {
-                    newMid = (target.dalliance_feature.max|0);
+                    newMid = (target.dalliance_feature.max|0) + 1;
                 }
             }
 
 	    var width = this.viewEnd - this.viewStart;
 	    this.setLocation(newMid - (width/2), newMid + (width/2));
+            
+            var extraPix = this.featurePanelWidth - ((width+1)*this.scale);
+            // alert(extraPix);
+            if (Math.abs(extraPix) > 1) {
+                this.move(extraPix/2);
+            }
 	} else {
 	    this.dcTimeoutID = setTimeout(function() {
 		thisB.dcTimeoutID = null;
