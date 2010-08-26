@@ -8,10 +8,11 @@
 //
 
 var VERSION = {
-    MAJOR: 0,
-    MINOR: 4,
-    MICRO: 13,
-    PATCH: 'b'
+    CONFIG: 2,
+    MAJOR:  0,
+    MINOR:  4,
+    MICRO:  14,
+    PATCH:  ''
 }
 
 VERSION.toString = function() {

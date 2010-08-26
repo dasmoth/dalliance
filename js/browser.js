@@ -7,6 +7,8 @@
 // browser.js: browser setup and UI.
 //
 
+// constants
+
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
 
@@ -729,6 +731,17 @@ Browser.prototype.realInit = function(opts) {
         }
         
         reset = queryDict.reset;
+    }
+
+    var storedConfigVersion = localStorage['dalliance.' + this.cookieKey + '.version'];
+    if (storedConfigVersion) {
+        storedConfigVersion = storedConfigVersion|0;
+    } else {
+        storedConfigVersion = -100;
+    }
+    if (VERSION.CONFIG != storedConfigVersion) {
+//        alert("Don't understand config version " + storedConfigVersion + ", resetting.");
+        reset = true;
     }
 
     if (this.cookieKey && localStorage['dalliance.' + this.cookieKey + '.view-chr'] && !reset) {
@@ -1688,6 +1701,7 @@ Browser.prototype.storeStatus = function(){
 	currentSourceList.push(this.tiers[t].dasSource);
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
+    localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;
 }
 
 Browser.prototype.scheduleRefresh = function(time) {
