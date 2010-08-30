@@ -1,0 +1,102 @@
+---
+layout: default
+title: Embedding Dalliance
+---
+<p>
+Dalliance is a self-contained Javascript object which can be inserted into
+almost any web page, e.g.:
+</p>
+
+<script language="javascript" src="http://www.biodalliance.org/js/dalliance-compiled.js"></script>
+<script language="javascript">
+  new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human',
+
+    sources:     [{name:                 'Genome',      
+                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
+                   tier_type:            'sequence',
+                   provides_entrypoints: true},
+                  {name:                 'Genes',     
+                   desc:                 'Gene structures from Ensembl 54',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   collapseSuperGroups:  true,
+                   provides_karyotype:   true,
+                   provides_search:      true},
+                  {name:                 'Repeats',     
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'},
+                  {name:                 'MeDIP raw',
+                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads'},
+                  {name:                 'MeDIP-seq',
+                   uri:                  'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/'}],
+
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
+    browserLinks: {
+        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
+    },
+
+    forceWidth: 700
+  });
+</script>
+
+<div id="svgHolder"></div>
+
+<p>
+Typical embedding code looks something like:
+</p>
+
+{% highlight html %}
+<script language="javascript" src="http://www.biodalliance.org/js/dalliance-compiled.js"></script>
+<script language="javascript">
+  new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human',
+
+    sources:     [{name:                 'Genome',      
+                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
+                   tier_type:            'sequence',
+                   provides_entrypoints: true},
+                  {name:                 'Genes',     
+                   desc:                 'Gene structures from Ensembl 54',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   collapseSuperGroups:  true,
+                   provides_karyotype:   true,
+                   provides_search:      true},
+                  {name:                 'Repeats',     
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'},
+                  {name:                 'MeDIP raw',
+                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads'},
+                  {name:                 'MeDIP-seq',
+                   uri:                  'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/'}],
+
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
+    browserLinks: {
+        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
+    },
+
+    forceWidth: 700
+  });
+</script>
+
+<div id="svgHolder"></div>
+{% endhighlight %}
+
+Note that you need to provide a DIV (named "svgHolder" by default, although this can be changed if you
+want to embed multiple browsers in one page) into which the browser components will be inserted.  By
+default, the browser will use the whole width of the page -- you'll typically want to specify a sensible
+value of forceWidth when embedding into any non-trivial container page.
+
+<h3>Embedding API</h3>
+
+It's possible to change or animate the view, add/remove tracks, or adjust the highlighted
+region from Javascript code.  The API is not stable as of 0.5, but we can probably clean up
+and stabilize things quite quickly if you have any particular applications in mind -- drop
+me a line if interested.

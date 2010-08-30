@@ -1,0 +1,136 @@
+---
+layout: default
+title: Getting started
+---
+<p>
+Dalliance is a track-oriented genome viewer similar to
+<a href="http://www.ensembl.org/">Ensembl</a>, <a href="http://genome.ucsc.edu/">UCSC</a>, or <a href="http://www.gbrowse.org">GBrowse</a>.  However, it
+is a little different in operation because it uses recent extensions to
+web standards ("HTML 5") to offer a higher level of interactivity than
+most previous genome viewers.  It also uses <a href="http://biodas.org">DAS</a>
+to collect annotations from around the internet -- which will be important
+if you want to add custom data to a Dalliance browser.
+</p>
+
+<p>
+Before reading on, you might want
+to <a href="http://www.biodalliance.org/human/ncbi36/"
+target="_new">click here</a> to open a genome viewer in a new window.
+</p>
+
+<h3>Navigation</h3>
+
+<p>
+Assuming that all is well, you should see a genome view something like this:
+</p>
+
+<img src="view1.png" />
+
+<p>
+You'll see several distinct tracks of information about the genome.  Some, such as
+the gene structures, are fetched from servers operated as part of the Dalliance
+project.  Others come from elsewhere -- for instance, DNA methylation data hosted
+at EBI.
+</p>
+
+<p>
+To move around, point at the blue background of any of the tracks, hold down the
+left mouse button, and drag.  Alternatively, if your input device supports panning
+gestures, you can use these instead (<em>e.g.</em> with an Apple Magic Mouse, moving one finger
+horizontally across the top surface of the mouse will scroll).
+</p>
+
+<p>
+You can scroll in or out by dragging the tab on the zoom slider:
+<p>
+
+<img src="zoom.png" />
+
+<p>
+If you rapidly zoom out, you may see a cross-hatched background.  This
+indicates that data currently hasn't been fetched for a region.  Wait a moment
+and the hatched regions will be replaced by genome annotation.
+</p>
+
+<img src="view2.png" />
+
+<p>
+If you zoom in far enough, you will eventually see the base-pair-level genome
+sequence.  In the example below, you can see the ATG start codon of the protein-coding
+part of a gene.
+</p>
+
+<img src="view3.png" />
+
+<p>
+As you zoom in and out, notice that any feature directly underneath the red
+guideline remains centred.  You can double-click on any feature to center
+it, then zoom in to find other features which might be aligned with it.  For
+larger features, you can also double-click close to the edges of the feature
+to center that edge.
+
+<h3>Searching</h3>
+
+To jump to specific coordinates, or search for a named feature, click on the location
+label:
+
+<img src="jump.png" />
+
+<p>
+If a named feature can be found in the DAS system, it will be highlighted in the browser,
+e.g.:
+</p>
+
+<img src="view4.png" />
+
+<p>
+<strong>NB</strong> feature search currently has a few limitations.  Most significantly,
+gene names are cases sensitive (which means you need to search for "BRCA2" in human but
+"Brca2" in mouse!), and the system deals badly with searches which match to more than one
+region of the genome.  We're very keen to improve this aspect of the system in the future.
+</p>
+
+<h3>Customizing your display</h3>
+
+<p>
+Some types of track have a customization button in their name-tab.  Genes and some other
+"region" tracks have an expand/collapse button:
+</p>
+
+<img src="toggle.png" />
+
+<p>
+In the case of gene tracks, expanding will show all the annotated splice variants.
+</p>
+
+<p>
+Quantitative tracks can be configured by clicking on the magnifying glass, for instance
+to adjust the y-axis scale:
+</p>
+
+<img src="quant.png" />
+
+<p>
+You can change the order of tracks by dragging their name-tabs and dropping them elsewhere
+in the browser display:
+<p>
+
+<p>You can also delete a track by dragging its name-tab to the waste bin.</p>
+
+<p>
+Adding new tracks...
+</p>
+
+<p>
+If you delete important tracks or otherwise get the browser into a state you don't want,
+just hit the "reset" button in the toolbar.
+</p>
+
+<img src="reset.png" />
+
+<h3>Tips and tricks</h3>
+
+<ul>
+<li>You can also perform basic navigation using the keyboard (arrow keys to scroll, shift-arrow to scroll fast, +/- to zoom).</li>
+<li>For publication-quality graphics, at least on a Mac, you can "print as PDF", then use Preview to crop the resulting file.  Everything in Dalliance is drawn using vector graphics, so the resulting PDF will look good in print.</lI.
+</ul>

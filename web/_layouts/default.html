@@ -1,0 +1,52 @@
+<html>
+<head>
+  <title>{{ page.title }} :: Dalliance</title>
+  <link rel="stylesheet" href="css/960.css" />
+  <link rel="stylesheet" href="css/syntax.css" />
+  <style>
+       * {
+         font-family: helvetica
+       }
+
+       .grid_3 a {
+         display: block
+       }
+
+       #content img {
+         display: block;
+         margin-left: auto;
+         margin-right: auto
+       }
+
+  .highlight * {
+    font-family: Monaco, "Courier New", monospace;
+    font-size: 80%;
+  }
+
+  .highlight {
+    border: 1px solid #ddd;
+    background-color: #eef;
+    padding: 0 .4em;
+  }
+  </style>
+</head>
+<body>
+<div class="container_12">
+  <div class="grid_12">
+    <h1><center>Dalliance :: {{ page.title }}</center></h1>
+  </div>
+  <div class="clear"></div>
+  <div id="sidebar" class="grid_3">
+    <a href="index.html">Home<a>
+    <a href="docs.html">Documentation</a>
+    <a href="adding.html">Adding data</a>
+    <a href="embed.html">Embedding</a>
+    <a href="dev.html">Developers</a>
+    <a href="about.html">About us</a>
+  </div>
+  <div id="content" class="grid_9">
+    {{ content }}
+  </div>
+</div>
+</body>
+</html>
