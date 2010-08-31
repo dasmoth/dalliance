@@ -11,8 +11,8 @@ var VERSION = {
     CONFIG: 2,
     MAJOR:  0,
     MINOR:  4,
-    MICRO:  14,
-    PATCH:  'c'
+    MICRO:  15,
+    PATCH:  'a'
 }
 
 VERSION.toString = function() {
