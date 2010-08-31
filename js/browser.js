@@ -745,6 +745,14 @@ Browser.prototype.realInit = function(opts) {
         reset = true;
     }
 
+    var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
+    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
+    if (pageConfigHash != storedConfigHash) {
+//        alert('page config seems to have changed, resetting');
+        reset=true;
+        localStorage['dalliance.' + this.cookieKey + '.configHash'] = pageConfigHash;
+    }
+
     if (this.cookieKey && localStorage['dalliance.' + this.cookieKey + '.view-chr'] && !reset) {
         qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
         qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
