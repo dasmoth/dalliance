@@ -984,22 +984,6 @@ Browser.prototype.realInit = function(opts) {
         ev.stopPropagation(); ev.preventDefault();
 	thisB.removeAllPopups(); 
 
-        var mx =  ev.clientX, my = ev.clientY;
-	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	my +=  document.documentElement.scrollTop || document.body.scrollTop;
-        
-        var popup = makeElement('div', makeElement('p', 'Link to this region in...'));
-        var winWidth = window.innerWidth;
-        popup.style.position = 'absolute';
-        popup.style.top = '' + (my + 30) + 'px';
-        popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
-        popup.style.width = '200px';
-        popup.style.backgroundColor = 'white';
-        popup.style.borderWidth = '1px';
-        popup.style.borderColor = 'black'
-        popup.style.borderStyle = 'solid';
-        popup.style.padding = '2px';
-        
         var linkList = makeElement('ul');
         for (l in thisB.browserLinks) {
             linkList.appendChild(makeElement('li', makeElement('a', l, {
@@ -1017,9 +1001,7 @@ Browser.prototype.realInit = function(opts) {
                 target: '_new'
             })));
         }
-        popup.appendChild(linkList);
-
-	thisB.hPopupHolder.appendChild(popup);
+        thisB.popit(ev, 'Link', makeElement('div', [makeElement('p', 'Link to this region in...'), linkList]));
     }, false);
 
     // set up the navigator
