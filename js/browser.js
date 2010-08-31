@@ -391,9 +391,20 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
 
 Browser.prototype.updateRegion = function()
 {
-    var regionDisplay = "chr: " + this.chr + " start: " + (this.viewStart|0) + " end: " + (this.viewEnd|0);
+    var chrLabel = this.chr;
+    if (chrLabel.indexOf('chr') < 0) {
+        chrLabel = 'chr' + chrLabel;
+    }
+    var fullLabel = chrLabel + ':' + (this.viewStart|0) + '..' + (this.viewEnd|0);
+
     removeChildren(this.regionLabel);
-    this.regionLabel.appendChild(document.createTextNode(regionDisplay));
+    this.regionLabel.appendChild(document.createTextNode(fullLabel));
+    var bb = this.regionLabel.getBBox();
+    var rlm = bb.x + bb.width;
+    if (this.regionLabelMax && rlm > this.regionLabelMax) {
+        removeChildren(this.regionLabel);
+        this.regionLabel.appendChild(document.createTextNode(chrLabel));
+    }
 }
 
 Browser.prototype.refresh = function() {
@@ -846,7 +857,7 @@ Browser.prototype.realInit = function(opts) {
     this.svgRoot.appendChild(main);
 
     this.regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
-        x: 240,
+        x: 230,
         y: 30,
         strokeWidth: 0
     });
@@ -933,7 +944,7 @@ Browser.prototype.realInit = function(opts) {
     }
 
     this.karyo = new Karyoscape(this, this.karyoEndpoint);
-    this.karyo.svg.setAttribute('transform', 'translate(500, 15)');
+    this.karyo.svg.setAttribute('transform', 'translate(450, 15)');
     this.karyo.onchange = function(pos) {
         var width = thisB.viewEnd - thisB.viewStart + 1;
         var newStart = ((pos * thisB.currentSeqMax) - (width/2))|0;
@@ -1438,7 +1449,7 @@ Browser.prototype.makeZoomerTicks = function() {
 
 Browser.prototype.resizeViewer = function() {
     var width = window.innerWidth;
-    width = Math.max(width, 600);
+    width = Math.max(width, 640);
 
     if (this.forceWidth) {
         width = this.forceWidth;
@@ -1450,11 +1461,12 @@ Browser.prototype.resizeViewer = function() {
     this.featureBackground.setAttribute('width', width - this.tabMargin - 40);
 
     this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
-    if (width < 1125) {
+    if (width < 1045) {
         this.karyo.svg.setAttribute('transform', 'translate(2000, 15)');
     } else {
-        this.karyo.svg.setAttribute('transform', 'translate(500, 15)');
+        this.karyo.svg.setAttribute('transform', 'translate(420, 20)');
     }
+    this.regionLabelMax = (width - this.zoomSlider.width - 120)
     var oldFPW = this.featurePanelWidth;
     this.featurePanelWidth = (width - this.tabMargin - 40)|0;
     
