@@ -62,6 +62,13 @@ Browser.prototype.makeTooltip = function(ele, text)
         ele.addEventListener('mouseout', outlistener, false);
         setup(ev);
     }, false);
+    ele.addEventListener('DOMNodeRemoved', function(ev) {
+        isin = false;
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    }, false);
 }
 
 Browser.prototype.popit = function(ev, name, ele, opts)
