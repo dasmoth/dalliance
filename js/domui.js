@@ -9,10 +9,12 @@
 
 Browser.prototype.makeTooltip = function(ele, text)
 {
+    var isin = false;
     var thisB = this;
     var timer = null;
     var outlistener;
     outlistener = function(ev) {
+        isin = false;
         if (timer) {
             clearTimeout(timer);
             timer = null;
@@ -20,7 +22,8 @@ Browser.prototype.makeTooltip = function(ele, text)
         ele.removeEventListener('mouseout', outlistener, false);
     };
 
-    ele.addEventListener('mouseover', function(ev) {
+    var setup;
+    setup = function(ev) {
         var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         if (!timer) {
             timer = setTimeout(function() {
@@ -44,12 +47,20 @@ Browser.prototype.makeTooltip = function(ele, text)
                         // May have been removed by other code which clears the popup layer.
                     }
                     window.removeEventListener('mousemove', moveHandler, false);
+                    if (isin) {
+                        setup(ev);
+                    }
                 }
                 window.addEventListener('mousemove', moveHandler, false);
                 timer = null;
             }, 1000);
-            ele.addEventListener('mouseout', outlistener, false);
         }
+    };
+
+    ele.addEventListener('mouseover', function(ev) {
+        isin = true
+        ele.addEventListener('mouseout', outlistener, false);
+        setup(ev);
     }, false);
 }
 
