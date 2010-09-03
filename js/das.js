@@ -502,6 +502,7 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 	    
 	    if (uri) {
 		var source = new DASSource(uri, {
+                    source_uri: sourceXML.getAttribute('uri'),
                     name:  sourceXML.getAttribute('title'),
                     desc:  sourceXML.getAttribute('description'),
                     coords: coords,

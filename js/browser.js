@@ -116,10 +116,10 @@ Browser.prototype.arrangeTiers = function() {
 	viewportBackground.setAttribute('stroke', 'none');
 	labelGroup.appendChild(viewportBackground);
 
-        this.makeTooltip(viewportBackground, tier.dasSource.desc ? 
-                    makeElement('span', [makeElement('b', tier.dasSource.name), makeElement('br'), tier.dasSource.desc]) : 
-                    tier.dasSource.name
-                   );
+//        this.makeTooltip(viewportBackground, tier.dasSource.desc ? 
+//                    makeElement('span', [makeElement('b', tier.dasSource.name), makeElement('br'), tier.dasSource.desc]) : 
+//                   tier.dasSource.name
+//                   );
 	this.setupTierDrag(viewportBackground, ti);
 	    
         var hasWidget = false;
@@ -260,11 +260,41 @@ Browser.prototype.offsetForTier = function(ti) {
     return clh;
 }
 
+Browser.prototype.tierInfoPopup = function(tier, ev) {
+    var regel;
+    if (this.availableSources.length == 0) {
+        regel = makeElement('p', 'Registry data not available');
+    } else {
+        for (var ri = 0; ri < this.availableSources.length; ++ri) {
+            var re = this.availableSources[ri];
+            if (re.uri == tier.dasSource.uri && re.source_uri) {
+                regel = makeElement('p', makeElement('a', 'Registry entry: ' + re.name, {href: 'http://www.dasregistry.org/showdetails.jsp?auto_id=' + re.source_uri, target: '_new'})); 
+                break;
+            }
+        }
+        if (!regel) {
+            regel = makeElement('p', 'No registry information for this source');
+        }
+    }
+
+    var popcontents = [];
+    popcontents.push(makeElement('b', tier.dasSource.name));
+    if (tier.dasSource.desc) {
+        popcontents.push(makeElement('br'));
+        popcontents.push(tier.dasSource.desc);
+    }
+    popcontents.push(regel);
+
+    this.popit(ev, 'Tier', makeElement('div', popcontents));
+}
+
 Browser.prototype.setupTierDrag = function(element, ti) {
     var thisB = this;
     var dragOriginX, dragOriginY;
     var dragFeedbackRect;
     var targetTier;
+    var clickTimeout = null;
+    var tier = this.tiers[ti];
     
     var moveHandler = function(ev) {
         var cly = ((ev.clientY + window.scrollY - dragOriginY) | 0) - 50;
@@ -296,9 +326,16 @@ Browser.prototype.setupTierDrag = function(element, ti) {
         window.removeEventListener('mouseup', upHandler, true);
         thisB.bin.removeEventListener('mouseover', binEnterHandler, true);
         thisB.bin.removeEventListener('mouseout', binLeaveHandler, true);
-        thisB.popupHolder.removeChild(dragFeedbackRect);
         thisB.bin.setAttribute('stroke', 'gray');
-        
+
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            clickTimeout = null;
+            thisB.tierInfoPopup(tier, ev);
+            return;
+        }
+
+        thisB.popupHolder.removeChild(dragFeedbackRect);
         if (binned) {
             var newTiers = [];
             
@@ -348,7 +385,9 @@ Browser.prototype.setupTierDrag = function(element, ti) {
     }
     
     element.addEventListener('mousedown', function(ev) {
+        thisB.removeAllPopups();
         ev.stopPropagation(); ev.preventDefault();
+        
         var origin = thisB.svgHolder.getBoundingClientRect();
         dragOriginX = origin.left + window.scrollX; dragOriginY = origin.top + window.scrollY;
         window.addEventListener('mousemove', moveHandler, true);
@@ -364,7 +403,14 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             fill: 'red',
             stroke: 'none'
         });
-        thisB.popupHolder.appendChild(dragFeedbackRect);
+        
+        clickTimeout = setTimeout(function() {
+            clickTimeout = null;
+            // We can do all the setup on click, but don't show the feedback rectangle
+            // until we're sure it's a click rather than a drag.
+            thisB.popupHolder.appendChild(dragFeedbackRect);
+        }, 200);
+
     },true);
 }
 
