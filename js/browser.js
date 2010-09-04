@@ -89,6 +89,20 @@ function Browser(opts) {
 }
 
 
+function formatQuantLabel(v) {
+    var t = '' + v;
+    var dot = t.indexOf('.');
+    if (dot < 0) {
+        return t;
+    } else {
+        if (dot >= 2) {
+            return t.substring(0, dot);
+        } else {
+            return t.substring(0, dot + 2);
+        }
+    }
+}
+
 Browser.prototype.arrangeTiers = function() {
     var browserSvg = this.svgRoot;
     for (var p = 0; p < this.placards.length; ++p) {
@@ -168,7 +182,7 @@ Browser.prototype.arrangeTiers = function() {
                 y2: clh + (tier.clientMax|0),
                 strokeWidth: 1
             }));
-            var minQ = makeElementNS(NS_SVG, 'text', '' + tier.min, {
+            var minQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.min), {
                 x: 80,
                 y: (clh|0) + (tier.clientMin|0),
                 strokeWidth: 0,
@@ -180,7 +194,7 @@ Browser.prototype.arrangeTiers = function() {
             minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
             minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
                     
-            var maxQ = makeElementNS(NS_SVG, 'text', '' + tier.max, {
+            var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
                 x: 80,
                 y: (clh|0) + (tier.clientMax|0),
                 strokeWidth: 0,

@@ -92,7 +92,8 @@ function drawLine(featureGroupElement, features, style, tier, y)
 {
     var origin = tier.browser.origin, scale = tier.browser.scale;
     var height = style.HEIGHT || 30;
-    var min = tier.dasSource.forceMin || style.MIN || 0, max = tier.dasSource.forceMax || style.MAX || 100;
+    var min = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
+    var max = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
     var color = style.COLOR || style.COLOR1 || 'black';
@@ -148,6 +149,7 @@ function sortFeatures(tier)
     var superGroups = {};
     var groupsToSupers = {};
     var nonPositional = [];
+    var minScore, maxScore;
     
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
 	var f = tier.currentFeatures[fi];
@@ -156,6 +158,16 @@ function sortFeatures(tier)
             nonPositional.push(f);
             continue;
         }    
+
+        if (f.score && f.score != '.' && f.score != '-') {
+            sc = 1.0 * f.score;
+            if (!minScore || sc < minScore) {
+                minScore = sc;
+            }
+            if (!maxScore || sc > maxScore) {
+                maxScore = sc;
+            }
+        }
 
 	var fGroups = [];
 	var fSuperGroup = null;
@@ -193,6 +205,16 @@ function sortFeatures(tier)
     tier.groups = groups;
     tier.superGroups = superGroups;
     tier.groupsToSupers = groupsToSupers;
+
+    if (minScore) {
+        if (minScore > 0) {
+            minScore = 0;
+        } else if (maxScore < 0) {
+            maxScore = 0;
+        }
+        tier.currentFeaturesMinScore = minScore;
+        tier.currentFeaturesMaxScore = maxScore;
+    }
 }
 
 var clipIdSeed = 0;
@@ -1049,8 +1071,8 @@ function glyphForFeature(feature, y, style, tier)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-	    var smin = tier.dasSource.forceMin || style.MIN || 0;
-	    var smax = tier.dasSource.forceMax || style.MAX || 100;
+	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
+	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
 	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }
