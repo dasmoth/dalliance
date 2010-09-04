@@ -1088,25 +1088,11 @@ Browser.prototype.realInit = function(opts) {
             }
         });
 
-        var mx =  ev.clientX, my = ev.clientY;
-	mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-	my +=  document.documentElement.scrollTop || document.body.scrollTop;
-
         var popup = makeElement('div');
-        var winWidth = window.innerWidth;
-        popup.style.position = 'absolute';
-        popup.style.top = '' + (my + 30) + 'px';
-        popup.style.left = '' + Math.min((mx - 30), (winWidth-410)) + 'px';
-        popup.style.width = '200px';
-        popup.style.backgroundColor = 'white';
-        popup.style.borderWidth = '1px';
-        popup.style.borderColor = 'black'
-        popup.style.borderStyle = 'solid';
         popup.style.padding = '5px';
         popup.style.paddingRight = '9px';
        
         {
-            popup.appendChild(makeElement('p', 'Jump to...'));
             var form = makeElement('form');
             var tab = makeElement('table');
 
@@ -1129,8 +1115,7 @@ Browser.prototype.realInit = function(opts) {
             form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
             popup.appendChild(form);
         }
-        thisB.hPopupHolder.appendChild(popup);
-
+        thisB.popit(ev, 'Jump to...', popup, {width: 300});
 
 	form.addEventListener('submit', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();

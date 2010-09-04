@@ -86,12 +86,12 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var winWidth = window.innerWidth;
 
     var top = (my + 30);
-    var left = (mx - 30);
+    var left = Math.min((mx - 30), (winWidth - width - 10));
 
     var popup = makeElement('div');
     popup.style.position = 'absolute';
     popup.style.top = '' + top + 'px';
-    popup.style.left = '' + Math.min(left, (winWidth - width - 10)) + 'px';
+    popup.style.left = '' + left + 'px';
     popup.style.width = width + 'px';
     popup.style.backgroundColor = 'white';
     popup.style.borderWidth = '2px';
@@ -131,7 +131,13 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         moveHandler = function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             left = left + (ev.clientX - dragOX);
+            if (left < 10) {
+                left = 10;
+            } if (left > (winWidth - width - 10)) {
+                left = (winWidth - width - 10);
+            }
             top = top + (ev.clientY - dragOY);
+            top = Math.max(10, top);
             popup.style.top = '' + top + 'px';
             popup.style.left = '' + Math.min(left, (winWidth - width - 10)) + 'px';
             dragOX = ev.clientX; dragOY = ev.clientY;
