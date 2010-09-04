@@ -1035,11 +1035,15 @@ function glyphForFeature(feature, y, style, tier)
 	// Also handles HISTOGRAM, GRADIENT, and TOOMANY.
     
 	var stroke = style.FGCOLOR || 'none';
-	var fill = style.BGCOLOR || 'green';
+	var fill = style.BGCOLOR || style.COLOR1 || 'green';
 	var height = style.HEIGHT || 12;
 	requiredHeight = height = 1.0 * height;
 
-        if (maxPos - minPos < MIN_FEATURE_PX) {
+        if (style.WIDTH) {
+            var w = style.WIDTH|0;
+            minPos = (maxPos + minPos - w) / 2;
+            maxPos = minPos + w;
+        } else if (maxPos - minPos < MIN_FEATURE_PX) {
             minPos = (maxPos + minPos - MIN_FEATURE_PX) / 2;
             maxPos = minPos + MIN_FEATURE_PX;
         }

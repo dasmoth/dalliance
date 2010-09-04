@@ -1256,7 +1256,7 @@ Browser.prototype.realInit = function(opts) {
     }
     
     if ((this.viewEnd - this.viewStart) > MAX_VIEW_SIZE) {
-        var mid = ((viewEnd + viewStart) / 2)|0;
+        var mid = ((this.viewEnd + this.viewStart) / 2)|0;
         this.viewStart = mid - (MAX_VIEW_SIZE/2);
         this.viewEnd = mid + (MAX_VIEW_SIZE/2) - 1;
     }
