@@ -102,12 +102,12 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         var closeButton = makeElement('div', 'X', null, {
             margin: '-3px',
             padding: '3px',
-            float: 'right',
             borderStyle: 'none',
             borderLeftStyle: 'solid',
             borderWidth: '1px',
             borderColor: 'rgb(128,128,128)'
         });
+        closeButton.style['float'] = 'right';
         closeButton.addEventListener('mouseover', function(ev) {
             closeButton.style.color = 'red';
         }, false);

@@ -46,6 +46,8 @@ function dasColourForName(name) {
     var c = palette[name];
     if (!c) {
 	alert("couldn't handle color: " + name);
+        c = palette.black;
+        palette[name] = c;
     }
     return c;
 }
@@ -588,6 +590,22 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var spans = null;
     var strand = null;
     var quant = null;
+    var consHeight;
+
+    for (var i = 0; i < features.length; ++i) {
+	var feature = features[i];
+        var style = stylesheet[feature.type] || stylesheet['default'];
+	if (!style) {
+	    continue;
+	}
+        if (style.HEIGHT) {
+            if (!consHeight) {
+                consHeight = style.HEIGHT|0;
+            } else {
+                consHeight = Math.max(consHeight, style.HEIGHT|0);
+            }
+        }
+    }
   
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     glyphGroup.dalliance_group = groupElement;
@@ -607,7 +625,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	if (!style) {
 	    continue;
 	}
-	var glyph = glyphForFeature(feature, y, style, tier);
+	var glyph = glyphForFeature(feature, y, style, tier, consHeight);
         if (glyph && glyph.glyph) {
             featureDGlyphs.push(glyph);
         }
@@ -638,7 +656,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     if (spans) {
 	var blockList = spans.ranges();
 	for (var i = 1; i < blockList.length; ++i) {
-	    var lmin = ((blockList[i - 1].max() + 1 - origin) * scale) - 1;
+	    var lmin = ((blockList[i - 1].max() + 1 - origin) * scale);
 	    var lmax = (blockList[i].min() - origin) * scale;
 
             var path;
@@ -673,7 +691,12 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
                     vee = false;
                 }
 
-                var hh = height/2;
+                var hh;
+                if (quant) {
+                    hh = height;  // HACK to give ensembl-like behaviour for grouped histograms.
+                } else {
+                    hh = height/2;
+                }
 		if (vee && (strand == "+" || strand == "-")) {
 		    var lmid = (lmin + lmax) / 2;
 		    var lmidy = (strand == "-") ? y + 12 : y;
@@ -711,7 +734,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     return dg;
 }
 
-function glyphForFeature(feature, y, style, tier)
+function glyphForFeature(feature, y, style, tier, forceHeight)
 {
     var scale = tier.browser.scale, origin = tier.browser.origin;
     var gtype = style.glyph || 'BOX';
@@ -725,7 +748,7 @@ function glyphForFeature(feature, y, style, tier)
     var label = feature.label;
 
     var minPos = (min - origin) * scale;
-    var maxPos = ((max - origin + 1) * scale) - 1;
+    var maxPos = ((max - origin + 1) * scale) - 0.05;
 
     var requiredHeight;
     var quant;
@@ -735,7 +758,7 @@ function glyphForFeature(feature, y, style, tier)
     } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'LINE' || gtype == 'DOT' || gtype == 'TRIANGLE') {
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'none';
-	var height = style.HEIGHT || 12;
+	var height = style.HEIGHT || forceHeight || 12;
 	requiredHeight = height = 1.0 * height;
 
 	var mid = (minPos + maxPos)/2;
@@ -863,7 +886,7 @@ function glyphForFeature(feature, y, style, tier)
     } else if (gtype == 'PRIMERS') {
 	var arrowColor = style.FGCOLOR || 'red';
 	var lineColor = style.BGCOLOR || 'black';
-	var height = style.HEIGHT || 12;
+	var height = style.HEIGHT || forceHeight || 12;
 	requiredHeight = height = 1.0 * height;
 
 	var mid = (minPos + maxPos)/2;
@@ -889,7 +912,7 @@ function glyphForFeature(feature, y, style, tier)
 
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || 'green';
-	var height = style.HEIGHT || 12;
+	var height = style.HEIGHT || forceHeight || 12;
 	requiredHeight = height = 1.0 * height;
 	var headInset = parallel ? 0.5 *height : 0.25 * height;
 	var midPos = (maxPos + minPos)/2;
@@ -970,7 +993,7 @@ function glyphForFeature(feature, y, style, tier)
     } else if (gtype == 'ANCHORED_ARROW') {
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || 'green';
-	var height = style.HEIGHT || 12;
+	var height = style.HEIGHT || forceHeight || 12;
 	requiredHeight = height = 1.0 * height;
 	var lInset = 0;
 	var rInset = 0;
@@ -1014,7 +1037,7 @@ function glyphForFeature(feature, y, style, tier)
     } else if (gtype == 'TEXT') {
         var textFill = style.FGCOLOR || 'none';
         var bgFill = style.BGCOLOR || 'none';
-        var height = style.HEIGHT || 12;
+        var height = style.HEIGHT || forceHeight || 12;
         var tstring = style.STRING;
         requiredHeight = height;
         if (!tstring) {
@@ -1058,7 +1081,7 @@ function glyphForFeature(feature, y, style, tier)
     
 	var stroke = style.FGCOLOR || 'none';
 	var fill = style.BGCOLOR || style.COLOR1 || 'green';
-	var height = style.HEIGHT || 12;
+	var height = style.HEIGHT || forceHeight || 12;
 	requiredHeight = height = 1.0 * height;
 
         if (style.WIDTH) {
