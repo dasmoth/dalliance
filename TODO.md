@@ -14,11 +14,6 @@ Browser support
 Real Soon Now
 -------------
 
- - Improvements to the config system
-     + Config. updates in the static HTML should override localstorage.
-       - Store a hash of the static config?
-       - How does this work if multiple pages share a cookieKey?
-     + Multiple sessions + switching.
  - Cache server capabilities in the DAS layer (i.e. maxbins!)
      + Most code is in, currently doesn't work because of missing Access-Control-Expose-Headers support.
      + https://bugs.webkit.org/show_bug.cgi?id=41210
@@ -29,9 +24,8 @@ Real Soon Now
      + Increase/decrease viewed height of quant tracks?
  - Separate concepts of Known Space and Drawn Space.
  - Publication-quality SVG export.
- - Generalize the placard code?
  - Think about cancelling long-running XHRs if they're no longer needed?
- - DAS on geneID coords.
+ - Non-positional annotation.
  - Auto-detection of credentialed servers?
  - Undo
 
@@ -51,7 +45,6 @@ Nice to have
  - Support for a more compact encoding for quantitative tracks.
      + Will need some server suppport.  
      + Adding a new encoding to Dazzle shouldn't be too painful.
-     + DAS/1.6: has been some discussion of CONNEG but nothing finalized.
  - User-uploaded data
      + Round-tripped in via Dastard?
      + Also interesting to do LOCAL data additions?
@@ -68,6 +61,7 @@ Nice to have
   - Jiggle labels so they're always visible
      + For genes, try to keep them attached to exons.
   - Rename tiers?
+  - Multiple configurations/session switching/etc?
 
 Blue sky
 --------
@@ -91,8 +85,6 @@ The Server Side
 ---------------
  
  - Tidy up the Allow-Credentials support in Dazzle.
- - Are we better off using JKDBs to serve sequence?
-    + A JKDB-based sequence server could also usefully compute GC composition, etc., etc., on the fly. [done now]
  - bigFile-backed servers?
  - BAM-backed servers. 
     + Done using Picard.  Potential scalability issues in the future but working for now.
