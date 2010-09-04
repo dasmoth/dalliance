@@ -73,6 +73,7 @@ Browser.prototype.makeTooltip = function(ele, text)
 
 Browser.prototype.popit = function(ev, name, ele, opts)
 {
+    var thisB = this;
     if (!opts) {
         opts = {};
     }
@@ -82,20 +83,51 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var mx =  ev.clientX, my = ev.clientY;
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
+    var winWidth = window.innerWidth;
 
     var popup = makeElement('div');
-    var winWidth = window.innerWidth;
     popup.style.position = 'absolute';
     popup.style.top = '' + (my + 30) + 'px';
     popup.style.left = '' + Math.min((mx - 30), (winWidth - width - 10)) + 'px';
     popup.style.width = width + 'px';
     popup.style.backgroundColor = 'white';
-    popup.style.borderWidth = '1px';
+    popup.style.borderWidth = '2px';
     popup.style.borderColor = 'black'
     popup.style.borderStyle = 'solid';
-    popup.style.padding = '2px';
 
-    popup.appendChild(ele);
+    if (name) {
+        var closeButton = makeElement('div', 'X', null, {
+            margin: '-3px',
+            padding: '3px',
+            float: 'right',
+            borderStyle: 'none',
+            borderLeftStyle: 'solid',
+            borderWidth: '1px',
+            borderColor: 'rgb(128,128,128)'
+        });
+        closeButton.addEventListener('mouseover', function(ev) {
+            closeButton.style.color = 'red';
+        }, false);
+        closeButton.addEventListener('mouseout', function(ev) {
+            closeButton.style.color = 'black';
+        }, false);
+        closeButton.addEventListener('mousedown', function(ev) {
+            thisB.removeAllPopups();
+        }, false);
+        popup.appendChild(makeElement('div', [name, closeButton], null, {
+            backgroundColor: 'rgb(230,230,250)',
+            borderColor: 'rgb(128,128,128)',
+            borderStyle: 'none',
+            borderBottomStyle: 'solid',
+            borderWidth: '1px',
+            padding: '3px'
+        }));
+    }
+
+    popup.appendChild(makeElement('div', ele, null, {
+        padding: '3px',
+        clear: 'both'
+    }));
     this.hPopupHolder.appendChild(popup);
 }
 

@@ -299,7 +299,7 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
     }
     popcontents.push(regel);
 
-    this.popit(ev, 'Tier', makeElement('div', popcontents));
+    this.popit(ev, 'Tier', makeElement('div', popcontents), {width: 300});
 }
 
 Browser.prototype.setupTierDrag = function(element, ti) {
