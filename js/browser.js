@@ -292,14 +292,12 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
     }
 
     var popcontents = [];
-    popcontents.push(makeElement('b', tier.dasSource.name));
     if (tier.dasSource.desc) {
-        popcontents.push(makeElement('br'));
         popcontents.push(tier.dasSource.desc);
     }
     popcontents.push(regel);
 
-    this.popit(ev, 'Tier', makeElement('div', popcontents), {width: 300});
+    this.popit(ev, tier.dasSource.name, popcontents, {width: 300});
 }
 
 Browser.prototype.setupTierDrag = function(element, ti) {
@@ -558,16 +556,14 @@ Browser.prototype.featurePopup = function(ev, feature, group){
 
     var table = makeElement('table', null);
     table.style.width = '100%';
-    var idx = 0;
-    {
-        var row = makeElement('tr', [
-            makeElement('th', pick(group.type, feature.type)),
-            makeElement('td', pick(group.label, feature.label, group.id, feature.id))
-        ]);
-        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
-        table.appendChild(row);
-        ++idx;
+
+    var name = pick(group.type, feature.type);
+    var fid = pick(group.label, feature.label, group.id, feature.id);
+    if (fid && fid.indexOf('__dazzle') != 0) {
+        name = name + ': ' + fid;
     }
+
+    var idx = 0;
     {
         var loc;
         if (group.segment) {
@@ -627,7 +623,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
         }
     }
 
-    this.popit(ev, 'Feature info', table, {width: 400});
+    this.popit(ev, name, table, {width: 400});
 }
 
 Browser.prototype.mouseUpHandler = function(ev) {
@@ -1056,7 +1052,7 @@ Browser.prototype.realInit = function(opts) {
                 target: '_new'
             })));
         }
-        thisB.popit(ev, 'Link', makeElement('div', [makeElement('p', 'Link to this region in...'), linkList]));
+        thisB.popit(ev, 'Link to...', linkList);
     }, false);
 
     // set up the navigator

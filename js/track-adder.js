@@ -59,16 +59,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
     var popup = document.createElement('div');
-    popup.style.position = 'absolute';
-    popup.style.top = '' + (my + 30) + 'px';
-    popup.style.left = '' + (mx - 30) + 'px';
-    popup.style.width = '600px';
-    popup.style.height = '500px';
-    popup.style.backgroundColor = 'white';
-    popup.style.borderWidth = '1px';
-    popup.style.borderColor = 'black'
-    popup.style.borderStyle = 'solid';
-
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
 
     var addModeButtons = [];
@@ -234,5 +224,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     asform.appendChild(buttonHolder);
 
     popup.appendChild(asform);
-    this.hPopupHolder.appendChild(popup);  
+
+    this.popit(ev, 'Add DAS data', popup, {width: 600});
 }

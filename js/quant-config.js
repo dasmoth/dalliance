@@ -49,6 +49,6 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
             thisB.storeStatus();          // write updated limits to storage.
 	}, false);
 
-        thisB.popit(ev, "Config", makeElement('div', ['Configure: ' + tier.dasSource.name, form, updateButton]));
+        thisB.popit(ev, 'Configure: ' + tier.dasSource.name, [form, updateButton]);
     }, false);
 }
