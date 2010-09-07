@@ -16,7 +16,6 @@ var NS_HTML = "http://www.w3.org/1999/xhtml"
 
 MAX_VIEW_SIZE=500000;
 
-
 function Browser(opts) {
     if (!opts) {
         opts = {};
@@ -276,11 +275,24 @@ Browser.prototype.offsetForTier = function(ti) {
 
 Browser.prototype.tierInfoPopup = function(tier, ev) {
     var regel;
-    if (this.availableSources.length == 0) {
+
+    var popcontents = [];
+    if (tier.dasSource.desc) {
+        popcontents.push(tier.dasSource.desc);
+    }
+
+    var srcs = this.availableSources;
+    if (tier.dasSource.mapping) {
+        var mcs = this.chains[tier.dasSource.mapping].coords;
+        popcontents.push(makeElement('p', makeElement('i', 'Mapped from ' + mcs.auth + mcs.version)));
+        srcs = this.mappableSources[tier.dasSource.mapping];
+    }
+
+    if (srcs == 0) {
         regel = makeElement('p', 'Registry data not available');
     } else {
-        for (var ri = 0; ri < this.availableSources.length; ++ri) {
-            var re = this.availableSources[ri];
+        for (var ri = 0; ri < srcs.length; ++ri) {
+            var re = srcs[ri];
             if (re.uri == tier.dasSource.uri && re.source_uri) {
                 regel = makeElement('p', makeElement('a', 'Registry entry: ' + re.name, {href: 'http://www.dasregistry.org/showdetails.jsp?auto_id=' + re.source_uri, target: '_new'})); 
                 break;
@@ -291,10 +303,6 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
         }
     }
 
-    var popcontents = [];
-    if (tier.dasSource.desc) {
-        popcontents.push(tier.dasSource.desc);
-    }
     popcontents.push(regel);
 
     this.popit(ev, tier.dasSource.name, popcontents, {width: 300});
@@ -1415,6 +1423,7 @@ Browser.prototype.fetchMappedSources = function(m) {
             if (coords.taxon != chainSet.coords.taxon || coords.auth != chainSet.coords.auth || coords.version != chainSet.coords.version) {
                 continue;
             }
+            source.mapping = m;
             availableSources.push(source);
         }
         thisB.mappableSources[m] = availableSources;
@@ -1549,7 +1558,6 @@ Browser.prototype.resizeViewer = function() {
 }
 
 Browser.prototype.xfrmTiers = function(x, xs) {
-//    alert('xfrmTiers(' + x + ',' + xs + ')');
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         this.xfrmTier(this.tiers[ti], x, xs);
     }
@@ -1580,7 +1588,6 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (axs != 1) {
         xfrm += ', scale(' + axs + ',1)';
     }
-//    alert(xfrm);
     tier.viewport.setAttribute('transform', xfrm);
 }
 
@@ -1592,9 +1599,7 @@ Browser.prototype.spaceCheck = function() {
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
-    // alert('sc: ks=' + this.knownStart + ', ke=' + this.knownEnd + ', vs=' + this.viewStart + ', ve= ' + this.viewEnd + ', csm=' + this.currentSeqMax + ', min=' + minExtraW + ', max=' + maxExtraW);
     if ((this.knownStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.knownEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
-//        alert('refresh');
 	this.refresh();
     }
 }

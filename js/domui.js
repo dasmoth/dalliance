@@ -100,7 +100,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
 
     if (name) {
         var closeButton = makeElement('div', 'X', null, {
-            margin: '-3px',
+            marginTop: '-3px',
             padding: '3px',
             borderStyle: 'none',
             borderLeftStyle: 'solid',
@@ -118,7 +118,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         closeButton.addEventListener('mousedown', function(ev) {
             thisB.removeAllPopups();
         }, false);
-        var tbar = makeElement('div', [name, closeButton], null, {
+        var tbar = makeElement('div', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], null, {
             backgroundColor: 'rgb(230,230,250)',
             borderColor: 'rgb(128,128,128)',
             borderStyle: 'none',
