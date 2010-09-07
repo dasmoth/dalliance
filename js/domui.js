@@ -105,7 +105,8 @@ Browser.prototype.popit = function(ev, name, ele, opts)
             borderStyle: 'none',
             borderLeftStyle: 'solid',
             borderWidth: '1px',
-            borderColor: 'rgb(128,128,128)'
+            borderColor: 'rgb(128,128,128)',
+            cssFloat: 'right'
         });
         closeButton.style['float'] = 'right';
         closeButton.addEventListener('mouseover', function(ev) {
