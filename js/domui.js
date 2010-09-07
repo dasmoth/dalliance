@@ -152,7 +152,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
             dragOX = ev.clientX; dragOY = ev.clientY;
             window.addEventListener('mousemove', moveHandler, false);
             window.addEventListener('mouseup', upHandler, false);
-        });
+        }, false);
                               
 
         popup.appendChild(tbar);
