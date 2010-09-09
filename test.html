@@ -24,6 +24,7 @@
 <script language="javascript" src="js/karyoscape.js"></script>
 <script language="javascript" src="js/quant-config.js"></script>
 <script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
 <script language="javascript" src="js/version.js"></script>
 <script language="javascript" src="js/sha1.js"></script>
 <script language="javascript">
@@ -32,6 +33,16 @@
     viewStart:    30000000,
     viewEnd:      30030000,
     cookieKey:    'human',
+
+    chains: {
+      hg19ToHg18: new Chainset('http://www.derkholm.net:8080/das/hg19ToHg18/', 'GRCh37', 'NCBI36',
+                               {
+                                  speciesName: 'Human',
+                                  taxon: 9606,
+                                  auth: 'GRCh',
+                                  version: 37
+                               })
+    },
 
     sources:     [{name:                 'Genome',      
                    uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        

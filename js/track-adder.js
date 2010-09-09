@@ -11,8 +11,6 @@ Browser.prototype.currentlyActive = function(source) {
     for (var i = 0; i < this.tiers.length; ++i) {
         var ts = this.tiers[i].dasSource;
         if (ts.uri == source.uri) {
-
-
             // Special cases where we might meaningfully want two tiers of the same URI.
             if (ts.tier_type) {
                 if (!source.tier_type || source.tier_type != ts.tier_type) {
@@ -31,7 +29,7 @@ Browser.prototype.currentlyActive = function(source) {
     return false;
 }
 
-function makeButton(name) {
+Browser.prototype.makeButton = function(name, tooltip) {
     var regButton = makeElement('span', name);
     regButton.style.backgroundColor = 'rgb(230,230,250)';
     regButton.style.borderStyle = 'solid';
@@ -42,6 +40,9 @@ function makeButton(name) {
     regButton.style.marginRight = '10px';
     regButton.style.width = '100px';
     regButton.style['float'] = 'left';
+    if (tooltip) {
+        this.makeTooltip(regButton, tooltip);
+    }
     return regButton;
 }
 
@@ -63,11 +64,11 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var addModeButtons = [];
     var makeStab;
-    var regButton = makeButton('Registry');
+    var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
     addModeButtons.push(regButton);
     for (var m in this.mappableSources) {
         var mf  = function(mm) {
-            var mapButton = makeButton(thisB.chains[mm].srcTag);
+            var mapButton = thisB.makeButton(thisB.chains[mm].srcTag, 'Browse datasources mapped from ' + thisB.chains[mm].srcTag);
             addModeButtons.push(mapButton);
             mapButton.addEventListener('mousedown', function(ev) {
                 ev.preventDefault(); ev.stopPropagation();
@@ -76,9 +77,9 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
         }; mf(m);
     }
-    var defButton = makeButton('Defaults');
+    var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
     addModeButtons.push(defButton);
-    var custButton = makeButton('Custom');
+    var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
     activateButton(addModeButtons, regButton);
     popup.appendChild(makeElement('div', addModeButtons), null);
@@ -86,7 +87,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
-    var custURL, custName;
+    var custURL, custName, custCS;
     var customMode = false;
 
     var asform = makeElement('form', null, {}, {clear: 'both'});
@@ -158,16 +159,37 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = true;
 
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('p', 'Add a custom DAS datasource.  NB. the URL must end with a "/" character'));
+        stabHolder.appendChild(makeElement('p', 'Add a custom DAS datasource.'))
         stabHolder.appendChild(document.createTextNode('Label: '));
         stabHolder.appendChild(makeElement('br'));
         custName = makeElement('input', '', {value: 'New track'});
         stabHolder.appendChild(custName);
         stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(document.createTextNode('URL: '));
         stabHolder.appendChild(makeElement('br'));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
         stabHolder.appendChild(custURL);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
+        stabHolder.appendChild(makeElement('br'));
+        custCS = makeElement('select', null);
+        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+        if (thisB.chains) {
+            for (var csk in thisB.chains) {
+                var cs = thisB.chains[csk].coords;
+                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+            }
+        }
+        custCS.value = '__default__';
+        stabHolder.appendChild(custCS);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
+        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
+        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+        
     }, false);
 
 
@@ -185,7 +207,12 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (customMode) {
+            // alert(custCS.value);
             var nds = new DASSource({name: custName.value, uri: custURL.value});
+            var m = custCS.value;
+            if (m != '__default__') {
+                nds.mapping = m;
+            }
             thisB.sources.push(nds);
             thisB.makeTier(nds);
 	    thisB.storeStatus();
