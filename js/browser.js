@@ -255,8 +255,8 @@ Browser.prototype.arrangeTiers = function() {
 	
     this.featureBackground.setAttribute('height', ((clh | 0) - 50));
 
-    if (clh < 290) {
-	clh = 290;
+    if (clh < 150) {
+	clh = 150;
     }
 	
     this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
@@ -1022,7 +1022,10 @@ Browser.prototype.realInit = function(opts) {
     this.hPopupHolder = makeElement('div');
     this.svgHolder.appendChild(this.hPopupHolder);
   
-    this.bhtmlRoot = makeElement('div', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]);
+    this.bhtmlRoot = makeElement('div');
+    if (!this.disablePoweredBy) {
+        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
+    }
     this.svgHolder.appendChild(this.bhtmlRoot);
     
     if (this.guidelineStyle == 'foreground') {
