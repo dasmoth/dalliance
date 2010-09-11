@@ -16,6 +16,7 @@ are running a modern browser with Javascript enabled, you should see it running 
     cookieKey:    'human-embed-fp',
 
     sources:     [{name:                 'Genome',      
+                   desc:                 'Human reference genome build NCBI36',
                    uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
                    tier_type:            'sequence',
                    provides_entrypoints: true},
@@ -26,6 +27,7 @@ are running a modern browser with Javascript enabled, you should see it running 
                    provides_karyotype:   true,
                    provides_search:      true},
                   {name:                 'MeDIP-seq',
+                   desc:                 'MeDIP-seq reads from Nature Biotech. 26:779-785',
                    uri:                  'http://www.derkholm.net:8080/das/medipseq_reads'}],
 
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
@@ -34,7 +36,8 @@ are running a modern browser with Javascript enabled, you should see it running 
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
     },
 
-    forceWidth: 700
+    forceWidth: 700,
+    disablePoweredBy: true
   });
 </script>
 <div id="svgHolder"></div>

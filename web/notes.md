@@ -3,7 +3,7 @@ layout: default
 title: Release notes
 ---
 
-Release 0.5.0 (??th September 2010)
+Release 0.5.0 (11th September 2010)
 -------------
 
     Mapping of features from other assemblies (using the DAS alignment system).
