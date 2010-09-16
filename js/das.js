@@ -231,66 +231,96 @@ DASSource.prototype.features = function(segment, options, callback) {
                 max: segmentXML.getAttribute('stop')
             };
 	    
-                var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
-                for (var i = 0; i < featureXMLs.length; ++i) {
-                    var feature = featureXMLs[i];
-                    var dasFeature = new DASFeature();
-                    
-		    dasFeature.segment = segmentID;
-                    dasFeature.id = feature.getAttribute('id');
-                    dasFeature.label = feature.getAttribute('label');
-                    dasFeature.min = elementValue(feature, "START");
-                    dasFeature.max = elementValue(feature, "END");
-                    dasFeature.type = elementValue(feature, "TYPE");
-                    dasFeature.method = elementValue(feature, "METHOD");
-                    {
-                        var ori = elementValue(feature, "ORIENTATION");
-                        if (!ori) {
-                            ori = '0';
+            var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
+            for (var i = 0; i < featureXMLs.length; ++i) {
+                var feature = featureXMLs[i];
+                var dasFeature = new DASFeature();
+                
+		dasFeature.segment = segmentID;
+                dasFeature.id = feature.getAttribute('id');
+                dasFeature.label = feature.getAttribute('label');
+                dasFeature.min = elementValue(feature, "START");
+                dasFeature.max = elementValue(feature, "END");
+                {
+                    var tec = feature.getElementsByTagName('TYPE');
+                    if (tec.length > 0) {
+                        var te = tec[0];
+                        if (te.firstChild) {
+                            dasFeature.type = te.firstChild.nodeValue;
                         }
-                        dasFeature.orientation = ori;
+                        dasFeature.typeId = te.getAttribute('id');
+                        dasFeature.typeCv = te.getAttribute('cvId');
                     }
-                    dasFeature.score = elementValue(feature, "SCORE");
-                    dasFeature.links = dasLinksOf(feature);
-                    dasFeature.notes = dasNotesOf(feature);
-                    
-                    var groups = feature.getElementsByTagName("GROUP");
-                    for (var gi  = 0; gi < groups.length; ++gi) {
-                        var groupXML = groups[gi];
-                        var dasGroup = new DASGroup();
-                        dasGroup.type = groupXML.getAttribute('type');
-                        dasGroup.id = groupXML.getAttribute('id');
-                        dasGroup.links = dasLinksOf(groupXML);
-			dasGroup.notes = dasNotesOf(groupXML);
-                        if (!dasFeature.groups) {
-                            dasFeature.groups = new Array(dasGroup);
-                        } else {
-                            dasFeature.groups.push(dasGroup);
-                        }
+                }
+                dasFeature.type = elementValue(feature, "TYPE");
+                
+                dasFeature.method = elementValue(feature, "METHOD");
+                {
+                    var ori = elementValue(feature, "ORIENTATION");
+                    if (!ori) {
+                        ori = '0';
                     }
-                    
+                    dasFeature.orientation = ori;
+                }
+                dasFeature.score = elementValue(feature, "SCORE");
+                dasFeature.links = dasLinksOf(feature);
+                dasFeature.notes = dasNotesOf(feature);
+                
+                var groups = feature.getElementsByTagName("GROUP");
+                for (var gi  = 0; gi < groups.length; ++gi) {
+                    var groupXML = groups[gi];
+                    var dasGroup = new DASGroup();
+                    dasGroup.type = groupXML.getAttribute('type');
+                    dasGroup.id = groupXML.getAttribute('id');
+                    dasGroup.links = dasLinksOf(groupXML);
+		    dasGroup.notes = dasNotesOf(groupXML);
+                    if (!dasFeature.groups) {
+                        dasFeature.groups = new Array(dasGroup);
+                    } else {
+                        dasFeature.groups.push(dasGroup);
+                    }
+                }
 
-                    if (dasFeature.notes) {
-                        for (var ni = 0; ni < dasFeature.notes.length; ++ni) {
-                            var n = dasFeature.notes[ni];
-                            if (n.indexOf('Genename=') == 0) {
-                                var gg = new DASGroup();
-                                gg.type='gene';
-                                gg.id = n.substring(9);
-                                if (!dasFeature.groups) {
-                                    dasFeature.groups = new Array(gg);
-                                } else {
-                                    dasFeature.groups.push(gg);
-                                }
+                // Magic notes.  Check with TAD before changing this.
+                if (dasFeature.notes) {
+                    for (var ni = 0; ni < dasFeature.notes.length; ++ni) {
+                        var n = dasFeature.notes[ni];
+                        if (n.indexOf('Genename=') == 0) {
+                            var gg = new DASGroup();
+                            gg.type='gene';
+                            gg.id = n.substring(9);
+                            if (!dasFeature.groups) {
+                                dasFeature.groups = new Array(gg);
+                            } else {
+                                dasFeature.groups.push(gg);
                             }
                         }
                     }
-                    
-
-                    // Also handle DAS/1.6 part/parent?
-                    
-                    features.push(dasFeature);
                 }
+                
+                {
+                    var pec = feature.getElementsByTagName('PART');
+                    if (pec.length > 0) {
+                        var parts = [];
+                        for (var pi = 0; pi < pec.length; ++pi) {
+                            parts.push(pec[pi].getAttribute('id'));
+                        }
+                        dasFeature.parts = parts;
+                    }
+                }
+                {
+                    var pec = feature.getElementsByTagName('PARENT');
+                    if (pec.length > 0) {
+                        var parents = [];
+                        for (var pi = 0; pi < pec.length; ++pi) {
+                            parents.push(pec[pi].getAttribute('id'));
+                        }
+                        dasFeature.parents = parents;
+                    }
+                }
+                
+                features.push(dasFeature);
+            }
 	}
                 
         callback(features, undefined, segmentMap);
@@ -553,7 +583,7 @@ function dasLinksOf(element)
     for (var ci = 0; ci < maybeLinkChilden.length; ++ci) {
         var linkXML = maybeLinkChilden[ci];
         if (linkXML.parentNode == element) {
-            links.push(new DASLink(linkXML.firstChild.nodeValue, linkXML.getAttribute('href')));
+            links.push(new DASLink(linkXML.firstChild ? linkXML.firstChild.nodeValue : 'Unknown', linkXML.getAttribute('href')));
         }
     }
     

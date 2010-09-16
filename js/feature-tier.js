@@ -142,7 +142,6 @@ function drawLine(featureGroupElement, features, style, tier, y)
     return height|0 + MIN_PADDING;
 }
 
-
 function sortFeatures(tier)
 {
     var ungroupedFeatures = {};
@@ -152,9 +151,43 @@ function sortFeatures(tier)
     var groupsToSupers = {};
     var nonPositional = [];
     var minScore, maxScore;
+    var fbid;
+
+    var init_fbid = function() {
+        fbid = {};
+        for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
+            var f = tier.currentFeatures[fi];
+            if (f.id) {
+                fbid[f.id] = f;
+            }
+        }
+    };
     
+    var superParentsOf = function(f) {
+        // FIXME: should recur.
+        var spids = [];
+        if (f.parents) {
+            for (var pi = 0; pi < f.parents.length; ++pi) {
+                var pid = f.parents[pi];
+                var p = fbid[pid];
+                if (!p) {
+                    continue;
+                }
+                // alert(p.type + ':' + p.typeCv);
+                if (p.typeCv == 'SO:0000704') {
+                    pushnew(spids, pid);
+                }
+            }
+        }
+        return spids;
+    }
+
+
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
 	var f = tier.currentFeatures[fi];
+        if (f.parts) {
+            continue;
+        }
 
         if (!f.min || !f.max) {
             nonPositional.push(f);
@@ -190,6 +223,43 @@ function sortFeatures(tier)
 	        }
 	    }
 	}
+
+        if (f.parents) {
+            if (!fbid) {
+                init_fbid();
+            }
+            for (var pi = 0; pi < f.parents.length; ++pi) {
+                var pid = f.parents[pi];
+                var p = fbid[pid];
+                if (!p) {
+                    // alert("couldn't find " + pid);
+                    continue;
+                }
+                pushnewo(groupedFeatures, pid, p);
+                pusho(groupedFeatures, pid, f);
+                
+                if (!groups[pid]) {
+                    groups[pid] = {
+                        type: p.type,
+                        id: p.id,
+                        label: p.label || p.id
+                    };
+                }
+                fGroups.push(pid);
+
+                var sgs = superParentsOf(p);
+                if (sgs.length > 0) {
+                    fSuperGroup = sgs[0];
+                    var sp = fbid[sgs[0]];
+                    groups[sgs[0]] = {
+                        type: sp.type,
+                        id: sp.id,
+                        label: sp.label || sp.id
+                    };
+                    tier.dasSource.collapseSuperGroups = true;
+                }
+            }   
+        }
 
 	if (fGroups.length == 0) {
 	    pusho(ungroupedFeatures, f.type, f);
@@ -720,7 +790,7 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     dg.strand = strand;
     dg.bump = true; // grouped features always bumped.
     if (label) {
-	dg.label = label;
+	dg.label = groupElement.label || label;
 	var sg = tier.groupsToSupers[groupElement.id];
 	if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
 	    if (groupElement.id != tier.superGroups[sg][0]) {
@@ -753,7 +823,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var requiredHeight;
     var quant;
 
-    if (gtype == 'HIDDEN') {
+    if (gtype == 'HIDDEN' || feature.parts) {
 	glyph = null;
     } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'LINE' || gtype == 'DOT' || gtype == 'TRIANGLE') {
 	var stroke = style.FGCOLOR || 'black';
@@ -1174,10 +1244,12 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         }
     }
 
-    glyph.dalliance_feature = feature;
+    if (glyph) {
+        glyph.dalliance_feature = feature;
+    }
     var dg = new DGlyph(glyph, min, max, requiredHeight);
-    if (style.LABEL && feature.label) {
-	dg.label = feature.label;
+    if (style.LABEL && (feature.label || feature.id)) {
+	dg.label = feature.label || feature.id;
     }
     if (style.BUMP) {
 	dg.bump = true;

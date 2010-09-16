@@ -30,6 +30,14 @@ function stringToInt(str) {
     return str|0;
 }
 
+function pushnew(a, v) {
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] == v) {
+            return;
+        }
+    }
+    a.push(v);
+}
 
 function pusho(obj, k, v) {
     if (obj[k]) {
