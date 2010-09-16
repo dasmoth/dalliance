@@ -186,7 +186,6 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(custCS);
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('br'));
-        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
         stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
         stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
         
@@ -207,7 +206,6 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (customMode) {
-            // alert(custCS.value);
             var nds = new DASSource({name: custName.value, uri: custURL.value});
             var m = custCS.value;
             if (m != '__default__') {
