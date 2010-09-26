@@ -12,13 +12,17 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  5,
     MICRO:  0,
-    PATCH:  '-das16'
+    PATCH:  'a',
+    BRANCH: 'das16'
 }
 
 VERSION.toString = function() {
     var vs = '' + this.MAJOR + '.' + this.MINOR + '.' + this.MICRO;
     if (this.PATCH) {
         vs = vs + this.PATCH;
+    }
+    if (this.BRANCH && this.BRANCH != '') {
+        vs = vs + '-' + this.BRANCH;
     }
     return vs;
 }
