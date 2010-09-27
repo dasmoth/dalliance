@@ -423,7 +423,9 @@ function drawFeatureTier(tier)
 	var gid = gl[gx];
 	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier,
 			       (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
-	groupGlyphs[gid] = g;
+        if (g) {
+	    groupGlyphs[gid] = g;
+        }
     }
 
     for (var sg in tier.superGroups) {
@@ -700,6 +702,10 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
             featureDGlyphs.push(glyph);
         }
     }
+    if (featureDGlyphs.length == 0) {
+        return null;
+    }
+
     featureDGlyphs = featureDGlyphs.sort(function(g1, g2) {
         return g1.zindex - g2.zindex;
     });

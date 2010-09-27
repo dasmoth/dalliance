@@ -239,8 +239,15 @@ DASSource.prototype.features = function(segment, options, callback) {
 		dasFeature.segment = segmentID;
                 dasFeature.id = feature.getAttribute('id');
                 dasFeature.label = feature.getAttribute('label');
-                dasFeature.min = elementValue(feature, "START");
-                dasFeature.max = elementValue(feature, "END");
+                var spos = elementValue(feature, "START");
+                var epos = elementValue(feature, "END");
+                if (spos > epos) {
+                    dasFeature.min = epos;
+                    dasFeature.max = spos;
+                } else {
+                    dasFeature.min = spos;
+                    dasFeature.max = epos;
+                }
                 {
                     var tec = feature.getElementsByTagName('TYPE');
                     if (tec.length > 0) {
@@ -253,6 +260,9 @@ DASSource.prototype.features = function(segment, options, callback) {
                     }
                 }
                 dasFeature.type = elementValue(feature, "TYPE");
+                if (!dasFeature.type && dasFeature.typeId) {
+                    dasFeature.type = dasFeature.typeId; // FIXME?
+                }
                 
                 dasFeature.method = elementValue(feature, "METHOD");
                 {
