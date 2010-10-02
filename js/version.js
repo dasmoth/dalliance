@@ -11,9 +11,9 @@ var VERSION = {
     CONFIG: 2,
     MAJOR:  0,
     MINOR:  5,
-    MICRO:  1,
+    MICRO:  2,
     PATCH:  '',
-    BRANCH: 'das16'
+    BRANCH: ''
 }
 
 VERSION.toString = function() {
