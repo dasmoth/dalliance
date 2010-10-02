@@ -62,7 +62,7 @@ Chainset.prototype.fetchChainsTo = function(chr) {
                         destChr:    aln.objects[destSeg.object].accession,
                         destMin:    destSeg.min|0,
                         destMax:    destSeg.max|0,
-                        destOri:    destSeg.ori,
+                        destOri:    destSeg.strand,
                         blocks:     []
                     }
 
@@ -106,28 +106,6 @@ Chainset.prototype.fetchChainsTo = function(chr) {
             thisCS.postFetchQueues[chr] = null;
         }
     });
-    
-    
-/*
-
-    var uri = this.uri + 'chr' + chr + '.json';
-//    alert('fetching chains: ' + uri);
-    var req = new XMLHttpRequest();
-    req.open('get', uri, false);
-    req.send();
-    var chains = eval(req.responseText);
-
-    for (var i = 0; i < chains.length; ++i) {
-        var c = chains[i];
-        pusho(this.chainsBySrc, c.srcChr, c);
-        pusho(this.chainsByDest, c.destChr, c);
-    }
-
-    if (!this.chainsByDest[chr]) {
-        this.chainsByDest[chr] = [];    // FIXME: currently needed to prevent duplicate fetches if no chains are available.
-    }
-
-*/
 }
 
 Chainset.prototype.mapPoint = function(chr, pos) {

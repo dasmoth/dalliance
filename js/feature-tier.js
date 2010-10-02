@@ -336,6 +336,7 @@ function drawFeatureTier(tier)
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
 	for (var sg in tier.superGroups) {
 	    var sgg = tier.superGroups[sg];
+            tier.groups[sg].type = tier.groups[sgg[0]].type;   // HACK to make styling easier in DAS1.6
 	    var featsByType = {};
 	    for (var g = 0; g < sgg.length; ++g) {
 		var gf = tier.groupedFeatures[sgg[g]];
@@ -663,6 +664,8 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var strand = null;
     var quant = null;
     var consHeight;
+    var gstyle = stylesheet[groupElement.type] || stylesheet['default'] || {};
+    
 
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
@@ -762,7 +765,6 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 		path.setAttribute('stroke-width', '1');
 		
                 var vee = true;
-                var gstyle = stylesheet[groupElement.type];
                 if (gstyle && gstyle.STYLE && gstyle.STYLE != 'hat') {
                     vee = false;
                 }
@@ -795,7 +797,8 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var dg = new DGlyph(glyphGroup, spans.min(), spans.max(), height);
     dg.strand = strand;
     dg.bump = true; // grouped features always bumped.
-    if (label) {
+    // alert(miniJSONify(gstyle));
+    if (label || gstyle.LABEL || gstyle.LABELS) {  // HACK, LABELS should work.
 	dg.label = groupElement.label || label;
 	var sg = tier.groupsToSupers[groupElement.id];
 	if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.

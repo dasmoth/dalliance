@@ -148,6 +148,7 @@ function refreshTier_features()
                                     if (mmin.flipped) {
                                         if (f.orientation == '-') {
                                             f.orientation = '+';
+                                            alert(miniJSONify(f));
                                         } else if (f.orientation == '+') {
                                             f.orientation = '-';
                                         }
