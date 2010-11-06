@@ -102,6 +102,10 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = false;
         addButtons = [];
         removeChildren(stabHolder);
+        if (!sources) {
+            stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
+            return;
+        }
         var stab = document.createElement('table');
         stab.style.width='100%';
         var idx = 0;

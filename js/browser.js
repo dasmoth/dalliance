@@ -1403,8 +1403,8 @@ Browser.prototype.realInit = function(opts) {
             thisB.availableSources.push(source);
         }
     }, function(error) {
-        alert('Warning: registry query failed');
-        thisB.availableSources = [];
+        // alert('Warning: registry query failed');
+        thisB.availableSources = null;
     }, this.coordSystem);
 
     for (var m in this.chains) {
@@ -1431,7 +1431,7 @@ Browser.prototype.fetchMappedSources = function(m) {
         }
         thisB.mappableSources[m] = availableSources;
     }, function(error) {
-        alert('Warning: registry query failed');
+        // alert('Warning: registry query failed');
     }, chainSet.coords);
 }
 
