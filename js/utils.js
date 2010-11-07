@@ -232,3 +232,11 @@ function miniJSONify(o) {
 	return (typeof o);
     }
 }
+
+function shallowCopy(o) {
+    n = {};
+    for (k in o) {
+        n[k] = o[k];
+    }
+    return n;
+}
