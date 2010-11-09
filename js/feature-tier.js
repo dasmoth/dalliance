@@ -93,14 +93,7 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 //
 
 DasTier.prototype.styleForFeature = function(f) {
-    var ssScale;
-    if (this.browser.scale > 0.2) {
-        ssScale = 'high';
-    } else if (this.browser.scale > 0.01) {
-        ssScale = 'medium';
-    } else  {
-        ssScale = 'low';
-    }
+    var ssScale = zoomForScale(this.browser.scale);
 
     if (!this.stylesheet) {
         return null;
@@ -568,18 +561,26 @@ function drawFeatureTier(tier)
 	var bumped = false;
 	var minHeight = lh;
 	
-/*for (s in styles) {    URGENT
-	    if (s.bump) {
-		bumped = true;
+        var ss = tier.stylesheet;
+        if (ss) {
+            var ssScale = zoomForScale(tier.browser.scale);
+            for (var si = 0; si < ss.styles.length; ++si) {
+                var sh = ss.styles[si];
+                if (!sh.zoom || sh.zoom == ssScale) {
+                    var s = sh.style;
+                     if (s.bump) {
+		         bumped = true;
+	             }
+	            if (s.height && (4.0 + s.height) > minHeight) {
+		        minHeight = (4.0 + s.height);
+	            }
+                }
+            }
+	    if (bumped) {
+	        lh = 2 * minHeight;
 	    }
-	    if (s.height && (4.0 + s.height) > minHeight) {
-		minHeight = (4.0 + s.height);
-	    }
-	} */
-	if (bumped) {
-	    lh = 2 * minHeight;
-	}
-    }				
+        }
+    }			
 
     if (!tier.layoutWasDone || tier.browser.autoSizeTiers) {
 	tier.layoutHeight = lh;
