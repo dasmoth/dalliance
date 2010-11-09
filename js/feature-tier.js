@@ -88,7 +88,46 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
     return true;
 }
 
+//
+// Stylesheet handling (experimental 0.5.3 version)
+//
 
+DasTier.prototype.styleForFeature = function(f) {
+    var ssScale;
+    if (this.browser.scale > 0.2) {
+        ssScale = 'high';
+    } else if (this.browser.scale > 0.01) {
+        ssScale = 'medium';
+    } else  {
+        ssScale = 'low';
+    }
+
+    if (!this.stylesheet) {
+        return null;
+    }
+
+    var maybe = null;
+    var ss = this.stylesheet.styles;
+    for (var si = 0; si < ss.length; ++si) {
+        var sh = ss[si];
+        if (sh.zoom && sh.zoom != ssScale) {
+            continue;
+        }
+        if (sh.label && !(new RegExp(sh.label).test(f.label))) {
+            continue;
+        }
+        if (sh.type) {
+            if (sh.type == 'default') {
+                maybe = sh.style;
+            } else if (sh.type != f.type) {
+                continue;
+            }
+        }
+        // perfect match.
+        return sh.style;
+    }
+    return maybe;
+}
 
 function drawLine(featureGroupElement, features, style, tier, y)
 {
@@ -310,7 +349,7 @@ function drawFeatureTier(tier)
     if (tier.bumped) {
 	bumpMatrix = new Array(0);
     }
-    var styles = tier.styles(tier.browser.scale);
+    // var styles = tier.styles(tier.browser.scale);
 
     var glyphs = [];
     var specials = false;
@@ -319,14 +358,16 @@ function drawFeatureTier(tier)
 	
     for (var uft in tier.ungroupedFeatures) {
 	var ufl = tier.ungroupedFeatures[uft];
-	var style = styles[uft] || styles['default'];
+	// var style = styles[uft] || styles['default'];
+        var style = tier.styleForFeature(ufl[0]);   // FIXME this isn't quite right...
 	if (!style) continue;
 	if (style.glyph == 'LINEPLOT') {
 	    lh += Math.max(drawLine(featureGroupElement, ufl, style, tier, lh));
 	    specials = true;
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
-		var g = glyphForFeature(ufl[pgid], 0, style, tier);
+                var f = ufl[pgid];
+		var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
 		glyphs.push(g);
 	    }
 	}
@@ -423,7 +464,7 @@ function drawFeatureTier(tier)
     var groupGlyphs = {};
     for (var gx = 0; gx < gl.length; ++gx) {
 	var gid = gl[gx];
-	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, styles, tier.groups[gid], tier,
+	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, tier.groups[gid], tier,
 			       (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
         if (g) {
 	    groupGlyphs[gid] = g;
@@ -526,14 +567,15 @@ function drawFeatureTier(tier)
     if (stBoundaries.length < 2) {
 	var bumped = false;
 	var minHeight = lh;
-	for (s in styles) {
+	
+/*for (s in styles) {    URGENT
 	    if (s.bump) {
 		bumped = true;
 	    }
 	    if (s.height && (4.0 + s.height) > minHeight) {
 		minHeight = (4.0 + s.height);
 	    }
-	}
+	} */
 	if (bumped) {
 	    lh = 2 * minHeight;
 	}
@@ -655,7 +697,7 @@ function drawFeatureTier(tier)
     tier.scale = 1;
 }
 
-function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorType) {
+function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var scale = tier.browser.scale, origin = tier.browser.origin;
     var height=1;
     var label;
@@ -665,12 +707,13 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
     var strand = null;
     var quant = null;
     var consHeight;
-    var gstyle = stylesheet[groupElement.type] || stylesheet['default'] || {};
+    var gstyle = tier.styleForFeature(groupElement);
     
 
     for (var i = 0; i < features.length; ++i) {
 	var feature = features[i];
-        var style = stylesheet[feature.type] || stylesheet['default'];
+        // var style = stylesheet[feature.type] || stylesheet['default'];
+        var style = tier.styleForFeature(feature);
 	if (!style) {
 	    continue;
 	}
@@ -697,7 +740,8 @@ function glyphsForGroup(features, y, stylesheet, groupElement, tier, connectorTy
 	if (feature.links && links==null) {
 	    links = feature.links;
 	}
-	var style = stylesheet[feature.type] || stylesheet['default'];
+	// var style = stylesheet[feature.type] || stylesheet['default'];
+        var style = tier.styleForFeature(feature);
 	if (!style) {
 	    continue;
 	}

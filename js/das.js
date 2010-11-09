@@ -399,12 +399,18 @@ DASSource.prototype.alignments = function(segment, options, callback) {
 
 
 function DASStylesheet() {
+/*
     this.highZoomStyles = new Object();
     this.mediumZoomStyles = new Object();
     this.lowZoomStyles = new Object();
+*/
+
+    this.styles = [];
 }
 
-DASStylesheet.prototype.pushStyle = function(type, zoom, style) {
+DASStylesheet.prototype.pushStyle = function(filters, zoom, style) {
+    /*
+
     if (!zoom) {
 	this.highZoomStyles[type] = style;
 	this.mediumZoomStyles[type] = style;
@@ -416,6 +422,18 @@ DASStylesheet.prototype.pushStyle = function(type, zoom, style) {
     } else if (zoom == 'low') {
 	this.lowZoomStyles[type] = style;
     }
+
+    */
+
+    if (!filters) {
+        filters = {type: 'default'};
+    }
+    var styleHolder = shallowCopy(filters);
+    if (zoom) {
+        styleHolder.zoom = zoom;
+    }
+    styleHolder.style = style;
+    this.styles.push(styleHolder);
 }
 
 function DASStyle() {
@@ -441,7 +459,10 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
 	var typeXMLs = responseXML.getElementsByTagName('TYPE');
 	for (var i = 0; i < typeXMLs.length; ++i) {
 	    var typeStyle = typeXMLs[i];
-	    var type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
+            
+            var filter = {};
+	    filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
+            filter.label = typeStyle.getAttribute('label');
 	    var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
 	    for (var gi = 0; gi < glyphXMLs.length; ++gi) {
 		var glyphXML = glyphXMLs[gi];
@@ -458,7 +479,7 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
 		    }
 		    child = child.nextSibling;
 		}
-		stylesheet.pushStyle(type, zoom, style);
+		stylesheet.pushStyle(filter, zoom, style);
 	    }
 	}
 	successCB(stylesheet);

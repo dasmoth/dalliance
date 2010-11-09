@@ -49,6 +49,7 @@ DasTier.prototype.init = function() {
 }
 
 DasTier.prototype.styles = function(scale) {
+    // alert('Old SS code called');
     if (this.stylesheet == null) {
 	return null;
     } else if (this.browser.scale > 0.2) {
@@ -85,9 +86,20 @@ function refreshTier_sequence()
 
 function refreshTier_features()
 {
-    var stylesheet = this.styles(this.browser.scale);
+    // var stylesheet = this.styles(this.browser.scale);
     var fetchTypes = [];
     var inclusive = false;
+    var ssScale;
+    if (this.browser.scale > 0.2) {
+        ssScale = 'high';
+    } else if (this.browser.scale > 0.01) {
+        ssScale = 'medium';
+    } else  {
+        ssScale = 'low';
+    }
+    
+/*
+
     if (stylesheet) {
 	for (tt in stylesheet) {
 	    if (tt == 'default') {
@@ -100,6 +112,25 @@ function refreshTier_features()
 	this.currentFeatures = [];
 	dasRequestComplete(this); // FIXME isn't this daft?
 	return;
+    }
+
+
+*/
+
+    if (this.stylesheet) {
+        var ss = this.stylesheet.styles;
+        for (var si = 0; si < ss.length; ++si) {
+            var sh = ss[si];
+            // alert(miniJSONify(sh));
+            if (!sh.zoom || sh.zoom == ssScale) {
+                if (!sh.type || sh.type == 'default') {
+                    inclusive = true;
+                    break;
+                } else {
+                    pushnew(fetchTypes, sh.type);
+                }
+            }
+        }
     }
     
     var scaledQuantRes = this.browser.targetQuantRes / this.browser.scale;
