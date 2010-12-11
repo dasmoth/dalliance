@@ -83,24 +83,26 @@ Karyoscape.prototype.redraw = function() {
 	if (!col) {
 	    // alert("don't understand " + k.label);
 	} else {
-	    var band = makeElementNS(NS_SVG, 'rect', null, {
-		x: bmin,
-		y: (k.label == 'stalk' || k.label == 'acen' ? 5 : 0),
-		width: (bmax - bmin),
-		height: (k.label == 'stalk' || k.label == 'acen'? 5 : 15),
-		stroke: 'none',
-		fill: col
-	    });
-	    if (k.label.substring(0, 1) == 'g') {
-		var br = new Range(k.min, k.max);
-		if (bandspans == null) {
-		    bandspans = br;
-		} else {
-		    bandspans = union(bandspans, br);
-		}
-	    }
-	    this.browser.makeTooltip(band, k.id);
-	    this.svg.appendChild(band);
+            if (bmax > bmin) {
+	        var band = makeElementNS(NS_SVG, 'rect', null, {
+		    x: bmin,
+		    y: (k.label == 'stalk' || k.label == 'acen' ? 5 : 0),
+		    width: (bmax - bmin),
+		    height: (k.label == 'stalk' || k.label == 'acen'? 5 : 15),
+		    stroke: 'none',
+		    fill: col
+	        });
+	        if (k.label.substring(0, 1) == 'g') {
+		    var br = new Range(k.min, k.max);
+		    if (bandspans == null) {
+		        bandspans = br;
+		    } else {
+		        bandspans = union(bandspans, br);
+		    }
+	        }
+	        this.browser.makeTooltip(band, k.id);
+	        this.svg.appendChild(band);
+            }
 	}
     }
 
