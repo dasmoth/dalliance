@@ -463,6 +463,7 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
             var filter = {};
 	    filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
             filter.label = typeStyle.getAttribute('label');
+            filter.method = typeStyle.getAttribute('method');
 	    var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
 	    for (var gi = 0; gi < glyphXMLs.length; ++gi) {
 		var glyphXML = glyphXMLs[gi];

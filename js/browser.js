@@ -35,6 +35,8 @@ function Browser(opts) {
     };
     this.chains = {};
 
+    this.exportServer = 'http://www.derkholm.net:8765/'
+
     this.pageName = 'svgHolder'
     this.maxExtra = 1.5;
     this.minExtra = 0.2;
@@ -572,6 +574,15 @@ Browser.prototype.featurePopup = function(ev, feature, group){
     }
 
     var idx = 0;
+    if (feature.method) {
+        var row = makeElement('tr', [
+            makeElement('th', 'Method'),
+            makeElement('td', feature.method)
+        ]);
+        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
+        table.appendChild(row);
+        ++idx;
+    }
     {
         var loc;
         if (group.segment) {
@@ -921,7 +932,7 @@ Browser.prototype.realInit = function(opts) {
     this.svgRoot.appendChild(main);
 
     this.regionLabel = makeElementNS(NS_SVG, 'text', 'chr???', {
-        x: 230,
+        x: 260,
         y: 30,
         strokeWidth: 0
     });
@@ -942,6 +953,34 @@ Browser.prototype.realInit = function(opts) {
     resetButton.setAttribute('transform', 'translate(180, 10)');
     this.makeTooltip(resetButton, 'Reset the browser to a default state');
     main.appendChild(resetButton);
+
+    var saveButton = this.icons.createButton('export', main, 30, 30);
+    saveButton.setAttribute('transform', 'translate(220, 10)');
+    this.makeTooltip(saveButton, 'Export the current genome display as a vector graphics file');
+    main.appendChild(saveButton);
+    saveButton.addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+
+        var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
+        saveDoc.documentElement.setAttribute('width', thisB.svgRoot.getAttribute('width'));
+        saveDoc.documentElement.setAttribute('height', thisB.svgRoot.getAttribute('height'));
+        var svgChildren = thisB.svgRoot.childNodes;
+        for (var ci = 0; ci < svgChildren.length; ++ci) {
+            saveDoc.documentElement.appendChild(svgChildren[ci].cloneNode(true));
+        }
+
+        var saveForm = makeElement('form', [makeElement('p', "POST to export.  Yes, I know it's horrid"),
+                                            makeElement('input', null, {type: 'hidden',  name: 'svgdata', value: new XMLSerializer().serializeToString(saveDoc)}),
+                                            makeElement('input', null, {type: 'submit'})],
+                                   {action: thisB.exportServer + 'browser-image.svg', method: 'POST'});
+        saveForm.addEventListener('submit', function(sev) {
+            setTimeout(function() {
+                thisB.removeAllPopups();
+            }, 200);
+            return true;
+        }, false);
+        thisB.popit(ev, 'Export', saveForm, {width: 400});
+    }, false);
 
     this.bin = this.icons.createIcon('bin', main);
     this.bin.setAttribute('transform', 'translate(10, 18)');
@@ -1008,7 +1047,7 @@ Browser.prototype.realInit = function(opts) {
     }
 
     this.karyo = new Karyoscape(this, this.karyoEndpoint);
-    this.karyo.svg.setAttribute('transform', 'translate(450, 15)');
+    this.karyo.svg.setAttribute('transform', 'translate(480, 15)');
     this.karyo.onchange = function(pos) {
         var width = thisB.viewEnd - thisB.viewStart + 1;
         var newStart = ((pos * thisB.currentSeqMax) - (width/2))|0;
@@ -1514,10 +1553,10 @@ Browser.prototype.resizeViewer = function() {
     this.featureBackground.setAttribute('width', width - this.tabMargin - 40);
 
     this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
-    if (width < 1045) {
+    if (width < 1075) {
         this.karyo.svg.setAttribute('transform', 'translate(2000, 15)');
     } else {
-        this.karyo.svg.setAttribute('transform', 'translate(420, 20)');
+        this.karyo.svg.setAttribute('transform', 'translate(450, 20)');
     }
     this.regionLabelMax = (width - this.zoomSlider.width - 120)
     var oldFPW = this.featurePanelWidth;

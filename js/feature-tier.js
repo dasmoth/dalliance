@@ -109,6 +109,9 @@ DasTier.prototype.styleForFeature = function(f) {
         if (sh.label && !(new RegExp(sh.label).test(f.label))) {
             continue;
         }
+        if (sh.method && !(new RegExp(sh.method).test(f.method))) {
+            continue;
+        }
         if (sh.type) {
             if (sh.type == 'default') {
                 maybe = sh.style;
