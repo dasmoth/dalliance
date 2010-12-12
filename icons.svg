@@ -60,4 +60,10 @@
       <line x1='11' y1='35' x2='26' y2='28' />
     </g>
   </g>
+  <g transform='translate(60,60)'>
+    <g id='export' stroke='gray' fill='none'>
+      <circle cx='30' cy='20' r='10' stroke-width='3' fill='grey' />
+      <path d='M 15 15 L 25 15 L 25 12 L 30 17 L 25 22 L 25 19 L 15 19 Z' fill='red' stroke='none'/>
+    </g>
+  </g>
 </svg>

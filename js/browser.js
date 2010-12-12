@@ -11,6 +11,7 @@
 
 var NS_SVG = "http://www.w3.org/2000/svg";
 var NS_HTML = "http://www.w3.org/1999/xhtml"
+var NS_XLINK = 'http://www.w3.org/1999/xlink'
 
 // Limit stops
 
@@ -35,7 +36,7 @@ function Browser(opts) {
     };
     this.chains = {};
 
-    this.exportServer = 'http://www.derkholm.net:8765/'
+    this.exportServer = 'http://www.biodalliance.org:8765/'
 
     this.pageName = 'svgHolder'
     this.maxExtra = 1.5;
@@ -73,7 +74,7 @@ function Browser(opts) {
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
     }
 
-    this.iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons.svg'
+    this.iconsURI = 'http://www.derkholm.net/dalliance-test/stylesheets/icons2.svg'
 
     // Registry
 
@@ -962,12 +963,50 @@ Browser.prototype.realInit = function(opts) {
         ev.stopPropagation(); ev.preventDefault();
 
         var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
-        saveDoc.documentElement.setAttribute('width', thisB.svgRoot.getAttribute('width'));
+        var saveWidth = thisB.svgRoot.getAttribute('width')|0;
+        saveDoc.documentElement.setAttribute('width', saveWidth);
         saveDoc.documentElement.setAttribute('height', thisB.svgRoot.getAttribute('height'));
-        var svgChildren = thisB.svgRoot.childNodes;
-        for (var ci = 0; ci < svgChildren.length; ++ci) {
-            saveDoc.documentElement.appendChild(svgChildren[ci].cloneNode(true));
+
+        // var svgChildren = thisB.svgRoot.childNodes;
+        // for (var ci = 0; ci < svgChildren.length; ++ci) {
+        //    saveDoc.documentElement.appendChild(svgChildren[ci].cloneNode(true));
+        // }
+
+        var saveRoot = makeElementNS(NS_SVG, 'g', null, {
+            fontFamily: 'helvetica'
+        });
+        saveDoc.documentElement.appendChild(saveRoot);
+        var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
+                x: 80,
+                y: 35,
+                strokeWidth: 0,
+                fill: 'black',
+                fontSize: '12pt'
+        });
+        thisB.svgRoot.appendChild(dallianceAnchor);
+        var daWidth = dallianceAnchor.getBBox().width;
+        thisB.svgRoot.removeChild(dallianceAnchor);
+        dallianceAnchor.setAttribute('x', saveWidth - daWidth - 50);
+        saveRoot.appendChild(dallianceAnchor);
+        // dallianceAnchor.setAttributeNS(NS_XLINK, 'xlink:href', 'http://www.biodalliance.org/');
+        
+        var chrLabel = thisB.chr;
+        if (chrLabel.indexOf('chr') < 0) {
+            chrLabel = 'chr' + chrLabel;
         }
+        var fullLabel = chrLabel + ':' + (thisB.viewStart|0) + '..' + (thisB.viewEnd|0);
+        saveRoot.appendChild(makeElementNS(NS_SVG, 'text', fullLabel, {
+            x: 40,
+            y: 35,
+            strokeWidth: 0,
+            fill: 'black',
+            fontSize: '12pt'
+        })); 
+
+        saveRoot.appendChild(labelClip.cloneNode(true));
+        saveRoot.appendChild(thisB.dasLabelHolder.cloneNode(true));
+        saveRoot.appendChild(featureClip.cloneNode(true));
+        saveRoot.appendChild(thisB.dasTierHolder.cloneNode(true));
 
         var saveForm = makeElement('form', [makeElement('p', "POST to export.  Yes, I know it's horrid"),
                                             makeElement('input', null, {type: 'hidden',  name: 'svgdata', value: new XMLSerializer().serializeToString(saveDoc)}),
@@ -993,14 +1032,16 @@ Browser.prototype.realInit = function(opts) {
         width: 850 - this.tabMargin,
         height: 440
     });
-    main.appendChild(makeElementNS(NS_SVG, 'clipPath', this.featureClipRect, {id: 'featureClip-' + this.pageName}));
+    var featureClip = makeElementNS(NS_SVG, 'clipPath', this.featureClipRect, {id: 'featureClip-' + this.pageName});
+    main.appendChild(featureClip);
     this.labelClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: 10,
         y: 50,
         width: this.tabMargin - 10,
         height: 440
     });
-    main.appendChild(makeElementNS(NS_SVG, 'clipPath', this.labelClipRect, {id: 'labelClip-' + this.pageName}));
+    var labelClip = makeElementNS(NS_SVG, 'clipPath', this.labelClipRect, {id: 'labelClip-' + this.pageName});
+    main.appendChild(labelClip);
     
     this.featureBackground = makeElementNS(NS_SVG, 'rect', null, {
         x: this.tabMargin,
