@@ -791,6 +791,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	    if (connectorType == 'collapsed_gene') {
 		path = document.createElementNS(NS_SVG, 'path');
 		path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', 'black');
 		path.setAttribute('stroke-width', '1');
 		
                 var hh = height/2;
@@ -811,6 +812,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	    } else {
 		path = document.createElementNS(NS_SVG, 'path');
 		path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', 'black');
 		path.setAttribute('stroke-width', '1');
 		
                 var vee = true;
