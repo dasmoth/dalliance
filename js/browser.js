@@ -967,11 +967,6 @@ Browser.prototype.realInit = function(opts) {
         saveDoc.documentElement.setAttribute('width', saveWidth);
         saveDoc.documentElement.setAttribute('height', thisB.svgRoot.getAttribute('height'));
 
-        // var svgChildren = thisB.svgRoot.childNodes;
-        // for (var ci = 0; ci < svgChildren.length; ++ci) {
-        //    saveDoc.documentElement.appendChild(svgChildren[ci].cloneNode(true));
-        // }
-
         var saveRoot = makeElementNS(NS_SVG, 'g', null, {
             fontFamily: 'helvetica'
         });
@@ -1008,10 +1003,30 @@ Browser.prototype.realInit = function(opts) {
         saveRoot.appendChild(featureClip.cloneNode(true));
         saveRoot.appendChild(thisB.dasTierHolder.cloneNode(true));
 
-        var saveForm = makeElement('form', [makeElement('p', "POST to export.  Yes, I know it's horrid"),
+        var svgButton = makeElement('input', null, {
+            type: 'radio',
+            name: 'format',
+            value: 'svg',
+            checked: true
+        });
+        var pdfButton = makeElement('input', null, {
+            type: 'radio',
+            name: 'format',
+            value: 'pdf'
+        });
+        var saveForm = makeElement('form', [makeElement('p', "To work around restrictions on saving files from web applications, image export currently requires transmission of the browser's current state to a remote server"),
+                                            svgButton, 'SVG', makeElement('br'),
+                                            pdfButton, 'PDF', makeElement('br'),
+                                            makeElement('br'),
                                             makeElement('input', null, {type: 'hidden',  name: 'svgdata', value: new XMLSerializer().serializeToString(saveDoc)}),
                                             makeElement('input', null, {type: 'submit'})],
                                    {action: thisB.exportServer + 'browser-image.svg', method: 'POST'});
+        svgButton.addEventListener('click', function(cev) {
+            saveForm.setAttribute('action', thisB.exportServer + 'browser-image.svg');
+        }, false);
+        pdfButton.addEventListener('click', function(cev) {
+            saveForm.setAttribute('action', thisB.exportServer + 'browser-image.pdf');
+        }, false);
         saveForm.addEventListener('submit', function(sev) {
             setTimeout(function() {
                 thisB.removeAllPopups();
