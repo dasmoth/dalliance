@@ -23,7 +23,7 @@
 	"-d" (.getPath pdf-temp)
 	(.getPath svg-temp)))
     {:status 200
-     :headers {"Content-Type" "application/pdf"}
+     :headers {"Content-Type" "application/binary"}
      :body pdf-temp}))
 
 (defroutes exporter
