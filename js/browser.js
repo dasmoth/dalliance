@@ -973,7 +973,7 @@ Browser.prototype.realInit = function(opts) {
         saveDoc.documentElement.appendChild(saveRoot);
         var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
                 x: 80,
-                y: 35,
+                y: 30,
                 strokeWidth: 0,
                 fill: 'black',
                 fontSize: '12pt'
@@ -981,7 +981,7 @@ Browser.prototype.realInit = function(opts) {
         thisB.svgRoot.appendChild(dallianceAnchor);
         var daWidth = dallianceAnchor.getBBox().width;
         thisB.svgRoot.removeChild(dallianceAnchor);
-        dallianceAnchor.setAttribute('x', saveWidth - daWidth - 50);
+        dallianceAnchor.setAttribute('x', saveWidth - daWidth - 60);
         saveRoot.appendChild(dallianceAnchor);
         // dallianceAnchor.setAttributeNS(NS_XLINK, 'xlink:href', 'http://www.biodalliance.org/');
         
@@ -992,7 +992,7 @@ Browser.prototype.realInit = function(opts) {
         var fullLabel = chrLabel + ':' + (thisB.viewStart|0) + '..' + (thisB.viewEnd|0);
         saveRoot.appendChild(makeElementNS(NS_SVG, 'text', fullLabel, {
             x: 40,
-            y: 35,
+            y: 30,
             strokeWidth: 0,
             fill: 'black',
             fontSize: '12pt'
@@ -1014,7 +1014,8 @@ Browser.prototype.realInit = function(opts) {
             name: 'format',
             value: 'pdf'
         });
-        var saveForm = makeElement('form', [makeElement('p', "To work around restrictions on saving files from web applications, image export currently requires transmission of the browser's current state to a remote server"),
+        var saveForm = makeElement('form', [makeElement('p', "To work around restrictions on saving files from web applications, image export currently requires transmission of the browser's current state to a remote server.  Depending on connection speed, this can take a few seconds -- please be patient."),
+                                            makeElement('p', 'The download links only work once, so if you wish to keep or share your exported images, please save a copy on your computer'),
                                             svgButton, 'SVG', makeElement('br'),
                                             pdfButton, 'PDF', makeElement('br'),
                                             makeElement('br'),

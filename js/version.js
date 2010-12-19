@@ -11,9 +11,9 @@ var VERSION = {
     CONFIG: 2,
     MAJOR:  0,
     MINOR:  5,
-    MICRO:  3,
+    MICRO:  4,
     PATCH:  '',
-    BRANCH: 'export'
+    BRANCH: ''
 }
 
 VERSION.toString = function() {
