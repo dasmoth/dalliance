@@ -48,18 +48,20 @@ function DASSource(a1, a2) {
             this[k] = options[k];
         }
     }
-    if (!this.uri || this.uri.length == 0) {
-        throw "URIRequired";
-    }
-    if (this.uri.substr(this.uri.length - 1) != '/') {
-        this.uri = this.uri + '/';
-    }
+
 
     if (!this.coords) {
         this.coords = [];
     }
     if (!this.props) {
         this.props = {};
+    }
+
+    // if (!this.uri || this.uri.length == 0) {
+    //    throw "URIRequired";
+    // }   FIXME
+    if (this.uri && this.uri.substr(this.uri.length - 1) != '/') {
+        this.uri = this.uri + '/';
     }
 }
 

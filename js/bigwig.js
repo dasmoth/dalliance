@@ -59,14 +59,13 @@ URLFetchable.prototype.slice = function(s, l) {
 }
 
 URLFetchable.prototype.fetch = function(callback) {
-    dlog('url=' + this.url + '; start=' + this.start + '; end=' + this.end);
+    // dlog('url=' + this.url + '; start=' + this.start + '; end=' + this.end);
     var req = new XMLHttpRequest();
     req.open('GET', this.url, true);
     req.overrideMimeType('text/plain; charset=x-user-defined');
     if (this.end) {
-        dlog('Range: bytes=' + this.start + '-' + this.end);
+        // dlog('Range: bytes=' + this.start + '-' + this.end);
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
-        // req.setRequestHeader('X-Blibble', 'bar');
     }
     req.onreadystatechange = function() {
         if (req.readyState == 4) {
@@ -106,9 +105,9 @@ BigWig.prototype.readChromTree = function(callback) {
 
     this.data.slice(this.chromTreeOffset, this.unzoomedDataOffset - this.chromTreeOffset).fetch(function(result) {
 	var bpt = bstringToBuffer(result);
-	dlog('Loaded BPT');
+	// dlog('Loaded BPT');
 
-	var ba = new Int8Array(bpt);
+	var ba = new Uint8Array(bpt);
 	var sa = new Int16Array(bpt);
 	var la = new Int32Array(bpt);
 	var bptMagic = la[0];
@@ -118,7 +117,7 @@ BigWig.prototype.readChromTree = function(callback) {
 	var itemCount = (la[4] << 32) | (la[5]);
 	var rootNodeOffset = 32;
 	
-	// dlog('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
+        // dlog('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
 
 	var bptReadNode = function(offset) {
 	    var nodeType = ba[offset];
@@ -140,8 +139,8 @@ BigWig.prototype.readChromTree = function(callback) {
 			    key += String.fromCharCode(charCode);
 			}
 		    }
-		    var chromId = la[offset/4];
-		    var chromSize = la[offset/4 + 1];
+		    var chromId = (ba[offset+3]<<24) | (ba[offset+2]<<16) | (ba[offset+1]<<8) | (ba[offset+0]);
+		    var chromSize = (ba[offset + 7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
 		    offset += 8;
 
 		    // dlog(key + ':' + chromId + ',' + chromSize);
@@ -149,6 +148,7 @@ BigWig.prototype.readChromTree = function(callback) {
 		    if (key.indexOf('chr') == 0) {
 			thisB.chromsToIDs[key.substr(3)] = chromId;
 		    }
+                    thisB.idsToChroms[chromId] = key;
 		}
 	    }
 	};
@@ -179,7 +179,20 @@ BigWig.prototype.readCirHeader = function(callback) {
     });
 }
 
-BigWig.prototype.readWigData = function(chr, min, max, callback) {
+BigWig.prototype.readWigData = function(chrName, min, max, callback) {
+    var chr = this.chromsToIDs[chrName];
+    if (!chr) {
+        // Not an error because some .bwgs won't have data for all chromosomes.
+
+        dlog("Couldn't find chr " + chrName);
+        dlog('Chroms=' + miniJSONify(this.chromsToIDs));
+        callback([]);
+    } else {
+        this.readWigDataById(chr, min, max, callback);
+    }
+}
+
+BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
     var thisB = this;
     if (!this.cir) {
 	dlog('No CIR yet, fetching');
@@ -244,7 +257,14 @@ BigWig.prototype.readWigData = function(chr, min, max, callback) {
 	var features = [];
 	var maybeCreateFeature = function(fmin, fmax, score) {
 	    if (fmin <= max && fmax >= min) {
-		features.push({min: fmin, max: fmax, score: score});
+                var f = new DASFeature();
+                f.segment = thisB.idsToChroms[chr];
+                f.min = fmin;
+                f.max = fmax;
+                f.score = score;
+                f.type = 'bigwig';
+                
+		features.push(f);
 	    }
 	};
 	var tramp = function() {
@@ -380,8 +400,6 @@ function makeBwg(data, callback) {
 		dlog("BWG is armed and ready");
                 callback(bwg);
 	    });
-	});
-
-	
+	});	
     });
 }
