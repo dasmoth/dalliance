@@ -9,6 +9,8 @@
 
 function DasTier(browser, source, viewport, background)
 {
+    var thisTier = this;
+
     this.browser = browser;
     this.dasSource = new DASSource(source);
     this.viewport = viewport;
@@ -32,20 +34,37 @@ function DasTier(browser, source, viewport, background)
 
 DasTier.prototype.init = function() {
     var tier = this;
-    tier.status = 'Fetching stylesheet';
-    this.dasSource.stylesheet(function(stylesheet) {
-	tier.stylesheet = stylesheet;
-	tier.refreshTier();
-    }, function() {
-	// tier.error = 'No stylesheet';
+
+    if (tier.dasSource.bwgURI) {
+        // No stylesheet for binary formats (FIXME should we handle this somewhere else???)
         tier.stylesheet = new DASStylesheet();
-        var defStyle = new DASStyle();
-        defStyle.glyph = 'BOX';
-        defStyle.BGCOLOR = 'blue';
-        defStyle.FGCOLOR = 'black';
-        tier.stylesheet.pushStyle('default', null, defStyle);
-	tier.refreshTier();
-    });
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = 'HISTOGRAM';
+        wigStyle.COLOR1 = 'white';
+        wigStyle.COLOR2 = 'black';
+        wigStyle.HEIGHT = 100;
+        tier.stylesheet.pushStyle('default', null, wigStyle);
+
+        makeBwgFromURL(tier.dasSource.bwgURI, function(bwg) {
+            tier.bwg = bwg;
+            tier.refreshTier();
+        });
+    } else {
+        tier.status = 'Fetching stylesheet';
+        this.dasSource.stylesheet(function(stylesheet) {
+	    tier.stylesheet = stylesheet;
+	    tier.refreshTier();
+        }, function() {
+	    // tier.error = 'No stylesheet';
+            tier.stylesheet = new DASStylesheet();
+            var defStyle = new DASStyle();
+            defStyle.glyph = 'BOX';
+            defStyle.BGCOLOR = 'blue';
+            defStyle.FGCOLOR = 'black';
+            tier.stylesheet.pushStyle('default', null, defStyle);
+	    tier.refreshTier();
+        });
+    }
 }
 
 DasTier.prototype.styles = function(scale) {
@@ -127,7 +146,16 @@ function refreshTier_features()
 	var tier = this;
 	this.status = 'Fetching features';
 
-        if (this.dasSource.mapping) {
+        if (this.dasSource.bwgURI) {
+            if (this.bwg) {
+                this.bwg.readWigData(this.browser.chr, fetchStart, fetchEnd, function(features) {
+                    tier.currentFeatures = features;
+                    tier.error = null; tier.status = null;
+                    tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
+                    dasRequestComplete(tier);
+                });
+            }
+        } else if (this.dasSource.mapping) {
             var mapping = this.browser.chains[this.dasSource.mapping];
             mapping.sourceBlocksForRange(this.browser.chr, fetchStart, fetchEnd, function(mseg) {
                 if (mseg.length == 0) {
