@@ -149,6 +149,12 @@ function refreshTier_features()
         if (this.dasSource.bwgURI) {
             if (this.bwg) {
                 this.bwg.readWigData(this.browser.chr, fetchStart, fetchEnd, function(features) {
+                    dlog('got ' + features.length + ' features');
+                    if (features.length > maxBins) {
+                        features = downsample(features, scaledQuantRes);
+                        dlog('downsampled to ' + features.length);
+                    }
+
                     tier.currentFeatures = features;
                     tier.error = null; tier.status = null;
                     tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;

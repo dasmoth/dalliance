@@ -565,6 +565,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
 
     this.removeAllPopups();
 
+    dlog('starting popup');
     var table = makeElement('table', null);
     table.style.width = '100%';
 
@@ -574,6 +575,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
         name = name + ': ' + fid;
     }
 
+    dlog('done id');
     var idx = 0;
     if (feature.method) {
         var row = makeElement('tr', [
@@ -584,6 +586,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
         table.appendChild(row);
         ++idx;
     }
+    dlog('done method');
     {
         var loc;
         if (group.segment) {
@@ -599,15 +602,17 @@ Browser.prototype.featurePopup = function(ev, feature, group){
         table.appendChild(row);
         ++idx;
     }
+    dlog('done loc');
     if (feature.score && feature.score != '-') {
         var row = makeElement('tr', [
             makeElement('th', 'Score'),
-            makeElement('td', feature.score)
+            makeElement('td', '' + feature.score)
         ]);
         row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
+    dlog('score done');
     {
         var links = maybeConcat(group.links, feature.links);
         if (links && links.length > 0) {
@@ -622,6 +627,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
             ++idx;
         }
     }
+    dlog('links done');
     {
         var notes = maybeConcat(group.notes, feature.notes);
         for (var ni = 0; ni < notes.length; ++ni) {
@@ -642,6 +648,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
             ++idx;
         }
     }
+    dlog('notes done');
 
     this.popit(ev, name, table, {width: 400});
 }
