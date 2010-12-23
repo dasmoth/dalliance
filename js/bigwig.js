@@ -158,27 +158,6 @@ BigWig.prototype.readChromTree = function(callback) {
     });
 }
 
-BigWig.prototype.readCirHeader = function(callback) {
-    var thisB = this;
-    this.data.slice(this.unzoomedIndexOffset, 48).fetch(function(result) {
-	var cir = bstringToBuffer(result);
-	var ba = new Int8Array(cir);
-	var la = new Int32Array(cir);
-	var magic = la[0];
-	thisB.cirBlockSize = la[1];
-	thisB.cirItemCount = (la[2] << 32)|(la[3]);
-	thisB.cirStartChromIx = la[4];
-	thisB.cirStartBase = la[5];
-	thisB.cirEndChromIx = la[6];
-	thisB.cirEndBase = la[7];
-	thisB.cirFileSize = (la[8]<<32)|(la[9]);
-	thisB.cirItemsPerSlot = la[10];
-
-	dlog('Read CIR header.  magic=' + magic + '   size=' + thisB.cirFileSize);
-	callback(thisB);
-    });
-}
-
 BigWig.prototype.readWigData = function(chrName, min, max, callback) {
     var chr = this.chromsToIDs[chrName];
     if (!chr) {
@@ -396,10 +375,8 @@ function makeBwg(data, callback) {
 	}
 
 	bwg.readChromTree(function() {
-	    bwg.readCirHeader(function() {
-		dlog("BWG is armed and ready");
-                callback(bwg);
-	    });
-	});	
+	    dlog("BWG is armed and ready");
+            callback(bwg);
+	});
     });
 }
