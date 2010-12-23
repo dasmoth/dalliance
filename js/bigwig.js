@@ -158,24 +158,31 @@ BigWig.prototype.readChromTree = function(callback) {
     });
 }
 
-BigWig.prototype.readWigData = function(chrName, min, max, callback) {
-    var chr = this.chromsToIDs[chrName];
+function BigWigView(bwg, cirTreeOffset, cirTreeLength, isSummary) {
+    this.bwg = bwg;
+    this.cirTreeOffset = cirTreeOffset;
+    this.cirTreeLength = cirTreeLength;
+    this.isSummary = isSummary;
+}
+
+BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
+    var chr = this.bwg.chromsToIDs[chrName];
     if (!chr) {
         // Not an error because some .bwgs won't have data for all chromosomes.
 
         dlog("Couldn't find chr " + chrName);
-        dlog('Chroms=' + miniJSONify(this.chromsToIDs));
+        dlog('Chroms=' + miniJSONify(this.bwg.chromsToIDs));
         callback([]);
     } else {
         this.readWigDataById(chr, min, max, callback);
     }
 }
 
-BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
+BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     var thisB = this;
     if (!this.cir) {
 	dlog('No CIR yet, fetching');
-	this.data.slice(this.unzoomedIndexOffset, this.zoomLevels[0].dataOffset - this.unzoomedIndexOffset).fetch(function(result) {
+        this.bwg.data.slice(this.cirTreeOffset, this.cirTreeLength).fetch(function(result) {
 	    thisB.cir = bstringToBuffer(result);
 	    thisB.readWigData(chr, min, max, callback);
 	});
@@ -223,7 +230,7 @@ BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
 		    (endChrom   > chr || (endChrom == chr && endBase >= min)))
 		{
 		    dlog('Need to recur: ' + blockOffset);
-		    cirFobRecur(blockOffset - thisB.unzoomedIndexOffset);
+		    cirFobRecur(blockOffset - thisB.cirTreeOffset);
 		}
 		offset += 24;
 	    }
@@ -237,7 +244,7 @@ BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
 	var maybeCreateFeature = function(fmin, fmax, score) {
 	    if (fmin <= max && fmax >= min) {
                 var f = new DASFeature();
-                f.segment = thisB.idsToChroms[chr];
+                f.segment = thisB.bwg.idsToChroms[chr];
                 f.min = fmin;
                 f.max = fmax;
                 f.score = score;
@@ -253,45 +260,67 @@ BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
 	    } else {
 		var block = blocksToFetch[0];
 		if (block.data) {
-		    var ba = new Int8Array(block.data);
+                    var ba = new Int8Array(block.data);
 		    var sa = new Int16Array(block.data);
 		    var la = new Int32Array(block.data);
 		    var fa = new Float32Array(block.data);
-		    
-		    var chromId = la[0];
-		    var blockStart = la[1];
-		    var blockEnd = la[2];
-		    var itemStep = la[3];
-		    var itemSpan = la[4];
-		    var blockType = ba[20];
-		    var itemCount = sa[11];
 
-		    if (blockType == BIG_WIG_TYPE_FSTEP) {
-			for (var i = 0; i < itemCount; ++i) {
-			    var score = fa[i + 6];
-			    maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, score);
-			}
-		    } else if (blockType == BIG_WIG_TYPE_VSTEP) {
-			for (var i = 0; i < itemCount; ++i) {
-			    var start = la[(i*2) + 6];
-			    var score = fa[(i*2) + 7];
-			    maybeCreateFeature(start, start + itemSpan, score);
-			}
-		    } else if (blockType == BIG_WIG_TYPE_GRAPH) {
-			for (var i = 0; i < itemCount; ++i) {
-			    var start = la[(i*3) + 6];
-			    var end   = la[(i*3) + 7];
-			    var score = fa[(i*3) + 8];
-			    maybeCreateFeature(start, end, score);
-			}
-		    } else {
-			dlog('Currently not handling bwgType=' + blockType);
-		    }
+                    if (thisB.isSummary) {
+                        dlog('processing summary block...')
+                        var itemCount = block.data.byteLength/32;
+                        dlog('Summary itemCount=' + itemCount);
+                        for (var i = 0; i < itemCount; ++i) {
+                            var chromId =   la[(i*8)];
+                            var start =     la[(i*8)+1];
+                            var end =       la[(i*8)+2];
+                            var validCnt =  la[(i*8)+3];
+                            var minVal    = fa[(i*8)+4];
+                            var maxVal    = fa[(i*8)+5];
+                            var sumData   = fa[(i*8)+6];
+                            var sumSqData = fa[(i*8)+7];
+
+                            if (chromId == chr) {
+                                maybeCreateFeature(start, end, sumData/validCnt);
+                            }
+                        }
+                    } else {
+
+		        
+		        var chromId = la[0];
+		        var blockStart = la[1];
+		        var blockEnd = la[2];
+		        var itemStep = la[3];
+		        var itemSpan = la[4];
+		        var blockType = ba[20];
+		        var itemCount = sa[11];
+
+		        if (blockType == BIG_WIG_TYPE_FSTEP) {
+			    for (var i = 0; i < itemCount; ++i) {
+			        var score = fa[i + 6];
+			        maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, score);
+			    }
+		        } else if (blockType == BIG_WIG_TYPE_VSTEP) {
+			    for (var i = 0; i < itemCount; ++i) {
+			        var start = la[(i*2) + 6];
+			        var score = fa[(i*2) + 7];
+			        maybeCreateFeature(start, start + itemSpan, score);
+			    }
+		        } else if (blockType == BIG_WIG_TYPE_GRAPH) {
+			    for (var i = 0; i < itemCount; ++i) {
+			        var start = la[(i*3) + 6];
+			        var end   = la[(i*3) + 7];
+			        var score = fa[(i*3) + 8];
+			        maybeCreateFeature(start, end, score);
+			    }
+		        } else {
+			    dlog('Currently not handling bwgType=' + blockType);
+		        }
+                    }
 		    blocksToFetch.splice(0, 1);
 		    tramp();
 		} else {
-		    thisB.data.slice(block.offset, block.size).fetch(function(result) {
-			if (thisB.uncompressBufSize > 0) {
+		    thisB.bwg.data.slice(block.offset, block.size).fetch(function(result) {
+			if (thisB.bwg.uncompressBufSize > 0) {
 			    // dlog('first few bytes of compressed block: ' + result.charCodeAt(0) + ',' + result.charCodeAt(1)); 
 			    dlog('inflating ' + result.length);
 			    result = JSInflate.inflate(result.substr(2));
@@ -305,6 +334,25 @@ BigWig.prototype.readWigDataById = function(chr, min, max, callback) {
 	}
 	tramp();
     }
+}
+
+BigWig.prototype.readWigData = function(chrName, min, max, callback) {
+    this.getUnzoomedView.readWigData(chrName, min, max, callback);
+}
+
+BigWig.prototype.getUnzoomedView = function() {
+    if (!this.unzoomedView) {
+        this.unzoomedView = new BigWigView(this, this.unzoomedIndexOffset, this.zoomLevels[0].dataOffset - this.unzoomedIndexOffset, false);
+    }
+    return this.unzoomedView;
+}
+
+BigWig.prototype.getZoomedView = function(z) {
+    var zh = this.zoomLevels[z];
+    if (!zh.view) {
+        zh.view = new BigWigView(this, zh.indexOffset, this.zoomLevels[z + 1].dataOffset - zh.indexOffset, true);
+    }
+    return zh.view;
 }
 
 function handle() {
@@ -370,7 +418,7 @@ function makeBwg(data, callback) {
 	    var zlReduction = la[zl*6 + 16]
 	    var zlData = (la[zl*6 + 18]<<32)|(la[zl*6 + 19]);
 	    var zlIndex = (la[zl*6 + 20]<<32)|(la[zl*6 + 21]);
-	    // dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
+	    dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
 	    bwg.zoomLevels.push({reduction: zlReduction, dataOffset: zlData, indexOffset: zlIndex});
 	}
 
