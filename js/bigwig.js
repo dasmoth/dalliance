@@ -337,7 +337,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 }
 
 BigWig.prototype.readWigData = function(chrName, min, max, callback) {
-    this.getUnzoomedView.readWigData(chrName, min, max, callback);
+    this.getUnzoomedView().readWigData(chrName, min, max, callback);
 }
 
 BigWig.prototype.getUnzoomedView = function() {
