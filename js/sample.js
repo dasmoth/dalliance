@@ -34,7 +34,7 @@ DSBin.prototype.feature = function(f) {
 
 function downsample(features, targetRez) {
     var sn = 0;
-    while (ds_scale(sn) < targetRez) {
+    while (ds_scale(sn + 1) < targetRez) {
 	++sn;
     }
     var scale = ds_scale(sn);
