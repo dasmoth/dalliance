@@ -36,17 +36,26 @@ DasTier.prototype.init = function() {
     var tier = this;
 
     if (tier.dasSource.bwgURI) {
-        // No stylesheet for binary formats (FIXME should we handle this somewhere else???)
-        tier.stylesheet = new DASStylesheet();
-        var wigStyle = new DASStyle();
-        wigStyle.glyph = 'HISTOGRAM';
-        wigStyle.COLOR1 = 'white';
-        wigStyle.COLOR2 = 'black';
-        wigStyle.HEIGHT = 100;
-        tier.stylesheet.pushStyle('default', null, wigStyle);
-
         makeBwgFromURL(tier.dasSource.bwgURI, function(bwg) {
             tier.bwg = bwg;
+
+            // No stylesheet for binary formats (FIXME should we handle this somewhere else???)
+            tier.stylesheet = new DASStylesheet();
+            var wigStyle = new DASStyle();
+            if (tier.bwg.type == 'bigbed') {
+                wigStyle.glyph = 'BOX';
+                wigStyle.FGCOLOR = 'black';
+                wigStyle.BGCOLOR = 'red'
+                wigStyle.HEIGHT = 12;
+                wigStyle.BUMP = true;
+                wigStyle.LABEL = true;
+            } else {
+                wigStyle.glyph = 'HISTOGRAM';
+                wigStyle.COLOR1 = 'white';
+                wigStyle.COLOR2 = 'black';
+            }
+            tier.stylesheet.pushStyle('default', null, wigStyle);
+
             tier.refreshTier();
         });
     } else {
@@ -150,7 +159,7 @@ function refreshTier_features()
             if (this.bwg) {
                 this.bwg.readWigData(this.browser.chr, fetchStart, fetchEnd, function(features) {
                     dlog('got ' + features.length + ' features');
-                    if (features.length > maxBins) {
+                    if (tier.bwg.type == 'bigwig' && features.length > maxBins) {
                         features = downsample(features, scaledQuantRes);
                         dlog('downsampled to ' + features.length);
                     }

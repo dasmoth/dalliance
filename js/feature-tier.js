@@ -841,7 +841,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     groupElement.segment = features[0].segment;
     groupElement.min = spans.min();
     groupElement.max = spans.max();
-    if (notes && !groupElement.notes || groupElement.notes.length==0) {
+    if (notes && (!groupElement.notes || groupElement.notes.length==0)) {
         groupElement.notes = notes;
     }
 
