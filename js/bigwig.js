@@ -105,7 +105,12 @@ BigWig.prototype.readChromTree = function(callback) {
     this.chromsToIDs = {};
     this.idsToChroms = {};
 
-    this.data.slice(this.chromTreeOffset, this.unzoomedDataOffset - this.chromTreeOffset).fetch(function(result) {
+    var udo = this.unzoomedDataOffset;
+    while ((udo % 4) != 0) {
+        ++udo;
+    }
+
+    this.data.slice(this.chromTreeOffset, udo - this.chromTreeOffset).fetch(function(result) {
 	var bpt = bstringToBuffer(result);
 	// dlog('Loaded BPT');
 
@@ -243,18 +248,28 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 	callback([]);
     } else {
 	var features = [];
-	var maybeCreateFeature = function(fmin, fmax, score) {
-	    if (fmin <= max && fmax >= min) {
-                var f = new DASFeature();
-                f.segment = thisB.bwg.idsToChroms[chr];
-                f.min = fmin;
-                f.max = fmax;
-                f.score = score;
-                f.type = 'bigwig';
-                
-		features.push(f);
-	    }
+	var createFeature = function(fmin, fmax, opts) {
+            if (!opts) {
+                opts = {};
+            }
+            
+            var f = new DASFeature();
+            f.segment = thisB.bwg.idsToChroms[chr];
+            f.min = fmin;
+            f.max = fmax;
+            f.type = 'bigwig';
+            
+            for (k in opts) {
+                f[k] = opts[k];
+            }
+
+	    features.push(f);
 	};
+        var maybeCreateFeature = function(fmin, fmax, opts) {
+            if (fmin <= max && fmax >= min) {
+                createFeature(fmin, fmax, opts);
+            }
+        };
 	var tramp = function() {
 	    if (blocksToFetch.length == 0) {
 		callback(features);
@@ -263,11 +278,12 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		var block = blocksToFetch[0];
 		if (block.data) {
                     var ba = new Uint8Array(block.data);
-		    var sa = new Int16Array(block.data);
-		    var la = new Int32Array(block.data);
-		    var fa = new Float32Array(block.data);
 
                     if (thisB.isSummary) {
+                        var sa = new Int16Array(block.data);
+		        var la = new Int32Array(block.data);
+		        var fa = new Float32Array(block.data);
+
                         dlog('processing summary block...')
                         var itemCount = block.data.byteLength/32;
                         dlog('Summary itemCount=' + itemCount);
@@ -282,10 +298,14 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             var sumSqData = fa[(i*8)+7];
 
                             if (chromId == chr) {
-                                maybeCreateFeature(start, end, sumData/validCnt);
+                                maybeCreateFeature(start, end, {score: sumData/validCnt});
                             }
                         }
                     } else if (thisB.bwg.type == 'bigwig') {
+		        var sa = new Int16Array(block.data);
+		        var la = new Int32Array(block.data);
+		        var fa = new Float32Array(block.data);
+
 		        var chromId = la[0];
 		        var blockStart = la[1];
 		        var blockEnd = la[2];
@@ -297,20 +317,20 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		        if (blockType == BIG_WIG_TYPE_FSTEP) {
 			    for (var i = 0; i < itemCount; ++i) {
 			        var score = fa[i + 6];
-			        maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, score);
+			        maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, {score: score});
 			    }
 		        } else if (blockType == BIG_WIG_TYPE_VSTEP) {
 			    for (var i = 0; i < itemCount; ++i) {
 			        var start = la[(i*2) + 6];
 			        var score = fa[(i*2) + 7];
-			        maybeCreateFeature(start, start + itemSpan, score);
+			        maybeCreateFeature(start, start + itemSpan, {score: score});
 			    }
 		        } else if (blockType == BIG_WIG_TYPE_GRAPH) {
 			    for (var i = 0; i < itemCount; ++i) {
 			        var start = la[(i*3) + 6];
 			        var end   = la[(i*3) + 7];
 			        var score = fa[(i*3) + 8];
-			        maybeCreateFeature(start, end, score);
+			        maybeCreateFeature(start, end, {score: score});
 			    }
 		        } else {
 			    dlog('Currently not handling bwgType=' + blockType);
@@ -331,8 +351,45 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     break;
                                 }
                             }
-                            if (chromId == chr) {
-                                maybeCreateFeature(start, end, 0);
+
+                            var featureOpts = {};
+
+                            var bedColumns = rest.split('\t');
+                            if (bedColumns.length > 0) {
+                                featureOpts.label = bedColumns[0];
+                            }
+                            if (bedColumns.length > 1) {
+                                featureOpts.score = 100; /* bedColumns[1]; */
+                            }
+                            if (bedColumns.length > 2) {
+                                featureOpts.orientation = bedColumns[2];
+                            }
+
+                            if (bedColumns.length < 9) {
+                                if (chromId == chr) {
+                                    maybeCreateFeature(start, end, featureOpts);
+                                }
+                            } else if (chromId == chr && start <= max && end >= min) {
+                                // Complex-BED?
+                                // FIXME this is currently a bit of a hack to do Clever Things with ensGene.bb
+
+                                var blockCount = bedColumns[6]|0;
+                                var blockStarts = bedColumns[7].split(',');
+                                var blockEnds = bedColumns[8].split(',');
+
+                                featureOpts.type = 'bb-transcript'
+                                var grp = new DASGroup();
+                                grp.id = bedColumns[0];
+                                grp.type = 'bb-transcript'
+                                grp.notes = [];
+                                featureOpts.groups = [grp];
+
+                                for (var b = 0; b < blockCount; ++b) {
+                                    var bmin = blockStarts[b]|0;
+                                    var bmax = blockEnds[b]|0;
+                                    // dlog('bmin=' + bmin + '; bmax=' + bmax);
+                                    createFeature(bmin, bmax, featureOpts);
+                                }
                             }
                         }
                     } else {
