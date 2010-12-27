@@ -78,9 +78,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         }; mf(m);
     }
     var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
-    addModeButtons.push(defButton);
+    // addModeButtons.push(defButton);
     var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
+    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
+    addModeButtons.push(binButton);
     activateButton(addModeButtons, regButton);
     popup.appendChild(makeElement('div', addModeButtons), null);
     
@@ -178,10 +180,48 @@ Browser.prototype.showTrackAdder = function(ev) {
         activateButton(addModeButtons, defButton);
         makeStab(new Observed(thisB.defaultSources));
     }, false);
+    binButton.addEventListener('mousedown', function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        activateButton(addModeButtons, binButton);
+        customMode = 'bin';
+
+        removeChildren(stabHolder);
+        stabHolder.appendChild(makeElement('p', 'Add custom URL-based datasource.'));
+        stabHolder.appendChild(makeElement('p', 'Currently supported formats are bigwig and bigbed'));
+        stabHolder.appendChild(document.createTextNode('Label: '));
+        stabHolder.appendChild(makeElement('br'));
+        custName = makeElement('input', '', {value: 'New track'});
+        stabHolder.appendChild(custName);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(document.createTextNode('URL: '));
+        stabHolder.appendChild(makeElement('br'));
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net/dalliance-test/stylesheets/ensGene.bb'});
+        stabHolder.appendChild(custURL);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
+        stabHolder.appendChild(makeElement('br'));
+        custCS = makeElement('select', null);
+        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+        /* if (thisB.chains) {
+            for (var csk in thisB.chains) {
+                var cs = thisB.chains[csk].coords;
+                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+            }
+        } */
+        custCS.value = '__default__';
+        stabHolder.appendChild(custCS);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
+        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+        
+    }, false);
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, custButton);
-        customMode = true;
+        customMode = 'das';
 
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('p', 'Add a custom DAS datasource.'))
@@ -217,6 +257,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, false);
 
 
+
     var addButton = document.createElement('span');
     addButton.style.backgroundColor = 'rgb(230,230,250)';
     addButton.style.borderStyle = 'solid';
@@ -231,7 +272,12 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (customMode) {
-            var nds = new DASSource({name: custName.value, uri: custURL.value});
+            var nds;
+            if (customMode === 'das') {
+                nds = new DASSource({name: custName.value, uri: custURL.value});
+            } else {
+                nds = new DASSource({name: custName.value, bwgURI: custURL.value});
+            }
             var m = custCS.value;
             if (m != '__default__') {
                 nds.mapping = m;
