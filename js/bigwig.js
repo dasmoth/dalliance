@@ -373,6 +373,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 // Complex-BED?
                                 // FIXME this is currently a bit of a hack to do Clever Things with ensGene.bb
 
+                                var thickStart = bedColumns[3]|0;
+                                var thickEnd   = bedColumns[4]|0;
                                 var blockCount = bedColumns[6]|0;
                                 var blockStarts = bedColumns[7].split(',');
                                 var blockEnds = bedColumns[8].split(',');
@@ -384,11 +386,34 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 grp.notes = [];
                                 featureOpts.groups = [grp];
 
+                                var spans = null;
                                 for (var b = 0; b < blockCount; ++b) {
                                     var bmin = blockStarts[b]|0;
                                     var bmax = blockEnds[b]|0;
+                                    var span = new Range(bmin, bmax);
+                                    if (spans) {
+                                        spans = union(spans, span);
+                                    } else {
+                                        spans = span;
+                                    }
                                     // dlog('bmin=' + bmin + '; bmax=' + bmax);
-                                    createFeature(bmin, bmax, featureOpts);
+                                    // createFeature(bmin, bmax, featureOpts);
+                                }
+                                
+                                var tsList = spans.ranges();
+                                for (var s = 0; s < tsList.length; ++s) {
+                                    var ts = tsList[s];
+                                    createFeature(ts.min(), ts.max(), featureOpts);
+                                }
+
+                                var tl = intersection(spans, new Range(thickStart, thickEnd));
+                                if (tl) {
+                                    featureOpts.type = 'bb-translation';
+                                    var tlList = tl.ranges();
+                                    for (var s = 0; s < tlList.length; ++s) {
+                                        var ts = tlList[s];
+                                        createFeature(ts.min(), ts.max(), featureOpts);
+                                    }
                                 }
                             }
                         }
