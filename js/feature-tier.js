@@ -93,6 +93,8 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 //
 
 DasTier.prototype.styleForFeature = function(f) {
+    // dlog('styling ' + miniJSONify(f));
+
     var ssScale = zoomForScale(this.browser.scale);
 
     if (!this.stylesheet) {
@@ -115,6 +117,7 @@ DasTier.prototype.styleForFeature = function(f) {
         if (sh.type) {
             if (sh.type == 'default') {
                 maybe = sh.style;
+                continue;
             } else if (sh.type != f.type) {
                 continue;
             }

@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
@@ -99,6 +101,36 @@ function union(s0, s1) {
 	return oranges[0];
     } else {
 	return new _Compound(oranges);
+    }
+}
+
+function intersection(s0, s1) {
+    var r0 = s0.ranges();
+    var r1 = s1.ranges();
+    var l0 = r0.length, l1 = r1.length;
+    var i0 = 0, i1 = 0;
+    var or = [];
+
+    while (i0 < l0 && i1 < l1) {
+        var s0 = r0[i0], s1 = r1[i1];
+        var lapMin = Math.max(s0.min(), s1.min());
+        var lapMax = Math.min(s0.max(), s1.max());
+        if (lapMax >= lapMin) {
+            or.push(new Range(lapMin, lapMax));
+        }
+        if (s0.max() > s1.max()) {
+            ++i1;
+        } else {
+            ++i0;
+        }
+    }
+    
+    if (or.length == 0) {
+        return null; // FIXME
+    } else if (or.length == 1) {
+        return or[0];
+    } else {
+        return new _Compound(or);
     }
 }
 

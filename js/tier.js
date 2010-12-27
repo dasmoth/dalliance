@@ -40,21 +40,33 @@ DasTier.prototype.init = function() {
             tier.bwg = bwg;
 
             // No stylesheet for binary formats (FIXME should we handle this somewhere else???)
-            tier.stylesheet = new DASStylesheet();
-            var wigStyle = new DASStyle();
+
             if (tier.bwg.type == 'bigbed') {
+                tier.stylesheet = new DASStylesheet();
+
+                var wigStyle = new DASStyle();
                 wigStyle.glyph = 'BOX';
                 wigStyle.FGCOLOR = 'black';
                 wigStyle.BGCOLOR = 'red'
                 wigStyle.HEIGHT = 12;
                 wigStyle.BUMP = true;
                 wigStyle.LABEL = true;
+                tier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+
+                var tsStyle = new DASStyle();
+                tsStyle.glyph = 'BOX';
+                tsStyle.FGCOLOR = 'black';
+                tsStyle.BGCOLOR = 'while';
+                tsStyle.BUMP = true;
+                tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
             } else {
+                tier.stylesheet = new DASStylesheet();
+                var wigStyle = new DASStyle();
                 wigStyle.glyph = 'HISTOGRAM';
                 wigStyle.COLOR1 = 'white';
                 wigStyle.COLOR2 = 'black';
+                tier.stylesheet.pushStyle('default', null, wigStyle);
             }
-            tier.stylesheet.pushStyle('default', null, wigStyle);
 
             tier.refreshTier();
         });
