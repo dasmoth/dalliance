@@ -492,6 +492,9 @@ Browser.prototype.refresh = function() {
 	    od += this.tiers[t].originHaxx;
 	}
 	this.tiers[t].originHaxx = od;
+    }
+
+    for (var t = 0; t < this.tiers.length; ++t) {
 	this.tiers[t].refreshTier();
     }
 }
