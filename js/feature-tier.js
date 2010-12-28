@@ -116,7 +116,9 @@ DasTier.prototype.styleForFeature = function(f) {
         }
         if (sh.type) {
             if (sh.type == 'default') {
-                maybe = sh.style;
+                if (!maybe) {
+                    maybe = sh.style;
+                }
                 continue;
             } else if (sh.type != f.type) {
                 continue;
