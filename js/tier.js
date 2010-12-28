@@ -39,9 +39,22 @@ DasTier.prototype.init = function() {
         makeBwgFromURL(tier.dasSource.bwgURI, function(bwg) {
             tier.bwg = bwg;
 
-            // No stylesheet for binary formats (FIXME should we handle this somewhere else???)
-
-            if (tier.bwg.type == 'bigbed') {
+            if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
+                tier.status = 'Fetching stylesheet';
+                tier.dasSource.stylesheet(function(stylesheet) {
+	            tier.stylesheet = stylesheet;
+	            tier.refreshTier();
+                }, function() {
+	            // tier.error = 'No stylesheet';
+                    tier.stylesheet = new DASStylesheet();
+                    var defStyle = new DASStyle();
+                    defStyle.glyph = 'BOX';
+                    defStyle.BGCOLOR = 'blue';
+                    defStyle.FGCOLOR = 'black';
+                    tier.stylesheet.pushStyle('default', null, defStyle);
+	            tier.refreshTier();
+                });
+            } else  if (tier.bwg.type == 'bigbed') {
                 tier.stylesheet = new DASStylesheet();
 
                 var wigStyle = new DASStyle();
@@ -59,6 +72,8 @@ DasTier.prototype.init = function() {
                 tsStyle.BGCOLOR = 'white';
                 tsStyle.BUMP = true;
                 tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+
+                tier.refreshTier();
             } else {
                 tier.stylesheet = new DASStylesheet();
                 var wigStyle = new DASStyle();
@@ -66,9 +81,9 @@ DasTier.prototype.init = function() {
                 wigStyle.COLOR1 = 'white';
                 wigStyle.COLOR2 = 'black';
                 tier.stylesheet.pushStyle('default', null, wigStyle);
-            }
 
-            tier.refreshTier();
+                tier.refreshTier();
+            }
         });
     } else {
         tier.status = 'Fetching stylesheet';
