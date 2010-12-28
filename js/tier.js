@@ -56,7 +56,7 @@ DasTier.prototype.init = function() {
                 var tsStyle = new DASStyle();
                 tsStyle.glyph = 'BOX';
                 tsStyle.FGCOLOR = 'black';
-                tsStyle.BGCOLOR = 'while';
+                tsStyle.BGCOLOR = 'white';
                 tsStyle.BUMP = true;
                 tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
             } else {

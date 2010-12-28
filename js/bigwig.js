@@ -386,6 +386,16 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 grp.notes = [];
                                 featureOpts.groups = [grp];
 
+                                if (bedColumns.length > 10) {
+                                    var geneId = bedColumns[9];
+                                    var geneName = bedColumns[10];
+                                    var gg = new DASGroup();
+                                    gg.id = geneId;
+                                    gg.label = geneName;
+                                    gg.type = 'gene';
+                                    featureOpts.groups.push(gg);
+                                }
+
                                 var spans = null;
                                 for (var b = 0; b < blockCount; ++b) {
                                     var bmin = blockStarts[b]|0;
