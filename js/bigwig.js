@@ -25,7 +25,6 @@ BlobFetchable.prototype.slice = function(start, length) {
     } else {
         b = this.blob.slice(start);
     }
-    dlog('slicedBlob');
     return new BlobFetchable(b);
 }
 
@@ -196,7 +195,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 	return;
     }
 
-    dlog('Got ' + this.cir.byteLength + ' bytes of CIR');
+    // dlog('Got ' + this.cir.byteLength + ' bytes of CIR');
     var ba = new Int8Array(this.cir);
     var sa = new Int16Array(this.cir);
     var la = new Int32Array(this.cir);
@@ -220,7 +219,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		if ((startChrom < chr || (startChrom == chr && startBase <= max)) &&
 		    (endChrom   > chr || (endChrom == chr && endBase >= min)))
 		{
-		    dlog('Got an interesting block: startBase=' + startBase + '; endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
+		    // dlog('Got an interesting block: startBase=' + startBase + '; endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
 		    blocksToFetch.push({offset: blockOffset, size: blockSize});
 		}
 		offset += 32;
@@ -236,7 +235,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		if ((startChrom < chr || (startChrom == chr && startBase <= max)) &&
 		    (endChrom   > chr || (endChrom == chr && endBase >= min)))
 		{
-		    dlog('Need to recur: ' + blockOffset);
+		    // dlog('Need to recur: ' + blockOffset);
 		    cirFobRecur(blockOffset - thisB.cirTreeOffset);
 		}
 		offset += 24;
@@ -446,9 +445,9 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                         ++bi;
                     }
 
-                    if (bi > 1) {
+                    /* if (bi > 1) {
                         dlog('Aggregate fetch of ' + bi + ' blocks');
-                    }
+                    } */
 
 		    thisB.bwg.data.slice(fetchStart, fetchSize).fetch(function(result) {
                         var offset = 0;
@@ -518,7 +517,6 @@ function makeBwg(data, callback) {
 
 */
 
-        dlog('File size=' + result.length);
         var header = bstringToBuffer(result);
 	var sa = new Int16Array(header);
 	var la = new Int32Array(header);
@@ -530,7 +528,7 @@ function makeBwg(data, callback) {
 	    dlog('Invalid magic=' + la[0]);
 	    return;
 	}
-        dlog('magic okay');
+//        dlog('magic okay');
 
 	bwg.version = sa[2];             // 4
 	bwg.numZoomLevels = sa[3];       // 6
@@ -556,12 +554,11 @@ function makeBwg(data, callback) {
 	    var zlReduction = la[zl*6 + 16]
 	    var zlData = (la[zl*6 + 18]<<32)|(la[zl*6 + 19]);
 	    var zlIndex = (la[zl*6 + 20]<<32)|(la[zl*6 + 21]);
-	    dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
+	    // dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
 	    bwg.zoomLevels.push({reduction: zlReduction, dataOffset: zlData, indexOffset: zlIndex});
 	}
 
 	bwg.readChromTree(function() {
-	    dlog("BWG is armed and ready");
             callback(bwg);
 	});
     });

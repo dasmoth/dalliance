@@ -1104,9 +1104,7 @@ Browser.prototype.realInit = function(opts) {
         this.zoomSlider.onchange = function(zoomVal, released) {
 	    thisB.zoom(Math.exp((1.0 * zoomVal) / thisB.zoomExpt));
 	    if (released) {
-                for (var t = 0; t < thisB.tiers.length; ++t) {
-                    thisB.tiers[t].layoutWasDone = false;
-                }
+                thisB.invalidateLayouts();
 	        thisB.refresh();
 	        thisB.storeStatus();
 	    }
@@ -1445,9 +1443,17 @@ Browser.prototype.realInit = function(opts) {
     }, false);
 
     var keyHandler = function(ev) {
-//        alert('key = ' + ev.keyCode + ', char = ' + ev.charCode);
-
-        if (ev.keyCode == 37) {
+        if (ev.keyCode == 32 || ev.charCode == 32) {
+            if (!thisB.isSnapZooming) {
+                thisB.isSnapZooming = true;
+                thisB.savedZoom = thisB.zoomSlider.getValue();
+                thisB.zoomSlider.setValue(25);
+                thisB.zoom(Math.exp((25.0) / thisB.zoomExpt));
+                thisB.invalidateLayouts();
+                thisB.refresh();
+            }      
+            ev.stopPropagation(); ev.preventDefault();      
+        } else if (ev.keyCode == 37) {
             // left
             ev.stopPropagation(); ev.preventDefault();
             thisB.move(ev.shiftKey ? - 100 : -25);
@@ -1478,15 +1484,30 @@ Browser.prototype.realInit = function(opts) {
             }
         } 
     };
+    var keyUpHandler = function(ev) {
+        if (ev.keyCode == 32) {
+            if (thisB.isSnapZooming) {
+                thisB.isSnapZooming = false;
+                thisB.zoomSlider.setValue(thisB.savedZoom);
+                thisB.zoom(Math.exp((1.0 * thisB.savedZoom / thisB.zoomExpt)));
+                thisB.invalidateLayouts();
+                thisB.refresh();
+            }
+            ev.stopPropagation(); ev.preventDefault();
+        }
+    }
+
     var mouseLeaveHandler;
     mouseLeaveHandler = function(ev) {
         window.removeEventListener('keydown', keyHandler, false);
+        window.removeEventListener('keyup', keyUpHandler, false);
         window.removeEventListener('keypress', keyHandler, false);
         thisB.svgRoot.removeEventListener('mouseout', mouseLeaveHandler, false);
     }
 
     this.svgRoot.addEventListener('mouseover', function(ev) {
         window.addEventListener('keydown', keyHandler, false);
+        window.addEventListener('keyup', keyUpHandler, false);
         window.addEventListener('keypress', keyHandler, false);
         thisB.svgRoot.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
@@ -1900,4 +1921,10 @@ Browser.prototype.scheduleRefresh = function(time) {
         thisB.refreshTB = null;
         thisB.refresh();
     }, time);
+}
+
+Browser.prototype.invalidateLayouts = function() {
+    for (var t = 0; t < this.tiers.length; ++t) {
+        this.tiers[t].layoutWasDone = false;
+    }
 }
