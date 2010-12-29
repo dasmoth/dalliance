@@ -64,12 +64,14 @@ DasTier.prototype.init = function() {
                 wigStyle.HEIGHT = 12;
                 wigStyle.BUMP = true;
                 wigStyle.LABEL = true;
+                wigStyle.ZINDEX = 20;
                 tier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
 
                 var tsStyle = new DASStyle();
                 tsStyle.glyph = 'BOX';
                 tsStyle.FGCOLOR = 'black';
                 tsStyle.BGCOLOR = 'white';
+                tsStyle.ZINDEX = 10;
                 tsStyle.BUMP = true;
                 tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
 
