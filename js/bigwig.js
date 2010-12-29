@@ -188,7 +188,7 @@ BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
 BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     var thisB = this;
     if (!this.cir) {
-	dlog('No CIR yet, fetching');
+	// dlog('No CIR yet, fetching');
         this.bwg.data.slice(this.cirTreeOffset, this.cirTreeLength).fetch(function(result) {
 	    thisB.cir = bstringToBuffer(result);
 	    thisB.readWigDataById(chr, min, max, callback);
@@ -244,6 +244,11 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 	}
     };
     cirFobRecur(48);
+
+    blocksToFetch.sort(function(b0, b1) {
+        return (b0.offset|0) - (b1.offset|0);
+    });
+
     if (blocksToFetch.length == 0) {
 	callback([]);
     } else {
@@ -284,9 +289,9 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		        var la = new Int32Array(block.data);
 		        var fa = new Float32Array(block.data);
 
-                        dlog('processing summary block...')
+                        // dlog('processing summary block...')
                         var itemCount = block.data.byteLength/32;
-                        dlog('Summary itemCount=' + itemCount);
+                        // dlog('Summary itemCount=' + itemCount);
                         for (var i = 0; i < itemCount; ++i) {
                             var chromId =   la[(i*8)];
                             var start =     la[(i*8)+1];
@@ -433,14 +438,34 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		    blocksToFetch.splice(0, 1);
 		    tramp();
 		} else {
-		    thisB.bwg.data.slice(block.offset, block.size).fetch(function(result) {
-			if (thisB.bwg.uncompressBufSize > 0) {
-			    // dlog('first few bytes of compressed block: ' + result.charCodeAt(0) + ',' + result.charCodeAt(1)); 
-			    dlog('inflating ' + result.length);
-			    result = JSInflate.inflate(result.substr(2));
-			    dlog('inflated ' + result.length);
-			}
-			block.data = bstringToBuffer(result);
+                    var fetchStart = block.offset;
+                    var fetchSize = block.size;
+                    var bi = 1;
+                    while (bi < blocksToFetch.length && blocksToFetch[bi].offset == (fetchStart + fetchSize)) {
+                        fetchSize += blocksToFetch[bi].size;
+                        ++bi;
+                    }
+
+                    if (bi > 1) {
+                        dlog('Aggregate fetch of ' + bi + ' blocks');
+                    }
+
+		    thisB.bwg.data.slice(fetchStart, fetchSize).fetch(function(result) {
+                        var offset = 0;
+                        var bi = 0;
+                        while (offset < fetchSize) {
+                            var fb = blocksToFetch[bi];
+                            var bresult;
+			    if (thisB.bwg.uncompressBufSize > 0) {
+			        bresult = JSInflate.inflate(result.substr(offset + 2, fb.size - 2));
+			    } else {
+                                bresult = result.substr(offset, fb.size);
+                            }
+			    fb.data = bstringToBuffer(bresult);
+
+                            offset += fb.size;
+                            ++bi;
+                        }
 			tramp();
 		    });
 		}
@@ -479,7 +504,7 @@ function makeBwgFromFile(file, callback) {
 }
 
 function makeBwg(data, callback) {
-    dlog('makeBwg');
+    // dlog('makeBwg');
     var bwg = new BigWig();
     bwg.data = data;
     bwg.data.slice(0, 512).fetch(function(result) {
@@ -519,13 +544,12 @@ function makeBwg(data, callback) {
         bwg.uncompressBufSize = la[13];  // 52
          
         dlog('bigType: ' + bwg.type);
-	dlog('chromTree at: ' + bwg.chromTreeOffset);
-        dlog('fieldCount: ' + bwg.fieldCount);
-	dlog('uncompress: ' + bwg.uncompressBufSize);
-	dlog('data at: ' + bwg.unzoomedDataOffset);
-	dlog('index at: ' + bwg.unzoomedIndexOffset);
-        dlog('field count: ' + bwg.fieldCount);
-        dlog('defined count: ' + bwg.definedFieldCount);
+	// dlog('chromTree at: ' + bwg.chromTreeOffset);
+	// dlog('uncompress: ' + bwg.uncompressBufSize);
+	// dlog('data at: ' + bwg.unzoomedDataOffset);
+	// dlog('index at: ' + bwg.unzoomedIndexOffset);
+        // dlog('field count: ' + bwg.fieldCount);
+        // dlog('defined count: ' + bwg.definedFieldCount);
 
 	bwg.zoomLevels = [];
 	for (var zl = 0; zl < bwg.numZoomLevels; ++zl) {
