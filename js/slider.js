@@ -56,6 +56,10 @@ function DSlider(width, opts) {
 	this.handle.setAttribute('x', value - 4);
     }
 
+    this.setColor = function(c) {
+	this.handle.setAttribute('fill', c);
+    }
+
     this.onchange = null;
 
     var moveHandler = function(ev) {
