@@ -1444,14 +1444,28 @@ Browser.prototype.realInit = function(opts) {
 
     var keyHandler = function(ev) {
         if (ev.keyCode == 32 || ev.charCode == 32) {
-            if (!thisB.isSnapZooming) {
-                thisB.isSnapZooming = true;
-                thisB.savedZoom = thisB.zoomSlider.getValue();
-                thisB.zoomSlider.setValue(25);
-                thisB.zoom(Math.exp((25.0) / thisB.zoomExpt));
-                thisB.invalidateLayouts();
-                thisB.refresh();
-            }      
+            if (!thisB.snapZoomLockout) {
+                if (!thisB.isSnapZooming) {
+                    thisB.isSnapZooming = true;
+                    var newZoom = thisB.savedZoom || 1.0;
+                    thisB.savedZoom = thisB.zoomSlider.getValue();
+                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    thisB.invalidateLayouts();
+                    thisB.zoomSlider.setColor('red');
+                    thisB.refresh();
+                } else {
+                    thisB.isSnapZooming = false;
+                    var newZoom = thisB.savedZoom || 10.0;
+                    thisB.savedZoom = thisB.zoomSlider.getValue();
+                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    thisB.invalidateLayouts();
+                    thisB.zoomSlider.setColor('blue');
+                    thisB.refresh();
+                }
+                thisB.snapZoomLockout = true;
+            }
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 37) {
             // left
@@ -1485,6 +1499,9 @@ Browser.prototype.realInit = function(opts) {
         } 
     };
     var keyUpHandler = function(ev) {
+
+        thisB.snapZoomLockout = false;
+/*
         if (ev.keyCode == 32) {
             if (thisB.isSnapZooming) {
                 thisB.isSnapZooming = false;
@@ -1494,7 +1511,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.refresh();
             }
             ev.stopPropagation(); ev.preventDefault();
-        }
+        } */
     }
 
     var mouseLeaveHandler;
