@@ -8,6 +8,28 @@
 //
 
 
+function Awaited() {
+    this.queue = [];
+}
+
+Awaited.prototype.provide = function(x) {
+    if (this.res) {
+	throw "Resource has already been provided.";
+    }
+
+    this.res = x;
+    for (var i = 0; i < this.queue.length; ++i) {
+	this.queue[i](x);
+    }
+}
+
+Awaited.prototype.await = function(f) {
+    if (this.res) {
+	f(this.res);
+    } else {
+	this.queue.push(f);
+    }
+}
 
 
 function FetchPool() {
@@ -62,6 +84,9 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
 
 KnownSpace.prototype.startFetchesFor = function(tier) {
     tier.getSource().fetch(this.chr, this.min, this.max, this.scale, null, this.pool, function(status, features, scale) {
+	if (scale < this.scale) {
+	    features = downsample(features, this.scale);
+	}
 	tier.viewFeatures(this.chr, this.min, this.max, this.scale, features);
     });
 }
@@ -81,8 +106,6 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	new DASSegment(chr, min, max),
 	{type: types, maxbins: maxBins},
 	function(features, status) {
-	    // dlog('fetchStatus: ' + status);
-	    // dlog('features: ' + miniJSONify(features));
 	    callback(status, features, scale);
 	}
     );
@@ -95,20 +118,24 @@ DASFeatureSource.prototype.getScales = function() {
 
 function BWGFeatureSource(bwgURI) {
     var thisB = this;
+    thisB.bwgHolder = new Awaited();
     makeBwgFromURL(bwgURI, function(bwg) {
-	dlog('bwgReady');
-	thisB.bwg = bwg;
+	thisB.bwgHolder.provide(bwg);
     });
 }
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    dlog('bwgtry');
-    if (!this.bwg) {
-	return;
-    }
-    dlog('bwgfetch');
-    this.bwg.readWigData(chr, min, max, function(features) {
-	callback(null, features, scale);
+    this.bwgHolder.await(function(bwg) {
+	bwg.readWigData(chr, min, max, function(features) {
+	    var fs = scale;
+	    if (bwg.type === 'bigwig') {
+		var is = (max - min) / features.length;
+		if (is < fs) {
+		    fs = is;
+		}
+	    }
+	    callback(null, features, fs);
+	});
     });
 }
 
