@@ -494,9 +494,14 @@ Browser.prototype.refresh = function() {
 	this.tiers[t].originHaxx = od;
     }
 
+/*
     for (var t = 0; t < this.tiers.length; ++t) {
 	this.tiers[t].refreshTier();
-    }
+    }*/
+
+    var scaledQuantRes = this.targetQuantRes / this.scale;
+    this.knownSpace = new KnownSpace(this.tiers, this.chr, this.knownStart, this.knownEnd, scaledQuantRes);
+    this.knownSpace.viewFeatures(this.chr, this.knownStart, this.knownEnd, scaledQuantRes);
 }
 
 

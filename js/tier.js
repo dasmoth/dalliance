@@ -30,6 +30,12 @@ function DasTier(browser, source, viewport, background)
     }
 
     this.layoutWasDone = false;
+
+    if (this.dasSource.bwgURI) {
+        this.featureSource = new BWGFeatureSource(this.dasSource.bwgURI);
+    } else {
+        this.featureSource = new DASFeatureSource(this.dasSource);
+    }
 }
 
 DasTier.prototype.init = function() {
@@ -43,7 +49,7 @@ DasTier.prototype.init = function() {
                 tier.status = 'Fetching stylesheet';
                 tier.dasSource.stylesheet(function(stylesheet) {
 	            tier.stylesheet = stylesheet;
-	            tier.refreshTier();
+	            // tier.refreshTier();
                 }, function() {
 	            // tier.error = 'No stylesheet';
                     tier.stylesheet = new DASStylesheet();
@@ -52,7 +58,9 @@ DasTier.prototype.init = function() {
                     defStyle.BGCOLOR = 'blue';
                     defStyle.FGCOLOR = 'black';
                     tier.stylesheet.pushStyle('default', null, defStyle);
-	            tier.refreshTier();
+
+
+	            // tier.refreshTier();
                 });
             } else  if (tier.bwg.type == 'bigbed') {
                 tier.stylesheet = new DASStylesheet();
@@ -75,7 +83,7 @@ DasTier.prototype.init = function() {
                 tsStyle.BUMP = true;
                 tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
 
-                tier.refreshTier();
+                // tier.refreshTier();
             } else {
                 tier.stylesheet = new DASStylesheet();
                 var wigStyle = new DASStyle();
@@ -84,14 +92,14 @@ DasTier.prototype.init = function() {
                 wigStyle.COLOR2 = 'black';
                 tier.stylesheet.pushStyle('default', null, wigStyle);
 
-                tier.refreshTier();
+                // tier.refreshTier();
             }
         });
     } else {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
 	    tier.stylesheet = stylesheet;
-	    tier.refreshTier();
+	    // tier.refreshTier();
         }, function() {
 	    // tier.error = 'No stylesheet';
             tier.stylesheet = new DASStylesheet();
@@ -100,7 +108,7 @@ DasTier.prototype.init = function() {
             defStyle.BGCOLOR = 'blue';
             defStyle.FGCOLOR = 'black';
             tier.stylesheet.pushStyle('default', null, defStyle);
-	    tier.refreshTier();
+	    // tier.refreshTier();
         });
     }
 }
@@ -117,6 +125,26 @@ DasTier.prototype.styles = function(scale) {
 	return this.stylesheet.lowZoomStyles;
     }
 }
+
+DasTier.prototype.getSource = function() {
+    return this.featureSource;
+}
+
+DasTier.prototype.getDesiredTypes = function(scale) {
+    return null;
+}
+
+DasTier.prototype.setStatus = function(status) {
+    dlog(status);
+}
+
+DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
+    this.currentFeatures = features;
+    this.knownStart = min; this.knownEnd = max;
+    this.status = null; this.error = null;
+    dasRequestComplete(this);
+}
+
 
 function refreshTier_sequence()
 {
@@ -155,6 +183,8 @@ function zoomForScale(scale) {
 
 function refreshTier_features()
 {
+    throw "refreshTier_features called"
+
     // var stylesheet = this.styles(this.browser.scale);
     var fetchTypes = [];
     var inclusive = false;
