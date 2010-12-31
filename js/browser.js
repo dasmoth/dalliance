@@ -1430,7 +1430,7 @@ Browser.prototype.realInit = function(opts) {
                     thisB.savedZoom = thisB.zoomSlider.getValue();
                     thisB.zoomSlider.setValue(newZoom);
                     thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    thisB.invalidateLayouts();
+                    // thisB.invalidateLayouts();
                     thisB.zoomSlider.setColor('red');
                     thisB.refresh();
                 } else {
@@ -1439,7 +1439,7 @@ Browser.prototype.realInit = function(opts) {
                     thisB.savedZoom = thisB.zoomSlider.getValue();
                     thisB.zoomSlider.setValue(newZoom);
                     thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    thisB.invalidateLayouts();
+                    // thisB.invalidateLayouts();
                     thisB.zoomSlider.setColor('blue');
                     thisB.refresh();
                 }
