@@ -46,8 +46,17 @@ FetchPool.prototype.abortAll = function() {
     }
 }
 
+function KSCacheBaton(chr, min, max, scale, features) {
+    this.chr = chr;
+    this.min = min;
+    this.max = max;
+    this.scale = scale;
+    this.features = features;
+}
 
-
+KSCacheBaton.prototype.toString = function() {
+    return this.chr + ":" + this.min + ".." + this.max + ";scale=" + this.scale;
+}
 
 function KnownSpace(tierMap, chr, min, max, scale, parent) {
     this.tierMap = tierMap;
@@ -56,7 +65,7 @@ function KnownSpace(tierMap, chr, min, max, scale, parent) {
     this.max = max;
     this.scale = scale;
 
-    this.features = {};
+    this.featureCache = {};
 
     if (parent) {
 	// try to copy stuff
@@ -83,9 +92,46 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     
 
 KnownSpace.prototype.startFetchesFor = function(tier) {
-    tier.getSource().fetch(this.chr, this.min, this.max, this.scale, null, this.pool, function(status, features, scale) {
-	if (scale < this.scale) {
-	    features = downsample(features, this.scale);
+    var thisB = this;
+
+    var source = tier.getSource();
+    var baton = thisB.featureCache[tier];
+    if (baton) {
+	dlog('considering cached features: ' + baton);
+    }
+    if (baton && baton.chr === this.chr && baton.min <= this.min && baton.max >= this.max) {
+	var cachedFeatures = baton.features;
+	if (baton.min < this.min || baton.max > this.max) {
+	    var ff = [];
+	    for (var fi = 0; fi < cachedFeatures.length; ++fi) {
+		var f = cachedFeatures[fi];
+		if (f.min <= this.max && f.max >= this.min) {
+		    ff.push(f);
+		}
+	    }
+	    cachedFeatures = ff;
+	}
+	if (baton.scale < thisB.scale) {
+	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
+	}
+	tier.viewFeatures(baton.chr, baton.min, baton.max, baton.scale, cachedFeatures);   // FIXME change scale if downsampling
+
+	var availableScales = source.getScales();
+	if (baton.scale <= this.scale || !availableScales) {
+	    dlog('used cached features');
+	    return;
+	} else {
+	    dlog('used cached features (temporarily)');
+	}
+    }
+
+    source.fetch(this.chr, this.min, this.max, this.scale, null, this.pool, function(status, features, scale) {
+	if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
+	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
+	}
+
+	if (scale < thisB.scale) {
+	    features = downsample(features, thisB.scale);
 	}
 	tier.viewFeatures(this.chr, this.min, this.max, this.scale, features);
     });
@@ -137,6 +183,15 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	    callback(null, features, fs);
 	});
     });
+}
+
+BWGFeatureSource.prototype.getScales = function() {
+    var bwg = this.bwgHolder.res;
+    if (bwg) {
+	return null;
+    } else {
+	return null;
+    }
 }
 
 
