@@ -7,10 +7,13 @@
 // tier.js: (try) to encapsulate the functionality of a browser tier.
 //
 
+var __tier_idSeed = 0;
+
 function DasTier(browser, source, viewport, background)
 {
     var thisTier = this;
 
+    this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
     this.dasSource = new DASSource(source);
     this.viewport = viewport;
@@ -36,6 +39,10 @@ function DasTier(browser, source, viewport, background)
     } else {
         this.featureSource = new DASFeatureSource(this.dasSource);
     }
+}
+
+DasTier.prototype.toString = function() {
+    return this.id;
 }
 
 DasTier.prototype.init = function() {
