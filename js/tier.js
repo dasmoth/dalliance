@@ -26,17 +26,51 @@ function DasTier(browser, source, viewport, background)
     }
     this.y = 0;
 
+/*
     if (this.dasSource.tier_type == 'sequence') {
 	this.refreshTier = refreshTier_sequence;
     } else {
 	this.refreshTier = refreshTier_features;
-    }
+    } */
 
     this.layoutWasDone = false;
 
     var fs;
     if (this.dasSource.bwgURI) {
         fs = new BWGFeatureSource(this.dasSource.bwgURI);
+
+        if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
+            fs.bwgHolder.await(function(bwg) {
+                if (bwg.type == 'bigbed') {
+                    thisTier.stylesheet = new DASStylesheet();
+                    
+                    var wigStyle = new DASStyle();
+                    wigStyle.glyph = 'BOX';
+                    wigStyle.FGCOLOR = 'black';
+                    wigStyle.BGCOLOR = 'red'
+                    wigStyle.HEIGHT = 12;
+                    wigStyle.BUMP = true;
+                    wigStyle.LABEL = true;
+                    wigStyle.ZINDEX = 20;
+                    thisTier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+                    
+                    var tsStyle = new DASStyle();
+                    tsStyle.glyph = 'BOX';
+                    tsStyle.FGCOLOR = 'black';
+                    tsStyle.BGCOLOR = 'white';
+                    tsStyle.ZINDEX = 10;
+                    tsStyle.BUMP = true;
+                    thisTier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+                } else {
+                    thisTier.stylesheet = new DASStylesheet();
+                    var wigStyle = new DASStyle();
+                    wigStyle.glyph = 'HISTOGRAM';
+                    wigStyle.COLOR1 = 'white';
+                    wigStyle.COLOR2 = 'black';
+                    thisTier.stylesheet.pushStyle('default', null, wigStyle);
+                }
+            });
+        }
     } else {
         fs = new DASFeatureSource(this.dasSource);
     }
@@ -55,65 +89,12 @@ DasTier.prototype.toString = function() {
 DasTier.prototype.init = function() {
     var tier = this;
 
-    if (tier.dasSource.bwgURI) {
-        makeBwgFromURL(tier.dasSource.bwgURI, function(bwg) {
-            tier.bwg = bwg;
+ 
 
-            if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
-                tier.status = 'Fetching stylesheet';
-                tier.dasSource.stylesheet(function(stylesheet) {
-	            tier.stylesheet = stylesheet;
-	            // tier.refreshTier();
-                }, function() {
-	            // tier.error = 'No stylesheet';
-                    tier.stylesheet = new DASStylesheet();
-                    var defStyle = new DASStyle();
-                    defStyle.glyph = 'BOX';
-                    defStyle.BGCOLOR = 'blue';
-                    defStyle.FGCOLOR = 'black';
-                    tier.stylesheet.pushStyle('default', null, defStyle);
-
-
-	            // tier.refreshTier();
-                });
-            } else  if (tier.bwg.type == 'bigbed') {
-                tier.stylesheet = new DASStylesheet();
-
-                var wigStyle = new DASStyle();
-                wigStyle.glyph = 'BOX';
-                wigStyle.FGCOLOR = 'black';
-                wigStyle.BGCOLOR = 'red'
-                wigStyle.HEIGHT = 12;
-                wigStyle.BUMP = true;
-                wigStyle.LABEL = true;
-                wigStyle.ZINDEX = 20;
-                tier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
-
-                var tsStyle = new DASStyle();
-                tsStyle.glyph = 'BOX';
-                tsStyle.FGCOLOR = 'black';
-                tsStyle.BGCOLOR = 'white';
-                tsStyle.ZINDEX = 10;
-                tsStyle.BUMP = true;
-                tier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
-
-                // tier.refreshTier();
-            } else {
-                tier.stylesheet = new DASStylesheet();
-                var wigStyle = new DASStyle();
-                wigStyle.glyph = 'HISTOGRAM';
-                wigStyle.COLOR1 = 'white';
-                wigStyle.COLOR2 = 'black';
-                tier.stylesheet.pushStyle('default', null, wigStyle);
-
-                // tier.refreshTier();
-            }
-        });
-    } else {
+    if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
 	    tier.stylesheet = stylesheet;
-	    // tier.refreshTier();
         }, function() {
 	    // tier.error = 'No stylesheet';
             tier.stylesheet = new DASStylesheet();
@@ -122,7 +103,6 @@ DasTier.prototype.init = function() {
             defStyle.BGCOLOR = 'blue';
             defStyle.FGCOLOR = 'black';
             tier.stylesheet.pushStyle('default', null, defStyle);
-	    // tier.refreshTier();
         });
     }
 }
@@ -195,128 +175,6 @@ function zoomForScale(scale) {
     return ssScale;
 }
 
-function refreshTier_features()
-{
-    throw "refreshTier_features called"
-
-    // var stylesheet = this.styles(this.browser.scale);
-    var fetchTypes = [];
-    var inclusive = false;
-    var ssScale = zoomForScale(this.browser.scale);
-
-    if (this.stylesheet) {
-        var ss = this.stylesheet.styles;
-        for (var si = 0; si < ss.length; ++si) {
-            var sh = ss[si];
-            if (!sh.zoom || sh.zoom == ssScale) {
-                if (!sh.type || sh.type == 'default') {
-                    inclusive = true;
-                    break;
-                } else {
-                    pushnew(fetchTypes, sh.type);
-                }
-            }
-        }
-    }
-    
-    var scaledQuantRes = this.browser.targetQuantRes / this.browser.scale;
-    var maxBins = 1 + (((this.browser.knownEnd - this.browser.knownStart) / scaledQuantRes) | 0);
-    var fetchStart = this.browser.knownStart;
-    var fetchEnd = this.browser.knownEnd;
-
-    if (inclusive || fetchTypes.length > 0) {
-	var tier = this;
-	this.status = 'Fetching features';
-
-        if (this.dasSource.bwgURI) {
-            if (this.bwg) {
-                this.bwg.readWigData(this.browser.chr, fetchStart, fetchEnd, function(features) {
-                    dlog('got ' + features.length + ' features');
-                    if (tier.bwg.type == 'bigwig' && features.length > maxBins) {
-                        features = downsample(features, scaledQuantRes);
-                        dlog('downsampled to ' + features.length);
-                    }
-
-                    tier.currentFeatures = features;
-                    tier.error = null; tier.status = null;
-                    tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
-                    dasRequestComplete(tier);
-                });
-            }
-        } else if (this.dasSource.mapping) {
-            var mapping = this.browser.chains[this.dasSource.mapping];
-            mapping.sourceBlocksForRange(this.browser.chr, fetchStart, fetchEnd, function(mseg) {
-                if (mseg.length == 0) {
-                    tier.currentFeatures = [];
-                    tier.status = "No mapping available for this regions";
-                    dasRequestComplete(tier);
-                } else {
-                    tier.dasSource.features(
-                        mseg[0],
-                        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
-	                function(features, status) {
-		            if (status) {
-		                tier.error = status;
-		            } else {
-		                tier.error = null; tier.status = null;
-		            }
-
-                            var mappedFeatures = [];
-                            for (var fi = 0; fi < features.length; ++fi) {
-                                var f = features[fi];
-                                var mmin = mapping.mapPoint(f.segment, f.min);
-                                var mmax = mapping.mapPoint(f.segment, f.max);
-                                if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != tier.browser.chr) {
-                                    // Discard feature.
-                                } else {
-                                    f.segment = mmin.seq;
-                                    f.min = mmin.pos;
-                                    f.max = mmax.pos;
-                                    if (f.min > f.max) {
-                                        var tmp = f.max;
-                                        f.max = f.min;
-                                        f.min = tmp;
-                                    }
-                                    if (mmin.flipped) {
-                                        if (f.orientation == '-') {
-                                            f.orientation = '+';
-                                            alert(miniJSONify(f));
-                                        } else if (f.orientation == '+') {
-                                            f.orientation = '-';
-                                        }
-                                    }
-                                    mappedFeatures.push(f);
-                                }
-                            }
-                            tier.currentFeatures = mappedFeatures;
-                            tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
-                            dasRequestComplete(tier);
-	                }
-                    );
-                }
-            });
-        } else {        
-            this.dasSource.features(
-	        new DASSegment(this.browser.chr, fetchStart, fetchEnd),
-	        {type: (inclusive ? null : fetchTypes), maxbins: maxBins},
-	        function(features, status) {
-		    if (status) {
-		        tier.error = status;
-		    } else {
-		        tier.error = null; tier.status = null;
-		    }
-                    tier.currentFeatures = features;
-                    tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
-                    dasRequestComplete(tier);
-	        }
-            );
-        }
-    } else {
-	this.status = 'Nothing to show at this zoom level';
-	this.currentFeatures = [];
-	dasRequestComplete(this);
-    }
-}
 
 DasTier.prototype.setBackground = function() {            
     if (this.knownStart) {
