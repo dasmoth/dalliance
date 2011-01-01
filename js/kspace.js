@@ -198,4 +198,60 @@ BWGFeatureSource.prototype.getScales = function() {
 
 
 function MappedFeatureSource(source, mapping) {
+    this.source = source;
+    this.mapping = mapping;
 }
+
+MappedFeatureSource.prototype.getScales = function() {
+    return this.source.getScales();
+}
+
+MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
+
+    this.mapping.sourceBlocksForRange(chr, min, max, function(mseg) {
+        if (mseg.length == 0) {
+            callback("No mapping available for this regions", [], scale);
+        } else {
+	    var seg = mseg[0];
+	    thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, scale) {
+		var mappedFeatures = [];
+		if (features) {
+		    for (var fi = 0; fi < features.length; ++fi) {
+                        var f = features[fi];
+			var sn = f.segment;
+			if (sn.indexOf('chr') == 0) {
+			    sn = sn.substr(3);
+			}
+                        var mmin = thisB.mapping.mapPoint(sn, f.min);
+                        var mmax = thisB.mapping.mapPoint(sn, f.max);
+                        if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
+                            // Discard feature.
+                        } else {
+                            f.segment = mmin.seq;
+                            f.min = mmin.pos;
+                            f.max = mmax.pos;
+                            if (f.min > f.max) {
+                                var tmp = f.max;
+                                f.max = f.min;
+                                f.min = tmp;
+                            }
+                            if (mmin.flipped) {
+                                if (f.orientation == '-') {
+                                    f.orientation = '+';
+                                    alert(miniJSONify(f));
+                                } else if (f.orientation == '+') {
+                                    f.orientation = '-';
+                                }
+                            }
+                            mappedFeatures.push(f);
+                        }
+                    }
+		}
+
+		callback(status, mappedFeatures, scale);
+	    });
+	}
+    });
+}
+
