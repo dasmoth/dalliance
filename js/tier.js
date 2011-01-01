@@ -34,11 +34,18 @@ function DasTier(browser, source, viewport, background)
 
     this.layoutWasDone = false;
 
+    var fs;
     if (this.dasSource.bwgURI) {
-        this.featureSource = new BWGFeatureSource(this.dasSource.bwgURI);
+        fs = new BWGFeatureSource(this.dasSource.bwgURI);
     } else {
-        this.featureSource = new DASFeatureSource(this.dasSource);
+        fs = new DASFeatureSource(this.dasSource);
     }
+    
+    if (this.dasSource.mapping) {
+        fs = new MappedFeatureSource(fs, this.browser.chains[this.dasSource.mapping]);
+    }
+
+    this.featureSource = fs;
 }
 
 DasTier.prototype.toString = function() {
