@@ -89,8 +89,6 @@ DasTier.prototype.toString = function() {
 DasTier.prototype.init = function() {
     var tier = this;
 
- 
-
     if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
@@ -133,10 +131,15 @@ DasTier.prototype.setStatus = function(status) {
 }
 
 DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
+//    dlog('viewFeatures(' + chr + ',' + min + ',' + max + ')');
+
     this.currentFeatures = features;
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
-    dasRequestComplete(this);
+
+    drawFeatureTier(this);
+    this.originHaxx = 0;
+    this.browser.arrangeTiers();
 }
 
 
@@ -181,12 +184,4 @@ DasTier.prototype.setBackground = function() {
         this.background.setAttribute('x', (this.knownStart - this.browser.origin) * this.browser.scale);
         this.background.setAttribute('width', (this.knownEnd - this.knownStart + 1) * this.browser.scale);
     }    
-}
-
-function dasRequestComplete(tier)
-{
-    drawFeatureTier(tier);
-    tier.originHaxx = 0;
-    tier.setBackground();
-    tier.browser.arrangeTiers();
 }

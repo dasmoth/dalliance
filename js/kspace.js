@@ -72,6 +72,15 @@ function KnownSpace(tierMap, chr, min, max, scale, parent) {
     }
 }
 
+KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
+    var baton = this.featureCache[this.tierMap[0]];
+    if (baton) {
+	return baton;
+    } else {
+	return null;
+    }
+}
+
 KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     if (chr != this.chr) {
 	throw "Can't extend Known Space to a new chromosome";
@@ -97,7 +106,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
     var source = tier.getSource();
     var baton = thisB.featureCache[tier];
     if (baton) {
-	dlog('considering cached features: ' + baton);
+// 	dlog('considering cached features: ' + baton);
     }
     if (baton && baton.chr === this.chr && baton.min <= this.min && baton.max >= this.max) {
 	var cachedFeatures = baton.features;
@@ -118,10 +127,10 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 
 	var availableScales = source.getScales();
 	if (baton.scale <= this.scale || !availableScales) {
-	    dlog('used cached features');
+//	    dlog('used cached features');
 	    return;
 	} else {
-	    dlog('used cached features (temporarily)');
+//	    dlog('used cached features (temporarily)');
 	}
     }
 
@@ -133,7 +142,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	if (scale < thisB.scale) {
 	    features = downsample(features, thisB.scale);
 	}
-	tier.viewFeatures(this.chr, this.min, this.max, this.scale, features);
+	tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
     });
 }
 

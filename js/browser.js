@@ -478,9 +478,9 @@ Browser.prototype.updateRegion = function()
 
 Browser.prototype.refresh = function() {
     var width = (this.viewEnd - this.viewStart) + 1;
+    var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
-    this.knownStart = Math.max(1, (this.viewStart|0) - maxExtraW);
-    this.knownEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
+
     
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
@@ -496,10 +496,26 @@ Browser.prototype.refresh = function() {
 
     var scaledQuantRes = this.targetQuantRes / this.scale;
 
+
+    var innerDrawnStart = Math.max(1, (this.viewStart|0) - minExtraW);
+    var innerDrawnEnd = Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000))
+    var outerDrawnStart = Math.max(1, (this.viewStart|0) - maxExtraW);
+    var outerDrawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
+
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
-        this.knownSpace = new KnownSpace(this.tiers, this.chr, this.knownStart, this.knownEnd, scaledQuantRes);
+        this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes);
     }
-    this.knownSpace.viewFeatures(this.chr, this.knownStart, this.knownEnd, scaledQuantRes);
+    
+    var seg = this.knownSpace.bestCacheOverlapping(this.chr, innerDrawnStart, innerDrawnEnd);
+    if (seg) {
+        this.drawnStart = Math.max(seg.min, outerDrawnStart);
+        this.drawnEnd = Math.min(seg.max, outerDrawnEnd);
+    } else {
+        this.drawnStart = outerDrawnStart;
+        this.drawnEnd = outerDrawnEnd;
+    }
+
+    this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
 }
 
 
@@ -1368,6 +1384,7 @@ Browser.prototype.realInit = function(opts) {
 	var source = this.sources[t];
         this.makeTier(source);
     }
+    thisB.arrangeTiers();
     
     //
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
@@ -1786,11 +1803,13 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
 // Navigation prims.
 //
 
-Browser.prototype.spaceCheck = function() {
+Browser.prototype.spaceCheck = function(dontRefresh) {
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
-    if ((this.knownStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.knownEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
+    if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
+//         this.drawnStart = Math.max(1, (this.viewStart|0) - maxExtraW);
+//        this.drawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
 	this.refresh();
     }
 }
@@ -1832,13 +1851,14 @@ Browser.prototype.zoom = function(factor) {
     }
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
     this.updateRegion();
+    this.spaceCheck(false);
     
     var width = this.viewEnd - this.viewStart + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
     // Currently, always reset Known Space after a zoom :-(
-    this.knownStart = Math.max(1, Math.round(this.viewStart) - maxExtraW);
-    this.knownEnd = Math.round(this.viewEnd) + maxExtraW;
+//    this.knownStart = Math.max(1, Math.round(this.viewStart) - maxExtraW);
+//    this.knownEnd = Math.round(this.viewEnd) + maxExtraW;
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));
