@@ -507,7 +507,7 @@ Browser.prototype.refresh = function() {
     }
     
     var seg = this.knownSpace.bestCacheOverlapping(this.chr, innerDrawnStart, innerDrawnEnd);
-    if (seg) {
+    if (seg && seg.min <= innerDrawnStart && seg.max >= innerDrawnEnd) {
         this.drawnStart = Math.max(seg.min, outerDrawnStart);
         this.drawnEnd = Math.min(seg.max, outerDrawnEnd);
     } else {
