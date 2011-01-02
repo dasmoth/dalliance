@@ -1800,7 +1800,7 @@ Browser.prototype.move = function(pos)
 
 Browser.prototype.zoom = function(factor) {
     this.zoomFactor = factor;
-    var viewCenter = (this.viewStart + this.viewEnd) / 2.0;
+    var viewCenter = Math.round((this.viewStart + this.viewEnd) / 2.0)|0;
     this.viewStart = viewCenter - this.zoomBase * this.zoomFactor / 2;
     this.viewEnd = viewCenter + this.zoomBase * this.zoomFactor / 2;
     if (this.currentSeqMax > 0 && (this.viewEnd > this.currentSeqMax + 5)) {
@@ -1817,11 +1817,6 @@ Browser.prototype.zoom = function(factor) {
     this.updateRegion();
 
     var width = this.viewEnd - this.viewStart + 1;
-    var minExtraW = (width * this.minExtra) | 0;
-    var maxExtraW = (width * this.maxExtra) | 0;
-    // Currently, always reset Known Space after a zoom :-(
-//    this.knownStart = Math.max(1, Math.round(this.viewStart) - maxExtraW);
-//    this.knownEnd = Math.round(this.viewEnd) + maxExtraW;
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));

@@ -1,7 +1,6 @@
 For 0.6
 -------
 
-  - Align to nearest bp after (snap) zoom.
   - Handle grouped features properly when filtering from the cache.
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
