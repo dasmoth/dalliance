@@ -45,7 +45,7 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
 	    tier.dasSource.forceMin = minInput.value;
 	    tier.dasSource.forceMax = maxInput.value;
 	    thisB.removeAllPopups();
-	    dasRequestComplete(tier);
+            tier.draw();
             thisB.storeStatus();          // write updated limits to storage.
 	}, false);
 

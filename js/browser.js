@@ -453,7 +453,7 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
     bumpToggle.addEventListener('mousedown', function(ev) {
 	tier.bumped = !tier.bumped;
         tier.layoutWasDone = false;   // permits the feature-tier layout code to resize the tier.
-	dasRequestComplete(tier);   // is there a more abstract way to do this?
+	tier.draw();
     }, false);
     this.makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
 }
