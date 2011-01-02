@@ -56,7 +56,7 @@ function drawGuidelines(tier, featureGroupElement)
 
 function drawSeqTier(tier, seq)
 {
-    var scale = tier.browser.scale, knownStart = tier.browser.knownStart, knownEnd = tier.browser.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
+    var scale = tier.browser.scale, knownStart = tier.knownStart, knownEnd = tier.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
     if (!scale) {
 	return;
     }
@@ -103,7 +103,7 @@ function drawSeqTier(tier, seq)
 	
 	var height = 30;
 	
-	if (seq) {
+    if (seq && seq.seq) {
 	    for (var i = seq.start; i <= seq.end; ++i) {
 	        var base = seq.seq.substr(i - seq.start, 1).toUpperCase();
 	        var color = baseColors[base];

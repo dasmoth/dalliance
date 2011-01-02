@@ -123,7 +123,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	if (baton.scale < thisB.scale) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
-	tier.viewFeatures(baton.chr, baton.min, baton.max, baton.scale, cachedFeatures);   // FIXME change scale if downsampling
+	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
 	var availableScales = source.getScales();
 	if (baton.scale <= this.scale || !availableScales) {
@@ -165,6 +165,40 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	}
     );
 }
+
+
+function DASSequenceSource(dasSource) {
+    this.dasSource = dasSource;
+}
+
+DASSequenceSource.prototype.getScales = function() {
+    return [0.1, 10];
+}
+
+DASSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (scale < 1) {
+	this.dasSource.sequence(
+            new DASSegment(chr, min, max),
+            function(seqs) {
+		var f = new DASFeature();
+		f.segment = chr;
+		f.min = min;
+		f.max = max;
+		f.sequence = seqs[0];
+		callback(null, [f], 1);
+            }
+        );
+    } else {
+	var f = new DASFeature();
+	f.segment = chr;
+	f.min = min;
+	f.max = max;
+	f.sequence = new DASSequence(chr, min, max, null, null);
+	callback(null, [f], 1000000000);
+    }
+}
+
+
 
 DASFeatureSource.prototype.getScales = function() {
     return [];

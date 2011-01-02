@@ -1810,8 +1810,7 @@ Browser.prototype.zoom = function(factor) {
     }
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
     this.updateRegion();
-    this.spaceCheck(false);
-    
+
     var width = this.viewEnd - this.viewStart + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;

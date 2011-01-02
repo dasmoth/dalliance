@@ -25,14 +25,6 @@ function DasTier(browser, source, viewport, background)
         this.bumped = false;
     }
     this.y = 0;
-
-/*
-    if (this.dasSource.tier_type == 'sequence') {
-	this.refreshTier = refreshTier_sequence;
-    } else {
-	this.refreshTier = refreshTier_features;
-    } */
-
     this.layoutWasDone = false;
 
     var fs;
@@ -71,6 +63,8 @@ function DasTier(browser, source, viewport, background)
                 }
             });
         }
+    } else if (this.dasSource.tier_type == 'sequence') {
+        fs = new DASSequenceSource(this.dasSource);
     } else {
         fs = new DASFeatureSource(this.dasSource);
     }
@@ -137,33 +131,13 @@ DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
 
-    drawFeatureTier(this);
+    if (features && features.length > 0 && features[0].sequence) {
+        drawSeqTier(this, features[0].sequence); 
+    } else {
+        drawFeatureTier(this);
+    }
     this.originHaxx = 0;
     this.browser.arrangeTiers();
-}
-
-
-function refreshTier_sequence()
-{
-    var fetchStart = this.browser.knownStart;
-    var fetchEnd = this.browser.knownEnd;
-    if (this.browser.scale >= 1) {
-	var tier = this;
-        this.dasSource.sequence(
-            new DASSegment(this.browser.chr, fetchStart, fetchEnd),
-            function(seqs) {
-                tier.knownStart = fetchStart; tier.knownEnd = fetchEnd;
-                drawSeqTier(tier, seqs[0]);  // FIXME: check array.
-                tier.setBackground();
-		tier.originHaxx = 0;
-            }
-        );
-    } else {
-        this.knownStart = fetchStart; this.knownEnd = fetchEnd;
-        drawSeqTier(this);
-        this.setBackground();
-	this.originHaxx = 0;
-    }
 }
 
 function zoomForScale(scale) {
