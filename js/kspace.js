@@ -2,7 +2,7 @@
 
 // 
 // Dalliance Genome Explorer
-// (c) Thomas Down 2006-2010
+// (c) Thomas Down 2006-2011
 //
 // kspace.js: Manage a block of Known Space
 //
@@ -82,6 +82,11 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
 }
 
 KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
+    dlog('viewFeatures(' + chr + ', ' + min + ', ' + max + ', ' + scale +')');
+    if (scale != scale) {
+	throw "viewFeatures called with silly scale";
+    }
+
     if (chr != this.chr) {
 	throw "Can't extend Known Space to a new chromosome";
     }
@@ -297,4 +302,3 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 	}
     });
 }
-

@@ -1390,7 +1390,7 @@ Browser.prototype.realInit = function(opts) {
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
     //
 
-    this.resizeViewer();
+    this.resizeViewer(true);
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
@@ -1418,8 +1418,7 @@ Browser.prototype.realInit = function(opts) {
     this.zoomExpt = 250 / Math.log(MAX_VIEW_SIZE / this.zoomBase);
     this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
-    this.move(0);
-    this.refresh();
+    this.move(0); // will trigger a refresh() after failing spaceCheck.
 
     //
     // Tick-marks on the zoomer
@@ -1705,7 +1704,7 @@ Browser.prototype.makeZoomerTicks = function() {
 }
 
 
-Browser.prototype.resizeViewer = function() {
+Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = window.innerWidth;
     width = Math.max(width, 640);
 
@@ -1747,7 +1746,9 @@ Browser.prototype.resizeViewer = function() {
     
 	this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
 	this.updateRegion();
-	this.spaceCheck();
+        if (!skipRefresh) {
+	    this.spaceCheck();
+        }
     }
 
     if (this.fgGuide) {
