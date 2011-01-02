@@ -1343,6 +1343,7 @@ Browser.prototype.realInit = function(opts) {
         removeChildren(thisB.tierHolder);
         thisB.tiers = [];
         thisB.sources = [];
+        thisB.knownSpace = null;
 
         for (var t = 0; t < thisB.defaultSources.length; ++t) {
 	    var source = thisB.defaultSources[t];
@@ -1614,7 +1615,10 @@ Browser.prototype.makeTier = function(source) {
     
     var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
-    this.tiers.push(tier);
+    this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
+    if (this.knownSpace) {
+        this.knownSpace.startFetchesFor(tier);    // are we happy exposing this outside the KS?
+    }
 }
 
 
