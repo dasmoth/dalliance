@@ -216,7 +216,7 @@ function BWGFeatureSource(bwgURI) {
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     this.bwgHolder.await(function(bwg) {
 	bwg.readWigData(chr, min, max, function(features) {
-	    var fs = scale;
+	    var fs = 1000000000;
 	    if (bwg.type === 'bigwig') {
 		var is = (max - min) / features.length;
 		if (is < fs) {
