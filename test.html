@@ -27,6 +27,10 @@
 <script language="javascript" src="js/chainset.js"></script>
 <script language="javascript" src="js/version.js"></script>
 <script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="js-inflate.js"></script>
 <script language="javascript">
   var b = new Browser({
     chr:          '22',
@@ -48,7 +52,7 @@
                    uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
                    tier_type:            'sequence',
                    provides_entrypoints: true},
-                  {name:                 'Genes',     
+                  /* {name:                 'Genes',     
                    desc:                 'Gene structures from Ensembl 54',
                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
                    collapseSuperGroups:  true,
@@ -56,16 +60,29 @@
                    provides_search:      true},
                   {name:                 'Repeats',     
                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
-                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'},
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/repeats-L1.xml'}, */
                   {name:                 'CpG Density', 
                    uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
                    stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/cpg-hist.xml'},
-                  {name:                 'MeDIP raw',
-                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads'},
+                  /* {name:                 'MeDIP raw',
+                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads/'},
                   {name:                 'MeDIP-seq',
                    uri:                  'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/'},
                   {name:                 'MeDIP-chip',
-                   uri:                  'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/'}],
+                   uri:                  'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_SP/'}, */
+                  {name:                 'BWG test',
+                   bwgURI:               'http://localhost/msh10h.bw',
+                   stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet'},
+                  {name:                 'BBD test',
+                   bwgURI:               'http://localhost/ensGene.bb',
+                   collapseSuperGroups:  true},
+                  {name:                 'BBD mapping',
+                   bwgURI:               'http://localhost/ensGene-hg19.bb',
+                   collapseSuperGroups:  true,
+                   mapping:              'hg19ToHg18'},
+                  {name:                 'BBD repeats',
+                   bwgURI:               'http://localhost/repeats.bb',
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/repeats-def.xml'}],
 
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
     browserLinks: {
@@ -82,6 +99,9 @@
 <h2>Human NCBI36</h2>
 
 <div id='svgHolder'>
+</div>
+
+<div id="log">
 </div>
 
 </body>

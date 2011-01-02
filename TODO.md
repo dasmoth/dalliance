@@ -1,3 +1,12 @@
+For 0.6
+-------
+
+  - Align to nearest bp after (snap) zoom.
+  - Handle grouped features properly when filtering from the cache.
+  - Check maxbins support for DAS sources
+  - Allow maxbins and credentials flags to be set when adding DAS sources
+  - Replace js-inflate?
+
 Browser support
 ---------------
 
@@ -10,6 +19,7 @@ Browser support
           * DAS-fetching can be made to work (requires dedicated code path using XDomainRequest)
 	  * Currently no features displaying
 	  * Probably transform and/or clipping problems.
+
  
 Real Soon Now
 -------------
@@ -22,8 +32,6 @@ Real Soon Now
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
- - Separate concepts of Known Space and Drawn Space.
- - Publication-quality SVG export.
  - Think about cancelling long-running XHRs if they're no longer needed?
  - Non-positional annotation.
  - Auto-detection of credentialed servers?
@@ -86,6 +94,7 @@ The Server Side
  
  - Tidy up the Allow-Credentials support in Dazzle.
  - bigFile-backed servers?
+    + Now doing this client-side instead?  Do we still need the server?
  - BAM-backed servers. 
     + Done using Picard.  Potential scalability issues in the future but working for now.
  - Dazzle replacement (i.e. fast, scalable, DAS middleware).
