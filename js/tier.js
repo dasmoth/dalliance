@@ -131,6 +131,11 @@ DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
 
+    this.draw();
+}
+
+DasTier.prototype.draw = function() {
+    var features = this.currentFeatures;
     if (features && features.length > 0 && features[0].sequence) {
         drawSeqTier(this, features[0].sequence); 
     } else {
