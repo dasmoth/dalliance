@@ -104,6 +104,36 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     }
 }
     
+function filterFeatures(features, min, max) {
+    var ff = [];
+    featuresByGroup = {};
+
+    for (var fi = 0; fi < features.length; ++fi) {
+	var f = features[fi];
+        if (f.groups && f.groups.length > 0) {
+            pusho(featuresByGroup, f.groups[0].id, f);
+        } else if (f.min <= max && f.max >= min) {
+	    ff.push(f);
+	}
+    }
+
+    for (var gid in featuresByGroup) {
+        var gf = featuresByGroup[gid];
+        var gmin = 100000000000, gmax = -100000000000;
+        for (var fi = 0; fi < gf.length; ++fi) {
+            var f = gf[fi];
+            gmin = Math.min(gmin, f.min);
+            gmax = Math.max(gmax, f.max);
+        }
+        if (gmin <= max || gmax >= min) {
+            for (var fi = 0; fi < gf.length; ++fi) {
+                ff.push(gf[fi]);
+            }
+        }
+    }
+
+    return ff;
+}
 
 KnownSpace.prototype.startFetchesFor = function(tier) {
     var thisB = this;
@@ -116,14 +146,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
     if (baton && baton.chr === this.chr && baton.min <= this.min && baton.max >= this.max) {
 	var cachedFeatures = baton.features;
 	if (baton.min < this.min || baton.max > this.max) {
-	    var ff = [];
-	    for (var fi = 0; fi < cachedFeatures.length; ++fi) {
-		var f = cachedFeatures[fi];
-		if (f.min <= this.max && f.max >= this.min) {
-		    ff.push(f);
-		}
-	    }
-	    cachedFeatures = ff;
+	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
 	}
 	if (baton.scale < thisB.scale) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
