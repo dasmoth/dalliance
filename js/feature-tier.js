@@ -233,7 +233,7 @@ function sortFeatures(tier)
         if (!f.min || !f.max) {
             nonPositional.push(f);
             continue;
-        }    
+        }
 
         if (f.score && f.score != '.' && f.score != '-') {
             sc = 1.0 * f.score;

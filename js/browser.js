@@ -1657,9 +1657,7 @@ Browser.prototype.makeTier = function(source) {
     var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
-    if (this.knownSpace) {
-        this.knownSpace.startFetchesFor(tier);    // are we happy exposing this outside the KS?
-    }
+    this.refreshTier(tier);
 }
 
 
@@ -1965,5 +1963,12 @@ Browser.prototype.scheduleRefresh = function(time) {
 Browser.prototype.invalidateLayouts = function() {
     for (var t = 0; t < this.tiers.length; ++t) {
         this.tiers[t].layoutWasDone = false;
+    }
+}
+
+Browser.prototype.refreshTier = function(tier) {
+    if (this.knownSpace) {
+        this.knownSpace.invalidate(tier);
+        dlog('refrehsing');
     }
 }
