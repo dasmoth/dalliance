@@ -87,6 +87,8 @@ DasTier.prototype.init = function() {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
 	    tier.stylesheet = stylesheet;
+            dlog('got a stylesheet');
+            tier.browser.refreshTier(tier);
         }, function() {
 	    // tier.error = 'No stylesheet';
             tier.stylesheet = new DASStylesheet();
@@ -95,6 +97,7 @@ DasTier.prototype.init = function() {
             defStyle.BGCOLOR = 'blue';
             defStyle.FGCOLOR = 'black';
             tier.stylesheet.pushStyle('default', null, defStyle);
+            tier.browser.refreshTier(tier);
         });
     }
 }
@@ -117,7 +120,30 @@ DasTier.prototype.getSource = function() {
 }
 
 DasTier.prototype.getDesiredTypes = function(scale) {
-    return null;
+    var fetchTypes = [];
+    var inclusive = false;
+    var ssScale = zoomForScale(this.browser.scale);
+
+    if (this.stylesheet) {
+        var ss = this.stylesheet.styles;
+        for (var si = 0; si < ss.length; ++si) {
+            var sh = ss[si];
+            if (!sh.zoom || sh.zoom == ssScale) {
+                if (!sh.type || sh.type == 'default') {
+                    inclusive = true;
+                    break;
+                } else {
+                    pushnew(fetchTypes, sh.type);
+                }
+            }
+        }
+    }
+
+    if (inclusive) {
+        return null;
+    } else {
+        return fetchTypes;
+    }
 }
 
 DasTier.prototype.setStatus = function(status) {

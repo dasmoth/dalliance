@@ -110,7 +110,9 @@ function filterFeatures(features, min, max) {
 
     for (var fi = 0; fi < features.length; ++fi) {
 	var f = features[fi];
-        if (f.groups && f.groups.length > 0) {
+        if (!f.min || !f.max) {
+            ff.push(f);
+        } else if (f.groups && f.groups.length > 0) {
             pusho(featuresByGroup, f.groups[0].id, f);
         } else if (f.min <= max && f.max >= min) {
 	    ff.push(f);
@@ -133,6 +135,11 @@ function filterFeatures(features, min, max) {
     }
 
     return ff;
+}
+
+KnownSpace.prototype.invalidate = function(tier) {
+    this.featureCache[tier] = null;
+    this.startFetchesFor(tier);
 }
 
 KnownSpace.prototype.startFetchesFor = function(tier) {
@@ -162,7 +169,8 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	}
     }
 
-    source.fetch(this.chr, this.min, this.max, this.scale, null, this.pool, function(status, features, scale) {
+    var wantedTypes = tier.getDesiredTypes(this.scale);
+    source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
 	if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
 	}
@@ -180,6 +188,12 @@ function DASFeatureSource(dasSource) {
 }
 
 DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (types && types.length == 0) {
+        dlog('called with empty types array');
+        callback(null, [], scale);
+        return;
+    }
+
     if (!this.dasSource.uri) {
 	return;
     }
@@ -279,6 +293,8 @@ MappedFeatureSource.prototype.getScales = function() {
 
 MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
+
+
 
     this.mapping.sourceBlocksForRange(chr, min, max, function(mseg) {
         if (mseg.length == 0) {
