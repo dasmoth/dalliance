@@ -155,9 +155,12 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	if (baton.min < this.min || baton.max > this.max) {
 	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
 	}
-	if (baton.scale < thisB.scale) {
+        
+        dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
+	if (baton.scale > (thisB.scale*2) && cachedFeatures.length > 200) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
+//        dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
 	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
 	var availableScales = source.getScales();
@@ -175,9 +178,10 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
 	}
 
-	if (scale < thisB.scale) {
+	if (scale > (thisB.scale*2) && features.length > 200) {
 	    features = downsample(features, thisB.scale);
 	}
+//        dlog('Provisioning ' + tier.toString() + ' with fresh features');
 	tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
     });
 }

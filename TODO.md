@@ -1,10 +1,11 @@
 For 0.6
 -------
 
-  - Handle grouped features properly when filtering from the cache.
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
   - Replace js-inflate?
+  - Registry caching?
+  - Try to fetch SOURCE data when attaching custom DAS sources?
 
 Browser support
 ---------------
