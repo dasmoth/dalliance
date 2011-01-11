@@ -44,6 +44,10 @@ function downsample(features, targetRez) {
     var minBin = 10000000000;
     for (var fi = 0; fi < features.length; ++fi) {
 	var f = features[fi];
+        if (f.groups && f.groups.length > 0) {
+            // Don't downsample complex features (?)
+            return features;
+        }
 	if (f.score) {
 	    var minLap = (f.min / scale)|0;
 	    var maxLap = (f.max / scale)|0;
