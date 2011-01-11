@@ -157,7 +157,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	}
         
         dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
-	if (baton.scale > (thisB.scale*2) && cachedFeatures.length > 200) {
+	if (baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
 //        dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
@@ -178,7 +178,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
 	}
 
-	if (scale > (thisB.scale*2) && features.length > 200) {
+	if (scale < (thisB.scale/2) && features.length > 200) {
 	    features = downsample(features, thisB.scale);
 	}
 //        dlog('Provisioning ' + tier.toString() + ' with fresh features');
