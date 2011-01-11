@@ -1807,6 +1807,11 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
 //
 
 Browser.prototype.spaceCheck = function(dontRefresh) {
+    if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
+        this.refresh();
+        return;
+    } 
+
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
@@ -1922,7 +1927,7 @@ Browser.prototype.setLocation = function(newMin, newMax, newChr) {
 
     this.updateRegion();
     this.karyo.update(this.chr, this.viewStart, this.viewEnd);
-    this.refresh();
+    this.spaceCheck();
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), 1);   // FIXME currently needed to set the highlight (!)
     this.storeStatus();
 }
