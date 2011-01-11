@@ -77,5 +77,6 @@ function downsample(features, targetRez) {
 	    sampledFeatures.push(f);
 	}
     }
+    dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length);
     return sampledFeatures;
 }
