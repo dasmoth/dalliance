@@ -298,14 +298,12 @@ MappedFeatureSource.prototype.getScales = function() {
 MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
 
-
-
     this.mapping.sourceBlocksForRange(chr, min, max, function(mseg) {
         if (mseg.length == 0) {
             callback("No mapping available for this regions", [], scale);
         } else {
 	    var seg = mseg[0];
-	    thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, scale) {
+	    thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
 		var mappedFeatures = [];
 		if (features) {
 		    for (var fi = 0; fi < features.length; ++fi) {
@@ -340,7 +338,7 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                     }
 		}
 
-		callback(status, mappedFeatures, scale);
+		callback(status, mappedFeatures, fscale);
 	    });
 	}
     });
