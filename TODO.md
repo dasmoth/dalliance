@@ -6,6 +6,8 @@ For 0.6
   - Replace js-inflate?
   - Registry caching?
   - Try to fetch SOURCE data when attaching custom DAS sources?
+  - Label jiggling?
+  - Next/prev feature prototype.
 
 Browser support
 ---------------
