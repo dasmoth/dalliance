@@ -962,8 +962,15 @@ Browser.prototype.realInit = function(opts) {
     saveButton.setAttribute('transform', 'translate(220, 10)');
     this.makeTooltip(saveButton, 'Export the current genome display as a vector graphics file');
     main.appendChild(saveButton);
+    var savePopupHandle;
     saveButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
+        var showing = savePopupHandle && savePopupHandle.displayed;
+        thisB.removeAllPopups();
+        
+        if (showing) {
+            return;
+        }
 
         var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
         var saveWidth = thisB.svgRoot.getAttribute('width')|0;
@@ -1037,7 +1044,7 @@ Browser.prototype.realInit = function(opts) {
             }, 200);
             return true;
         }, false);
-        thisB.popit(ev, 'Export', saveForm, {width: 400});
+        savePopupHandle = thisB.popit(ev, 'Export', saveForm, {width: 400});
     }, false);
 
     this.bin = this.icons.createIcon('bin', main);
@@ -1141,9 +1148,14 @@ Browser.prototype.realInit = function(opts) {
     
     // set up the linker
 
+    var linkPopupHandle;
     linkButton.addEventListener('mousedown', function(ev) {
+        var showing = linkPopupHandle && linkPopupHandle.displayed;
         ev.stopPropagation(); ev.preventDefault();
-	thisB.removeAllPopups(); 
+	thisB.removeAllPopups();
+        if (showing) {
+            return;
+        }
 
         var linkList = makeElement('ul');
         for (l in thisB.browserLinks) {
@@ -1162,14 +1174,19 @@ Browser.prototype.realInit = function(opts) {
                 target: '_new'
             })));
         }
-        thisB.popit(ev, 'Link to...', linkList);
+        linkPopupHandle = thisB.popit(ev, 'Link to...', linkList);
     }, false);
 
     // set up the navigator
 
+    var navPopupHandle;
     this.regionLabel.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
+        var showing = navPopupHandle && navPopupHandle.displayed;
 	thisB.removeAllPopups(); 
+        if (showing) {
+            return;
+        }
 
         if (thisB.entryPoints == null) {
             alert("entry_points aren't currently available for this genome");
@@ -1225,7 +1242,7 @@ Browser.prototype.realInit = function(opts) {
             form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
             popup.appendChild(form);
         }
-        thisB.popit(ev, 'Jump to...', popup, {width: 300});
+        navPopupHandle = thisB.popit(ev, 'Jump to...', popup, {width: 300});
 
 	form.addEventListener('submit', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
@@ -1306,10 +1323,14 @@ Browser.prototype.realInit = function(opts) {
     }, false);
 
   
+    var addPopupHandle;
     addButton.addEventListener('mousedown', function(ev) {
 	ev.stopPropagation(); ev.preventDefault();
+        var showing = addPopupHandle && addPopupHandle.displayed;
 	thisB.removeAllPopups();
-        thisB.showTrackAdder(ev);
+        if (!showing) {
+            addPopupHandle = thisB.showTrackAdder(ev);
+        }
     }, false);
 
     // set up the resetter

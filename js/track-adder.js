@@ -254,5 +254,5 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     popup.appendChild(asform);
 
-    this.popit(ev, 'Add DAS data', popup, {width: 600});
+    return this.popit(ev, 'Add DAS data', popup, {width: 600});
 }

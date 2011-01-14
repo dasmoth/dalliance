@@ -164,6 +164,15 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         clear: 'both'
     }));
     this.hPopupHolder.appendChild(popup);
+
+    var popupHandle = {
+        node: popup,
+        displayed: true
+    };
+    popup.addEventListener('DOMNodeRemoved', function(ev) {
+        popupHandle.displayed = false;
+    }, false);
+    return popupHandle;
 }
 
 function IconSet(uri)
