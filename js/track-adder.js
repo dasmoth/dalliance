@@ -10,7 +10,7 @@
 Browser.prototype.currentlyActive = function(source) {
     for (var i = 0; i < this.tiers.length; ++i) {
         var ts = this.tiers[i].dasSource;
-        if (ts.uri == source.uri) {
+        if (ts.uri == source.uri || ts.uri == source.uri + '/') {
             // Special cases where we might meaningfully want two tiers of the same URI.
             if (ts.tier_type) {
                 if (!source.tier_type || source.tier_type != ts.tier_type) {
@@ -300,5 +300,5 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     popup.appendChild(asform);
 
-    this.popit(ev, 'Add DAS data', popup, {width: 600});
+    return this.popit(ev, 'Add DAS data', popup, {width: 600});
 }
