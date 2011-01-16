@@ -1463,7 +1463,7 @@ Browser.prototype.realInit = function(opts) {
     }, false);
 
     var keyHandler = function(ev) {
-        // dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
+        dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
             dlog('hit return');
             var layoutsChanged = false;
@@ -1503,16 +1503,13 @@ Browser.prototype.realInit = function(opts) {
                 thisB.snapZoomLockout = true;
             }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 37) {
-            // left
-            ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? - 100 : -25);
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
+            thisB.move(ev.shiftKey ? - 100 : -25);
+        } else if (ev.keyCode == 37) {
+            ev.stopPropagation(); ev.preventDefault();
             thisB.move(ev.shiftKey ? 100 : 25);
-        } 
-
-        else if (ev.charCode == 61) {
+        } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
 
             var oz = thisB.zoomSlider.getValue();
@@ -1532,7 +1529,20 @@ Browser.prototype.realInit = function(opts) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
                 thisB.scheduleRefresh(500);
             }
-        } 
+        } else if (ev.keyCode == 84) {
+            var bumpStatus;
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                var t = thisB.tiers[ti];
+                if (t.dasSource.collapseSuperGroups) {
+                    if (bumpStatus === undefined) {
+                        bumpStatus = !t.bumped;
+                    }
+                    t.bumped = bumpStatus;
+                    t.layoutWasDone = false;
+                    t.draw();
+                }
+            }
+        }
     };
     var keyUpHandler = function(ev) {
 
