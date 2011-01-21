@@ -1380,6 +1380,10 @@ function labelGlyph(tier, dglyph, featureTier) {
 	    dglyph.min = ((nmin/scale)+origin)|0;
 	    dglyph.max = (textMax-adj)|0;
 	} else {
+            // Mark as a candidate for label-jiggling
+
+            labelText.jiggleMin = (dglyph.min - origin) * scale;
+            labelText.jiggleMax = ((dglyph.max - origin) * scale) - width;
 	}
     }
     return dglyph;
