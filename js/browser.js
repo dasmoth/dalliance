@@ -266,6 +266,8 @@ Browser.prototype.arrangeTiers = function() {
     this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
     this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
     this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+
+    this.jiggleLabels();
 }
 
 Browser.prototype.offsetForTier = function(ti) {
@@ -1463,7 +1465,7 @@ Browser.prototype.realInit = function(opts) {
     }, false);
 
     var keyHandler = function(ev) {
-        dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
+        // dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
             dlog('hit return');
             var layoutsChanged = false;
@@ -1788,8 +1790,25 @@ Browser.prototype.xfrmTiers = function(x, xs) {
 	this.highlight.setAttribute('x', (this.highlightMin - this.origin) * this.scale);
 	this.highlight.setAttribute('width', (this.highlightMax - this.highlightMin + 1) * this.scale);
     } 
+    this.jiggleLabels();
 }
 
+Browser.prototype.jiggleLabels = function() {
+    for (ti = 0; ti < this.tiers.length; ++ti) {
+        var tier = this.tiers[ti];
+        var x = tier.xfrmX;
+        var labels = tier.viewport.getElementsByClassName("label-text");
+        for (var li = 0; li < labels.length; ++li) {
+            var label = labels[li];
+            if (label.jiggleMin && label.jiggleMax) {
+                var bb = label.getBBox();
+                var actX = bb.x + x;
+                label.setAttribute('x', Math.min(Math.max(this.tabMargin - x, label.jiggleMin), label.jiggleMax));
+            }
+        }
+    }
+}
+        
 Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (tier.originHaxx && tier.originHaxx != 0) {
 	x -= ((1.0 * tier.originHaxx) * this.scale);
@@ -1805,6 +1824,7 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (axs != 1) {
         xfrm += ', scale(' + axs + ',1)';
     }
+    tier.xfrmX = x;
     tier.viewport.setAttribute('transform', xfrm);
 }
 

@@ -180,7 +180,9 @@ Karyoscape.prototype.redraw = function() {
 Karyoscape.prototype.setThumb = function() {
     var pos = ((this.start|0) + (this.end|0)) / 2
     var gpos = ((1.0 * pos)/this.chrLen) * this.width;
-    this.thumb.setAttribute('x', gpos - 4);
+    if (this.thumb) {
+        this.thumb.setAttribute('x', gpos - 4);
+    }
 }
 	    
 
