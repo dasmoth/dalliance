@@ -1,4 +1,4 @@
-var REPETITIONS = 100;
+var REPETITIONS = 1;
 
 function handle() {
     var beforeFetch = Date.now();

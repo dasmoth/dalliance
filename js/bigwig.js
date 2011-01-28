@@ -89,7 +89,7 @@ function dlog(msg) {
 }
 
 function bstringToBuffer(result) {
-    var ba = new Int8Array(result.length);
+    var ba = new Uint8Array(result.length);
     for (var i = 0; i < ba.length; ++i) {
         ba[i] = result.charCodeAt(i);
     }
@@ -454,6 +454,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                         var bi = 0;
                         while (offset < fetchSize) {
                             var fb = blocksToFetch[bi];
+                            
+                            /*
                             var bresult;
 			    if (thisB.bwg.uncompressBufSize > 0) {
 			        bresult = JSInflate.inflate(result.substr(offset + 2, fb.size - 2));
@@ -461,6 +463,15 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 bresult = result.substr(offset, fb.size);
                             }
 			    fb.data = bstringToBuffer(bresult);
+                            */
+
+                            var data;
+                            if (thisB.bwg.uncompressBufSize > 0) {
+                                data = uncompress(new Uint8Array(bstringToBuffer(result.substr(offset + 2, fb.size - 2))));
+                            } else {
+                                data = bstringToBuffer(result.substr(offset, fb.size));
+                            }
+                            fb.data = data;
 
                             offset += fb.size;
                             ++bi;
