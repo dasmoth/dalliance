@@ -804,7 +804,7 @@ InfBlocks.prototype.reset = function(z, c){
 	    z.avail_in=n;
 	    z.total_in+=p-z.next_in_index;z.next_in_index=p;
 	    this.write=q;
-	    return inflate_flush(z,r);
+	    return this.inflate_flush(z,r);
 	  };
 	  n--;
 	  b|=(z.next_in[p++]&0xff)<<k;
@@ -852,11 +852,10 @@ InfBlocks.prototype.reset = function(z, c){
 	  this.bitb=b; this.bitk=k; 
 	  z.avail_in=n;z.total_in+=p-z.next_in_index;z.next_in_index=p;
 	  this.write=q;
-	  return inflate_flush(z,r);
+	  return this.inflate_flush(z,r);
 	}
 	break;
       case IB_LENS:
-
 	while(k<(32)){
 	  if(n!=0){
 	    r=Z_OK;
@@ -866,7 +865,7 @@ InfBlocks.prototype.reset = function(z, c){
 	    z.avail_in=n;
 	    z.total_in+=p-z.next_in_index;z.next_in_index=p;
 	    this.write=q;
-	    return inflate_flush(z,r);
+	    return this.inflate_flush(z,r);
 	  };
 	  n--;
 	  b|=(z.next_in[p++]&0xff)<<k;
@@ -881,7 +880,7 @@ InfBlocks.prototype.reset = function(z, c){
 	  this.bitb=b; this.bitk=k; 
 	  z.avail_in=n;z.total_in+=p-z.next_in_index;z.next_in_index=p;
 	  this.write=q;
-	  return inflate_flush(z,r);
+	  return this.inflate_flush(z,r);
 	}
 	this.left = (b & 0xffff);
 	b = k = 0;                       // dump bits
@@ -892,7 +891,7 @@ InfBlocks.prototype.reset = function(z, c){
 	  this.bitb=b; this.bitk=k; 
 	  z.avail_in=n;z.total_in+=p-z.next_in_index;z.next_in_index=p;
 	  write=q;
-	  return inflate_flush(z,r);
+	  return this.inflate_flush(z,r);
 	}
 
 	if(m==0){
@@ -2179,7 +2178,7 @@ function adler32(adler, /* byte[] */ buf,  index, len){
 
 function uncompress(buffer) {
     var z = new ZStream();
-    z.inflateInit();
+    z.inflateInit(DEF_WBITS, true);
     z.next_in = buffer;
     z.next_in_index = 0;
     z.avail_in = buffer.length;
@@ -2187,7 +2186,7 @@ function uncompress(buffer) {
     var oBlockList = [];
     var totalSize = 0;
     while (true) {
-        var obuf = new Uint8Array(7654);
+        var obuf = new Uint8Array(32000);
         z.next_out = obuf;
         z.next_out_index = 0;
         z.avail_out = obuf.length;
