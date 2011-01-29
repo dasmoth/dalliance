@@ -267,8 +267,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 f[k] = opts[k];
             }
 
-            dlog('created ' + miniJSONify(f));
-
 	    features.push(f);
 	};
         var maybeCreateFeature = function(fmin, fmax, opts) {
@@ -320,8 +318,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		        var blockType = ba[20];
 		        var itemCount = sa[11];
 
-                        dlog('processing bwg block of type ' + blockType + '; count=' + itemCount);
-
 		        if (blockType == BIG_WIG_TYPE_FSTEP) {
 			    for (var i = 0; i < itemCount; ++i) {
 			        var score = fa[i + 6];
@@ -331,7 +327,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 			    for (var i = 0; i < itemCount; ++i) {
 			        var start = la[(i*2) + 6];
 			        var score = fa[(i*2) + 7];
-                                dlog('start = ' + start + '; score=' + score);
 			        maybeCreateFeature(start, start + itemSpan, {score: score});
 			    }
 		        } else if (blockType == BIG_WIG_TYPE_GRAPH) {
@@ -470,7 +465,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 			    fb.data = bstringToBuffer(bresult);
                             */
 
-                            dlog('fetchedChunk');
                             var data;
                             if (thisB.bwg.uncompressBufSize > 0) {
                                 data = uncompress(new Uint8Array(bstringToBuffer(result.substr(offset + 2, fb.size - 2))));
@@ -558,7 +552,7 @@ function makeBwg(data, callback) {
         bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
         bwg.uncompressBufSize = la[13];  // 52
          
-        dlog('bigType: ' + bwg.type);
+        // dlog('bigType: ' + bwg.type);
 	// dlog('chromTree at: ' + bwg.chromTreeOffset);
 	// dlog('uncompress: ' + bwg.uncompressBufSize);
 	// dlog('data at: ' + bwg.unzoomedDataOffset);

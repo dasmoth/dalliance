@@ -106,6 +106,19 @@ function formatQuantLabel(v) {
 }
 
 Browser.prototype.arrangeTiers = function() {
+    if (this.arrangeTiersBaton) {
+        dlog('AT already pending');
+    } else {
+        var thisB = this;
+        this.arrangeTiersBaton = setTimeout(function() {
+            thisB.arrangeTiersBaton = null;
+            thisB.realArrangeTiers();
+        }, 25);
+    }
+}
+
+Browser.prototype.realArrangeTiers = function() {
+    dlog('realAT');
     var browserSvg = this.svgRoot;
     for (var p = 0; p < this.placards.length; ++p) {
 	browserSvg.removeChild(this.placards[p]);
@@ -460,7 +473,19 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
     this.makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
 }
 
-Browser.prototype.updateRegion = function()
+Browser.prototype.updateRegion = function() {
+    if (this.updateRegionBaton) {
+        dlog('UR already pending');
+    } else {
+        var thisB = this;
+        this.updateRegionBaton = setTimeout(function() {
+            thisB.updateRegionBaton = null;
+            thisB.realUpdateRegion();
+        }, 25);
+    }
+}
+
+Browser.prototype.realUpdateRegion = function()
 {
     var chrLabel = this.chr;
     if (chrLabel.indexOf('chr') < 0) {
@@ -1801,8 +1826,6 @@ Browser.prototype.jiggleLabels = function() {
         for (var li = 0; li < labels.length; ++li) {
             var label = labels[li];
             if (label.jiggleMin && label.jiggleMax) {
-                var bb = label.getBBox();
-                var actX = bb.x + x;
                 label.setAttribute('x', Math.min(Math.max(this.tabMargin - x, label.jiggleMin), label.jiggleMax));
             }
         }
@@ -2000,6 +2023,5 @@ Browser.prototype.invalidateLayouts = function() {
 Browser.prototype.refreshTier = function(tier) {
     if (this.knownSpace) {
         this.knownSpace.invalidate(tier);
-        dlog('refrehsing');
     }
 }
