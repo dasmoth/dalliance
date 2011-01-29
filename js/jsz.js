@@ -4,7 +4,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2011
 //
-// jsz.js: Javascript zlib port
+// jsz.js: Javascript zlib port (based heavily on jzlib).
 //
 
 //
@@ -239,44 +239,8 @@ var fixed_td = [
 //
 
 function ZStream() {
-//  public byte[] next_in;     // next input byte
-//  public int next_in_index;
-//  public int avail_in;       // number of bytes available at next_in
-//  public long total_in;      // total nb of input bytes read so far
-
-//  public byte[] next_out;    // next output byte should be put there
-//  public int next_out_index;
-//  public int avail_out;      // remaining free space at next_out
-//  public long total_out;     // total nb of bytes output so far
-
-//  public String msg;
-
-//  Deflate dstate; 
-//  Inflate istate; 
-
-// int data_type; // best guess about the data type: ascii or binary
-
-//  public long adler;
-//  Adler32 _adler=new Adler32();
 }
 
-/*
-public int inflateInit(){
-    return inflateInit(DEF_WBITS);
-}
-
-
-  public int inflateInit(boolean nowrap){
-    return inflateInit(DEF_WBITS, nowrap);
-  }
-  public int inflateInit(int w){
-    return inflateInit(w, false);
-  }
-
-  public int inflateInit(int w, boolean nowrap){
-    istate=new Inflate();
-    return istate.inflateInit(this, nowrap?-w:w);
-  } */
 
 ZStream.prototype.inflateInit = function(w, nowrap) {
     if (!w) {
@@ -416,27 +380,6 @@ ZStream.prototype.inflateSetDictionary = function(dictionary, dictLength){
 //
 // Inflate.java
 //
-
-
-
-
-// State, should encap
-
-// var mode;
-// var method;        // if FLAGS, method byte
-
-// if CHECK, check values to compare
-// var was = [0]; // computed check value
-//var need;               // stream check value
-
-// if BAD, inflateSync's marker bytes count
-// var marker;
-
-// mode independent information
-// var  nowrap;          // flag for no wrapper
-// var wbits;            // log2(window size)  (8..15, defaults to 15)
-
-// var blocks;     // current inflate_blocks state
 
 function Inflate() {
     this.was = [0];
@@ -1284,11 +1227,6 @@ var IC_BADCODE=9;// x: got error
 function InfCodes() {
 }
 
-/*  void init(int bl, int bd,
-	   int[] tl, int tl_index,
-	   int[] td, int td_index, ZStream z){ */
-
-
 InfCodes.prototype.init = function(bl, bd, tl, tl_index, td, td_index, z) {
     this.mode=IC_START;
     this.lbits=bl;
@@ -1595,11 +1533,6 @@ InfCodes.prototype.free = function(z){
   // distance pair plus four bytes for overloading the bit buffer.
 
 InfCodes.prototype.inflate_fast = function(bl, bd, tl, tl_index, td, td_index, s, z) {
-
-/*(int bl, int bd, 
-		   int[] tl, int tl_index,
-		   int[] td, int td_index,
-		   InfBlocks s, ZStream z){ */
     var t;                // temporary pointer
     var   tp;             // temporary pointer (int[])
     var tp_index;         // temporary pointer
@@ -1808,19 +1741,6 @@ InfCodes.prototype.inflate_fast = function(bl, bd, tl, tl_index, td, td_index, s
 function InfTree() {
 }
 
-/* private int huft_build(int[] b, // code lengths in bits (all assumed <= BMAX)
-                         int bindex, 
-                         int n,   // number of codes (assumed <= 288)
-                         int s,   // number of simple-valued codes (0..s-1)
-                         int[] d, // list of base values for non-simple codes
-                         int[] e, // list of extra bits for non-simple codes
-                         int[] t, // result: starting table
-                         int[] m, // maximum lookup bits, returns actual
-                         int[] hp,// space for trees
-                         int[] hn,// hufts used in space
-                         int[] v  // working area: values in order of bit length
-                         ){ */
-
 InfTree.prototype.huft_build = function(b, bindex, n, s, d, e, t, m, hp, hn, v) {
 
     // Given a list of code lengths and a maximum table size, make a set of
@@ -2001,13 +1921,6 @@ InfTree.prototype.huft_build = function(b, bindex, n, s, d, e, t, m, hp, hn, v) 
     return y != 0 && g != 1 ? Z_BUF_ERROR : Z_OK;
 }
 
-/*  int inflate_trees_bits(int[] c,  // 19 code lengths
-                         int[] bb, // bits tree desired/actual depth
-                         int[] tb, // bits tree result
-                         int[] hp, // space for trees
-                         ZStream z // for messages
-                         ){ */
-
 InfTree.prototype.inflate_trees_bits = function(c, bb, tb, hp, z) {
     var result;
     this.initWorkArea(19);
@@ -2023,17 +1936,6 @@ InfTree.prototype.inflate_trees_bits = function(c, bb, tb, hp, z) {
     }
     return result;
 }
-
-/*  int inflate_trees_dynamic(int nl,   // number of literal/length codes
-                            int nd,   // number of distance codes
-                            int[] c,  // that many (total) code lengths
-                            int[] bl, // literal desired/actual bit depth
-                            int[] bd, // distance desired/actual bit depth 
-                            int[] tl, // literal/length tree result
-                            int[] td, // distance tree result
-                            int[] hp, // space for trees
-                            ZStream z // for messages
-                            ){ */
 
 InfTree.prototype.inflate_trees_dynamic = function(nl, nd, c, bl, bd, tl, td, hp, z) {
     var result;
