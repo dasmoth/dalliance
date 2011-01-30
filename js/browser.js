@@ -1509,38 +1509,29 @@ Browser.prototype.realInit = function(opts) {
         );
     }
 
-
     setTimeout(function() {
-        
-    new DASRegistry(thisB.registry).sources(function(sources) {
-	var as = [];
-        for (var s = 0; s < sources.length; ++s) {
-            var source = sources[s];
-            if (!source.coords || source.coords.length == 0) {
-                continue;
-            }
-            var coords = source.coords[0];
-            if (coords.taxon != thisB.coordSystem.taxon || coords.auth != thisB.coordSystem.auth || coords.version != thisB.coordSystem.version) {
-                continue;
-            }
-            as.push(source);
-        }
-        thisB.availableSources.set(as);
-    }, function(error) {
-        thisB.availableSources = null;
-    }, this.coordSystem);
-
+        this.queryRegistry();
     }, 10000);
 
     for (var m in this.chains) {
-        this.fetchMappedSources(m);
+        this.queryRegistry(m);
     }
 }
 
-Browser.prototype.fetchMappedSources = function(m) {
+Browser.prototype.queryRegistry = function(maybeMapping) {
     var thisB = this;
-    var chainSet = this.chains[m];
-    var msh = thisB.mappableSources[m] = new Observed();
+    var coords, msh;
+    if (maybeMapping) {
+        coords = this.chains[maybeMapping].coords;
+        if (!thisB.mappableSources[maybeMapping]) {
+            thisB.mappableSources[maybeMapping] = new Observed();
+        }
+        msh = thisB.mappableSources[maybeMapping];
+    } else {
+        coords = this.coordSystem;
+        msh = this.availableSources;
+    }
+    
     new DASRegistry(this.registry).sources(function(sources) {
 	var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
@@ -1548,16 +1539,19 @@ Browser.prototype.fetchMappedSources = function(m) {
             if (!source.coords || source.coords.length == 0) {
                 continue;
             }
-            var coords = source.coords[0];
-            if (coords.taxon != chainSet.coords.taxon || coords.auth != chainSet.coords.auth || coords.version != chainSet.coords.version) {
+            var scoords = source.coords[0];
+            if (scoords.taxon != coords.taxon || scoords.auth != coords.auth || scoords.version != coords.version) {
                 continue;
             }
-            source.mapping = m;
+            if (maybeMapping) {
+                source.mapping = maybeMapping;
+            }
             availableSources.push(source);
         }
         msh.set(availableSources);
     }, function(error) {
-    }, chainSet.coords);
+        msh.set(null);
+    }, coords);
 }
 
 Browser.prototype.makeTier = function(source) {

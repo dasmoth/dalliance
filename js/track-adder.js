@@ -176,7 +176,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     defButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, defButton);
-        makeStab(thisB.defaultSources);
+        makeStab(new Observed(thisB.defaultSources));
     }, false);
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -269,7 +269,21 @@ Browser.prototype.showTrackAdder = function(ev) {
         thisB.removeAllPopups();
     }, false);
 
-    var buttonHolder = makeElement('div', [addButton, canButton]);
+    var refreshButton = makeElement('span', 'Refresh');
+    refreshButton.style.backgroundColor = 'rgb(230,230,250)';
+    refreshButton.style.borderStyle = 'solid';
+    refreshButton.style.borderColor = 'blue';
+    refreshButton.style.borderWidth = '3px';
+    refreshButton.style.padding = '2px';
+    refreshButton.style.margin = '10px';
+    refreshButton.style.width = '120px';
+    refreshButton.style.float = 'right';
+    refreshButton.addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        thisB.queryRegistry(__mapping);
+    }, false);
+
+    var buttonHolder = makeElement('div', [addButton, canButton, refreshButton]);
     buttonHolder.style.margin = '10px';
     asform.appendChild(buttonHolder);
 
