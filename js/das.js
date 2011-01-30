@@ -204,7 +204,7 @@ DASSource.prototype.features = function(segment, options, callback) {
         dasURI = this.uri;
     }
    
-    dlog(dasURI);
+    // dlog(dasURI);
 
     // Feature/group-by-ID stuff?
     

@@ -173,11 +173,26 @@ function drawLine(featureGroupElement, features, style, tier, y)
     featureGroupElement.appendChild(clip);
     path.setAttribute('clip-path', 'url(#' + clipId + ')');
    
-    tier.isQuantitative = true;
-    tier.min = min;
-    tier.max = max;
-    tier.clientMin = y|0 + height;
-    tier.clientMax = y;
+    if (!tier.isQuantitative) {
+        tier.isQuantitative = true;
+        tier.isLabelValid = false;
+    }
+    if (tier.min != min) {
+        tier.min = min;
+        tier.isLabelValid = false;
+    }
+    if (tier.max != max) {
+        tier.max = max;
+        tier.isLabelValid = false;
+    }
+    if (tier.clientMin != y|0 + height) {
+        tier.clientMin = y|0 + height;
+        tier.isLabelValid = false;
+    }
+    if (tier.clientMax != y) {
+        tier.clientMax = y;
+        tier.isLabelValid = false;
+    }
 
     return height|0 + MIN_PADDING;
 }
@@ -553,6 +568,7 @@ function drawFeatureTier(tier)
 	}
         
         if (g.quant) {
+            tier.isLabelValid = false;    // FIXME
             tier.isQuantitative = true;
             tier.min = g.quant.min;
             tier.max = g.quant.max;

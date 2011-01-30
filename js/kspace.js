@@ -82,7 +82,7 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
 }
 
 KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
-    dlog('viewFeatures(' + chr + ', ' + min + ', ' + max + ', ' + scale +')');
+    // dlog('viewFeatures(' + chr + ', ' + min + ', ' + max + ', ' + scale +')');
     if (scale != scale) {
 	throw "viewFeatures called with silly scale";
     }
@@ -156,7 +156,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
 	}
         
-        dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
+        // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
 	if (baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
@@ -193,7 +193,6 @@ function DASFeatureSource(dasSource) {
 
 DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     if (types && types.length == 0) {
-        dlog('called with empty types array');
         callback(null, [], scale);
         return;
     }

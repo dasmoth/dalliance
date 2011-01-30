@@ -6,6 +6,17 @@ For 0.6
   - Registry caching?
   - Try to fetch SOURCE data when attaching custom DAS sources?
   - Next/prev feature prototype.
+  - More intelligent bigfile index caching
+  - Make sure bp-resolution features work properly
+  - Try touch support again.
+
+For 0.7
+-------
+
+  - Evaluate canvas rendering (requires 2-stage layout)
+  - If we stick to SVG rendering, implement incremental layout.
+  - Move fetching/mapping/etc to a webworker.
+  - If we swtich to 2-stage layout, can we do bumping &c in a worker as well?
 
 Browser support
 ---------------
