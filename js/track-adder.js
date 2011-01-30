@@ -63,7 +63,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
 
     var addModeButtons = [];
-    var makeStab;
+    var makeStab, makeStabObserver;
     var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
     addModeButtons.push(regButton);
     for (var m in this.mappableSources) {
@@ -97,18 +97,39 @@ Browser.prototype.showTrackAdder = function(ev) {
     stabHolder.style.height = '400px';
     asform.appendChild(stabHolder);
 
+    var __mapping;
+    var __sourceHolder;
 
-    makeStab = function(sources, mapping) {
+    makeStab = function(msources, mapping) {
+        if (__sourceHolder) {
+            __sourceHolder.removeListener(makeStabObserver);
+        }
+        __mapping = mapping;
+        __sourceHolder = msources;
+        __sourceHolder.addListenerAndFire(makeStabObserver);
+    }
+
+    makeStabObserver = function(msources) {
         customMode = false;
         addButtons = [];
         removeChildren(stabHolder);
-        if (!sources) {
+        if (!msources) {
             stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
             return;
         }
         var stab = document.createElement('table');
         stab.style.width='100%';
         var idx = 0;
+
+        var sources = [];
+        for (var i = 0; i < msources.length; ++i) {
+            sources.push(msources[i]);
+        }
+        
+        sources.sort(function(a, b) {
+            return a.name.toLowerCase().trim().localeCompare(b.name.toLowerCase().trim());
+        });
+
         for (var i = 0; i < sources.length; ++i) {
             var source = sources[i];
             var r = document.createElement('tr');
@@ -123,8 +144,8 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
-                if (mapping) {
-                    b.dalliance_mapping = mapping;
+                if (__mapping) {
+                    b.dalliance_mapping = __mapping;
                 }
                 bd.appendChild(b);
                 addButtons.push(b);

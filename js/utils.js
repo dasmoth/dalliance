@@ -100,6 +100,23 @@ function maybeConcat(a, b) {
     return l;
 }
 
+function arrayIndexOf(a, x) {
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] === x) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function arrayRemove(a, x) {
+    var i = arrayIndexOf(a, x);
+    if (i >= 0) {
+        a.splice(i, 1);
+        return true;
+    }
+    return false;
+}
 
 //
 // DOM utilities
@@ -239,4 +256,33 @@ function shallowCopy(o) {
         n[k] = o[k];
     }
     return n;
+}
+
+function Observed(x) {
+    this.value = x;
+    this.listeners = [];
+}
+
+Observed.prototype.addListener = function(f) {
+    this.listeners.push(f);
+}
+
+Observed.prototype.addListenerAndFire = function(f) {
+    this.listeners.push(f);
+    f(this.value);
+}
+
+Observed.prototype.removeListener = function(f) {
+    arrayRemove(this.listeners, f);
+}
+
+Observed.prototype.get = function() {
+    return x;
+}
+
+Observed.prototype.set = function(x) {
+    this.value = x;
+    for (var i = 0; i < this.listeners.length; ++i) {
+        this.listeners[i](x);
+    }
 }

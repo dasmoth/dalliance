@@ -78,7 +78,7 @@ function Browser(opts) {
 
     // Registry
 
-    this.availableSources = [];
+    this.availableSources = new Observed();
     this.defaultSources = [];
     this.mappableSources = {};
 
@@ -284,7 +284,7 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
         popcontents.push(tier.dasSource.desc);
     }
 
-    var srcs = this.availableSources;
+    var srcs = this.availableSources.get();
     if (tier.dasSource.mapping) {
         var mcs = this.chains[tier.dasSource.mapping].coords;
         popcontents.push(makeElement('p', makeElement('i', 'Mapped from ' + mcs.auth + mcs.version)));
@@ -1509,8 +1509,11 @@ Browser.prototype.realInit = function(opts) {
         );
     }
 
-    new DASRegistry(this.registry).sources(function(sources) {
-	thisB.availableSources = [];
+
+    setTimeout(function() {
+        
+    new DASRegistry(thisB.registry).sources(function(sources) {
+	var as = [];
         for (var s = 0; s < sources.length; ++s) {
             var source = sources[s];
             if (!source.coords || source.coords.length == 0) {
@@ -1520,12 +1523,14 @@ Browser.prototype.realInit = function(opts) {
             if (coords.taxon != thisB.coordSystem.taxon || coords.auth != thisB.coordSystem.auth || coords.version != thisB.coordSystem.version) {
                 continue;
             }
-            thisB.availableSources.push(source);
+            as.push(source);
         }
+        thisB.availableSources.set(as);
     }, function(error) {
-        // alert('Warning: registry query failed');
         thisB.availableSources = null;
     }, this.coordSystem);
+
+    }, 10000);
 
     for (var m in this.chains) {
         this.fetchMappedSources(m);
@@ -1535,6 +1540,7 @@ Browser.prototype.realInit = function(opts) {
 Browser.prototype.fetchMappedSources = function(m) {
     var thisB = this;
     var chainSet = this.chains[m];
+    var msh = thisB.mappableSources[m] = new Observed();
     new DASRegistry(this.registry).sources(function(sources) {
 	var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
@@ -1549,9 +1555,8 @@ Browser.prototype.fetchMappedSources = function(m) {
             source.mapping = m;
             availableSources.push(source);
         }
-        thisB.mappableSources[m] = availableSources;
+        msh.set(availableSources);
     }, function(error) {
-        // alert('Warning: registry query failed');
     }, chainSet.coords);
 }
 
