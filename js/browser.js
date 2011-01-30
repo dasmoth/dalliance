@@ -105,20 +105,130 @@ function formatQuantLabel(v) {
     }
 }
 
-Browser.prototype.arrangeTiers = function() {
-    if (this.arrangeTiersBaton) {
-        dlog('AT already pending');
-    } else {
-        var thisB = this;
-        this.arrangeTiersBaton = setTimeout(function() {
-            thisB.arrangeTiersBaton = null;
-            thisB.realArrangeTiers();
-        }, 25);
+Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
+    var labelWidth = this.tabMargin;
+    var viewportBackground = document.createElementNS(NS_SVG, 'path');
+    viewportBackground.setAttribute('d', 'M 15 ' + 2 + 
+				    ' L 10 ' + 7 +
+				    ' L 10 ' + 18 +
+				    ' L 15 ' + 22 +
+				    ' L ' + (10 + labelWidth) + ' ' + 22 +
+				    ' L ' + (10 + labelWidth) + ' ' + 2 + ' Z');
+    viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
+    viewportBackground.setAttribute('stroke', 'none');
+    labelGroup.appendChild(viewportBackground);
+    this.setupTierDrag(viewportBackground, ti);
+
+    var hasWidget = false;
+    if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
+        hasWidget = true;
+	this.makeToggleButton(labelGroup, tier, 0);
+    } 
+
+    if (tier.isQuantitative) {
+        hasWidget = true;
+        var quantTools = makeElementNS(NS_SVG, 'g');
+        quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
+            x: this.tabMargin - 25,
+            y: 0,
+            width: 25,
+            height: tier.layoutHeight,
+            stroke: 'none',
+            fill: this.tierBackgroundColors[ti % this.tierBackgroundColors.length]
+        }));
+        labelGroup.appendChild(quantTools);
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin,
+            y1: 0 + (tier.clientMin|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMax|0),
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -5 ,
+            y1: 0 + (tier.clientMin|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMin|0),
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -3 ,
+            y1: 0 + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
+            x2: this.tabMargin,
+            y2: 0 + ((tier.clientMin|0) +(tier.clientMax|0))/2,
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -5 ,
+            y1: 0 + (tier.clientMax|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMax|0),
+            strokeWidth: 1
+        }));
+        var minQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.min), {
+            x: 80,
+            y:  (tier.clientMin|0),
+            strokeWidth: 0,
+            fill: 'black',
+            fontSize: '8pt'
+        });
+        quantTools.appendChild(minQ);
+        var mqbb = minQ.getBBox();
+        minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+        minQ.setAttribute('y', (tier.clientMin|0) + (mqbb.height/2) - 4);
+                    
+        var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
+            x: 80,
+            y: (tier.clientMax|0),
+            strokeWidth: 0,
+            fill: 'black',
+            fontSize: '8pt'
+        });
+        quantTools.appendChild(maxQ);
+        maxQ.setAttribute('x', this.tabMargin - maxQ.getBBox().width - 3);
+        mqbb = maxQ.getBBox();
+        maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+        maxQ.setAttribute('y', (tier.clientMax|0) + (mqbb.height/2) -1 );
+        
+        var button = this.icons.createIcon('magnifier', labelGroup);
+        button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + ((tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
+        
+        // FIXME style-changes don't currently work because of the way icons get grouped.
+        button.addEventListener('mouseover', function(ev) {
+	    button.setAttribute('fill', 'red');
+        }, false);
+        button.addEventListener('mouseout', function(ev) {
+	    button.setAttribute('stroke', 'gray');
+        }, false);
+                
+        quantTools.appendChild(button);
+        this.makeQuantConfigButton(quantTools, tier, 0);
+        this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
     }
+
+    var labelMaxWidth = this.tabMargin - 20;
+    if (hasWidget) {
+        labelMaxWidth -= 20;
+    }
+    var labelString = tier.dasSource.name;
+    var labelText = document.createElementNS(NS_SVG, 'text');
+    labelText.setAttribute('x', 15);
+    labelText.setAttribute('y', 17);
+    labelText.setAttribute('stroke-width', 0);
+    labelText.setAttribute('fill', 'black');
+    labelText.appendChild(document.createTextNode(labelString));
+    labelText.setAttribute('pointer-events', 'none');
+    labelGroup.appendChild(labelText);
+
+    while (labelText.getBBox().width > labelMaxWidth) {
+        removeChildren(labelText);
+        labelString = labelString.substring(0, labelString.length - 1);
+        labelText.appendChild(document.createTextNode(labelString + '...'));
+    }
+    return labelGroup;
 }
 
-Browser.prototype.realArrangeTiers = function() {
-    dlog('realAT');
+Browser.prototype.arrangeTiers = function() {
     var browserSvg = this.svgRoot;
     for (var p = 0; p < this.placards.length; ++p) {
 	browserSvg.removeChild(this.placards[p]);
@@ -126,136 +236,19 @@ Browser.prototype.realArrangeTiers = function() {
     this.placards = [];
 
     var labelGroup = this.dasLabelHolder;
-    removeChildren(labelGroup);
 	
     var clh = 50;
     for (ti = 0; ti < this.tiers.length; ++ti) {
 	var tier = this.tiers[ti];
 	tier.y = clh;
-	    
-	var labelWidth = this.tabMargin;
-	var viewportBackground = document.createElementNS(NS_SVG, 'path');
-	viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
-					' L 10 ' + (clh+7) +
-					' L 10 ' + (clh + 18) +
-					' L 15 ' + (clh + 22) +
-					' L ' + (10 + labelWidth) + ' ' + (clh+22) +
-					' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
-	viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
-	viewportBackground.setAttribute('stroke', 'none');
-	labelGroup.appendChild(viewportBackground);
-
-//        this.makeTooltip(viewportBackground, tier.dasSource.desc ? 
-//                    makeElement('span', [makeElement('b', tier.dasSource.name), makeElement('br'), tier.dasSource.desc]) : 
-//                   tier.dasSource.name
-//                   );
-	this.setupTierDrag(viewportBackground, ti);
-	    
-        var hasWidget = false;
-	if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
-            hasWidget = true;
-	    this.makeToggleButton(labelGroup, tier, clh);
-	} 
-
-        if (tier.isQuantitative) {
-            hasWidget = true;
-            var quantTools = makeElementNS(NS_SVG, 'g');
-            quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
-                x: this.tabMargin - 25,
-                y: clh,
-                width: 25,
-                height: tier.layoutHeight,
-                stroke: 'none',
-                fill: this.tierBackgroundColors[ti % this.tierBackgroundColors.length]
-            }));
-            labelGroup.appendChild(quantTools);
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin,
-                y1: clh + (tier.clientMin|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMax|0),
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -5 ,
-                y1: clh + (tier.clientMin|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMin|0),
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -3 ,
-                y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
-                x2: this.tabMargin,
-                y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -5 ,
-                y1: clh + (tier.clientMax|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMax|0),
-                strokeWidth: 1
-            }));
-            var minQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.min), {
-                x: 80,
-                y: (clh|0) + (tier.clientMin|0),
-                strokeWidth: 0,
-                fill: 'black',
-                fontSize: '8pt'
-            });
-            quantTools.appendChild(minQ);
-            var mqbb = minQ.getBBox();
-            minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
-            minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
-                    
-            var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
-                x: 80,
-                y: (clh|0) + (tier.clientMax|0),
-                strokeWidth: 0,
-                fill: 'black',
-                fontSize: '8pt'
-            });
-            quantTools.appendChild(maxQ);
-            maxQ.setAttribute('x', this.tabMargin - maxQ.getBBox().width - 3);
-            mqbb = maxQ.getBBox();
-            maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
-            maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
-
-            var button = this.icons.createIcon('magnifier', labelGroup);
-            button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + (clh + (tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
-
-            // FIXME style-changes don't currently work because of the way icons get grouped.
-            button.addEventListener('mouseover', function(ev) {
-	        button.setAttribute('fill', 'red');
-            }, false);
-            button.addEventListener('mouseout', function(ev) {
-	        button.setAttribute('stroke', 'gray');
-            }, false);
-                
-            quantTools.appendChild(button);
-            this.makeQuantConfigButton(quantTools, tier, clh);
-            this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
-        }
-
-        var labelMaxWidth = this.tabMargin - 20;
-        if (hasWidget) {
-            labelMaxWidth -= 20;
-        }
-        var labelString = tier.dasSource.name;
-	var labelText = document.createElementNS(NS_SVG, 'text');
-	labelText.setAttribute('x', 15);
-	labelText.setAttribute('y', clh + 17);
-	labelText.setAttribute('stroke-width', 0);
-	labelText.setAttribute('fill', 'black');
-	labelText.appendChild(document.createTextNode(labelString));
-        labelText.setAttribute('pointer-events', 'none');
-	labelGroup.appendChild(labelText);
-
-        while (labelText.getBBox().width > labelMaxWidth) {
-            removeChildren(labelText);
-            labelString = labelString.substring(0, labelString.length - 1);
-            labelText.appendChild(document.createTextNode(labelString + '...'));
+        
+        if (!tier.isLabelValid) {
+            if (tier.label) {
+                labelGroup.removeChild(tier.label);
+            }
+            tier.label = makeElementNS(NS_SVG, 'g');
+            labelGroup.appendChild(tier.label);
+            this.labelForTier(tier, ti, tier.label);
         }
 
 	this.xfrmTier(tier, this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), -1);
@@ -275,12 +268,13 @@ Browser.prototype.realArrangeTiers = function() {
 	clh = 150;
     }
 	
-    this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
-    this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
-    this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
-    this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
-
-    this.jiggleLabels();
+    if (this.browserFrameHeight != clh) {
+        this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
+        this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
+        this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+        this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+        this.browserFrameHeight = clh;
+    }
 }
 
 Browser.prototype.offsetForTier = function(ti) {
@@ -388,6 +382,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             thisB.tiers = newTiers;
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
+                thisB.tiers[nti].isLabelValid = false;
             }
             
             thisB.arrangeTiers();
@@ -415,6 +410,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             thisB.tiers = newTiers;
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
+                thisB.tiers[nti].isLabelValid = false;
             }
             
             thisB.arrangeTiers();
@@ -468,6 +464,7 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
     bumpToggle.addEventListener('mousedown', function(ev) {
 	tier.bumped = !tier.bumped;
         tier.layoutWasDone = false;   // permits the feature-tier layout code to resize the tier.
+        tier.isLabelValid = false;
 	tier.draw();
     }, false);
     this.makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
@@ -475,7 +472,7 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
 
 Browser.prototype.updateRegion = function() {
     if (this.updateRegionBaton) {
-        dlog('UR already pending');
+        // dlog('UR already pending');
     } else {
         var thisB = this;
         this.updateRegionBaton = setTimeout(function() {
@@ -1835,12 +1832,9 @@ Browser.prototype.xfrmTiers = function(x, xs) {
 	this.highlight.setAttribute('x', (this.highlightMin - this.origin) * this.scale);
 	this.highlight.setAttribute('width', (this.highlightMax - this.highlightMin + 1) * this.scale);
     } 
-    this.jiggleLabels();
 }
 
-Browser.prototype.jiggleLabels = function() {
-    for (ti = 0; ti < this.tiers.length; ++ti) {
-        var tier = this.tiers[ti];
+Browser.prototype.jiggleLabels = function(tier) {
         var x = tier.xfrmX;
         var labels = tier.viewport.getElementsByClassName("label-text");
         for (var li = 0; li < labels.length; ++li) {
@@ -1849,7 +1843,6 @@ Browser.prototype.jiggleLabels = function() {
                 label.setAttribute('x', Math.min(Math.max(this.tabMargin - x, label.jiggleMin), label.jiggleMax));
             }
         }
-    }
 }
         
 Browser.prototype.xfrmTier = function(tier, x , xs) {
@@ -1863,12 +1856,26 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
     } else {
         tier.scale = xs;
     }
-    var xfrm = 'translate(' + x + ',' + tier.y + ')';
-    if (axs != 1) {
-        xfrm += ', scale(' + axs + ',1)';
+
+    var y = tier.y;
+        
+    if (x != tier.xfrmX || y != tier.xfrmY || axs != tier.xfrmS) {
+        var xfrm = 'translate(' + x + ',' + tier.y + ')';
+        if (axs != 1) {
+            xfrm += ', scale(' + axs + ',1)';
+        }
+        tier.viewport.setAttribute('transform', xfrm);
     }
+    if (tier.label && (y != tier.xfrmY || !tier.isLabelValid)) {
+        tier.label.setAttribute('transform', 'translate(0, ' + y + ')');
+        tier.isLabelValid = true;
+    }
+
     tier.xfrmX = x;
-    tier.viewport.setAttribute('transform', xfrm);
+    tier.xfrmY = y;
+    tier.xfrmS = axs;
+
+    this.jiggleLabels(tier);
 }
 
 //
