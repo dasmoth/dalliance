@@ -277,7 +277,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     refreshButton.style.padding = '2px';
     refreshButton.style.margin = '10px';
     refreshButton.style.width = '120px';
-    refreshButton.style.float = 'right';
+    refreshButton.style['float'] = 'right';
     refreshButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.queryRegistry(__mapping);
