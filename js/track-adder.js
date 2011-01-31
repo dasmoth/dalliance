@@ -282,6 +282,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.queryRegistry(__mapping);
     }, false);
+    this.makeTooltip(refreshButton, 'Click to re-fetch data from the DAS registry');
 
     var buttonHolder = makeElement('div', [addButton, canButton, refreshButton]);
     buttonHolder.style.margin = '10px';

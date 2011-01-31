@@ -1509,16 +1509,22 @@ Browser.prototype.realInit = function(opts) {
         );
     }
 
-    setTimeout(function() {
-        this.queryRegistry();
-    }, 10000);
-
+    thisB.queryRegistry(null, true);
     for (var m in this.chains) {
-        this.queryRegistry(m);
+        this.queryRegistry(m, true);
     }
 }
 
-Browser.prototype.queryRegistry = function(maybeMapping) {
+function setSources(msh, availableSources, maybeMapping) {
+    if (maybeMapping) {
+        for (var s = 0; s < availableSources.length; ++s) {
+            availableSources[s].mapping = maybeMapping;
+        }
+    }
+    msh.set(availableSources);
+}
+
+Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
     var thisB = this;
     var coords, msh;
     if (maybeMapping) {
@@ -1531,7 +1537,21 @@ Browser.prototype.queryRegistry = function(maybeMapping) {
         coords = this.coordSystem;
         msh = this.availableSources;
     }
-    
+    var cacheHash = hex_sha1(miniJSONify(coords));
+    if (tryCache) {
+        var cacheTime = localStorage['dalliance.registry.' + cacheHash + '.last_queried'];
+        if (cacheTime) {
+            setSources(msh, eval(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
+            var cacheAge = (Date.now()|0) - (cacheTime|0);
+            if (cacheAge < (12 * 60 * 60 * 1000)) {
+                // alert('Using cached registry data');
+                return;
+            } else {
+                // alert('Registry data is stale, refetching');
+            }
+        }
+    }
+            
     new DASRegistry(this.registry).sources(function(sources) {
 	var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
@@ -1542,15 +1562,16 @@ Browser.prototype.queryRegistry = function(maybeMapping) {
             var scoords = source.coords[0];
             if (scoords.taxon != coords.taxon || scoords.auth != coords.auth || scoords.version != coords.version) {
                 continue;
-            }
-            if (maybeMapping) {
-                source.mapping = maybeMapping;
-            }
+            }   
             availableSources.push(source);
         }
-        msh.set(availableSources);
+
+        localStorage['dalliance.registry.' + cacheHash + '.sources'] = miniJSONify(availableSources);
+        localStorage['dalliance.registry.' + cacheHash + '.last_queried'] = '' + Date.now();
+        
+        setSources(msh, availableSources, maybeMapping);
     }, function(error) {
-        msh.set(null);
+        // msh.set(null);
     }, coords);
 }
 
