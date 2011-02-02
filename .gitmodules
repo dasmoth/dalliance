@@ -1,0 +1,3 @@
+[submodule "jszlib"]
+	path = jszlib
+	url = git://github.com/dasmoth/jszlib.git

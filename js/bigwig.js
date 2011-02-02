@@ -467,11 +467,11 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
                             var data;
                             if (thisB.bwg.uncompressBufSize > 0) {
-                                data = uncompress(new Uint8Array(bstringToBuffer(result.substr(offset + 2, fb.size - 2))));
+                                data = jszlib_inflate_buffer(bstringToBuffer(result.substr(offset + 2, fb.size - 2)));
                             } else {
-                                data = bstringToBuffer(result.substr(offset, fb.size));
+                                data = bstringToBuffer(result.substr(offset, fb.size)).buffer;
                             }
-                            fb.data = data.buffer;
+                            fb.data = data;
 
                             offset += fb.size;
                             ++bi;

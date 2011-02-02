@@ -3,7 +3,6 @@ For 0.6
 
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
-  - Registry caching?
   - Try to fetch SOURCE data when attaching custom DAS sources?
   - Next/prev feature prototype.
   - More intelligent bigfile index caching
