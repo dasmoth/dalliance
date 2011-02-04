@@ -1254,8 +1254,22 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
-	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+            dlog('currentFeaturesMaxScore=' + tier.currentFeaturesMaxScore);
+            dlog('currentFeaturesMinScore=' + tier.currentFeaturesMinScore);
+	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+
+            if (!smax) {
+                if (smin < 0) {
+                    smax = 0;
+                } else {
+                    smax = 10;
+                }
+            }
+            if (!smin) {
+                smin = 0;
+            }
+
 	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }
