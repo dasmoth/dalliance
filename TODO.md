@@ -3,6 +3,7 @@ For 0.6
 
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
+  - Cross-index manually added sources to the registry?
   - Try to fetch SOURCE data when attaching custom DAS sources?
   - Next/prev feature prototype.
   - More intelligent bigfile index caching
@@ -16,6 +17,7 @@ For 0.7
   - If we stick to SVG rendering, implement incremental layout.
   - Move fetching/mapping/etc to a webworker.
   - If we swtich to 2-stage layout, can we do bumping &c in a worker as well?
+  - Local data.
 
 Browser support
 ---------------

@@ -59,6 +59,7 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.glyph = 'HISTOGRAM';
                     wigStyle.COLOR1 = 'white';
                     wigStyle.COLOR2 = 'black';
+                    wigStyle.HEIGHT=30;
                     thisTier.stylesheet.pushStyle('default', null, wigStyle);
                 }
             });

@@ -1254,8 +1254,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-            dlog('currentFeaturesMaxScore=' + tier.currentFeaturesMaxScore);
-            dlog('currentFeaturesMinScore=' + tier.currentFeaturesMinScore);
 	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
 	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
