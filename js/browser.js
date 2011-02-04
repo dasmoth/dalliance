@@ -97,7 +97,12 @@ function formatQuantLabel(v) {
     if (dot < 0) {
         return t;
     } else {
-        if (dot >= 2) {
+        var dotThreshold = 2;
+        if (t.substring(0, 1) == '-') {
+            ++dotThreshold;
+        }
+
+        if (dot >= dotThreshold) {
             return t.substring(0, dot);
         } else {
             return t.substring(0, dot + 2);
@@ -377,7 +382,11 @@ Browser.prototype.setupTierDrag = function(element, ti) {
                 }
             }
             
-            thisB.tierHolder.removeChild(thisB.tiers[ti].viewport);
+            var deadTier = thisB.tiers[ti];
+            thisB.tierHolder.removeChild(deadTier.viewport);
+            if (deadTier.label) {
+                thisB.dasLabelHolder.removeChild(deadTier.label);
+            }
             
             thisB.tiers = newTiers;
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
@@ -1386,6 +1395,7 @@ Browser.prototype.realInit = function(opts) {
         ev.stopPropagation(); ev.preventDefault();
 
         removeChildren(thisB.tierHolder);
+        removeChildren(thisB.dasLabelHolder);
         thisB.tiers = [];
         thisB.sources = [];
         thisB.knownSpace = null;
