@@ -81,6 +81,6 @@ function downsample(features, targetRez) {
     }
 
     var afterDS = Date.now();
-//    dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms');
+    // dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms');
     return sampledFeatures;
 }

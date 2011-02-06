@@ -1,7 +1,6 @@
 For 0.6
 -------
 
-  - Use pre-scaled data where possible.
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
   - Cross-index manually added sources to the registry.

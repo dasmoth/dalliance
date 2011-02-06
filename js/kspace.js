@@ -260,7 +260,27 @@ function BWGFeatureSource(bwgURI) {
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     this.bwgHolder.await(function(bwg) {
-	bwg.readWigData(chr, min, max, function(features) {
+        // dlog('want scale: ' + scale);
+        var data;
+        if (bwg.type == 'bigwig') {
+            var zoom = -1;
+            for (var z = 0; z < bwg.zoomLevels.length; ++z) {
+                if (bwg.zoomLevels[z].reduction <= scale) {
+                    zoom = z;
+                } else {
+                    break;
+                }
+            }
+            // dlog('selected zoom: ' + zoom);
+            if (zoom < 0) {
+                data = bwg.getUnzoomedView();
+            } else {
+                data = bwg.getZoomedView(zoom);
+            }
+        } else {
+            data = bwg.getUnzoomedView();
+        }
+	data.readWigData(chr, min, max, function(features) {
 	    var fs = 1000000000;
 	    if (bwg.type === 'bigwig') {
 		var is = (max - min) / features.length;
