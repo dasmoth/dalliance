@@ -33,6 +33,8 @@ DSBin.prototype.feature = function(f) {
 }
 
 function downsample(features, targetRez) {
+    var beforeDS = Date.now();
+
     var sn = 0;
     while (ds_scale(sn + 1) < targetRez) {
 	++sn;
@@ -77,6 +79,8 @@ function downsample(features, targetRez) {
 	    sampledFeatures.push(f);
 	}
     }
-    dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length);
+
+    var afterDS = Date.now();
+//    dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms');
     return sampledFeatures;
 }

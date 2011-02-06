@@ -200,6 +200,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     var blocksToFetch = [];
     var outstanding = 0;
 
+    var beforeBWG = Date.now();
+
     var cirFobRecur = function(offset, level) {
         outstanding += offset.length;
 
@@ -317,6 +319,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             };
 	    var tramp = function() {
 	        if (blocksToFetch.length == 0) {
+                    var afterBWG = Date.now();
+                    // dlog('BWG fetch took ' + (afterBWG - beforeBWG) + 'ms');
 		    callback(features);
 		    return;  // just in case...
 	        } else {
@@ -494,7 +498,10 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             
                                 var data;
                                 if (thisB.bwg.uncompressBufSize > 0) {
+                                    // var beforeInf = Date.now();
                                     data = jszlib_inflate_buffer(bstringToBuffer(result.substr(offset + 2, fb.size - 2)));
+                                    // var afterInf = Date.now();
+                                    // dlog('inflate: ' + (afterInf - beforeInf) + 'ms');
                                 } else {
                                     data = bstringToBuffer(result.substr(offset, fb.size)).buffer;
                                 }

@@ -1,4 +1,4 @@
-var REPETITIONS = 1;
+var REPETITIONS = 100;
 
 function handle() {
     var beforeFetch = Date.now();
@@ -32,7 +32,7 @@ function handle() {
 	    var beforeNew = Date.now();
 	    var nresult;
 	    for (var i = 0; i < REPETITIONS; ++i) {
-		nresult = uncompress(bb);
+		nresult = new Uint8Array(jszlib_inflate_buffer(bb.buffer));
 	    }
 	    var afterNew = Date.now();
 	    
@@ -45,7 +45,8 @@ function handle() {
 	    dlog(s);
 	}
 
-	{
+
+	/* {
 	    var bresult;
 	    var beforeUncompress = Date.now();
 	    for (var i = 0; i < REPETITIONS; ++i) {
@@ -54,6 +55,6 @@ function handle() {
 	    var afterUncompress = Date.now();
 	    dlog('Uncompress: ' + bresult.length);
 	    dlog('Uncompress took ' + (afterUncompress - beforeUncompress) + 'ms');
-	}
+	} */
     });
 }
