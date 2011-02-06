@@ -1666,7 +1666,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
     if (tryCache) {
         var cacheTime = localStorage['dalliance.registry.' + cacheHash + '.last_queried'];
         if (cacheTime) {
-            setSources(msh, eval(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
+            setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
             var cacheAge = (Date.now()|0) - (cacheTime|0);
             if (cacheAge < (12 * 60 * 60 * 1000)) {
                 // alert('Using cached registry data');
@@ -1691,7 +1691,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
             availableSources.push(source);
         }
 
-        localStorage['dalliance.registry.' + cacheHash + '.sources'] = miniJSONify(availableSources);
+        localStorage['dalliance.registry.' + cacheHash + '.sources'] = JSON.stringify(availableSources);
         localStorage['dalliance.registry.' + cacheHash + '.last_queried'] = '' + Date.now();
         
         setSources(msh, availableSources, maybeMapping);
