@@ -1,13 +1,13 @@
 For 0.6
 -------
 
+  - Use pre-scaled data where possible.
   - Check maxbins support for DAS sources
   - Allow maxbins and credentials flags to be set when adding DAS sources
-  - Cross-index manually added sources to the registry?
-  - Try to fetch SOURCE data when attaching custom DAS sources?
-  - Next/prev feature prototype.
-  - More intelligent bigfile index caching
-  - Make sure bp-resolution features work properly
+  - Cross-index manually added sources to the registry.
+  - Try to fetch SOURCE data when attaching custom DAS sources.
+  - Check rendering code, see if we can reduce stripiness.
+  - Next/prev feature prototype???
   - Try touch support again.
 
 For 0.7
