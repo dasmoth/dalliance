@@ -192,44 +192,54 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 	    thisB.cirHeader = bstringToBuffer(result);
             var la = new Int32Array(thisB.cirHeader);
             thisB.cirBlockSize = la[1];
-            
-            // dlog('CIR blockSize = ' + la[1]);
-            // dlog('CIR itemCount = ' + ((la[2] << 32) | (la[3])));
-            // dlog('CIR fileSize = ' + ((la[8] << 32)| (la[9])));
-            // dlog('CIR itemsPerSlot = ' + (la[10]));
 	    thisB.readWigDataById(chr, min, max, callback);
 	});
 	return;
     }
 
-    // dlog('Got ' + this.cir.byteLength + ' bytes of CIR');
-
-
     var blocksToFetch = [];
     var outstanding = 0;
 
-    var cirCompleted;
-
     var cirFobRecur = function(offset, level) {
-        ++outstanding;
-        thisB.bwg.data.slice(offset, 4 + (thisB.cirBlockSize * 32)).fetch(function(result) {
-            cirFobRecur2(bstringToBuffer(result), level);
-            --outstanding;
-            if (outstanding == 0) {
-                cirCompleted();
+        outstanding += offset.length;
+
+        var maxCirBlockSpan = 4 +  (thisB.cirBlockSize * 32);   // Upper bound on size, based on a completely full leaf node.
+        var spans;
+        for (var i = 0; i < offset.length; ++i) {
+            var blockSpan = new Range(offset[i], Math.min(offset[i] + maxCirBlockSpan, thisB.cirTreeOffset + thisB.cirTreeLength));
+            spans = spans ? union(spans, blockSpan) : blockSpan;
+        }
+        
+        var fetchRanges = spans.ranges();
+        for (var r = 0; r < fetchRanges.length; ++r) {
+            var fr = fetchRanges[r];
+            cirFobStartFetch(offset, fr, level);
+        }
+    }
+
+    var cirFobStartFetch = function(offset, fr, level) {
+        thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
+            var resultBuffer = bstringToBuffer(result);
+            for (var i = 0; i < offset.length; ++i) {
+                if (fr.contains(offset[i])) {
+                    cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
+                    --outstanding;
+                    if (outstanding == 0) {
+                        cirCompleted();
+                    }
+                }
             }
         });
     }
 
-    var cirFobRecur2 = function(cirBlockData, level) {
+    var cirFobRecur2 = function(cirBlockData, offset, level) {
         var ba = new Int8Array(cirBlockData);
         var sa = new Int16Array(cirBlockData);
         var la = new Int32Array(cirBlockData);
-        var offset = 0;   // FIXME.
 
 	var isLeaf = ba[offset];
 	var cnt = sa[offset/2 + 1];
-        dlog('cir level=' + level + '; cnt=' + cnt);
+        // dlog('cir level=' + level + '; cnt=' + cnt);
 	offset += 4;
 
 	if (isLeaf != 0) {
@@ -250,6 +260,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		offset += 32;
 	    }
 	} else {
+            var recurOffsets = [];
 	    for (var i = 0; i < cnt; ++i) {
 		var lo = offset/4;
 		var startChrom = la[lo];
@@ -260,16 +271,18 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		if ((startChrom < chr || (startChrom == chr && startBase <= max)) &&
 		    (endChrom   > chr || (endChrom == chr && endBase >= min)))
 		{
-		    // dlog('Need to recur: ' + blockOffset);
-		    cirFobRecur(blockOffset, level + 1);
+                    recurOffsets.push(blockOffset);
 		}
 		offset += 24;
 	    }
+            if (recurOffsets.length > 0) {
+                cirFobRecur(recurOffsets, level + 1);
+            }
 	}
     };
     
 
-    cirCompleted = function() {
+    var cirCompleted = function() {
         blocksToFetch.sort(function(b0, b1) {
             return (b0.offset|0) - (b1.offset|0);
         });
@@ -499,7 +512,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
         }
     }
 
-    cirFobRecur(thisB.cirTreeOffset + 48, 1);
+    cirFobRecur([thisB.cirTreeOffset + 48], 1);
 }
 
 BigWig.prototype.readWigData = function(chrName, min, max, callback) {
