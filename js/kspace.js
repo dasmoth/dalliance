@@ -156,11 +156,11 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
 	}
         
-        // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
+        dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
 	if (baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
-//        dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
+        dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
 	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
 	var availableScales = source.getScales();
@@ -181,7 +181,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	if (scale < (thisB.scale/2) && features.length > 200) {
 	    features = downsample(features, thisB.scale);
 	}
-//        dlog('Provisioning ' + tier.toString() + ' with fresh features');
+        dlog('Provisioning ' + tier.toString() + ' with fresh features');
 	tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
     });
 }
@@ -295,8 +295,12 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 
 BWGFeatureSource.prototype.getScales = function() {
     var bwg = this.bwgHolder.res;
-    if (bwg) {
-	return null;
+    if (bwg && bwg.type == 'bigwig') {
+	var scales = [1];  // Can we be smarter about inferring baseline scale?
+        for (var z = 0; z < bwg.zoomLevels.length; ++z) {
+            scales.push(bwg.zoomLevels[z].reduction);
+        }
+        return scales;
     } else {
 	return null;
     }

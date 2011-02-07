@@ -1499,7 +1499,6 @@ Browser.prototype.realInit = function(opts) {
     var keyHandler = function(ev) {
         // dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
-            dlog('hit return');
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 var t = thisB.tiers[ti];
