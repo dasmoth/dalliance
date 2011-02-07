@@ -277,7 +277,7 @@ Observed.prototype.removeListener = function(f) {
 }
 
 Observed.prototype.get = function() {
-    return x;
+    return this.value;
 }
 
 Observed.prototype.set = function(x) {
