@@ -288,10 +288,10 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
     if (tier.dasSource.mapping) {
         var mcs = this.chains[tier.dasSource.mapping].coords;
         popcontents.push(makeElement('p', makeElement('i', 'Mapped from ' + mcs.auth + mcs.version)));
-        srcs = this.mappableSources[tier.dasSource.mapping];
+        srcs = this.mappableSources[tier.dasSource.mapping].get();
     }
 
-    if (srcs == 0) {
+    if (!srcs || srcs == 0) {
         regel = makeElement('p', 'Registry data not available');
     } else {
         for (var ri = 0; ri < srcs.length; ++ri) {
