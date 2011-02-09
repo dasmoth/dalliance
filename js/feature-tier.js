@@ -908,7 +908,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var label = feature.label;
 
     var minPos = (min - origin) * scale;
-    var maxPos = ((max - origin + 1) * scale) - 0.05;
+    var maxPos = ((max - origin + 1) * scale);
 
     var requiredHeight;
     var quant;
@@ -1302,7 +1302,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             } 
 
 	    if (gtype == 'HISTOGRAM') {
-		height = (height * relScore)|0;
+		height = relScore * height;
 		y = y + (requiredHeight - height);
                 
                 quant = {
@@ -1310,8 +1310,12 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     max: smax
                 };
 	    }
+
+            maxPos += 0.75;   // Fudge factor to eliminate pixel-jitter.
 	}
  
+        // dlog('min=' + min + '; max=' + max + '; minPos=' + minPos + '; maxPos=' + maxPos);
+
         var rect = document.createElementNS(NS_SVG, 'rect');
         rect.setAttribute('x', minPos);
         rect.setAttribute('y', y);
