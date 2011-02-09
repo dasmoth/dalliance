@@ -36,12 +36,23 @@ BlobFetchable.prototype.fetch = function(callback) {
     reader.readAsBinaryString(this.blob);
 }
 
-function URLFetchable(url, start, end) {
+function URLFetchable(url, start, end, opts) {
+    if (!opts) {
+        if (typeof start === 'object') {
+            opts = start;
+            start = undefined;
+        } else {
+            opts = {};
+        }
+    }
+
     this.url = url;
     this.start = start || 0;
     if (end) {
         this.end = end;
     }
+    this.opts = opts;
+    // dlog('made a UF, opts=' + miniJSONify(this.opts));
 }
 
 URLFetchable.prototype.slice = function(s, l) {
@@ -56,7 +67,7 @@ URLFetchable.prototype.slice = function(s, l) {
     } else {
         ne = ne || l - 1;
     }
-    return new URLFetchable(this.url, ns, ne);
+    return new URLFetchable(this.url, ns, ne, this.opts);
 }
 
 URLFetchable.prototype.fetch = function(callback) {
@@ -77,6 +88,9 @@ URLFetchable.prototype.fetch = function(callback) {
             }
         }
     };
+    if (this.opts.credentials) {
+        req.withCredentials = true;
+    }
     req.send('');
 }
 
@@ -333,9 +347,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 		            var la = new Int32Array(block.data);
 		            var fa = new Float32Array(block.data);
 
-                            // dlog('processing summary block...')
                             var itemCount = block.data.byteLength/32;
-                            // dlog('Summary itemCount=' + itemCount);
                             for (var i = 0; i < itemCount; ++i) {
                                 var chromId =   la[(i*8)];
                                 var start =     la[(i*8)+1];
@@ -347,7 +359,11 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var sumSqData = fa[(i*8)+7];
                                 
                                 if (chromId == chr) {
-                                    maybeCreateFeature(start, end, {score: sumData/validCnt});
+                                    var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
+                                    if (thisB.bwg.type == 'bigbed') {
+                                        summaryOpts.type = 'density';
+                                    }
+                                    maybeCreateFeature(start, end, summaryOpts);
                                 }
                             }
                         } else if (thisB.bwg.type == 'bigwig') {
@@ -542,8 +558,8 @@ BigWig.prototype.getZoomedView = function(z) {
 }
 
 
-function makeBwgFromURL(url, callback) {
-    makeBwg(new URLFetchable(url), callback);
+function makeBwgFromURL(url, callback, creds) {
+    makeBwg(new URLFetchable(url, {credentials: creds}), callback);
 }
 
 function makeBwgFromFile(file, callback) {

@@ -156,11 +156,11 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
 	}
         
-        dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
+        // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
 	if (baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
-        dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
+        // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
 	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
 	var availableScales = source.getScales();
@@ -181,7 +181,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	if (scale < (thisB.scale/2) && features.length > 200) {
 	    features = downsample(features, thisB.scale);
 	}
-        dlog('Provisioning ' + tier.toString() + ' with fresh features');
+        // dlog('Provisioning ' + tier.toString() + ' with fresh features');
 	tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
     });
 }
@@ -250,19 +250,24 @@ DASFeatureSource.prototype.getScales = function() {
 }
 
 
-function BWGFeatureSource(bwgURI) {
+function BWGFeatureSource(bwgURI, credentials) {
     var thisB = this;
     thisB.bwgHolder = new Awaited();
     makeBwgFromURL(bwgURI, function(bwg) {
 	thisB.bwgHolder.provide(bwg);
-    });
+    }, credentials);
 }
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     this.bwgHolder.await(function(bwg) {
         // dlog('want scale: ' + scale);
         var data;
-        if (bwg.type == 'bigwig') {
+        // dlog(miniJSONify(types));
+        var wantDensity = !types || types.length == 0 || arrayIndexOf(types, 'density') >= 0;
+        if (wantDensity) {
+            dlog('want density');
+        }
+        if (bwg.type == 'bigwig' || wantDensity) {
             var zoom = -1;
             for (var z = 0; z < bwg.zoomLevels.length; ++z) {
                 if (bwg.zoomLevels[z].reduction <= scale) {
@@ -271,7 +276,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     break;
                 }
             }
-            // dlog('selected zoom: ' + zoom);
+            dlog('selected zoom: ' + zoom);
             if (zoom < 0) {
                 data = bwg.getUnzoomedView();
             } else {
@@ -295,7 +300,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 
 BWGFeatureSource.prototype.getScales = function() {
     var bwg = this.bwgHolder.res;
-    if (bwg && bwg.type == 'bigwig') {
+    if (bwg /* && bwg.type == 'bigwig' */) {
 	var scales = [1];  // Can we be smarter about inferring baseline scale?
         for (var z = 0; z < bwg.zoomLevels.length; ++z) {
             scales.push(bwg.zoomLevels[z].reduction);

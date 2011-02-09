@@ -101,6 +101,10 @@ function maybeConcat(a, b) {
 }
 
 function arrayIndexOf(a, x) {
+    if (!a) {
+        return -1;
+    }
+
     for (var i = 0; i < a.length; ++i) {
         if (a[i] === x) {
             return i;
@@ -223,7 +227,11 @@ function removeChildren(node)
 //
 
 function miniJSONify(o) {
-    if (typeof o == 'string') {
+    if (typeof o === 'undefined') {
+        return 'undefined';
+    } else if (o == null) {
+        return 'null';
+    } else if (typeof o == 'string') {
 	return "'" + o + "'";
     } else if (typeof o == 'number') {
 	return "" + o;

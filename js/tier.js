@@ -29,7 +29,7 @@ function DasTier(browser, source, viewport, background)
 
     var fs;
     if (this.dasSource.bwgURI) {
-        fs = new BWGFeatureSource(this.dasSource.bwgURI);
+        fs = new BWGFeatureSource(this.dasSource.bwgURI, this.dasSource.credentials);
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -39,20 +39,37 @@ function DasTier(browser, source, viewport, background)
                     var wigStyle = new DASStyle();
                     wigStyle.glyph = 'BOX';
                     wigStyle.FGCOLOR = 'black';
-                    wigStyle.BGCOLOR = 'red'
-                    wigStyle.HEIGHT = 12;
+                    wigStyle.BGCOLOR = 'blue'
+                    wigStyle.HEIGHT = 8;
                     wigStyle.BUMP = true;
                     wigStyle.LABEL = true;
                     wigStyle.ZINDEX = 20;
-                    thisTier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+                    thisTier.stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+
+                    wigStyle.glyph = 'BOX';
+                    wigStyle.FGCOLOR = 'black';
+                    wigStyle.BGCOLOR = 'red'
+                    wigStyle.HEIGHT = 10;
+                    wigStyle.BUMP = true;
+                    wigStyle.LABEL = true;
+                    wigStyle.ZINDEX = 20;
+                    thisTier.stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
                     
                     var tsStyle = new DASStyle();
                     tsStyle.glyph = 'BOX';
                     tsStyle.FGCOLOR = 'black';
                     tsStyle.BGCOLOR = 'white';
+                    wigStyle.HEIGHT = 10;
                     tsStyle.ZINDEX = 10;
                     tsStyle.BUMP = true;
                     thisTier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+
+                    var densStyle = new DASStyle();
+                    densStyle.glyph = 'HISTOGRAM';
+                    densStyle.COLOR1 = 'white';
+                    densStyle.COLOR2 = 'black';
+                    densStyle.HEIGHT=30;
+                    thisTier.stylesheet.pushStyle({type: 'density'}, null, densStyle);
                 } else {
                     thisTier.stylesheet = new DASStylesheet();
                     var wigStyle = new DASStyle();
@@ -60,7 +77,7 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.COLOR1 = 'white';
                     wigStyle.COLOR2 = 'black';
                     wigStyle.HEIGHT=30;
-                    thisTier.stylesheet.pushStyle('default', null, wigStyle);
+                    thisTier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
                 }
             });
         }
@@ -97,7 +114,7 @@ DasTier.prototype.init = function() {
             defStyle.glyph = 'BOX';
             defStyle.BGCOLOR = 'blue';
             defStyle.FGCOLOR = 'black';
-            tier.stylesheet.pushStyle('default', null, defStyle);
+            tier.stylesheet.pushStyle({type: 'default'}, null, defStyle);
             tier.browser.refreshTier(tier);
         });
     }
@@ -126,6 +143,7 @@ DasTier.prototype.getDesiredTypes = function(scale) {
     var ssScale = zoomForScale(this.browser.scale);
 
     if (this.stylesheet) {
+        // dlog('ss = ' + miniJSONify(this.stylesheet));
         var ss = this.stylesheet.styles;
         for (var si = 0; si < ss.length; ++si) {
             var sh = ss[si];
@@ -138,7 +156,11 @@ DasTier.prototype.getDesiredTypes = function(scale) {
                 }
             }
         }
+    } else {
+        inclusive = true;
     }
+
+    // dlog('gdt(' + this.id + ') = ' + miniJSONify(fetchTypes));
 
     if (inclusive) {
         return null;
