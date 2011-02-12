@@ -70,19 +70,34 @@ URLFetchable.prototype.slice = function(s, l) {
     return new URLFetchable(this.url, ns, ne, this.opts);
 }
 
-URLFetchable.prototype.fetch = function(callback) {
+URLFetchable.prototype.fetch = function(callback, attempt) {
+    var thisB = this;
+
+    attempt = attempt || 1;
+    if (attempt > 3) {
+        return;
+    }
+
     // dlog('url=' + this.url + '; start=' + this.start + '; end=' + this.end);
     var req = new XMLHttpRequest();
+    var length;
     req.open('GET', this.url, true);
     req.overrideMimeType('text/plain; charset=x-user-defined');
     if (this.end) {
         // dlog('Range: bytes=' + this.start + '-' + this.end);
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
+        length = this.end - this.start + 1;
     }
     req.onreadystatechange = function() {
         if (req.readyState == 4) {
             if (req.status == 200 || req.status == 206) {
-                callback(req.responseText);
+                var r = req.responseText;
+                if (length && length != r.length) {
+                    dlog('slice response mismatch: ' + r.length + ' != ' + length);
+                    return thisB.fetch(callback, attempt + 1);
+                } else {
+                    return callback(req.responseText);
+                }
             } else {
                 dlog('HTTP status = ' + req.status);
             }
@@ -227,15 +242,27 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
         }
         
         var fetchRanges = spans.ranges();
+        // dlog('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
             var fr = fetchRanges[r];
             cirFobStartFetch(offset, fr, level);
         }
     }
 
-    var cirFobStartFetch = function(offset, fr, level) {
+    var cirFobStartFetch = function(offset, fr, level, attempts) {
+        var length = fr.max() - fr.min();
+        // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
         thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
             var resultBuffer = bstringToBuffer(result);
+
+// This is now handled in URLFetchable instead.
+//
+//            if (resultBuffer.byteLength != length) {           
+//                dlog("Didn't get expected size: " + resultBuffer.byteLength + " != " + length);
+//                return cirFobStartFetch(offset, fr, level, attempts + 1);
+//            }
+
+
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
@@ -618,7 +645,7 @@ function makeBwg(data, callback) {
 	    var zlReduction = la[zl*6 + 16]
 	    var zlData = (la[zl*6 + 18]<<32)|(la[zl*6 + 19]);
 	    var zlIndex = (la[zl*6 + 20]<<32)|(la[zl*6 + 21]);
-	    // dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
+//	    dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
 	    bwg.zoomLevels.push({reduction: zlReduction, dataOffset: zlData, indexOffset: zlIndex});
 	}
 

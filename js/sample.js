@@ -14,22 +14,37 @@ function ds_scale(n) {
 }
 
 
-function DSBin() {
+function DSBin(scale, min, max) {
+    this.scale = scale;
     this.tot = 0;
     this.cnt = 0;
+    this.hasScore = false;
+    this.min = min; this.max = max;
+    this.lap = 0;
 }
 
 DSBin.prototype.score = function() {
     if (this.cnt == 0) {
 	return 0;
-    } else {
+    } else if (this.hasScore) {
 	return this.tot / this.cnt;
+    } else {
+        return 100.0 * this.lap / this.scale;
     }
 }
 
 DSBin.prototype.feature = function(f) {
-    this.tot += f.score;
-    this.cnt += 1;
+    if (f.score) {
+        this.tot += f.score;
+        this.hasScore = true
+    }
+    var fMin = f.min|0;
+    var fMax = f.max|0;
+    var lMin = Math.max(this.min, fMin);
+    var lMax = Math.min(this.max, fMax);
+    // dlog('f.min=' + fMin + '; f.max=' + fMax + '; lMin=' + lMin + '; lMax=' + lMax + '; lap=' + (1.0 * (lMax - lMin + 1))/(fMax - fMin + 1));
+    this.lap += (1.0 * (lMax - lMin + 1))/(fMax - fMin + 1);
+    ++this.cnt;
 }
 
 function downsample(features, targetRez) {
@@ -50,7 +65,7 @@ function downsample(features, targetRez) {
             // Don't downsample complex features (?)
             return features;
         }
-	if (f.score) {
+//	if (f.score) {
 	    var minLap = (f.min / scale)|0;
 	    var maxLap = (f.max / scale)|0;
 	    maxBin = Math.max(maxBin, maxLap);
@@ -58,12 +73,12 @@ function downsample(features, targetRez) {
 	    for (var b = minLap; b <= maxLap; ++b) {
 		var bm = binTots[b];
 		if (!bm) {
-		    bm = new DSBin();
+		    bm = new DSBin(scale, b * scale, (b + 1) * scale - 1);
 		    binTots[b] = bm;
 		}
 		bm.feature(f);
 	    }
-	}
+//	}
     }
 
     var sampledFeatures = [];
@@ -75,7 +90,7 @@ function downsample(features, targetRez) {
             f.min = (b * scale) + 1;
             f.max = (b + 1) * scale;
             f.score = bm.score();
-            f.type = 'sampler';
+            f.type = 'density';
 	    sampledFeatures.push(f);
 	}
     }

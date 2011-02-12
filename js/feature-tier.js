@@ -1311,7 +1311,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 };
 	    }
 
-            maxPos += 0.75;   // Fudge factor to eliminate pixel-jitter.
+            minPos -= 0.25
+            maxPos += 0.25;   // Fudge factor to mitigate pixel-jitter.
 	}
  
         // dlog('min=' + min + '; max=' + max + '; minPos=' + minPos + '; maxPos=' + maxPos);

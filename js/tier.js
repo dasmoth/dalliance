@@ -29,7 +29,10 @@ function DasTier(browser, source, viewport, background)
 
     var fs;
     if (this.dasSource.bwgURI) {
-        fs = new BWGFeatureSource(this.dasSource.bwgURI, this.dasSource.credentials);
+        fs = new BWGFeatureSource(this.dasSource.bwgURI, {
+            credentials: this.dasSource.credentials,
+            preflight: this.dasSource.preflight
+        });
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -105,7 +108,7 @@ DasTier.prototype.init = function() {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
 	    tier.stylesheet = stylesheet;
-            dlog('got a stylesheet');
+//            dlog('got a stylesheet');
             tier.browser.refreshTier(tier);
         }, function() {
 	    // tier.error = 'No stylesheet';

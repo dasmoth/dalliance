@@ -26,6 +26,7 @@ Awaited.prototype.provide = function(x) {
 Awaited.prototype.await = function(f) {
     if (this.res) {
 	f(this.res);
+        return this.res;
     } else {
 	this.queue.push(f);
     }
@@ -147,6 +148,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 
     var source = tier.getSource();
     var baton = thisB.featureCache[tier];
+    var wantedTypes = tier.getDesiredTypes(this.scale);
     if (baton) {
 // 	dlog('considering cached features: ' + baton);
     }
@@ -157,7 +159,7 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	}
         
         // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
-	if (baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) {
+	if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
 	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
 	}
         // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
@@ -172,13 +174,13 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	}
     }
 
-    var wantedTypes = tier.getDesiredTypes(this.scale);
+    
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
 	if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
 	}
 
-	if (scale < (thisB.scale/2) && features.length > 200) {
+	if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
 	    features = downsample(features, thisB.scale);
 	}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
@@ -249,13 +251,53 @@ DASFeatureSource.prototype.getScales = function() {
     return [];
 }
 
+var bwg_preflights = {};
 
-function BWGFeatureSource(bwgURI, credentials) {
+function BWGFeatureSource(bwgURI, opts) {
     var thisB = this;
+    this.bwgURI = bwgURI;
+    this.opts = opts || {};
+    
     thisB.bwgHolder = new Awaited();
-    makeBwgFromURL(bwgURI, function(bwg) {
+
+    if (this.opts.preflight) {
+        var pfs = bwg_preflights[this.opts.preflight];
+        if (!pfs) {
+            pfs = new Awaited();
+            bwg_preflights[this.opts.preflight] = pfs;
+
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        pfs.provide('success');
+                    } else {
+                        pfs.provide('failure');
+                    }
+                }
+            };
+            // req.setRequestHeader('cache-control', 'no-cache');    /* Doesn't work, not an allowed request header in CORS */
+            req.open('get', this.opts.preflight + '?' + hex_sha1('salt' + Date.now()), true);    // Instead, ensure we always preflight a unique URI.
+            if (this.opts.credentials) {
+                req.withCredentials = true;
+            }
+            req.send('');
+        }
+        pfs.await(function(status) {
+            if (status === 'success') {
+                thisB.init();
+            }
+        });
+    } else {
+        thisB.init();
+    }
+}
+
+BWGFeatureSource.prototype.init = function() {
+    var thisB = this;
+    makeBwgFromURL(this.bwgURI, function(bwg) {
 	thisB.bwgHolder.provide(bwg);
-    }, credentials);
+    }, this.opts.credentials);
 }
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -264,9 +306,9 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         var data;
         // dlog(miniJSONify(types));
         var wantDensity = !types || types.length == 0 || arrayIndexOf(types, 'density') >= 0;
-        if (wantDensity) {
-            dlog('want density');
-        }
+/*        if (wantDensity) {
+            dlog('want density; scale=' + scale);
+        } */
         if (bwg.type == 'bigwig' || wantDensity) {
             var zoom = -1;
             for (var z = 0; z < bwg.zoomLevels.length; ++z) {
@@ -276,7 +318,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     break;
                 }
             }
-            dlog('selected zoom: ' + zoom);
+            // dlog('selected zoom: ' + zoom);
             if (zoom < 0) {
                 data = bwg.getUnzoomedView();
             } else {
@@ -287,12 +329,12 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         }
 	data.readWigData(chr, min, max, function(features) {
 	    var fs = 1000000000;
-	    if (bwg.type === 'bigwig') {
+	    // if (bwg.type === 'bigwig') {
 		var is = (max - min) / features.length;
 		if (is < fs) {
 		    fs = is;
 		}
-	    }
+	    // }
 	    callback(null, features, fs);
 	});
     });
