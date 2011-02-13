@@ -91,6 +91,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var addButtons = [];
     var custURL, custName, custCS;
     var customMode = false;
+    var dataToFinalize = null;
 
     var asform = makeElement('form', null, {}, {clear: 'both'});
     var stabHolder = document.createElement('div');
@@ -101,6 +102,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var __mapping;
     var __sourceHolder;
+
 
     makeStab = function(msources, mapping) {
         if (__sourceHolder) {
@@ -259,6 +261,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, custButton);
+        switchToCustomMode();
+    }, false);
+
+    var switchToCustomMode = function() {
         customMode = 'das';
 
         removeChildren(stabHolder);
@@ -291,8 +297,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
         stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
-        
-    }, false);
+    }
 
 
 
@@ -310,19 +315,32 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (customMode) {
-            var nds;
             if (customMode === 'das') {
-                nds = new DASSource({name: custName.value, uri: custURL.value});
-            } else {
-                nds = new DASSource({name: custName.value, bwgURI: custURL.value});
+                var nds = new DASSource({name: custName.value, uri: custURL.value});
+                var m = custCS.value;
+                if (m != '__default__') {
+                    nds.mapping = m;
+                }
+
+                tryAddDAS(nds);
+            } else if (customMode === 'bin') {
+                var nds = new DASSource({name: custName.value, bwgURI: custURL.value});
+                var m = custCS.value;
+                if (m != '__default__') {
+                    nds.mapping = m;
+                }
+                thisB.sources.push(nds);
+                thisB.makeTier(nds);
+	        thisB.storeStatus();
+                thisB.removeAllPopups();
+            } else if (customMode === 'reset') {
+                switchToCustomMode();
+            } else if (customMode === 'finalize') {
+                thisB.sources.push(dataToFinalize);
+                thisB.makeTier(dataToFinalize);
+	        thisB.storeStatus();
+                thisB.removeAllPopups();
             }
-            var m = custCS.value;
-            if (m != '__default__') {
-                nds.mapping = m;
-            }
-            thisB.sources.push(nds);
-            thisB.makeTier(nds);
-	    thisB.storeStatus();
         } else {
             for (var bi = 0; bi < addButtons.length; ++bi) {
                 var b = addButtons[bi];
@@ -333,10 +351,41 @@ Browser.prototype.showTrackAdder = function(ev) {
 		    thisB.storeStatus();
                 }
             }
+            thisB.removeAllPopups();
         }
-
-        thisB.removeAllPopups();
     }, false);
+
+    var tryAddDAS = function(nds, retry) {
+        var knownSpace = thisB.knownSpace;
+        if (!knownSpace) {
+            alert("Can't confirm track-addition to an uninit browser.");
+            return;
+        }
+        var tsm = Math.max(knownSpace.min, (knownSpace.min + knownSpace.max - 100) / 2)|0;
+        var testSegment = new DASSegment(knownSpace.chr, tsm, Math.min(tsm + 99, knownSpace.max));
+        dlog('test segment: ' + testSegment);
+        nds.features(testSegment, {}, function(features, status) {
+            dlog('status=' + status);
+            if (status) {
+                if (!retry) {
+                    dlog('retrying with credentials');
+                    nds.credentials = true;
+                    tryAddDAS(nds, true);
+                } else {
+                    removeChildren(stabHolder);
+                    stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests'));
+                    customMode = 'reset';
+                    return;
+                }
+            } else {
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('p', 'Appears to be a valid DAS source...'));
+                customMode = 'finalize';
+                dataToFinalize = nds;
+                return;
+            }
+        });
+    }
 
     var canButton = document.createElement('span');
     canButton.style.backgroundColor = 'rgb(230,230,250)';

@@ -5,7 +5,6 @@ For 0.6
   - Allow maxbins and credentials flags to be set when adding DAS sources
   - Cross-index manually added sources to the registry.
   - Try to fetch SOURCE data when attaching custom DAS sources.
-  - Stylesheet-driven switch to density features (at least for bb)
   - Reinstate FF3.6 support
   - Find a sane way of warning users that their browser is a bit old.
 

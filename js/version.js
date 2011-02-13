@@ -13,7 +13,7 @@ var VERSION = {
     MINOR:  6,
     MICRO:  0,
     PATCH:  '',
-    BRANCH: 'pre6'
+    BRANCH: 'pre7'
 }
 
 VERSION.toString = function() {
