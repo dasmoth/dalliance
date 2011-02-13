@@ -159,11 +159,13 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	}
         
         // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
-	if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
-	}
+//	if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
+//	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
+//	}
         // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
-	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
+//	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
+
+        thisB.provision(tier, baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, wantedTypes, cachedFeatures);
 
 	var availableScales = source.getScales();
 	if (baton.scale <= this.scale || !availableScales) {
@@ -180,12 +182,22 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features);
 	}
 
-	if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-	    features = downsample(features, thisB.scale);
-	}
+	//if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
+	//    features = downsample(features, thisB.scale);
+	//}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
-	tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
+	//tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
+        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, thisB.scale, wantedTypes, features);
     });
+}
+
+KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features) {
+    if ((actualScale < (this.scale/2) && features.length > 200) || 
+        (BWGFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)) 
+    {
+	features = downsample(features, this.scale);
+    }
+    tier.viewFeatures(chr, min, max, actualScale, features);
 }
 
 
