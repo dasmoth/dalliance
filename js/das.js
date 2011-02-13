@@ -171,6 +171,8 @@ function DASLink(desc, uri) {
 }
 
 DASSource.prototype.features = function(segment, options, callback) {
+    options = options || {};
+
     var dasURI;
     if (this.uri.indexOf('http://') == 0) {
         dasURI = this.uri + 'features?';
@@ -243,7 +245,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 dasFeature.label = feature.getAttribute('label');
                 var spos = elementValue(feature, "START");
                 var epos = elementValue(feature, "END");
-                if (spos > epos) {
+                if ((spos|0) > (epos|0)) {
                     dasFeature.min = epos;
                     dasFeature.max = spos;
                 } else {
