@@ -235,7 +235,7 @@ DASSequenceSource.prototype.getScales = function() {
 }
 
 DASSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    if (scale < 1) {
+    if (scale < 5) {   // Correct for default targetQuantRes.
 	this.dasSource.sequence(
             new DASSegment(chr, min, max),
             function(seqs) {

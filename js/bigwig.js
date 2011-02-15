@@ -100,6 +100,7 @@ URLFetchable.prototype.fetch = function(callback, attempt) {
                 }
             } else {
                 dlog('HTTP status = ' + req.status);
+                return thisB.fetch(callback, attempt + 1);
             }
         }
     };
