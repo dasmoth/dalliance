@@ -461,7 +461,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
                                 if (bedColumns.length < 9) {
                                     if (chromId == chr) {
-                                        maybeCreateFeature(start, end, featureOpts);
+                                        maybeCreateFeature(start + 1, end, featureOpts);
                                     }
                                 } else if (chromId == chr && start <= max && end >= min) {
                                     // Complex-BED?
@@ -505,7 +505,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     var tsList = spans.ranges();
                                     for (var s = 0; s < tsList.length; ++s) {
                                         var ts = tsList[s];
-                                        createFeature(ts.min(), ts.max(), featureOpts);
+                                        createFeature(ts.min() + 1, ts.max(), featureOpts);
                                     }
 
                                     var tl = intersection(spans, new Range(thickStart, thickEnd));
@@ -514,7 +514,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                         var tlList = tl.ranges();
                                         for (var s = 0; s < tlList.length; ++s) {
                                             var ts = tlList[s];
-                                            createFeature(ts.min(), ts.max(), featureOpts);
+                                            createFeature(ts.min() + 1, ts.max(), featureOpts);
                                         }
                                     }
                                 }

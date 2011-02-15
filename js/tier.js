@@ -183,6 +183,7 @@ DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
 
+    this.setBackground();
     this.draw();
 }
 
