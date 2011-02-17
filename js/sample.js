@@ -21,6 +21,7 @@ function DSBin(scale, min, max) {
     this.hasScore = false;
     this.min = min; this.max = max;
     this.lap = 0;
+    this.covered = null;
 }
 
 DSBin.prototype.score = function() {
@@ -29,7 +30,7 @@ DSBin.prototype.score = function() {
     } else if (this.hasScore) {
 	return this.tot / this.cnt;
     } else {
-        return 100.0 * this.lap / this.scale;
+        return this.lap / coverage(this.covered);
     }
 }
 
@@ -43,8 +44,14 @@ DSBin.prototype.feature = function(f) {
     var lMin = Math.max(this.min, fMin);
     var lMax = Math.min(this.max, fMax);
     // dlog('f.min=' + fMin + '; f.max=' + fMax + '; lMin=' + lMin + '; lMax=' + lMax + '; lap=' + (1.0 * (lMax - lMin + 1))/(fMax - fMin + 1));
-    this.lap += (1.0 * (lMax - lMin + 1))/(fMax - fMin + 1);
+    this.lap += (1.0 * (lMax - lMin + 1));
     ++this.cnt;
+    var newRange = new Range(lMin, lMax);
+    if (this.covered) {
+        this.covered = union(this.covered, newRange);
+    } else {
+        this.covered = newRange;
+    }
 }
 
 function downsample(features, targetRez) {

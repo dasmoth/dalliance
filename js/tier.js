@@ -31,7 +31,9 @@ function DasTier(browser, source, viewport, background)
     if (this.dasSource.bwgURI) {
         fs = new BWGFeatureSource(this.dasSource.bwgURI, {
             credentials: this.dasSource.credentials,
-            preflight: this.dasSource.preflight
+            preflight: this.dasSource.preflight,
+            clientBin: this.dasSource.clientBin,
+            forceReduction: this.dasSource.forceReduction
         });
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {

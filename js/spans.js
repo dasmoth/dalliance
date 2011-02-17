@@ -134,6 +134,15 @@ function intersection(s0, s1) {
     }
 }
 
+function coverage(s) {
+    var tot = 0;
+    var rl = s.ranges();
+    for (var ri = 0; ri < rl.length; ++ri) {
+        var r = rl[ri];
+        tot += (r.max() - r.min() + 1);
+    }
+    return tot;
+}
 
 
 

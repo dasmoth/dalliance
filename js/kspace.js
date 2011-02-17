@@ -313,6 +313,7 @@ BWGFeatureSource.prototype.init = function() {
 }
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
     this.bwgHolder.await(function(bwg) {
         // dlog('want scale: ' + scale);
         var data;
@@ -321,7 +322,10 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 /*        if (wantDensity) {
             dlog('want density; scale=' + scale);
         } */
-        if (bwg.type == 'bigwig' || wantDensity) {
+        if (thisB.opts.clientBin) {
+            wantDensity = false;
+        }
+        if (bwg.type == 'bigwig' || wantDensity || (typeof thisB.opts.forceReduction !== 'undefined')) {
             var zoom = -1;
             for (var z = 0; z < bwg.zoomLevels.length; ++z) {
                 if (bwg.zoomLevels[z].reduction <= scale) {
@@ -330,7 +334,10 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     break;
                 }
             }
-            // dlog('selected zoom: ' + zoom);
+            if (typeof thisB.opts.forceReduction !== 'undefined') {
+                zoom = thisB.opts.forceReduction;
+            }
+//            dlog('selected zoom: ' + zoom);
             if (zoom < 0) {
                 data = bwg.getUnzoomedView();
             } else {
