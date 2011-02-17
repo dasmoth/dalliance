@@ -35,10 +35,10 @@ Browser.prototype.makeButton = function(name, tooltip) {
     regButton.style.borderStyle = 'solid';
     regButton.style.borderColor = 'red';
     regButton.style.borderWidth = '3px';
-    regButton.style.padding = '2px';
+    regButton.style.padding = '4px';
     regButton.style.marginLeft = '10px';
     regButton.style.marginRight = '10px';
-    regButton.style.width = '100px';
+    // regButton.style.width = '100px';
     regButton.style['float'] = 'left';
     if (tooltip) {
         this.makeTooltip(regButton, tooltip);
@@ -78,7 +78,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }; mf(m);
     }
     var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
-    // addModeButtons.push(defButton);
+    addModeButtons.push(defButton);
     var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
@@ -89,7 +89,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
-    var custURL, custName, custCS;
+    var custURL, custName, custCS, custQuant;
     var customMode = false;
     var dataToFinalize = null;
 
@@ -268,35 +268,15 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = 'das';
 
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('p', 'Add a custom DAS datasource.'))
-        stabHolder.appendChild(document.createTextNode('Label: '));
-        stabHolder.appendChild(makeElement('br'));
-        custName = makeElement('input', '', {value: 'New track'});
-        stabHolder.appendChild(custName);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('h2', 'Add custom DAS data'))
+        stabHolder.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
+                
         stabHolder.appendChild(document.createTextNode('URL: '));
         stabHolder.appendChild(makeElement('br'));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
         stabHolder.appendChild(custURL);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
-        stabHolder.appendChild(makeElement('br'));
-        custCS = makeElement('select', null);
-        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
-        if (thisB.chains) {
-            for (var csk in thisB.chains) {
-                var cs = thisB.chains[csk].coords;
-                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
-            }
-        }
-        custCS.value = '__default__';
-        stabHolder.appendChild(custCS);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+
+        stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.  If the source is password-protected, you may be prompted to enter credentials.'));
     }
 
 
@@ -316,11 +296,13 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         if (customMode) {
             if (customMode === 'das') {
-                var nds = new DASSource({name: custName.value, uri: custURL.value});
+                var nds = new DASSource({name: 'temporary', uri: custURL.value});
+
+/*
                 var m = custCS.value;
                 if (m != '__default__') {
                     nds.mapping = m;
-                }
+                } */
 
                 tryAddDAS(nds);
             } else if (customMode === 'bin') {
@@ -336,6 +318,14 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (customMode === 'reset') {
                 switchToCustomMode();
             } else if (customMode === 'finalize') {
+                dataToFinalize.name = custName.value;
+                var m = custCS.value;
+                if (m != '__default__') {
+                    dataToFinalize.mapping = m;
+                }
+                dataToFinalize.maxbins = custQuant.checked;
+                dlog('maxbins: ' + dataToFinalize.maxbins);
+
                 thisB.sources.push(dataToFinalize);
                 thisB.makeTier(dataToFinalize);
 	        thisB.storeStatus();
@@ -363,9 +353,9 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         var tsm = Math.max(knownSpace.min, (knownSpace.min + knownSpace.max - 100) / 2)|0;
         var testSegment = new DASSegment(knownSpace.chr, tsm, Math.min(tsm + 99, knownSpace.max));
-        dlog('test segment: ' + testSegment);
+//        dlog('test segment: ' + testSegment);
         nds.features(testSegment, {}, function(features, status) {
-            dlog('status=' + status);
+            // dlog('status=' + status);
             if (status) {
                 if (!retry) {
                     dlog('retrying with credentials');
@@ -373,13 +363,45 @@ Browser.prototype.showTrackAdder = function(ev) {
                     tryAddDAS(nds, true);
                 } else {
                     removeChildren(stabHolder);
+                    stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
                     stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests'));
                     customMode = 'reset';
                     return;
                 }
             } else {
+                var nameExtractPattern = new RegExp('/([^/]+)/?$');
+                var match = nameExtractPattern.exec(nds.uri);
+                if (match) {
+                    nds.name = match[1];
+                }
+                
                 removeChildren(stabHolder);
-                stabHolder.appendChild(makeElement('p', 'Appears to be a valid DAS source...'));
+                stabHolder.appendChild(makeElement('h2', 'Add custom DAS data: step 2'));
+                stabHolder.appendChild(document.createTextNode('Label: '));
+                custName = makeElement('input', '', {value: nds.name});
+                stabHolder.appendChild(custName);
+                stabHolder.appendChild(makeElement('br'));
+                stabHolder.appendChild(makeElement('br'));
+                stabHolder.appendChild(document.createTextNode('Coordinate system: '));
+                custCS = makeElement('select', null);
+                custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+                if (thisB.chains) {
+                    for (var csk in thisB.chains) {
+                        var cs = thisB.chains[csk].coords;
+                        custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+                    }
+                }
+                custCS.value = '__default__';
+                stabHolder.appendChild(custCS);
+
+                stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
+                stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+
+                stabHolder.appendChild(document.createTextNode('Quantitative: '));
+                custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
+                stabHolder.appendChild(custQuant);
+
+
                 customMode = 'finalize';
                 dataToFinalize = nds;
                 return;
