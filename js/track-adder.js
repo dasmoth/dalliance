@@ -374,40 +374,69 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (match) {
                     nds.name = match[1];
                 }
-                
-                removeChildren(stabHolder);
-                stabHolder.appendChild(makeElement('h2', 'Add custom DAS data: step 2'));
-                stabHolder.appendChild(document.createTextNode('Label: '));
-                custName = makeElement('input', '', {value: nds.name});
-                stabHolder.appendChild(custName);
-                stabHolder.appendChild(makeElement('br'));
-                stabHolder.appendChild(makeElement('br'));
-                stabHolder.appendChild(document.createTextNode('Coordinate system: '));
-                custCS = makeElement('select', null);
-                custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
-                if (thisB.chains) {
-                    for (var csk in thisB.chains) {
-                        var cs = thisB.chains[csk].coords;
-                        custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+
+                new DASRegistry(nds.uri, {credentials: nds.credentials}).sources(
+                    function(sources) {
+                        if (sources && sources.length == 1) {
+                            var fs = sources[0];
+                            dlog(miniJSONify(fs));
+                            nds.name = fs.name;
+                            nds.desc = fs.desc;
+                            if (fs.maxbins) {
+                                nds.maxbins = true;
+                            } else {
+                                nds.maxbins = false;
+                            }
+                        }
+                        return addDasCompletionPage(nds);
+                    },
+                    function() {
+                        dlog('no sources');
+                        return addDasCompletionPage(nds);
                     }
-                }
-                custCS.value = '__default__';
-                stabHolder.appendChild(custCS);
+                );
+                
 
-                stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-                stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
-
-                stabHolder.appendChild(document.createTextNode('Quantitative: '));
-                custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
-                stabHolder.appendChild(custQuant);
-
-
-                customMode = 'finalize';
-                dataToFinalize = nds;
                 return;
             }
         });
     }
+                     
+    var addDasCompletionPage = function(nds) {
+        removeChildren(stabHolder);
+        stabHolder.appendChild(makeElement('h2', 'Add custom DAS data: step 2'));
+        stabHolder.appendChild(document.createTextNode('Label: '));
+        custName = makeElement('input', '', {value: nds.name});
+        stabHolder.appendChild(custName);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
+        custCS = makeElement('select', null);
+        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+        if (thisB.chains) {
+            for (var csk in thisB.chains) {
+                var cs = thisB.chains[csk].coords;
+                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+            }
+        }
+        custCS.value = '__default__';
+        stabHolder.appendChild(custCS);
+
+        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
+        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+
+        stabHolder.appendChild(document.createTextNode('Quantitative: '));
+        custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
+        if (typeof nds.maxbins !== 'undefined') {
+            custQuant.checked = nds.maxbins;
+        }
+        stabHolder.appendChild(custQuant);
+
+
+        customMode = 'finalize';
+        dataToFinalize = nds;
+    }
+
 
     var canButton = document.createElement('span');
     canButton.style.backgroundColor = 'rgb(230,230,250)';
