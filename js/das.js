@@ -68,6 +68,10 @@ function DASSource(a1, a2) {
 function DASCoords() {
 }
 
+function coordsMatch(c1, c2) {
+    return c1.taxon == c2.taxon && c1.auth == c2.auth && c1.version == c2.version;
+}
+
 //
 // DAS 1.6 entry_points command
 //

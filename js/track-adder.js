@@ -296,14 +296,11 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         if (customMode) {
             if (customMode === 'das') {
-                var nds = new DASSource({name: 'temporary', uri: custURL.value});
-
-/*
-                var m = custCS.value;
-                if (m != '__default__') {
-                    nds.mapping = m;
-                } */
-
+                var curi = custURL.value.trim();
+                if (!/^.+:\/\//.exec(curi)) {
+                    curi = 'http://' + curi;
+                }
+                var nds = new DASSource({name: 'temporary', uri: curi});
                 tryAddDAS(nds);
             } else if (customMode === 'bin') {
                 var nds = new DASSource({name: custName.value, bwgURI: custURL.value});
@@ -322,9 +319,10 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var m = custCS.value;
                 if (m != '__default__') {
                     dataToFinalize.mapping = m;
+                } else {
+                    dataToFinalize.mapping = undefined;
                 }
                 dataToFinalize.maxbins = custQuant.checked;
-                dlog('maxbins: ' + dataToFinalize.maxbins);
 
                 thisB.sources.push(dataToFinalize);
                 thisB.makeTier(dataToFinalize);
@@ -377,9 +375,10 @@ Browser.prototype.showTrackAdder = function(ev) {
 
                 new DASRegistry(nds.uri, {credentials: nds.credentials}).sources(
                     function(sources) {
+                        var coordsDetermined = false, quantDetermined = false;
                         if (sources && sources.length == 1) {
                             var fs = sources[0];
-                            dlog(miniJSONify(fs));
+//                            dlog(miniJSONify(fs));
                             nds.name = fs.name;
                             nds.desc = fs.desc;
                             if (fs.maxbins) {
@@ -387,11 +386,27 @@ Browser.prototype.showTrackAdder = function(ev) {
                             } else {
                                 nds.maxbins = false;
                             }
+                            quantDetermined = true
+                            
+                            if (fs.coords && fs.coords.length == 1) {
+                                var coords = fs.coords[0];
+                                if (coordsMatch(coords, thisB.coordSystem)) {
+                                    coordsDetermined = true;
+                                } else if (thisB.chains) {
+                                    for (var k in thisB.chains) {
+                                        if (coordsMatch(coords, thisB.chains[k].coords)) {
+                                            nds.mapping = k;
+                                            coordsDetermined = true;
+                                        }
+                                    }
+                                }
+                            }
+                                    
                         }
-                        return addDasCompletionPage(nds);
+                        return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
                     },
                     function() {
-                        dlog('no sources');
+//                        dlog('no sources');
                         return addDasCompletionPage(nds);
                     }
                 );
@@ -402,7 +417,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         });
     }
                      
-    var addDasCompletionPage = function(nds) {
+    var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined) {
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('h2', 'Add custom DAS data: step 2'));
         stabHolder.appendChild(document.createTextNode('Label: '));
@@ -410,7 +425,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(custName);
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
+        stabHolder.appendChild(makeElement('h4', 'Coordinate system: '));
         custCS = makeElement('select', null);
         custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
         if (thisB.chains) {
@@ -419,11 +434,15 @@ Browser.prototype.showTrackAdder = function(ev) {
                 custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
             }
         }
-        custCS.value = '__default__';
+        custCS.value = nds.mapping || '__default__';
         stabHolder.appendChild(custCS);
 
-        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+        if (coordsDetermined) {
+            stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
+        } else {
+            stabHolder.appendChild(makeElement('p', [makeElement('b', 'Warning: '), "unable to determine the correct value from server responses.  Please check carefully."]));
+            stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+        }
 
         stabHolder.appendChild(document.createTextNode('Quantitative: '));
         custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
@@ -431,6 +450,11 @@ Browser.prototype.showTrackAdder = function(ev) {
             custQuant.checked = nds.maxbins;
         }
         stabHolder.appendChild(custQuant);
+        if (quantDetermined) {
+            stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
+        } else {
+            stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
+        }
 
 
         customMode = 'finalize';

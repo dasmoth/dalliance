@@ -294,3 +294,14 @@ Observed.prototype.set = function(x) {
         this.listeners[i](x);
     }
 }
+
+
+//
+// Missing APIs
+// 
+
+if (!('trim' in String.prototype)) {
+    String.prototype.trim = function() {
+        return this.replace(/^\s+/, '').replace(/\s+$/, '');
+    };
+}
