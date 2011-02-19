@@ -1658,13 +1658,17 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
     if (tryCache) {
         var cacheTime = localStorage['dalliance.registry.' + cacheHash + '.last_queried'];
         if (cacheTime) {
-            setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
-            var cacheAge = (Date.now()|0) - (cacheTime|0);
-            if (cacheAge < (12 * 60 * 60 * 1000)) {
-                // alert('Using cached registry data');
-                return;
-            } else {
-                // alert('Registry data is stale, refetching');
+            try {
+                setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
+                var cacheAge = (Date.now()|0) - (cacheTime|0);
+                if (cacheAge < (12 * 60 * 60 * 1000)) {
+                    // alert('Using cached registry data');
+                    return;
+                } else {
+                    // alert('Registry data is stale, refetching');
+                }
+            } catch (rex) {
+                dlog('Bad registry cache: ' + rex);
             }
         }
     }
