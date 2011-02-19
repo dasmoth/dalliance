@@ -1,11 +1,6 @@
 For 0.6
 -------
 
-  - Check maxbins support for DAS sources
-  - Allow maxbins and credentials flags to be set when adding DAS sources
-  - Cross-index manually added sources to the registry.
-  - Try to fetch SOURCE data when attaching custom DAS sources.
-  - Reinstate FF3.6 support
   - Find a sane way of warning users that their browser is a bit old.
 
 For 0.7
@@ -18,6 +13,7 @@ For 0.7
   - Local data.
   - Next/prev feature.
   - Try touch support again.
+  - Cross-index manually added sources to the registry.
 
 Browser support
 ---------------

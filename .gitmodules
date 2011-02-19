@@ -1,3 +1,6 @@
 [submodule "jszlib"]
 	path = jszlib
 	url = git://github.com/dasmoth/jszlib.git
+[submodule "json"]
+	path = json
+	url = git://github.com/douglascrockford/JSON-js.git
