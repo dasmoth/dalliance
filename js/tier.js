@@ -162,7 +162,9 @@ DasTier.prototype.getDesiredTypes = function(scale) {
             }
         }
     } else {
-        inclusive = true;
+        // inclusive = true;
+        return [];             // If no stylesheet yet, claim we don't want any types.
+                               // A hard refresh will be forced once the SS arrives.
     }
 
     // dlog('gdt(' + this.id + ') = ' + miniJSONify(fetchTypes));

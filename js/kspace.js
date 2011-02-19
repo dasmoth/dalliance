@@ -193,6 +193,10 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 //    dlog(miniJSONify(this.dasSource));
 //    return;
 
+    if (!types) {
+        throw "Null types";
+    } 
+
     var tryMaxBins = (this.dasSource.maxbins !== false);
     var fops = {
         type: types
