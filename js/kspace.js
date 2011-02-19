@@ -8,31 +8,6 @@
 //
 
 
-function Awaited() {
-    this.queue = [];
-}
-
-Awaited.prototype.provide = function(x) {
-    if (this.res) {
-	throw "Resource has already been provided.";
-    }
-
-    this.res = x;
-    for (var i = 0; i < this.queue.length; ++i) {
-	this.queue[i](x);
-    }
-}
-
-Awaited.prototype.await = function(f) {
-    if (this.res) {
-	f(this.res);
-        return this.res;
-    } else {
-	this.queue.push(f);
-    }
-}
-
-
 function FetchPool() {
     this.reqs = [];
 }
@@ -215,12 +190,26 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	return;
     }
 
-    var maxBins = 1 + (((max - min) / scale) | 0);
+//    dlog(miniJSONify(this.dasSource));
+//    return;
+
+    var tryMaxBins = (this.dasSource.maxbins !== false);
+    var fops = {
+        type: types
+    };
+    if (tryMaxBins) {
+        fops.maxbins = 1 + (((max - min) / scale) | 0);
+    }
+    
     this.dasSource.features(
 	new DASSegment(chr, min, max),
-	{type: types, maxbins: maxBins},
+	fops,
 	function(features, status) {
-	    callback(status, features, scale);
+            var retScale = scale;
+            if (!tryMaxBins) {
+                retScale = 0.1;
+            }
+	    callback(status, features, retScale);
 	}
     );
 }

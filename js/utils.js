@@ -295,6 +295,30 @@ Observed.prototype.set = function(x) {
     }
 }
 
+function Awaited() {
+    this.queue = [];
+}
+
+Awaited.prototype.provide = function(x) {
+    if (this.res) {
+	throw "Resource has already been provided.";
+    }
+
+    this.res = x;
+    for (var i = 0; i < this.queue.length; ++i) {
+	this.queue[i](x);
+    }
+}
+
+Awaited.prototype.await = function(f) {
+    if (this.res) {
+	f(this.res);
+        return this.res;
+    } else {
+	this.queue.push(f);
+    }
+}
+
 
 //
 // Missing APIs
