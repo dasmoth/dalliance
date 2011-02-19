@@ -190,13 +190,6 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	return;
     }
 
-//    dlog(miniJSONify(this.dasSource));
-//    return;
-
-    if (!types) {
-        throw "Null types";
-    } 
-
     var tryMaxBins = (this.dasSource.maxbins !== false);
     var fops = {
         type: types
@@ -398,6 +391,10 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                         var mmax = thisB.mapping.mapPoint(sn, f.max);
                         if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
                             // Discard feature.
+                            // dlog('discarding ' + miniJSONify(f));
+                            if (f.parts && f.parts.length > 0) {    // FIXME: Ugly hack to make ASTD source map properly.
+                                 mappedFeatures.push(f);
+                            }
                         } else {
                             f.segment = mmin.seq;
                             f.min = mmin.pos;
@@ -410,7 +407,6 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                             if (mmin.flipped) {
                                 if (f.orientation == '-') {
                                     f.orientation = '+';
-                                    alert(miniJSONify(f));
                                 } else if (f.orientation == '+') {
                                     f.orientation = '-';
                                 }
@@ -419,6 +415,8 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                         }
                     }
 		}
+
+                // dlog('mapped ' + features.length + ' -> ' + mappedFeatures.length);
 
 		callback(status, mappedFeatures, fscale);
 	    });
