@@ -1484,7 +1484,7 @@ Browser.prototype.realInit = function(opts) {
 	if (ev.axis == 1) {
 	    ev.stopPropagation(); ev.preventDefault();
 	    if (ev.detail != 0) {
-		thisB.move(ev.detail);
+		thisB.move(ev.detail/4);
 	    }
         }
     }, false);
