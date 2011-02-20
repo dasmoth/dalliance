@@ -301,7 +301,7 @@ BWGFeatureSource.prototype.init = function() {
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
     this.bwgHolder.await(function(bwg) {
-        // dlog('want scale: ' + scale);
+        // dlog('bwg: ' + bwg.name + '; want scale: ' + scale);
         var data;
         // dlog(miniJSONify(types));
         var wantDensity = !types || types.length == 0 || arrayIndexOf(types, 'density') >= 0;
@@ -323,7 +323,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             if (typeof thisB.opts.forceReduction !== 'undefined') {
                 zoom = thisB.opts.forceReduction;
             }
-//            dlog('selected zoom: ' + zoom);
+           // dlog('selected zoom: ' + zoom);
             if (zoom < 0) {
                 data = bwg.getUnzoomedView();
             } else {
@@ -335,7 +335,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 	data.readWigData(chr, min, max, function(features) {
 	    var fs = 1000000000;
 	    // if (bwg.type === 'bigwig') {
-		var is = (max - min) / features.length;
+		var is = (max - min) / features.length / 2;
 		if (is < fs) {
 		    fs = is;
 		}

@@ -587,17 +587,18 @@ BigWig.prototype.getZoomedView = function(z) {
 
 
 function makeBwgFromURL(url, callback, creds) {
-    makeBwg(new URLFetchable(url, {credentials: creds}), callback);
+    makeBwg(new URLFetchable(url, {credentials: creds}), callback, url);
 }
 
 function makeBwgFromFile(file, callback) {
-    makeBwg(new BlobFetchable(file), callback);
+    makeBwg(new BlobFetchable(file), callback, 'file');
 }
 
-function makeBwg(data, callback) {
+function makeBwg(data, callback, name) {
     // dlog('makeBwg');
     var bwg = new BigWig();
     bwg.data = data;
+    bwg.name = name;
     bwg.data.slice(0, 512).fetch(function(result) {
 
 /*
