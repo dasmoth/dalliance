@@ -1531,10 +1531,10 @@ Browser.prototype.realInit = function(opts) {
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? - 100 : -25);
+            thisB.move(ev.shiftKey ? 100 : 25);
         } else if (ev.keyCode == 37) {
             ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? 100 : 25);
+            thisB.move(ev.shiftKey ? -100 : -25);
         } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
 
