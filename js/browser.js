@@ -1271,24 +1271,13 @@ Browser.prototype.realInit = function(opts) {
        
         {
             var form = makeElement('form');
-            var tab = makeElement('table');
-
-            var selectChr = makeElement('select', null);
-            for (var epi = 0; epi < epMenuItems.length; ++epi) {
-                var ep = epMenuItems[epi].entryPoint;
-	        epsByChrName[ep.name] = ep;
-                selectChr.appendChild(makeElement('option', ep.toString(), {value: ep.name}));
-            }
-            selectChr.value = thisB.chr;
-            tab.appendChild(makeElement('tr', [makeElement('td', 'Chr:'), makeElement('td', selectChr)]));
-
-            var minPosInput = makeElement('input', null, {value: (thisB.viewStart|0)});
-            tab.appendChild(makeElement('tr', [makeElement('td', 'Start:'), makeElement('td',  minPosInput)]));
             
-            var maxPosInput = makeElement('input', null, {value: (thisB.viewEnd|0)});
-            tab.appendChild(makeElement('tr', [makeElement('td', 'End:'), makeElement('td',  maxPosInput)]));
-
-            form.appendChild(tab);
+            form.appendChild(document.createTextNode('Location:'));
+            var locWarning = makeElement('div', null, {}, {'color': 'red'});
+            form.appendChild(locWarning);
+            var locInput = (makeElement('input', null, {type: 'text', value: (thisB.chr + ':' + (thisB.viewStart|0) + '..' + (thisB.viewEnd|0))}));
+            form.appendChild(locInput);
+            form.appendChild(makeElement('br'));
             form.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
             popup.appendChild(form);
         }
@@ -1297,21 +1286,29 @@ Browser.prototype.realInit = function(opts) {
 	form.addEventListener('submit', function(ev) {
 	    ev.stopPropagation(); ev.preventDefault();
 
-	    var nchr = selectChr.value;
-	    var nmin = stringToInt(minPosInput.value);
-	    var nmax = stringToInt(maxPosInput.value);    
-	    thisB.removeAllPopups();
-
-	    if (nchr && nmin && nmax) {
+            var locString = locInput.value.trim();
+            var match = /^([A-Za-z0-9]+)[:\t ]([0-9]+)[-:.\t ]+([0-9]+)$/.exec(locString);
+            if (match && match.length == 4) {
+                var nchr = match[1];
+	        var nmin = stringToInt(match[2]);
+	        var nmax = stringToInt(match[3]);    
+	        
                 if (nchr != thisB.chr) {
                     thisB.highlightMin = -1;
                     thisB.highlightMax = -1;
                 }
-		thisB.setLocation(nmin, nmax, nchr);
-	    } else {
-		alert('Must specify min and max');
-	    }
-
+                
+                try {
+		    thisB.setLocation(nmin, nmax, nchr);
+                    thisB.removeAllPopups();
+                } catch (msg) {
+                    removeChildren(locWarning);
+                    locWarning.appendChild(document.createTextNode(msg));
+                }
+            } else {
+                removeChildren(locWarning);
+                locWarning.appendChild(document.createTextNode('Should match chr:start...end'));
+            }
 	    return false;
 	}, false);
 
@@ -1962,22 +1959,21 @@ Browser.prototype.setLocation = function(newMin, newMax, newChr) {
 
     if (newChr && (newChr != this.chr)) {
 	if (!this.entryPoints) {
-            alert('Need entry points');
-	    return;
+            throw 'Need entry points';
 	}
 	var ep = null;
 	for (var epi = 0; epi < this.entryPoints.length; ++epi) {
-	    if (this.entryPoints[epi].name == newChr) {
+            var epName = this.entryPoints[epi].name;
+	    if (epName === newChr || ('chr' + epName) === newChr || epName === ('chr' + newChr)) {
 		ep = this.entryPoints[epi];
 		break;
 	    }
 	}
 	if (!ep) {
-            alert("Couldn't find new chromosome");
-	    return;
+            throw "Couldn't find chromosome " + newChr;
 	}
 
-	this.chr = newChr;
+	this.chr = ep.name;
 	this.currentSeqMax = ep.end;
     }
 
