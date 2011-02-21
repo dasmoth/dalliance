@@ -822,6 +822,8 @@ Browser.prototype.realInit = function(opts) {
     if (!opts) {
         opts = {};
     }
+    this.supportsBinary = (typeof Int8Array === 'function');
+    // dlog('supports binary: ' + this.supportsBinary);
 
     var thisB = this;
     // Cache away the default sources before anything else
@@ -1407,6 +1409,13 @@ Browser.prototype.realInit = function(opts) {
     }
     for (var t = 0; t < this.sources.length; ++t) {
 	var source = this.sources[t];
+        if (source.bwgURI && !this.supportsBinary) {
+            if (!this.binaryWarningGiven) {
+                this.popit({clientX: 100, clientY: 100}, 'Warning', makeElement('p', 'browser does not support binary data, some track(s) not loaded'));
+                this.binaryWarningGiven = true;
+            }
+            continue;
+        }
         this.makeTier(source);
     }
     thisB.arrangeTiers();
