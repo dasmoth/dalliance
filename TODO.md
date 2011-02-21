@@ -1,7 +1,3 @@
-For 0.6
--------
-
-  - Find a sane way of warning users that their browser is a bit old.
 
 For 0.7
 -------

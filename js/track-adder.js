@@ -105,12 +105,14 @@ Browser.prototype.showTrackAdder = function(ev) {
 
 
     makeStab = function(msources, mapping) {
+        refreshButton.style.visibility = 'visible';
         if (__sourceHolder) {
             __sourceHolder.removeListener(makeStabObserver);
         }
         __mapping = mapping;
         __sourceHolder = msources;
         __sourceHolder.addListenerAndFire(makeStabObserver);
+       
     }
 
     makeStabObserver = function(msources) {
@@ -170,7 +172,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         stabHolder.appendChild(stab);
     };
-    makeStab(thisB.availableSources);
+    
 
     regButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -187,6 +189,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, binButton);
         customMode = 'bin';
+        refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
 
@@ -236,6 +239,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var switchToCustomMode = function() {
         customMode = 'das';
+        refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('h2', 'Add custom DAS data'))
@@ -455,7 +459,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     refreshButton.style.padding = '2px';
     refreshButton.style.margin = '10px';
     refreshButton.style.width = '120px';
-    refreshButton.style['float'] = 'right';
     refreshButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.queryRegistry(__mapping);
@@ -467,6 +470,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     asform.appendChild(buttonHolder);
 
     popup.appendChild(asform);
+    makeStab(thisB.availableSources);
 
     return this.popit(ev, 'Add DAS data', popup, {width: 600});
 }
