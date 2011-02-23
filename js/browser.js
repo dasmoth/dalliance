@@ -1157,8 +1157,32 @@ Browser.prototype.realInit = function(opts) {
 	    }
         };
         plusIcon.setAttribute('transform', 'translate(0,15)');
+        plusIcon.setAttribute('pointer-events', 'all');
+        plusIcon.addEventListener('mousedown', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz - 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
+            }
+        }, false);
         this.zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
         minusIcon.setAttribute('transform', 'translate(285,15)');
+        minusIcon.setAttribute('pointer-events', 'all');
+        minusIcon.addEventListener('mousedown', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz + 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
+            }
+        }, false);
         this.zoomWidget = makeElementNS(NS_SVG, 'g', [this.zoomTickMarks, plusIcon, this.zoomSlider.svg, minusIcon]);
 
         this.makeTooltip(this.zoomWidget, 'Drag to zoom');
