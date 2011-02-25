@@ -94,6 +94,11 @@ Browser.prototype.showTrackAdder = function(ev) {
     var dataToFinalize = null;
 
     var asform = makeElement('form', null, {}, {clear: 'both'});
+    asform.addEventListener('submit', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+            doAdd();
+            return false;
+    }, true); 
     var stabHolder = document.createElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'auto';
@@ -242,15 +247,20 @@ Browser.prototype.showTrackAdder = function(ev) {
         refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('h2', 'Add custom DAS data'))
-        stabHolder.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
-                
-        stabHolder.appendChild(document.createTextNode('URL: '));
-        stabHolder.appendChild(makeElement('br'));
-        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
-        stabHolder.appendChild(custURL);
 
-        stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.  If the source is password-protected, you may be prompted to enter credentials.'));
+        var customForm = makeElement('div');
+        customForm.appendChild(makeElement('h2', 'Add custom DAS data'));
+        customForm.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
+                
+        customForm.appendChild(document.createTextNode('URL: '));
+        customForm.appendChild(makeElement('br'));
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
+        customForm.appendChild(custURL);
+
+        customForm.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.  If the source is password-protected, you may be prompted to enter credentials.'));
+        stabHolder.appendChild(customForm);
+
+        custURL.focus();
     }
 
 
@@ -267,7 +277,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     addButton.appendChild(document.createTextNode('Add'));
     addButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
+        doAdd();
+    }, false);
 
+    function doAdd() {
         if (customMode) {
             if (customMode === 'das') {
                 var curi = custURL.value.trim();
@@ -315,7 +328,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             }
             thisB.removeAllPopups();
         }
-    }, false);
+    };
 
     var tryAddDAS = function(nds, retry) {
         var knownSpace = thisB.knownSpace;
@@ -430,7 +443,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
         }
 
-
+        custName.focus();
         customMode = 'finalize';
         dataToFinalize = nds;
     }
