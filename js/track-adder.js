@@ -193,6 +193,11 @@ Browser.prototype.showTrackAdder = function(ev) {
     binButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, binButton);
+        switchToBinMode();
+    });
+
+
+    function switchToBinMode() {
         customMode = 'bin';
         refreshButton.style.visibility = 'hidden';
 
@@ -200,18 +205,24 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         if (thisB.supportsBinary) {
             stabHolder.appendChild(makeElement('h2', 'Add custom URL-based data'));
-            stabHolder.appendChild(makeElement('p', 'Currently supported formats are bigwig and bigbed'));
-            stabHolder.appendChild(document.createTextNode('Label: '));
+            stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/binary.html'}), ').  Currently supported formats are bigwig and bigbed.']));
+
+            /* stabHolder.appendChild(document.createTextNode('Label: '));
             stabHolder.appendChild(makeElement('br'));
             custName = makeElement('input', '', {value: 'New track'});
             stabHolder.appendChild(custName);
             stabHolder.appendChild(makeElement('br'));
+            stabHolder.appendChild(makeElement('br'));*/
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('URL: '));
-            stabHolder.appendChild(makeElement('br'));
             custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net/dalliance-test/stylesheets/ensGene.bb'});
             stabHolder.appendChild(custURL);
-            stabHolder.appendChild(makeElement('br'));
+            custURL.focus();
+
+            stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
+
+
+            /* stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('Coordinate system: '));
             stabHolder.appendChild(makeElement('br'));
@@ -228,13 +239,13 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-            stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
+            stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org")); */
         } else {
             stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
             stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
         }
         
-    }, false);
+    }
 
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -290,17 +301,16 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var nds = new DASSource({name: 'temporary', uri: curi});
                 tryAddDAS(nds);
             } else if (customMode === 'bin') {
-                var nds = new DASSource({name: custName.value, bwgURI: custURL.value});
-                var m = custCS.value;
-                if (m != '__default__') {
-                    nds.mapping = m;
+                var curi = custURL.value.trim();
+                if (!/^.+:\/\//.exec(curi)) {
+                    curi = 'http://' + curi;
                 }
-                thisB.sources.push(nds);
-                thisB.makeTier(nds);
-	        thisB.storeStatus();
-                thisB.removeAllPopups();
+                var nds = new DASSource({name: 'temporary', bwgURI: curi});
+                tryAddBin(nds);
             } else if (customMode === 'reset') {
                 switchToCustomMode();
+            } else if (customMode === 'reset-bin') {
+                switchToBinMode(); 
             } else if (customMode === 'finalize') {
                 dataToFinalize.name = custName.value;
                 var m = custCS.value;
@@ -309,7 +319,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     dataToFinalize.mapping = undefined;
                 }
-                dataToFinalize.maxbins = custQuant.checked;
+                if (custQuant) {
+                    dataToFinalize.maxbins = custQuant.checked;
+                }
 
                 thisB.sources.push(dataToFinalize);
                 thisB.makeTier(dataToFinalize);
@@ -403,10 +415,33 @@ Browser.prototype.showTrackAdder = function(ev) {
             }
         });
     }
+
+    var tryAddBin = function(nds) {
+        makeBwgFromURL(nds.bwgURI, function(bwg, error) {
+            if (bwg) {
+                var nameExtractPattern = new RegExp('/([^/]+?)(.bw|.bb)?$');
+                var match = nameExtractPattern.exec(nds.bwgURI);
+                if (match) {
+                    nds.name = match[1];
+                }
+                return addDasCompletionPage(nds, false, false, true);
+            } else {
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
+                stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests.'));
+                if (error) {
+                    stabHolder.appendChild(makeElement('p', '' + error));
+                }
+                stabHolder.appendChild(makeElement('p', 'If in doubt, please check that the server where the file is hosted supports CORS.'));
+                customMode = 'reset-bin';
+                return;
+            }
+        });
+    }
                      
-    var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined) {
+    var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('h2', 'Add custom DAS data: step 2'));
+        stabHolder.appendChild(makeElement('h2', 'Add custom data: step 2'));
         stabHolder.appendChild(document.createTextNode('Label: '));
         custName = makeElement('input', '', {value: nds.name});
         stabHolder.appendChild(custName);
@@ -431,16 +466,18 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
         }
 
-        stabHolder.appendChild(document.createTextNode('Quantitative: '));
-        custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
-        if (typeof nds.maxbins !== 'undefined') {
-            custQuant.checked = nds.maxbins;
-        }
-        stabHolder.appendChild(custQuant);
-        if (quantDetermined) {
-            stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
-        } else {
-            stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
+        if (!quantIrrelevant) {
+            stabHolder.appendChild(document.createTextNode('Quantitative: '));
+            custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
+            if (typeof nds.maxbins !== 'undefined') {
+                custQuant.checked = nds.maxbins;
+            }
+            stabHolder.appendChild(custQuant);
+            if (quantDetermined) {
+                stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
+            } else {
+                stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
+            }
         }
 
         custName.focus();

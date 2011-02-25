@@ -52,7 +52,6 @@ function URLFetchable(url, start, end, opts) {
         this.end = end;
     }
     this.opts = opts;
-    // dlog('made a UF, opts=' + miniJSONify(this.opts));
 }
 
 URLFetchable.prototype.slice = function(s, l) {
@@ -75,10 +74,9 @@ URLFetchable.prototype.fetch = function(callback, attempt) {
 
     attempt = attempt || 1;
     if (attempt > 3) {
-        return;
+        return callback(null);
     }
 
-    // dlog('url=' + this.url + '; start=' + this.start + '; end=' + this.end);
     var req = new XMLHttpRequest();
     var length;
     req.open('GET', this.url, true);
@@ -600,15 +598,9 @@ function makeBwg(data, callback, name) {
     bwg.data = data;
     bwg.name = name;
     bwg.data.slice(0, 512).fetch(function(result) {
-
-/*
-        dlog('Loadend: status=' + bwgHeadReader.readyState + ' error=' + bwgHeadReader.error);
-        if (bwgHeadReader.error) {
-            dlog('errorCode=' + bwgHeadReader.error.code);
-            dlog('errorMessage=' + bwgHeadReader.error.getMessage());
+        if (!result) {
+            return callback(null, "Couldn't fetch file");
         }
-
-*/
 
         var header = bstringToBuffer(result);
 	var sa = new Int16Array(header);
@@ -618,8 +610,7 @@ function makeBwg(data, callback, name) {
         } else if (la[0] == BIG_BED_MAGIC) {
             bwg.type = 'bigbed';
         } else {
-	    dlog('Invalid magic=' + la[0]);
-	    return;
+	    callback(null, "Not a supported format");
 	}
 //        dlog('magic okay');
 
@@ -652,7 +643,7 @@ function makeBwg(data, callback, name) {
 	}
 
 	bwg.readChromTree(function() {
-            callback(bwg);
+            return callback(bwg);
 	});
     });
 }
