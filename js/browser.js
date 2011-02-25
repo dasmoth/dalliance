@@ -1004,7 +1004,7 @@ Browser.prototype.realInit = function(opts) {
 
     var linkButton = this.icons.createButton('link', main, 30, 30);
     linkButton.setAttribute('transform', 'translate(140, 10)');
-    this.makeTooltip(linkButton, 'Link to other genome browsers');
+    this.makeTooltip(linkButton, 'Follow links to other genome browsers');
     main.appendChild(linkButton);
 
     var resetButton = this.icons.createButton('reset', main, 30, 30);
@@ -1250,7 +1250,7 @@ Browser.prototype.realInit = function(opts) {
                 target: '_new'
             })));
         }
-        linkPopupHandle = thisB.popit(ev, 'Link to...', linkList);
+        linkPopupHandle = thisB.popit(ev, 'Follow links to...', linkList);
     }, false);
 
     // set up the navigator
@@ -1435,7 +1435,7 @@ Browser.prototype.realInit = function(opts) {
 	var source = this.sources[t];
         if (source.bwgURI && !this.supportsBinary) {
             if (!this.binaryWarningGiven) {
-                this.popit({clientX: 100, clientY: 100}, 'Warning', makeElement('p', 'browser does not support binary data, some track(s) not loaded'));
+                this.popit({clientX: 300, clientY: 100}, 'Warning', makeElement('p', 'browser does not support binary data, some track(s) not loaded'));
                 this.binaryWarningGiven = true;
             }
             continue;

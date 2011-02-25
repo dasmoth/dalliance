@@ -91,13 +91,13 @@ URLFetchable.prototype.fetch = function(callback, attempt) {
             if (req.status == 200 || req.status == 206) {
                 var r = req.responseText;
                 if (length && length != r.length) {
-                    dlog('slice response mismatch: ' + r.length + ' != ' + length);
+                    // dlog('slice response mismatch: ' + r.length + ' != ' + length);
                     return thisB.fetch(callback, attempt + 1);
                 } else {
                     return callback(req.responseText);
                 }
             } else {
-                dlog('HTTP status = ' + req.status);
+                // dlog('HTTP status = ' + req.status);
                 return thisB.fetch(callback, attempt + 1);
             }
         }
@@ -204,9 +204,9 @@ BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
     if (chr === undefined) {
         // Not an error because some .bwgs won't have data for all chromosomes.
 
-        dlog("Couldn't find chr " + chrName);
-        dlog('Chroms=' + miniJSONify(this.bwg.chromsToIDs));
-        callback([]);
+        // dlog("Couldn't find chr " + chrName);
+        // dlog('Chroms=' + miniJSONify(this.bwg.chromsToIDs));
+        return callback([]);
     } else {
         this.readWigDataById(chr, min, max, callback);
     }

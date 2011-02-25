@@ -315,7 +315,10 @@ function sortFeatures(tier)
                         id: sp.id,
                         label: sp.label || sp.id
                     };
-                    tier.dasSource.collapseSuperGroups = true;
+                    if (!tier.dasSource.collapseSuperGroups) {
+                        tier.dasSource.collapseSuperGroups = true;
+                        tier.isLabelValid = false;
+                    }
                 }
             }   
         }
