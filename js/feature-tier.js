@@ -291,6 +291,9 @@ function sortFeatures(tier)
                     // alert("couldn't find " + pid);
                     continue;
                 }
+                if (!p.parts) {
+                    p.parts = [f];
+                }
                 pushnewo(groupedFeatures, pid, p);
                 pusho(groupedFeatures, pid, f);
                 
@@ -383,6 +386,9 @@ function drawFeatureTier(tier)
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
                 var f = ufl[pgid];
+                if (f.parts) {  // FIXME shouldn't really be needed
+                    continue;
+                }
 		var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
 		glyphs.push(g);
 	    }
@@ -779,6 +785,9 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	if (!style) {
 	    continue;
 	}
+        if (feature.parts) {  // FIXME shouldn't really be needed
+            continue;
+        }
 	var glyph = glyphForFeature(feature, y, style, tier, consHeight);
         if (glyph && glyph.glyph) {
             featureDGlyphs.push(glyph);
