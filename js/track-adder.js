@@ -207,12 +207,6 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('h2', 'Add custom URL-based data'));
             stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/binary.html'}), ').  Currently supported formats are bigwig and bigbed.']));
 
-            /* stabHolder.appendChild(document.createTextNode('Label: '));
-            stabHolder.appendChild(makeElement('br'));
-            custName = makeElement('input', '', {value: 'New track'});
-            stabHolder.appendChild(custName);
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(makeElement('br'));*/
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('URL: '));
             custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net/dalliance-test/stylesheets/ensGene.bb'});
@@ -220,26 +214,6 @@ Browser.prototype.showTrackAdder = function(ev) {
             custURL.focus();
 
             stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
-
-
-            /* stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(document.createTextNode('Coordinate system: '));
-            stabHolder.appendChild(makeElement('br'));
-            custCS = makeElement('select', null);
-            custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
-            if (thisB.chains) {
-                for (var csk in thisB.chains) {
-                    var cs = thisB.chains[csk].coords;
-                    custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
-                }
-            }
-            custCS.value = '__default__';
-            stabHolder.appendChild(custCS);
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-            stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org")); */
         } else {
             stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
             stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
