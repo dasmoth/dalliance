@@ -35,10 +35,10 @@ Browser.prototype.makeButton = function(name, tooltip) {
     regButton.style.borderStyle = 'solid';
     regButton.style.borderColor = 'red';
     regButton.style.borderWidth = '3px';
-    regButton.style.padding = '2px';
+    regButton.style.padding = '4px';
     regButton.style.marginLeft = '10px';
     regButton.style.marginRight = '10px';
-    regButton.style.width = '100px';
+    // regButton.style.width = '100px';
     regButton.style['float'] = 'left';
     if (tooltip) {
         this.makeTooltip(regButton, tooltip);
@@ -81,16 +81,24 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(defButton);
     var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
+    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
+    addModeButtons.push(binButton);
     activateButton(addModeButtons, regButton);
     popup.appendChild(makeElement('div', addModeButtons), null);
     
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
-    var custURL, custName, custCS;
+    var custURL, custName, custCS, custQuant;
     var customMode = false;
+    var dataToFinalize = null;
 
     var asform = makeElement('form', null, {}, {clear: 'both'});
+    asform.addEventListener('submit', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+            doAdd();
+            return false;
+    }, true); 
     var stabHolder = document.createElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'auto';
@@ -100,13 +108,16 @@ Browser.prototype.showTrackAdder = function(ev) {
     var __mapping;
     var __sourceHolder;
 
+
     makeStab = function(msources, mapping) {
+        refreshButton.style.visibility = 'visible';
         if (__sourceHolder) {
             __sourceHolder.removeListener(makeStabObserver);
         }
         __mapping = mapping;
         __sourceHolder = msources;
         __sourceHolder.addListenerAndFire(makeStabObserver);
+       
     }
 
     makeStabObserver = function(msources) {
@@ -166,7 +177,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         stabHolder.appendChild(stab);
     };
-    makeStab(thisB.availableSources);
+    
 
     regButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -178,43 +189,65 @@ Browser.prototype.showTrackAdder = function(ev) {
         activateButton(addModeButtons, defButton);
         makeStab(new Observed(thisB.defaultSources));
     }, false);
+
+    binButton.addEventListener('mousedown', function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        activateButton(addModeButtons, binButton);
+        switchToBinMode();
+    });
+
+
+    function switchToBinMode() {
+        customMode = 'bin';
+        refreshButton.style.visibility = 'hidden';
+
+        removeChildren(stabHolder);
+
+        if (thisB.supportsBinary) {
+            stabHolder.appendChild(makeElement('h2', 'Add custom URL-based data'));
+            stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/binary.html'}), ').  Currently supported formats are bigwig and bigbed.']));
+
+            stabHolder.appendChild(makeElement('br'));
+            stabHolder.appendChild(document.createTextNode('URL: '));
+            custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net/dalliance-test/stylesheets/ensGene.bb'});
+            stabHolder.appendChild(custURL);
+            custURL.focus();
+
+            stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
+        } else {
+            stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
+            stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
+        }
+        
+    }
+
     custButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, custButton);
-        customMode = true;
+        switchToCustomMode();
+    }, false);
+
+    var switchToCustomMode = function() {
+        customMode = 'das';
+        refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('p', 'Add a custom DAS datasource.'))
-        stabHolder.appendChild(document.createTextNode('Label: '));
-        stabHolder.appendChild(makeElement('br'));
-        custName = makeElement('input', '', {value: 'New track'});
-        stabHolder.appendChild(custName);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(document.createTextNode('URL: '));
-        stabHolder.appendChild(makeElement('br'));
+
+        var customForm = makeElement('div');
+        customForm.appendChild(makeElement('h2', 'Add custom DAS data'));
+        customForm.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
+                
+        customForm.appendChild(document.createTextNode('URL: '));
+        customForm.appendChild(makeElement('br'));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
-        stabHolder.appendChild(custURL);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(document.createTextNode('Coordinate system: '));
-        stabHolder.appendChild(makeElement('br'));
-        custCS = makeElement('select', null);
-        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
-        if (thisB.chains) {
-            for (var csk in thisB.chains) {
-                var cs = thisB.chains[csk].coords;
-                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
-            }
-        }
-        custCS.value = '__default__';
-        stabHolder.appendChild(custCS);
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('br'));
-        stabHolder.appendChild(makeElement('p', [makeElement('b', 'NB: '), "we're currently completely trusting of whatever coordinate system you select.  Please get this right or you ", makeElement('i', 'will'), " get misleading results."]));
-        stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
-        
-    }, false);
+        customForm.appendChild(custURL);
+
+        customForm.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.  If the source is password-protected, you may be prompted to enter credentials.'));
+        stabHolder.appendChild(customForm);
+
+        custURL.focus();
+    }
+
 
 
     var addButton = document.createElement('span');
@@ -229,16 +262,46 @@ Browser.prototype.showTrackAdder = function(ev) {
     addButton.appendChild(document.createTextNode('Add'));
     addButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
+        doAdd();
+    }, false);
 
+    function doAdd() {
         if (customMode) {
-            var nds = new DASSource({name: custName.value, uri: custURL.value});
-            var m = custCS.value;
-            if (m != '__default__') {
-                nds.mapping = m;
+            if (customMode === 'das') {
+                var curi = custURL.value.trim();
+                if (!/^.+:\/\//.exec(curi)) {
+                    curi = 'http://' + curi;
+                }
+                var nds = new DASSource({name: 'temporary', uri: curi});
+                tryAddDAS(nds);
+            } else if (customMode === 'bin') {
+                var curi = custURL.value.trim();
+                if (!/^.+:\/\//.exec(curi)) {
+                    curi = 'http://' + curi;
+                }
+                var nds = new DASSource({name: 'temporary', bwgURI: curi});
+                tryAddBin(nds);
+            } else if (customMode === 'reset') {
+                switchToCustomMode();
+            } else if (customMode === 'reset-bin') {
+                switchToBinMode(); 
+            } else if (customMode === 'finalize') {
+                dataToFinalize.name = custName.value;
+                var m = custCS.value;
+                if (m != '__default__') {
+                    dataToFinalize.mapping = m;
+                } else {
+                    dataToFinalize.mapping = undefined;
+                }
+                if (custQuant) {
+                    dataToFinalize.maxbins = custQuant.checked;
+                }
+
+                thisB.sources.push(dataToFinalize);
+                thisB.makeTier(dataToFinalize);
+	        thisB.storeStatus();
+                thisB.removeAllPopups();
             }
-            thisB.sources.push(nds);
-            thisB.makeTier(nds);
-	    thisB.storeStatus();
         } else {
             for (var bi = 0; bi < addButtons.length; ++bi) {
                 var b = addButtons[bi];
@@ -249,10 +312,153 @@ Browser.prototype.showTrackAdder = function(ev) {
 		    thisB.storeStatus();
                 }
             }
+            thisB.removeAllPopups();
+        }
+    };
+
+    var tryAddDAS = function(nds, retry) {
+        var knownSpace = thisB.knownSpace;
+        if (!knownSpace) {
+            alert("Can't confirm track-addition to an uninit browser.");
+            return;
+        }
+        var tsm = Math.max(knownSpace.min, (knownSpace.min + knownSpace.max - 100) / 2)|0;
+        var testSegment = new DASSegment(knownSpace.chr, tsm, Math.min(tsm + 99, knownSpace.max));
+//        dlog('test segment: ' + testSegment);
+        nds.features(testSegment, {}, function(features, status) {
+            // dlog('status=' + status);
+            if (status) {
+                if (!retry) {
+                    dlog('retrying with credentials');
+                    nds.credentials = true;
+                    tryAddDAS(nds, true);
+                } else {
+                    removeChildren(stabHolder);
+                    stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
+                    stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests'));
+                    customMode = 'reset';
+                    return;
+                }
+            } else {
+                var nameExtractPattern = new RegExp('/([^/]+)/?$');
+                var match = nameExtractPattern.exec(nds.uri);
+                if (match) {
+                    nds.name = match[1];
+                }
+
+                new DASRegistry(nds.uri, {credentials: nds.credentials}).sources(
+                    function(sources) {
+                        var coordsDetermined = false, quantDetermined = false;
+                        if (sources && sources.length == 1) {
+                            var fs = sources[0];
+//                            dlog(miniJSONify(fs));
+                            nds.name = fs.name;
+                            nds.desc = fs.desc;
+                            if (fs.maxbins) {
+                                nds.maxbins = true;
+                            } else {
+                                nds.maxbins = false;
+                            }
+                            quantDetermined = true
+                            
+                            if (fs.coords && fs.coords.length == 1) {
+                                var coords = fs.coords[0];
+                                if (coordsMatch(coords, thisB.coordSystem)) {
+                                    coordsDetermined = true;
+                                } else if (thisB.chains) {
+                                    for (var k in thisB.chains) {
+                                        if (coordsMatch(coords, thisB.chains[k].coords)) {
+                                            nds.mapping = k;
+                                            coordsDetermined = true;
+                                        }
+                                    }
+                                }
+                            }
+                                    
+                        }
+                        return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
+                    },
+                    function() {
+//                        dlog('no sources');
+                        return addDasCompletionPage(nds);
+                    }
+                );
+                
+
+                return;
+            }
+        });
+    }
+
+    var tryAddBin = function(nds) {
+        makeBwgFromURL(nds.bwgURI, function(bwg, error) {
+            if (bwg) {
+                var nameExtractPattern = new RegExp('/([^/]+?)(.bw|.bb)?$');
+                var match = nameExtractPattern.exec(nds.bwgURI);
+                if (match) {
+                    nds.name = match[1];
+                }
+                return addDasCompletionPage(nds, false, false, true);
+            } else {
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
+                stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests.'));
+                if (error) {
+                    stabHolder.appendChild(makeElement('p', '' + error));
+                }
+                stabHolder.appendChild(makeElement('p', 'If in doubt, please check that the server where the file is hosted supports CORS.'));
+                customMode = 'reset-bin';
+                return;
+            }
+        });
+    }
+                     
+    var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
+        removeChildren(stabHolder);
+        stabHolder.appendChild(makeElement('h2', 'Add custom data: step 2'));
+        stabHolder.appendChild(document.createTextNode('Label: '));
+        custName = makeElement('input', '', {value: nds.name});
+        stabHolder.appendChild(custName);
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('br'));
+        stabHolder.appendChild(makeElement('h4', 'Coordinate system: '));
+        custCS = makeElement('select', null);
+        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+        if (thisB.chains) {
+            for (var csk in thisB.chains) {
+                var cs = thisB.chains[csk].coords;
+                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+            }
+        }
+        custCS.value = nds.mapping || '__default__';
+        stabHolder.appendChild(custCS);
+
+        if (coordsDetermined) {
+            stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
+        } else {
+            stabHolder.appendChild(makeElement('p', [makeElement('b', 'Warning: '), "unable to determine the correct value from server responses.  Please check carefully."]));
+            stabHolder.appendChild(makeElement('p', "If you don't see the mapping you're looking for, please contact thomas@biodalliance.org"));
         }
 
-        thisB.removeAllPopups();
-    }, false);
+        if (!quantIrrelevant) {
+            stabHolder.appendChild(document.createTextNode('Quantitative: '));
+            custQuant = makeElement('input', null, {type: 'checkbox', checked: true});
+            if (typeof nds.maxbins !== 'undefined') {
+                custQuant.checked = nds.maxbins;
+            }
+            stabHolder.appendChild(custQuant);
+            if (quantDetermined) {
+                stabHolder.appendChild(makeElement('p', "(Based on server response, probably doesn't need changing.)"));
+            } else {
+                stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
+            }
+        }
+
+        custName.focus();
+        customMode = 'finalize';
+        dataToFinalize = nds;
+    }
+
 
     var canButton = document.createElement('span');
     canButton.style.backgroundColor = 'rgb(230,230,250)';
@@ -277,7 +483,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     refreshButton.style.padding = '2px';
     refreshButton.style.margin = '10px';
     refreshButton.style.width = '120px';
-    refreshButton.style['float'] = 'right';
     refreshButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.queryRegistry(__mapping);
@@ -289,6 +494,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     asform.appendChild(buttonHolder);
 
     popup.appendChild(asform);
+    makeStab(thisB.availableSources);
 
     return this.popit(ev, 'Add DAS data', popup, {width: 600});
 }

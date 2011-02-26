@@ -48,12 +48,7 @@ function DASSource(a1, a2) {
             this[k] = options[k];
         }
     }
-    if (!this.uri || this.uri.length == 0) {
-        throw "URIRequired";
-    }
-    if (this.uri.substr(this.uri.length - 1) != '/') {
-        this.uri = this.uri + '/';
-    }
+
 
     if (!this.coords) {
         this.coords = [];
@@ -61,9 +56,20 @@ function DASSource(a1, a2) {
     if (!this.props) {
         this.props = {};
     }
+
+    // if (!this.uri || this.uri.length == 0) {
+    //    throw "URIRequired";
+    // }   FIXME
+    if (this.uri && this.uri.substr(this.uri.length - 1) != '/') {
+        this.uri = this.uri + '/';
+    }
 }
 
 function DASCoords() {
+}
+
+function coordsMatch(c1, c2) {
+    return c1.taxon == c2.taxon && c1.auth == c2.auth && c1.version == c2.version;
 }
 
 //
@@ -169,6 +175,8 @@ function DASLink(desc, uri) {
 }
 
 DASSource.prototype.features = function(segment, options, callback) {
+    options = options || {};
+
     var dasURI;
     if (this.uri.indexOf('http://') == 0) {
         dasURI = this.uri + 'features?';
@@ -202,7 +210,7 @@ DASSource.prototype.features = function(segment, options, callback) {
         dasURI = this.uri;
     }
    
-    // alert(dasURI);
+    // dlog(dasURI);
 
     // Feature/group-by-ID stuff?
     
@@ -241,7 +249,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 dasFeature.label = feature.getAttribute('label');
                 var spos = elementValue(feature, "START");
                 var epos = elementValue(feature, "END");
-                if (spos > epos) {
+                if ((spos|0) > (epos|0)) {
                     dasFeature.min = epos;
                     dasFeature.max = spos;
                 } else {

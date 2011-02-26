@@ -56,7 +56,7 @@ function drawGuidelines(tier, featureGroupElement)
 
 function drawSeqTier(tier, seq)
 {
-    var scale = tier.browser.scale, knownStart = tier.browser.knownStart, knownEnd = tier.browser.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
+    var scale = tier.browser.scale, knownStart = tier.knownStart, knownEnd = tier.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
     if (!scale) {
 	return;
     }
@@ -75,22 +75,72 @@ function drawSeqTier(tier, seq)
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
 	seqTierMax = currentSeqMax;
     }
+	
+    var height = 35;
+    var drawCheckers = false;
+    if (seq && seq.seq) {
+	for (var i = seq.start; i <= seq.end; ++i) {
+	    var base = seq.seq.substr(i - seq.start, 1).toUpperCase();
+	    var color = baseColors[base];
+	    if (!color) {
+	        color = 'gray';
+	    }
+	    
+	    if (scale >= 8) {
+                var labelText = document.createElementNS(NS_SVG, "text");
+                labelText.setAttribute("x", ((i - origin) * scale));
+                labelText.setAttribute("y",  12);
+                labelText.setAttribute("stroke-width", "0");
+                labelText.setAttribute("fill", color);
+                labelText.setAttribute("class", "label-text");
+                labelText.appendChild(document.createTextNode(base));
+                featureGroupElement.appendChild(labelText);
+	    } else {
+                var rect = document.createElementNS(NS_SVG, "rect");
+                rect.setAttribute('x', ((i - origin) * scale));
+                rect.setAttribute('y', 5);
+                rect.setAttribute('height', 10);
+                rect.setAttribute('width', scale);
+                rect.setAttribute('fill', color);
+                rect.setAttribute('stroke', 'none');
+                featureGroupElement.appendChild(rect);
+	    }
+        }
+    } else {
+	drawCheckers = true;
+    }
 
     while (pos <= seqTierMax) {
-        var rect = document.createElementNS(NS_SVG, "rect");
-        rect.setAttribute('x', (pos - origin) * scale);
-        rect.setAttribute('y', 5);
-        rect.setAttribute('height', 3);
-        var rwid = Math.min(tile, seqTierMax - pos) * scale;
-        rect.setAttribute('width', rwid);
-        rect.setAttribute('fill', rulerTileColors[(pos / tile) % 2]);
-        rect.setAttribute('stroke-width', 1);
-        featureGroupElement.appendChild(rect);
+	if (drawCheckers) {
+            var rect = document.createElementNS(NS_SVG, "rect");
+            rect.setAttribute('x', (pos - origin) * scale);
+            rect.setAttribute('y', 8);
+            rect.setAttribute('height', 3);
+            var rwid = Math.min(tile, seqTierMax - pos) * scale;
+            rect.setAttribute('width', rwid);
+            rect.setAttribute('fill', rulerTileColors[(pos / tile) % 2]);
+            rect.setAttribute('stroke-width', 1);
+            featureGroupElement.appendChild(rect);
+	}
         
         if ((pos / tile) % 2 == 0) {
-            var labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            labelText.setAttribute("x", ((pos - origin) * scale));
-            labelText.setAttribute("y",  25);
+	    var fudge = 0;
+	    if (!drawCheckers) {
+		featureGroupElement.appendChild(
+		    makeElementNS(NS_SVG, 'line', null, {
+			x1: ((pos - origin) * scale),
+			y1: 15,
+			x2: ((pos - origin) * scale),
+			y2: 35,
+			stroke: 'rgb(80, 90, 150)',
+			strokeWidth: 1
+		    }));
+		fudge += 3;
+	    }
+
+            var labelText = document.createElementNS(NS_SVG, "text");
+            labelText.setAttribute("x", ((pos - origin) * scale) + fudge);
+            labelText.setAttribute("y",  30);
             labelText.setAttribute("stroke-width", "0");
             labelText.setAttribute("fill", "black");
             labelText.setAttribute("class", "label-text");
@@ -98,41 +148,7 @@ function drawSeqTier(tier, seq)
             featureGroupElement.appendChild(labelText);
         }
 	     
-	    pos += tile;
-	}
-	
-	var height = 30;
-	
-	if (seq) {
-	    for (var i = seq.start; i <= seq.end; ++i) {
-	        var base = seq.seq.substr(i - seq.start, 1).toUpperCase();
-	        var color = baseColors[base];
-	        if (!color) {
-	            color = 'gray';
-	        }
-	        
-	        if (scale >= 8) {
-                var labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                labelText.setAttribute("x", ((i - origin) * scale));
-                labelText.setAttribute("y",  45);
-                labelText.setAttribute("stroke-width", "0");
-                labelText.setAttribute("fill", color);
-                labelText.setAttribute("class", "label-text");
-                labelText.appendChild(document.createTextNode(base));
-                featureGroupElement.appendChild(labelText);
-                height = 50;
-            } else {
-                var rect = document.createElementNS(NS_SVG, "rect");
-                rect.setAttribute('x', ((i - origin) * scale));
-                rect.setAttribute('y', 30);
-                rect.setAttribute('height', 8);
-                rect.setAttribute('width', scale);
-                rect.setAttribute('fill', color);
-                rect.setAttribute('stroke', 'none');
-                featureGroupElement.appendChild(rect);
-                height = 42;
-            }
-        }
+	pos += tile;
     }
 
     tier.layoutHeight = height;

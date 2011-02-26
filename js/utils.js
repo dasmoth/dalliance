@@ -101,6 +101,10 @@ function maybeConcat(a, b) {
 }
 
 function arrayIndexOf(a, x) {
+    if (!a) {
+        return -1;
+    }
+
     for (var i = 0; i < a.length; ++i) {
         if (a[i] === x) {
             return i;
@@ -223,7 +227,11 @@ function removeChildren(node)
 //
 
 function miniJSONify(o) {
-    if (typeof o == 'string') {
+    if (typeof o === 'undefined') {
+        return 'undefined';
+    } else if (o == null) {
+        return 'null';
+    } else if (typeof o == 'string') {
 	return "'" + o + "'";
     } else if (typeof o == 'number') {
 	return "" + o;
@@ -285,4 +293,39 @@ Observed.prototype.set = function(x) {
     for (var i = 0; i < this.listeners.length; ++i) {
         this.listeners[i](x);
     }
+}
+
+function Awaited() {
+    this.queue = [];
+}
+
+Awaited.prototype.provide = function(x) {
+    if (this.res) {
+	throw "Resource has already been provided.";
+    }
+
+    this.res = x;
+    for (var i = 0; i < this.queue.length; ++i) {
+	this.queue[i](x);
+    }
+}
+
+Awaited.prototype.await = function(f) {
+    if (this.res) {
+	f(this.res);
+        return this.res;
+    } else {
+	this.queue.push(f);
+    }
+}
+
+
+//
+// Missing APIs
+// 
+
+if (!('trim' in String.prototype)) {
+    String.prototype.trim = function() {
+        return this.replace(/^\s+/, '').replace(/\s+$/, '');
+    };
 }

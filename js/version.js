@@ -10,10 +10,10 @@
 var VERSION = {
     CONFIG: 2,
     MAJOR:  0,
-    MINOR:  5,
-    MICRO:  7,
+    MINOR:  6,
+    MICRO:  0,
     PATCH:  '',
-    BRANCH: ''
+    BRANCH: 'beta3'
 }
 
 VERSION.toString = function() {

@@ -97,12 +97,140 @@ function formatQuantLabel(v) {
     if (dot < 0) {
         return t;
     } else {
-        if (dot >= 2) {
+        var dotThreshold = 2;
+        if (t.substring(0, 1) == '-') {
+            ++dotThreshold;
+        }
+
+        if (dot >= dotThreshold) {
             return t.substring(0, dot);
         } else {
             return t.substring(0, dot + 2);
         }
     }
+}
+
+Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
+    var labelWidth = this.tabMargin;
+    var viewportBackground = document.createElementNS(NS_SVG, 'path');
+    viewportBackground.setAttribute('d', 'M 15 ' + 2 + 
+				    ' L 10 ' + 7 +
+				    ' L 10 ' + 18 +
+				    ' L 15 ' + 22 +
+				    ' L ' + (10 + labelWidth) + ' ' + 22 +
+				    ' L ' + (10 + labelWidth) + ' ' + 2 + ' Z');
+    viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
+    viewportBackground.setAttribute('stroke', 'none');
+    labelGroup.appendChild(viewportBackground);
+    this.setupTierDrag(viewportBackground, ti);
+
+    var hasWidget = false;
+    if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
+        hasWidget = true;
+	this.makeToggleButton(labelGroup, tier, 0);
+    } 
+
+    if (tier.isQuantitative) {
+        hasWidget = true;
+        var quantTools = makeElementNS(NS_SVG, 'g');
+        quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
+            x: this.tabMargin - 25,
+            y: 0,
+            width: 25,
+            height: tier.layoutHeight,
+            stroke: 'none',
+            fill: this.tierBackgroundColors[ti % this.tierBackgroundColors.length]
+        }));
+        labelGroup.appendChild(quantTools);
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin,
+            y1: 0 + (tier.clientMin|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMax|0),
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -5 ,
+            y1: 0 + (tier.clientMin|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMin|0),
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -3 ,
+            y1: 0 + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
+            x2: this.tabMargin,
+            y2: 0 + ((tier.clientMin|0) +(tier.clientMax|0))/2,
+            strokeWidth: 1
+        }));
+        quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
+            x1: this.tabMargin -5 ,
+            y1: 0 + (tier.clientMax|0),
+            x2: this.tabMargin,
+            y2: 0 + (tier.clientMax|0),
+            strokeWidth: 1
+        }));
+        var minQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.min), {
+            x: 80,
+            y:  (tier.clientMin|0),
+            strokeWidth: 0,
+            fill: 'black',
+            fontSize: '8pt'
+        });
+        quantTools.appendChild(minQ);
+        var mqbb = minQ.getBBox();
+        minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+        minQ.setAttribute('y', (tier.clientMin|0) + (mqbb.height/2) - 4);
+                    
+        var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
+            x: 80,
+            y: (tier.clientMax|0),
+            strokeWidth: 0,
+            fill: 'black',
+            fontSize: '8pt'
+        });
+        quantTools.appendChild(maxQ);
+        maxQ.setAttribute('x', this.tabMargin - maxQ.getBBox().width - 3);
+        mqbb = maxQ.getBBox();
+        maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
+        maxQ.setAttribute('y', (tier.clientMax|0) + (mqbb.height/2) -1 );
+        
+        var button = this.icons.createIcon('magnifier', labelGroup);
+        button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + ((tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
+        
+        // FIXME style-changes don't currently work because of the way icons get grouped.
+        button.addEventListener('mouseover', function(ev) {
+	    button.setAttribute('fill', 'red');
+        }, false);
+        button.addEventListener('mouseout', function(ev) {
+	    button.setAttribute('stroke', 'gray');
+        }, false);
+                
+        quantTools.appendChild(button);
+        this.makeQuantConfigButton(quantTools, tier, 0);
+        this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
+    }
+
+    var labelMaxWidth = this.tabMargin - 20;
+    if (hasWidget) {
+        labelMaxWidth -= 20;
+    }
+    var labelString = tier.dasSource.name;
+    var labelText = document.createElementNS(NS_SVG, 'text');
+    labelText.setAttribute('x', 15);
+    labelText.setAttribute('y', 17);
+    labelText.setAttribute('stroke-width', 0);
+    labelText.setAttribute('fill', 'black');
+    labelText.appendChild(document.createTextNode(labelString));
+    labelText.setAttribute('pointer-events', 'none');
+    labelGroup.appendChild(labelText);
+
+    while (labelText.getBBox().width > labelMaxWidth) {
+        removeChildren(labelText);
+        labelString = labelString.substring(0, labelString.length - 1);
+        labelText.appendChild(document.createTextNode(labelString + '...'));
+    }
+    return labelGroup;
 }
 
 Browser.prototype.arrangeTiers = function() {
@@ -113,136 +241,19 @@ Browser.prototype.arrangeTiers = function() {
     this.placards = [];
 
     var labelGroup = this.dasLabelHolder;
-    removeChildren(labelGroup);
 	
     var clh = 50;
     for (ti = 0; ti < this.tiers.length; ++ti) {
 	var tier = this.tiers[ti];
 	tier.y = clh;
-	    
-	var labelWidth = this.tabMargin;
-	var viewportBackground = document.createElementNS(NS_SVG, 'path');
-	viewportBackground.setAttribute('d', 'M 15 ' + (clh+2) + 
-					' L 10 ' + (clh+7) +
-					' L 10 ' + (clh + 18) +
-					' L 15 ' + (clh + 22) +
-					' L ' + (10 + labelWidth) + ' ' + (clh+22) +
-					' L ' + (10 + labelWidth) + ' ' + (clh+2) + ' Z');
-	viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
-	viewportBackground.setAttribute('stroke', 'none');
-	labelGroup.appendChild(viewportBackground);
-
-//        this.makeTooltip(viewportBackground, tier.dasSource.desc ? 
-//                    makeElement('span', [makeElement('b', tier.dasSource.name), makeElement('br'), tier.dasSource.desc]) : 
-//                   tier.dasSource.name
-//                   );
-	this.setupTierDrag(viewportBackground, ti);
-	    
-        var hasWidget = false;
-	if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
-            hasWidget = true;
-	    this.makeToggleButton(labelGroup, tier, clh);
-	} 
-
-        if (tier.isQuantitative) {
-            hasWidget = true;
-            var quantTools = makeElementNS(NS_SVG, 'g');
-            quantTools.appendChild(makeElementNS(NS_SVG, 'rect', null, {
-                x: this.tabMargin - 25,
-                y: clh,
-                width: 25,
-                height: tier.layoutHeight,
-                stroke: 'none',
-                fill: this.tierBackgroundColors[ti % this.tierBackgroundColors.length]
-            }));
-            labelGroup.appendChild(quantTools);
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin,
-                y1: clh + (tier.clientMin|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMax|0),
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -5 ,
-                y1: clh + (tier.clientMin|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMin|0),
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -3 ,
-                y1: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2 ,
-                x2: this.tabMargin,
-                y2: clh + ((tier.clientMin|0) +(tier.clientMax|0))/2,
-                strokeWidth: 1
-            }));
-            quantTools.appendChild(makeElementNS(NS_SVG, 'line', null, {
-                x1: this.tabMargin -5 ,
-                y1: clh + (tier.clientMax|0),
-                x2: this.tabMargin,
-                y2: clh + (tier.clientMax|0),
-                strokeWidth: 1
-            }));
-            var minQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.min), {
-                x: 80,
-                y: (clh|0) + (tier.clientMin|0),
-                strokeWidth: 0,
-                fill: 'black',
-                fontSize: '8pt'
-            });
-            quantTools.appendChild(minQ);
-            var mqbb = minQ.getBBox();
-            minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
-            minQ.setAttribute('y', (clh|0) + (tier.clientMin|0) + (mqbb.height/2) - 4);
-                    
-            var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
-                x: 80,
-                y: (clh|0) + (tier.clientMax|0),
-                strokeWidth: 0,
-                fill: 'black',
-                fontSize: '8pt'
-            });
-            quantTools.appendChild(maxQ);
-            maxQ.setAttribute('x', this.tabMargin - maxQ.getBBox().width - 3);
-            mqbb = maxQ.getBBox();
-            maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
-            maxQ.setAttribute('y', (clh|0) + (tier.clientMax|0) + (mqbb.height/2) -1 );
-
-            var button = this.icons.createIcon('magnifier', labelGroup);
-            button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + (clh + (tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
-
-            // FIXME style-changes don't currently work because of the way icons get grouped.
-            button.addEventListener('mouseover', function(ev) {
-	        button.setAttribute('fill', 'red');
-            }, false);
-            button.addEventListener('mouseout', function(ev) {
-	        button.setAttribute('stroke', 'gray');
-            }, false);
-                
-            quantTools.appendChild(button);
-            this.makeQuantConfigButton(quantTools, tier, clh);
-            this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
-        }
-
-        var labelMaxWidth = this.tabMargin - 20;
-        if (hasWidget) {
-            labelMaxWidth -= 20;
-        }
-        var labelString = tier.dasSource.name;
-	var labelText = document.createElementNS(NS_SVG, 'text');
-	labelText.setAttribute('x', 15);
-	labelText.setAttribute('y', clh + 17);
-	labelText.setAttribute('stroke-width', 0);
-	labelText.setAttribute('fill', 'black');
-	labelText.appendChild(document.createTextNode(labelString));
-        labelText.setAttribute('pointer-events', 'none');
-	labelGroup.appendChild(labelText);
-
-        while (labelText.getBBox().width > labelMaxWidth) {
-            removeChildren(labelText);
-            labelString = labelString.substring(0, labelString.length - 1);
-            labelText.appendChild(document.createTextNode(labelString + '...'));
+        
+        if (!tier.isLabelValid) {
+            if (tier.label) {
+                labelGroup.removeChild(tier.label);
+            }
+            tier.label = makeElementNS(NS_SVG, 'g');
+            labelGroup.appendChild(tier.label);
+            this.labelForTier(tier, ti, tier.label);
         }
 
 	this.xfrmTier(tier, this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), -1);
@@ -262,10 +273,13 @@ Browser.prototype.arrangeTiers = function() {
 	clh = 150;
     }
 	
-    this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
-    this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
-    this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
-    this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+    if (this.browserFrameHeight != clh) {
+        this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
+        this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
+        this.featureClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+        this.labelClipRect.setAttribute("height", "" + ((clh | 0) - 10));
+        this.browserFrameHeight = clh;
+    }
 }
 
 Browser.prototype.offsetForTier = function(ti) {
@@ -368,11 +382,16 @@ Browser.prototype.setupTierDrag = function(element, ti) {
                 }
             }
             
-            thisB.tierHolder.removeChild(thisB.tiers[ti].viewport);
+            var deadTier = thisB.tiers[ti];
+            thisB.tierHolder.removeChild(deadTier.viewport);
+            if (deadTier.label) {
+                thisB.dasLabelHolder.removeChild(deadTier.label);
+            }
             
             thisB.tiers = newTiers;
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
+                thisB.tiers[nti].isLabelValid = false;
             }
             
             thisB.arrangeTiers();
@@ -400,6 +419,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             thisB.tiers = newTiers;
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
+                thisB.tiers[nti].isLabelValid = false;
             }
             
             thisB.arrangeTiers();
@@ -453,12 +473,25 @@ Browser.prototype.makeToggleButton = function(labelGroup, tier, ypos) {
     bumpToggle.addEventListener('mousedown', function(ev) {
 	tier.bumped = !tier.bumped;
         tier.layoutWasDone = false;   // permits the feature-tier layout code to resize the tier.
-	dasRequestComplete(tier);   // is there a more abstract way to do this?
+        tier.isLabelValid = false;
+	tier.draw();
     }, false);
     this.makeTooltip(bumpToggle, 'Click to ' + (tier.bumped ? 'collapse' : 'expand'));
 }
 
-Browser.prototype.updateRegion = function()
+Browser.prototype.updateRegion = function() {
+    if (this.updateRegionBaton) {
+        // dlog('UR already pending');
+    } else {
+        var thisB = this;
+        this.updateRegionBaton = setTimeout(function() {
+            thisB.updateRegionBaton = null;
+            thisB.realUpdateRegion();
+        }, 25);
+    }
+}
+
+Browser.prototype.realUpdateRegion = function()
 {
     var chrLabel = this.chr;
     if (chrLabel.indexOf('chr') < 0) {
@@ -478,9 +511,9 @@ Browser.prototype.updateRegion = function()
 
 Browser.prototype.refresh = function() {
     var width = (this.viewEnd - this.viewStart) + 1;
+    var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
-    this.knownStart = Math.max(1, (this.viewStart|0) - maxExtraW);
-    this.knownEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
+
     
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
@@ -494,9 +527,28 @@ Browser.prototype.refresh = function() {
 	this.tiers[t].originHaxx = od;
     }
 
-    for (var t = 0; t < this.tiers.length; ++t) {
-	this.tiers[t].refreshTier();
+    var scaledQuantRes = this.targetQuantRes / this.scale;
+
+
+    var innerDrawnStart = Math.max(1, (this.viewStart|0) - minExtraW);
+    var innerDrawnEnd = Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000))
+    var outerDrawnStart = Math.max(1, (this.viewStart|0) - maxExtraW);
+    var outerDrawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
+
+    if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
+        this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes);
     }
+    
+    var seg = this.knownSpace.bestCacheOverlapping(this.chr, innerDrawnStart, innerDrawnEnd);
+    if (seg && seg.min <= innerDrawnStart && seg.max >= innerDrawnEnd) {
+        this.drawnStart = Math.max(seg.min, outerDrawnStart);
+        this.drawnEnd = Math.min(seg.max, outerDrawnEnd);
+    } else {
+        this.drawnStart = outerDrawnStart;
+        this.drawnEnd = outerDrawnEnd;
+    }
+
+    this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
 }
 
 
@@ -605,7 +657,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
     if (feature.score && feature.score != '-') {
         var row = makeElement('tr', [
             makeElement('th', 'Score'),
-            makeElement('td', feature.score)
+            makeElement('td', '' + feature.score)
         ]);
         row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
@@ -770,6 +822,8 @@ Browser.prototype.realInit = function(opts) {
     if (!opts) {
         opts = {};
     }
+    this.supportsBinary = (typeof Int8Array === 'function');
+    // dlog('supports binary: ' + this.supportsBinary);
 
     var thisB = this;
     // Cache away the default sources before anything else
@@ -950,7 +1004,7 @@ Browser.prototype.realInit = function(opts) {
 
     var linkButton = this.icons.createButton('link', main, 30, 30);
     linkButton.setAttribute('transform', 'translate(140, 10)');
-    this.makeTooltip(linkButton, 'Link to other genome browsers');
+    this.makeTooltip(linkButton, 'Follow links to other genome browsers');
     main.appendChild(linkButton);
 
     var resetButton = this.icons.createButton('reset', main, 30, 30);
@@ -1097,16 +1151,38 @@ Browser.prototype.realInit = function(opts) {
         this.zoomSlider.onchange = function(zoomVal, released) {
 	    thisB.zoom(Math.exp((1.0 * zoomVal) / thisB.zoomExpt));
 	    if (released) {
-                for (var t = 0; t < thisB.tiers.length; ++t) {
-                    thisB.tiers[t].layoutWasDone = false;
-                }
+                thisB.invalidateLayouts();
 	        thisB.refresh();
 	        thisB.storeStatus();
 	    }
         };
         plusIcon.setAttribute('transform', 'translate(0,15)');
+        plusIcon.setAttribute('pointer-events', 'all');
+        plusIcon.addEventListener('mousedown', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz - 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
+            }
+        }, false);
         this.zoomSlider.svg.setAttribute('transform', 'translate(30, 0)');
         minusIcon.setAttribute('transform', 'translate(285,15)');
+        minusIcon.setAttribute('pointer-events', 'all');
+        minusIcon.addEventListener('mousedown', function(ev) {
+            ev.stopPropagation(); ev.preventDefault();
+
+            var oz = thisB.zoomSlider.getValue();
+            thisB.zoomSlider.setValue(oz + 10);
+            var nz = thisB.zoomSlider.getValue();
+            if (nz != oz) {
+                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
+                thisB.scheduleRefresh(500);
+            }
+        }, false);
         this.zoomWidget = makeElementNS(NS_SVG, 'g', [this.zoomTickMarks, plusIcon, this.zoomSlider.svg, minusIcon]);
 
         this.makeTooltip(this.zoomWidget, 'Drag to zoom');
@@ -1174,7 +1250,7 @@ Browser.prototype.realInit = function(opts) {
                 target: '_new'
             })));
         }
-        linkPopupHandle = thisB.popit(ev, 'Link to...', linkList);
+        linkPopupHandle = thisB.popit(ev, 'Follow links to...', linkList);
     }, false);
 
     // set up the navigator
@@ -1335,8 +1411,10 @@ Browser.prototype.realInit = function(opts) {
         ev.stopPropagation(); ev.preventDefault();
 
         removeChildren(thisB.tierHolder);
+        removeChildren(thisB.dasLabelHolder);
         thisB.tiers = [];
         thisB.sources = [];
+        thisB.knownSpace = null;
 
         for (var t = 0; t < thisB.defaultSources.length; ++t) {
 	    var source = thisB.defaultSources[t];
@@ -1355,14 +1433,22 @@ Browser.prototype.realInit = function(opts) {
     }
     for (var t = 0; t < this.sources.length; ++t) {
 	var source = this.sources[t];
+        if (source.bwgURI && !this.supportsBinary) {
+            if (!this.binaryWarningGiven) {
+                this.popit({clientX: 300, clientY: 100}, 'Warning', makeElement('p', 'browser does not support binary data, some track(s) not loaded'));
+                this.binaryWarningGiven = true;
+            }
+            continue;
+        }
         this.makeTier(source);
     }
+    thisB.arrangeTiers();
     
     //
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
     //
 
-    this.resizeViewer();
+    this.resizeViewer(true);
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
@@ -1390,8 +1476,7 @@ Browser.prototype.realInit = function(opts) {
     this.zoomExpt = 250 / Math.log(MAX_VIEW_SIZE / this.zoomBase);
     this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
-    this.move(0);
-    this.refresh();
+    this.move(0); // will trigger a refresh() after failing spaceCheck.
 
     //
     // Tick-marks on the zoomer
@@ -1429,24 +1514,58 @@ Browser.prototype.realInit = function(opts) {
 	if (ev.axis == 1) {
 	    ev.stopPropagation(); ev.preventDefault();
 	    if (ev.detail != 0) {
-		thisB.move(ev.detail);
+		thisB.move(ev.detail/4);
 	    }
         }
     }, false);
 
     var keyHandler = function(ev) {
-//        alert('key = ' + ev.keyCode + ', char = ' + ev.charCode);
-
-        if (ev.keyCode == 37) {
-            // left
-            ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? - 100 : -25);
+        // dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
+        if (ev.keyCode == 13) {
+            var layoutsChanged = false;
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                var t = thisB.tiers[ti];
+                if (t.wantedLayoutHeight && t.wantedLayoutHeight != t.layoutHeight) {
+                    t.layoutHeight = t.wantedLayoutHeight;
+                    t.placard = null;
+                    t.clipTier();
+                    layoutsChanged = true;
+                }
+            }
+            if (layoutsChanged) {
+                thisB.arrangeTiers();
+            }
+        } else if (ev.keyCode == 32 || ev.charCode == 32) {
+            if (!thisB.snapZoomLockout) {
+                if (!thisB.isSnapZooming) {
+                    thisB.isSnapZooming = true;
+                    var newZoom = thisB.savedZoom || 1.0;
+                    thisB.savedZoom = thisB.zoomSlider.getValue();
+                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    thisB.invalidateLayouts();
+                    thisB.zoomSlider.setColor('red');
+                    thisB.refresh();
+                } else {
+                    thisB.isSnapZooming = false;
+                    var newZoom = thisB.savedZoom || 10.0;
+                    thisB.savedZoom = thisB.zoomSlider.getValue();
+                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    thisB.invalidateLayouts();
+                    thisB.zoomSlider.setColor('blue');
+                    thisB.refresh();
+                }
+                thisB.snapZoomLockout = true;
+            }
+            ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
             thisB.move(ev.shiftKey ? 100 : 25);
-        } 
-
-        else if (ev.charCode == 61) {
+        } else if (ev.keyCode == 37) {
+            ev.stopPropagation(); ev.preventDefault();
+            thisB.move(ev.shiftKey ? -100 : -25);
+        } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
 
             var oz = thisB.zoomSlider.getValue();
@@ -1466,17 +1585,48 @@ Browser.prototype.realInit = function(opts) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
                 thisB.scheduleRefresh(500);
             }
-        } 
+        } else if (ev.keyCode == 84) {
+            var bumpStatus;
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                var t = thisB.tiers[ti];
+                if (t.dasSource.collapseSuperGroups) {
+                    if (bumpStatus === undefined) {
+                        bumpStatus = !t.bumped;
+                    }
+                    t.bumped = bumpStatus;
+                    t.layoutWasDone = false;
+                    t.draw();
+                }
+            }
+        }
     };
+    var keyUpHandler = function(ev) {
+
+        thisB.snapZoomLockout = false;
+/*
+        if (ev.keyCode == 32) {
+            if (thisB.isSnapZooming) {
+                thisB.isSnapZooming = false;
+                thisB.zoomSlider.setValue(thisB.savedZoom);
+                thisB.zoom(Math.exp((1.0 * thisB.savedZoom / thisB.zoomExpt)));
+                thisB.invalidateLayouts();
+                thisB.refresh();
+            }
+            ev.stopPropagation(); ev.preventDefault();
+        } */
+    }
+
     var mouseLeaveHandler;
     mouseLeaveHandler = function(ev) {
         window.removeEventListener('keydown', keyHandler, false);
+        window.removeEventListener('keyup', keyUpHandler, false);
         window.removeEventListener('keypress', keyHandler, false);
         thisB.svgRoot.removeEventListener('mouseout', mouseLeaveHandler, false);
     }
 
     this.svgRoot.addEventListener('mouseover', function(ev) {
         window.addEventListener('keydown', keyHandler, false);
+        window.addEventListener('keyup', keyUpHandler, false);
         window.addEventListener('keypress', keyHandler, false);
         thisB.svgRoot.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
@@ -1538,13 +1688,17 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
     if (tryCache) {
         var cacheTime = localStorage['dalliance.registry.' + cacheHash + '.last_queried'];
         if (cacheTime) {
-            setSources(msh, eval(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
-            var cacheAge = (Date.now()|0) - (cacheTime|0);
-            if (cacheAge < (12 * 60 * 60 * 1000)) {
-                // alert('Using cached registry data');
-                return;
-            } else {
-                // alert('Registry data is stale, refetching');
+            try {
+                setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
+                var cacheAge = (Date.now()|0) - (cacheTime|0);
+                if (cacheAge < (12 * 60 * 60 * 1000)) {
+                    // alert('Using cached registry data');
+                    return;
+                } else {
+                    // alert('Registry data is stale, refetching');
+                }
+            } catch (rex) {
+                dlog('Bad registry cache: ' + rex);
             }
         }
     }
@@ -1563,7 +1717,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
             availableSources.push(source);
         }
 
-        localStorage['dalliance.registry.' + cacheHash + '.sources'] = miniJSONify(availableSources);
+        localStorage['dalliance.registry.' + cacheHash + '.sources'] = JSON.stringify(availableSources);
         localStorage['dalliance.registry.' + cacheHash + '.last_queried'] = '' + Date.now();
         
         setSources(msh, availableSources, maybeMapping);
@@ -1588,7 +1742,8 @@ Browser.prototype.makeTier = function(source) {
     
     var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
-    this.tiers.push(tier);
+    this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
+    this.refreshTier(tier);
 }
 
 
@@ -1637,7 +1792,7 @@ Browser.prototype.makeZoomerTicks = function() {
 }
 
 
-Browser.prototype.resizeViewer = function() {
+Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = window.innerWidth;
     width = Math.max(width, 640);
 
@@ -1679,7 +1834,9 @@ Browser.prototype.resizeViewer = function() {
     
 	this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
 	this.updateRegion();
-	this.spaceCheck();
+        if (!skipRefresh) {
+	    this.spaceCheck();
+        }
     }
 
     if (this.fgGuide) {
@@ -1713,6 +1870,17 @@ Browser.prototype.xfrmTiers = function(x, xs) {
     } 
 }
 
+Browser.prototype.jiggleLabels = function(tier) {
+        var x = tier.xfrmX;
+        var labels = tier.viewport.getElementsByClassName("label-text");
+        for (var li = 0; li < labels.length; ++li) {
+            var label = labels[li];
+            if (label.jiggleMin && label.jiggleMax) {
+                label.setAttribute('x', Math.min(Math.max(this.tabMargin - x, label.jiggleMin), label.jiggleMax));
+            }
+        }
+}
+        
 Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (tier.originHaxx && tier.originHaxx != 0) {
 	x -= ((1.0 * tier.originHaxx) * this.scale);
@@ -1724,22 +1892,44 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
     } else {
         tier.scale = xs;
     }
-    var xfrm = 'translate(' + x + ',' + tier.y + ')';
-    if (axs != 1) {
-        xfrm += ', scale(' + axs + ',1)';
+
+    var y = tier.y;
+        
+    if (x != tier.xfrmX || y != tier.xfrmY || axs != tier.xfrmS) {
+        var xfrm = 'translate(' + x + ',' + tier.y + ')';
+        if (axs != 1) {
+            xfrm += ', scale(' + axs + ',1)';
+        }
+        tier.viewport.setAttribute('transform', xfrm);
     }
-    tier.viewport.setAttribute('transform', xfrm);
+    if (tier.label && (y != tier.xfrmY || !tier.isLabelValid)) {
+        tier.label.setAttribute('transform', 'translate(0, ' + y + ')');
+        tier.isLabelValid = true;
+    }
+
+    tier.xfrmX = x;
+    tier.xfrmY = y;
+    tier.xfrmS = axs;
+
+    this.jiggleLabels(tier);
 }
 
 //
 // Navigation prims.
 //
 
-Browser.prototype.spaceCheck = function() {
+Browser.prototype.spaceCheck = function(dontRefresh) {
+    if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
+        this.refresh();
+        return;
+    } 
+
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
-    if ((this.knownStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.knownEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
+    if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
+//         this.drawnStart = Math.max(1, (this.viewStart|0) - maxExtraW);
+//        this.drawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
 	this.refresh();
     }
 }
@@ -1766,7 +1956,7 @@ Browser.prototype.move = function(pos)
 
 Browser.prototype.zoom = function(factor) {
     this.zoomFactor = factor;
-    var viewCenter = (this.viewStart + this.viewEnd) / 2.0;
+    var viewCenter = Math.round((this.viewStart + this.viewEnd) / 2.0)|0;
     this.viewStart = viewCenter - this.zoomBase * this.zoomFactor / 2;
     this.viewEnd = viewCenter + this.zoomBase * this.zoomFactor / 2;
     if (this.currentSeqMax > 0 && (this.viewEnd > this.currentSeqMax + 5)) {
@@ -1781,13 +1971,8 @@ Browser.prototype.zoom = function(factor) {
     }
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
     this.updateRegion();
-    
+
     var width = this.viewEnd - this.viewStart + 1;
-    var minExtraW = (width * this.minExtra) | 0;
-    var maxExtraW = (width * this.maxExtra) | 0;
-    // Currently, always reset Known Space after a zoom :-(
-    this.knownStart = Math.max(1, Math.round(this.viewStart) - maxExtraW);
-    this.knownEnd = Math.round(this.viewEnd) + maxExtraW;
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));
@@ -1853,7 +2038,7 @@ Browser.prototype.setLocation = function(newMin, newMax, newChr) {
 
     this.updateRegion();
     this.karyo.update(this.chr, this.viewStart, this.viewEnd);
-    this.refresh();
+    this.spaceCheck();
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), 1);   // FIXME currently needed to set the highlight (!)
     this.storeStatus();
 }
@@ -1889,4 +2074,16 @@ Browser.prototype.scheduleRefresh = function(time) {
         thisB.refreshTB = null;
         thisB.refresh();
     }, time);
+}
+
+Browser.prototype.invalidateLayouts = function() {
+    for (var t = 0; t < this.tiers.length; ++t) {
+        this.tiers[t].layoutWasDone = false;
+    }
+}
+
+Browser.prototype.refreshTier = function(tier) {
+    if (this.knownSpace) {
+        this.knownSpace.invalidate(tier);
+    }
 }

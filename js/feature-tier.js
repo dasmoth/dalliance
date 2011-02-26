@@ -93,6 +93,8 @@ DSubTier.prototype.hasSpaceFor = function(glyph) {
 //
 
 DasTier.prototype.styleForFeature = function(f) {
+    // dlog('styling ' + miniJSONify(f));
+
     var ssScale = zoomForScale(this.browser.scale);
 
     if (!this.stylesheet) {
@@ -114,7 +116,10 @@ DasTier.prototype.styleForFeature = function(f) {
         }
         if (sh.type) {
             if (sh.type == 'default') {
-                maybe = sh.style;
+                if (!maybe) {
+                    maybe = sh.style;
+                }
+                continue;
             } else if (sh.type != f.type) {
                 continue;
             }
@@ -168,11 +173,26 @@ function drawLine(featureGroupElement, features, style, tier, y)
     featureGroupElement.appendChild(clip);
     path.setAttribute('clip-path', 'url(#' + clipId + ')');
    
-    tier.isQuantitative = true;
-    tier.min = min;
-    tier.max = max;
-    tier.clientMin = y|0 + height;
-    tier.clientMax = y;
+    if (!tier.isQuantitative) {
+        tier.isQuantitative = true;
+        tier.isLabelValid = false;
+    }
+    if (tier.min != min) {
+        tier.min = min;
+        tier.isLabelValid = false;
+    }
+    if (tier.max != max) {
+        tier.max = max;
+        tier.isLabelValid = false;
+    }
+    if (tier.clientMin != y|0 + height) {
+        tier.clientMin = y|0 + height;
+        tier.isLabelValid = false;
+    }
+    if (tier.clientMax != y) {
+        tier.clientMax = y;
+        tier.isLabelValid = false;
+    }
 
     return height|0 + MIN_PADDING;
 }
@@ -228,7 +248,7 @@ function sortFeatures(tier)
         if (!f.min || !f.max) {
             nonPositional.push(f);
             continue;
-        }    
+        }
 
         if (f.score && f.score != '.' && f.score != '-') {
             sc = 1.0 * f.score;
@@ -271,6 +291,9 @@ function sortFeatures(tier)
                     // alert("couldn't find " + pid);
                     continue;
                 }
+                if (!p.parts) {
+                    p.parts = [f];
+                }
                 pushnewo(groupedFeatures, pid, p);
                 pusho(groupedFeatures, pid, f);
                 
@@ -292,7 +315,10 @@ function sortFeatures(tier)
                         id: sp.id,
                         label: sp.label || sp.id
                     };
-                    tier.dasSource.collapseSuperGroups = true;
+                    if (!tier.dasSource.collapseSuperGroups) {
+                        tier.dasSource.collapseSuperGroups = true;
+                        tier.isLabelValid = false;
+                    }
                 }
             }   
         }
@@ -363,6 +389,9 @@ function drawFeatureTier(tier)
 	} else {
 	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
                 var f = ufl[pgid];
+                if (f.parts) {  // FIXME shouldn't really be needed
+                    continue;
+                }
 		var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
 		glyphs.push(g);
 	    }
@@ -548,6 +577,7 @@ function drawFeatureTier(tier)
 	}
         
         if (g.quant) {
+            tier.isLabelValid = false;    // FIXME
             tier.isQuantitative = true;
             tier.min = g.quant.min;
             tier.max = g.quant.max;
@@ -585,9 +615,9 @@ function drawFeatureTier(tier)
         }
     }			
 
+    tier.wantedLayoutHeight = lh;
     if (!tier.layoutWasDone || tier.browser.autoSizeTiers) {
 	tier.layoutHeight = lh;
-	tier.background.setAttribute("height", lh);
 	if (glyphs.length > 0 || specials) {
 	    tier.layoutWasDone = true;
 	}
@@ -638,8 +668,9 @@ function drawFeatureTier(tier)
 	    spandPlacard.appendChild(arrow);
 	    
 	    spandPlacard.addEventListener('mousedown', function(ev) {
-		tier.layoutWasDone = false;
-		drawFeatureTier(tier);
+		tier.layoutHeight = tier.wantedLayoutHeight;
+                tier.placard = null;
+                tier.clipTier();
 		tier.browser.arrangeTiers();
 	    }, false);
 
@@ -686,6 +717,16 @@ function drawFeatureTier(tier)
 	tier.placard = statusPlacard;
     }
 
+    tier.clipTier();
+	    
+    tier.scale = 1;
+}
+
+DasTier.prototype.clipTier = function() {
+    var featureGroupElement = this.viewport;
+
+    this.background.setAttribute("height", this.layoutHeight);
+
     var clipId = 'tier_clip_' + (++clipIdSeed);
     var clip = document.createElementNS(NS_SVG, 'clipPath');
     clip.setAttribute('id', clipId);
@@ -693,12 +734,10 @@ function drawFeatureTier(tier)
     clipRect.setAttribute('x', -500000);
     clipRect.setAttribute('y', 0);
     clipRect.setAttribute('width', 1000000);
-    clipRect.setAttribute('height', tier.layoutHeight);
+    clipRect.setAttribute('height', this.layoutHeight);
     clip.appendChild(clipRect);
     featureGroupElement.appendChild(clip);
     featureGroupElement.setAttribute('clip-path', 'url(#' + clipId + ')');
-	    
-    tier.scale = 1;
 }
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
@@ -749,6 +788,9 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	if (!style) {
 	    continue;
 	}
+        if (feature.parts) {  // FIXME shouldn't really be needed
+            continue;
+        }
 	var glyph = glyphForFeature(feature, y, style, tier, consHeight);
         if (glyph && glyph.glyph) {
             featureDGlyphs.push(glyph);
@@ -841,7 +883,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     groupElement.segment = features[0].segment;
     groupElement.min = spans.min();
     groupElement.max = spans.max();
-    if (notes && !groupElement.notes || groupElement.notes.length==0) {
+    if (notes && (!groupElement.notes || groupElement.notes.length==0)) {
         groupElement.notes = notes;
     }
 
@@ -878,7 +920,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var label = feature.label;
 
     var minPos = (min - origin) * scale;
-    var maxPos = ((max - origin + 1) * scale) - 0.05;
+    var maxPos = ((max - origin + 1) * scale);
 
     var requiredHeight;
     var quant;
@@ -1224,8 +1266,20 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         }
 
 	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score) {
-	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
-	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+
+            if (!smax) {
+                if (smin < 0) {
+                    smax = 0;
+                } else {
+                    smax = 10;
+                }
+            }
+            if (!smin) {
+                smin = 0;
+            }
+
 	    if ((1.0 * score) < (1.0 *smin)) {
 		score = smin;
 	    }
@@ -1260,7 +1314,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             } 
 
 	    if (gtype == 'HISTOGRAM') {
-		height = (height * relScore)|0;
+		height = relScore * height;
 		y = y + (requiredHeight - height);
                 
                 quant = {
@@ -1268,8 +1322,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     max: smax
                 };
 	    }
+
+            minPos -= 0.25
+            maxPos += 0.25;   // Fudge factor to mitigate pixel-jitter.
 	}
  
+        // dlog('min=' + min + '; max=' + max + '; minPos=' + minPos + '; maxPos=' + maxPos);
+
         var rect = document.createElementNS(NS_SVG, 'rect');
         rect.setAttribute('x', minPos);
         rect.setAttribute('y', y);
@@ -1366,6 +1425,10 @@ function labelGlyph(tier, dglyph, featureTier) {
 	    dglyph.min = ((nmin/scale)+origin)|0;
 	    dglyph.max = (textMax-adj)|0;
 	} else {
+            // Mark as a candidate for label-jiggling
+
+            labelText.jiggleMin = (dglyph.min - origin) * scale;
+            labelText.jiggleMax = ((dglyph.max - origin) * scale) - width;
 	}
     }
     return dglyph;
