@@ -209,7 +209,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('URL: '));
-            custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net/dalliance-test/stylesheets/ensGene.bb'});
+            custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'});
             stabHolder.appendChild(custURL);
             custURL.focus();
 
