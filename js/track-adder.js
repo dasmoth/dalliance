@@ -346,48 +346,83 @@ Browser.prototype.showTrackAdder = function(ev) {
                     nds.name = match[1];
                 }
 
-                new DASRegistry(nds.uri, {credentials: nds.credentials}).sources(
-                    function(sources) {
-                        var coordsDetermined = false, quantDetermined = false;
-                        if (sources && sources.length == 1) {
-                            var fs = sources[0];
-//                            dlog(miniJSONify(fs));
-                            nds.name = fs.name;
-                            nds.desc = fs.desc;
-                            if (fs.maxbins) {
-                                nds.maxbins = true;
-                            } else {
-                                nds.maxbins = false;
-                            }
-                            quantDetermined = true
-                            
-                            if (fs.coords && fs.coords.length == 1) {
-                                var coords = fs.coords[0];
-                                if (coordsMatch(coords, thisB.coordSystem)) {
-                                    coordsDetermined = true;
-                                } else if (thisB.chains) {
-                                    for (var k in thisB.chains) {
-                                        if (coordsMatch(coords, thisB.chains[k].coords)) {
-                                            nds.mapping = k;
-                                            coordsDetermined = true;
-                                        }
-                                    }
-                                }
-                            }
-                                    
-                        }
-                        return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
-                    },
-                    function() {
-//                        dlog('no sources');
-                        return addDasCompletionPage(nds);
-                    }
-                );
+                tryAddDASxSources(nds);
+                
                 
 
                 return;
             }
         });
+    }
+
+    function tryAddDASxSources(nds, retry) {
+        var uri = nds.uri;
+        if (retry) {
+            var match = /(.+)\/[^\/]+\/?/.exec(uri);
+            if (match) {
+                uri = match[1] + '/sources';
+            }
+        }
+//        dlog('sourceQuery: ' + uri);
+        function sqfail() {
+            if (!retry) {
+                return tryAddDASxSources(nds, true);
+            } else {
+                return addDasCompletionPage(nds);
+            }
+        }
+        new DASRegistry(uri, {credentials: nds.credentials}).sources(
+            function(sources) {
+                if (!sources || sources.length == 0) {
+                    return sqfail();
+                } 
+//                dlog('got ' + sources.length + ' sources');
+
+                var fs = null;
+                if (sources.length == 1) {
+                    fs = sources[0];
+                } else {
+                    for (var i = 0; i < sources.length; ++i) {
+                        if (sources[i].uri === nds.uri) {
+//                            dlog('got match!');
+                            fs = sources[i];
+                            break;
+                        }
+                    }
+                }
+
+                var coordsDetermined = false, quantDetermined = false;
+                if (fs) {
+                    nds.name = fs.name;
+                    nds.desc = fs.desc;
+                    if (fs.maxbins) {
+                        nds.maxbins = true;
+                    } else {
+                        nds.maxbins = false;
+                    }
+                    quantDetermined = true
+                    
+                    if (fs.coords && fs.coords.length == 1) {
+                        var coords = fs.coords[0];
+                        if (coordsMatch(coords, thisB.coordSystem)) {
+                            coordsDetermined = true;
+                        } else if (thisB.chains) {
+                            for (var k in thisB.chains) {
+                                if (coordsMatch(coords, thisB.chains[k].coords)) {
+                                    nds.mapping = k;
+                                    coordsDetermined = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
+            },
+            function() {
+                return sqfail();
+            }
+        );
     }
 
     var tryAddBin = function(nds) {
