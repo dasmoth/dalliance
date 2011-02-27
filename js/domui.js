@@ -48,7 +48,11 @@ Browser.prototype.makeTooltip = function(ele, text)
                     }
                     window.removeEventListener('mousemove', moveHandler, false);
                     if (isin) {
-                        setup(ev);
+                        if (ele.offsetParent == null) {
+                            // dlog('Null parent...');
+                        } else {
+                            setup(ev);
+                        }
                     }
                 }
                 window.addEventListener('mousemove', moveHandler, false);

@@ -194,7 +194,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         activateButton(addModeButtons, binButton);
         switchToBinMode();
-    });
+    }, false);
 
 
     function switchToBinMode() {
