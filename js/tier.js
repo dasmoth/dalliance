@@ -84,6 +84,7 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.HEIGHT=30;
                     thisTier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
                 }
+                thisTier.browser.refreshTier(thisTier);
             });
         }
     } else if (this.dasSource.tier_type == 'sequence') {
@@ -97,6 +98,7 @@ function DasTier(browser, source, viewport, background)
     }
 
     this.featureSource = fs;
+    this.setBackground();
 }
 
 DasTier.prototype.toString = function() {
@@ -163,11 +165,8 @@ DasTier.prototype.getDesiredTypes = function(scale) {
         }
     } else {
         // inclusive = true;
-        return [];             // If no stylesheet yet, claim we don't want any types.
-                               // A hard refresh will be forced once the SS arrives.
+        return undefined;
     }
-
-    // dlog('gdt(' + this.id + ') = ' + miniJSONify(fetchTypes));
 
     if (inclusive) {
         return null;
@@ -187,6 +186,15 @@ DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
 
+    this.setBackground();
+    this.draw();
+}
+
+DasTier.prototype.updateStatus = function(status) {
+    if (status) {
+        this.currentFeatures = [];
+        this.error = status;
+    }
     this.setBackground();
     this.draw();
 }
@@ -216,8 +224,11 @@ function zoomForScale(scale) {
 
 
 DasTier.prototype.setBackground = function() {            
-    if (this.knownStart) {
-        this.background.setAttribute('x', (this.knownStart - this.browser.origin) * this.browser.scale);
-        this.background.setAttribute('width', (this.knownEnd - this.knownStart + 1) * this.browser.scale);
-    }    
+//    if (this.knownStart) {
+
+    var ks = this.knownStart || -100000000;
+    var ke = this.knownEnd || -100000001;
+        this.background.setAttribute('x', (ks - this.browser.origin) * this.browser.scale);
+        this.background.setAttribute('width', (ke - this.knownStart + 1) * this.browser.scale);
+//    }    
 }

@@ -132,10 +132,10 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         moveHandler = function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             left = left + (ev.clientX - dragOX);
-            if (left < 10) {
-                left = 10;
-            } if (left > (winWidth - width - 10)) {
-                left = (winWidth - width - 10);
+            if (left < 8) {
+                left = 8;
+            } if (left > (winWidth - width - 32)) {
+                left = (winWidth - width - 26);
             }
             top = top + (ev.clientY - dragOY);
             top = Math.max(10, top);
