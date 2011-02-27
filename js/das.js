@@ -217,7 +217,13 @@ DASSource.prototype.features = function(segment, options, callback) {
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
 
 	if (!responseXML) {
-	    callback([], 'Failed request: ' + dasURI);     // FIXME response code here?
+            var msg;
+            if (req.status == 0) {
+                msg = 'server may not support CORS';
+            } else {
+                msg = 'status=' + req.status;
+            }
+	    callback([], 'Failed request: ' + msg);
 	    return;
 	}
 /*	if (req) {

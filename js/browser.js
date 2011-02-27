@@ -374,28 +374,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
 
         thisB.popupHolder.removeChild(dragFeedbackRect);
         if (binned) {
-            var newTiers = [];
-            
-            for (var t = 0; t < thisB.tiers.length; ++t) {
-                if (t != ti) {
-                    newTiers.push(thisB.tiers[t]);
-                }
-            }
-            
-            var deadTier = thisB.tiers[ti];
-            thisB.tierHolder.removeChild(deadTier.viewport);
-            if (deadTier.label) {
-                thisB.dasLabelHolder.removeChild(deadTier.label);
-            }
-            
-            thisB.tiers = newTiers;
-            for (var nti = 0; nti < thisB.tiers.length; ++nti) {
-                thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
-                thisB.tiers[nti].isLabelValid = false;
-            }
-            
-            thisB.arrangeTiers();
-	    thisB.storeStatus();
+            thisB.removeTier(thisB.tiers[ti]);
         } else if (targetTier == ti) {
             // Nothing at all.
         } else {
@@ -417,6 +396,9 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             }
             
             thisB.tiers = newTiers;
+            if (thisB.knownSpace) {
+                thisB.knownSpace.tierMap = thisB.tiers;
+            }
             for (var nti = 0; nti < thisB.tiers.length; ++nti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
                 thisB.tiers[nti].isLabelValid = false;
@@ -1746,6 +1728,27 @@ Browser.prototype.makeTier = function(source) {
     this.refreshTier(tier);
 }
 
+Browser.prototype.removeTier = function(tier) {
+    var ti = arrayIndexOf(this.tiers, tier);
+    if (ti < 0) {
+        return dlog("Couldn't find tier");
+    }
+            
+    var deadTier = this.tiers[ti];
+    this.tierHolder.removeChild(deadTier.viewport);
+    if (deadTier.label) {
+        this.dasLabelHolder.removeChild(deadTier.label);
+    }
+            
+    this.tiers.splice(ti, 1);
+    for (var nti = 0; nti < this.tiers.length; ++nti) {
+        this.tiers[nti].background.setAttribute("fill", this.tierBackgroundColors[nti % this.tierBackgroundColors.length]);
+        this.tiers[nti].isLabelValid = false;
+    }
+
+    this.arrangeTiers();
+    this.storeStatus();
+}
 
 Browser.prototype.makeZoomerTicks = function() {
     var thisB = this;

@@ -710,9 +710,27 @@ function drawFeatureTier(tier)
 	status.setAttribute('fill', 'red');
 	status.setAttribute('font-family', 'helvetica');
 	status.setAttribute('font-size', '10pt');
-	status.setAttribute('x', 80);
+	status.setAttribute('x', 25);
 	status.setAttribute('y', -6);
 	status.appendChild(document.createTextNode(statusMsg));
+
+        if (tier.error) {
+            var dismiss = document.createElementNS(NS_SVG, 'text');
+	    dismiss.setAttribute('stroke', 'none');
+	    dismiss.setAttribute('fill', 'red');
+	    dismiss.setAttribute('font-family', 'helvetica');
+	    dismiss.setAttribute('font-size', '10pt');
+	    dismiss.appendChild(document.createTextNode("(Remove track)"));
+	    dismiss.setAttribute('x', 800);
+	    dismiss.setAttribute('y', -6);
+	    dismiss.addEventListener('mousedown', function(ev) {
+		ev.preventDefault(); ev.stopPropagation();
+                // dlog('Remove');
+                tier.browser.removeTier(tier);
+	    }, false);
+            statusPlacard.appendChild(dismiss);
+        }
+
 	statusPlacard.appendChild(status);
 	tier.placard = statusPlacard;
     }
