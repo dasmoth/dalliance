@@ -1184,6 +1184,8 @@ Browser.prototype.realInit = function(opts) {
     this.popupHolder = makeElementNS(NS_SVG, 'g');
     main.appendChild(this.popupHolder);
     this.hPopupHolder = makeElement('div');
+    this.hPopupHolder.style['font-family'] = 'helvetica';
+    this.hPopupHolder.style['font-size'] = '12pt';
     this.svgHolder.appendChild(this.hPopupHolder);
   
     this.bhtmlRoot = makeElement('div');
@@ -1803,6 +1805,10 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         width = this.forceWidth;
     }
 
+    if (this.center) {
+        this.svgHolder.style['margin-left'] = (((window.innerWidth - width) / 2)|0) + 'px';
+    }
+
     this.svgRoot.setAttribute('width', width - 30);
     this.svgBackground.setAttribute('width', width - 30);
     this.featureClipRect.setAttribute('width', width - this.tabMargin - 40);
@@ -2048,7 +2054,7 @@ Browser.prototype.setLocation = function(newMin, newMax, newChr) {
 
 
 Browser.prototype.storeStatus = function(){
-    if (!this.cookieKey) {
+    if (!this.cookieKey || this.noPersist) {
 	return;
     }
 
