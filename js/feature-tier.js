@@ -909,7 +909,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     dg.strand = strand;
     dg.bump = true; // grouped features always bumped.
     // alert(miniJSONify(gstyle));
-    if (label || gstyle.LABEL || gstyle.LABELS) {  // HACK, LABELS should work.
+    if (label || (gstyle && (gstyle.LABEL || gstyle.LABELS))) {  // HACK, LABELS should work.
 	dg.label = groupElement.label || label;
 	var sg = tier.groupsToSupers[groupElement.id];
 	if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
