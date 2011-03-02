@@ -572,6 +572,7 @@ function drawFeatureTier(tier)
 	    var g = stg[i];
 	    if (g.glyph) {
 		g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
+                g.glyph.setAttribute('cursor', 'pointer');
 		featureGroupElement.appendChild(g.glyph);
 	    }
 	}
