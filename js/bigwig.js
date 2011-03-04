@@ -734,6 +734,8 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             var bestPos = -1;
 	    var createFeature = function(chrx, fmin, fmax, opts) {
 //                dlog('createFeature(' + fmin +', ' + fmax + ')');
+	    var createFeature = function(fmin, fmax, opts) {
+                // dlog('createFeature(' + fmin +', ' + fmax + ')');
 
                 if (!opts) {
                     opts = {};
