@@ -10,8 +10,8 @@
 // constants
 
 var NS_SVG = 'http://www.w3.org/2000/svg';
-var NS_HTML = 'http://www.w3.org/1999/xhtml'
-var NS_XLINK = 'http://www.w3.org/1999/xlink'
+var NS_HTML = 'http://www.w3.org/1999/xhtml';
+var NS_XLINK = 'http://www.w3.org/1999/xlink';
 
 // Limit stops
 
@@ -59,6 +59,8 @@ function Browser(opts) {
     this.guidelineSpacing = 75;
     this.fgGuide = null;
     this.positionFeedback = false;
+
+    this.selectedTier = 1;
 
     this.placards = [];
 
@@ -119,7 +121,12 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
 				    ' L 15 ' + 22 +
 				    ' L ' + (10 + labelWidth) + ' ' + 22 +
 				    ' L ' + (10 + labelWidth) + ' ' + 2 + ' Z');
-    viewportBackground.setAttribute('fill', this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
+    var fill = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+    if (ti == this.selectedTier) {
+        fill = 'rgb(240, 200, 200)';
+    }
+    //     dlog('tier ' + ti + '; fill=' + fill + '; sel= ' + tier.selectedTier);
+    viewportBackground.setAttribute('fill', fill);
     viewportBackground.setAttribute('stroke', 'none');
     labelGroup.appendChild(viewportBackground);
     this.setupTierDrag(viewportBackground, ti);
@@ -1545,10 +1552,64 @@ Browser.prototype.realInit = function(opts) {
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? 100 : 25);
+            if (ev.ctrlKey) {
+                thisB.tiers[thisB.selectedTier].findNextFeature(
+                      thisB.chr,
+                      ((thisB.viewStart + thisB.viewEnd)/2)|0,
+                      1,
+                      function(nxt) {
+                          if (nxt) {
+                              var nmin = nxt.min;
+                              var nmax = nxt.max;
+                              var wid = thisB.viewEnd - thisB.viewStart + 1;
+                              var newStart = (nmin + nmax - wid)/2;
+                              var newEnd = newStart + wid - 1;
+                              thisB.setLocation(newStart, newEnd, nxt.chr);
+                          } else {
+                              dlog('no next feature');
+                          }
+                      });
+            } else {
+                thisB.move(ev.shiftKey ? 100 : 25);
+            }
         } else if (ev.keyCode == 37) {
             ev.stopPropagation(); ev.preventDefault();
-            thisB.move(ev.shiftKey ? -100 : -25);
+            if (ev.ctrlKey) {
+                thisB.tiers[thisB.selectedTier].findNextFeature(
+                      thisB.chr,
+                      ((thisB.viewStart + thisB.viewEnd)/2)|0,
+                      -1,
+                      function(nxt) {
+                          if (nxt) {
+                              var nmin = nxt.min;
+                              var nmax = nxt.max;
+                              var wid = thisB.viewEnd - thisB.viewStart + 1;
+                              var newStart = (nmin + nmax - wid)/2;
+                              var newEnd = newStart + wid - 1;
+                              thisB.setLocation(newStart, newEnd, nxt.chr);
+                          } else {
+                              dlog('no next feature');
+                          }
+                      });
+            } else {
+                thisB.move(ev.shiftKey ? -100 : -25);
+            }
+        } else if (ev.keyCode == 38) {
+            ev.stopPropagation(); ev.preventDefault();
+            if (thisB.selectedTier > 0) {
+                --thisB.selectedTier;
+                thisB.tiers[thisB.selectedTier].isLabelValid = false;
+                thisB.tiers[thisB.selectedTier + 1].isLabelValid = false;
+                thisB.arrangeTiers();
+            }
+        } else if (ev.keyCode == 40) {
+            ev.stopPropagation(); ev.preventDefault();
+            if (thisB.selectedTier < thisB.tiers.length -1) {
+                ++thisB.selectedTier;
+                thisB.tiers[thisB.selectedTier].isLabelValid = false;
+                thisB.tiers[thisB.selectedTier - 1].isLabelValid = false;
+                thisB.arrangeTiers();
+            }
         } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
 
