@@ -289,3 +289,4 @@ DasTier.prototype.setBackground = function() {
 DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
     callback(null);
 }
+
