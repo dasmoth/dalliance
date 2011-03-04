@@ -35,6 +35,15 @@ function DasTier(browser, source, viewport, background)
             clientBin: this.dasSource.clientBin,
             forceReduction: this.dasSource.forceReduction
         });
+        this.findNextFeature = function(chr, pos, dir, callback) {
+            fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
+                    // dlog('got a result');
+                    if (res.length > 0 && res[0] != null) {
+                        callback(res[0]);
+                    }
+                });
+        }
+        
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -231,4 +240,8 @@ DasTier.prototype.setBackground = function() {
         this.background.setAttribute('x', (ks - this.browser.origin) * this.browser.scale);
         this.background.setAttribute('width', (ke - this.knownStart + 1) * this.browser.scale);
 //    }    
+}
+
+DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    callback(null);
 }
