@@ -326,3 +326,4 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
 //    dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
+
