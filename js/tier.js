@@ -28,8 +28,8 @@ function DasTier(browser, source, viewport, background)
     this.layoutWasDone = false;
 
     var fs;
-    if (this.dasSource.bwgURI) {
-        fs = new BWGFeatureSource(this.dasSource.bwgURI, {
+    if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
+        fs = new BWGFeatureSource(this.dasSource, {
             credentials: this.dasSource.credentials,
             preflight: this.dasSource.preflight,
             clientBin: this.dasSource.clientBin,

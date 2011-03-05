@@ -1711,6 +1711,15 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 }
 
 Browser.prototype.makeTier = function(source) {
+    try {
+        this.realMakeTier(source);
+    } catch (err) {
+        dlog('Error creating tier: ' + err);
+        // ...and continue.
+    }
+}
+
+Browser.prototype.realMakeTier = function(source) {
     var viewport = document.createElementNS(NS_SVG, 'g');
     var viewportBackground = document.createElementNS(NS_SVG, 'rect');
     var col = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
@@ -1722,10 +1731,11 @@ Browser.prototype.makeTier = function(source) {
     viewportBackground.setAttribute('stroke-width', "0");
     viewport.appendChild(viewportBackground);
     viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
-    this.tierHolder.appendChild(viewport);
     
     var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
+
+    this.tierHolder.appendChild(viewport);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
 }
@@ -2064,7 +2074,10 @@ Browser.prototype.storeStatus = function(){
 
     var currentSourceList = [];
     for (var t = 0; t < this.tiers.length; ++t) {
-	currentSourceList.push(this.tiers[t].dasSource);
+        var ts = this.tiers[t].dasSource;
+        if (!ts.noPersist) {
+	    currentSourceList.push(this.tiers[t].dasSource);
+        }
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
     localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;

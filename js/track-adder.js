@@ -89,7 +89,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
-    var custURL, custName, custCS, custQuant;
+    var custURL, custName, custCS, custQuant, custFile;
     var customMode = false;
     var dataToFinalize = null;
 
@@ -212,6 +212,13 @@ Browser.prototype.showTrackAdder = function(ev) {
             custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'});
             stabHolder.appendChild(custURL);
             custURL.focus();
+            stabHolder.appendChild(makeElement('br'));
+            stabHolder.appendChild(document.createTextNode('- or -'));
+            stabHolder.appendChild(makeElement('br'));
+            stabHolder.appendChild(document.createTextNode('File: '));
+            custFile = makeElement('input', null, {type: 'file'});
+            stabHolder.appendChild(custFile);
+            
 
             stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
         } else {
@@ -275,11 +282,19 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var nds = new DASSource({name: 'temporary', uri: curi});
                 tryAddDAS(nds);
             } else if (customMode === 'bin') {
-                var curi = custURL.value.trim();
-                if (!/^.+:\/\//.exec(curi)) {
-                    curi = 'http://' + curi;
+                var opts = {name: 'temporary'};
+                var fileList = custFile.files;
+                if (fileList && fileList.length > 0 && fileList[0]) {
+                    opts.bwgBlob = fileList[0];
+                    opts.noPersist = true;
+                } else {
+                    var curi = custURL.value.trim();
+                    if (!/^.+:\/\//.exec(curi)) {
+                        curi = 'http://' + curi;
+                    }
+                    opts.bwgURI = curi;
                 }
-                var nds = new DASSource({name: 'temporary', bwgURI: curi});
+                var nds = new DASSource(opts);
                 tryAddBin(nds);
             } else if (customMode === 'reset') {
                 switchToCustomMode();
@@ -426,10 +441,19 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     var tryAddBin = function(nds) {
-        makeBwgFromURL(nds.bwgURI, function(bwg, error) {
+        var make, arg;
+        if (nds.bwgURI) {
+            make = makeBwgFromURL;
+            arg = nds.bwgURI;
+        } else {
+            make = makeBwgFromFile;
+            arg = nds.bwgBlob;
+        }
+
+        make(arg, function(bwg, error) {
             if (bwg) {
-                var nameExtractPattern = new RegExp('/([^/]+?)(.bw|.bb)?$');
-                var match = nameExtractPattern.exec(nds.bwgURI);
+                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
+                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
                 if (match) {
                     nds.name = match[1];
                 }
@@ -487,6 +511,10 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else {
                 stabHolder.appendChild(makeElement('p', [makeElement('b', "Warning: "), "unable to determine correct value.  If in doubt, leave checked."]));
             }
+        }
+
+        if (nds.bwgBlob) {
+            stabHolder.appendChild(makeElement('p', [makeElement('b', 'Warning: '), 'data added from local file.  Due to the browser security model, the track will disappear if you reload Dalliance.']));
         }
 
         custName.focus();

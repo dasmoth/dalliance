@@ -593,7 +593,6 @@ function makeBwgFromFile(file, callback) {
 }
 
 function makeBwg(data, callback, name) {
-    // dlog('makeBwg');
     var bwg = new BigWig();
     bwg.data = data;
     bwg.name = name;

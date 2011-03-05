@@ -260,9 +260,9 @@ DASFeatureSource.prototype.getScales = function() {
 
 var bwg_preflights = {};
 
-function BWGFeatureSource(bwgURI, opts) {
+function BWGFeatureSource(bwgSource, opts) {
     var thisB = this;
-    this.bwgURI = bwgURI;
+    this.bwgSource = bwgSource;
     this.opts = opts || {};
     
     thisB.bwgHolder = new Awaited();
@@ -302,7 +302,16 @@ function BWGFeatureSource(bwgURI, opts) {
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
-    makeBwgFromURL(this.bwgURI, function(bwg) {
+    var make, arg;
+    if (this.bwgSource.bwgURI) {
+        make = makeBwgFromURL;
+        arg = this.bwgSource.bwgURI;
+    } else {
+        make = makeBwgFromFile;
+        arg = this.bwgSource.bwgBlob;
+    }
+
+    make(arg, function(bwg) {
 	thisB.bwgHolder.provide(bwg);
     }, this.opts.credentials);
 }
