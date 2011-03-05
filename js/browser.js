@@ -1564,7 +1564,7 @@ Browser.prototype.realInit = function(opts) {
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
                               var newStart = (nmin + nmax - wid)/2;
                               var newEnd = newStart + wid - 1;
-                              thisB.setLocation(newStart, newEnd, nxt.chr);
+                              thisB.setLocation(newStart, newEnd, nxt.segment);
                           } else {
                               dlog('no next feature');
                           }
@@ -1586,7 +1586,7 @@ Browser.prototype.realInit = function(opts) {
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
                               var newStart = (nmin + nmax - wid)/2;
                               var newEnd = newStart + wid - 1;
-                              thisB.setLocation(newStart, newEnd, nxt.chr);
+                              thisB.setLocation(newStart, newEnd, nxt.segment);
                           } else {
                               dlog('no next feature');
                           }
@@ -2010,7 +2010,7 @@ Browser.prototype.move = function(pos)
     this.viewStart -= pos / this.scale;
     this.viewEnd = this.viewStart + wid;
     if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
-        this.viewEnd = currentSeqMax;
+        this.viewEnd = this.currentSeqMax;
         this.viewStart = this.viewEnd - wid;
     }
     if (this.viewStart < 1) {
