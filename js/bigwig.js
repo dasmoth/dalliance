@@ -665,15 +665,17 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 		var endBase = la[lo + 3];
 		var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
 		var blockSize = (la[lo + 6]<<32) | (la[lo + 7]);
-		if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)) &&
-                                 (endChrom   >= chr))) ||
-                     (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)) &&
-                                  (startChrom <= chr))))
+                // dlog('startChrom=' + startChrom);
+		if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)))) ||
+                    (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)))))
 		{
-		    // dlog('Got an interesting block: startBase=' + startBase + '; endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
-                    if (blockToFetch == null || ((dir < 0) && (endChr > bestBlockChr || endBase > bestBlockOffset) ||
-                                                 (dir > 0) && (startChrom < bestBlockChr || startBase < bestBlockOffset)))
+                    // dlog('Got an interesting block: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
+                    if (/_random/.exec(thisB.bwg.idsToChroms[startChrom])) {
+                        // dlog('skipping random: ' + thisB.bwg.idsToChroms[startChrom]);
+                    } else if (blockToFetch == null || ((dir < 0) && (endChrom > bestBlockChr || (endChrom == bestBlockChr && endBase > bestBlockOffset)) ||
+                                                 (dir > 0) && (startChrom < bestBlockChr || (startChrom == bestBlockChr && startBase < bestBlockOffset))))
                     {
+                        //                        dlog('best is: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                         blockToFetch = {offset: blockOffset, size: blockSize};
                         bestBlockOffset = (dir < 0) ? endBase : startBase;
                         bestBlockChr = (dir < 0) ? endChrom : startChrom;
@@ -692,11 +694,13 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 		var endChrom = la[lo + 2];
 		var endBase = la[lo + 3];
 		var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
+                // dlog('startChrom=' + startChrom);
                 if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)) &&
                                  (endChrom   >= chr))) ||
                      (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)) &&
                                   (startChrom <= chr))))
 		{
+                    // dlog('Got an interesting block: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                     if (bestRecur < 0 || endBase > bestPos) {
                         bestRecur = blockOffset;
                         bestPos = (dir < 0) ? endBase : startBase;
@@ -715,7 +719,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
     var cirCompleted = function() {
         if (blockToFetch == null) {
             return dlog('got nothing');
-        }
+        } 
         var blocksToFetch = [blockToFetch];
 
         blocksToFetch.sort(function(b0, b1) {
@@ -728,15 +732,15 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 	    var bestFeature = null;
             var bestChr = -1;
             var bestPos = -1;
-	    var createFeature = function(fmin, fmax, opts) {
-                // dlog('createFeature(' + fmin +', ' + fmax + ')');
+	    var createFeature = function(chrx, fmin, fmax, opts) {
+//                dlog('createFeature(' + fmin +', ' + fmax + ')');
 
                 if (!opts) {
                     opts = {};
                 }
             
                 var f = new DASFeature();
-                f.segment = thisB.bwg.idsToChroms[chr];
+                f.segment = thisB.bwg.idsToChroms[chrx];
                 f.min = fmin;
                 f.max = fmax;
                 f.type = 'bigwig';
@@ -745,16 +749,17 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                     f[k] = opts[k];
                 }
                 
-                if (bestFeature == null || ((dir < 0) && (chr > bestChr || fmax > bestPos)) || ((dir > 0) && (chr < bestChr || fmin < bestPos))) {
+                if (bestFeature == null || ((dir < 0) && (chrx > bestChr || fmax > bestPos)) || ((dir > 0) && (chrx < bestChr || fmin < bestPos))) {
                     bestFeature = f;
                     bestPos = (dir < 0) ? fmax : fmin;
-                    bestChr = chr;
+                    bestChr = chrx;
                 }
 	    };
-            var maybeCreateFeature = function(fmin, fmax, opts) {
-                if ((dir < 0 && fmax < pos) || (dir > 0 && fmin > pos)) {
+            var maybeCreateFeature = function(chrx, fmin, fmax, opts) {
+//                dlog('maybeCreateFeature(' + thisB.bwg.idsToChroms[chrx] + ',' + fmin + ',' + fmax + ')');
+                if ((dir < 0 && (chrx < chr || fmax < pos)) || (dir > 0 && (chrx > chr || fmin > pos))) {
                 //                if (fmin <= max && fmax >= min) {
-                    createFeature(fmin, fmax, opts);
+                    createFeature(chrx, fmin, fmax, opts);
                     //}
                 }
             };
@@ -785,13 +790,11 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                 var sumData   = fa[(i*8)+6];
                                 var sumSqData = fa[(i*8)+7];
                                 
-                                if (chromId == chr) {
-                                    var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
-                                    if (thisB.bwg.type == 'bigbed') {
-                                        summaryOpts.type = 'density';
-                                    }
-                                    maybeCreateFeature(start, end, summaryOpts);
+                                var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
+                                if (thisB.bwg.type == 'bigbed') {
+                                    summaryOpts.type = 'density';
                                 }
+                                maybeCreateFeature(chromId, start, end, summaryOpts);
                             }
                         } else if (thisB.bwg.type == 'bigwig') {
 		            var sa = new Int16Array(block.data);
@@ -811,7 +814,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 		            if (blockType == BIG_WIG_TYPE_FSTEP) {
 			        for (var i = 0; i < itemCount; ++i) {
 			            var score = fa[i + 6];
-			            maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, {score: score});
+			            maybeCreateFeature(chromId, blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, {score: score});
 			        }
 		            } else if (blockType == BIG_WIG_TYPE_VSTEP) {
 			        for (var i = 0; i < itemCount; ++i) {
@@ -859,9 +862,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                     featureOpts.orientation = bedColumns[2];
                                 }
 
-                                if (chromId == chr) {
-                                    maybeCreateFeature(start + 1, end, featureOpts);
-                                }
+                                maybeCreateFeature(chromId, start + 1, end, featureOpts);
                             }
                         } else {
                             dlog("Don't know what to do with " + thisB.bwg.type);
