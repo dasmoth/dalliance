@@ -1949,7 +1949,7 @@ Browser.prototype.move = function(pos)
     this.viewStart -= pos / this.scale;
     this.viewEnd = this.viewStart + wid;
     if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
-        this.viewEnd = currentSeqMax;
+        this.viewEnd = this.currentSeqMax;
         this.viewStart = this.viewEnd - wid;
     }
     if (this.viewStart < 1) {
