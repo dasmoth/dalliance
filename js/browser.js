@@ -1564,7 +1564,7 @@ Browser.prototype.realInit = function(opts) {
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
                               var newStart = (nmin + nmax - wid)/2;
                               var newEnd = newStart + wid - 1;
-                              thisB.setLocation(newStart, newEnd, nxt.chr);
+                              thisB.setLocation(newStart, newEnd, nxt.segment);
                           } else {
                               dlog('no next feature');
                           }
