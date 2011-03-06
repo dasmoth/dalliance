@@ -4,11 +4,13 @@ title: Binary data support
 ---
 Dalliance can integrate data from certain types of indexed binary file
 directly, without any software support beyond that provided by normal
-web servers like [Apache HTTPD](http://httpd.apache.org/).  This is
-potentially the easiest way to add your own data to Dalliance.  It may
-also have performance advantages over traditional DAS, especially when
-you have larger numbers of features or a slow network connection.  There
-are currently a few limitations:
+web servers like [Apache HTTPD](http://httpd.apache.org/).  Indexed
+binary data can also be viewed directly from disk, with no server
+requirements whatsoever.  This is potentially the easiest way to add
+your own data to Dalliance.  It may also have performance advantages
+over traditional DAS, especially when you have larger numbers of
+features or a slow network connection.  There are currently a few
+limitations:
 
 1. Binary data suppport only works with the newest web browsers (currently
 Google Chrome 8 or later, or Firefox 4.0 or later).
@@ -18,6 +20,13 @@ may be needed (see below).
 
 3. Some DAS attributes (*e.g.* web-links associated with features) are not
 available using the currently-supported binary formats.
+
+4. The browser security model means that a web application can only
+access files that you have explicitly selected using a file-chooser
+dialog.  The resulting permission only lasts for the duration of the
+current browsing session, therefore there is no way for Dalliance to
+automatically restore tracks added from local files when you restart
+the browser.
 
 If none of these limitations affect you, indexed binary formats may
 well be your best option.
@@ -40,8 +49,10 @@ BED or WIG.  Tools to perform this conversion can be downloaded from UCSC.
 Other formats (*e.g.* [BAM](http://samtools.sourceforge.net/)) may be
 supported in the future.
 
-Configuring your server
+Configuring your server 
 ------------
+
+(You can skip this if you are only interested in accessing local files).
 
 In principle, you can just drop a binary file on a web server and access
 it from Dalliance.  However, unless you are able to host the file on the
@@ -84,7 +95,7 @@ DAS data.  Click the "Add track" button and then select the "Binary" tab.
 
 ![...](addbin1.png)
 
-Enter the URL where your data is hosted, then click "Add".
+Enter the URL where your data is hosted, or select a file, then click "Add".
 
 ![...](addbin2.png)
 
