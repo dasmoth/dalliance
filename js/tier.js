@@ -35,7 +35,7 @@ function DasTier(browser, source, viewport, background)
             clientBin: this.dasSource.clientBin,
             forceReduction: this.dasSource.forceReduction
         });
-        this.findNextFeature = function(chr, pos, dir, callback) {
+        this.sourceFindNextFeature = function(chr, pos, dir, callback) {
             fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
                     // dlog('got a result');
                     if (res.length > 0 && res[0] != null) {
@@ -242,6 +242,42 @@ DasTier.prototype.setBackground = function() {
 //    }    
 }
 
-DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
+DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
     callback(null);
+}
+
+DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    // dlog('fnf: ' + pos);
+    if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
+        if (this.currentFeatures) {
+            var bestFeature = null;
+            for (var fi = 0; fi < this.currentFeatures.length; ++fi) {
+                var f = this.currentFeatures[fi];
+                if (!f.min || !f.max) {
+                    continue;
+                }
+                if (dir < 0) {
+                    if (f.max < pos) {
+                        if (!bestFeature || f.max > bestFeature.max)
+                            bestFeature = f;
+                    }
+                } else {
+                    if (f.min > pos) {
+                        if (!bestFeature || f.min < bestFeature.min)
+                            bestFeature = f;
+                    }
+                }
+            }
+            if (bestFeature) {
+                return callback(bestFeature);
+            }
+            if (dir < 0) {
+                pos = this.knownStart;
+            } else {
+                pos = this.knownEnd;
+            }
+        }
+    }
+    // dlog('delegating to source: ' + pos);
+    this.sourceFindNextFeature(chr, pos, dir, callback);
 }

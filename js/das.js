@@ -256,11 +256,11 @@ DASSource.prototype.features = function(segment, options, callback) {
                 var spos = elementValue(feature, "START");
                 var epos = elementValue(feature, "END");
                 if ((spos|0) > (epos|0)) {
-                    dasFeature.min = epos;
-                    dasFeature.max = spos;
+                    dasFeature.min = epos|0;
+                    dasFeature.max = spos|0;
                 } else {
-                    dasFeature.min = spos;
-                    dasFeature.max = epos;
+                    dasFeature.min = spos|0;
+                    dasFeature.max = epos|0;
                 }
                 {
                     var tec = feature.getElementsByTagName('TYPE');
