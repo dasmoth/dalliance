@@ -291,7 +291,6 @@ DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
 }
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
-//    dlog('fnf: ' + pos);
     if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
         if (this.currentFeatures) {
             var bestFeature = null;
@@ -313,7 +312,6 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
                 }
             }
             if (bestFeature) {
-//                dlog('bestFeature = ' + miniJSONify(bestFeature));
                 return callback(bestFeature);
             }
             if (dir < 0) {
@@ -323,7 +321,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
             }
         }
     }
-//    dlog('delegating to source: ' + pos);
+    // dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
 
