@@ -789,6 +789,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     }
   
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
+    var glyphChildren = [];
     glyphGroup.dalliance_group = groupElement;
     var featureDGlyphs = [];
     for (var i = 0; i < features.length; ++i) {
@@ -826,7 +827,8 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     for (var i = 0; i < featureDGlyphs.length; ++i) {
         var glyph = featureDGlyphs[i];
         glyph.glyph.dalliance_group = groupElement;
-	glyphGroup.appendChild(glyph.glyph);
+	// glyphGroup.appendChild(glyph.glyph);
+        glyphChildren.push(glyph.glyph);
 	var gspan = new Range(glyph.min, glyph.max);
 	if (spans == null) {
 	    spans = gspan;
@@ -897,6 +899,10 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	    }
 	    glyphGroup.appendChild(path);
 	}
+    }
+
+    for (var i = 0; i < glyphChildren.length; ++i) {
+        glyphGroup.appendChild(glyphChildren[i]);
     }
 
     groupElement.segment = features[0].segment;
@@ -1023,6 +1029,19 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             bMaxPos = Math.max(maxPos, mid+hh);
 	}  else if (gtype == 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
+            if (dir === 'FORWARD') {
+                if (strand === '-') {
+                    dir = 'W';
+                } else {
+                    dir = 'E';
+                }
+            } else if (dir === 'REVERSE') {
+                if (strand === '-') {
+                    dir = 'E';
+                } else {
+                    dir = 'W';
+                }
+            }
 	    var width = style.LINEWIDTH || height;
 	    halfHeight = 0.5 * height;
 	    halfWidth = 0.5 * width;
@@ -1074,6 +1093,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 	    glyph.appendChild(bg);
         }
 	glyph.appendChild(mark);
+/*
+        if (bMinPos < minPos) {
+            min = bMinPos/scale + origin;
+        } 
+        if (bMaxPos > maxPos) {
+            max = (bMaxPos-1)/scale + origin;
+        } */
     } else if (gtype == 'PRIMERS') {
 	var arrowColor = style.FGCOLOR || 'red';
 	var lineColor = style.BGCOLOR || 'black';
