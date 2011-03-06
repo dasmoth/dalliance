@@ -213,7 +213,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(custURL);
             custURL.focus();
             stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(document.createTextNode('- or -'));
+            stabHolder.appendChild(makeElement('b', '- or -'));
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('File: '));
             custFile = makeElement('input', null, {type: 'file'});
@@ -457,6 +457,11 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (match) {
                     nds.name = match[1];
                 }
+                
+                if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+                    nds.collapseSuperGroups = true;
+                }
+
                 return addDasCompletionPage(nds, false, false, true);
             } else {
                 removeChildren(stabHolder);
