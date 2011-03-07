@@ -46,7 +46,7 @@ Alternatively, you can specify an origin URI, *e.g.*:
 
 There are other CORS headers to fine-tune the handling of more advanced
 HTTP features (headers, cookies, passwords).  Everything is documented
-in the [CORS spec](http://ww.w3.org/TR/cors/) if you are curious.
+in the [CORS spec](http://www.w3.org/TR/cors/) if you are curious.
 
 Password-protected sources
 --------------------------
