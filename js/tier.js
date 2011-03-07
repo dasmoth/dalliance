@@ -312,6 +312,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
                 }
             }
             if (bestFeature) {
+//                dlog('bestFeature = ' + miniJSONify(bestFeature));
                 return callback(bestFeature);
             }
             if (dir < 0) {
@@ -321,7 +322,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
             }
         }
     }
-    // dlog('delegating to source: ' + pos);
+//    dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
 
