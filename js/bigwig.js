@@ -397,13 +397,15 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                         createFeature(ts.min() + 1, ts.max(), featureOpts);
                                     }
 
-                                    var tl = intersection(spans, new Range(thickStart, thickEnd));
-                                    if (tl) {
-                                        featureOpts.type = 'bb-translation';
-                                        var tlList = tl.ranges();
-                                        for (var s = 0; s < tlList.length; ++s) {
-                                            var ts = tlList[s];
-                                            createFeature(ts.min() + 1, ts.max(), featureOpts);
+                                    if (thickEnd > thickStart) {
+                                        var tl = intersection(spans, new Range(thickStart, thickEnd));
+                                        if (tl) {
+                                            featureOpts.type = 'bb-translation';
+                                            var tlList = tl.ranges();
+                                            for (var s = 0; s < tlList.length; ++s) {
+                                                var ts = tlList[s];
+                                                createFeature(ts.min() + 1, ts.max(), featureOpts);
+                                            }
                                         }
                                     }
                                 }

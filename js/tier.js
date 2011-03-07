@@ -78,7 +78,6 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.BGCOLOR = 'red'
                     wigStyle.HEIGHT = 10;
                     wigStyle.BUMP = true;
-                    wigStyle.LABEL = true;
                     wigStyle.ZINDEX = 20;
                     thisTier.stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
                     
@@ -86,9 +85,10 @@ function DasTier(browser, source, viewport, background)
                     tsStyle.glyph = 'BOX';
                     tsStyle.FGCOLOR = 'black';
                     tsStyle.BGCOLOR = 'white';
-                    wigStyle.HEIGHT = 10;
+                    tsStyle.HEIGHT = 10;
                     tsStyle.ZINDEX = 10;
                     tsStyle.BUMP = true;
+                    tsStyle.LABEL = true;
                     thisTier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
 
                     var densStyle = new DASStyle();
@@ -291,7 +291,7 @@ DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
 }
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
-    // dlog('fnf: ' + pos);
+//    dlog('fnf: ' + pos);
     if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
         if (this.currentFeatures) {
             var bestFeature = null;
@@ -313,6 +313,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
                 }
             }
             if (bestFeature) {
+//                dlog('bestFeature = ' + miniJSONify(bestFeature));
                 return callback(bestFeature);
             }
             if (dir < 0) {
@@ -322,6 +323,6 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
             }
         }
     }
-    // dlog('delegating to source: ' + pos);
+//    dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
