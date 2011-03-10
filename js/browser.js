@@ -636,7 +636,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
         table.appendChild(row);
         ++idx;
     }
-    if (feature.score && feature.score != '-') {
+    if (feature.score !== undefined && feature.score !== null && feature.score != '-') {
         var row = makeElement('tr', [
             makeElement('th', 'Score'),
             makeElement('td', '' + feature.score)
