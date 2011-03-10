@@ -1359,8 +1359,20 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             } 
 
 	    if (gtype == 'HISTOGRAM') {
-		height = relScore * height;
-		y = y + (requiredHeight - height);
+                if (true) {
+                    var relOrigin = (-1.0 * smin) / (smax - smin);
+                    if (relScore >= relOrigin) {
+                        height = (relScore - relOrigin) * requiredHeight;
+                        y = y + ((1.0 - relScore) * requiredHeight);
+                    } else {
+                        height = (relOrigin - relScore) * requiredHeight;
+                        y = y + ((1.0 - relOrigin) * requiredHeight);
+                    }
+                } else {
+                    // old impl
+		    height = relScore * height;
+		    y = y + (requiredHeight - height);
+                }
                 
                 quant = {
                     min: smin,
