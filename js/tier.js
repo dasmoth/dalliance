@@ -42,7 +42,7 @@ function DasTier(browser, source, viewport, background)
                         callback(res[0]);
                     }
                 });
-        }
+        };
         
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
@@ -100,6 +100,29 @@ function DasTier(browser, source, viewport, background)
         fs = new DASSequenceSource(this.dasSource);
     } else {
         fs = new DASFeatureSource(this.dasSource);
+        var dasAdjLock = false;
+        if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
+            this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+                if (dasAdjLock) {
+                    return dlog('Already looking for a next feature, be patient!');
+                }
+                dasAdjLock = true;
+                var fops = {
+                    adjacent: chr + ':' + (pos|0) + ':' + (dir > 0 ? 'F' : 'B')
+                }
+                var types = thisTier.getDesiredTypes(thisTier.browser.scale);
+                if (types) {
+                    fops.types = types;
+                }
+                thisTier.dasSource.features(null, fops, function(res) {
+                    dasAdjLock = false;
+                    if (res.length > 0 && res[0] != null) {
+                        dlog('DAS adjacent seems to be working...');
+                        callback(res[0]);
+                    }
+                });
+            };
+        }
     }
     
     if (this.dasSource.mapping) {
@@ -254,6 +277,9 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
             for (var fi = 0; fi < this.currentFeatures.length; ++fi) {
                 var f = this.currentFeatures[fi];
                 if (!f.min || !f.max) {
+                    continue;
+                }
+                if (f.parents && f.parents.length > 0) {
                     continue;
                 }
                 if (dir < 0) {

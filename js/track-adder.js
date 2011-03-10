@@ -415,6 +415,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                     } else {
                         nds.maxbins = false;
                     }
+                    if (fs.capabilities) {
+                        nds.capabilities = fs.capabilities;
+                    }
                     quantDetermined = true
                     
                     if (fs.coords && fs.coords.length == 1) {
