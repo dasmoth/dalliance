@@ -43,7 +43,6 @@ function DasTier(browser, source, viewport, background)
                     }
                 });
         };
-        
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
