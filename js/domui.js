@@ -228,3 +228,10 @@ IconSet.prototype.createButton = function(name, parent, bx, by)
         copy ]);
     return button;
 }
+
+function dlog(msg) {
+    var logHolder = document.getElementById('log');
+    if (logHolder) {
+	logHolder.appendChild(makeElement('p', msg));
+    }
+}
