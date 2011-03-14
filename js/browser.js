@@ -1664,8 +1664,20 @@ Browser.prototype.realInit = function(opts) {
             }
         } else if (ev.keyCode == 84) {
             var bumpStatus;
-            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
-                var t = thisB.tiers[ti];
+            if( ev.altKey ){
+                for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                    var t = thisB.tiers[ti];
+                    if (t.dasSource.collapseSuperGroups) {
+                        if (bumpStatus === undefined) {
+                            bumpStatus = !t.bumped;
+                        }
+                        t.bumped = bumpStatus;
+                        t.layoutWasDone = false;
+                        t.draw();
+                    }
+                }
+            } else {
+                var t = thisB.tiers[thisB.selectedTier];
                 if (t.dasSource.collapseSuperGroups) {
                     if (bumpStatus === undefined) {
                         bumpStatus = !t.bumped;
@@ -1675,6 +1687,8 @@ Browser.prototype.realInit = function(opts) {
                     t.draw();
                 }
             }
+        } else {
+            //dlog('key: ' + ev.keyCode)
         }
     };
     var keyUpHandler = function(ev) {
