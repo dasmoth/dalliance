@@ -1,0 +1,21 @@
+<html>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript">
+function dlog(msg) {
+    var logHolder = document.getElementById('log');
+    if (logHolder) {
+	logHolder.appendChild(makeElement('p', msg));
+    }
+}
+
+makeBam(new URLFetchable('http://localhost/subset22-sorted.bam'));
+</script>
+<head>
+<h1>BAM test</h1>
+<div id='log'>
+</div>
+</html>
