@@ -268,7 +268,7 @@ DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
     callback(null);
 }
 
-DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
+DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
 //    dlog('fnf: ' + pos);
     if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
         if (this.currentFeatures) {
@@ -282,14 +282,30 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, callback) {
                     continue;
                 }
                 if (dir < 0) {
-                    if (f.max < pos) {
-                        if (!bestFeature || f.max > bestFeature.max)
+                    if (fedge == 1 && f.max >= pos && f.min < pos) {
+                        if (!bestFeature || f.min > bestFeature.min ||
+                            (f.min == bestFeature.min && f.max < bestFeature.max)) {
                             bestFeature = f;
+                        }
+                    } else if (f.max < pos) {
+                        if (!bestFeature || f.max > bestFeature.max || 
+                            (f.max == bestFeature.max && f.min < bestFeature.min) ||
+                            (f.min == bestFeature.mmin && bestFeature.max >= pos)) {
+                            bestFeature = f;
+                        } 
                     }
                 } else {
-                    if (f.min > pos) {
-                        if (!bestFeature || f.min < bestFeature.min)
+                    if (fedge == 1 && f.min <= pos && f.max > pos) {
+                        if (!bestFeature || f.max < bestFeature.max ||
+                            (f.max == bestFeature.max && f.min > bestFeature.min)) {
                             bestFeature = f;
+                        }
+                    } else if (f.min > pos) {
+                        if (!bestFeature || f.min < bestFeature.min ||
+                            (f.min == bestFeature.min && f.max > bestFeature.max) ||
+                            (f.max == bestFeature.max && bestFeature.min <= pos)) {
+                            bestFeature = f;
+                        }
                     }
                 }
             }

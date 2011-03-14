@@ -1553,17 +1553,33 @@ Browser.prototype.realInit = function(opts) {
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
+                var fedge = 0;
+                if(ev.shiftKey){
+                    fedge = 1;
+                }
+                var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
                 thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
-                      ((thisB.viewStart + thisB.viewEnd)/2)|0,
+                      pos,
                       1,
+                      fedge,
                       function(nxt) {
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
+                              if (fedge) { 
+                                  if (nmin>pos+1) {
+                                      nmax=nmin;
+                                  } else {
+                                      nmax++;
+                                      nmin=nmax
+                                  }
+                              }
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
-                              var newStart = (nmin + nmax - wid)/2;
+                              if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
+                              var newStart = (nmin + nmax - wid)/2 + 1;
                               var newEnd = newStart + wid - 1;
+                              var pos2=pos;
                               thisB.setLocation(newStart, newEnd, nxt.segment);
                           } else {
                               dlog('no next feature');
@@ -1575,17 +1591,33 @@ Browser.prototype.realInit = function(opts) {
         } else if (ev.keyCode == 37) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
+                var fedge = 0;
+                if(ev.shiftKey){
+                    fedge = 1;
+                }
+                var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
                 thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
-                      ((thisB.viewStart + thisB.viewEnd)/2)|0,
+                      pos,
                       -1,
+                      fedge,
                       function(nxt) {
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
+                              if (fedge) {
+                                  if (nmax<pos-1) {
+                                      nmax++;
+                                      nmin=nmax;
+                                  } else {
+                                      nmax=nmin;
+                                  }
+                              }
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
-                              var newStart = (nmin + nmax - wid)/2;
+                              if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
+                              var newStart = (nmin + nmax - wid)/2 + 1;
                               var newEnd = newStart + wid - 1;
+                              var pos2=pos;
                               thisB.setLocation(newStart, newEnd, nxt.segment);
                           } else {
                               dlog('no next feature');
