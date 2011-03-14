@@ -1511,7 +1511,7 @@ Browser.prototype.realInit = function(opts) {
     }, false);
 
     var keyHandler = function(ev) {
-        // dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
+//        dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -1550,7 +1550,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.snapZoomLockout = true;
             }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 39) {
+        } else if (ev.keyCode == 39 || ev.keyCode == 68) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -1588,7 +1588,7 @@ Browser.prototype.realInit = function(opts) {
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
-        } else if (ev.keyCode == 37) {
+        } else if (ev.keyCode == 37 || ev.keyCode == 65) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -1626,7 +1626,7 @@ Browser.prototype.realInit = function(opts) {
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
-        } else if (ev.keyCode == 38) {
+        } else if (ev.keyCode == 38 || ev.keyCode == 87) {
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier > 0) {
                 --thisB.selectedTier;
@@ -1634,7 +1634,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.tiers[thisB.selectedTier + 1].isLabelValid = false;
                 thisB.arrangeTiers();
             }
-        } else if (ev.keyCode == 40) {
+        } else if (ev.keyCode == 40 || ev.keyCode == 83) {
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier < thisB.tiers.length -1) {
                 ++thisB.selectedTier;
