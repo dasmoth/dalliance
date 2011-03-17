@@ -1687,9 +1687,6 @@ Browser.prototype.realInit = function(opts) {
                     t.bumped = bumpStatus;
                     t.layoutWasDone = false;
                     t.isLabelValid = false;
-                    // below doesn't work...
-                    // t.labelGroup.bumpToggle.draw();
-                    // thisB.labelGroup[ti].bumpToggle.draw();
                     t.draw();
                 }
             }
