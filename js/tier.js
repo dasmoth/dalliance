@@ -87,6 +87,36 @@ function DasTier(browser, source, viewport, background)
                 thisTier.browser.refreshTier(thisTier);
             });
         }
+    } else if (this.dasSource.bamURI) {
+        fs = new BAMFeatureSource(this.dasSource, {
+            credentials: this.dasSource.credentials
+        });
+
+        if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
+            fs.bamHolder.await(function(bam) {
+                thisTier.stylesheet = new DASStylesheet();
+                
+                var densStyle = new DASStyle();
+                densStyle.glyph = 'HISTOGRAM';
+                densStyle.COLOR1 = 'white';
+                densStyle.COLOR2 = 'black';
+                densStyle.HEIGHT=30;
+                thisTier.stylesheet.pushStyle({type: 'density'}, 'low', densStyle);
+
+                var wigStyle = new DASStyle();
+                wigStyle.glyph = 'BOX';
+                wigStyle.FGCOLOR = 'black';
+                wigStyle.BGCOLOR = 'blue'
+                wigStyle.HEIGHT = 8;
+                wigStyle.BUMP = true;
+                wigStyle.LABEL = false;
+                wigStyle.ZINDEX = 20;
+                thisTier.stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
+                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
+
+                thisTier.browser.refreshTier(thisTier);
+            });
+        }
     } else if (this.dasSource.tier_type == 'sequence') {
         fs = new DASSequenceSource(this.dasSource);
     } else {

@@ -41,8 +41,6 @@ function makeBam(data, bai, callback) {
 
         var magic = readInt(uncba, 0);
         var headLen = readInt(uncba, 4);
-        dlog('magic=' + magic);
-        dlog('headerLen=' + headLen);
         var header = '';
         for (var i = 0; i < headLen; ++i) {
             header += String.fromCharCode(uncba[i + 8]);
@@ -125,13 +123,12 @@ function makeBam(data, bai, callback) {
 
 BamFile.prototype.blocksForRange = function(chr, min, max) {
     var refId = this.chrToIndex[chr];
-    dlog('chrLookup: ' + chr + ' = ' + refId);
     if (refId === undefined) {
         return [];
     }
     var bindex = this.indices[refId] || {};
 
-    var intBins = reg2bins(30000000,30100000);
+    var intBins = reg2bins(min, max);
     var intChunks = [];
     for (var b = 0; b < intBins.length; ++b) {
         var cc = bindex[intBins[b]];
@@ -182,7 +179,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
         if (index >= chunks.length) {
             return callback(records);
         } else if (!data) {
-            dlog('fetching ' + index);
+            // dlog('fetching ' + index);
             var c = chunks[index];
             var fetchMin = c.minv.block;
             var fetchMax = c.maxv.block + (1<<16); // *sigh*
@@ -192,7 +189,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
             });
         } else {
             var ba = new Uint8Array(data);
-            readBamRecords(ba, chunks[index].minv.offset, records);
+            readBamRecords(ba, chunks[index].minv.offset, records, min, max);
             data = null;
             ++index;
             return tramp();
@@ -206,7 +203,7 @@ var SEQRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x'
 function BamRecord() {
 }
 
-function readBamRecords(ba, offset, sink) {
+function readBamRecords(ba, offset, sink, min, max) {
     while (true) {
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
@@ -300,7 +297,10 @@ function readBamRecords(ba, offset, sink) {
             }
             record[tag] = value;
         }
-        sink.push(record);
+
+        if (!min || record.pos <= max && record.pos + lseq >= min) {
+            sink.push(record);
+        }
         offset = blockEnd;
     }
 

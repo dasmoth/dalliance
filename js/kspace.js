@@ -176,7 +176,8 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
         tier.updateStatus(status);
     } else {
         if ((actualScale < (this.scale/2) && features.length > 200) || 
-            (BWGFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)) 
+            (BWGFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)|| 
+            (BAMFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)) 
         {
 	    features = downsample(features, this.scale);
         }
@@ -299,6 +300,46 @@ function BWGFeatureSource(bwgSource, opts) {
         thisB.init();
     }
 }
+
+function BAMFeatureSource(bamSource, opts) {
+    var thisB = this;
+    this.bamSource = bamSource;
+    this.opts = opts || {};
+    this.bamHolder = new Awaited();
+    makeBam(new URLFetchable(bamSource.bamURI), new URLFetchable(bamSource.bamURI + '.bai'), function(bam) {
+        thisB.bamHolder.provide(bam);
+    });
+}
+
+BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
+    this.bamHolder.await(function(bam) {
+        bam.fetch(chr, min, max, function(bamRecords, error) {
+            if (error) {
+                callback(error, null, null);
+            } else {
+                var features = [];
+                for (var ri = 0; ri < bamRecords.length; ++ri) {
+                    var r = bamRecords[ri];
+                    var f = new DASFeature();
+                    f.min = r.pos + 1;
+                    f.max = r.pos + r.seq.length;
+                    f.type = 'bam';
+                    f.id = r.readName;
+                    f.notes = ['Sequence=' + r.seq, 'MQ=' + r.mq];
+                    features.push(f);
+                }
+                callback(null, features, 1000000000);
+            }
+        });
+    });
+}
+
+BAMFeatureSource.prototype.getScales = function() {
+    return 1000000000;
+}
+    
+
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
