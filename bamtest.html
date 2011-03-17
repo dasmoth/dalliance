@@ -12,7 +12,12 @@ function dlog(msg) {
     }
 }
 
-makeBam(new URLFetchable('http://localhost/subset22-sorted.bam'));
+makeBam(new URLFetchable('http://localhost/subset22-sorted.bam'), 
+        new URLFetchable('http://localhost/subset22-sorted.bam.bai'),
+        function(bam) {
+            dlog('built BAM obj');
+            dlog(miniJSONify(bam.blocksForRange('22', 30000000, 30100000)));
+        });
 </script>
 <head>
 <h1>BAM test</h1>
