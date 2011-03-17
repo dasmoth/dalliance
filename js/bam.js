@@ -36,11 +36,7 @@ function makeBam(data, bai, callback) {
 	    return dlog("Couldn't access BAM");
 	}
 
-	var header = bstringToBuffer(r);
-	var ba = new Uint8Array(header);
-	var xlen = (ba[11] << 8) | (ba[10])
-	dlog('xlen=' + xlen);
-	var unc = jszlib_inflate_buffer(bstringToBuffer(r.substr( 12 + xlen, 65536-12)));
+        var unc = unbgzf(bstringToBuffer(r));
 	var uncba = new Uint8Array(unc);
 
         var magic = readInt(uncba, 0);
@@ -74,11 +70,6 @@ function makeBam(data, bai, callback) {
         if (bam.indices) {
             return callback(bam);
         }
-
-        // var nxt = readBamRecord(uncba, p);
-        // dlog('Next record at ' + nxt);
-        // nxt  = readBamRecord(uncba, nxt + 4);
-        // nxt  = readBamRecord(uncba, nxt + 4);
     });
 
     bam.bai.fetch(function(r) {   // Do we really need to fetch the whole thing? :-(
@@ -176,97 +167,144 @@ BamFile.prototype.blocksForRange = function(chr, min, max) {
     return mergedChunks;
 }
 
+BamFile.prototype.fetch = function(chr, min, max, callback) {
+    var thisB = this;
+    var chunks = this.blocksForRange(chr, min, max);
+    if (!chunks) {
+        callback(null, 'Error in index fetch');
+    }
+    
+    var records = [];
+    var index = 0;
+    var data;
+
+    function tramp() {
+        if (index >= chunks.length) {
+            return callback(records);
+        } else if (!data) {
+            dlog('fetching ' + index);
+            var c = chunks[index];
+            var fetchMin = c.minv.block;
+            var fetchMax = c.maxv.block + (1<<16); // *sigh*
+            thisB.data.slice(fetchMin, fetchMax - fetchMin).fetch(function(r) {
+                data = unbgzf(bstringToBuffer(r), c.maxv.block - c.minv.block + 1);
+                return tramp();
+            });
+        } else {
+            var ba = new Uint8Array(data);
+            readBamRecords(ba, chunks[index].minv.offset, records);
+            data = null;
+            ++index;
+            return tramp();
+        }
+    }
+    tramp();
+}
+
 var SEQRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
 
-function readBamRecord(ba, offset) {
-    var blockSize = readInt(ba, offset);
-    var blockEnd = offset + blockSize; // FIXME off by 4.
+function BamRecord() {
+}
 
-    var refID = readInt(ba, offset + 4);
-    var pos = readInt(ba, offset + 8);
-
-    var bmn = readInt(ba, offset + 12);
-    var bin = (bmn & 0xffff0000) >> 16;
-    var mq = (bmn & 0xff00) >> 8;
-    var nl = bmn & 0xff;
-
-    var flag_nc = readInt(ba, offset + 16);
-    var flag = (flag_nc & 0xffff0000) >> 16;
-    var nc = flag_nc & 0xffff;
-    
-    var lseq = readInt(ba, offset + 20);
-    
-    var nextRef  = readInt(ba, offset + 24);
-    var nextPos = readInt(ba, offset + 28);
-    
-    var tlen = readInt(ba, offset + 32);
-    
-    var readName = '';
-    for (var j = 0; j < nl-1; ++j) {
-        readName += String.fromCharCode(ba[offset + 36 + j]);
-    }
-    
-    var p = offset + 36 + nl;
-    // Skip CIGAR
-    p += nc * 4;
-    
-    var seq = '';
-    var seqBytes = (lseq + 1) >> 1;
-    dlog('seqBytes = ' + seqBytes);
-    for (var j = 0; j < seqBytes; ++j) {
-        var sb = ba[p + j];
-        seq += SEQRET_DECODER[(sb & 0xf0) >> 4];
-        seq += SEQRET_DECODER[(sb & 0x0f)];
-    }
-    p += seqBytes;
-    dlog('seq=' + seq);
-
-    var qseq = '';
-    for (var j = 0; j < lseq; ++j) {
-        qseq += String.fromCharCode(ba[p + j]);
-    }
-    p += lseq;
-    dlog('quals=' + qseq);
-
-    dlog('refID=' + refID + '; pos=' + pos + '; bin=' + bin + '; mq=' + mq + '; name=' + readName);
-
-    while (p < blockEnd) {
-        var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-        var type = String.fromCharCode(ba[p + 2]);
-        var value;
-
-        if (type == 'A') {
-            value = String.fromCharCode(ba[p + 3]);
-            p += 4;
-        } else if (type == 'i' || type == 'I') {
-            value = readInt(ba, p + 3);
-            p += 7;
-        } else if (type == 'c' || type == 'C') {
-            value = ba[p + 3];
-            p += 4;
-        } else if (type == 's' || type == 'S') {
-            value = readShort(ba, p + 3);
-            p += 5;
-        } else if (type == 'f') {
-            throw 'FIXME need floats';
-        } else if (type == 'Z') {
-            p += 3;
-            value = '';
-            for (;;) {
-                var cc = ba[p++];
-                if (cc == 0) {
-                    break;
-                } else {
-                    value += String.fromCharCode(cc);
-                }
-            }
-        } else {
-            throw 'Unknown type '+ type;
+function readBamRecords(ba, offset, sink) {
+    while (true) {
+        var blockSize = readInt(ba, offset);
+        var blockEnd = offset + blockSize + 4;
+        if (blockEnd >= ba.length) {
+            return sink;
         }
-        dlog(tag + ':' + value);
+
+        var record = new BamRecord();
+
+        var refID = readInt(ba, offset + 4);
+        var pos = readInt(ba, offset + 8);
+        
+        var bmn = readInt(ba, offset + 12);
+        var bin = (bmn & 0xffff0000) >> 16;
+        var mq = (bmn & 0xff00) >> 8;
+        var nl = bmn & 0xff;
+
+        var flag_nc = readInt(ba, offset + 16);
+        var flag = (flag_nc & 0xffff0000) >> 16;
+        var nc = flag_nc & 0xffff;
+    
+        var lseq = readInt(ba, offset + 20);
+        
+        var nextRef  = readInt(ba, offset + 24);
+        var nextPos = readInt(ba, offset + 28);
+        
+        var tlen = readInt(ba, offset + 32);
+    
+        var readName = '';
+        for (var j = 0; j < nl-1; ++j) {
+            readName += String.fromCharCode(ba[offset + 36 + j]);
+        }
+    
+        var p = offset + 36 + nl;
+        // Skip CIGAR
+        p += nc * 4;
+    
+        var seq = '';
+        var seqBytes = (lseq + 1) >> 1;
+        for (var j = 0; j < seqBytes; ++j) {
+            var sb = ba[p + j];
+            seq += SEQRET_DECODER[(sb & 0xf0) >> 4];
+            seq += SEQRET_DECODER[(sb & 0x0f)];
+        }
+        p += seqBytes;
+        record.seq = seq;
+
+        var qseq = '';
+        for (var j = 0; j < lseq; ++j) {
+            qseq += String.fromCharCode(ba[p + j]);
+        }
+        p += lseq;
+        record.quals = qseq;
+        
+        record.pos = pos;
+        record.mq = mq;
+        record.readName = readName;
+
+        while (p < blockEnd) {
+            var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
+            var type = String.fromCharCode(ba[p + 2]);
+            var value;
+
+            if (type == 'A') {
+                value = String.fromCharCode(ba[p + 3]);
+                p += 4;
+            } else if (type == 'i' || type == 'I') {
+                value = readInt(ba, p + 3);
+                p += 7;
+            } else if (type == 'c' || type == 'C') {
+                value = ba[p + 3];
+                p += 4;
+            } else if (type == 's' || type == 'S') {
+                value = readShort(ba, p + 3);
+                p += 5;
+            } else if (type == 'f') {
+                throw 'FIXME need floats';
+            } else if (type == 'Z') {
+                p += 3;
+                value = '';
+                for (;;) {
+                    var cc = ba[p++];
+                    if (cc == 0) {
+                        break;
+                    } else {
+                        value += String.fromCharCode(cc);
+                    }
+                }
+            } else {
+                throw 'Unknown type '+ type;
+            }
+            record[tag] = value;
+        }
+        sink.push(record);
+        offset = blockEnd;
     }
 
-    return blockEnd;
+    // Exits via top of loop.
 }
 
 function readInt(ba, offset) {
@@ -280,6 +318,36 @@ function readShort(ba, offset) {
 function readVob(ba, offset) {
     // return '' + ba[offset+5] + ',' + (ba[offset + 4]) + ',' +  (ba[offset+3]) +',' + ba[offset+2] + ',' + ba[offset+1] + ',' + ba[offset];
     return new Vob((ba[offset+5]<<24) | (ba[offset + 4] << 16) | (ba[offset+3] << 8) |(ba[offset+2]), (ba[offset+1] << 8) | (ba[offset]));
+}
+
+function unbgzf(data, lim) {
+    lim = lim || 1;
+    var oBlockList = [];
+    var ptr = [0];
+    var totalSize = 0;
+
+    while (ptr[0] < lim) {
+        var ba = new Uint8Array(data, ptr[0], 100); // FIXME is this enough for all credible BGZF block headers?
+        var xlen = (ba[11] << 8) | (ba[10]);
+        // dlog('xlen[' + (ptr[0]) +']=' + xlen);
+        var unc = jszlib_inflate_buffer(data, 12 + xlen + ptr[0], Math.min(65536, data.byteLength - 12 - xlen - ptr[0]), ptr);
+        ptr[0] += 8;
+        totalSize += unc.byteLength;
+        oBlockList.push(unc);
+    }
+
+    if (oBlockList.length == 1) {
+        return oBlockList[0];
+    } else {
+        var out = new Uint8Array(totalSize);
+        var cursor = 0;
+        for (var i = 0; i < oBlockList.length; ++i) {
+            var b = new Uint8Array(oBlockList[i]);
+            arrayCopy(b, 0, out, cursor, b.length);
+            cursor += b.length;
+        }
+        return out.buffer;
+    }
 }
 
 //

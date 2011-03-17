@@ -16,7 +16,17 @@ makeBam(new URLFetchable('http://localhost/subset22-sorted.bam'),
         new URLFetchable('http://localhost/subset22-sorted.bam.bai'),
         function(bam) {
             dlog('built BAM obj');
-            dlog(miniJSONify(bam.blocksForRange('22', 30000000, 30100000)));
+            bam.fetch('22', 30000000, 30010000, function(r, e) {
+                if (r) {
+                    dlog('got ' + r.length +' records');
+                    for (var ri = 0; ri < r.length; ri += 100) {
+                        dlog(miniJSONify(r[ri]));
+                    }
+                }
+                if (e) {
+                    dlog('err: ' + e);
+                }
+            });
         });
 </script>
 <head>
