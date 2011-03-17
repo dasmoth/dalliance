@@ -1561,18 +1561,18 @@ Browser.prototype.realInit = function(opts) {
                 thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
                       pos,
-                      1,
+                      -1,
                       fedge,
                       function(nxt) {
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
-                              if (fedge) { 
-                                  if (nmin>pos+1) {
-                                      nmax=nmin;
-                                  } else {
+                              if (fedge) {
+                                  if (nmax<pos-1) {
                                       nmax++;
-                                      nmin=nmax
+                                      nmin=nmax;
+                                  } else {
+                                      nmax=nmin;
                                   }
                               }
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
@@ -1599,18 +1599,18 @@ Browser.prototype.realInit = function(opts) {
                 thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
                       pos,
-                      -1,
+                      1,
                       fedge,
                       function(nxt) {
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
-                              if (fedge) {
-                                  if (nmax<pos-1) {
-                                      nmax++;
-                                      nmin=nmax;
-                                  } else {
+                              if (fedge) { 
+                                  if (nmin>pos+1) {
                                       nmax=nmin;
+                                  } else {
+                                      nmax++;
+                                      nmin=nmax
                                   }
                               }
                               var wid = thisB.viewEnd - thisB.viewStart + 1;
@@ -1662,9 +1662,10 @@ Browser.prototype.realInit = function(opts) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
                 thisB.scheduleRefresh(500);
             }
-        } else if (ev.keyCode == 84) {
+        } else if (ev.keyCode == 84 || ev.keyCode == 116) {
+            ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
-            if( ev.altKey ){
+            if( ev.shiftKey ){
                 for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                     var t = thisB.tiers[ti];
                     if (t.dasSource.collapseSuperGroups) {
@@ -1684,6 +1685,9 @@ Browser.prototype.realInit = function(opts) {
                     }
                     t.bumped = bumpStatus;
                     t.layoutWasDone = false;
+                    // below doesn't work...
+                    // t.labelGroup.bumpToggle.draw();
+                    // thisB.labelGroup[ti].bumpToggle.draw();
                     t.draw();
                 }
             }
