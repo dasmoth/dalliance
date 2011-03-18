@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC
+	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     >
+
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
+<title>Mouse NCBIm37 :: Dalliance</title> 
+<style>
+body {font-family: 'helvetica'}
+</style>
+<script language="javascript" src="js/spans.js"></script>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="js/browser.js"></script>
+<script language="javascript" src="js/tier.js"></script>
+<script language="javascript" src="js/sequence-tier.js"></script>
+<script language="javascript" src="js/feature-tier.js"></script>
+<script language="javascript" src="js/slider.js"></script>
+<script language="javascript" src="js/domui.js"></script>
+<script language="javascript" src="js/karyoscape.js"></script>
+<script language="javascript" src="js/quant-config.js"></script>
+<script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
+<script language="javascript" src="js/version.js"></script>
+<script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="json/json2.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+
+<script language="javascript"> 
+  new Browser({
+      chr:        '19',
+      viewStart:  30000000,
+      viewEnd:    30030000,
+      cookieKey:  'mouse',
+ 
+      coordSystem: {
+          speciesName: 'Mouse',
+          taxon: 10090,
+          auth: 'NCBIM',
+          version: 37
+      },
+ 
+    chains: {
+      mm8ToMm9: new Chainset('http://www.derkholm.net:8080/das/mm8ToMm9/', 'NCBIM36', 'NCBIM37',
+                               {
+                                  speciesName: 'Mouse',
+                                  taxon: 10090,
+                                  auth: 'NCBIM',
+                                  version: 36
+                               })
+    },
+ 
+ 
+      sources:      [{name: 'Genome',
+                     uri:  'http://www.derkholm.net:9080/das/mm9comp/',
+                     desc: 'Mouse reference genome build NCBIm37',
+                     tier_type: 'sequence',
+                     provides_entrypoints: true},
+                    {name: 'Genes',
+                     desc: 'Gene structures from Ensembl 58',
+                     uri:  'http://www.derkholm.net:8080/das/mmu_58_37k/',
+                     collapseSuperGroups: true,
+                     provides_karyotype: true,
+                     provides_search: true},
+                    {name: 'Repeats',
+                     desc: 'Repeat annotation from Ensembl 58',
+                     uri: 'http://www.derkholm.net:8080/das/mmu_58_37k/',
+                     stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/mouse-repeats.xml'},
+                    {name: 'CpG Density',
+                     desc: 'CpG observed/expected ratio',
+                     uri: 'http://www.derkholm.net:9080/das/mm9comp/',
+                     stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'},
+                    {name: 'BAM test',
+                     bamURI: 'http://localhost/bam/ERZ000001-sorted.bam'}],
+   
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),
+    karyoEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),
+ 
+    browserLinks: {
+        Ensembl: 'http://www.ensembl.org/Mus_musculus/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position=chr${chr}:${start}-${end}'
+    }
+});
+</script> 
+</head> 
+ 
+<body> 
+ 
+<h2>Mouse NCBIm37</h2> 
+ 
+<div id='svgHolder'> 
+Dalliance requires a modern Javascript-enabled web browser.  If in doubt, please download the latest version
+of <a href="http://www.mozilla.com/firefox/">Firefox</a>, <a href="http://www.google.com/chrome">Google Chrome</a>, 
+or <a href="http://www.apple.com/safari/">Safari</a> for your platform.
+</div> 
+ 
+</body> 
+</html>
+
