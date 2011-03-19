@@ -60,6 +60,11 @@ function makeBam(data, bai, callback) {
             var lRef = readInt(uncba, p + lName + 4);
             // dlog(name + ': ' + lRef);
             bam.chrToIndex[name] = i;
+            if (name.indexOf('chr') == 0) {
+                bam.chrToIndex[name.substring(3)] = i;
+            } else {
+                bam.chrToIndex['chr' + name] = i;
+            }
             bam.indexToChr.push(name);
 
             p = p + 8 + lName;
@@ -81,7 +86,7 @@ function makeBam(data, bai, callback) {
         var baiMagic = readInt(uncba, 0);
         var nref = readInt(uncba, 4);
 
-        // dlog('got a BAI.  magic=' + baiMagic +'; nref=' + nref + '; size=' + uncba.length);
+//        dlog('got a BAI.  magic=' + baiMagic +'; nref=' + nref + '; size=' + uncba.length);
         bam.indices = [];
 
         var p = 8;
@@ -109,7 +114,7 @@ function makeBam(data, bai, callback) {
             }
             var nintv = readInt(uncba, p); p += 4;
             p += (nintv * 8);
-            // dlog('ref=' + ref + ';nbin=' + nbin + '; nintv = ' + nintv + '; totChnk=' + totChnk);
+//            dlog('ref=' + ref + ';nbin=' + nbin + '; nintv = ' + nintv + '; totChnk=' + totChnk);
 
             if (nbin > 0) {
                 bam.indices[ref] = bindex;
