@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC
+	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     >
+
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
+<title>Human GRCh37 :: Dalliance</title> 
+<style>
+body {font-family: 'helvetica'}
+</style>
+<script language="javascript" src="js/spans.js"></script>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="js/browser.js"></script>
+<script language="javascript" src="js/tier.js"></script>
+<script language="javascript" src="js/sequence-tier.js"></script>
+<script language="javascript" src="js/feature-tier.js"></script>
+<script language="javascript" src="js/slider.js"></script>
+<script language="javascript" src="js/domui.js"></script>
+<script language="javascript" src="js/karyoscape.js"></script>
+<script language="javascript" src="js/quant-config.js"></script>
+<script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
+<script language="javascript" src="js/version.js"></script>
+<script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="json/json2.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+
+<script language="javascript">
+  var b = new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human-grc_h37',
+
+    coordSystem: {
+      speciesName: 'Human',
+      taxon: 9606,
+      auth: 'GRCh',
+      version: '37'
+    },
+ 
+    chains: {
+      hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',
+                               {
+                                  speciesName: 'Human',
+                                  taxon: 9606,
+                                  auth: 'NCBI',
+                                  version: 36
+                               })
+    },
+
+    sources:          [{name: 'Genome',
+                        uri:  'http://www.derkholm.net:8080/das/hg19comp/',
+                        desc: 'Human reference genome build GRCh37',
+                        tier_type: 'sequence',
+                        provides_entrypoints: true},
+                       {name: 'Genes',
+                        desc: 'Gene structures from Ensembl 59 (GENCODE 4)',
+                        uri: 'http://www.derkholm.net:8080/das/hsa_59_37d/',
+                        collapseSuperGroups: true,
+                        provides_karyotype: true,     
+                        provides_search: true,
+                        maxbins: false}, 
+                       {name: 'Repeats',
+                        desc: 'Repeat annotation from Ensembl 59', 
+                        uri: 'http://www.derkholm.net:8080/das/hsa_59_37d/',
+                        stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'},
+                       {name: 'CpG Density',
+                        desc: 'CpG observed/expected ratio',
+                        uri: 'http://www.derkholm.net:8080/das/hg19comp/',
+                        stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'},
+
+                  {name:                 'BWG test',
+                   bwgURI:               'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwDgf/wgEncodeUwDgfGm06990Raw.bigWig'},
+                  {name:                 'BAM test',
+                   bamURI:               'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwDgf/wgEncodeUwDgfGm06990Aln.bam'}],
+ 
+                   // stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet'},
+
+    browserLinks: {
+      Ensembl: 'http://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+      UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
+      Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
+    },
+ 
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+    karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')
+
+  });
+</script>
+</head>
+
+<body>
+
+<h2>Human GRCh37</h2>
+
+<div id='svgHolder'>
+</div>
+
+<div id="log">
+</div>
+
+</body>
+</html>
+
