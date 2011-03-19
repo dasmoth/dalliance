@@ -113,6 +113,8 @@ function makeBam(data, bai, callback) {
     });
 }
 
+
+
 BamFile.prototype.blocksForRange = function(refId, min, max) {
     var index = this.indices[refId];
     if (!index) {
@@ -124,9 +126,8 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
     for (var i = 0; i < intBinsL.length; ++i) {
         intBins[intBinsL[i]] = true;
     }
-    var intChunks = [];
-    
-    
+    var leafChunks = [], otherChunks = [];
+
     var nbin = readInt(index, 0);
     var p = 4;
     for (var b = 0; b < nbin; ++b) {
@@ -138,12 +139,48 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             for (var c = 0; c < nchnk; ++c) {
                 var cs = readVob(index, p);
                 var ce = readVob(index, p + 8);
-                intChunks.push(new Chunk(cs, ce));
+                (bin < 4681 ? otherChunks : leafChunks).push(new Chunk(cs, ce));
                 p += 16;
             }
         } else {
             p +=  (nchnk * 16);
         }
+    }
+//    dlog('leafChunks = ' + miniJSONify(leafChunks));
+//    dlog('otherChunks = ' + miniJSONify(otherChunks));
+
+    var nintv = readInt(index, p);
+    var lowest = null;
+    var minLin = Math.min(min>>14, nintv - 1), maxLin = Math.min(max>>14, nintv - 1);
+    for (var i = minLin; i <= maxLin; ++i) {
+        var lb =  readVob(index, p + 4 + (i * 8));
+        if (!lb) {
+            continue;
+        }
+        if (!lowest || lb.block < lowest.block || lb.offset < lowest.offset) {
+            lowest = lb;
+        }
+    }
+    // dlog('Lowest LB = ' + lowest);
+    
+    var prunedOtherChunks = [];
+    if (lowest != null) {
+        for (var i = 0; i < otherChunks.length; ++i) {
+            var chnk = otherChunks[i];
+            if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
+                prunedOtherChunks.push(chnk);
+            }
+        }
+    }
+    // dlog('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
+    otherChunks = prunedOtherChunks;
+
+    var intChunks = [];
+    for (var i = 0; i < otherChunks.length; ++i) {
+        intChunks.push(otherChunks[i]);
+    }
+    for (var i = 0; i < leafChunks.length; ++i) {
+        intChunks.push(leafChunks[i]);
     }
 
     intChunks.sort(function(c0, c1) {
@@ -154,7 +191,6 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             return c0.minv.offset - c1.minv.offset;
         }
     });
-
     var mergedChunks = [];
     if (intChunks.length > 0) {
         var cur = intChunks[0];
@@ -169,6 +205,8 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
+    // dlog('mergedChunks = ' + miniJSONify(mergedChunks));
+
     return mergedChunks;
 }
 
@@ -334,8 +372,13 @@ function readShort(ba, offset) {
 }
 
 function readVob(ba, offset) {
-    // return '' + ba[offset+5] + ',' + (ba[offset + 4]) + ',' +  (ba[offset+3]) +',' + ba[offset+2] + ',' + ba[offset+1] + ',' + ba[offset];
-    return new Vob((ba[offset+5]<<24) | (ba[offset + 4] << 16) | (ba[offset+3] << 8) |(ba[offset+2]), (ba[offset+1] << 8) | (ba[offset]));
+    var block = (ba[offset+5]<<24) | (ba[offset + 4] << 16) | (ba[offset+3] << 8) |(ba[offset+2]);
+    var bint = (ba[offset+1] << 8) | (ba[offset]);
+    if (block == 0 && bint == 0) {
+        return null;  // Should only happen in the linear index?
+    } else {
+        return new Vob(block, bint);
+    }
 }
 
 function unbgzf(data, lim) {
