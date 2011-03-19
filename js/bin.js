@@ -62,7 +62,7 @@ URLFetchable.prototype.slice = function(s, l) {
     return new URLFetchable(this.url, ns, ne, this.opts);
 }
 
-URLFetchable.prototype.fetch = function(callback, attempt) {
+URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var thisB = this;
 
     attempt = attempt || 1;
@@ -82,8 +82,8 @@ URLFetchable.prototype.fetch = function(callback, attempt) {
         if (req.readyState == 4) {
             if (req.status == 200 || req.status == 206) {
                 var r = req.responseText;
-                if (length && length != r.length) {
-                    return thisB.fetch(callback, attempt + 1);
+                if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
+                    return thisB.fetch(callback, attempt + 1, r.length);
                 } else {
                     return callback(req.responseText);
                 }

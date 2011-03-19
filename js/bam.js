@@ -382,7 +382,7 @@ function readVob(ba, offset) {
 }
 
 function unbgzf(data, lim) {
-    lim = lim || 1;
+    lim = Math.min(lim || 1, data.byteLength - 100);
     var oBlockList = [];
     var ptr = [0];
     var totalSize = 0;
