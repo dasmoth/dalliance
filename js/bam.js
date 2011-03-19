@@ -84,40 +84,27 @@ function makeBam(data, bai, callback) {
 
 
         var baiMagic = readInt(uncba, 0);
+        if (baiMagic != BAI_MAGIC) {
+            return dlog('Not a BAI file');
+        }
+
         var nref = readInt(uncba, 4);
 
-//        dlog('got a BAI.  magic=' + baiMagic +'; nref=' + nref + '; size=' + uncba.length);
         bam.indices = [];
 
         var p = 8;
         for (var ref = 0; ref < nref; ++ref) {
+            var blockStart = p;
             var nbin = readInt(uncba, p); p += 4;
-            var totChnk = 0;
-            var bindex = {};
             for (var b = 0; b < nbin; ++b) {
                 var bin = readInt(uncba, p);
                 var nchnk = readInt(uncba, p+4);
-                p += 8;
-
-                var chunks = [];
-                for (var c = 0; c < nchnk; ++c) {
-                    var cs = readVob(uncba, p);
-                    var ce = readVob(uncba, p + 8);
-                    chunks.push(new Chunk(cs, ce));
-                    p += 16;
-                }
-                bindex[bin] = chunks;
-                //                if (nchnk != 0 && b < 50) {
-                //    dlog('bin ' + bin + ' contains ' + miniJSONify(chunks));
-                // }
-                totChnk += nchnk;
+                p += 8 + (nchnk * 16);
             }
             var nintv = readInt(uncba, p); p += 4;
             p += (nintv * 8);
-//            dlog('ref=' + ref + ';nbin=' + nbin + '; nintv = ' + nintv + '; totChnk=' + totChnk);
-
             if (nbin > 0) {
-                bam.indices[ref] = bindex;
+                bam.indices[ref] = new Uint8Array(header, blockStart, p - blockStart);
             }                     
         }
         if (bam.chrToIndex) {
@@ -126,23 +113,39 @@ function makeBam(data, bai, callback) {
     });
 }
 
-BamFile.prototype.blocksForRange = function(chr, min, max) {
-    var refId = this.chrToIndex[chr];
-    if (refId === undefined) {
+BamFile.prototype.blocksForRange = function(refId, min, max) {
+    var index = this.indices[refId];
+    if (!index) {
         return [];
     }
-    var bindex = this.indices[refId] || {};
 
-    var intBins = reg2bins(min, max);
+    var intBinsL = reg2bins(min, max);
+    var intBins = [];
+    for (var i = 0; i < intBinsL.length; ++i) {
+        intBins[intBinsL[i]] = true;
+    }
     var intChunks = [];
-    for (var b = 0; b < intBins.length; ++b) {
-        var cc = bindex[intBins[b]];
-        if (cc) {
-            for (var c = 0; c < cc.length; ++c) {
-                intChunks.push(cc[c]);
+    
+    
+    var nbin = readInt(index, 0);
+    var p = 4;
+    for (var b = 0; b < nbin; ++b) {
+        var bin = readInt(index, p);
+        var nchnk = readInt(index, p+4);
+//        dlog('bin=' + bin + '; nchnk=' + nchnk);
+        p += 8;
+        if (intBins[bin]) {
+            for (var c = 0; c < nchnk; ++c) {
+                var cs = readVob(index, p);
+                var ce = readVob(index, p + 8);
+                intChunks.push(new Chunk(cs, ce));
+                p += 16;
             }
+        } else {
+            p +=  (nchnk * 16);
         }
     }
+
     intChunks.sort(function(c0, c1) {
         var dif = c0.minv.block - c1.minv.block;
         if (dif != 0) {
@@ -171,9 +174,16 @@ BamFile.prototype.blocksForRange = function(chr, min, max) {
 
 BamFile.prototype.fetch = function(chr, min, max, callback) {
     var thisB = this;
-    var chunks = this.blocksForRange(chr, min, max);
-    if (!chunks) {
-        callback(null, 'Error in index fetch');
+
+    var chrId = this.chrToIndex[chr];
+    var chunks;
+    if (chrId === undefined) {
+        chunks = [];
+    } else {
+        chunks = this.blocksForRange(chrId, min, max);
+        if (!chunks) {
+            callback(null, 'Error in index fetch');
+        }
     }
     
     var records = [];
@@ -194,7 +204,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
             });
         } else {
             var ba = new Uint8Array(data);
-            readBamRecords(ba, chunks[index].minv.offset, records, min, max);
+            thisB.readBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
             data = null;
             ++index;
             return tramp();
@@ -208,7 +218,7 @@ var SEQRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x'
 function BamRecord() {
 }
 
-function readBamRecords(ba, offset, sink, min, max) {
+BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
     while (true) {
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
@@ -266,6 +276,7 @@ function readBamRecords(ba, offset, sink, min, max) {
         record.pos = pos;
         record.mq = mq;
         record.readName = readName;
+        record.segment = this.indexToChr[refID];
 
         while (p < blockEnd) {
             var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
@@ -304,7 +315,9 @@ function readBamRecords(ba, offset, sink, min, max) {
         }
 
         if (!min || record.pos <= max && record.pos + lseq >= min) {
-            sink.push(record);
+            if (chrId === undefined || refID == chrId) {
+                sink.push(record);
+            }
         }
         offset = blockEnd;
     }

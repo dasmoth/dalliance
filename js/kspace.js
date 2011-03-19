@@ -324,6 +324,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     var f = new DASFeature();
                     f.min = r.pos + 1;
                     f.max = r.pos + r.seq.length;
+                    f.segment = r.segment;
                     f.type = 'bam';
                     f.id = r.readName;
                     f.notes = ['Sequence=' + r.seq, 'MQ=' + r.mq];
