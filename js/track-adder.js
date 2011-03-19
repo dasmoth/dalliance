@@ -441,29 +441,16 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     var tryAddBin = function(nds) {
-        var make, arg;
+
+        var fetchable;
         if (nds.bwgURI) {
-            make = makeBwgFromURL;
-            arg = nds.bwgURI;
+            fetchable = new URLFetchable(nds.bwgURI);
         } else {
-            make = makeBwgFromFile;
-            arg = nds.bwgBlob;
+            fetchable = new BlobFetchable(nds.bwgBlob);
         }
 
-        make(arg, function(bwg, error) {
-            if (bwg) {
-                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
-                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                if (match) {
-                    nds.name = match[1];
-                }
-                
-                if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
-                    nds.collapseSuperGroups = true;
-                }
-
-                return addDasCompletionPage(nds, false, false, true);
-            } else {
+        fetchable.slice(0, 1<<16).fetch(function(result) {
+            if (!result) {
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
                 stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests.'));
@@ -474,7 +461,54 @@ Browser.prototype.showTrackAdder = function(ev) {
                 customMode = 'reset-bin';
                 return;
             }
+
+            var rbuf = bstringToBuffer(result);
+            var ba = new Uint8Array(rbuf);
+            var magic = readInt(ba, 0);
+            if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
+                dlog('detected a bwg');
+                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
+                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
+                if (match) {
+                    nds.name = match[1];
+                }
+
+                return addDasCompletionPage(nds, false, false, true);
+            } else {
+                if (ba[0] != 31 || ba[1] != 139) {
+                    return binFormatErrorPage();
+                }
+                var unc = unbgzf(rbuf);
+                var uncba = new Uint8Array(unc);
+                magic = readInt(uncba, 0);
+                if (magic == BAM_MAGIC) {
+                    dlog('Detected a BAM');
+                    
+                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
+                    var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
+                    if (match) {
+                        nds.name = match[1];
+                    }
+
+                    nds.bamURI = nds.bwgURI;
+                    nds.bwgURI = undefined;
+                    nds.bwgBlob = undefined;
+
+                    return addDasCompletionPage(nds, false, false, true);
+                } else {
+                    // maybe Tabix?
+                   return binFormatErrorPage();
+                }
+            }
         });
+    }
+
+    function binFormatErrorPage() {
+        removeChildren(stabHolder);
+        stabHolder.appendChild(makeElement('h2', 'Custom data format not recognized'));
+        stabHolder.appendChild(makeElement('p', 'Currently supported formats are bigBed, bigWig, and BAM.'));
+        customMode = 'reset-bin';
+        return;
     }
                      
     var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {

@@ -38,6 +38,13 @@ function DasTier(browser, source, viewport, background)
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
+                if (thisTier.dasSource.collapseSuperGroups === undefined) {
+                    if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+                        thisTier.dasSource.collapseSuperGroups = true;
+                        thisTier.bumped = false;
+                    }
+                }
+
                 if (bwg.type == 'bigbed') {
                     thisTier.stylesheet = new DASStylesheet();
                     
