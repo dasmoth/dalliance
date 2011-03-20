@@ -79,6 +79,10 @@ function coordsMatch(c1, c2) {
 DASSource.prototype.entryPoints = function(callback) {
     var dasURI = this.uri + 'entry_points';
     this.doCrossDomainRequest(dasURI, function(responseXML) {
+            if (!responseXML) {
+                return callback([]);
+            }
+
                 var entryPoints = new Array();
                 
                 var segs = responseXML.getElementsByTagName('SEGMENT');

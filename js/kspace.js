@@ -362,6 +362,10 @@ BWGFeatureSource.prototype.init = function() {
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
     this.bwgHolder.await(function(bwg) {
+        if (bwg == null) {
+            return callback("Can't access binary file", null, null);
+        }
+
         // dlog('bwg: ' + bwg.name + '; want scale: ' + scale);
         var data;
         // dlog(miniJSONify(types));

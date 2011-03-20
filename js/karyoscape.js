@@ -27,12 +27,12 @@ Karyoscape.prototype.update = function(chr, start, end) {
 	    new DASSegment(chr),
 	    {type: 'karyotype'},
 	    function(karyos, err, segmentMap) {
-                if (segmentMap[chr] && segmentMap[chr].max) {
+                if (segmentMap && segmentMap[chr] && segmentMap[chr].max) {
                     kscape.chrLen = segmentMap[chr].max;
                 } else {
                     kscape.chrLen = null;
                 }
-		kscape.karyos = karyos;
+		kscape.karyos = karyos || [];
 		kscape.redraw();
 	    }
 	);
@@ -66,7 +66,7 @@ Karyoscape.prototype.redraw = function() {
     } else {
         if (!this.chrLen) {
             alert('Warning: insufficient data to set up spatial navigator');
-            this.chrLen = 20000000;
+            this.chrLen = 200000000;
         } 
         this.karyos.push({
             min: 1,
