@@ -1995,7 +1995,7 @@ Browser.prototype.zoom = function(factor) {
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));
-        
+
     var labels = this.svgRoot.getElementsByClassName("label-text");
     for (var li = 0; li < labels.length; ++li) {
         var label = labels[li];

@@ -1416,8 +1416,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             }
             glyph = makeElementNS(NS_SVG, 'g', bits);
         } if (feature.seq && scale >= 1) {
-            
-            // var tt = makeElementNS(NS_SVG, 'text', feature.seq, {stroke: 'none', fill: 'black', x: minPos, y: 10});
             var seq  = feature.seq.toUpperCase();
             var gg = [];
             for (var i = 0; i < seq.length; ++i) {
@@ -1433,7 +1431,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     labelText.setAttribute("y",  12);
                     labelText.setAttribute('stroke', 'none');
                     labelText.setAttribute("fill", color);
-                    labelText.setAttribute("class", "label-text");
                     labelText.appendChild(document.createTextNode(base));
                     gg.push(labelText);
                     requiredHeight = 14;
