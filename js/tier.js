@@ -100,7 +100,7 @@ function DasTier(browser, source, viewport, background)
                 thisTier.browser.refreshTier(thisTier);
             });
         }
-    } else if (this.dasSource.bamURI) {
+    } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
         fs = new BAMFeatureSource(this.dasSource, {
             credentials: this.dasSource.credentials
         });

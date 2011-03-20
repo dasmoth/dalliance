@@ -306,7 +306,15 @@ function BAMFeatureSource(bamSource, opts) {
     this.bamSource = bamSource;
     this.opts = opts || {};
     this.bamHolder = new Awaited();
-    makeBam(new URLFetchable(bamSource.bamURI), new URLFetchable(bamSource.bamURI + '.bai'), function(bam) {
+    var bamF, baiF;
+    if (bamSource.bamBlob) {
+        bamF = new BlobFetchable(bamSource.bamBlob);
+        baiF = new BlobFetchable(bamSource.baiBlob);
+    } else {
+        bamF = new URLFetchable(bamSource.bamURI);
+        baiF = new URLFetchable(bamSource.baiURI || (bamSource.bamURI + '.bai'));
+    }
+    makeBam(bamF, baiF, function(bam) {
         thisB.bamHolder.provide(bam);
     });
 }

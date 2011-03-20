@@ -300,6 +300,14 @@ Browser.prototype.showTrackAdder = function(ev) {
                 switchToCustomMode();
             } else if (customMode === 'reset-bin') {
                 switchToBinMode(); 
+            } else if (customMode === 'prompt-bai') {
+                var fileList = custFile.files;
+                if (fileList && fileList.length > 0 && fileList[0]) {
+                    dataToFinalize.baiBlob = fileList[0];
+                    completeBAM(dataToFinalize);
+                } else {
+                    promptForBAI(dataToFinalize);
+                }
             } else if (customMode === 'finalize') {
                 dataToFinalize.name = custName.value;
                 var m = custCS.value;
@@ -362,9 +370,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 tryAddDASxSources(nds);
-                
-                
-
                 return;
             }
         });
@@ -441,7 +446,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     var tryAddBin = function(nds) {
-
         var fetchable;
         if (nds.bwgURI) {
             fetchable = new URLFetchable(nds.bwgURI);
@@ -449,7 +453,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             fetchable = new BlobFetchable(nds.bwgBlob);
         }
 
-        fetchable.slice(0, 1<<16).fetch(function(result) {
+        fetchable.slice(0, 1<<16).fetch(function(result, error) {
             if (!result) {
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
@@ -481,36 +485,61 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var uncba = new Uint8Array(unc);
                 magic = readInt(uncba, 0);
                 if (magic == BAM_MAGIC) {
-                    indexF = new URLFetchable(nds.bwgURI + '.bai');
-                    indexF.slice(0, 256).fetch(function(r) {
-                        var hasBAI = false;
-                        if (r) {
-                            var ba = new Uint8Array(bstringToBuffer(r));
-                            var magic2 = readInt(ba, 0);
-                            hasBAI = (magic2 == BAI_MAGIC);
-                        }
-                        if (hasBAI) {
-                            var nameExtractPattern = new RegExp('/?([^/]+?)(.bam)?$');
-                            var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                            if (match) {
-                                nds.name = match[1];
-                            }
-
-                            nds.bamURI = nds.bwgURI;
-                            nds.bwgURI = undefined;
-                            nds.bwgBlob = undefined;
-                            
-                            return addDasCompletionPage(nds, false, false, true);
-                        } else {
-                            return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
-                        }
-                    });
-
+                    if (nds.bwgBlob) {
+                        return promptForBAI(nds);
+                    } else {
+                        return completeBAM(nds);
+                    }
                 } else {
                     // maybe Tabix?
                    return binFormatErrorPage();
                 }
             }
+        });
+    }
+
+    function promptForBAI(nds) {
+        removeChildren(stabHolder);
+        customMode = 'prompt-bai'
+        stabHolder.appendChild(makeElement('h2', 'Select an index file'));
+        stabHolder.appendChild(makeElement('p', 'Dalliance requires a BAM index (.bai) file when displaying BAM data.  These normally accompany BAM files.  For security reasons, web applications like Dalliance can only access local files which you have explicity selected.  Please use the file chooser below to select the appropriate BAI file'));
+
+        stabHolder.appendChild(document.createTextNode('Index file: '));
+        custFile = makeElement('input', null, {type: 'file'});
+        stabHolder.appendChild(custFile);
+        dataToFinalize = nds;
+    }
+
+    function completeBAM(nds) {
+        var indexF;
+        if (nds.baiBlob) {
+            indexF = new BlobFetchable(nds.baiBlob);
+        } else {
+            indexF = new URLFetchable(nds.bwgURI + '.bai');
+        }
+        indexF.slice(0, 256).fetch(function(r) {
+                var hasBAI = false;
+                if (r) {
+                    var ba = new Uint8Array(bstringToBuffer(r));
+                    var magic2 = readInt(ba, 0);
+                    hasBAI = (magic2 == BAI_MAGIC);
+                }
+                if (hasBAI) {
+                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bam)?$');
+                    var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
+                    if (match) {
+                        nds.name = match[1];
+                    }
+
+                    nds.bamURI = nds.bwgURI;
+                    nds.bamBlob = nds.bwgBlob;
+                    nds.bwgURI = undefined;
+                    nds.bwgBlob = undefined;
+                            
+                    return addDasCompletionPage(nds, false, false, true);
+                } else {
+                    return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
+                }
         });
     }
 
