@@ -1362,10 +1362,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 if (true) {
                     var relOrigin = (-1.0 * smin) / (smax - smin);
                     if (relScore >= relOrigin) {
-                        height = (relScore - relOrigin) * requiredHeight;
-                        y = y + ((1.0 - relScore) * requiredHeight);
+                        height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                        y = y + ((1.0 - relOrigin) * requiredHeight) - height;
                     } else {
-                        height = (relOrigin - relScore) * requiredHeight;
+                        height = Math.max(1, (relOrigin - relScore) * requiredHeight);
                         y = y + ((1.0 - relOrigin) * requiredHeight);
                     }
                 } else {
