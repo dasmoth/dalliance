@@ -1415,6 +1415,40 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 }));
             }
             glyph = makeElementNS(NS_SVG, 'g', bits);
+        } if (feature.seq && scale >= 1) {
+            
+            // var tt = makeElementNS(NS_SVG, 'text', feature.seq, {stroke: 'none', fill: 'black', x: minPos, y: 10});
+            var seq  = feature.seq.toUpperCase();
+            var gg = [];
+            for (var i = 0; i < seq.length; ++i) {
+                var base = seq.substr(i, 1);
+                var color = baseColors[base];
+	        if (!color) {
+	            color = 'gray';
+	        }
+
+                if (scale >= 8) {
+                    var labelText = document.createElementNS(NS_SVG, "text");
+                    labelText.setAttribute("x", minPos + i*scale);
+                    labelText.setAttribute("y",  12);
+                    labelText.setAttribute('stroke', 'none');
+                    labelText.setAttribute("fill", color);
+                    labelText.setAttribute("class", "label-text");
+                    labelText.appendChild(document.createTextNode(base));
+                    gg.push(labelText);
+                    requiredHeight = 14;
+                } else {
+                    var br = document.createElementNS(NS_SVG, "rect");
+                    br.setAttribute('x', minPos + i*scale);
+                    br.setAttribute('y', y);
+                    br.setAttribute('height', height);
+                    br.setAttribute('width', scale);
+                    br.setAttribute('fill', color);
+                    br.setAttribute('stroke', 'none');
+                    gg.push(br);
+                }
+            }
+            glyph = makeElementNS(NS_SVG, 'g', gg);
         } else {
 	    glyph = rect;
         }
