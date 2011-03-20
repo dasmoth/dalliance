@@ -6,14 +6,12 @@ For 0.7
   - If we stick to SVG rendering, implement incremental layout.
   - Move fetching/mapping/etc to a webworker.
   - If we swtich to 2-stage layout, can we do bumping &c in a worker as well?
-  - Local data.
   - Next/prev feature.
   - Try touch support again.
   - Cross-index manually added sources to the registry.
   - Out-to-chromosome zooming
-  - BAM support
   - Strand-flipping
-
+  - Fetch-pools.
  
 Real Soon Now
 -------------
@@ -22,7 +20,6 @@ Real Soon Now
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
- - Think about cancelling long-running XHRs if they're no longer needed?
  - Non-positional annotation.
  - Undo.
  - Alignment improvements.

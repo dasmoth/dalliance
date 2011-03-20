@@ -205,7 +205,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         if (thisB.supportsBinary) {
             stabHolder.appendChild(makeElement('h2', 'Add custom URL-based data'));
-            stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/binary.html'}), ').  Currently supported formats are bigwig and bigbed.']));
+            stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
 
             stabHolder.appendChild(makeElement('br'));
             stabHolder.appendChild(document.createTextNode('URL: '));
@@ -466,8 +466,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             var ba = new Uint8Array(rbuf);
             var magic = readInt(ba, 0);
             if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
-                dlog('detected a bwg');
-                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
+                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb|.bigWig|.bigBed)?$');
                 var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
                 if (match) {
                     nds.name = match[1];
@@ -482,19 +481,31 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var uncba = new Uint8Array(unc);
                 magic = readInt(uncba, 0);
                 if (magic == BAM_MAGIC) {
-                    dlog('Detected a BAM');
-                    
-                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb)?$');
-                    var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                    if (match) {
-                        nds.name = match[1];
-                    }
+                    indexF = new URLFetchable(nds.bwgURI + '.bai');
+                    indexF.slice(0, 256).fetch(function(r) {
+                        var hasBAI = false;
+                        if (r) {
+                            var ba = new Uint8Array(bstringToBuffer(r));
+                            var magic2 = readInt(ba, 0);
+                            hasBAI = (magic2 == BAI_MAGIC);
+                        }
+                        if (hasBAI) {
+                            var nameExtractPattern = new RegExp('/?([^/]+?)(.bam)?$');
+                            var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
+                            if (match) {
+                                nds.name = match[1];
+                            }
 
-                    nds.bamURI = nds.bwgURI;
-                    nds.bwgURI = undefined;
-                    nds.bwgBlob = undefined;
+                            nds.bamURI = nds.bwgURI;
+                            nds.bwgURI = undefined;
+                            nds.bwgBlob = undefined;
+                            
+                            return addDasCompletionPage(nds, false, false, true);
+                        } else {
+                            return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
+                        }
+                    });
 
-                    return addDasCompletionPage(nds, false, false, true);
                 } else {
                     // maybe Tabix?
                    return binFormatErrorPage();
@@ -503,9 +514,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         });
     }
 
-    function binFormatErrorPage() {
+    function binFormatErrorPage(message) {
         removeChildren(stabHolder);
-        stabHolder.appendChild(makeElement('h2', 'Custom data format not recognized'));
+        message = message || 'Custom data format not recognized';
+        stabHolder.appendChild(makeElement('h2', 'Error adding custom data'));
+        stabHolder.appendChild(makeElement('p', message));
         stabHolder.appendChild(makeElement('p', 'Currently supported formats are bigBed, bigWig, and BAM.'));
         customMode = 'reset-bin';
         return;
