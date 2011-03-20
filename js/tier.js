@@ -105,10 +105,11 @@ function DasTier(browser, source, viewport, background)
                 
                 var densStyle = new DASStyle();
                 densStyle.glyph = 'HISTOGRAM';
-                densStyle.COLOR1 = 'white';
-                densStyle.COLOR2 = 'black';
+                densStyle.COLOR1 = 'blue';
+                densStyle.COLOR2 = 'red';
                 densStyle.HEIGHT=30;
                 thisTier.stylesheet.pushStyle({type: 'density'}, 'low', densStyle);
+                thisTier.stylesheet.pushStyle({type: 'density'}, 'medium', densStyle);
 
                 var wigStyle = new DASStyle();
                 wigStyle.glyph = 'BOX';
@@ -119,7 +120,7 @@ function DasTier(browser, source, viewport, background)
                 wigStyle.LABEL = false;
                 wigStyle.ZINDEX = 20;
                 thisTier.stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
-                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
+//                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
 
                 thisTier.browser.refreshTier(thisTier);
             });
