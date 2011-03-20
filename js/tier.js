@@ -105,7 +105,7 @@ function DasTier(browser, source, viewport, background)
                 
                 var densStyle = new DASStyle();
                 densStyle.glyph = 'HISTOGRAM';
-                densStyle.COLOR1 = 'blue';
+                densStyle.COLOR1 = 'black';
                 densStyle.COLOR2 = 'red';
                 densStyle.HEIGHT=30;
                 thisTier.stylesheet.pushStyle({type: 'density'}, 'low', densStyle);
