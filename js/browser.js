@@ -9,8 +9,8 @@
 
 // constants
 
-var NS_SVG = "http://www.w3.org/2000/svg";
-var NS_HTML = "http://www.w3.org/1999/xhtml"
+var NS_SVG = 'http://www.w3.org/2000/svg';
+var NS_HTML = 'http://www.w3.org/1999/xhtml'
 var NS_XLINK = 'http://www.w3.org/1999/xlink'
 
 // Limit stops
@@ -2044,7 +2044,7 @@ Browser.prototype.setLocation = function(newMin, newMax, newChr) {
 	newMin = 1;
 	newMax = Math.min(newMin + wid - 1, this.currentSeqMax);
     }
-    if (newMax > this.currentSeqMax) {
+    if (this.currentSeqMax > 0 && newMax > this.currentSeqMax) {
 	var wid = newMax - newMin + 1;
 	newMax = this.currentSeqMax;
 	newMin = Math.max(1, newMax - wid + 1);

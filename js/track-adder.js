@@ -457,7 +457,12 @@ Browser.prototype.showTrackAdder = function(ev) {
             if (!result) {
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
-                stabHolder.appendChild(makeElement('p', 'DAS uri: ' + nds.uri + ' is not answering features requests.'));
+                if (nds.bwgURI) {
+                    stabHolder.appendChild(makeElement('p', 'Data URI: ' + nds.bwgURI + ' is not accessible.'));
+                } else {
+                    stabHolder.appendChild(makeElement('p', 'File access failed, are you using an up-to-date browser?'));
+                }
+
                 if (error) {
                     stabHolder.appendChild(makeElement('p', '' + error));
                 }
