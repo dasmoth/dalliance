@@ -12,6 +12,8 @@ var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires ma
 
 var MIN_PADDING = 3;
 
+var SUBTIER_MAX = 50;
+
 //
 // Colour handling
 //
@@ -367,12 +369,6 @@ function drawFeatureTier(tier)
     drawGuidelines(tier, featureGroupElement);
 	
     var lh = MIN_PADDING;
-    var bumpMatrix = null;
-    if (tier.bumped) {
-	bumpMatrix = new Array(0);
-    }
-    // var styles = tier.styles(tier.browser.scale);
-
     var glyphs = [];
     var specials = false;
 
@@ -543,9 +539,13 @@ function drawFeatureTier(tier)
 		    continue GLYPH_LOOP;
 		}
 	    }
-	    var st = new DSubTier();
-	    st.add(g);
-	    bumpedSTs.push(st);
+            if (bumpedSTs.length >= SUBTIER_MAX) {
+                tier.status = 'Too many overlapping features, truncating at ' + SUBTIER_MAX;
+            } else {
+                var st = new DSubTier();
+                st.add(g);
+                bumpedSTs.push(st);
+            }
 	} else {
 	    unbumpedST.add(g);
 	}
@@ -1434,6 +1434,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     labelText.appendChild(document.createTextNode(base));
                     gg.push(labelText);
                     requiredHeight = 14;
+
+                    min -= 3;
+                    max += 3;
                 } else {
                     var br = document.createElementNS(NS_SVG, "rect");
                     br.setAttribute('x', minPos + i*scale);
@@ -1443,6 +1446,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     br.setAttribute('fill', color);
                     br.setAttribute('stroke', 'none');
                     gg.push(br);
+
+                    min = Math.floor(min - (2 / scale))|0;
+                    max = Math.ceil(max + (2/scale))|0;
                 }
             }
             glyph = makeElementNS(NS_SVG, 'g', gg);
