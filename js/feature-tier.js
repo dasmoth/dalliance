@@ -12,7 +12,7 @@ var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires ma
 
 var MIN_PADDING = 3;
 
-var SUBTIER_MAX = 50;
+var SUBTIER_MAX = 25;
 
 //
 // Colour handling
@@ -1415,7 +1415,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 }));
             }
             glyph = makeElementNS(NS_SVG, 'g', bits);
-        } if (feature.seq && scale >= 1) {
+        } else if (feature.seq && scale >= 1) {
             var seq  = feature.seq.toUpperCase();
             var gg = [];
             for (var i = 0; i < seq.length; ++i) {
@@ -1435,8 +1435,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     gg.push(labelText);
                     requiredHeight = 14;
 
-                    min -= 3;
-                    max += 3;
+                    min -= 1;
+                    max += 1;
                 } else {
                     var br = document.createElementNS(NS_SVG, "rect");
                     br.setAttribute('x', minPos + i*scale);
@@ -1447,8 +1447,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     br.setAttribute('stroke', 'none');
                     gg.push(br);
 
-                    min = Math.floor(min - (2 / scale))|0;
-                    max = Math.ceil(max + (2/scale))|0;
+                    min = Math.floor(min - (1 / scale))|0;
+                    max = Math.ceil(max + (1/scale))|0;
                 }
             }
             glyph = makeElementNS(NS_SVG, 'g', gg);
