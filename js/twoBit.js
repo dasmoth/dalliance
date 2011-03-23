@@ -85,7 +85,7 @@ TwoBitSeq.prototype.init = function(cnt) {
 	    thisB.mBlockCnt = readInt(ba, thisB.nBlockCnt*8);
 	    dlog('mBlockCnt=' + thisB.mBlockCnt);
 	    var seqLength = ((thisB.length + 3)/4)|0;
-	    thisB.tbf.data.slice(thisB.offset + 12 + ((thisB.nBlockCnt + thisB.mBlockCnt) * 8), seqLength).fetch(function(r3) {
+	    thisB.tbf.data.slice(thisB.offset + 16 + ((thisB.nBlockCnt + thisB.mBlockCnt) * 8), seqLength).fetch(function(r3) {
 		if (!r3) {
 		    return cnt('Fetch failed');
 		}
