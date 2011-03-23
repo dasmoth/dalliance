@@ -1,0 +1,31 @@
+<html>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript">
+function dlog(msg) {
+    var logHolder = document.getElementById('log');
+    if (logHolder) {
+	logHolder.appendChild(makeElement('p', msg));
+    }
+}
+
+makeTwoBit(new URLFetchable('http://localhost/hg18.2bit'), function(tb) {
+dlog('Got a 2bit');
+tb.fetch('chr22', 30000000, 30000100, function(seq, error) {
+    if (error) {
+        dlog(error);
+    } else {
+        dlog(seq);
+    }
+});
+});
+</script>
+<head>
+<h1>2bit test</h1>
+<div id='log'>
+</div>
+</html>
