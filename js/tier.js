@@ -43,7 +43,6 @@ function DasTier(browser, source, viewport, background)
                     }
                 });
         };
-        
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -367,4 +366,3 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
 //    dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
-
