@@ -851,12 +851,12 @@ Browser.prototype.realInit = function(opts) {
         storedConfigVersion = -100;
     }
     if (VERSION.CONFIG != storedConfigVersion) {
-//        alert("Don't understand config version " + storedConfigVersion + ", resetting.");
+//        dlog("Don't understand config version " + storedConfigVersion + ", resetting.");
         reset = true;
     }
 
     var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
-    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
+    var pageConfigHash = hex_sha1(miniJSONify(this.sources));   // okay to switch this to "real" JSON?
     if (pageConfigHash != storedConfigHash) {
 //        alert('page config seems to have changed, resetting');
         reset=true;
@@ -872,7 +872,7 @@ Browser.prototype.realInit = function(opts) {
     if (this.cookieKey) {
 	var maybeSourceConfig = localStorage['dalliance.' + this.cookieKey + '.sources'];
 	if (maybeSourceConfig && !reset) {
-	    overrideSources = eval(maybeSourceConfig);
+	    overrideSources = JSON.parse(maybeSourceConfig);
 	}
     }
     
@@ -2079,7 +2079,7 @@ Browser.prototype.storeStatus = function(){
 	    currentSourceList.push(this.tiers[t].dasSource);
         }
     }
-    localStorage['dalliance.' + this.cookieKey + '.sources'] = miniJSONify(currentSourceList);
+    localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
     localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;
 }
 

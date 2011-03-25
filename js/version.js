@@ -8,11 +8,11 @@
 //
 
 var VERSION = {
-    CONFIG: 2,
+    CONFIG: 3,
     MAJOR:  0,
     MINOR:  6,
     MICRO:  3,
-    PATCH:  '',
+    PATCH:  'a',
     BRANCH: ''
 }
 
