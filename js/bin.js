@@ -24,7 +24,7 @@ BlobFetchable.prototype.slice = function(start, length) {
 BlobFetchable.prototype.fetch = function(callback) {
     var reader = new FileReader();
     reader.onloadend = function(ev) {
-        callback(reader.result);
+        callback(bstringToBuffer(reader.result));
     };
     reader.readAsBinaryString(this.blob);
 }
@@ -85,7 +85,7 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
                 if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
                     return thisB.fetch(callback, attempt + 1, r.length);
                 } else {
-                    return callback(req.responseText);
+                    return callback(bstringToBuffer(req.responseText));
                 }
             } else {
                 return thisB.fetch(callback, attempt + 1);
@@ -99,6 +99,10 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
 }
 
 function bstringToBuffer(result) {
+    if (!result) {
+        return null;
+    }
+
     var ba = new Uint8Array(result.length);
     for (var i = 0; i < ba.length; ++i) {
         ba[i] = result.charCodeAt(i);

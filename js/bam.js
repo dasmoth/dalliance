@@ -36,7 +36,7 @@ function makeBam(data, bai, callback) {
 	    return dlog("Couldn't access BAM");
 	}
 
-        var unc = unbgzf(bstringToBuffer(r));
+        var unc = unbgzf(r);
 	var uncba = new Uint8Array(unc);
 
         var magic = readInt(uncba, 0);
@@ -75,14 +75,12 @@ function makeBam(data, bai, callback) {
         }
     });
 
-    bam.bai.fetch(function(r) {   // Do we really need to fetch the whole thing? :-(
-	if (!r) {
+    bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
+	if (!header) {
 	    return dlog("Couldn't access BAI");
 	}
-        var header = bstringToBuffer(r);
+
         var uncba = new Uint8Array(header);
-
-
         var baiMagic = readInt(uncba, 0);
         if (baiMagic != BAI_MAGIC) {
             return dlog('Not a BAI file');
@@ -237,7 +235,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
             var fetchMin = c.minv.block;
             var fetchMax = c.maxv.block + (1<<16); // *sigh*
             thisB.data.slice(fetchMin, fetchMax - fetchMin).fetch(function(r) {
-                data = unbgzf(bstringToBuffer(r), c.maxv.block - c.minv.block + 1);
+                data = unbgzf(r, c.maxv.block - c.minv.block + 1);
                 return tramp();
             });
         } else {

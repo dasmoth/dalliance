@@ -27,10 +27,7 @@ BigWig.prototype.readChromTree = function(callback) {
         ++udo;
     }
 
-    this.data.slice(this.chromTreeOffset, udo - this.chromTreeOffset).fetch(function(result) {
-	var bpt = bstringToBuffer(result);
-	// dlog('Loaded BPT');
-
+    this.data.slice(this.chromTreeOffset, udo - this.chromTreeOffset).fetch(function(bpt) {
 	var ba = new Uint8Array(bpt);
 	var sa = new Int16Array(bpt);
 	var la = new Int32Array(bpt);
@@ -107,7 +104,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     if (!this.cirHeader) {
 	// dlog('No CIR yet, fetching');
         this.bwg.data.slice(this.cirTreeOffset, 48).fetch(function(result) {
-	    thisB.cirHeader = bstringToBuffer(result);
+	    thisB.cirHeader = result;
             var la = new Int32Array(thisB.cirHeader);
             thisB.cirBlockSize = la[1];
 	    thisB.readWigDataById(chr, min, max, callback);
@@ -141,17 +138,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     var cirFobStartFetch = function(offset, fr, level, attempts) {
         var length = fr.max() - fr.min();
         // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
-        thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
-            var resultBuffer = bstringToBuffer(result);
-
-// This is now handled in URLFetchable instead.
-//
-//            if (resultBuffer.byteLength != length) {           
-//                dlog("Didn't get expected size: " + resultBuffer.byteLength + " != " + length);
-//                return cirFobStartFetch(offset, fr, level, attempts + 1);
-//            }
-
-
+        thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(resultBuffer) {
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
@@ -431,11 +418,13 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var data;
                                 if (thisB.bwg.uncompressBufSize > 0) {
                                     // var beforeInf = Date.now();
-                                    data = jszlib_inflate_buffer(bstringToBuffer(result.substr(offset + 2, fb.size - 2)));
+                                    data = jszlib_inflate_buffer(result, offset + 2, fb.size - 2);
                                     // var afterInf = Date.now();
                                     // dlog('inflate: ' + (afterInf - beforeInf) + 'ms');
                                 } else {
-                                    data = bstringToBuffer(result.substr(offset, fb.size)).buffer;
+                                    var tmp = new Uint8Array(fb.size);    // FIXME is this really the best we can do?
+                                    arrayCopy(new Uint8Array(result, offset, fb.size), 0, tmp, 0, fb.size);
+                                    data = tmp.buffer;
                                 }
                                 fb.data = data;
                                 
@@ -491,7 +480,7 @@ function makeBwg(data, callback, name) {
             return callback(null, "Couldn't fetch file");
         }
 
-        var header = bstringToBuffer(result);
+        var header = result;
 	var sa = new Int16Array(header);
 	var la = new Int32Array(header);
 	if (la[0] == BIG_WIG_MAGIC) {

@@ -471,8 +471,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 return;
             }
 
-            var rbuf = bstringToBuffer(result);
-            var ba = new Uint8Array(rbuf);
+            var ba = new Uint8Array(result);
             var magic = readInt(ba, 0);
             if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
                 var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb|.bigWig|.bigBed)?$');
@@ -486,7 +485,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (ba[0] != 31 || ba[1] != 139) {
                     return binFormatErrorPage();
                 }
-                var unc = unbgzf(rbuf);
+                var unc = unbgzf(result);
                 var uncba = new Uint8Array(unc);
                 magic = readInt(uncba, 0);
                 if (magic == BAM_MAGIC) {
@@ -525,7 +524,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         indexF.slice(0, 256).fetch(function(r) {
                 var hasBAI = false;
                 if (r) {
-                    var ba = new Uint8Array(bstringToBuffer(r));
+                    var ba = new Uint8Array(r);
                     var magic2 = readInt(ba, 0);
                     hasBAI = (magic2 == BAI_MAGIC);
                 }
