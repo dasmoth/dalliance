@@ -44,12 +44,20 @@ var palette = {
     black: new DColour(0, 0, 0, 'black')
 };
 
+var COLOR_RE = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
+
 function dasColourForName(name) {
     var c = palette[name];
     if (!c) {
-	alert("couldn't handle color: " + name);
-        c = palette.black;
-        palette[name] = c;
+        var match = COLOR_RE.exec(name);
+        if (match) {
+            c = new DColour(('0x' + match[1])|0, ('0x' + match[2])|0, ('0x' + match[3])|0, name);
+            palette[name] = c;
+        } else {
+            dlog("couldn't handle color: " + name);
+            c = palette.black;
+            palette[name] = c;
+        }
     }
     return c;
 }

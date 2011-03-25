@@ -49,6 +49,7 @@ var karyo_palette = {
     gpos66: 'rgb(100,100,100)',
     gpos75: 'rgb(64,64,64)',
     gpos100: 'rgb(0,0,0)',
+    gpos: 'rgb(0,0,0)',
     gvar: 'rgb(100,100,100)',
     acen: 'rgb(100,100,100)',
     stalk: 'rgb(100,100,100)'
