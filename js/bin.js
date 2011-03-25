@@ -78,14 +78,21 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
         length = this.end - this.start + 1;
     }
+    req.responseType = 'arraybuffer';
     req.onreadystatechange = function() {
         if (req.readyState == 4) {
             if (req.status == 200 || req.status == 206) {
-                var r = req.responseText;
-                if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
-                    return thisB.fetch(callback, attempt + 1, r.length);
+                if (req.response) {
+                    return callback(req.response);
+                } else if (req.mozResponseArrayBuffer) {
+                    return callback(req.mozResponseArrayBuffer);
                 } else {
-                    return callback(bstringToBuffer(req.responseText));
+                    var r = req.responseText;
+                    if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
+                        return thisB.fetch(callback, attempt + 1, r.length);
+                    } else {
+                        return callback(bstringToBuffer(req.responseText));
+                    }
                 }
             } else {
                 return thisB.fetch(callback, attempt + 1);
@@ -103,10 +110,13 @@ function bstringToBuffer(result) {
         return null;
     }
 
+//    var before = Date.now();
     var ba = new Uint8Array(result.length);
     for (var i = 0; i < ba.length; ++i) {
         ba[i] = result.charCodeAt(i);
     }
+//    var after  = Date.now();
+//    dlog('bb took ' + (after - before) + 'ms');
     return ba.buffer;
 }
 

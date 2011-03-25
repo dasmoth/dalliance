@@ -20,7 +20,7 @@ function makeTwoBit(fetchable, cnt) {
 	if (!r) {
 	    return cnt(null, "Couldn't access data");
 	}
-	var ba = new Uint8Array(bstringToBuffer(r));
+	var ba = new Uint8Array(r);
 	var magic = readInt(ba, 0);
 	// dlog('magic=' + magic + '; expect=' + TWOBIT_MAGIC);
 	if (magic != TWOBIT_MAGIC) {
@@ -73,7 +73,7 @@ TwoBitSeq.prototype.init = function(cnt) {
 	if (!r1) {
 	    return cnt('Fetch failed');
 	}
-	var ba = new Uint8Array(bstringToBuffer(r1));
+	var ba = new Uint8Array(r1);
 	thisB.length = readInt(ba, 0);
 	thisB.nBlockCnt = readInt(ba, 4);
 	dlog('length=' + thisB.length + '; nBlockCnt=' + thisB.nBlockCnt);
@@ -81,7 +81,7 @@ TwoBitSeq.prototype.init = function(cnt) {
 	    if (!r2) {
 		return cnt('Fetch failed');
 	    }
-	    var ba = new Uint8Array(bstringToBuffer(r2));
+	    var ba = new Uint8Array(r2);
 	    thisB.mBlockCnt = readInt(ba, thisB.nBlockCnt*8);
 	    dlog('mBlockCnt=' + thisB.mBlockCnt);
 	    var seqLength = ((thisB.length + 3)/4)|0;
@@ -89,7 +89,7 @@ TwoBitSeq.prototype.init = function(cnt) {
 		if (!r3) {
 		    return cnt('Fetch failed');
 		}
-		thisB.seqData = new Uint8Array(bstringToBuffer(r3));
+		thisB.seqData = new Uint8Array(r3);
 		return cnt();
 	    });
 	});
