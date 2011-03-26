@@ -1738,6 +1738,7 @@ Browser.prototype.realMakeTier = function(source) {
     this.tierHolder.appendChild(viewport);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
+    this.arrangeTiers();
 }
 
 Browser.prototype.removeTier = function(tier) {

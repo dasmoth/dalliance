@@ -19,7 +19,7 @@ function DasTier(browser, source, viewport, background)
     this.viewport = viewport;
     this.background = background;
     this.req = null;
-    this.layoutHeight = 50;
+    this.layoutHeight = 25;
     this.bumped = true; 
     if (this.dasSource.collapseSuperGroups) {
         this.bumped = false;
