@@ -132,7 +132,11 @@ function DasTier(browser, source, viewport, background)
             });
         }
     } else if (this.dasSource.tier_type == 'sequence') {
-        fs = new DASSequenceSource(this.dasSource);
+        if (this.dasSource.twoBitURI) {
+            fs = new TwoBitSequenceSource(this.dasSource);
+        } else {
+            fs = new DASSequenceSource(this.dasSource);
+        }
     } else {
         fs = new DASFeatureSource(this.dasSource);
     }
@@ -156,7 +160,6 @@ DasTier.prototype.init = function() {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
 	    tier.stylesheet = stylesheet;
-//            dlog('got a stylesheet');
             tier.browser.refreshTier(tier);
         }, function() {
 	    // tier.error = 'No stylesheet';
@@ -168,7 +171,15 @@ DasTier.prototype.init = function() {
             tier.stylesheet.pushStyle({type: 'default'}, null, defStyle);
             tier.browser.refreshTier(tier);
         });
-    }
+    } else if (tier.dasSource.twoBitURI) {
+        tier.stylesheet = new DASStylesheet();
+        var defStyle = new DASStyle();
+        defStyle.glyph = 'BOX';
+        defStyle.BGCOLOR = 'blue';
+        defStyle.FGCOLOR = 'black';
+        tier.stylesheet.pushStyle({type: 'default'}, null, defStyle);
+        tier.browser.refreshTier(tier);
+    };
 }
 
 DasTier.prototype.styles = function(scale) {
@@ -224,8 +235,6 @@ DasTier.prototype.setStatus = function(status) {
 }
 
 DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
-//    dlog('viewFeatures(' + chr + ',' + min + ',' + max + ')');
-
     this.currentFeatures = features;
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;

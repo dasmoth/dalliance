@@ -221,7 +221,6 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     );
 }
 
-
 function DASSequenceSource(dasSource) {
     this.dasSource = dasSource;
 }
@@ -253,6 +252,49 @@ DASSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, 
     }
 }
 
+function TwoBitSequenceSource(source) {
+    var thisB = this;
+    this.source = source;
+    this.twoBit = new Awaited();
+    makeTwoBit(new URLFetchable(source.twoBitURI), function(tb, error) {
+        if (error) {
+            dlog(error);
+        } else {
+            thisB.twoBit.provide(tb);
+        }
+    });
+}
+
+TwoBitSequenceSource.prototype.getScales = function() {
+    return [0.1, 10];
+}
+
+TwoBitSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (scale < 5) {   // Correct for default targetQuantRes.
+        this.twoBit.await(function(tb) {
+            tb.fetch(chr, min, max,
+                     function(seq, err) {
+                         if (err) {
+                             return callback(err, null, 1);
+                         } else {
+                             var f = new DASFeature();
+		             f.segment = chr;
+		             f.min = min;
+		             f.max = max;
+		             f.sequence = new DASSequence(chr, min, max, 'DNA', seq);
+                             return callback(null, [f], 1);
+                         }
+                     });
+        });
+    } else {
+	var f = new DASFeature();
+	f.segment = chr;
+	f.min = min;
+	f.max = max;
+	f.sequence = new DASSequence(chr, min, max, null, null);
+	callback(null, [f], 1000000000);
+    }
+}
 
 
 DASFeatureSource.prototype.getScales = function() {
