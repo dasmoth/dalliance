@@ -1626,7 +1626,7 @@ Browser.prototype.realInit = function(opts) {
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
-        } else if (ev.keyCode == 38 || ev.keyCode == 87) {
+        } else if (ev.keyCode == 38 || ev.keyCode == 87) { // & or W
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier > 0) {
                 --thisB.selectedTier;
@@ -1634,7 +1634,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.tiers[thisB.selectedTier + 1].isLabelValid = false;
                 thisB.arrangeTiers();
             }
-        } else if (ev.keyCode == 40 || ev.keyCode == 83) {
+        } else if (ev.keyCode == 40 || ev.keyCode == 83) { // ( or S
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier < thisB.tiers.length -1) {
                 ++thisB.selectedTier;
@@ -1642,7 +1642,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.tiers[thisB.selectedTier - 1].isLabelValid = false;
                 thisB.arrangeTiers();
             }
-        } else if (ev.charCode == 61) {
+        } else if (ev.charCode == 61) { // =
             ev.stopPropagation(); ev.preventDefault();
 
             var oz = thisB.zoomSlider.getValue();
@@ -1652,7 +1652,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
                 thisB.scheduleRefresh(500);
             }
-        } else if (ev.charCode == 45) {
+        } else if (ev.charCode == 45) { // -
             ev.stopPropagation(); ev.preventDefault();
 
             var oz = thisB.zoomSlider.getValue();
@@ -1662,7 +1662,7 @@ Browser.prototype.realInit = function(opts) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
                 thisB.scheduleRefresh(500);
             }
-        } else if (ev.keyCode == 84 || ev.keyCode == 116) {
+        } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t or T
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
@@ -1688,6 +1688,50 @@ Browser.prototype.realInit = function(opts) {
                     t.layoutWasDone = false;
                     t.isLabelValid = false;
                     t.draw();
+                }
+            }
+        } else if (ev.keyCode == 82 || ev.keyCode == 114) { // r or R
+            ev.stopPropagation(); ev.preventDefault();
+            if( ev.shiftKey ){
+                for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                    var t = thisB.tiers[ti];
+                    if (t.hasBumpedFeatures) {
+                        if (t.layoutHeight != t.wantedLayoutHeight) {
+                            t.layoutHeight = t.wantedLayoutHeight;
+                            t.placard = null;
+                            t.clipTier();
+                            t.browser.arrangeTiers();
+                        }
+                    }
+                }
+            } else {
+                var t = thisB.tiers[thisB.selectedTier];
+                if (t.hasBumpedFeatures) {
+                    if (t.layoutHeight != t.wantedLayoutHeight) {
+                        t.layoutHeight = t.wantedLayoutHeight;
+                        t.placard = null;
+                        t.clipTier();
+                        t.browser.arrangeTiers();
+                    }
+                }
+            }
+        } else if (ev.keyCode == 77 || ev.keyCode == 109) { // m or M
+            ev.stopPropagation(); ev.preventDefault();
+            if( ev.shiftKey ){
+                for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                    var t = thisB.tiers[ti];
+                    if (t.hasBumpedFeatures) {
+                        if (t.browser.autoSizeTiers == true) {
+                            t.browser.autoSizeTiers = false;
+                        }
+                    }
+                }
+            } else {
+                var t = thisB.tiers[thisB.selectedTier];
+                if (t.hasBumpedFeatures) {
+                    if (t.browser.autoSizeTiers == true) {
+                        t.browser.autoSizeTiers = false;
+                    }
                 }
             }
         } else {
