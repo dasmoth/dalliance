@@ -250,6 +250,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
 }
 
 var SEQRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
+var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
 
 function BamRecord() {
 }
@@ -289,8 +290,14 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         }
     
         var p = offset + 36 + nl;
-        // Skip CIGAR
-        p += nc * 4;
+
+        var cigar = '';
+        for (var c = 0; c < nc; ++c) {
+            var cigop = readInt(ba, p);
+            cigar = cigar + (cigop>>4) + CIGAR_DECODER[cigop & 0xf];
+            p += 4;
+        }
+        record.cigar = cigar;
     
         var seq = '';
         var seqBytes = (lseq + 1) >> 1;

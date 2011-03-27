@@ -371,7 +371,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     f.segment = r.segment;
                     f.type = 'bam';
                     f.id = r.readName;
-                    f.notes = ['Sequence=' + r.seq, 'MQ=' + r.mq];
+                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
                     f.seq = r.seq;
                     features.push(f);
                 }
