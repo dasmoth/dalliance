@@ -315,12 +315,12 @@ DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
     if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
         if (this.currentFeatures) {
-            var threashold;
+            var threshold;
             if (this.isQuantitative) {
                 if(this.dasSource.forceMax && this.dasSource.forceMax < this.max){
-                    threashold=this.dasSource.forcemax*0.8;
+                    threshold=this.dasSource.forcemax*0.6;
                 }else{
-                    threashold=this.max*0.8;
+                    threshold=this.max*0.6;
                 }
             }
             var bestFeature = null;
@@ -339,7 +339,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
                             bestFeature = f;
                         }
                     } else if (f.max < pos) {
-                        if (threashold && f.score < threashold){
+                        if (threshold && f.score < threshold){
                             continue;
                         }
                         if (!bestFeature || f.max > bestFeature.max || 
@@ -355,7 +355,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
                             bestFeature = f;
                         }
                     } else if (f.min > pos) {
-                        if (threashold && f.score < threashold){
+                        if (threshold && f.score < threshold){
                             continue;
                         }
                         if (!bestFeature || f.min < bestFeature.min ||
