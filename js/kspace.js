@@ -73,24 +73,7 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     }
     this.pool = new FetchPool();
     
-    var awaitedSeq = new Awaited();
-    var needSeq = false;
-
-    for (var t = 0; t < this.tierMap.length; ++t) {
-	if (this.startFetchesFor(this.tierMap[t], awaitedSeq)) {
-            needSeq = true;
-        }
-    }
-
-    if (needSeq) {
-        this.seqSource.fetch(chr, min, max, this.pool, function(err, seq) {
-            if (seq) {
-                awaitedSeq.provide(seq);
-            } else {
-                dlog('Noseq: ' + miniJSONify(err));
-            }
-        });
-    } 
+    this.startFetchesForTiers(this.tierMap);
 }
     
 function filterFeatures(features, min, max) {
@@ -128,7 +111,28 @@ function filterFeatures(features, min, max) {
 
 KnownSpace.prototype.invalidate = function(tier) {
     this.featureCache[tier] = null;
-    this.startFetchesFor(tier);
+    this.startFetchesForTiers([tier]);
+}
+
+KnownSpace.prototype.startFetchesForTiers = function(tiers) {
+    var awaitedSeq = new Awaited();
+    var needSeq = false;
+
+    for (var t = 0; t < tiers.length; ++t) {
+	if (this.startFetchesFor(tiers[t], awaitedSeq)) {
+            needSeq = true;
+        }
+    }
+
+    if (needSeq) {
+        this.seqSource.fetch(this.chr, this.min, this.max, this.pool, function(err, seq) {
+            if (seq) {
+                awaitedSeq.provide(seq);
+            } else {
+                dlog('Noseq: ' + miniJSONify(err));
+            }
+        });
+    } 
 }
 
 KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
@@ -520,8 +524,6 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                         }
                     }
 		}
-
-                // dlog('mapped ' + features.length + ' -> ' + mappedFeatures.length);
 
 		callback(status, mappedFeatures, fscale);
 	    });
