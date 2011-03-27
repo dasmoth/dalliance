@@ -35,18 +35,15 @@ KSCacheBaton.prototype.toString = function() {
     return this.chr + ":" + this.min + ".." + this.max + ";scale=" + this.scale;
 }
 
-function KnownSpace(tierMap, chr, min, max, scale, parent) {
+function KnownSpace(tierMap, chr, min, max, scale, seqSource) {
     this.tierMap = tierMap;
     this.chr = chr;
     this.min = min;
     this.max = max;
     this.scale = scale;
+    this.seqSource = seqSource || new DummySequenceSource();
 
     this.featureCache = {};
-
-    if (parent) {
-	// try to copy stuff
-    }
 }
 
 KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
@@ -75,10 +72,25 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
 	this.pool.abortAll();
     }
     this.pool = new FetchPool();
+    
+    var awaitedSeq = new Awaited();
+    var needSeq = false;
 
     for (var t = 0; t < this.tierMap.length; ++t) {
-	this.startFetchesFor(this.tierMap[t]);
+	if (this.startFetchesFor(this.tierMap[t], awaitedSeq)) {
+            needSeq = true;
+        }
     }
+
+    if (needSeq) {
+        this.seqSource.fetch(chr, min, max, this.pool, function(err, seq) {
+            if (seq) {
+                awaitedSeq.provide(seq);
+            } else {
+                dlog('Noseq: ' + miniJSONify(err));
+            }
+        });
+    } 
 }
     
 function filterFeatures(features, min, max) {
@@ -119,15 +131,16 @@ KnownSpace.prototype.invalidate = function(tier) {
     this.startFetchesFor(tier);
 }
 
-KnownSpace.prototype.startFetchesFor = function(tier) {
+KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     var thisB = this;
 
-    var source = tier.getSource();
+    var source = tier.getSource() || new DummyFeatureSource();
+    var needsSeq = tier.needsSequence(this.scale);
     var baton = thisB.featureCache[tier];
     var wantedTypes = tier.getDesiredTypes(this.scale);
     if (wantedTypes === undefined) {
-//        dlog('Aborting fetch');
-        return;
+//         dlog('skipping because wantedTypes is undef');
+        return false;
     }
     if (baton) {
 // 	dlog('considering cached features: ' + baton);
@@ -145,18 +158,17 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
         // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
 //	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
-        thisB.provision(tier, baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, wantedTypes, cachedFeatures, baton.status);
+        thisB.provision(tier, baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
 
 	var availableScales = source.getScales();
 	if (baton.scale <= this.scale || !availableScales) {
 //	    dlog('used cached features');
-	    return;
+	    return needsSeq;
 	} else {
 //	    dlog('used cached features (temporarily)');
 	}
     }
 
-    
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
 	if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
 	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features, status);
@@ -167,11 +179,12 @@ KnownSpace.prototype.startFetchesFor = function(tier) {
 	//}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
 	//tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
-        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, thisB.scale, wantedTypes, features, status);
+        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, thisB.scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
+    return needsSeq;
 }
 
-KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status) {
+KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
     if (status) {
         tier.updateStatus(status);
     } else {
@@ -181,7 +194,14 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
         {
 	    features = downsample(features, this.scale);
         }
-        tier.viewFeatures(chr, min, max, actualScale, features);
+
+        if (awaitedSeq) {
+            awaitedSeq.await(function(seq) {
+                tier.viewFeatures(chr, min, max, actualScale, features, seq);
+            });
+        } else {
+            tier.viewFeatures(chr, min, max, actualScale, features);
+        }
     }
 }
 
@@ -225,31 +245,18 @@ function DASSequenceSource(dasSource) {
     this.dasSource = dasSource;
 }
 
-DASSequenceSource.prototype.getScales = function() {
-    return [0.1, 10];
-}
 
-DASSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    if (scale < 5) {   // Correct for default targetQuantRes.
-	this.dasSource.sequence(
-            new DASSegment(chr, min, max),
-            function(seqs) {
-		var f = new DASFeature();
-		f.segment = chr;
-		f.min = min;
-		f.max = max;
-		f.sequence = seqs[0];
-		callback(null, [f], 1);
+DASSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
+    this.dasSource.sequence(
+        new DASSegment(chr, min, max),
+        function(seqs) {
+            if (seqs.length == 1) {
+                return callback(null, seqs[0]);
+            } else {
+                return callback("Didn't get sequence");
             }
-        );
-    } else {
-	var f = new DASFeature();
-	f.segment = chr;
-	f.min = min;
-	f.max = max;
-	f.sequence = new DASSequence(chr, min, max, null, null);
-	callback(null, [f], 1000000000);
-    }
+        }
+    );
 }
 
 function TwoBitSequenceSource(source) {
@@ -265,35 +272,18 @@ function TwoBitSequenceSource(source) {
     });
 }
 
-TwoBitSequenceSource.prototype.getScales = function() {
-    return [0.1, 10];
-}
-
-TwoBitSequenceSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    if (scale < 5) {   // Correct for default targetQuantRes.
+TwoBitSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
         this.twoBit.await(function(tb) {
             tb.fetch(chr, min, max,
                      function(seq, err) {
                          if (err) {
-                             return callback(err, null, 1);
+                             return callback(err, null);
                          } else {
-                             var f = new DASFeature();
-		             f.segment = chr;
-		             f.min = min;
-		             f.max = max;
-		             f.sequence = new DASSequence(chr, min, max, 'DNA', seq);
-                             return callback(null, [f], 1);
+		             var sequence = new DASSequence(chr, min, max, 'DNA', seq);
+                             return callback(null, sequence);
                          }
-                     });
+                     })
         });
-    } else {
-	var f = new DASFeature();
-	f.segment = chr;
-	f.min = min;
-	f.max = max;
-	f.sequence = new DASSequence(chr, min, max, null, null);
-	callback(null, [f], 1000000000);
-    }
 }
 
 
@@ -537,4 +527,22 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 	    });
 	}
     });
+}
+
+function DummyFeatureSource() {
+}
+
+DummyFeatureSource.prototype.getScales = function() {
+    return null;
+}
+
+DummyFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, cnt) {
+    return cnt(null, [], 1000000000);
+}
+
+function DummySequenceSource() {
+}
+
+DummySequenceSource.prototype.fetch = function(chr, min, max, pool, cnt) {
+    return cnt(null, null);
 }

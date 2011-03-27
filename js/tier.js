@@ -27,7 +27,7 @@ function DasTier(browser, source, viewport, background)
     this.y = 0;
     this.layoutWasDone = false;
 
-    var fs;
+    var fs, ss;
     if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
         fs = new BWGFeatureSource(this.dasSource, {
             credentials: this.dasSource.credentials,
@@ -133,9 +133,9 @@ function DasTier(browser, source, viewport, background)
         }
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
-            fs = new TwoBitSequenceSource(this.dasSource);
+            ss = new TwoBitSequenceSource(this.dasSource);
         } else {
-            fs = new DASSequenceSource(this.dasSource);
+            ss = new DASSequenceSource(this.dasSource);
         }
     } else {
         fs = new DASFeatureSource(this.dasSource);
@@ -146,6 +146,7 @@ function DasTier(browser, source, viewport, background)
     }
 
     this.featureSource = fs;
+    this.sequenceSource = ss;
     this.setBackground();
 }
 
@@ -230,12 +231,23 @@ DasTier.prototype.getDesiredTypes = function(scale) {
     }
 }
 
+DasTier.prototype.needsSequence = function(scale ) {
+    if (this.dasSource.tier_type === 'sequence' && scale < 5) {
+        return true;
+    }
+    // BAM stuff.
+    return false;
+}
+
 DasTier.prototype.setStatus = function(status) {
     dlog(status);
 }
 
-DasTier.prototype.viewFeatures = function(chr, min, max, scale, features) {
+DasTier.prototype.viewFeatures = function(chr, min, max, scale, features, sequence) {
     this.currentFeatures = features;
+    this.currentSequence = sequence;
+    
+    this.knownChr = chr;
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
 
@@ -254,8 +266,9 @@ DasTier.prototype.updateStatus = function(status) {
 
 DasTier.prototype.draw = function() {
     var features = this.currentFeatures;
-    if (features && features.length > 0 && features[0].sequence) {
-        drawSeqTier(this, features[0].sequence); 
+    var seq = this.currentSequence;
+    if (this.dasSource.tier_type === 'sequence') {
+        drawSeqTier(this, seq); 
     } else {
         drawFeatureTier(this);
     }

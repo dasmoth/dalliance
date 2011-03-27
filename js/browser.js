@@ -518,7 +518,14 @@ Browser.prototype.refresh = function() {
     var outerDrawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
 
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
-        this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes);
+        var ss = null;
+        for (var i = 0; i < this.tiers.length; ++i) {
+            if (this.tiers[i].sequenceSource) {
+                ss = this.tiers[i].sequenceSource;
+                break;
+            }
+        }
+        this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
     
     var seg = this.knownSpace.bestCacheOverlapping(this.chr, innerDrawnStart, innerDrawnEnd);
@@ -1621,7 +1628,7 @@ Browser.prototype.realInit = function(opts) {
     var epSource;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var s = this.tiers[ti].dasSource;
-        if (s.tier_type == 'sequence') {
+        if (s.provides_entrypoints) {
             epSource = this.tiers[ti].dasSource;
             break;
         }
