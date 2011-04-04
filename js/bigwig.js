@@ -346,8 +346,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     var thickStart = bedColumns[3]|0;
                                     var thickEnd   = bedColumns[4]|0;
                                     var blockCount = bedColumns[6]|0;
-                                    var blockStarts = bedColumns[7].split(',');
-                                    var blockEnds = bedColumns[8].split(',');
+                                    var blockSizes = bedColumns[7].split(',');
+                                    var blockStarts = bedColumns[8].split(',');
                                     
                                     featureOpts.type = 'bb-transcript'
                                     var grp = new DASGroup();
@@ -368,8 +368,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
                                     var spans = null;
                                     for (var b = 0; b < blockCount; ++b) {
-                                        var bmin = blockStarts[b]|0;
-                                        var bmax = blockEnds[b]|0;
+                                        var bmin = (blockStarts[b]|0) + start;
+                                        var bmax = bmin + (blockSizes[b]|0);
                                         var span = new Range(bmin, bmax);
                                         if (spans) {
                                             spans = union(spans, span);
