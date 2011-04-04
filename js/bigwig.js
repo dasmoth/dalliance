@@ -312,14 +312,9 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var start = (ba[offset+7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
                                 var end = (ba[offset+11]<<24) | (ba[offset+10]<<16) | (ba[offset+9]<<8) | (ba[offset+8]);
                                 offset += 12;
-                                var rest = '';
-                                while (true) {
-                                    var ch = ba[offset++];
-                                    if (ch != 0) {
-                                        rest += String.fromCharCode(ch);
-                                    } else {
-                                        break;
-                                    }
+                                var rest = '', ch;
+                                while ((ch = ba[offset++]) != 0) {
+                                    rest += String.fromCharCode(ch);
                                 }
 
                                 var featureOpts = {};
