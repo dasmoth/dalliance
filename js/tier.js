@@ -48,6 +48,7 @@ function DasTier(browser, source, viewport, background)
                     if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
                         thisTier.dasSource.collapseSuperGroups = true;
                         thisTier.bumped = false;
+                        thisTier.isLabelValid = false;
                     }
                 }
 
