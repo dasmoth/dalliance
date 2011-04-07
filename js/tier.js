@@ -35,6 +35,14 @@ function DasTier(browser, source, viewport, background)
             clientBin: this.dasSource.clientBin,
             forceReduction: this.dasSource.forceReduction
         });
+        this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+            fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
+                    // dlog('got a result');
+                    if (res.length > 0 && res[0] != null) {
+                        callback(res[0]);
+                    }
+                });
+        };
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -70,7 +78,6 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.BGCOLOR = 'red'
                     wigStyle.HEIGHT = 10;
                     wigStyle.BUMP = true;
-                    wigStyle.LABEL = true;
                     wigStyle.ZINDEX = 20;
                     thisTier.stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
                     
@@ -78,9 +85,10 @@ function DasTier(browser, source, viewport, background)
                     tsStyle.glyph = 'BOX';
                     tsStyle.FGCOLOR = 'black';
                     tsStyle.BGCOLOR = 'white';
-                    wigStyle.HEIGHT = 10;
+                    tsStyle.HEIGHT = 10;
                     tsStyle.ZINDEX = 10;
                     tsStyle.BUMP = true;
+                    tsStyle.LABEL = true;
                     thisTier.stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
 
                     var densStyle = new DASStyle();
@@ -140,6 +148,29 @@ function DasTier(browser, source, viewport, background)
         }
     } else {
         fs = new DASFeatureSource(this.dasSource);
+        var dasAdjLock = false;
+        if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
+            this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+                if (dasAdjLock) {
+                    return dlog('Already looking for a next feature, be patient!');
+                }
+                dasAdjLock = true;
+                var fops = {
+                    adjacent: chr + ':' + (pos|0) + ':' + (dir > 0 ? 'F' : 'B')
+                }
+                var types = thisTier.getDesiredTypes(thisTier.browser.scale);
+                if (types) {
+                    fops.types = types;
+                }
+                thisTier.dasSource.features(null, fops, function(res) {
+                    dasAdjLock = false;
+                    if (res.length > 0 && res[0] != null) {
+                        dlog('DAS adjacent seems to be working...');
+                        callback(res[0]);
+                    }
+                });
+            };
+        }
     }
     
     if (this.dasSource.mapping) {
@@ -300,4 +331,63 @@ DasTier.prototype.setBackground = function() {
         this.background.setAttribute('x', (ks - this.browser.origin) * this.browser.scale);
         this.background.setAttribute('width', (ke - this.knownStart + 1) * this.browser.scale);
 //    }    
+}
+
+DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
+    callback(null);
+}
+
+DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
+    if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
+        if (this.currentFeatures) {
+            var bestFeature = null;
+            for (var fi = 0; fi < this.currentFeatures.length; ++fi) {
+                var f = this.currentFeatures[fi];
+                if (!f.min || !f.max) {
+                    continue;
+                }
+                if (f.parents && f.parents.length > 0) {
+                    continue;
+                }
+                if (dir < 0) {
+                    if (fedge == 1 && f.max >= pos && f.min < pos) {
+                        if (!bestFeature || f.min > bestFeature.min ||
+                            (f.min == bestFeature.min && f.max < bestFeature.max)) {
+                            bestFeature = f;
+                        }
+                    } else if (f.max < pos) {
+                        if (!bestFeature || f.max > bestFeature.max || 
+                            (f.max == bestFeature.max && f.min < bestFeature.min) ||
+                            (f.min == bestFeature.mmin && bestFeature.max >= pos)) {
+                            bestFeature = f;
+                        } 
+                    }
+                } else {
+                    if (fedge == 1 && f.min <= pos && f.max > pos) {
+                        if (!bestFeature || f.max < bestFeature.max ||
+                            (f.max == bestFeature.max && f.min > bestFeature.min)) {
+                            bestFeature = f;
+                        }
+                    } else if (f.min > pos) {
+                        if (!bestFeature || f.min < bestFeature.min ||
+                            (f.min == bestFeature.min && f.max > bestFeature.max) ||
+                            (f.max == bestFeature.max && bestFeature.min <= pos)) {
+                            bestFeature = f;
+                        }
+                    }
+                }
+            }
+            if (bestFeature) {
+//                dlog('bestFeature = ' + miniJSONify(bestFeature));
+                return callback(bestFeature);
+            }
+            if (dir < 0) {
+                pos = this.knownStart;
+            } else {
+                pos = this.knownEnd;
+            }
+        }
+    }
+//    dlog('delegating to source: ' + pos);
+    this.sourceFindNextFeature(chr, pos, dir, callback);
 }

@@ -183,32 +183,49 @@ DASSource.prototype.features = function(segment, options, callback) {
 
     var dasURI;
     if (this.uri.indexOf('http://') == 0) {
-        dasURI = this.uri + 'features?';
+        var filters = [];
 
 	if (segment) {
-	    dasURI += segment.toDASQuery();
+	    filters.push(segment.toDASQuery());
 	} else if (options.group) {
 	    var g = options.group;
 	    if (typeof g == 'string') {
-		dasURI += ';group_id=' + g;
+		filters.push('group_id=' + g);
 	    } else {
 		for (var gi = 0; gi < g.length; ++gi) {
-		    dasURI += ';group_id=' + g[gi];
+		    filters.push('group_id=' + g[gi]);
 		}
 	    }
 	}
+
+        if (options.adjacent) {
+            var adj = options.adjacent;
+            if (typeof adj == 'string') {
+                adj = [adj];
+            }
+            for (var ai = 0; ai < adj.length; ++ai) {
+                filters.push('adjacent=' + adj[ai]);
+            }
+        }
+
         if (options.type) {
             if (typeof options.type == 'string') {
-                dasURI += ';type=' + options.type;
+                filters.push('type=' + options.type);
             } else {
                 for (var ti = 0; ti < options.type.length; ++ti) {
-                    dasURI += ';type=' + options.type[ti];
+                    filters.push('type=' + options.type[ti]);
                 }
             }
         }
 	
         if (options.maxbins) {
-            dasURI += ';maxbins=' + options.maxbins;
+            filters.push('maxbins=' + options.maxbins);
+        }
+        
+        if (filters.length > 0) {
+            dasURI = this.uri + 'features?' + filters.join(';');
+        } else {
+            callback([], 'No filters specified');
         }
     } else {
         dasURI = this.uri;
@@ -216,8 +233,6 @@ DASSource.prototype.features = function(segment, options, callback) {
    
     // dlog(dasURI);
 
-    // Feature/group-by-ID stuff?
-    
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
 
 	if (!responseXML) {
@@ -260,11 +275,11 @@ DASSource.prototype.features = function(segment, options, callback) {
                 var spos = elementValue(feature, "START");
                 var epos = elementValue(feature, "END");
                 if ((spos|0) > (epos|0)) {
-                    dasFeature.min = epos;
-                    dasFeature.max = spos;
+                    dasFeature.min = epos|0;
+                    dasFeature.max = spos|0;
                 } else {
-                    dasFeature.min = spos;
-                    dasFeature.max = epos;
+                    dasFeature.min = spos|0;
+                    dasFeature.max = epos|0;
                 }
                 {
                     var tec = feature.getElementsByTagName('TYPE');
@@ -564,10 +579,14 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
 		coords.push(coord);
 	    }
 	    
+            var caps = [];
 	    var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
 	    var uri;
 	    for (var ci = 0; ci < capXMLs.length; ++ci) {
 		var capXML = capXMLs[ci];
+                
+                caps.push(capXML.getAttribute('type'));
+
 		if (capXML.getAttribute('type') == 'das1:features') {
 		    var fep = capXML.getAttribute('query_uri');
 		    uri = fep.substring(0, fep.length - ('features'.length));
@@ -586,7 +605,8 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
                     name:  sourceXML.getAttribute('title'),
                     desc:  sourceXML.getAttribute('description'),
                     coords: coords,
-                    props: props
+                    props: props,
+                    capabilities: caps
                 });
 		sources.push(source);
 	    }
