@@ -53,9 +53,9 @@ _Compound.prototype.max = function() {
 _Compound.prototype.contains = function(pos) {
     // FIXME implement bsearch if we use this much.
     for (var s = 0; s < this._ranges.length; ++s) {
-	if (this._ranges[s].contains(pos)) {
-	    return true;
-	}
+        if (this._ranges[s].contains(pos)) {
+            return true;
+        }
     }
     return false;
 }
@@ -71,10 +71,10 @@ _Compound.prototype.ranges = function() {
 _Compound.prototype.toString = function() {
     var s = '';
     for (var r = 0; r < this._ranges.length; ++r) {
-	if (r>0) {
-	    s = s + ',';
-	}
-	s = s + this._ranges[r].toString();
+        if (r>0) {
+            s = s + ',';
+        }
+        s = s + this._ranges[r].toString();
     }
     return s;
 }
@@ -85,22 +85,22 @@ function union(s0, s1) {
     var current = ranges[0];
 
     for (var i = 1; i < ranges.length; ++i) {
-	var nxt = ranges[i];
-	if (nxt.min() > (current.max() + 1)) {
-	    oranges.push(current);
-	    current = nxt;
-	} else {
-	    if (nxt.max() > current.max()) {
-		current = new Range(current.min(), nxt.max());
-	    }
-	}
+        var nxt = ranges[i];
+        if (nxt.min() > (current.max() + 1)) {
+            oranges.push(current);
+            current = nxt;
+        } else {
+            if (nxt.max() > current.max()) {
+                current = new Range(current.min(), nxt.max());
+            }
+        }
     }
     oranges.push(current);
 
     if (oranges.length == 1) {
-	return oranges[0];
+        return oranges[0];
     } else {
-	return new _Compound(oranges);
+        return new _Compound(oranges);
     }
 }
 

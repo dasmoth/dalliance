@@ -24,8 +24,8 @@ var STRICT_NUM_REGEXP = new RegExp('^[0-9]+$');
 function stringToInt(str) {
     str = str.replace(new RegExp(',', 'g'), '');
     if (!STRICT_NUM_REGEXP.test(str)) {
-	alert("Don't understand '" + str + "'");
-	return null;
+        alert("Don't understand '" + str + "'");
+        return null;
     }
     return str|0;
 }
@@ -41,23 +41,23 @@ function pushnew(a, v) {
 
 function pusho(obj, k, v) {
     if (obj[k]) {
-	obj[k].push(v);
+        obj[k].push(v);
     } else {
-	obj[k] = [v];
+        obj[k] = [v];
     }
 }
 
 function pushnewo(obj, k, v) {
     var a = obj[k];
     if (a) {
-	for (var i = 0; i < a.length; ++i) {    // indexOf requires JS16 :-(.
-	    if (a[i] == v) {
-		return;
-	    }
-	}
-	a.push(v);
+        for (var i = 0; i < a.length; ++i) {    // indexOf requires JS16 :-(.
+            if (a[i] == v) {
+                return;
+            }
+        }
+        a.push(v);
     } else {
-	obj[k] = [v];
+        obj[k] = [v];
     }
 }
 
@@ -232,29 +232,29 @@ function miniJSONify(o) {
     } else if (o == null) {
         return 'null';
     } else if (typeof o == 'string') {
-	return "'" + o + "'";
+        return "'" + o + "'";
     } else if (typeof o == 'number') {
-	return "" + o;
+        return "" + o;
     } else if (typeof o == 'boolean') {
-	return "" + o;
+        return "" + o;
     } else if (typeof o == 'object') {
-	if (o instanceof Array) {
-	    var s = null;
-	    for (var i = 0; i < o.length; ++i) {
-		s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
-	    }
-	    return '[' + (s?s:'') + ']';
-	} else {
-	    var s = null;
-	    for (var k in o) {
-		if (k != undefined && typeof(o[k]) != 'function') {
-		    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
-		}
-	    }
-	    return '{' + (s?s:'') + '}';
-	}
+        if (o instanceof Array) {
+            var s = null;
+            for (var i = 0; i < o.length; ++i) {
+                s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
+            }
+            return '[' + (s?s:'') + ']';
+        } else {
+            var s = null;
+            for (var k in o) {
+                if (k != undefined && typeof(o[k]) != 'function') {
+                    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
+                }
+            }
+            return '{' + (s?s:'') + '}';
+        }
     } else {
-	return (typeof o);
+        return (typeof o);
     }
 }
 
@@ -301,21 +301,21 @@ function Awaited() {
 
 Awaited.prototype.provide = function(x) {
     if (this.res) {
-	throw "Resource has already been provided.";
+        throw "Resource has already been provided.";
     }
 
     this.res = x;
     for (var i = 0; i < this.queue.length; ++i) {
-	this.queue[i](x);
+        this.queue[i](x);
     }
 }
 
 Awaited.prototype.await = function(f) {
     if (this.res) {
-	f(this.res);
+        f(this.res);
         return this.res;
     } else {
-	this.queue.push(f);
+        this.queue.push(f);
     }
 }
 

@@ -192,10 +192,10 @@ DasTier.prototype.init = function() {
     if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
-	    tier.stylesheet = stylesheet;
+            tier.stylesheet = stylesheet;
             tier.browser.refreshTier(tier);
         }, function() {
-	    // tier.error = 'No stylesheet';
+            // tier.error = 'No stylesheet';
             tier.stylesheet = new DASStylesheet();
             var defStyle = new DASStyle();
             defStyle.glyph = 'BOX';
@@ -218,13 +218,13 @@ DasTier.prototype.init = function() {
 DasTier.prototype.styles = function(scale) {
     // alert('Old SS code called');
     if (this.stylesheet == null) {
-	return null;
+        return null;
     } else if (this.browser.scale > 0.2) {
-	return this.stylesheet.highZoomStyles;
+        return this.stylesheet.highZoomStyles;
     } else if (this.browser.scale > 0.01) {
-	return this.stylesheet.mediumZoomStyles;
+        return this.stylesheet.mediumZoomStyles;
     } else {
-	return this.stylesheet.lowZoomStyles;
+        return this.stylesheet.lowZoomStyles;
     }
 }
 

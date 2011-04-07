@@ -32,12 +32,12 @@ function makeBam(data, bai, callback) {
     bam.bai = bai;
 
     bam.data.slice(0, 65536).fetch(function(r) {
-	if (!r) {
-	    return dlog("Couldn't access BAM");
-	}
+        if (!r) {
+            return dlog("Couldn't access BAM");
+        }
 
         var unc = unbgzf(r);
-	var uncba = new Uint8Array(unc);
+        var uncba = new Uint8Array(unc);
 
         var magic = readInt(uncba, 0);
         var headLen = readInt(uncba, 4);
@@ -76,9 +76,9 @@ function makeBam(data, bai, callback) {
     });
 
     bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
-	if (!header) {
-	    return dlog("Couldn't access BAI");
-	}
+        if (!header) {
+            return dlog("Couldn't access BAI");
+        }
 
         var uncba = new Uint8Array(header);
         var baiMagic = readInt(uncba, 0);

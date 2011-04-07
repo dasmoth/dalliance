@@ -26,9 +26,9 @@ function DSBin(scale, min, max) {
 
 DSBin.prototype.score = function() {
     if (this.cnt == 0) {
-	return 0;
+        return 0;
     } else if (this.hasScore) {
-	return this.tot / this.cnt;
+        return this.tot / this.cnt;
     } else {
         return this.lap / coverage(this.covered);
     }
@@ -59,7 +59,7 @@ function downsample(features, targetRez) {
 
     var sn = 0;
     while (ds_scale(sn + 1) < targetRez) {
-	++sn;
+        ++sn;
     }
     var scale = ds_scale(sn);
 
@@ -67,39 +67,39 @@ function downsample(features, targetRez) {
     var maxBin = -10000000000;
     var minBin = 10000000000;
     for (var fi = 0; fi < features.length; ++fi) {
-	var f = features[fi];
+        var f = features[fi];
         if (f.groups && f.groups.length > 0) {
             // Don't downsample complex features (?)
             return features;
         }
-//	if (f.score) {
-	    var minLap = (f.min / scale)|0;
-	    var maxLap = (f.max / scale)|0;
-	    maxBin = Math.max(maxBin, maxLap);
-	    minBin = Math.min(minBin, minLap);
-	    for (var b = minLap; b <= maxLap; ++b) {
-		var bm = binTots[b];
-		if (!bm) {
-		    bm = new DSBin(scale, b * scale, (b + 1) * scale - 1);
-		    binTots[b] = bm;
-		}
-		bm.feature(f);
-	    }
-//	}
+//      if (f.score) {
+            var minLap = (f.min / scale)|0;
+            var maxLap = (f.max / scale)|0;
+            maxBin = Math.max(maxBin, maxLap);
+            minBin = Math.min(minBin, minLap);
+            for (var b = minLap; b <= maxLap; ++b) {
+                var bm = binTots[b];
+                if (!bm) {
+                    bm = new DSBin(scale, b * scale, (b + 1) * scale - 1);
+                    binTots[b] = bm;
+                }
+                bm.feature(f);
+            }
+//      }
     }
 
     var sampledFeatures = [];
     for (var b = minBin; b <= maxBin; ++b) {
-	var bm = binTots[b];
-	if (bm) {
-	    var f = new DASFeature();
+        var bm = binTots[b];
+        if (bm) {
+            var f = new DASFeature();
             f.segment = features[0].segment;
             f.min = (b * scale) + 1;
             f.max = (b + 1) * scale;
             f.score = bm.score();
             f.type = 'density';
-	    sampledFeatures.push(f);
-	}
+            sampledFeatures.push(f);
+        }
     }
 
     var afterDS = Date.now();

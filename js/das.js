@@ -105,7 +105,7 @@ DASSource.prototype.entryPoints = function(callback) {
                     entryPoints.push(new DASSegment(segId, segMin, segMax, segDesc));
                 }          
                callback(entryPoints);
-    });		
+    });         
 }
 
 //
@@ -124,10 +124,10 @@ function DASSequence(name, start, end, alpha, seq) {
 DASSource.prototype.sequence = function(segment, callback) {
     var dasURI = this.uri + 'sequence?' + segment.toDASQuery();
     this.doCrossDomainRequest(dasURI, function(responseXML) {
-	if (!responseXML) {
-	    callback([]);
-	    return;
-	} else {
+        if (!responseXML) {
+            callback([]);
+            return;
+        } else {
                 var seqs = new Array();
                 
                 var segs = responseXML.getElementsByTagName('SEQUENCE');
@@ -157,7 +157,7 @@ DASSource.prototype.sequence = function(segment, callback) {
                 }
                 
                 callback(seqs);
-	}
+        }
     });
 }
 
@@ -185,18 +185,18 @@ DASSource.prototype.features = function(segment, options, callback) {
     if (this.uri.indexOf('http://') == 0) {
         var filters = [];
 
-	if (segment) {
-	    filters.push(segment.toDASQuery());
-	} else if (options.group) {
-	    var g = options.group;
-	    if (typeof g == 'string') {
-		filters.push('group_id=' + g);
-	    } else {
-		for (var gi = 0; gi < g.length; ++gi) {
-		    filters.push('group_id=' + g[gi]);
-		}
-	    }
-	}
+        if (segment) {
+            filters.push(segment.toDASQuery());
+        } else if (options.group) {
+            var g = options.group;
+            if (typeof g == 'string') {
+                filters.push('group_id=' + g);
+            } else {
+                for (var gi = 0; gi < g.length; ++gi) {
+                    filters.push('group_id=' + g[gi]);
+                }
+            }
+        }
 
         if (options.adjacent) {
             var adj = options.adjacent;
@@ -217,7 +217,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 }
             }
         }
-	
+        
         if (options.maxbins) {
             filters.push('maxbins=' + options.maxbins);
         }
@@ -235,41 +235,41 @@ DASSource.prototype.features = function(segment, options, callback) {
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
 
-	if (!responseXML) {
+        if (!responseXML) {
             var msg;
             if (req.status == 0) {
                 msg = 'server may not support CORS';
             } else {
                 msg = 'status=' + req.status;
             }
-	    callback([], 'Failed request: ' + msg);
-	    return;
-	}
-/*	if (req) {
-	    var caps = req.getResponseHeader('X-DAS-Capabilties');
-	    if (caps) {
-		alert(caps);
-	    }
-	} */
+            callback([], 'Failed request: ' + msg);
+            return;
+        }
+/*      if (req) {
+            var caps = req.getResponseHeader('X-DAS-Capabilties');
+            if (caps) {
+                alert(caps);
+            }
+        } */
 
         var features = new Array();
         var segmentMap = {};
 
-	var segs = responseXML.getElementsByTagName('SEGMENT');
-	for (var si = 0; si < segs.length; ++si) {
+        var segs = responseXML.getElementsByTagName('SEGMENT');
+        for (var si = 0; si < segs.length; ++si) {
             var segmentXML = segs[si];
-	    var segmentID = segmentXML.getAttribute('id');
+            var segmentID = segmentXML.getAttribute('id');
             segmentMap[segmentID] = {
                 min: segmentXML.getAttribute('start'),
                 max: segmentXML.getAttribute('stop')
             };
-	    
+            
             var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
             for (var i = 0; i < featureXMLs.length; ++i) {
                 var feature = featureXMLs[i];
                 var dasFeature = new DASFeature();
                 
-		dasFeature.segment = segmentID;
+                dasFeature.segment = segmentID;
                 dasFeature.id = feature.getAttribute('id');
                 dasFeature.label = feature.getAttribute('label');
                 var spos = elementValue(feature, "START");
@@ -316,7 +316,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                     dasGroup.type = groupXML.getAttribute('type');
                     dasGroup.id = groupXML.getAttribute('id');
                     dasGroup.links = dasLinksOf(groupXML);
-		    dasGroup.notes = dasNotesOf(groupXML);
+                    dasGroup.notes = dasNotesOf(groupXML);
                     if (!dasFeature.groups) {
                         dasFeature.groups = new Array(dasGroup);
                     } else {
@@ -364,7 +364,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 
                 features.push(dasFeature);
             }
-	}
+        }
                 
         callback(features, undefined, segmentMap);
     });
@@ -445,15 +445,15 @@ DASStylesheet.prototype.pushStyle = function(filters, zoom, style) {
     /*
 
     if (!zoom) {
-	this.highZoomStyles[type] = style;
-	this.mediumZoomStyles[type] = style;
-	this.lowZoomStyles[type] = style;
+        this.highZoomStyles[type] = style;
+        this.mediumZoomStyles[type] = style;
+        this.lowZoomStyles[type] = style;
     } else if (zoom == 'high') {
-	this.highZoomStyles[type] = style;
+        this.highZoomStyles[type] = style;
     } else if (zoom == 'medium') {
-	this.mediumZoomStyles[type] = style;
+        this.mediumZoomStyles[type] = style;
     } else if (zoom == 'low') {
-	this.lowZoomStyles[type] = style;
+        this.lowZoomStyles[type] = style;
     }
 
     */
@@ -482,41 +482,41 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
     }
 
     doCrossDomainRequest(dasURI, function(responseXML) {
-	if (!responseXML) {
-	    if (failureCB) {
-		failureCB();
-	    } 
-	    return;
-	}
-	var stylesheet = new DASStylesheet();
-	var typeXMLs = responseXML.getElementsByTagName('TYPE');
-	for (var i = 0; i < typeXMLs.length; ++i) {
-	    var typeStyle = typeXMLs[i];
+        if (!responseXML) {
+            if (failureCB) {
+                failureCB();
+            } 
+            return;
+        }
+        var stylesheet = new DASStylesheet();
+        var typeXMLs = responseXML.getElementsByTagName('TYPE');
+        for (var i = 0; i < typeXMLs.length; ++i) {
+            var typeStyle = typeXMLs[i];
             
             var filter = {};
-	    filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
+            filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
             filter.label = typeStyle.getAttribute('label');
             filter.method = typeStyle.getAttribute('method');
-	    var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
-	    for (var gi = 0; gi < glyphXMLs.length; ++gi) {
-		var glyphXML = glyphXMLs[gi];
-		var zoom = glyphXML.getAttribute('zoom');
-		var glyph = childElementOf(glyphXML);
-		var style = new DASStyle();
-		style.glyph = glyph.localName;
-		var child = glyph.firstChild;
-	
-		while (child) {
-		    if (child.nodeType == Node.ELEMENT_NODE) {
-			// alert(child.localName);
-			style[child.localName] = child.firstChild.nodeValue;
-		    }
-		    child = child.nextSibling;
-		}
-		stylesheet.pushStyle(filter, zoom, style);
-	    }
-	}
-	successCB(stylesheet);
+            var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
+            for (var gi = 0; gi < glyphXMLs.length; ++gi) {
+                var glyphXML = glyphXMLs[gi];
+                var zoom = glyphXML.getAttribute('zoom');
+                var glyph = childElementOf(glyphXML);
+                var style = new DASStyle();
+                style.glyph = glyph.localName;
+                var child = glyph.firstChild;
+        
+                while (child) {
+                    if (child.nodeType == Node.ELEMENT_NODE) {
+                        // alert(child.localName);
+                        style[child.localName] = child.firstChild.nodeValue;
+                    }
+                    child = child.nextSibling;
+                }
+                stylesheet.pushStyle(filter, zoom, style);
+            }
+        }
+        successCB(stylesheet);
     }, creds);
 }
 
@@ -553,54 +553,54 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
     }
 
     doCrossDomainRequest(quri, function(responseXML) {
-	if (!responseXML && failure) {
-	    failure();
-	    return;
-	}
+        if (!responseXML && failure) {
+            failure();
+            return;
+        }
 
-	var sources = [];	
-	var sourceXMLs = responseXML.getElementsByTagName('SOURCE');
-	for (var si = 0; si < sourceXMLs.length; ++si) {
-	    var sourceXML = sourceXMLs[si];
-	    var versionXMLs = sourceXML.getElementsByTagName('VERSION');
-	    if (versionXMLs.length < 1) {
-		continue;
-	    }
-	    var versionXML = versionXMLs[0];
+        var sources = [];       
+        var sourceXMLs = responseXML.getElementsByTagName('SOURCE');
+        for (var si = 0; si < sourceXMLs.length; ++si) {
+            var sourceXML = sourceXMLs[si];
+            var versionXMLs = sourceXML.getElementsByTagName('VERSION');
+            if (versionXMLs.length < 1) {
+                continue;
+            }
+            var versionXML = versionXMLs[0];
 
-	    var coordXMLs = versionXML.getElementsByTagName('COORDINATES');
-	    var coords = [];
-	    for (var ci = 0; ci < coordXMLs.length; ++ci) {
-		var coordXML = coordXMLs[ci];
-		var coord = new DASCoords();
-		coord.auth = coordXML.getAttribute('authority');
-		coord.taxon = coordXML.getAttribute('taxid');
-		coord.version = coordXML.getAttribute('version');
-		coords.push(coord);
-	    }
-	    
+            var coordXMLs = versionXML.getElementsByTagName('COORDINATES');
+            var coords = [];
+            for (var ci = 0; ci < coordXMLs.length; ++ci) {
+                var coordXML = coordXMLs[ci];
+                var coord = new DASCoords();
+                coord.auth = coordXML.getAttribute('authority');
+                coord.taxon = coordXML.getAttribute('taxid');
+                coord.version = coordXML.getAttribute('version');
+                coords.push(coord);
+            }
+            
             var caps = [];
-	    var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
-	    var uri;
-	    for (var ci = 0; ci < capXMLs.length; ++ci) {
-		var capXML = capXMLs[ci];
+            var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
+            var uri;
+            for (var ci = 0; ci < capXMLs.length; ++ci) {
+                var capXML = capXMLs[ci];
                 
                 caps.push(capXML.getAttribute('type'));
 
-		if (capXML.getAttribute('type') == 'das1:features') {
-		    var fep = capXML.getAttribute('query_uri');
-		    uri = fep.substring(0, fep.length - ('features'.length));
-		}
-	    }
+                if (capXML.getAttribute('type') == 'das1:features') {
+                    var fep = capXML.getAttribute('query_uri');
+                    uri = fep.substring(0, fep.length - ('features'.length));
+                }
+            }
 
-	    var props = {};
-	    var propXMLs = versionXML.getElementsByTagName('PROP');
-	    for (var pi = 0; pi < propXMLs.length; ++pi) {
-		pusho(props, propXMLs[pi].getAttribute('name'), propXMLs[pi].getAttribute('value'));
-	    }
-	    
-	    if (uri) {
-		var source = new DASSource(uri, {
+            var props = {};
+            var propXMLs = versionXML.getElementsByTagName('PROP');
+            for (var pi = 0; pi < propXMLs.length; ++pi) {
+                pusho(props, propXMLs[pi].getAttribute('name'), propXMLs[pi].getAttribute('value'));
+            }
+            
+            if (uri) {
+                var source = new DASSource(uri, {
                     source_uri: sourceXML.getAttribute('uri'),
                     name:  sourceXML.getAttribute('title'),
                     desc:  sourceXML.getAttribute('description'),
@@ -608,11 +608,11 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
                     props: props,
                     capabilities: caps
                 });
-		sources.push(source);
-	    }
-	}
-	
-	callback(sources);
+                sources.push(source);
+            }
+        }
+        
+        callback(sources);
     });
 }
 
@@ -634,13 +634,13 @@ function elementValue(element, tag)
 function childElementOf(element)
 {
     if (element.hasChildNodes()) {
-	var child = element.firstChild;
-	do {
-	    if (child.nodeType == Node.ELEMENT_NODE) {
-		return child;
-	    } 
-	    child = child.nextSibling;
-	} while (child != null);
+        var child = element.firstChild;
+        do {
+            if (child.nodeType == Node.ELEMENT_NODE) {
+                return child;
+            } 
+            child = child.nextSibling;
+        } while (child != null);
     }
     return null;
 }
@@ -665,9 +665,9 @@ function dasNotesOf(element)
     var notes = [];
     var maybeNotes = element.getElementsByTagName('NOTE');
     for (var ni = 0; ni < maybeNotes.length; ++ni) {
-	if (maybeNotes[ni].firstChild) {
-	    notes.push(maybeNotes[ni].firstChild.nodeValue);
-	}
+        if (maybeNotes[ni].firstChild) {
+            notes.push(maybeNotes[ni].firstChild.nodeValue);
+        }
     }
     return notes;
 }
@@ -676,30 +676,30 @@ function doCrossDomainRequest(url, handler, credentials) {
     // TODO: explicit error handlers?
 
     if (window.XDomainRequest) {
-	var req = new XDomainRequest();
-	req.onload = function() {
-	    var dom = new ActiveXObject("Microsoft.XMLDOM");
-	    dom.async = false;
-	    dom.loadXML(req.responseText);
-	    handler(dom);
-	}
-	req.open("get", url);
-	req.send('');
+        var req = new XDomainRequest();
+        req.onload = function() {
+            var dom = new ActiveXObject("Microsoft.XMLDOM");
+            dom.async = false;
+            dom.loadXML(req.responseText);
+            handler(dom);
+        }
+        req.open("get", url);
+        req.send('');
     } else {
-	var req = new XMLHttpRequest();
+        var req = new XMLHttpRequest();
 
-	req.onreadystatechange = function() {
-	    if (req.readyState == 4) {
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
               if (req.status == 200 || req.status == 0) {
-		  handler(req.responseXML, req);
-	      }
+                  handler(req.responseXML, req);
+              }
             }
-	};
-	req.open("get", url, true);
-	if (credentials) {
-	    req.withCredentials = true;
-	}
-	req.send('');
+        };
+        req.open("get", url, true);
+        if (credentials) {
+            req.withCredentials = true;
+        }
+        req.send('');
     }
 }
 

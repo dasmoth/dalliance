@@ -18,7 +18,7 @@ FetchPool.prototype.addRequest = function(xhr) {
 
 FetchPool.prototype.abortAll = function() {
     for (var i = 0; i < this.reqs.length; ++i) {
-	this.reqs[i].abort();
+        this.reqs[i].abort();
     }
 }
 
@@ -49,27 +49,27 @@ function KnownSpace(tierMap, chr, min, max, scale, seqSource) {
 KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
     var baton = this.featureCache[this.tierMap[0]];
     if (baton) {
-	return baton;
+        return baton;
     } else {
-	return null;
+        return null;
     }
 }
 
 KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     // dlog('viewFeatures(' + chr + ', ' + min + ', ' + max + ', ' + scale +')');
     if (scale != scale) {
-	throw "viewFeatures called with silly scale";
+        throw "viewFeatures called with silly scale";
     }
 
     if (chr != this.chr) {
-	throw "Can't extend Known Space to a new chromosome";
+        throw "Can't extend Known Space to a new chromosome";
     }
     this.min = min;
     this.max = max;
     this.scale = scale;
 
     if (this.pool) {
-	this.pool.abortAll();
+        this.pool.abortAll();
     }
     this.pool = new FetchPool();
     this.awaitedSeq = new Awaited();
@@ -83,14 +83,14 @@ function filterFeatures(features, min, max) {
     featuresByGroup = {};
 
     for (var fi = 0; fi < features.length; ++fi) {
-	var f = features[fi];
+        var f = features[fi];
         if (!f.min || !f.max) {
             ff.push(f);
         } else if (f.groups && f.groups.length > 0) {
             pusho(featuresByGroup, f.groups[0].id, f);
         } else if (f.min <= max && f.max >= min) {
-	    ff.push(f);
-	}
+            ff.push(f);
+        }
     }
 
     for (var gid in featuresByGroup) {
@@ -123,7 +123,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
     var needSeq = false;
 
     for (var t = 0; t < tiers.length; ++t) {
-	if (this.startFetchesFor(tiers[t], awaitedSeq)) {
+        if (this.startFetchesFor(tiers[t], awaitedSeq)) {
             needSeq = true;
         }
     }
@@ -174,42 +174,42 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         return false;
     }
     if (baton) {
-// 	dlog('considering cached features: ' + baton);
+//      dlog('considering cached features: ' + baton);
     }
     if (baton && baton.chr === this.chr && baton.min <= this.min && baton.max >= this.max) {
-	var cachedFeatures = baton.features;
-	if (baton.min < this.min || baton.max > this.max) {
-	    cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
-	}
+        var cachedFeatures = baton.features;
+        if (baton.min < this.min || baton.max > this.max) {
+            cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
+        }
         
         // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
-//	if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-//	    cachedFeatures = downsample(cachedFeatures, thisB.scale);
-//	}
+//      if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
+//          cachedFeatures = downsample(cachedFeatures, thisB.scale);
+//      }
         // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
-//	tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
+//      tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
         thisB.provision(tier, baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
 
-	var availableScales = source.getScales();
-	if (baton.scale <= this.scale || !availableScales) {
-//	    dlog('used cached features');
-	    return needsSeq;
-	} else {
-//	    dlog('used cached features (temporarily)');
-	}
+        var availableScales = source.getScales();
+        if (baton.scale <= this.scale || !availableScales) {
+//          dlog('used cached features');
+            return needsSeq;
+        } else {
+//          dlog('used cached features (temporarily)');
+        }
     }
 
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
-	if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
-	    thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features, status);
-	}
+        if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
+            thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features, status);
+        }
 
-	//if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-	//    features = downsample(features, thisB.scale);
-	//}
+        //if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
+        //    features = downsample(features, thisB.scale);
+        //}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
-	//tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
+        //tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
         thisB.provision(tier, thisB.chr, thisB.min, thisB.max, thisB.scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
     return needsSeq;
@@ -223,7 +223,7 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
             (BWGFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)|| 
             (BAMFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)) 
         {
-	    features = downsample(features, this.scale);
+            features = downsample(features, this.scale);
         }
 
         if (awaitedSeq) {
@@ -248,7 +248,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     }
 
     if (!this.dasSource.uri) {
-	return;
+        return;
     }
 
     var tryMaxBins = (this.dasSource.maxbins !== false);
@@ -260,15 +260,15 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     }
     
     this.dasSource.features(
-	new DASSegment(chr, min, max),
-	fops,
-	function(features, status) {
+        new DASSegment(chr, min, max),
+        fops,
+        function(features, status) {
             var retScale = scale;
             if (!tryMaxBins) {
                 retScale = 0.1;
             }
-	    callback(status, features, retScale);
-	}
+            callback(status, features, retScale);
+        }
     );
 }
 
@@ -310,7 +310,7 @@ TwoBitSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
                          if (err) {
                              return callback(err, null);
                          } else {
-		             var sequence = new DASSequence(chr, min, max, 'DNA', seq);
+                             var sequence = new DASSequence(chr, min, max, 'DNA', seq);
                              return callback(null, sequence);
                          }
                      })
@@ -426,7 +426,7 @@ BWGFeatureSource.prototype.init = function() {
     }
 
     make(arg, function(bwg) {
-	thisB.bwgHolder.provide(bwg);
+        thisB.bwgHolder.provide(bwg);
     }, this.opts.credentials);
 }
 
@@ -468,29 +468,29 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         } else {
             data = bwg.getUnzoomedView();
         }
-	data.readWigData(chr, min, max, function(features) {
-	    var fs = 1000000000;
-	    // if (bwg.type === 'bigwig') {
-		var is = (max - min) / features.length / 2;
-		if (is < fs) {
-		    fs = is;
-		}
-	    // }
-	    callback(null, features, fs);
-	});
+        data.readWigData(chr, min, max, function(features) {
+            var fs = 1000000000;
+            // if (bwg.type === 'bigwig') {
+                var is = (max - min) / features.length / 2;
+                if (is < fs) {
+                    fs = is;
+                }
+            // }
+            callback(null, features, fs);
+        });
     });
 }
 
 BWGFeatureSource.prototype.getScales = function() {
     var bwg = this.bwgHolder.res;
     if (bwg /* && bwg.type == 'bigwig' */) {
-	var scales = [1];  // Can we be smarter about inferring baseline scale?
+        var scales = [1];  // Can we be smarter about inferring baseline scale?
         for (var z = 0; z < bwg.zoomLevels.length; ++z) {
             scales.push(bwg.zoomLevels[z].reduction);
         }
         return scales;
     } else {
-	return null;
+        return null;
     }
 }
 
@@ -513,16 +513,16 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
         if (mseg.length == 0) {
             callback("No mapping available for this regions", [], scale);
         } else {
-	    var seg = mseg[0];
-	    thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
-		var mappedFeatures = [];
-		if (features) {
-		    for (var fi = 0; fi < features.length; ++fi) {
+            var seg = mseg[0];
+            thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
+                var mappedFeatures = [];
+                if (features) {
+                    for (var fi = 0; fi < features.length; ++fi) {
                         var f = features[fi];
-			var sn = f.segment;
-			if (sn.indexOf('chr') == 0) {
-			    sn = sn.substr(3);
-			}
+                        var sn = f.segment;
+                        if (sn.indexOf('chr') == 0) {
+                            sn = sn.substr(3);
+                        }
                         var mmin = thisB.mapping.mapPoint(sn, f.min);
                         var mmax = thisB.mapping.mapPoint(sn, f.max);
                         if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
@@ -550,11 +550,11 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                             mappedFeatures.push(f);
                         }
                     }
-		}
+                }
 
-		callback(status, mappedFeatures, fscale);
-	    });
-	}
+                callback(status, mappedFeatures, fscale);
+            });
+        }
     });
 }
 

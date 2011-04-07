@@ -232,6 +232,6 @@ IconSet.prototype.createButton = function(name, parent, bx, by)
 function dlog(msg) {
     var logHolder = document.getElementById('log');
     if (logHolder) {
-	logHolder.appendChild(makeElement('p', msg));
+        logHolder.appendChild(makeElement('p', msg));
     }
 }

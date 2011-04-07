@@ -23,13 +23,13 @@ function DColour(red, green, blue, name) {
     this.green = green|0;
     this.blue = blue|0;
     if (name) {
-	this.name = name;
+        this.name = name;
     }
 }
 
 DColour.prototype.toSvgString = function() {
     if (!this.name) {
-	this.name = "rgb(" + this.red + "," + this.green + "," + this.blue + ")";
+        this.name = "rgb(" + this.red + "," + this.green + "," + this.blue + ")";
     }
 
     return this.name;
@@ -90,10 +90,10 @@ DSubTier.prototype.add = function(glyph) {
 
 DSubTier.prototype.hasSpaceFor = function(glyph) {
     for (var i = 0; i < this.glyphs.length; ++i) {
-	var g = this.glyphs[i];
-	if (g.min <= glyph.max && g.max >= glyph.min) {
-	    return false;
-	}
+        var g = this.glyphs[i];
+        if (g.min <= glyph.max && g.max >= glyph.min) {
+            return false;
+        }
     }
     return true;
 }
@@ -157,16 +157,16 @@ function drawLine(featureGroupElement, features, style, tier, y)
     var pathOps = '';
 
     for (var fi = 0; fi < features.length; ++fi) {
-	var f = features[fi];
+        var f = features[fi];
 
-	var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
+        var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
         var sc = ((f.score - (1.0*min)) * yscale)|0;
-	var py = y + (height - sc);
-	if (fi == 0) {
-	    pathOps = 'M ' + px + ' ' + py;
-	} else {
-	    pathOps += ' L ' + px + ' ' + py;
-	}	
+        var py = y + (height - sc);
+        if (fi == 0) {
+            pathOps = 'M ' + px + ' ' + py;
+        } else {
+            pathOps += ' L ' + px + ' ' + py;
+        }       
     }
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
@@ -249,7 +249,7 @@ function sortFeatures(tier)
 
 
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
-       	// var f = eval('[' + miniJSONify(tier.currentFeatures[fi]) + ']')[0]; 
+        // var f = eval('[' + miniJSONify(tier.currentFeatures[fi]) + ']')[0]; 
         var f = tier.currentFeatures[fi];
         if (f.parts) {
             continue;
@@ -270,25 +270,25 @@ function sortFeatures(tier)
             }
         }
 
-	var fGroups = [];
-	var fSuperGroup = null;
-	if (f.groups) {
-	    for (var gi = 0; gi < f.groups.length; ++gi) {
-	        var g = f.groups[gi];
-		var gid = g.id;
-		if (g.type == 'gene') {
-		    // Like a super-grouper...
-		    fSuperGroup = gid; 
-		    groups[gid] = shallowCopy(g);
-		} else if (g.type == 'translation') {
-		    // have to ignore this to get sensible results from bj-e :-(.
-		} else {
-		    pusho(groupedFeatures, gid, f);
-	            groups[gid] = shallowCopy(g);
-		    fGroups.push(gid);
-	        }
-	    }
-	}
+        var fGroups = [];
+        var fSuperGroup = null;
+        if (f.groups) {
+            for (var gi = 0; gi < f.groups.length; ++gi) {
+                var g = f.groups[gi];
+                var gid = g.id;
+                if (g.type == 'gene') {
+                    // Like a super-grouper...
+                    fSuperGroup = gid; 
+                    groups[gid] = shallowCopy(g);
+                } else if (g.type == 'translation') {
+                    // have to ignore this to get sensible results from bj-e :-(.
+                } else {
+                    pusho(groupedFeatures, gid, f);
+                    groups[gid] = shallowCopy(g);
+                    fGroups.push(gid);
+                }
+            }
+        }
 
         if (f.parents) {
             if (!fbid) {
@@ -333,15 +333,15 @@ function sortFeatures(tier)
             }   
         }
 
-	if (fGroups.length == 0) {
-	    pusho(ungroupedFeatures, f.type, f);
-	} else if (fSuperGroup) {
-	    for (var g = 0; g < fGroups.length; ++g) {
-		var gid = fGroups[g];
-		pushnewo(superGroups, fSuperGroup, gid);
-		groupsToSupers[gid] = fSuperGroup;
-	    } 
-	}	
+        if (fGroups.length == 0) {
+            pusho(ungroupedFeatures, f.type, f);
+        } else if (fSuperGroup) {
+            for (var g = 0; g < fGroups.length; ++g) {
+                var gid = fGroups[g];
+                pushnewo(superGroups, fSuperGroup, gid);
+                groupsToSupers[gid] = fSuperGroup;
+            } 
+        }       
     }
 
     tier.ungroupedFeatures = ungroupedFeatures;
@@ -371,161 +371,161 @@ function drawFeatureTier(tier)
 
     var featureGroupElement = tier.viewport;
     while (featureGroupElement.childNodes.length > 0) {
-	featureGroupElement.removeChild(featureGroupElement.firstChild);
+        featureGroupElement.removeChild(featureGroupElement.firstChild);
     }
     featureGroupElement.appendChild(tier.background);
     drawGuidelines(tier, featureGroupElement);
-	
+        
     var lh = MIN_PADDING;
     var glyphs = [];
     var specials = false;
 
     // Glyphify ungrouped.
-	
+        
     for (var uft in tier.ungroupedFeatures) {
-	var ufl = tier.ungroupedFeatures[uft];
-	// var style = styles[uft] || styles['default'];
+        var ufl = tier.ungroupedFeatures[uft];
+        // var style = styles[uft] || styles['default'];
         var style = tier.styleForFeature(ufl[0]);   // FIXME this isn't quite right...
-	if (!style) continue;
-	if (style.glyph == 'LINEPLOT') {
-	    lh += Math.max(drawLine(featureGroupElement, ufl, style, tier, lh));
-	    specials = true;
-	} else {
-	    for (var pgid = 0; pgid < ufl.length; ++pgid) {
+        if (!style) continue;
+        if (style.glyph == 'LINEPLOT') {
+            lh += Math.max(drawLine(featureGroupElement, ufl, style, tier, lh));
+            specials = true;
+        } else {
+            for (var pgid = 0; pgid < ufl.length; ++pgid) {
                 var f = ufl[pgid];
                 if (f.parts) {  // FIXME shouldn't really be needed
                     continue;
                 }
-		var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
-		glyphs.push(g);
-	    }
-	}
+                var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
+                glyphs.push(g);
+            }
+        }
     }
 
     // Merge supergroups
     
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
-	for (var sg in tier.superGroups) {
-	    var sgg = tier.superGroups[sg];
+        for (var sg in tier.superGroups) {
+            var sgg = tier.superGroups[sg];
             tier.groups[sg].type = tier.groups[sgg[0]].type;   // HACK to make styling easier in DAS1.6
-	    var featsByType = {};
-	    for (var g = 0; g < sgg.length; ++g) {
-		var gf = tier.groupedFeatures[sgg[g]];
-		for (var fi = 0; fi < gf.length; ++fi) {
-		    var f = gf[fi];
-		    pusho(featsByType, f.type, f);
-		}
+            var featsByType = {};
+            for (var g = 0; g < sgg.length; ++g) {
+                var gf = tier.groupedFeatures[sgg[g]];
+                for (var fi = 0; fi < gf.length; ++fi) {
+                    var f = gf[fi];
+                    pusho(featsByType, f.type, f);
+                }
 
-		if (tier.groups[sg] && !tier.groups[sg].links || tier.groups[sg].links.length == 0) {
-		    tier.groups[sg].links = tier.groups[sgg[0]].links;
-		}
+                if (tier.groups[sg] && !tier.groups[sg].links || tier.groups[sg].links.length == 0) {
+                    tier.groups[sg].links = tier.groups[sgg[0]].links;
+                }
 
-		delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
-	    }
+                delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
+            }
 
-	    for (var t in featsByType) {
-		var feats = featsByType[t];
-		var template = feats[0];
-		var loc = null;
-		for (var fi = 0; fi < feats.length; ++fi) {
-		    var f = feats[fi];
-		    var fl = new Range(f.min, f.max);
-		    if (!loc) {
-			loc = fl;
-		    } else {
-			loc = union(loc, fl);
-		    }
-		}
-		var mergedRanges = loc.ranges();
-		for (var si = 0; si < mergedRanges.length; ++si) {
-		    var r = mergedRanges[si];
+            for (var t in featsByType) {
+                var feats = featsByType[t];
+                var template = feats[0];
+                var loc = null;
+                for (var fi = 0; fi < feats.length; ++fi) {
+                    var f = feats[fi];
+                    var fl = new Range(f.min, f.max);
+                    if (!loc) {
+                        loc = fl;
+                    } else {
+                        loc = union(loc, fl);
+                    }
+                }
+                var mergedRanges = loc.ranges();
+                for (var si = 0; si < mergedRanges.length; ++si) {
+                    var r = mergedRanges[si];
 
-		    // begin coverage-counting
-		    var posCoverage = ((r.max()|0) - (r.min()|0) + 1) * sgg.length;
-		    var actCoverage = 0;
-		    for (var fi = 0; fi < feats.length; ++fi) {
-			var f = feats[fi];
-			if ((f.min|0) <= r.max() && (f.max|0) >= r.min()) {
-			    var umin = Math.max(f.min|0, r.min());
-			    var umax = Math.min(f.max|0, r.max());
-			    actCoverage += (umax - umin + 1);
-			}
-		    }
-		    var visualWeight = ((1.0 * actCoverage) / posCoverage);
-		    // end coverage-counting
+                    // begin coverage-counting
+                    var posCoverage = ((r.max()|0) - (r.min()|0) + 1) * sgg.length;
+                    var actCoverage = 0;
+                    for (var fi = 0; fi < feats.length; ++fi) {
+                        var f = feats[fi];
+                        if ((f.min|0) <= r.max() && (f.max|0) >= r.min()) {
+                            var umin = Math.max(f.min|0, r.min());
+                            var umax = Math.min(f.max|0, r.max());
+                            actCoverage += (umax - umin + 1);
+                        }
+                    }
+                    var visualWeight = ((1.0 * actCoverage) / posCoverage);
+                    // end coverage-counting
 
-		    var newf = new DASFeature();
-		    for (k in template) {
-			newf[k] = template[k];
-		    }
-		    newf.min = r.min();
-		    newf.max = r.max();
-		    if (newf.label && sgg.length > 1) {
-			newf.label += ' (' + sgg.length + ' vars)';
-		    }
-		    newf.visualWeight = ((1.0 * actCoverage) / posCoverage);
-		    pusho(tier.groupedFeatures, sg, newf);
-		    // supergroups are already in tier.groups.
-		}
-	    }
+                    var newf = new DASFeature();
+                    for (k in template) {
+                        newf[k] = template[k];
+                    }
+                    newf.min = r.min();
+                    newf.max = r.max();
+                    if (newf.label && sgg.length > 1) {
+                        newf.label += ' (' + sgg.length + ' vars)';
+                    }
+                    newf.visualWeight = ((1.0 * actCoverage) / posCoverage);
+                    pusho(tier.groupedFeatures, sg, newf);
+                    // supergroups are already in tier.groups.
+                }
+            }
 
-	    delete tier.superGroups[sg]; // Do we want this?
-	}	
+            delete tier.superGroups[sg]; // Do we want this?
+        }       
     }
 
     // Glyphify groups.
 
     var gl = new Array();
     for (var gid in tier.groupedFeatures) {
-	gl.push(gid);
+        gl.push(gid);
     }
     gl.sort(function(g1, g2) {
-	var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
-	if (d > 0) {
-	    return -1;
+        var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
+        if (d > 0) {
+            return -1;
         } else if (d = 0) {
-	    return 0;
+            return 0;
         } else {
-	    return 1;
+            return 1;
         }
     });
 
     var groupGlyphs = {};
     for (var gx = 0; gx < gl.length; ++gx) {
-	var gid = gl[gx];
-	var g = glyphsForGroup(tier.groupedFeatures[gid], 0, tier.groups[gid], tier,
-			       (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
+        var gid = gl[gx];
+        var g = glyphsForGroup(tier.groupedFeatures[gid], 0, tier.groups[gid], tier,
+                               (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
         if (g) {
-	    groupGlyphs[gid] = g;
+            groupGlyphs[gid] = g;
         }
     }
 
     for (var sg in tier.superGroups) {
-	var sgg = tier.superGroups[sg];
-	var sgGlyphs = [];
-	var sgMin = 10000000000;
-	var sgMax = -10000000000;
-	for (var sgi = 0; sgi < sgg.length; ++sgi) {
-	    var gg = groupGlyphs[sgg[sgi]];
-	    groupGlyphs[sgg[sgi]] = null;
-	    if (gg) {
-		sgGlyphs.push(gg);
-		sgMin = Math.min(sgMin, gg.min);
-		sgMax = Math.max(sgMax, gg.max);
-	    }
-	}
-	for (var sgi = 0; sgi < sgGlyphs.length; ++sgi) {
-	    var gg = sgGlyphs[sgi];
-	    gg.min = sgMin;
-	    gg.max = sgMax;
-	    glyphs.push(gg);
-	}
+        var sgg = tier.superGroups[sg];
+        var sgGlyphs = [];
+        var sgMin = 10000000000;
+        var sgMax = -10000000000;
+        for (var sgi = 0; sgi < sgg.length; ++sgi) {
+            var gg = groupGlyphs[sgg[sgi]];
+            groupGlyphs[sgg[sgi]] = null;
+            if (gg) {
+                sgGlyphs.push(gg);
+                sgMin = Math.min(sgMin, gg.min);
+                sgMax = Math.max(sgMax, gg.max);
+            }
+        }
+        for (var sgi = 0; sgi < sgGlyphs.length; ++sgi) {
+            var gg = sgGlyphs[sgi];
+            gg.min = sgMin;
+            gg.max = sgMax;
+            glyphs.push(gg);
+        }
     }
     for (var g in groupGlyphs) {
-	var gg = groupGlyphs[g];
-	if (gg) {
-	    glyphs.push(gg);
-	}
+        var gg = groupGlyphs[g];
+        if (gg) {
+            glyphs.push(gg);
+        }
     }
 
     var unbumpedST = new DSubTier();
@@ -534,19 +534,19 @@ function drawFeatureTier(tier)
     
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
-	var g = glyphs[i];
-	g = labelGlyph(tier, g, featureGroupElement);
+        var g = glyphs[i];
+        g = labelGlyph(tier, g, featureGroupElement);
         if (g.bump) {
             hasBumpedFeatures = true;
         }
-	if (g.bump && (tier.bumped || tier.dasSource.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
-	    for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
-		var st = bumpedSTs[sti];
-		if (st.hasSpaceFor(g)) {
-		    st.add(g);
-		    continue GLYPH_LOOP;
-		}
-	    }
+        if (g.bump && (tier.bumped || tier.dasSource.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
+            for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
+                var st = bumpedSTs[sti];
+                if (st.hasSpaceFor(g)) {
+                    st.add(g);
+                    continue GLYPH_LOOP;
+                }
+            }
             if (bumpedSTs.length >= SUBTIER_MAX) {
                 tier.status = 'Too many overlapping features, truncating at ' + SUBTIER_MAX;
             } else {
@@ -554,36 +554,36 @@ function drawFeatureTier(tier)
                 st.add(g);
                 bumpedSTs.push(st);
             }
-	} else {
-	    unbumpedST.add(g);
-	}
+        } else {
+            unbumpedST.add(g);
+        }
     }
 
     tier.hasBumpedFeatures = hasBumpedFeatures;
 
     if (unbumpedST.glyphs.length > 0) {
-	bumpedSTs = [unbumpedST].concat(bumpedSTs);
+        bumpedSTs = [unbumpedST].concat(bumpedSTs);
     }
 
     var stBoundaries = [];
     if (specials) {
-	stBoundaries.push(lh);
+        stBoundaries.push(lh);
     } 
     for (var bsi = 0; bsi < bumpedSTs.length; ++bsi) {
-	var st = bumpedSTs[bsi];
+        var st = bumpedSTs[bsi];
         var stg = st.glyphs;
         stg = stg.sort(function(g1, g2) {
             return g1.zindex - g2.zindex;
         });
 
-	for (var i = 0; i < stg.length; ++i) {
-	    var g = stg[i];
-	    if (g.glyph) {
-		g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
+        for (var i = 0; i < stg.length; ++i) {
+            var g = stg[i];
+            if (g.glyph) {
+                g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
                 g.glyph.setAttribute('cursor', 'pointer');
-		featureGroupElement.appendChild(g.glyph);
-	    }
-	}
+                featureGroupElement.appendChild(g.glyph);
+            }
+        }
         
         if (g.quant) {
             tier.isLabelValid = false;    // FIXME
@@ -594,15 +594,15 @@ function drawFeatureTier(tier)
             tier.clientMax = lh;
         }
 
-	lh += st.height + MIN_PADDING;
-	stBoundaries.push(lh);
+        lh += st.height + MIN_PADDING;
+        stBoundaries.push(lh);
     }
 
     lh = Math.max(tier.browser.minTierHeight, lh); // for sanity's sake.
     if (stBoundaries.length < 2) {
-	var bumped = false;
-	var minHeight = lh;
-	
+        var bumped = false;
+        var minHeight = lh;
+        
         var ss = tier.stylesheet;
         if (ss) {
             var ssScale = zoomForScale(tier.browser.scale);
@@ -611,141 +611,141 @@ function drawFeatureTier(tier)
                 if (!sh.zoom || sh.zoom == ssScale) {
                     var s = sh.style;
                      if (s.bump) {
-		         bumped = true;
-	             }
-	            if (s.height && (4.0 + s.height) > minHeight) {
-		        minHeight = (4.0 + s.height);
-	            }
+                         bumped = true;
+                     }
+                    if (s.height && (4.0 + s.height) > minHeight) {
+                        minHeight = (4.0 + s.height);
+                    }
                 }
             }
-	    if (bumped) {
-	        lh = 2 * minHeight;
-	    }
+            if (bumped) {
+                lh = 2 * minHeight;
+            }
         }
-    }			
+    }                   
 
     tier.wantedLayoutHeight = lh;
     if (!tier.layoutWasDone || tier.browser.autoSizeTiers) {
-	tier.layoutHeight = lh;
-	if (glyphs.length > 0 || specials) {
-	    tier.layoutWasDone = true;
-	}
-	tier.placard = null;
+        tier.layoutHeight = lh;
+        if (glyphs.length > 0 || specials) {
+            tier.layoutWasDone = true;
+        }
+        tier.placard = null;
     } else {
-	if (tier.layoutHeight != lh) {
-	    var spandPlacard = document.createElementNS(NS_SVG, 'g');
-	    var frame = document.createElementNS(NS_SVG, 'rect');
-	    frame.setAttribute('x', 0);
-	    frame.setAttribute('y', -20);
-	    frame.setAttribute('width', tier.browser.featurePanelWidth);
-	    frame.setAttribute('height', 20);
-	    frame.setAttribute('stroke', 'red');
-	    frame.setAttribute('stroke-width', 1);
-	    frame.setAttribute('fill', 'white');
-	    spandPlacard.appendChild(frame);
-	    var spand = document.createElementNS(NS_SVG, 'text');
-	    spand.setAttribute('stroke', 'none');
-	    spand.setAttribute('fill', 'red');
-	    spand.setAttribute('font-family', 'helvetica');
-	    spand.setAttribute('font-size', '10pt');
+        if (tier.layoutHeight != lh) {
+            var spandPlacard = document.createElementNS(NS_SVG, 'g');
+            var frame = document.createElementNS(NS_SVG, 'rect');
+            frame.setAttribute('x', 0);
+            frame.setAttribute('y', -20);
+            frame.setAttribute('width', tier.browser.featurePanelWidth);
+            frame.setAttribute('height', 20);
+            frame.setAttribute('stroke', 'red');
+            frame.setAttribute('stroke-width', 1);
+            frame.setAttribute('fill', 'white');
+            spandPlacard.appendChild(frame);
+            var spand = document.createElementNS(NS_SVG, 'text');
+            spand.setAttribute('stroke', 'none');
+            spand.setAttribute('fill', 'red');
+            spand.setAttribute('font-family', 'helvetica');
+            spand.setAttribute('font-size', '10pt');
 
-	    if (tier.layoutHeight < lh) { 
-		var dispST = 0;
-		while ((tier.layoutHeight - 20) >= stBoundaries[dispST]) { // NB allowance for placard!
-		    ++dispST;
-		}
-		spand.appendChild(document.createTextNode('Show ' + (stBoundaries.length - dispST) + ' more'));
-	    } else {
-		spand.appendChild(document.createTextNode('Show less'));
-	    }
-	    
-	    spand.setAttribute('x', 80);
-	    spand.setAttribute('y', -6);
-	    spandPlacard.appendChild(spand);
-	    var arrow = document.createElementNS(NS_SVG, 'path');
-	    arrow.setAttribute('fill', 'red');
-	    arrow.setAttribute('stroke', 'none');
-	    if (tier.layoutHeight < lh) {
-		arrow.setAttribute('d', 'M ' +  30 + ' ' + -16 +
-				   ' L ' + 42 + ' ' + -16 +
-				   ' L ' + 36 + ' ' + -4 + ' Z');
-	    } else {
-		arrow.setAttribute('d', 'M ' +  30 + ' ' + -4 +
-				   ' L ' + 42 + ' ' + -4 +
-				   ' L ' + 36 + ' ' + -16 + ' Z');
-	    }
-	    spandPlacard.appendChild(arrow);
-	    
-	    spandPlacard.addEventListener('mousedown', function(ev) {
-		tier.layoutHeight = tier.wantedLayoutHeight;
+            if (tier.layoutHeight < lh) { 
+                var dispST = 0;
+                while ((tier.layoutHeight - 20) >= stBoundaries[dispST]) { // NB allowance for placard!
+                    ++dispST;
+                }
+                spand.appendChild(document.createTextNode('Show ' + (stBoundaries.length - dispST) + ' more'));
+            } else {
+                spand.appendChild(document.createTextNode('Show less'));
+            }
+            
+            spand.setAttribute('x', 80);
+            spand.setAttribute('y', -6);
+            spandPlacard.appendChild(spand);
+            var arrow = document.createElementNS(NS_SVG, 'path');
+            arrow.setAttribute('fill', 'red');
+            arrow.setAttribute('stroke', 'none');
+            if (tier.layoutHeight < lh) {
+                arrow.setAttribute('d', 'M ' +  30 + ' ' + -16 +
+                                   ' L ' + 42 + ' ' + -16 +
+                                   ' L ' + 36 + ' ' + -4 + ' Z');
+            } else {
+                arrow.setAttribute('d', 'M ' +  30 + ' ' + -4 +
+                                   ' L ' + 42 + ' ' + -4 +
+                                   ' L ' + 36 + ' ' + -16 + ' Z');
+            }
+            spandPlacard.appendChild(arrow);
+            
+            spandPlacard.addEventListener('mousedown', function(ev) {
+                tier.layoutHeight = tier.wantedLayoutHeight;
                 tier.placard = null;
                 tier.clipTier();
-		tier.browser.arrangeTiers();
-	    }, false);
+                tier.browser.arrangeTiers();
+            }, false);
 
-	    var dismiss = document.createElementNS(NS_SVG, 'text');
-	    dismiss.setAttribute('stroke', 'none');
-	    dismiss.setAttribute('fill', 'red');
-	    dismiss.setAttribute('font-family', 'helvetica');
-	    dismiss.setAttribute('font-size', '10pt');
-	    dismiss.appendChild(document.createTextNode("(Auto grow-shrink)"));
-	    dismiss.setAttribute('x', 750);
-	    dismiss.setAttribute('y', -6);
-	    dismiss.addEventListener('mousedown', function(ev) {
-		ev.preventDefault(); ev.stopPropagation();
-		tier.browser.autoSizeTiers = true;
-		tier.browser.refresh();
-	    }, false);
-	    spandPlacard.appendChild(dismiss);
+            var dismiss = document.createElementNS(NS_SVG, 'text');
+            dismiss.setAttribute('stroke', 'none');
+            dismiss.setAttribute('fill', 'red');
+            dismiss.setAttribute('font-family', 'helvetica');
+            dismiss.setAttribute('font-size', '10pt');
+            dismiss.appendChild(document.createTextNode("(Auto grow-shrink)"));
+            dismiss.setAttribute('x', 750);
+            dismiss.setAttribute('y', -6);
+            dismiss.addEventListener('mousedown', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                tier.browser.autoSizeTiers = true;
+                tier.browser.refresh();
+            }, false);
+            spandPlacard.appendChild(dismiss);
 
-	    tier.placard = spandPlacard;
-	} 
+            tier.placard = spandPlacard;
+        } 
     }
 
     var statusMsg = tier.error || tier.status;
     if (statusMsg != null) {
-	var statusPlacard = document.createElementNS(NS_SVG, 'g');
-	var frame = document.createElementNS(NS_SVG, 'rect');
-	frame.setAttribute('x', 0);
-	frame.setAttribute('y', -20);
-	frame.setAttribute('width', tier.browser.featurePanelWidth);
-	frame.setAttribute('height', 20);
-	frame.setAttribute('stroke', 'red');
-	frame.setAttribute('stroke-width', 1);
-	frame.setAttribute('fill', 'white');
-	statusPlacard.appendChild(frame);
-	var status = document.createElementNS(NS_SVG, 'text');
-	status.setAttribute('stroke', 'none');
-	status.setAttribute('fill', 'red');
-	status.setAttribute('font-family', 'helvetica');
-	status.setAttribute('font-size', '10pt');
-	status.setAttribute('x', 25);
-	status.setAttribute('y', -6);
-	status.appendChild(document.createTextNode(statusMsg));
+        var statusPlacard = document.createElementNS(NS_SVG, 'g');
+        var frame = document.createElementNS(NS_SVG, 'rect');
+        frame.setAttribute('x', 0);
+        frame.setAttribute('y', -20);
+        frame.setAttribute('width', tier.browser.featurePanelWidth);
+        frame.setAttribute('height', 20);
+        frame.setAttribute('stroke', 'red');
+        frame.setAttribute('stroke-width', 1);
+        frame.setAttribute('fill', 'white');
+        statusPlacard.appendChild(frame);
+        var status = document.createElementNS(NS_SVG, 'text');
+        status.setAttribute('stroke', 'none');
+        status.setAttribute('fill', 'red');
+        status.setAttribute('font-family', 'helvetica');
+        status.setAttribute('font-size', '10pt');
+        status.setAttribute('x', 25);
+        status.setAttribute('y', -6);
+        status.appendChild(document.createTextNode(statusMsg));
 
         if (tier.error) {
             var dismiss = document.createElementNS(NS_SVG, 'text');
-	    dismiss.setAttribute('stroke', 'none');
-	    dismiss.setAttribute('fill', 'red');
-	    dismiss.setAttribute('font-family', 'helvetica');
-	    dismiss.setAttribute('font-size', '10pt');
-	    dismiss.appendChild(document.createTextNode("(Remove track)"));
-	    dismiss.setAttribute('x', 800);
-	    dismiss.setAttribute('y', -6);
-	    dismiss.addEventListener('mousedown', function(ev) {
-		ev.preventDefault(); ev.stopPropagation();
+            dismiss.setAttribute('stroke', 'none');
+            dismiss.setAttribute('fill', 'red');
+            dismiss.setAttribute('font-family', 'helvetica');
+            dismiss.setAttribute('font-size', '10pt');
+            dismiss.appendChild(document.createTextNode("(Remove track)"));
+            dismiss.setAttribute('x', 800);
+            dismiss.setAttribute('y', -6);
+            dismiss.addEventListener('mousedown', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
                 // dlog('Remove');
                 tier.browser.removeTier(tier);
-	    }, false);
+            }, false);
             statusPlacard.appendChild(dismiss);
         }
 
-	statusPlacard.appendChild(status);
-	tier.placard = statusPlacard;
+        statusPlacard.appendChild(status);
+        tier.placard = statusPlacard;
     }
 
     tier.clipTier();
-	    
+            
     tier.scale = 1;
 }
 
@@ -781,12 +781,12 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     
 
     for (var i = 0; i < features.length; ++i) {
-	var feature = features[i];
+        var feature = features[i];
         // var style = stylesheet[feature.type] || stylesheet['default'];
         var style = tier.styleForFeature(feature);
-	if (!style) {
-	    continue;
-	}
+        if (!style) {
+            continue;
+        }
         if (style.HEIGHT) {
             if (!consHeight) {
                 consHeight = style.HEIGHT|0;
@@ -801,25 +801,25 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     glyphGroup.dalliance_group = groupElement;
     var featureDGlyphs = [];
     for (var i = 0; i < features.length; ++i) {
-	var feature = features[i];
-	if (feature.orientation && strand==null) {
-	    strand = feature.orientation;
-	}
-	if (feature.notes && notes==null) {
-	    notes = feature.notes;
-	}
-	if (feature.links && links==null) {
-	    links = feature.links;
-	}
-	// var style = stylesheet[feature.type] || stylesheet['default'];
+        var feature = features[i];
+        if (feature.orientation && strand==null) {
+            strand = feature.orientation;
+        }
+        if (feature.notes && notes==null) {
+            notes = feature.notes;
+        }
+        if (feature.links && links==null) {
+            links = feature.links;
+        }
+        // var style = stylesheet[feature.type] || stylesheet['default'];
         var style = tier.styleForFeature(feature);
-	if (!style) {
-	    continue;
-	}
+        if (!style) {
+            continue;
+        }
         if (feature.parts) {  // FIXME shouldn't really be needed
             continue;
         }
-	var glyph = glyphForFeature(feature, y, style, tier, consHeight);
+        var glyph = glyphForFeature(feature, y, style, tier, consHeight);
         if (glyph && glyph.glyph) {
             featureDGlyphs.push(glyph);
         }
@@ -835,57 +835,57 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     for (var i = 0; i < featureDGlyphs.length; ++i) {
         var glyph = featureDGlyphs[i];
         glyph.glyph.dalliance_group = groupElement;
-	// glyphGroup.appendChild(glyph.glyph);
+        // glyphGroup.appendChild(glyph.glyph);
         glyphChildren.push(glyph.glyph);
-	var gspan = new Range(glyph.min, glyph.max);
-	if (spans == null) {
-	    spans = gspan;
-	} else {
-	    spans = union(spans, gspan);
-	}
-	height = Math.max(height, glyph.height);
-	if (!label && glyph.label) {
-	    label = glyph.label;
-	}
+        var gspan = new Range(glyph.min, glyph.max);
+        if (spans == null) {
+            spans = gspan;
+        } else {
+            spans = union(spans, gspan);
+        }
+        height = Math.max(height, glyph.height);
+        if (!label && glyph.label) {
+            label = glyph.label;
+        }
         if (glyph.quant) {
             quant = glyph.quant;
         }
     }
 
     if (spans) {
-	var blockList = spans.ranges();
-	for (var i = 1; i < blockList.length; ++i) {
-	    var lmin = ((blockList[i - 1].max() + 1 - origin) * scale);
-	    var lmax = (blockList[i].min() - origin) * scale;
+        var blockList = spans.ranges();
+        for (var i = 1; i < blockList.length; ++i) {
+            var lmin = ((blockList[i - 1].max() + 1 - origin) * scale);
+            var lmax = (blockList[i].min() - origin) * scale;
 
             var path;
-	    if (connectorType == 'collapsed_gene') {
-		path = document.createElementNS(NS_SVG, 'path');
-		path.setAttribute('fill', 'none');
+            if (connectorType == 'collapsed_gene') {
+                path = document.createElementNS(NS_SVG, 'path');
+                path.setAttribute('fill', 'none');
                 path.setAttribute('stroke', 'black');
-		path.setAttribute('stroke-width', '1');
-		
+                path.setAttribute('stroke-width', '1');
+                
                 var hh = height/2;
-		var pathops = "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh);
-		if (lmax - lmin > 8) {
-		    var lmid = (0.5*lmax) + (0.5*lmin);
-		    if (strand == '+') {
-			pathops += ' M ' + (lmid - 2) + ' ' + (y+hh-4) +
-			    ' L ' + (lmid + 2) + ' ' + (y+hh) +
-			    ' L ' + (lmid - 2) + ' ' + (y+hh+4); 
-		    } else if (strand == '-') {
-			pathops += ' M ' + (lmid + 2) + ' ' + (y+hh-4) +
-			    ' L ' + (lmid - 2) + ' ' + (y+hh) +
-			    ' L ' + (lmid + 2) + ' ' + (y+hh+4); 
-		    }
-		}
-		path.setAttribute('d', pathops);
-	    } else {
-		path = document.createElementNS(NS_SVG, 'path');
-		path.setAttribute('fill', 'none');
+                var pathops = "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh);
+                if (lmax - lmin > 8) {
+                    var lmid = (0.5*lmax) + (0.5*lmin);
+                    if (strand == '+') {
+                        pathops += ' M ' + (lmid - 2) + ' ' + (y+hh-4) +
+                            ' L ' + (lmid + 2) + ' ' + (y+hh) +
+                            ' L ' + (lmid - 2) + ' ' + (y+hh+4); 
+                    } else if (strand == '-') {
+                        pathops += ' M ' + (lmid + 2) + ' ' + (y+hh-4) +
+                            ' L ' + (lmid - 2) + ' ' + (y+hh) +
+                            ' L ' + (lmid + 2) + ' ' + (y+hh+4); 
+                    }
+                }
+                path.setAttribute('d', pathops);
+            } else {
+                path = document.createElementNS(NS_SVG, 'path');
+                path.setAttribute('fill', 'none');
                 path.setAttribute('stroke', 'black');
-		path.setAttribute('stroke-width', '1');
-		
+                path.setAttribute('stroke-width', '1');
+                
                 var vee = true;
                 if (gstyle && gstyle.STYLE && gstyle.STYLE != 'hat') {
                     vee = false;
@@ -897,16 +897,16 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
                 } else {
                     hh = height/2;
                 }
-		if (vee && (strand == "+" || strand == "-")) {
-		    var lmid = (lmin + lmax) / 2;
-		    var lmidy = (strand == "-") ? y + 12 : y;
-		    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + hh));
-		} else {
-		    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh));
-		}
-	    }
-	    glyphGroup.appendChild(path);
-	}
+                if (vee && (strand == "+" || strand == "-")) {
+                    var lmid = (lmin + lmax) / 2;
+                    var lmidy = (strand == "-") ? y + 12 : y;
+                    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmid + " " + lmidy + " L " + lmax + " " + (y + hh));
+                } else {
+                    path.setAttribute("d", "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh));
+                }
+            }
+            glyphGroup.appendChild(path);
+        }
     }
 
     for (var i = 0; i < glyphChildren.length; ++i) {
@@ -925,13 +925,13 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     dg.bump = true; // grouped features always bumped.
     // alert(miniJSONify(gstyle));
     if (label || (gstyle && (gstyle.LABEL || gstyle.LABELS))) {  // HACK, LABELS should work.
-	dg.label = groupElement.label || label;
-	var sg = tier.groupsToSupers[groupElement.id];
-	if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
-	    if (groupElement.id != tier.superGroups[sg][0]) {
-	    	dg.label = null;
-	    }
-	}
+        dg.label = groupElement.label || label;
+        var sg = tier.groupsToSupers[groupElement.id];
+        if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
+            if (groupElement.id != tier.superGroups[sg][0]) {
+                dg.label = null;
+            }
+        }
     }
     if (quant) {
         dg.quant = quant;
@@ -959,84 +959,84 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var quant;
 
     if (gtype == 'HIDDEN' || feature.parts) {
-	glyph = null;
+        glyph = null;
     } else if (gtype == 'CROSS' || gtype == 'EX' || gtype == 'SPAN' || gtype == 'LINE' || gtype == 'DOT' || gtype == 'TRIANGLE') {
-	var stroke = style.FGCOLOR || 'black';
-	var fill = style.BGCOLOR || 'none';
-	var height = style.HEIGHT || forceHeight || 12;
-	requiredHeight = height = 1.0 * height;
+        var stroke = style.FGCOLOR || 'black';
+        var fill = style.BGCOLOR || 'none';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
 
-	var mid = (minPos + maxPos)/2;
-	var hh = height/2;
+        var mid = (minPos + maxPos)/2;
+        var hh = height/2;
 
-	var mark;
+        var mark;
         var bMinPos = minPos, bMaxPos = maxPos;
 
-	if (gtype == 'CROSS') {
-	    mark = document.createElementNS(NS_SVG, 'path');
-	    mark.setAttribute('fill', 'none');
-	    mark.setAttribute('stroke', stroke);
-	    mark.setAttribute('stroke-width', 1);
-	    mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y+hh) + 
-			      ' L ' + (mid+hh) + ' ' + (y+hh) + 
-			      ' M ' + mid + ' ' + y +
-			      ' L ' + mid + ' ' + (y+height));
+        if (gtype == 'CROSS') {
+            mark = document.createElementNS(NS_SVG, 'path');
+            mark.setAttribute('fill', 'none');
+            mark.setAttribute('stroke', stroke);
+            mark.setAttribute('stroke-width', 1);
+            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y+hh) + 
+                              ' L ' + (mid+hh) + ' ' + (y+hh) + 
+                              ' M ' + mid + ' ' + y +
+                              ' L ' + mid + ' ' + (y+height));
             bMinPos = Math.min(minPos, mid-hh);
             bMaxPos = Math.max(maxPos, mid+hh);
-	} else if (gtype == 'EX') {
-	    mark = document.createElementNS(NS_SVG, 'path');
-	    mark.setAttribute('fill', 'none');
-	    mark.setAttribute('stroke', stroke);
-	    mark.setAttribute('stroke-width', 1);
-	    mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y) + 
-			      ' L ' + (mid+hh) + ' ' + (y+height) + 
-			      ' M ' + (mid+hh) + ' ' + (y) +
-			      ' L ' + (mid-hh) + ' ' + (y+height));  
+        } else if (gtype == 'EX') {
+            mark = document.createElementNS(NS_SVG, 'path');
+            mark.setAttribute('fill', 'none');
+            mark.setAttribute('stroke', stroke);
+            mark.setAttribute('stroke-width', 1);
+            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y) + 
+                              ' L ' + (mid+hh) + ' ' + (y+height) + 
+                              ' M ' + (mid+hh) + ' ' + (y) +
+                              ' L ' + (mid-hh) + ' ' + (y+height));  
             bMinPos = Math.min(minPos, mid-hh);
             bMaxPos = Math.max(maxPos, mid+hh);
-	} else if (gtype == 'SPAN') {
-	    mark = document.createElementNS(NS_SVG, 'path');
-	    mark.setAttribute('fill', 'none');
-	    mark.setAttribute('stroke', stroke);
-	    mark.setAttribute('stroke-width', 1);
-	    mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
-			      ' L ' + maxPos + ' ' + (y+hh) +
-			      ' M ' + minPos + ' ' + y +
-			      ' L ' + minPos + ' ' + (y + height) +
-			      ' M ' + maxPos + ' ' + y +
-			      ' L ' + maxPos + ' ' + (y + height));
-	} else if (gtype == 'LINE') {
-	    var lstyle = style.STYLE || 'solid';
-	    mark = document.createElementNS(NS_SVG, 'path');
-	    mark.setAttribute('fill', 'none');
-	    mark.setAttribute('stroke', stroke);
-	    mark.setAttribute('stroke-width', 1);
-	    if (lstyle == 'hat') {
-		var dip = 0;
-		if (feature.orientation == '-') {
-		    dip = height;
-		}
-		mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
-				  ' L ' + ((maxPos + minPos) / 2) + ' ' + (y+dip) +
-				  ' L ' + maxPos + ' ' + (y+hh));
-	    } else {
-		mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
-				  ' L ' + maxPos + ' ' + (y+hh));
-	    }
-	    if (lstyle == 'dashed') {
-		mark.setAttribute('stroke-dasharray', '3');
-	    }
-	} else if (gtype == 'DOT') {
-	    mark = document.createElementNS(NS_SVG, 'circle');
-	    mark.setAttribute('fill', stroke);   // yes, really...
-	    mark.setAttribute('stroke', 'none');
-	    mark.setAttribute('cx', mid);
-	    mark.setAttribute('cy', (y+hh));
-	    mark.setAttribute('r', hh);
+        } else if (gtype == 'SPAN') {
+            mark = document.createElementNS(NS_SVG, 'path');
+            mark.setAttribute('fill', 'none');
+            mark.setAttribute('stroke', stroke);
+            mark.setAttribute('stroke-width', 1);
+            mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+                              ' L ' + maxPos + ' ' + (y+hh) +
+                              ' M ' + minPos + ' ' + y +
+                              ' L ' + minPos + ' ' + (y + height) +
+                              ' M ' + maxPos + ' ' + y +
+                              ' L ' + maxPos + ' ' + (y + height));
+        } else if (gtype == 'LINE') {
+            var lstyle = style.STYLE || 'solid';
+            mark = document.createElementNS(NS_SVG, 'path');
+            mark.setAttribute('fill', 'none');
+            mark.setAttribute('stroke', stroke);
+            mark.setAttribute('stroke-width', 1);
+            if (lstyle == 'hat') {
+                var dip = 0;
+                if (feature.orientation == '-') {
+                    dip = height;
+                }
+                mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+                                  ' L ' + ((maxPos + minPos) / 2) + ' ' + (y+dip) +
+                                  ' L ' + maxPos + ' ' + (y+hh));
+            } else {
+                mark.setAttribute('d', 'M ' + minPos + ' ' + (y+hh) +
+                                  ' L ' + maxPos + ' ' + (y+hh));
+            }
+            if (lstyle == 'dashed') {
+                mark.setAttribute('stroke-dasharray', '3');
+            }
+        } else if (gtype == 'DOT') {
+            mark = document.createElementNS(NS_SVG, 'circle');
+            mark.setAttribute('fill', stroke);   // yes, really...
+            mark.setAttribute('stroke', 'none');
+            mark.setAttribute('cx', mid);
+            mark.setAttribute('cy', (y+hh));
+            mark.setAttribute('r', hh);
             bMinPos = Math.min(minPos, mid-hh);
             bMaxPos = Math.max(maxPos, mid+hh);
-	}  else if (gtype == 'TRIANGLE') {
-	    var dir = style.DIRECTION || 'N';
+        }  else if (gtype == 'TRIANGLE') {
+            var dir = style.DIRECTION || 'N';
             if (dir === 'FORWARD') {
                 if (strand === '-') {
                     dir = 'W';
@@ -1050,57 +1050,57 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     dir = 'W';
                 }
             }
-	    var width = style.LINEWIDTH || height;
-	    halfHeight = 0.5 * height;
-	    halfWidth = 0.5 * width;
-	    mark = document.createElementNS(NS_SVG, 'path');
-	    if (dir == 'E') {
-	    mark.setAttribute('d', 'M ' + (mid - halfWidth) + ' ' + 0 + 
-			      ' L ' + (mid - halfWidth) + ' ' + height +
-			      ' L ' + (mid + halfWidth) + ' ' + halfHeight + ' Z');
-	    } else if (dir == 'W') {
-		mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
-				  ' L ' + (mid + halfWidth) + ' ' + height +
-				  ' L ' + (mid - halfWidth) + ' ' + halfHeight + ' Z');
-	    } else if (dir == 'S') {
-		mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
-				  ' L ' + (mid - halfWidth) + ' ' + 0 +
-				  ' L ' + mid + ' ' + height + ' Z');
-	    } else {
-		mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + height + 
-				  ' L ' + (mid - halfWidth) + ' ' + height +
-				  ' L ' + mid + ' ' + 0 + ' Z');
-	    }
+            var width = style.LINEWIDTH || height;
+            halfHeight = 0.5 * height;
+            halfWidth = 0.5 * width;
+            mark = document.createElementNS(NS_SVG, 'path');
+            if (dir == 'E') {
+            mark.setAttribute('d', 'M ' + (mid - halfWidth) + ' ' + 0 + 
+                              ' L ' + (mid - halfWidth) + ' ' + height +
+                              ' L ' + (mid + halfWidth) + ' ' + halfHeight + ' Z');
+            } else if (dir == 'W') {
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
+                                  ' L ' + (mid + halfWidth) + ' ' + height +
+                                  ' L ' + (mid - halfWidth) + ' ' + halfHeight + ' Z');
+            } else if (dir == 'S') {
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
+                                  ' L ' + (mid - halfWidth) + ' ' + 0 +
+                                  ' L ' + mid + ' ' + height + ' Z');
+            } else {
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + height + 
+                                  ' L ' + (mid - halfWidth) + ' ' + height +
+                                  ' L ' + mid + ' ' + 0 + ' Z');
+            }
             bMinPos = Math.min(minPos, mid-halfWidth);
             bMaxPos = Math.max(maxPos, mid+halfWidth);
-	    mark.setAttribute('fill', stroke);
-	    mark.setAttribute('stroke', 'none');
-	}
+            mark.setAttribute('fill', stroke);
+            mark.setAttribute('stroke', 'none');
+        }
 
-	glyph = document.createElementNS(NS_SVG, 'g');
+        glyph = document.createElementNS(NS_SVG, 'g');
         if (fill == 'none' || bMinPos < minPos || bMaxPos > maxPos) {
             var bg = document.createElementNS(NS_SVG, 'rect');
-	    bg.setAttribute('x', bMinPos);
+            bg.setAttribute('x', bMinPos);
             bg.setAttribute('y', y);
             bg.setAttribute('width', bMaxPos - bMinPos);
             bg.setAttribute('height', height);
-	    bg.setAttribute('stroke', 'none');
-	    bg.setAttribute('fill', 'none');
+            bg.setAttribute('stroke', 'none');
+            bg.setAttribute('fill', 'none');
             bg.setAttribute('pointer-events', 'all');
-	    glyph.appendChild(bg);
+            glyph.appendChild(bg);
         }
         if (fill != 'none') {
-	    var bg = document.createElementNS(NS_SVG, 'rect');
-	    bg.setAttribute('x', minPos);
+            var bg = document.createElementNS(NS_SVG, 'rect');
+            bg.setAttribute('x', minPos);
             bg.setAttribute('y', y);
             bg.setAttribute('width', maxPos - minPos);
             bg.setAttribute('height', height);
-	    bg.setAttribute('stroke', 'none');
-	    bg.setAttribute('fill', fill);
+            bg.setAttribute('stroke', 'none');
+            bg.setAttribute('fill', fill);
             bg.setAttribute('pointer-events', 'all');
-	    glyph.appendChild(bg);
+            glyph.appendChild(bg);
         }
-	glyph.appendChild(mark);
+        glyph.appendChild(mark);
 /*
         if (bMinPos < minPos) {
             min = bMinPos/scale + origin;
@@ -1109,40 +1109,40 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             max = (bMaxPos-1)/scale + origin;
         } */
     } else if (gtype == 'PRIMERS') {
-	var arrowColor = style.FGCOLOR || 'red';
-	var lineColor = style.BGCOLOR || 'black';
-	var height = style.HEIGHT || forceHeight || 12;
-	requiredHeight = height = 1.0 * height;
+        var arrowColor = style.FGCOLOR || 'red';
+        var lineColor = style.BGCOLOR || 'black';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
 
-	var mid = (minPos + maxPos)/2;
-	var hh = height/2;
+        var mid = (minPos + maxPos)/2;
+        var hh = height/2;
 
-	var glyph = document.createElementNS(NS_SVG, 'g');
-	var line = document.createElementNS(NS_SVG, 'path');
-	line.setAttribute('stroke', lineColor);
-	line.setAttribute('fill', 'none');
-	line.setAttribute('d', 'M ' + minPos + ' ' + (height/2) + ' L ' + maxPos + ' ' + (height/2));
-	glyph.appendChild(line);
+        var glyph = document.createElementNS(NS_SVG, 'g');
+        var line = document.createElementNS(NS_SVG, 'path');
+        line.setAttribute('stroke', lineColor);
+        line.setAttribute('fill', 'none');
+        line.setAttribute('d', 'M ' + minPos + ' ' + (height/2) + ' L ' + maxPos + ' ' + (height/2));
+        glyph.appendChild(line);
 
-	var trigs = document.createElementNS(NS_SVG, 'path');
-	trigs.setAttribute('stroke', 'none');
-	trigs.setAttribute('fill', 'arrowColor');
-	trigs.setAttribute('d', 'M ' + minPos + ' ' + 0 + ' L ' + minPos + ' ' + height + ' L ' + (minPos + height) + ' ' + (height/2) + ' Z ' +
-	    		        'M ' + maxPos + ' ' + 0 + ' L ' + maxPos + ' ' + height + ' L ' + (maxPos - height) + ' ' + (height/2) + ' Z');
-	glyph.appendChild(trigs);
+        var trigs = document.createElementNS(NS_SVG, 'path');
+        trigs.setAttribute('stroke', 'none');
+        trigs.setAttribute('fill', 'arrowColor');
+        trigs.setAttribute('d', 'M ' + minPos + ' ' + 0 + ' L ' + minPos + ' ' + height + ' L ' + (minPos + height) + ' ' + (height/2) + ' Z ' +
+                                'M ' + maxPos + ' ' + 0 + ' L ' + maxPos + ' ' + height + ' L ' + (maxPos - height) + ' ' + (height/2) + ' Z');
+        glyph.appendChild(trigs);
     } else if (gtype == 'ARROW') {
         var parallel = style.PARALLEL ? style.PARALLEL == 'yes' : true;
         var ne = style.NORTHEAST && style.NORTHEAST == 'yes';
         var sw = style.SOUTHWEST && style.SOUTHWEST == 'yes';
 
-	var stroke = style.FGCOLOR || 'none';
-	var fill = style.BGCOLOR || 'green';
-	var height = style.HEIGHT || forceHeight || 12;
-	requiredHeight = height = 1.0 * height;
-	var headInset = parallel ? 0.5 *height : 0.25 * height;
-	var midPos = (maxPos + minPos)/2;
-	var instep = parallel ? 0.25 * height : 0.4 * height;
-	
+        var stroke = style.FGCOLOR || 'none';
+        var fill = style.BGCOLOR || 'green';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
+        var headInset = parallel ? 0.5 *height : 0.25 * height;
+        var midPos = (maxPos + minPos)/2;
+        var instep = parallel ? 0.25 * height : 0.4 * height;
+        
         if (parallel) {
             if (ne && (maxPos - midPos < height)) {
                 maxPos = midPos + height;
@@ -1157,12 +1157,12 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             }
         }
 
-	var path = document.createElementNS(NS_SVG, 'path');
-	path.setAttribute('fill', fill);
-	path.setAttribute('stroke', stroke);
-	if (stroke != 'none') {
-	    path.setAttribute('stroke-width', 1);
-	}
+        var path = document.createElementNS(NS_SVG, 'path');
+        path.setAttribute('fill', fill);
+        path.setAttribute('stroke', stroke);
+        if (stroke != 'none') {
+            path.setAttribute('stroke-width', 1);
+        }
 
         var pathops;
         if (parallel) {
@@ -1212,53 +1212,53 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             }
             pathops += ' Z';
         }
-	path.setAttribute('d', pathops);
+        path.setAttribute('d', pathops);
 
-	glyph = path;
+        glyph = path;
     } else if (gtype == 'ANCHORED_ARROW') {
-	var stroke = style.FGCOLOR || 'none';
-	var fill = style.BGCOLOR || 'green';
-	var height = style.HEIGHT || forceHeight || 12;
-	requiredHeight = height = 1.0 * height;
-	var lInset = 0;
-	var rInset = 0;
-	var minLength = height + 2;
-	var instep = 0.333333 * height;
-	
+        var stroke = style.FGCOLOR || 'none';
+        var fill = style.BGCOLOR || 'green';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
+        var lInset = 0;
+        var rInset = 0;
+        var minLength = height + 2;
+        var instep = 0.333333 * height;
+        
 
-	if (feature.orientation) {
-	    if (feature.orientation == '+') {
-		rInset = height/2;
-	    } else if (feature.orientation == '-') {
-		lInset = height/2;
-	    }
-	}
+        if (feature.orientation) {
+            if (feature.orientation == '+') {
+                rInset = height/2;
+            } else if (feature.orientation == '-') {
+                lInset = height/2;
+            }
+        }
 
         if (maxPos - minPos < minLength) {
             minPos = (maxPos + minPos - minLength) / 2;
             maxPos = minPos + minLength;
         }
 
-	var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-	path.setAttribute("fill", fill);
-	path.setAttribute('stroke', stroke);
-	if (stroke != 'none') {
-	    path.setAttribute("stroke-width", 1);
-	}
-	
-	path.setAttribute('d', 'M ' + ((minPos + lInset)) + ' ' + ((y+instep)) +
+        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("fill", fill);
+        path.setAttribute('stroke', stroke);
+        if (stroke != 'none') {
+            path.setAttribute("stroke-width", 1);
+        }
+        
+        path.setAttribute('d', 'M ' + ((minPos + lInset)) + ' ' + ((y+instep)) +
                           ' L ' + ((maxPos - rInset)) + ' ' + ((y+instep)) +
-			  ' L ' + ((maxPos - rInset)) + ' ' + (y) +
-			  ' L ' + (maxPos) + ' ' + ((y+(height/2))) +
-			  ' L ' + ((maxPos - rInset)) + ' ' + ((y+height)) +
-			  ' L ' + ((maxPos - rInset)) + ' ' + ((y + instep + instep)) +
-			  ' L ' + ((minPos + lInset)) + ' ' + ((y + instep + instep)) +
-			  ' L ' + ((minPos + lInset)) + ' ' + ((y + height)) +
-			  ' L ' + (minPos) + ' ' + ((y+(height/2))) +
-			  ' L ' + ((minPos + lInset)) + ' ' + (y) +
-			  ' L ' + ((minPos + lInset)) + ' ' + ((y+instep)));
+                          ' L ' + ((maxPos - rInset)) + ' ' + (y) +
+                          ' L ' + (maxPos) + ' ' + ((y+(height/2))) +
+                          ' L ' + ((maxPos - rInset)) + ' ' + ((y+height)) +
+                          ' L ' + ((maxPos - rInset)) + ' ' + ((y + instep + instep)) +
+                          ' L ' + ((minPos + lInset)) + ' ' + ((y + instep + instep)) +
+                          ' L ' + ((minPos + lInset)) + ' ' + ((y + height)) +
+                          ' L ' + (minPos) + ' ' + ((y+(height/2))) +
+                          ' L ' + ((minPos + lInset)) + ' ' + (y) +
+                          ' L ' + ((minPos + lInset)) + ' ' + ((y+instep)));
 
-	glyph = path;
+        glyph = path;
     } else if (gtype == 'TEXT') {
         var textFill = style.FGCOLOR || 'none';
         var bgFill = style.BGCOLOR || 'none';
@@ -1301,13 +1301,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             }
         }
     } else {
-	// BOX plus other rectangular stuff
-	// Also handles HISTOGRAM, GRADIENT, and TOOMANY.
+        // BOX plus other rectangular stuff
+        // Also handles HISTOGRAM, GRADIENT, and TOOMANY.
     
-	var stroke = style.FGCOLOR || 'none';
-	var fill = style.BGCOLOR || style.COLOR1 || 'green';
-	var height = style.HEIGHT || forceHeight || 12;
-	requiredHeight = height = 1.0 * height;
+        var stroke = style.FGCOLOR || 'none';
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
 
         if (style.WIDTH) {
             var w = style.WIDTH|0;
@@ -1318,9 +1318,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             maxPos = minPos + MIN_FEATURE_PX;
         }
 
-	if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score !== 'undefined') {
-	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
-	    var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+        if ((gtype == 'HISTOGRAM' || gtype == 'GRADIENT') && score !== 'undefined') {
+            var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+            var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
             if (!smax) {
                 if (smin < 0) {
@@ -1333,40 +1333,40 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 smin = 0;
             }
 
-	    if ((1.0 * score) < (1.0 *smin)) {
-		score = smin;
-	    }
-	    if ((1.0 * score) > (1.0 * smax)) {
-		score = smax;
-	    }
-	    var relScore = ((1.0 * score) - smin) / (smax-smin);
+            if ((1.0 * score) < (1.0 *smin)) {
+                score = smin;
+            }
+            if ((1.0 * score) > (1.0 * smax)) {
+                score = smax;
+            }
+            var relScore = ((1.0 * score) - smin) / (smax-smin);
 
             if (style.COLOR2) {
-	        var loc, hic, frac;
-	        if (style.COLOR3) {
-		    if (relScore < 0.5) {
-		        loc = dasColourForName(style.COLOR1);
-		        hic = dasColourForName(style.COLOR2);
-		        frac = relScore * 2;
-		    } else {
-		        loc = dasColourForName(style.COLOR2);
-		        hic = dasColourForName(style.COLOR3);
-		        frac = (relScore * 2.0) - 1.0;
-		    }
-	        } else {
-		    loc = dasColourForName(style.COLOR1);
-		    hic = dasColourForName(style.COLOR2);
-		    frac = relScore;
-	        }
+                var loc, hic, frac;
+                if (style.COLOR3) {
+                    if (relScore < 0.5) {
+                        loc = dasColourForName(style.COLOR1);
+                        hic = dasColourForName(style.COLOR2);
+                        frac = relScore * 2;
+                    } else {
+                        loc = dasColourForName(style.COLOR2);
+                        hic = dasColourForName(style.COLOR3);
+                        frac = (relScore * 2.0) - 1.0;
+                    }
+                } else {
+                    loc = dasColourForName(style.COLOR1);
+                    hic = dasColourForName(style.COLOR2);
+                    frac = relScore;
+                }
 
-	        fill = new DColour(
-		    ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
-		    ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
-		    ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
-	        ).toSvgString();
+                fill = new DColour(
+                    ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
+                    ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
+                    ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
+                ).toSvgString();
             } 
 
-	    if (gtype == 'HISTOGRAM') {
+            if (gtype == 'HISTOGRAM') {
                 if (true) {
                     var relOrigin = (-1.0 * smin) / (smax - smin);
                     if (relScore >= relOrigin) {
@@ -1378,19 +1378,19 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     }
                 } else {
                     // old impl
-		    height = relScore * height;
-		    y = y + (requiredHeight - height);
+                    height = relScore * height;
+                    y = y + (requiredHeight - height);
                 }
                 
                 quant = {
                     min: smin,
                     max: smax
                 };
-	    }
+            }
 
             minPos -= 0.25
             maxPos += 0.25;   // Fudge factor to mitigate pixel-jitter.
-	}
+        }
  
         // dlog('min=' + min + '; max=' + max + '; minPos=' + minPos + '; maxPos=' + maxPos);
 
@@ -1399,17 +1399,17 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         rect.setAttribute('y', y);
         rect.setAttribute('width', maxPos - minPos);
         rect.setAttribute('height', height);
-	rect.setAttribute('stroke', stroke);
+        rect.setAttribute('stroke', stroke);
         rect.setAttribute('stroke-width', 1);
-	rect.setAttribute('fill', fill);
-	
-	if (feature.visualWeight && feature.visualWeight < 1.0) {
-	    rect.setAttribute('fill-opacity', feature.visualWeight);
-	    if (stroke != 'none') {
-		rect.setAttribute('stroke-opacity', feature.visualWeight);
-	    }
-	}
-	
+        rect.setAttribute('fill', fill);
+        
+        if (feature.visualWeight && feature.visualWeight < 1.0) {
+            rect.setAttribute('fill-opacity', feature.visualWeight);
+            if (stroke != 'none') {
+                rect.setAttribute('stroke-opacity', feature.visualWeight);
+            }
+        }
+        
         if (gtype == 'TOOMANY') {
             var bits = [rect];
             for (var i = 3; i < height; i += 3) {
@@ -1443,9 +1443,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     }
                 }
 
-	        if (!color) {
-	            color = 'gray';
-	        }
+                if (!color) {
+                    color = 'gray';
+                }
 
                 if (scale >= 8) {
                     var labelText = document.createElementNS(NS_SVG, 'text');
@@ -1478,7 +1478,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             
             glyph = makeElementNS(NS_SVG, 'g', gg);
         } else {
-	    glyph = rect;
+            glyph = rect;
         }
     }
 
@@ -1487,10 +1487,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     }
     var dg = new DGlyph(glyph, min, max, requiredHeight);
     if (style.LABEL && (feature.label || feature.id)) {
-	dg.label = feature.label || feature.id;
+        dg.label = feature.label || feature.id;
     }
     if (style.BUMP) {
-	dg.bump = true;
+        dg.bump = true;
     }
     dg.strand = feature.orientation || '0';
     if (quant) {
@@ -1505,50 +1505,50 @@ function labelGlyph(tier, dglyph, featureTier) {
     var scale = tier.browser.scale, origin = tier.browser.origin;
 
     if (dglyph.glyph && dglyph.label) {
-	var label = dglyph.label;
-	var labelText = document.createElementNS(NS_SVG, 'text');
-	labelText.setAttribute('x', (dglyph.min - origin) * scale);
-	labelText.setAttribute('y', dglyph.height + 15);
-	labelText.setAttribute('stroke-width', 0);
-	labelText.setAttribute('fill', 'black');
-	labelText.setAttribute('class', 'label-text');
-	labelText.setAttribute('font-family', 'helvetica');
-	labelText.setAttribute('font-size', '10pt');
-	if (dglyph.strand == '+') {
-	    label = label + '>';
-	} else if (dglyph.strand == '-') {
-	    label = '<' + label;
+        var label = dglyph.label;
+        var labelText = document.createElementNS(NS_SVG, 'text');
+        labelText.setAttribute('x', (dglyph.min - origin) * scale);
+        labelText.setAttribute('y', dglyph.height + 15);
+        labelText.setAttribute('stroke-width', 0);
+        labelText.setAttribute('fill', 'black');
+        labelText.setAttribute('class', 'label-text');
+        labelText.setAttribute('font-family', 'helvetica');
+        labelText.setAttribute('font-size', '10pt');
+        if (dglyph.strand == '+') {
+            label = label + '>';
+        } else if (dglyph.strand == '-') {
+            label = '<' + label;
         }
-	labelText.appendChild(document.createTextNode(label));
+        labelText.appendChild(document.createTextNode(label));
 
-	featureTier.appendChild(labelText);
-	var width = labelText.getBBox().width;
-	featureTier.removeChild(labelText);
+        featureTier.appendChild(labelText);
+        var width = labelText.getBBox().width;
+        featureTier.removeChild(labelText);
 
-	var g;
-	if (dglyph.glyph.localName == 'g') {
-	    g = dglyph.glyph;
-	} else {
-	    g = document.createElementNS(NS_SVG, 'g');
-	    g.appendChild(dglyph.glyph);
-	}
-	g.appendChild(labelText);
-	dglyph.glyph = g;
-	dglyph.height = dglyph.height + 20;
-	
-	var textMax = (dglyph.min|0) + ((width + 10) / scale)
-	if (textMax > dglyph.max) {
-	    var adj = (textMax - dglyph.max)/2;
-	    var nmin = ((dglyph.min - adj - origin) * scale) + 5;
-	    labelText.setAttribute('x', nmin)
-	    dglyph.min = ((nmin/scale)+origin)|0;
-	    dglyph.max = (textMax-adj)|0;
-	} else {
+        var g;
+        if (dglyph.glyph.localName == 'g') {
+            g = dglyph.glyph;
+        } else {
+            g = document.createElementNS(NS_SVG, 'g');
+            g.appendChild(dglyph.glyph);
+        }
+        g.appendChild(labelText);
+        dglyph.glyph = g;
+        dglyph.height = dglyph.height + 20;
+        
+        var textMax = (dglyph.min|0) + ((width + 10) / scale)
+        if (textMax > dglyph.max) {
+            var adj = (textMax - dglyph.max)/2;
+            var nmin = ((dglyph.min - adj - origin) * scale) + 5;
+            labelText.setAttribute('x', nmin)
+            dglyph.min = ((nmin/scale)+origin)|0;
+            dglyph.max = (textMax-adj)|0;
+        } else {
             // Mark as a candidate for label-jiggling
 
             labelText.jiggleMin = (dglyph.min - origin) * scale;
             labelText.jiggleMax = ((dglyph.max - origin) * scale) - width;
-	}
+        }
     }
     return dglyph;
 }
