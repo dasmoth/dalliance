@@ -1426,7 +1426,7 @@ Browser.prototype.realInit = function(opts) {
 	var source = this.sources[t];
         if (source.bwgURI && !this.supportsBinary) {
             if (!this.binaryWarningGiven) {
-                this.popit({clientX: 300, clientY: 100}, 'Warning', makeElement('p', 'browser does not support binary data, some track(s) not loaded'));
+                this.popit({clientX: 300, clientY: 100}, 'Warning', makeElement('p', 'your browser does not support binary data formats, some track(s) not loaded.  We currently recommend Google Chrome 9 or later, or Firefox 4 or later.'));
                 this.binaryWarningGiven = true;
             }
             continue;
