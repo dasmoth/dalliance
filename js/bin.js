@@ -14,9 +14,9 @@ function BlobFetchable(b) {
 BlobFetchable.prototype.slice = function(start, length) {
     var b;
     if (length) {
-        b = this.blob.slice(start, length);
+        b = this.blob.webkitSlice(start, start + length);
     } else {
-        b = this.blob.slice(start);
+        b = this.blob.webkitSlice(start);
     }
     return new BlobFetchable(b);
 }
