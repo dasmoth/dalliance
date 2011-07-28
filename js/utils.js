@@ -12,7 +12,7 @@ var NUM_REGEXP = new RegExp('[0-9]+');
 function stringToNumbersArray(str) {
     var nums = new Array();
     var m;
-    while (m = NUM_REGEXP(str)) {
+    while (m = NUM_REGEXP.exec(str)) {
         nums.push(m[0]);
         str=str.substring(m.index + (m[0].length));
     }
