@@ -467,7 +467,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
     if (!this.cirHeader) {
         // dlog('No CIR yet, fetching');
         this.bwg.data.slice(this.cirTreeOffset, 48).fetch(function(result) {
-            thisB.cirHeader = bstringToBuffer(result);
+            thisB.cirHeader = result;
             var la = new Int32Array(thisB.cirHeader);
             thisB.cirBlockSize = la[1];
             thisB.readWigDataById(chr, min, max, callback);
@@ -505,7 +505,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
         var length = fr.max() - fr.min();
         // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
         thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
-            var resultBuffer = bstringToBuffer(result);
+            var resultBuffer = result;
 
 // This is now handled in URLFetchable instead.
 //
@@ -767,12 +767,14 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                             
                                 var data;
                                 if (thisB.bwg.uncompressBufSize > 0) {
-                                    // var beforeInf = Date.now();
-                                    data = jszlib_inflate_buffer(bstringToBuffer(result.substr(offset + 2, fb.size - 2)));
+                                    // var beforeInf = Date.now()
+                                    data = jszlib_inflate_buffer(result, offset + 2, fb.size - 2);
                                     // var afterInf = Date.now();
                                     // dlog('inflate: ' + (afterInf - beforeInf) + 'ms');
                                 } else {
-                                    data = bstringToBuffer(result.substr(offset, fb.size)).buffer;
+                                    var tmp = new Uint8Array(fb.size);    // FIXME is this really the best we can do?
+                                    arrayCopy(new Uint8Array(result, offset, fb.size), 0, tmp, 0, fb.size);
+                                    data = tmp.buffer;
                                 }
                                 fb.data = data;
                                 
