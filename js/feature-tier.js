@@ -118,10 +118,10 @@ DasTier.prototype.styleForFeature = function(f) {
         if (sh.zoom && sh.zoom != ssScale) {
             continue;
         }
-        if (sh.label && !(new RegExp(sh.label).test(f.label))) {
+        if (sh.label && !(new RegExp('^' + sh.label + '$').test(f.label))) {
             continue;
         }
-        if (sh.method && !(new RegExp(sh.method).test(f.method))) {
+        if (sh.method && !(new RegExp('^' + sh.method + '$').test(f.method))) {
             continue;
         }
         if (sh.type) {

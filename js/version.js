@@ -12,7 +12,7 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  6,
     MICRO:  4,
-    PATCH:  'b',
+    PATCH:  'c',
     BRANCH: ''
 }
 
