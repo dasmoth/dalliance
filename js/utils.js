@@ -24,7 +24,6 @@ var STRICT_NUM_REGEXP = new RegExp('^[0-9]+$');
 function stringToInt(str) {
     str = str.replace(new RegExp(',', 'g'), '');
     if (!STRICT_NUM_REGEXP.test(str)) {
-        alert("Don't understand '" + str + "'");
         return null;
     }
     return str|0;

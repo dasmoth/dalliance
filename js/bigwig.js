@@ -329,7 +329,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     featureOpts.label = bedColumns[0];
                                 }
                                 if (bedColumns.length > 1) {
-                                    featureOpts.score = 100; /* bedColumns[1]; */
+                                    featureOpts.score = stringToInt(bedColumns[1]);
                                 }
                                 if (bedColumns.length > 2) {
                                     featureOpts.orientation = bedColumns[2];
