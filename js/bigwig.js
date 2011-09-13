@@ -808,7 +808,12 @@ BigWig.prototype.readWigData = function(chrName, min, max, callback) {
 
 BigWig.prototype.getUnzoomedView = function() {
     if (!this.unzoomedView) {
-        this.unzoomedView = new BigWigView(this, this.unzoomedIndexOffset, this.zoomLevels[0].dataOffset - this.unzoomedIndexOffset, false);
+        var cirLen = 4000;
+        var nzl = this.zoomLevels[0];
+        if (nzl) {
+            cirLen = this.zoomLevels[0].dataOffset - this.unzoomedIndexOffset;
+        }
+        this.unzoomedView = new BigWigView(this, this.unzoomedIndexOffset, cirLen, false);
     }
     return this.unzoomedView;
 }
