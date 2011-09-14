@@ -1314,6 +1314,11 @@ Browser.prototype.realInit = function(opts) {
             var match = /^([A-Za-z0-9]+)[:\t ]([0-9]+)([-:.\t ]+([0-9]+))?$/.exec(locString);
             if (match && match.length == 5) {
                 var nchr = match[1];
+<<<<<<< HEAD
+                var nmin = stringToInt(match[2]);
+                var nmax = stringToInt(match[3]);    
+                
+=======
 	        var nmin = stringToInt(match[2]);
                 if (match[4]) {
 	            var nmax = stringToInt(match[4]);
@@ -1323,6 +1328,7 @@ Browser.prototype.realInit = function(opts) {
                     nmax = nmin + wid;
                 }
 	        
+>>>>>>> 0.6.x
                 if (nchr != thisB.chr) {
                     thisB.highlightMin = -1;
                     thisB.highlightMax = -1;

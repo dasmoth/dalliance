@@ -576,6 +576,12 @@ function drawFeatureTier(tier)
             return g1.zindex - g2.zindex;
         });
 
+<<<<<<< HEAD
+        for (var i = 0; i < stg.length; ++i) {
+            var g = stg[i];
+            if (g.glyph) {
+                g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
+=======
 	for (var i = 0; i < stg.length; ++i) {
 	    var g = stg[i];
 	    if (g.glyph) {
@@ -584,6 +590,7 @@ function drawFeatureTier(tier)
                     gypos += (st.height - g.height);
                 }
 		g.glyph.setAttribute('transform', 'translate(0, ' + gypos + ')');
+>>>>>>> 0.6.x
                 g.glyph.setAttribute('cursor', 'pointer');
                 featureGroupElement.appendChild(g.glyph);
             }
