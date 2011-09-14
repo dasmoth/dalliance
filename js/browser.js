@@ -1304,11 +1304,17 @@ Browser.prototype.realInit = function(opts) {
 	    ev.stopPropagation(); ev.preventDefault();
 
             var locString = locInput.value.trim();
-            var match = /^([A-Za-z0-9]+)[:\t ]([0-9]+)[-:.\t ]+([0-9]+)$/.exec(locString);
-            if (match && match.length == 4) {
+            var match = /^([A-Za-z0-9]+)[:\t ]([0-9]+)([-:.\t ]+([0-9]+))?$/.exec(locString);
+            if (match && match.length == 5) {
                 var nchr = match[1];
 	        var nmin = stringToInt(match[2]);
-	        var nmax = stringToInt(match[3]);    
+                if (match[4]) {
+	            var nmax = stringToInt(match[4]);
+                } else {
+                    var wid = thisB.viewEnd - thisB.viewStart + 1;
+                    nmin = nmin - (wid/2)|0;
+                    nmax = nmin + wid;
+                }
 	        
                 if (nchr != thisB.chr) {
                     thisB.highlightMin = -1;
@@ -1324,7 +1330,7 @@ Browser.prototype.realInit = function(opts) {
                 }
             } else {
                 removeChildren(locWarning);
-                locWarning.appendChild(document.createTextNode('Should match chr:start...end'));
+                locWarning.appendChild(document.createTextNode('Should match chr:start...end or chr:midpoint'));
             }
 	    return false;
 	}, false);
