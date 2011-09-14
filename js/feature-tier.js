@@ -579,7 +579,11 @@ function drawFeatureTier(tier)
 	for (var i = 0; i < stg.length; ++i) {
 	    var g = stg[i];
 	    if (g.glyph) {
-		g.glyph.setAttribute('transform', 'translate(0, ' + lh + ')');
+                gypos = lh;
+                if (g.height < st.height) {
+                    gypos += (st.height - g.height);
+                }
+		g.glyph.setAttribute('transform', 'translate(0, ' + gypos + ')');
                 g.glyph.setAttribute('cursor', 'pointer');
 		featureGroupElement.appendChild(g.glyph);
 	    }
