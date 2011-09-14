@@ -1309,7 +1309,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         // Also handles HISTOGRAM, GRADIENT, and TOOMANY.
     
         var stroke = style.FGCOLOR || 'none';
-        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
         var height = style.HEIGHT || forceHeight || 12;
         requiredHeight = height = 1.0 * height;
 

@@ -86,6 +86,8 @@ function BigWigView(bwg, cirTreeOffset, cirTreeLength, isSummary) {
     this.isSummary = isSummary;
 }
 
+BED_COLOR_REGEXP = new RegExp("^[0-9]+,[0-9]+,[0-9]+");
+
 BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
     var chr = this.bwg.chromsToIDs[chrName];
     if (chr === undefined) {
@@ -333,6 +335,12 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 }
                                 if (bedColumns.length > 2) {
                                     featureOpts.orientation = bedColumns[2];
+                                }
+                                if (bedColumns.length > 5) {
+                                    var color = bedColumns[5];
+                                    if (BED_COLOR_REGEXP.test(color)) {
+                                        featureOpts.override_color = 'rgb(' + color + ')';
+                                    }
                                 }
 
                                 if (bedColumns.length < 9) {
