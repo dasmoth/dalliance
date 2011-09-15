@@ -483,7 +483,7 @@ function drawFeatureTier(tier)
         var d = tier.groupedFeatures[g1][0].score - tier.groupedFeatures[g2][0].score;
         if (d > 0) {
             return -1;
-        } else if (d = 0) {
+        } else if (d == 0) {
             return 0;
         } else {
             return 1;

@@ -111,7 +111,8 @@ function DasTier(browser, source, viewport, background)
         }
     } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
         fs = new BAMFeatureSource(this.dasSource, {
-            credentials: this.dasSource.credentials
+            credentials: this.dasSource.credentials,
+            preflight: this.dasSource.preflight
         });
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
