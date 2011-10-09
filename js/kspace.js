@@ -364,56 +364,6 @@ function BWGFeatureSource(bwgSource, opts) {
     }
 }
 
-function BAMFeatureSource(bamSource, opts) {
-    var thisB = this;
-    this.bamSource = bamSource;
-    this.opts = opts || {};
-    this.bamHolder = new Awaited();
-    var bamF, baiF;
-    if (bamSource.bamBlob) {
-        bamF = new BlobFetchable(bamSource.bamBlob);
-        baiF = new BlobFetchable(bamSource.baiBlob);
-    } else {
-        bamF = new URLFetchable(bamSource.bamURI);
-        baiF = new URLFetchable(bamSource.baiURI || (bamSource.bamURI + '.bai'));
-    }
-    makeBam(bamF, baiF, function(bam) {
-        thisB.bamHolder.provide(bam);
-    });
-}
-
-BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    var thisB = this;
-    this.bamHolder.await(function(bam) {
-        bam.fetch(chr, min, max, function(bamRecords, error) {
-            if (error) {
-                callback(error, null, null);
-            } else {
-                var features = [];
-                for (var ri = 0; ri < bamRecords.length; ++ri) {
-                    var r = bamRecords[ri];
-                    var f = new DASFeature();
-                    f.min = r.pos + 1;
-                    f.max = r.pos + r.seq.length;
-                    f.segment = r.segment;
-                    f.type = 'bam';
-                    f.id = r.readName;
-                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
-                    f.seq = r.seq;
-                    features.push(f);
-                }
-                callback(null, features, 1000000000);
-            }
-        });
-    });
-}
-
-BAMFeatureSource.prototype.getScales = function() {
-    return 1000000000;
-}
-    
-
-
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
     var make, arg;
@@ -494,8 +444,89 @@ BWGFeatureSource.prototype.getScales = function() {
     }
 }
 
+function BAMFeatureSource(bamSource, opts) {
+    var thisB = this;
+    this.bamSource = bamSource;
+    this.opts = opts || {};
+    this.bamHolder = new Awaited();
+    
+    if (this.opts.preflight) {
+        var pfs = bwg_preflights[this.opts.preflight];
+        if (!pfs) {
+            pfs = new Awaited();
+            bwg_preflights[this.opts.preflight] = pfs;
 
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        pfs.provide('success');
+                    } else {
+                        pfs.provide('failure');
+                    }
+                }
+            };
+            // req.setRequestHeader('cache-control', 'no-cache');    /* Doesn't work, not an allowed request header in CORS */
+            req.open('get', this.opts.preflight + '?' + hex_sha1('salt' + Date.now()), true);    // Instead, ensure we always preflight a unique URI.
+            if (this.opts.credentials) {
+                req.withCredentials = 'true';
+            }
+            req.send('');
+        }
+        pfs.await(function(status) {
+            if (status === 'success') {
+                thisB.init();
+            }
+        });
+    } else {
+        thisB.init();
+    }
+}
 
+BAMFeatureSource.prototype.init = function() {
+    var thisB = this;
+    var bamF, baiF;
+    if (this.bamSource.bamBlob) {
+        bamF = new BlobFetchable(this.bamSource.bamBlob);
+        baiF = new BlobFetchable(this.bamSource.baiBlob);
+    } else {
+        bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials});
+        baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
+    }
+    makeBam(bamF, baiF, function(bam) {
+        thisB.bamHolder.provide(bam);
+    });
+}
+
+BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
+    this.bamHolder.await(function(bam) {
+        bam.fetch(chr, min, max, function(bamRecords, error) {
+            if (error) {
+                callback(error, null, null);
+            } else {
+                var features = [];
+                for (var ri = 0; ri < bamRecords.length; ++ri) {
+                    var r = bamRecords[ri];
+                    var f = new DASFeature();
+                    f.min = r.pos + 1;
+                    f.max = r.pos + r.seq.length;
+                    f.segment = r.segment;
+                    f.type = 'bam';
+                    f.id = r.readName;
+                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
+                    f.seq = r.seq;
+                    features.push(f);
+                }
+                callback(null, features, 1000000000);
+            }
+        });
+    });
+}
+
+BAMFeatureSource.prototype.getScales = function() {
+    return 1000000000;
+}
 
 function MappedFeatureSource(source, mapping) {
     this.source = source;
