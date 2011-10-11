@@ -219,9 +219,18 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
     if (status) {
         tier.updateStatus(status);
     } else {
+        var mayDownsample = false;
+        var src = tier.getSource();
+        while (MappedFeatureSource.prototype.isPrototypeOf(src)) {
+            dlog('Skipping up...');
+            src = src.source;
+        }
+        if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
+            mayDownsample = true;
+        }
+
         if ((actualScale < (this.scale/2) && features.length > 200) || 
-            (BWGFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)|| 
-            (BAMFeatureSource.prototype.isPrototypeOf(tier.getSource()) && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0)) 
+            (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
         {
             features = downsample(features, this.scale);
         }
