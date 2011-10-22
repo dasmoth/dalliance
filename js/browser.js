@@ -745,39 +745,35 @@ Browser.prototype.mouseMoveHandler = function(ev) {
     }
 }
 
-/*
 
-var touchOriginX;
-
-function touchStartHandler(ev)
+Browser.prototype.touchStartHandler = function(ev)
 {
     removeAllPopups();
     ev.stopPropagation(); ev.preventDefault();
     
-    touchOriginX = ev.touches[0].pageX;
+    this.touchOriginX = ev.touches[0].pageX;
 }
 
-function touchMoveHandler(ev)
+Browser.prototype.touchMoveHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
     
     var touchX = ev.touches[0].pageX;
-    if (touchX != touchOriginX) {
-        move(touchX - touchOriginX);
-        touchOriginX = touchX;
+    // dlog('tx=' + touchX + '; ox=' + this.touchOriginX);
+    if (this.touchOriginX && touchX != this.touchOriginX) {
+        this.move(touchX - this.touchOriginX);
     }
+    this.touchOriginX = touchX;
 }
 
-function touchEndHandler(ev)
+Browser.prototype.touchEndHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
-    storeStatus();
+    this.storeStatus();
 }
 
-function touchCancelHandler(ev) {
+Browser.prototype.touchCancelHandler = function(ev) {
 }
-
-*/
 
 
 Browser.prototype.removeAllPopups = function() {
@@ -1500,11 +1496,10 @@ Browser.prototype.realInit = function(opts) {
     }
     main.addEventListener('mousedown', function(ev) {return thisB.mouseDownHandler(ev)}, false);
 
-/*
-    main.addEventListener('touchstart', touchStartHandler, false);
-    main.addEventListener('touchmove', touchMoveHandler, false);
-    main.addEventListener('touchend', touchEndHandler, false);
-    main.addEventListener('touchcancel', touchCancelHandler, false); */
+    main.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    main.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    main.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    main.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
 
     this.svgRoot.addEventListener('mousewheel', function(ev) {   // FIXME does this need to be on the document?
         if (!ev.wheelDeltaX) {
