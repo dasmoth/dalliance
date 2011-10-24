@@ -12,7 +12,7 @@ var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires ma
 
 var MIN_PADDING = 3;
 
-var SUBTIER_MAX = 25;
+var DEFAULT_SUBTIER_MAX = 25;
 
 //
 // Colour handling
@@ -531,6 +531,7 @@ function drawFeatureTier(tier)
     var unbumpedST = new DSubTier();
     var bumpedSTs = [];
     var hasBumpedFeatures = false;
+    var subtierMax = tier.dasSource.subtierMax || DEFAULT_SUBTIER_MAX;
     
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
@@ -547,8 +548,8 @@ function drawFeatureTier(tier)
                     continue GLYPH_LOOP;
                 }
             }
-            if (bumpedSTs.length >= SUBTIER_MAX) {
-                tier.status = 'Too many overlapping features, truncating at ' + SUBTIER_MAX;
+            if (bumpedSTs.length >= subtierMax) {
+                tier.status = 'Too many overlapping features, truncating at ' + subtierMax;
             } else {
                 var st = new DSubTier();
                 st.add(g);
@@ -1507,51 +1508,52 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 
 function labelGlyph(tier, dglyph, featureTier) {
     var scale = tier.browser.scale, origin = tier.browser.origin;
+    if (tier.dasSource.labels !== false) {
+        if (dglyph.glyph && dglyph.label) {
+            var label = dglyph.label;
+            var labelText = document.createElementNS(NS_SVG, 'text');
+            labelText.setAttribute('x', (dglyph.min - origin) * scale);
+            labelText.setAttribute('y', dglyph.height + 15);
+            labelText.setAttribute('stroke-width', 0);
+            labelText.setAttribute('fill', 'black');
+            labelText.setAttribute('class', 'label-text');
+            labelText.setAttribute('font-family', 'helvetica');
+            labelText.setAttribute('font-size', '10pt');
+            if (dglyph.strand == '+') {
+                label = label + '>';
+            } else if (dglyph.strand == '-') {
+                label = '<' + label;
+            }
+            labelText.appendChild(document.createTextNode(label));
 
-    if (dglyph.glyph && dglyph.label) {
-        var label = dglyph.label;
-        var labelText = document.createElementNS(NS_SVG, 'text');
-        labelText.setAttribute('x', (dglyph.min - origin) * scale);
-        labelText.setAttribute('y', dglyph.height + 15);
-        labelText.setAttribute('stroke-width', 0);
-        labelText.setAttribute('fill', 'black');
-        labelText.setAttribute('class', 'label-text');
-        labelText.setAttribute('font-family', 'helvetica');
-        labelText.setAttribute('font-size', '10pt');
-        if (dglyph.strand == '+') {
-            label = label + '>';
-        } else if (dglyph.strand == '-') {
-            label = '<' + label;
-        }
-        labelText.appendChild(document.createTextNode(label));
+            featureTier.appendChild(labelText);
+            var width = labelText.getBBox().width;
+            featureTier.removeChild(labelText);
 
-        featureTier.appendChild(labelText);
-        var width = labelText.getBBox().width;
-        featureTier.removeChild(labelText);
+            var g;
+            if (dglyph.glyph.localName == 'g') {
+                g = dglyph.glyph;
+            } else {
+                g = document.createElementNS(NS_SVG, 'g');
+                g.appendChild(dglyph.glyph);
+            }
+            g.appendChild(labelText);
+            dglyph.glyph = g;
+            dglyph.height = dglyph.height + 20;
+            
+            var textMax = (dglyph.min|0) + ((width + 10) / scale)
+            if (textMax > dglyph.max) {
+                var adj = (textMax - dglyph.max)/2;
+                var nmin = ((dglyph.min - adj - origin) * scale) + 5;
+                labelText.setAttribute('x', nmin)
+                dglyph.min = ((nmin/scale)+origin)|0;
+                dglyph.max = (textMax-adj)|0;
+            } else {
+                // Mark as a candidate for label-jiggling
 
-        var g;
-        if (dglyph.glyph.localName == 'g') {
-            g = dglyph.glyph;
-        } else {
-            g = document.createElementNS(NS_SVG, 'g');
-            g.appendChild(dglyph.glyph);
-        }
-        g.appendChild(labelText);
-        dglyph.glyph = g;
-        dglyph.height = dglyph.height + 20;
-        
-        var textMax = (dglyph.min|0) + ((width + 10) / scale)
-        if (textMax > dglyph.max) {
-            var adj = (textMax - dglyph.max)/2;
-            var nmin = ((dglyph.min - adj - origin) * scale) + 5;
-            labelText.setAttribute('x', nmin)
-            dglyph.min = ((nmin/scale)+origin)|0;
-            dglyph.max = (textMax-adj)|0;
-        } else {
-            // Mark as a candidate for label-jiggling
-
-            labelText.jiggleMin = (dglyph.min - origin) * scale;
-            labelText.jiggleMax = ((dglyph.max - origin) * scale) - width;
+                labelText.jiggleMin = (dglyph.min - origin) * scale;
+                labelText.jiggleMax = ((dglyph.max - origin) * scale) - width;
+            }
         }
     }
     return dglyph;

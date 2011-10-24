@@ -759,7 +759,7 @@ Browser.prototype.touchMoveHandler = function(ev)
     ev.stopPropagation(); ev.preventDefault();
     
     var touchX = ev.touches[0].pageX;
-    // dlog('tx=' + touchX + '; ox=' + this.touchOriginX);
+    // dlog('tl=' + ev.touches.length + 'tx=' + touchX + '; ox=' + this.touchOriginX);
     if (this.touchOriginX && touchX != this.touchOriginX) {
         this.move(touchX - this.touchOriginX);
     }
