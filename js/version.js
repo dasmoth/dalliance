@@ -12,8 +12,8 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  7,
     MICRO:  0,
-    PATCH:  'pre3',
-    BRANCH: ''
+    PATCH:  '',
+    BRANCH: 'CANVAS'
 }
 
 VERSION.toString = function() {

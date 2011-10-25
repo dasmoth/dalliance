@@ -325,13 +325,14 @@ function zoomForScale(scale) {
 
 
 DasTier.prototype.setBackground = function() {            
+    /*
 //    if (this.knownStart) {
 
     var ks = this.knownStart || -100000000;
     var ke = this.knownEnd || -100000001;
         this.background.setAttribute('x', (ks - this.browser.origin) * this.browser.scale);
         this.background.setAttribute('width', (ke - this.knownStart + 1) * this.browser.scale);
-//    }    
+//    }    */
 }
 
 DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {

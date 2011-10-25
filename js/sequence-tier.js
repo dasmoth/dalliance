@@ -56,6 +56,8 @@ function drawGuidelines(tier, featureGroupElement)
 
 function drawSeqTier(tier, seq)
 {
+    return; // FIXME let's punt on sequence tiers!
+
     var scale = tier.browser.scale, knownStart = tier.knownStart, knownEnd = tier.knownEnd, origin = tier.browser.origin, currentSeqMax = tier.browser.currentSeqMax;
     if (!scale) {
         return;
