@@ -114,6 +114,10 @@ Browser.prototype.realInit = function() {
         ev.stopPropagation(); ev.preventDefault();
         thisB.move(-ev.wheelDeltaX/5);
     }, false);
+    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
 
     // Popup support (does this really belong here? FIXME)
     this.hPopupHolder = makeElement('div');
@@ -135,6 +139,37 @@ Browser.prototype.realInit = function() {
     thisB.arrangeTiers();
     thisB.refresh();
 }
+
+// 
+// iOS touch support
+
+Browser.prototype.touchStartHandler = function(ev)
+{
+    ev.stopPropagation(); ev.preventDefault();
+    
+    this.touchOriginX = ev.touches[0].pageX;
+}
+
+Browser.prototype.touchMoveHandler = function(ev)
+{
+    ev.stopPropagation(); ev.preventDefault();
+    
+    var touchX = ev.touches[0].pageX;
+    if (this.touchOriginX && touchX != this.touchOriginX) {
+        this.move(touchX - this.touchOriginX);
+    }
+    this.touchOriginX = touchX;
+}
+
+Browser.prototype.touchEndHandler = function(ev)
+{
+    ev.stopPropagation(); ev.preventDefault();
+    this.storeStatus();
+}
+
+Browser.prototype.touchCancelHandler = function(ev) {
+}
+
 
 Browser.prototype.makeTier = function(source) {
     var viewport = makeElement('canvas', null, {width: "1000", height: "50"});    
