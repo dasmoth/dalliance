@@ -169,9 +169,15 @@ function drawFeatureTier(tier)
         }
     }
 
+    var drawn = 0;
     for (var i = 0; i < glyphs.length; ++i) {
-	glyphs[i].draw(gc);
+	var glyph = glyphs[i];
+	if (glyph.min() < 1000 && glyph.max() > 0) {     // FIXME use real width!
+	    glyphs[i].draw(gc);
+	    ++drawn;
+	}
     }
+    // dlog('drawn ' + drawn + '/' + glyphs.length);
 }
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
@@ -331,19 +337,67 @@ BoxGlyph.prototype.draw = function(g) {
     }
 }
 
+BoxGlyph.prototype.min = function() {
+    return this.x;
+}
+
+BoxGlyph.prototype.max = function() {
+    return this.x + this.width;
+}
+
+
 function GroupGlyph(glyphs, connector) {
     this.glyphs = glyphs;
+    this.glyphs.sort(function(g1, g2) {
+	return g1.min() - g2.min();
+    });
     this.connector = connector;
 }
 
 GroupGlyph.prototype.draw = function(g) {
+    var last = null;
     for (var i = 0; i < this.glyphs.length; ++i) {
-	this.glyphs[i].draw(g);
+	var gl = this.glyphs[i];
+	gl.draw(g);
+	if (last && gl.min() > last.max()) {
+	    var start = last.max();
+	    var end = gl.min();
+	    var mid = (start+end)/2
+	    
+	    g.beginPath();
+	    g.moveTo(start, 20);
+	    g.lineTo(mid, 5);
+	    g.lineTo(end, 20);
+	    g.stroke();
+	}
+	last = gl;
     }
 }
 
+GroupGlyph.prototype.min = function() {
+    return this.glyphs[0].min();
+}
+
+GroupGlyph.prototype.max = function() {
+    // FIXME: optimize or cache?
+    
+    var m = -10000000;
+    for (var i = 0; i < this.glyphs.length; ++i) {
+	var glm = this.glyphs[i].max();
+	if (glm > m) {
+	    m = glm;
+	}
+    }
+    return m;
+}
+	
+    
+
 DasTier.prototype.styleForFeature = function(f) {
-    // dlog('styling ' + miniJSONify(f));
+    var cs = f._cachedStyle;
+    if (cs) {
+	return cs;
+    }
 
     var ssScale = zoomForScale(this.browser.scale);
 
@@ -375,7 +429,9 @@ DasTier.prototype.styleForFeature = function(f) {
             }
         }
         // perfect match.
+	f._cachedStyle = sh.style;
         return sh.style;
     }
+    f._cachedStyle = maybe;
     return maybe;
 }

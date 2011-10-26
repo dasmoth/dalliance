@@ -214,9 +214,6 @@ Browser.prototype.refresh = function() {
 
     var scaledQuantRes = this.targetQuantRes / this.scale;
 
-    dlog('scale = ' + this.scale + '; sqr = ' + scaledQuantRes);
-
-
     var innerDrawnStart = Math.max(1, (this.viewStart|0) - minExtraW);
     var innerDrawnEnd = Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000))
     var outerDrawnStart = Math.max(1, (this.viewStart|0) - maxExtraW);
