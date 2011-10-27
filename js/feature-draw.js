@@ -22,7 +22,7 @@ function drawFeatureTier(tier)
         var style = tier.styleForFeature(ufl[0]);   // FIXME this isn't quite right...
         if (!style) continue;
         if (style.glyph == 'LINEPLOT') {
-            lh += Math.max(drawLine(featureGroupElement, ufl, style, tier, lh));
+            glyphs.push(makeLineGlyph(ufl, style, tier));
             specials = true;
         } else {
             for (var pgid = 0; pgid < ufl.length; ++pgid) {
@@ -187,9 +187,9 @@ DasTier.prototype.paint = function() {
 	if (glyph.min() < 1000-offset && glyph.max() > -offset) {     // FIXME use real width!
 	    glyphs[i].draw(gc);
 	    ++drawn;
-	}
+	 }
     }
-    // dlog('drawn ' + drawn + '/' + glyphs.length);
+    dlog('drawn ' + drawn + '/' + glyphs.length);
     gc.translate(-offset, 0);
 }
 
@@ -424,4 +424,58 @@ DasTier.prototype.styleForFeature = function(f) {
     }
     f._cachedStyle = maybe;
     return maybe;
+}
+
+function makeLineGlyph(features, style, tier) {
+    // return new BoxGlyph(-1000, 5, 3000, 15, 'red', 'black');
+    var origin = tier.browser.viewStart, scale = tier.browser.scale;
+    var height = style.HEIGHT || 30;
+    var min = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
+    var max = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+    var yscale = ((1.0 * height) / (max - min));
+    var width = style.LINEWIDTH || 1;
+    var color = style.COLOR || style.COLOR1 || 'black';
+
+    var points = [];
+    for (var fi = 0; fi < features.length; ++fi) {
+        var f = features[fi];
+
+        var px = ((((f.min|0) + (f.max|0)) / 2) - origin) * scale;
+        var sc = ((f.score - (1.0*min)) * yscale)|0;
+        var py = (height - sc);  // FIXME y???
+        points.push(px);
+	points.push(py);
+    }
+    var lgg = new LineGraphGlyph(points);
+    return lgg;
+}
+
+function LineGraphGlyph(points) {
+    this.points = points;
+}
+
+LineGraphGlyph.prototype.min = function() {
+    return this.points[0];
+};
+
+LineGraphGlyph.prototype.max = function() {
+    return this.points[this.points.length - 2];
+};
+
+LineGraphGlyph.prototype.draw = function(g) {
+    g.save();
+    g.strokeStyle = 'black';
+    g.lineWidth = 2;
+    g.beginPath();
+    for (var i = 0; i < this.points.length; i += 2) {
+	var x = this.points[i];
+	var y = this.points[i + 1];
+	if (i == 0) {
+	    g.moveTo(x, y);
+	} else {
+	    g.lineTo(x, y);
+	}
+    }
+    g.stroke();
+    g.restore();
 }
