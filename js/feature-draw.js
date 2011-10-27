@@ -235,7 +235,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var requiredHeight = height = 1.0 * height;
     var quant;
 
-    if (gtype === 'HISTOGRAM' && score !== 'undefined') {
+    if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
         var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
@@ -257,41 +257,18 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             score = smax;
         }
         var relScore = ((1.0 * score) - smin) / (smax-smin);
-
-	var stroke = style.FGCOLOR || null;
-	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
-	
 	var relOrigin = (-1.0 * smin) / (smax - smin);
-        if (relScore >= relOrigin) {
-            height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-            y = y + ((1.0 - relOrigin) * requiredHeight) - height;
-        } else {
-            height = Math.max(1, (relOrigin - relScore) * requiredHeight);
-            y = y + ((1.0 - relOrigin) * requiredHeight);
-        }
-	return new BoxGlyph(minPos, 5 + (requiredHeight - height), (maxPos - minPos), height,fill, stroke);
-    } else if (gtype === 'GRADIENT' && score !== 'undefined') {
-	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
-        var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
-        if (!smax) {
-            if (smin < 0) {
-                smax = 0;
-            } else {
-                smax = 10;
-            }
-        }
-        if (!smin) {
-            smin = 0;
-        }
-
-        if ((1.0 * score) < (1.0 *smin)) {
-            score = smin;
-        }
-        if ((1.0 * score) > (1.0 * smax)) {
-            score = smax;
-        }
-        var relScore = ((1.0 * score) - smin) / (smax-smin);
+	if (gtype === 'HISTOGRAM') {
+	    if (relScore >= relOrigin) {
+		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+	    } else {
+		height = Math.max(1, (relOrigin - relScore) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight);
+	    }
+	}
+	// return new BoxGlyph(minPos, 5 + (requiredHeight - height), (maxPos - minPos), height,fill, stroke);
 
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
@@ -321,7 +298,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             ).toSvgString();
         } 
 
-	return new BoxGlyph(minPos, 10, (maxPos - minPos), 20, fill, stroke);
+	return new BoxGlyph(minPos, 5 + (requiredHeight - height), (maxPos - minPos), height,fill, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
