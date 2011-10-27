@@ -222,7 +222,6 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
         var mayDownsample = false;
         var src = tier.getSource();
         while (MappedFeatureSource.prototype.isPrototypeOf(src)) {
-            dlog('Skipping up...');
             src = src.source;
         }
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
