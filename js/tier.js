@@ -307,6 +307,7 @@ DasTier.prototype.draw = function() {
     } else {
         drawFeatureTier(this);
     }
+    this.paint();
     this.originHaxx = 0;
     this.browser.arrangeTiers();
 }

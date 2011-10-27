@@ -9,11 +9,6 @@ var MIN_PADDING = 3;
 
 function drawFeatureTier(tier)
 {
-    var gc = tier.viewport.getContext('2d');
-
-    gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
-    gc.fillRect(0, 0, 2000, 200);
-
     sortFeatures(tier);
 
     var lh = MIN_PADDING;
@@ -169,15 +164,33 @@ function drawFeatureTier(tier)
         }
     }
 
+    tier.glyphs = glyphs;
+    tier.glyphCacheOrigin = tier.browser.viewStart;
+}
+
+DasTier.prototype.paint = function() {
+    var gc = this.viewport.getContext('2d');
+    gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
+    gc.fillRect(0, 0, 2000, 200);
+
+    var glyphs = this.glyphs;
+    if (!glyphs) {
+	return;
+    }
+
+    var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
+    gc.translate(offset, 0);
+
     var drawn = 0;
     for (var i = 0; i < glyphs.length; ++i) {
 	var glyph = glyphs[i];
-	if (glyph.min() < 1000 && glyph.max() > 0) {     // FIXME use real width!
+	if (glyph.min() < 1000-offset && glyph.max() > -offset) {     // FIXME use real width!
 	    glyphs[i].draw(gc);
 	    ++drawn;
 	}
     }
     // dlog('drawn ' + drawn + '/' + glyphs.length);
+    gc.translate(-offset, 0);
 }
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {

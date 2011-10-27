@@ -262,7 +262,7 @@ Browser.prototype.move = function(pos)
     }
     
     for (var i = 0; i < this.tiers.length; ++i) {
-	this.tiers[i].draw();
+	this.tiers[i].paint();
     }
 
 /*    this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
