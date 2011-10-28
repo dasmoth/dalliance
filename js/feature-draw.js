@@ -6,6 +6,28 @@
 //
 
 var MIN_PADDING = 3;
+var DEFAULT_SUBTIER_MAX = 25;
+
+function SubTier() {
+    this.glyphs = [];
+    this.height = 0;
+}
+
+SubTier.prototype.add = function(glyph) {
+    this.glyphs.push(glyph);
+    this.height = Math.max(this.height, glyph.height);
+}
+
+SubTier.prototype.hasSpaceFor = function(glyph) {
+    for (var i = 0; i < this.glyphs.length; ++i) {
+        var g = this.glyphs[i];
+        if (g.min() <= glyph.max() && g.max() >= glyph.min()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 function drawFeatureTier(tier)
 {
@@ -164,7 +186,46 @@ function drawFeatureTier(tier)
         }
     }
 
-    tier.glyphs = glyphs;
+    // Bumping
+
+    var unbumpedST = new SubTier();
+    var bumpedSTs = [];
+    var hasBumpedFeatures = false;
+    var subtierMax = tier.dasSource.subtierMax || DEFAULT_SUBTIER_MAX;
+    
+  GLYPH_LOOP:
+    for (var i = 0; i < glyphs.length; ++i) {
+        var g = glyphs[i];
+        // g = labelGlyph(tier, g, featureGroupElement);
+        if (g.bump) {
+            hasBumpedFeatures = true;
+        }
+        if (g.bump && (tier.bumped || tier.dasSource.collapseSuperGroups)) {       // kind-of nasty.  supergroup collapsing is different from "normal" unbumping
+            for (var sti = 0; sti < bumpedSTs.length;  ++sti) {
+                var st = bumpedSTs[sti];
+                if (st.hasSpaceFor(g)) {
+                    st.add(g);
+                    continue GLYPH_LOOP;
+                }
+            }
+            if (bumpedSTs.length >= subtierMax) {
+                tier.status = 'Too many overlapping features, truncating at ' + subtierMax;
+            } else {
+                var st = new SubTier();
+                st.add(g);
+                bumpedSTs.push(st);
+            }
+        } else {
+            unbumpedST.add(g);
+        }
+    }
+
+    if (unbumpedST.glyphs.length > 0) {
+        bumpedSTs = [unbumpedST].concat(bumpedSTs);
+    }
+
+
+    tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
 }
 
@@ -173,8 +234,8 @@ DasTier.prototype.paint = function() {
     gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
     gc.fillRect(0, 0, 2000, 200);
 
-    var glyphs = this.glyphs;
-    if (!glyphs) {
+    var subtiers = this.subtiers;
+    if (!subtiers) {
 	return;
     }
 
@@ -182,15 +243,19 @@ DasTier.prototype.paint = function() {
     var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
     gc.translate(offset, 0);
 
-    var drawn = 0;
-    for (var i = 0; i < glyphs.length; ++i) {
-	var glyph = glyphs[i];
-	if (glyph.min() < 1000-offset && glyph.max() > -offset) {     // FIXME use real width!
-	    glyphs[i].draw(gc);
-	    ++drawn;
-	 }
+    for (var s = 0; s < subtiers.length; ++s) {
+	var glyphs = subtiers[s].glyphs;
+	var drawn = 0;
+	for (var i = 0; i < glyphs.length; ++i) {
+	    var glyph = glyphs[i];
+	    if (glyph.min() < 1000-offset && glyph.max() > -offset) {     // FIXME use real width!
+		glyphs[i].draw(gc);
+		++drawn;
+	    }
+	}
+	// dlog('drawn ' + drawn + '/' + glyphs.length);
+	gc.translate(0, 20);
     }
-    // dlog('drawn ' + drawn + '/' + glyphs.length);
     gc.restore();
 }
 
@@ -234,7 +299,9 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	}
     }
 
-    return new GroupGlyph(glyphs, connector);
+    var gg = new GroupGlyph(glyphs, connector);
+    gg.bump = true;
+    return gg;
 }
 
 function glyphForFeature(feature, y, style, tier, forceHeight)
