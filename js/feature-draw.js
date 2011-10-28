@@ -266,6 +266,7 @@ DasTier.prototype.paint = function() {
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var gstyle = tier.styleForFeature(groupElement);
+    var label;
 
     var glyphs = [];
     var strand = null;
@@ -273,6 +274,9 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	var f = features[i];
 	if (f.orientation && strand==null) {
             strand = f.orientation;
+        }
+	 if (!label && f.label) {
+            label = f.label;
         }
 
 	var style = tier.styleForFeature(f);
@@ -304,7 +308,26 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	}
     }
 
+    var labelText = null;
+    if (label || (gstyle && (gstyle.LABEL || gstyle.LABELS))) {  // HACK, LABELS should work.
+        labelText = groupElement.label || label;
+        var sg = tier.groupsToSupers[groupElement.id];
+        if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
+            //if (groupElement.id != tier.superGroups[sg][0]) {
+            //    dg.label = null;
+            // }
+        }
+    }
+
     var gg = new GroupGlyph(glyphs, connector);
+    if (labelText) {
+	if (strand === '+') {
+	    labelText = '>' + labelText;
+	} else if (strand === '-') {
+	    labelText = '<' + labelText;
+	}
+	gg = new LabelledGlyph(gg, labelText);
+    }
     gg.bump = true;
     return gg;
 }
@@ -436,7 +459,7 @@ BoxGlyph.prototype.height = function() {
 function GroupGlyph(glyphs, connector) {
     this.glyphs = glyphs;
     this.connector = connector;
-    this.h = 0;
+    this.h = glyphs[0].height();
 
     var cov = new Range(glyphs[0].min(), glyphs[0].max());
     for (g = 1; g < glyphs.length; ++g) {
@@ -474,15 +497,19 @@ GroupGlyph.prototype.draw = function(g) {
 	    } else if (this.connector === 'collapsed+') {
 		g.moveTo(start, this.h/2);
 		g.lineTo(end, this.h/2);
-		g.moveTo(mid - 2, (this.h/2) - 5);
-		g.lineTo(mid + 2, this.h/2);
-		g.lineTo(mid - 2, (this.h/2) + 5);
+		if (end - start > 4) {
+		    g.moveTo(mid - 2, (this.h/2) - 5);
+		    g.lineTo(mid + 2, this.h/2);
+		    g.lineTo(mid - 2, (this.h/2) + 5);
+		}
 	    } else if (this.connector === 'collapsed-') {
 		g.moveTo(start, this.h/2);
 		g.lineTo(end, this.h/2);
-		g.moveTo(mid + 2, (this.h/2) - 5);
-		g.lineTo(mid - 2, this.h/2);
-		g.lineTo(mid + 2, (this.h/2) + 5);
+		if (end - start > 4) {
+		    g.moveTo(mid + 2, (this.h/2) - 5);
+		    g.lineTo(mid - 2, this.h/2);
+		    g.lineTo(mid + 2, (this.h/2) + 5);
+		}
 	    } else {
 		g.moveTo(start, this.h/2);
 		g.lineTo(end, this.h/2);
@@ -617,4 +644,27 @@ LineGraphGlyph.prototype.draw = function(g) {
     }
     g.stroke();
     g.restore();
+}
+
+function LabelledGlyph(glyph, text) {
+    this.glyph = glyph;
+    this.text = text;
+}
+
+LabelledGlyph.prototype.min = function() {
+    return this.glyph.min();
+}
+
+LabelledGlyph.prototype.max = function() {
+    return this.glyph.max();
+}
+
+LabelledGlyph.prototype.height = function() {
+    return this.glyph.height() + 20;
+}
+
+LabelledGlyph.prototype.draw = function(g) {
+    this.glyph.draw(g);
+    g.fillStyle = 'black';
+    g.fillText(this.text, this.glyph.min(), this.glyph.height() + 15);
 }
