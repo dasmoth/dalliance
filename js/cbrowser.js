@@ -39,6 +39,7 @@ function Browser(opts) {
     this.featurePanelWidth = 750;
     this.zoomBase = 100;
     this.zoomExpt = 30; // Now gets clobbered.
+    this.zoomSliderValue = 100;
     this.entryPoints = null;
     this.currentSeqMax = -1; // init once EPs are fetched.
 
@@ -255,22 +256,22 @@ Browser.prototype.realInit = function() {
         } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
 
-            var oz = thisB.zoomSlider.getValue();
-            thisB.zoomSlider.setValue(oz - 10);
-            var nz = thisB.zoomSlider.getValue();
+            var oz = thisB.zoomSliderValue;
+            thisB.zoomSliderValue=oz - 10;
+            var nz = thisB.zoomSliderValue;
             if (nz != oz) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-                thisB.scheduleRefresh(500);
+//                thisB.scheduleRefresh(500);
             }
         } else if (ev.charCode == 45) {
             ev.stopPropagation(); ev.preventDefault();
 
-            var oz = thisB.zoomSlider.getValue();
-            thisB.zoomSlider.setValue(oz + 10);
-            var nz = thisB.zoomSlider.getValue();
+            var oz = thisB.zoomSliderValue;
+            thisB.zoomSliderValue=oz + 10;
+            var nz = thisB.zoomSliderValue;
             if (nz != oz) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-                thisB.scheduleRefresh(500);
+//                thisB.scheduleRefresh(500);
             }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) {
             ev.stopPropagation(); ev.preventDefault();
@@ -486,6 +487,33 @@ Browser.prototype.move = function(pos)
     this.karyo.update(this.chr, this.viewStart, this.viewEnd); */
 
     this.spaceCheck();
+}
+
+Browser.prototype.zoom = function(factor) {
+    this.zoomFactor = factor;
+    var viewCenter = Math.round((this.viewStart + this.viewEnd) / 2.0)|0;
+    this.viewStart = viewCenter - this.zoomBase * this.zoomFactor / 2;
+    this.viewEnd = viewCenter + this.zoomBase * this.zoomFactor / 2;
+    if (this.currentSeqMax > 0 && (this.viewEnd > this.currentSeqMax + 5)) {
+        var len = this.viewEnd - this.viewStart + 1;
+        this.viewEnd = this.currentSeqMax;
+        this.viewStart = this.viewEnd - len + 1;
+    }
+    if (this.viewStart < 1) {
+        var len = this.viewEnd - this.viewStart + 1;
+        this.viewStart = 1;
+        this.viewEnd = this.viewStart + len - 1;
+    }
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
+//    this.updateRegion();
+
+    var width = this.viewEnd - this.viewStart + 1;
+    
+    var scaleRat = (this.scale / this.scaleAtLastRedraw);
+    
+
+
+    this.refresh();
 }
 
 Browser.prototype.spaceCheck = function(dontRefresh) {
