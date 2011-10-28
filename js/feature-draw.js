@@ -178,6 +178,7 @@ DasTier.prototype.paint = function() {
 	return;
     }
 
+    gc.save();
     var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
     gc.translate(offset, 0);
 
@@ -189,16 +190,21 @@ DasTier.prototype.paint = function() {
 	    ++drawn;
 	 }
     }
-    dlog('drawn ' + drawn + '/' + glyphs.length);
-    gc.translate(-offset, 0);
+    // dlog('drawn ' + drawn + '/' + glyphs.length);
+    gc.restore();
 }
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var gstyle = tier.styleForFeature(groupElement);
 
     var glyphs = [];
+    var strand = null;
     for (var i = 0; i < features.length; ++i) {
 	var f = features[i];
+	if (f.orientation && strand==null) {
+            strand = f.orientation;
+        }
+
 	var style = tier.styleForFeature(f);
         if (!style) {
             continue;
@@ -212,7 +218,23 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	    glyphs.push(g);
 	}
     }
-    return new GroupGlyph(glyphs);
+    
+    var connector = 'flat';
+    if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
+	if (strand === '+') {
+	    connector = 'collapsed+';
+	} else if (strand === '-') {
+	    connector = 'collapsed-';
+	}
+    } else {
+	if (strand === '+') {
+	    connector = 'hat+';
+	} else if (strand === '-') {
+	    connector = 'hat-';
+	}
+    }
+
+    return new GroupGlyph(glyphs, connector);
 }
 
 function glyphForFeature(feature, y, style, tier, forceHeight)
@@ -338,26 +360,55 @@ BoxGlyph.prototype.max = function() {
 
 function GroupGlyph(glyphs, connector) {
     this.glyphs = glyphs;
-    this.glyphs.sort(function(g1, g2) {
-	return g1.min() - g2.min();
-    });
     this.connector = connector;
+
+    var cov = new Range(glyphs[0].min(), glyphs[0].max());
+    for (g = 1; g < glyphs.length; ++g) {
+	cov = union(cov, new Range(glyphs[g].min(), glyphs[g].max()));
+    }
+    this.coverage = cov;
 }
 
 GroupGlyph.prototype.draw = function(g) {
-    var last = null;
     for (var i = 0; i < this.glyphs.length; ++i) {
 	var gl = this.glyphs[i];
 	gl.draw(g);
+    }
+
+    var ranges = this.coverage.ranges();
+    for (var r = 1; r < ranges.length; ++r) {
+	var gl = ranges[r];
+	var last = ranges[r - 1];
 	if (last && gl.min() > last.max()) {
 	    var start = last.max();
 	    var end = gl.min();
 	    var mid = (start+end)/2
 	    
 	    g.beginPath();
-	    g.moveTo(start, 20);
-	    g.lineTo(mid, 5);
-	    g.lineTo(end, 20);
+	    if (this.connector === 'hat+') {
+		g.moveTo(start, 20);
+		g.lineTo(mid, 10);
+		g.lineTo(end, 20);
+	    } else if (this.connector === 'hat-') {
+		g.moveTo(start, 20);
+		g.lineTo(mid, 30);
+		g.lineTo(end, 20);
+	    } else if (this.connector === 'collapsed+') {
+		g.moveTo(start, 20);
+		g.lineTo(end, 20);
+		g.moveTo(mid - 2, 15);
+		g.lineTo(mid + 2, 20);
+		g.lineTo(mid - 2, 25);
+	    } else if (this.connector === 'collapsed-') {
+		g.moveTo(start, 20);
+		g.lineTo(end, 20);
+		g.moveTo(mid + 2, 15);
+		g.lineTo(mid - 2, 20);
+		g.lineTo(mid + 2, 25);
+	    } else {
+		g.moveTo(start, 20);
+		g.lineTo(end, 20);
+	    }
 	    g.stroke();
 	}
 	last = gl;
@@ -365,20 +416,11 @@ GroupGlyph.prototype.draw = function(g) {
 }
 
 GroupGlyph.prototype.min = function() {
-    return this.glyphs[0].min();
+    return this.coverage.min();
 }
 
 GroupGlyph.prototype.max = function() {
-    // FIXME: optimize or cache?
-    
-    var m = -10000000;
-    for (var i = 0; i < this.glyphs.length; ++i) {
-	var glm = this.glyphs[i].max();
-	if (glm > m) {
-	    m = glm;
-	}
-    }
-    return m;
+    return this.coverage.max();
 }
 	
     
@@ -402,10 +444,21 @@ DasTier.prototype.styleForFeature = function(f) {
         if (sh.zoom && sh.zoom != ssScale) {
             continue;
         }
-        if (sh.label && !(new RegExp('^' + sh.label + '$').test(f.label))) {
+
+	var labelRE = sh._labelRE;
+	if (!labelRE) {
+	    labelRE = new RegExp('^' + sh.label + '$');
+	    sh._labelRE = labelRE;
+	}
+        if (sh.label && !(labelRE.test(f.label))) {
             continue;
         }
-        if (sh.method && !(new RegExp('^' + sh.method + '$').test(f.method))) {
+	var methodRE = sh._methodRE;
+	if (!methodRE) {
+	    methodRE = new RegExp('^' + sh.method + '$');
+	    sh._methodRE = methodRE;
+	}
+        if (sh.method && !(methodRE.test(f.method))) {
             continue;
         }
         if (sh.type) {
