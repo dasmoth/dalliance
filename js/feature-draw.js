@@ -15,7 +15,7 @@ function SubTier() {
 
 SubTier.prototype.add = function(glyph) {
     this.glyphs.push(glyph);
-    this.height = Math.max(this.height, glyph.height);
+    this.height = Math.max(this.height, glyph.height());
 }
 
 SubTier.prototype.hasSpaceFor = function(glyph) {
@@ -33,10 +33,8 @@ function drawFeatureTier(tier)
 {
     sortFeatures(tier);
 
-    var lh = MIN_PADDING;
     var glyphs = [];
     var specials = false;
-
 
     for (var uft in tier.ungroupedFeatures) {
         var ufl = tier.ungroupedFeatures[uft];
@@ -230,18 +228,25 @@ function drawFeatureTier(tier)
 }
 
 DasTier.prototype.paint = function() {
-    var gc = this.viewport.getContext('2d');
-    gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
-    gc.fillRect(0, 0, 2000, 200);
-
     var subtiers = this.subtiers;
     if (!subtiers) {
 	return;
     }
 
+    var lh = MIN_PADDING;
+    for (var s = 0; s < subtiers.length; ++s) {
+	lh = lh + subtiers[s].height + MIN_PADDING;
+    }
+    this.viewport.setAttribute('height', lh);
+
+    var gc = this.viewport.getContext('2d');
+    gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
+    gc.fillRect(0, 0, 2000, lh);
+    gc.restore();
+
     gc.save();
     var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
-    gc.translate(offset, 0);
+    gc.translate(offset, MIN_PADDING);
 
     for (var s = 0; s < subtiers.length; ++s) {
 	var glyphs = subtiers[s].glyphs;
@@ -254,7 +259,7 @@ DasTier.prototype.paint = function() {
 	    }
 	}
 	// dlog('drawn ' + drawn + '/' + glyphs.length);
-	gc.translate(0, 20);
+	gc.translate(0, subtiers[s].height + MIN_PADDING);
     }
     gc.restore();
 }
@@ -357,7 +362,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 		y = y + ((1.0 - relOrigin) * requiredHeight);
 	    }
 	}
-	// return new BoxGlyph(minPos, 5 + (requiredHeight - height), (maxPos - minPos), height,fill, stroke);
 
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
@@ -387,11 +391,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             ).toSvgString();
         } 
 
-	return new BoxGlyph(minPos, 5 + (requiredHeight - height), (maxPos - minPos), height,fill, stroke);
+	return new BoxGlyph(minPos, requiredHeight - height, (maxPos - minPos), height,fill, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
-	return new BoxGlyph(minPos, 10, (maxPos - minPos), 20, fill, stroke);
+	return new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
     }
 
 }
@@ -399,8 +403,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 function BoxGlyph(x, y, width, height, fill, stroke) {
     this.x = x;
     this.y = y;
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
     this.fill = fill;
     this.stroke = stroke;
 }
@@ -408,11 +412,11 @@ function BoxGlyph(x, y, width, height, fill, stroke) {
 BoxGlyph.prototype.draw = function(g) {
     if (this.fill) {
 	g.fillStyle = this.fill;
-	g.fillRect(this.x, this.y, this.width, this.height);
+	g.fillRect(this.x, this.y, this._width, this._height);
     }
     if (this.stroke) {
 	g.strokeStyle = this.stroke;
-	g.strokeRect(this.x, this.y, this.width, this.height);
+	g.strokeRect(this.x, this.y, this._width, this._height);
     }
 }
 
@@ -421,17 +425,24 @@ BoxGlyph.prototype.min = function() {
 }
 
 BoxGlyph.prototype.max = function() {
-    return this.x + this.width;
+    return this.x + this._width;
+}
+
+BoxGlyph.prototype.height = function() {
+    return this.y + this._height;
 }
 
 
 function GroupGlyph(glyphs, connector) {
     this.glyphs = glyphs;
     this.connector = connector;
+    this.h = 0;
 
     var cov = new Range(glyphs[0].min(), glyphs[0].max());
     for (g = 1; g < glyphs.length; ++g) {
-	cov = union(cov, new Range(glyphs[g].min(), glyphs[g].max()));
+	var gg = glyphs[g];
+	cov = union(cov, new Range(gg.min(), gg.max()));
+	this.h = Math.max(this.h, gg.height());
     }
     this.coverage = cov;
 }
@@ -453,28 +464,28 @@ GroupGlyph.prototype.draw = function(g) {
 	    
 	    g.beginPath();
 	    if (this.connector === 'hat+') {
-		g.moveTo(start, 20);
-		g.lineTo(mid, 10);
-		g.lineTo(end, 20);
+		g.moveTo(start, this.h/2);
+		g.lineTo(mid, 0);
+		g.lineTo(end, this.h/2);
 	    } else if (this.connector === 'hat-') {
-		g.moveTo(start, 20);
-		g.lineTo(mid, 30);
-		g.lineTo(end, 20);
+		g.moveTo(start, this.h/2);
+		g.lineTo(mid, this.h);
+		g.lineTo(end, this.h/2);
 	    } else if (this.connector === 'collapsed+') {
-		g.moveTo(start, 20);
-		g.lineTo(end, 20);
-		g.moveTo(mid - 2, 15);
-		g.lineTo(mid + 2, 20);
-		g.lineTo(mid - 2, 25);
+		g.moveTo(start, this.h/2);
+		g.lineTo(end, this.h/2);
+		g.moveTo(mid - 2, (this.h/2) - 5);
+		g.lineTo(mid + 2, this.h/2);
+		g.lineTo(mid - 2, (this.h/2) + 5);
 	    } else if (this.connector === 'collapsed-') {
-		g.moveTo(start, 20);
-		g.lineTo(end, 20);
-		g.moveTo(mid + 2, 15);
-		g.lineTo(mid - 2, 20);
-		g.lineTo(mid + 2, 25);
+		g.moveTo(start, this.h/2);
+		g.lineTo(end, this.h/2);
+		g.moveTo(mid + 2, (this.h/2) - 5);
+		g.lineTo(mid - 2, this.h/2);
+		g.lineTo(mid + 2, (this.h/2) + 5);
 	    } else {
-		g.moveTo(start, 20);
-		g.lineTo(end, 20);
+		g.moveTo(start, this.h/2);
+		g.lineTo(end, this.h/2);
 	    }
 	    g.stroke();
 	}
@@ -488,6 +499,10 @@ GroupGlyph.prototype.min = function() {
 
 GroupGlyph.prototype.max = function() {
     return this.coverage.max();
+}
+
+GroupGlyph.prototype.height = function() {
+    return this.h;
 }
 	
     
@@ -581,6 +596,10 @@ LineGraphGlyph.prototype.min = function() {
 LineGraphGlyph.prototype.max = function() {
     return this.points[this.points.length - 2];
 };
+
+LineGraphGlyph.prototype.height = function() {
+    return 50;
+}
 
 LineGraphGlyph.prototype.draw = function(g) {
     g.save();
