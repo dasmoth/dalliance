@@ -369,17 +369,38 @@ Browser.prototype.touchStartHandler = function(ev)
     ev.stopPropagation(); ev.preventDefault();
     
     this.touchOriginX = ev.touches[0].pageX;
+    if (ev.touches.length == 2) {
+        var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
+        this.zooming = true;
+        this.zoomLastSep = this.zoomInitialSep = sep;
+        this.zoomInitialScale = this.scale;
+    }
 }
 
 Browser.prototype.touchMoveHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
     
-    var touchX = ev.touches[0].pageX;
-    if (this.touchOriginX && touchX != this.touchOriginX) {
-        this.move(touchX - this.touchOriginX);
+    if (ev.touches.length == 1) {
+        var touchX = ev.touches[0].pageX;
+        if (this.touchOriginX && touchX != this.touchOriginX) {
+            this.move(touchX - this.touchOriginX);
+        }
+        this.touchOriginX = touchX;
+    } else if (this.zooming && ev.touches.length == 2) {
+        var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
+        if (sep != this.zoomLastSep) {
+            var cp = (ev.touches[0].pageX + ev.touches[1].pageX)/2;
+            var scp = this.viewStart + (cp/this.scale)|0
+            // dlog('sep=' + sep + '; zis=' + this.zoomInitialScale);
+            this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
+            this.viewStart = scp - (cp/this.scale)|0;
+            for (var i = 0; i < this.tiers.length; ++i) {
+	        this.tiers[i].draw();
+            }
+        }
+        this.zoomLastSep = sep;
     }
-    this.touchOriginX = touchX;
 }
 
 Browser.prototype.touchEndHandler = function(ev)
