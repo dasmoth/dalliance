@@ -115,10 +115,13 @@ Browser.prototype.realInit = function() {
         ev.stopPropagation(); ev.preventDefault();
         thisB.move(-ev.wheelDeltaX/5);
     }, false);
+
+
+
     this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
     this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
     this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
 
 
     var keyHandler = function(ev) {
@@ -336,6 +339,7 @@ Browser.prototype.realInit = function() {
         thisB.svgHolder.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
 
+
     // Popup support (does this really belong here? FIXME)
     this.hPopupHolder = makeElement('div');
     this.hPopupHolder.style['font-family'] = 'helvetica';
@@ -381,7 +385,7 @@ Browser.prototype.touchMoveHandler = function(ev)
 Browser.prototype.touchEndHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
-    this.storeStatus();
+//    this.storeStatus();
 }
 
 Browser.prototype.touchCancelHandler = function(ev) {

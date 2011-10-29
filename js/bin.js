@@ -62,6 +62,9 @@ URLFetchable.prototype.slice = function(s, l) {
     return new URLFetchable(this.url, ns, ne, this.opts);
 }
 
+var seed=0;
+var isIOS = navigator.userAgent.indexOf('Mobile') >= 0;
+
 URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var thisB = this;
 
@@ -72,9 +75,15 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
 
     var req = new XMLHttpRequest();
     var length;
-    req.open('GET', this.url, true);
+    var url = this.url;
+    if (isIOS) {
+        // dlog('On IOS');
+        url = url + '?salt=' + (++seed);
+    }
+    req.open('GET', url, true);
     req.overrideMimeType('text/plain; charset=x-user-defined');
     if (this.end) {
+        // dlog('req bytes=' + this.start + '-' + this.end);
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
         length = this.end - this.start + 1;
     }
@@ -83,7 +92,13 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         if (req.readyState == 4) {
             if (req.status == 200 || req.status == 206) {
                 if (req.response) {
-                    return callback(req.response);
+                    var bl = req.response.byteLength;
+                    // dlog('Got ' + bl + ' expected ' + length);
+                    if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
+                        return thisB.fetch(callback, attempt + 1, bl);
+                    } else {
+                        return callback(req.response);
+                    }
                 } else if (req.mozResponseArrayBuffer) {
                     return callback(req.mozResponseArrayBuffer);
                 } else {
