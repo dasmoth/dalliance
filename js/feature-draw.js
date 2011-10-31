@@ -390,28 +390,16 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
 
 	if (style.COLOR2) {
-            var loc, hic, frac;
-            if (style.COLOR3) {
-                if (relScore < 0.5) {
-                    loc = dasColourForName(style.COLOR1);
-                    hic = dasColourForName(style.COLOR2);
-                    frac = relScore * 2;
-                } else {
-                    loc = dasColourForName(style.COLOR2);
-                    hic = dasColourForName(style.COLOR3);
-                    frac = (relScore * 2.0) - 1.0;
-                }
-            } else {
-                loc = dasColourForName(style.COLOR1);
-                hic = dasColourForName(style.COLOR2);
-                frac = relScore;
-            }
+	    var grad = style._gradient;
+	    if (!grad) {
+		grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+		style._gradient = grad;
+	    }
 
-            fill = new DColour(
-                ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
-                ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
-                ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
-            ).toSvgString();
+	    var step = (relScore*grad.length)|0;
+	    if (step < 0) step = 0;
+	    if (step >= grad.length) step = grad.length - 1;
+	    fill = grad[step];
         } 
 
 	return new BoxGlyph(minPos, requiredHeight - height, (maxPos - minPos), height,fill, stroke);

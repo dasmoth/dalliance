@@ -41,3 +41,43 @@ function dasColourForName(name) {
     }
     return c;
 }
+
+function makeGradient(steps, color1, color2, color3) {
+    var cols = [];
+    var c1 = dasColourForName(color1);
+    var c2 = dasColourForName(color2);
+
+    if (color3) {
+	var c3 = dasColourForName(color3);
+	for (var s = 0; s < steps; ++s) {
+	    var relScore = (1.0 * s)/(steps-1);
+	    var ca, cb, frac;
+	    if (relScore < 0.5) {
+                ca = c1;
+                cb = c2;
+                frac = relScore * 2;
+            } else {
+		ca = c2;
+		cb = c3;
+                frac = (relScore * 2.0) - 1.0;
+            }
+	    var fill = new DColour(
+		((ca.red * (1.0 - frac)) + (cb.red * frac))|0,
+		((ca.green * (1.0 - frac)) + (cb.green * frac))|0,
+		((ca.blue * (1.0 - frac)) + (cb.blue * frac))|0
+            ).toSvgString();
+	    cols.push(fill);
+	}
+    } else {
+	for (var s = 0; s < steps; ++s) {
+	    var frac = (1.0 * s)/(steps-1);
+	    var fill = new DColour(
+		((c1.red * (1.0 - frac)) + (c2.red * frac))|0,
+		((c1.green * (1.0 - frac)) + (c2.green * frac))|0,
+		((c1.blue * (1.0 - frac)) + (c2.blue * frac))|0
+            ).toSvgString();
+	    cols.push(fill);
+	}
+    }
+    return cols;
+}

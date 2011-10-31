@@ -180,6 +180,7 @@ function DASLink(desc, uri) {
 
 DASSource.prototype.features = function(segment, options, callback) {
     options = options || {};
+    var thisB = this;
 
     var dasURI;
     if (this.uri.indexOf('http://') == 0) {
@@ -234,6 +235,7 @@ DASSource.prototype.features = function(segment, options, callback) {
     // dlog(dasURI);
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
+        var beforeProcess = Date.now();
 
         if (!responseXML) {
             var msg;
@@ -272,6 +274,23 @@ DASSource.prototype.features = function(segment, options, callback) {
                 dasFeature.segment = segmentID;
                 dasFeature.id = feature.getAttribute('id');
                 dasFeature.label = feature.getAttribute('label');
+
+
+/*
+                var childNodes = feature.childNodes;
+                for (var c = 0; c < childNodes.length; ++c) {
+                    var cn = childNodes[c];
+                    if (cn.nodeType == Node.ELEMENT_NODE) {
+                        var key = cn.tagName;
+                        //var val = null;
+                        //if (cn.firstChild) {
+                        //   val = cn.firstChild.nodeValue;
+                        //}
+                        dasFeature[key] = 'x';
+                    }
+                } */
+
+
                 var spos = elementValue(feature, "START");
                 var epos = elementValue(feature, "END");
                 if ((spos|0) > (epos|0)) {
@@ -366,6 +385,10 @@ DASSource.prototype.features = function(segment, options, callback) {
             }
         }
                 
+        if (thisB.timings) {
+            var afterProcess = Date.now();
+            dlog('Processing took ' + (afterProcess - beforeProcess) + 'ms');
+        }
         callback(features, undefined, segmentMap);
     });
 }
@@ -672,7 +695,7 @@ function dasNotesOf(element)
     return notes;
 }
 
-function doCrossDomainRequest(url, handler, credentials) {
+function doCrossDomainRequest(url, handler, credentials, timings) {
     // TODO: explicit error handlers?
 
     if (window.XDomainRequest) {
@@ -686,11 +709,18 @@ function doCrossDomainRequest(url, handler, credentials) {
         req.open("get", url);
         req.send('');
     } else {
+        var reqStart = Date.now();
         var req = new XMLHttpRequest();
 
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
               if (req.status == 200 || req.status == 0) {
+                  var reqFetched = Date.now();
+                  var xml = req.responseXML;
+                  var reqParsed = Date.now();
+                  if (timings) {
+                      dlog('fetch=' + (reqFetched-reqStart) + 'ms; parse=' + (reqParsed-reqFetched) + 'ms');
+                  }
                   handler(req.responseXML, req);
               }
             }
@@ -704,5 +734,5 @@ function doCrossDomainRequest(url, handler, credentials) {
 }
 
 DASSource.prototype.doCrossDomainRequest = function(url, handler) {
-    return doCrossDomainRequest(url, handler, this.credentials);
+    return doCrossDomainRequest(url, handler, this.credentials, this.timings);
 }
