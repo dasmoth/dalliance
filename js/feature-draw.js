@@ -233,6 +233,8 @@ DasTier.prototype.paint = function() {
 	return;
     }
 
+    var fpw = this.browser.featurePanelWidth;
+
     var lh = MIN_PADDING;
     for (var s = 0; s < subtiers.length; ++s) {
 	lh = lh + subtiers[s].height + MIN_PADDING;
@@ -241,19 +243,19 @@ DasTier.prototype.paint = function() {
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
-    gc.fillRect(0, 0, 2000, lh);
+    gc.fillRect(0, 0, fpw, lh);
     gc.restore();
 
     gc.save();
     var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
     gc.translate(offset, MIN_PADDING);
-
+   
     for (var s = 0; s < subtiers.length; ++s) {
 	var glyphs = subtiers[s].glyphs;
 	var drawn = 0;
 	for (var i = 0; i < glyphs.length; ++i) {
 	    var glyph = glyphs[i];
-	    if (glyph.min() < 1000-offset && glyph.max() > -offset) {     // FIXME use real width!
+	    if (glyph.min() < fpw-offset && glyph.max() > -offset) { 
 		glyphs[i].draw(gc);
 		++drawn;
 	    }
@@ -400,6 +402,30 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 	    if (step < 0) step = 0;
 	    if (step >= grad.length) step = grad.length - 1;
 	    fill = grad[step];
+	    /* 
+            var loc, hic, frac;
+            if (style.COLOR3) {
+                if (relScore < 0.5) {
+                    loc = dasColourForName(style.COLOR1);
+                    hic = dasColourForName(style.COLOR2);
+                    frac = relScore * 2;
+                } else {
+                    loc = dasColourForName(style.COLOR2);
+                    hic = dasColourForName(style.COLOR3);
+                    frac = (relScore * 2.0) - 1.0;
+                }
+            } else {
+                loc = dasColourForName(style.COLOR1);
+                hic = dasColourForName(style.COLOR2);
+                frac = relScore;
+            }
+
+            fill = new DColour(
+                ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
+                ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
+                ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
+            ).toSvgString();
+	    */
         } 
 
 	return new BoxGlyph(minPos, requiredHeight - height, (maxPos - minPos), height,fill, stroke);

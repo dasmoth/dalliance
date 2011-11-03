@@ -101,6 +101,15 @@ Browser.prototype.realInit = function() {
     }
     this.svgHolder.appendChild(this.bhtmlRoot);
 
+    //
+    // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
+    //
+
+    this.resizeViewer(true);
+    window.addEventListener('resize', function(ev) {
+        thisB.resizeViewer();
+    }, false);
+
     // Dimension stuff
 
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
@@ -414,7 +423,7 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 
 Browser.prototype.makeTier = function(source) {
-    var viewport = makeElement('canvas', null, {width: "1000", height: "50"});    
+    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"});    
     var tier = new DasTier(this, source, viewport);
     tier.init(); // fetches stylesheet
 
@@ -553,4 +562,78 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
         this.refresh();
     }
+}
+
+
+
+
+Browser.prototype.resizeViewer = function(skipRefresh) {
+    var width = window.innerWidth;
+    width = Math.max(width, 640);
+
+    if (this.forceWidth) {
+        width = this.forceWidth;
+    }
+/*
+    if (this.center) {
+        this.svgHolder.style['margin-left'] = (((window.innerWidth - width) / 2)|0) + 'px';
+    } */
+
+/*
+    this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
+    if (width < 1075) {
+        this.karyo.svg.setAttribute('transform', 'translate(2000, 15)');
+    } else {
+        this.karyo.svg.setAttribute('transform', 'translate(450, 20)');
+    }
+    this.regionLabelMax = (width - this.zoomSlider.width - 120) */
+
+
+    var oldFPW = this.featurePanelWidth;
+    this.featurePanelWidth = (width /* - this.tabMargin */ - 20)|0;
+    
+    if (oldFPW != this.featurePanelWidth) {
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            var tier = this.tiers[ti];
+            tier.viewport.setAttribute('width', '' + this.featurePanelWidth);
+            tier.paint();
+        }
+
+        var viewWidth = this.viewEnd - this.viewStart;
+        var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
+        var delta = nve - this.viewEnd;
+        this.viewStart = this.viewStart - (delta/2);
+        this.viewEnd = this.viewEnd + (delta/2);
+
+        var wid = this.viewEnd - this.viewStart + 1;
+        if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
+            this.viewEnd = this.currentSeqMax;
+            this.viewStart = this.viewEnd - wid + 1;
+        }
+        if (this.viewStart < 1) {
+            this.viewStart = 1;
+            this.viewEnd = this.viewStart + wid - 1;
+        }
+    
+        // this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
+        // this.updateRegion();
+        if (!skipRefresh) {
+            this.spaceCheck();
+        }
+    }
+
+/*
+    if (this.fgGuide) {
+        this.fgGuide.setAttribute('x1', (this.featurePanelWidth/2) + this.tabMargin);
+        this.fgGuide.setAttribute('x2', (this.featurePanelWidth/2) + this.tabMargin);
+    }
+        
+
+    for (var pi = 0; pi < this.placards.length; ++pi) {
+        var placard = this.placards[pi];
+        var rects = placard.getElementsByTagName('rect');
+        if (rects.length > 0) {
+            rects[0].setAttribute('width', this.featurePanelWidth);
+        }
+    } */
 }
