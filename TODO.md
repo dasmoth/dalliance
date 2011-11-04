@@ -1,17 +1,20 @@
 
-For 0.7
+For 0.8
 -------
 
-  - Evaluate canvas rendering (requires 2-stage layout)
-  - If we stick to SVG rendering, implement incremental layout.
-  - Move fetching/mapping/etc to a webworker.
-  - If we swtich to 2-stage layout, can we do bumping &c in a worker as well?
-  - Next/prev feature.
-  - Try touch support again.
-  - Cross-index manually added sources to the registry.
+  - Pick a UI toolkit!
+  - Reinstate sequence tracks
+  - Full set of glyphs on canvas renderer
+  - Walk the glyphtree to produce SVG for export
+  - Hit detection
+  - Incremental fetch (???)
+  - Refactor next/prev support in big* code.
   - Out-to-chromosome zooming
-  - Strand-flipping
-  - Fetch-pools.
+  - UI for next/prev
+  - Stylesheet overrides in config blobs.
+  - JSON-DAS support?
+  - Work out the kinks in security/preflighting.
+  - Binary data on Safari 5.1/Mobile (looks like a Webkit bug?)
  
 Real Soon Now
 -------------
@@ -35,8 +38,6 @@ Nice to have
      + Any reason not to just hack the server to do this?
      + Suggest-as-you-type?
      + Does new DAS search proposal help?
- - Tourist mode: fast movement between POIs 
-     + (how close is this to next/prev feature?)
  - State persistance between sessions
      + Add a "make URL" button?
  - Tier groups
