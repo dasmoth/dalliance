@@ -190,7 +190,10 @@ DasTier.prototype.toString = function() {
 DasTier.prototype.init = function() {
     var tier = this;
 
-    if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
+    if (tier.dasSource.style) {
+        this.stylesheet = {styles: tier.dasSource.style};
+        this.browser.refreshTier(this);
+    } else if (tier.dasSource.uri || tier.dasSource.stylesheet_uri) {
         tier.status = 'Fetching stylesheet';
         this.dasSource.stylesheet(function(stylesheet) {
             tier.stylesheet = stylesheet;
