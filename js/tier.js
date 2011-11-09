@@ -33,7 +33,8 @@ function DasTier(browser, source, viewport, background)
             credentials: this.dasSource.credentials,
             preflight: this.dasSource.preflight,
             clientBin: this.dasSource.clientBin,
-            forceReduction: this.dasSource.forceReduction
+            forceReduction: this.dasSource.forceReduction,
+            link: this.dasSource.link
         });
         this.sourceFindNextFeature = function(chr, pos, dir, callback) {
             fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
