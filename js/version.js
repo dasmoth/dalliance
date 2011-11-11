@@ -12,7 +12,7 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  7,
     MICRO:  0,
-    PATCH:  '',
+    PATCH:  'pre4',
     BRANCH: 'CANVAS'
 }
 

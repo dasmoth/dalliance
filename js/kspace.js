@@ -434,6 +434,14 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     fs = is;
                 }
             // }
+            if (thisB.opts.link) {
+                for (var fi = 0; fi < features.length; ++fi) {
+                    var f = features[fi];
+                    if (f.label) {
+                        f.links = [new DASLink('Link', thisB.opts.link.replace(/\$\$/, f.label))];
+                    }
+                }
+            }
             callback(null, features, fs);
         });
     });
