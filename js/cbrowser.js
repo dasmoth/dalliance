@@ -92,7 +92,7 @@ Browser.prototype.realInit = function() {
     this.svgHolder = document.getElementById(this.pageName);
     removeChildren(this.svgHolder);
 
-    this.tierHolder = makeElement('div');
+    this.tierHolder = makeElement('div', null, null, {padding: '0px', margin: '0px', border: '0px'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -424,8 +424,10 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 Browser.prototype.makeTier = function(source) {
     var thisB = this;
-    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"});    
+    var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
+    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"}, {padding: '0px', margin: '-1px', border: '0px'});
     var tier = new DasTier(this, source, viewport);
+    tier.background = background;
     
     viewport.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -464,7 +466,13 @@ Browser.prototype.makeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
-    this.tierHolder.appendChild(viewport);    
+    var label = makeElement('span', source.name);
+    viewport.style['vertical-align'] = 'top';
+    label.style['width'] = this.tabMargin + 'px';
+    label.style['display'] = 'inline-block';
+    label.style['background'] = background;
+    label.style['vertical-align'] = 'top';
+    this.tierHolder.appendChild(makeElement('div', [label, viewport], {}, {margin: '-2px'}));    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
     this.arrangeTiers();
@@ -626,7 +634,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
 
     var oldFPW = this.featurePanelWidth;
-    this.featurePanelWidth = (width /* - this.tabMargin */ - 20)|0;
+    this.featurePanelWidth = (width - this.tabMargin - 20)|0;
     
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {

@@ -244,7 +244,7 @@ DasTier.prototype.paint = function() {
     this.viewport.setAttribute('height', lh);
 
     var gc = this.viewport.getContext('2d');
-    gc.fillStyle = 'rgb(230,230,250)';           // FIXME background drawing
+    gc.fillStyle = this.background;
     gc.fillRect(0, 0, fpw, lh);
     gc.restore();
 
