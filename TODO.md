@@ -6,15 +6,19 @@ For 0.8
   - Reinstate sequence tracks
   - Full set of glyphs on canvas renderer
   - Walk the glyphtree to produce SVG for export
-  - Hit detection
-  - Incremental fetch (???)
+  - Incremental fetch
   - Refactor next/prev support in big* code.
   - Out-to-chromosome zooming
   - UI for next/prev
-  - Stylesheet overrides in config blobs.
+  - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - JSON-DAS support?
   - Work out the kinks in security/preflighting.
   - Binary data on Safari 5.1/Mobile (looks like a Webkit bug?)
+  - Vertical resizing
+  - Track style configuration (Ron/Julie)
+  - Version track config blobs per-track.
+  - Clean up track add/remove API.
+  - Route feature clicks/taps through an event model (i.e. feature-popup is no longer part of Browser)
  
 Real Soon Now
 -------------

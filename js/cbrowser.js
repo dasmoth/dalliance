@@ -2,7 +2,7 @@
 
 // 
 // Dalliance Genome Explorer
-// (c) Thomas Down 2006-2010
+// (c) Thomas Down 2006-2011
 //
 // cbrowser.js: canvas browser container
 //
@@ -31,8 +31,8 @@ function Browser(opts) {
     this.exportServer = 'http://www.biodalliance.org:8765/'
 
     this.pageName = 'svgHolder'
-    this.maxExtra = 1.5;
-    this.minExtra = 0.2;
+    this.maxExtra = 2.5;
+    this.minExtra = 0.5;
     this.zoomFactor = 1.0;
     this.origin = 0;
     this.targetQuantRes = 5.0;
@@ -423,8 +423,45 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 
 Browser.prototype.makeTier = function(source) {
+    var thisB = this;
     var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"});    
     var tier = new DasTier(this, source, viewport);
+    
+    viewport.addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+
+        var br = viewport.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        var st = tier.subtiers;
+        if (!st) {
+            return;
+        }
+
+        var sti = 0;
+        ry -= MIN_PADDING;
+        while (ry > st[sti].height) {
+            ry = ry - st[sti].height - MIN_PADDING;
+            ++sti;
+        }
+
+        var glyphs = st[sti].glyphs;
+        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale;
+        rx -= offset;
+        var hit;
+        for (var gi = 0; gi < glyphs.length; ++gi) {
+            var g = glyphs[gi];
+//            dlog(rx + ':    ' + g.min() + '...' + g.max());
+            if (g.min() <= rx && g.max() >= rx) {
+                hit = g.group || g.feature;
+                break;
+            }
+        }
+
+        if (hit) {
+            thisB.featurePopup(ev, hit);
+        }
+    }, false);
+
     tier.init(); // fetches stylesheet
 
     this.tierHolder.appendChild(viewport);    
@@ -450,7 +487,6 @@ Browser.prototype.refresh = function() {
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
 
-    
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
     this.origin = newOrigin;

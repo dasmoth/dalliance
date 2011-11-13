@@ -51,6 +51,7 @@ function drawFeatureTier(tier)
                     continue;
                 }
                 var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
+		g.feature = f;
                 glyphs.push(g);
             }
         }
@@ -152,6 +153,7 @@ function drawFeatureTier(tier)
         var g = glyphsForGroup(tier.groupedFeatures[gid], 0, tier.groups[gid], tier,
                                (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
         if (g) {
+	    g.group = tier.groups[gid];
             groupGlyphs[gid] = g;
         }
     }
@@ -402,30 +404,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 	    if (step < 0) step = 0;
 	    if (step >= grad.length) step = grad.length - 1;
 	    fill = grad[step];
-	    /* 
-            var loc, hic, frac;
-            if (style.COLOR3) {
-                if (relScore < 0.5) {
-                    loc = dasColourForName(style.COLOR1);
-                    hic = dasColourForName(style.COLOR2);
-                    frac = relScore * 2;
-                } else {
-                    loc = dasColourForName(style.COLOR2);
-                    hic = dasColourForName(style.COLOR3);
-                    frac = (relScore * 2.0) - 1.0;
-                }
-            } else {
-                loc = dasColourForName(style.COLOR1);
-                hic = dasColourForName(style.COLOR2);
-                frac = relScore;
-            }
-
-            fill = new DColour(
-                ((loc.red * (1.0 - frac)) + (hic.red * frac))|0,
-                ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
-                ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
-            ).toSvgString();
-	    */
         } 
 
 	return new BoxGlyph(minPos, requiredHeight - height, (maxPos - minPos), height,fill, stroke);

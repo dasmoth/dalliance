@@ -7,6 +7,11 @@
 // domui.js: SVG UI components
 //
 
+Browser.prototype.removeAllPopups = function() {
+    removeChildren(this.hPopupHolder);
+    removeChildren(this.popupHolder);
+}
+
 Browser.prototype.makeTooltip = function(ele, text)
 {
     var isin = false;
