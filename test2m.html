@@ -15,10 +15,13 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="js/spans.js"></script>
 <script language="javascript" src="js/utils.js"></script>
 <script language="javascript" src="js/das.js"></script>
-<script language="javascript" src="js/browser.js"></script>
+<script language="javascript" src="js/cbrowser.js"></script>
+<script language="javascript" src="js/feature-popup.js"></script>
 <script language="javascript" src="js/tier.js"></script>
 <script language="javascript" src="js/sequence-tier.js"></script>
-<script language="javascript" src="js/feature-tier.js"></script>
+<script language="javascript" src="js/features.js"></script>
+<script language="javascript" src="js/color.js"></script>
+<script language="javascript" src="js/feature-draw.js"></script>
 <script language="javascript" src="js/slider.js"></script>
 <script language="javascript" src="js/domui.js"></script>
 <script language="javascript" src="js/karyoscape.js"></script>
@@ -33,6 +36,7 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="js/bin.js"></script>
 <script language="javascript" src="js/bigwig.js"></script>
 <script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/twoBit.js"></script>
 <script language="javascript" src="jszlib/js/inflate.js"></script>
 
 <script language="javascript"> 
@@ -79,8 +83,10 @@ body {font-family: 'helvetica'}
                      desc: 'CpG observed/expected ratio',
                      uri: 'http://www.derkholm.net:9080/das/mm9comp/',
                      stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'},
-                    {name: 'BAM test',
-                     bamURI: 'http://localhost/bam/ERZ000001-sorted.bam'}],
+                    {name: 'Sperm meth',
+                     bwgURI: 'http://localhost/sperm_mC.bw'},
+                    {name: 'Sperm meth',
+                     bwgURI: 'http://localhost/sperm_hmC.bw'}],
    
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),
     karyoEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),

@@ -588,7 +588,7 @@ function makeLineGlyph(features, style, tier) {
     var max = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
-    var color = style.COLOR || style.COLOR1 || 'black';
+    var color = style.FGCOLOR || style.COLOR1 || 'black';
 
     var points = [];
     for (var fi = 0; fi < features.length; ++fi) {
@@ -600,12 +600,13 @@ function makeLineGlyph(features, style, tier) {
         points.push(px);
 	points.push(py);
     }
-    var lgg = new LineGraphGlyph(points);
+    var lgg = new LineGraphGlyph(points, color);
     return lgg;
 }
 
-function LineGraphGlyph(points) {
+function LineGraphGlyph(points, color) {
     this.points = points;
+    this.color = color;
 }
 
 LineGraphGlyph.prototype.min = function() {
@@ -622,7 +623,7 @@ LineGraphGlyph.prototype.height = function() {
 
 LineGraphGlyph.prototype.draw = function(g) {
     g.save();
-    g.strokeStyle = 'black';
+    g.strokeStyle = this.color;
     g.lineWidth = 2;
     g.beginPath();
     for (var i = 0; i < this.points.length; i += 2) {

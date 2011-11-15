@@ -634,7 +634,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
 
     var oldFPW = this.featurePanelWidth;
-    this.featurePanelWidth = (width - this.tabMargin - 20)|0;
+    this.featurePanelWidth = (width - this.tabMargin - 40)|0;
     
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {

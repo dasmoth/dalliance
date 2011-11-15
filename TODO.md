@@ -3,6 +3,13 @@ For 0.8
 -------
 
   - Pick a UI toolkit!
+  - Missing UI elements (w.r.t. 0.7)
+     + Scales on quantitative tracks
+     + Add/remove track mechanism.
+     + "Selected track"
+     + Chromosome overview (can we be less special-casey about this...?)
+     + Zoom slider (necessary?  some way to hide it when not in use?)
+     + Location/search tool.
   - Reinstate sequence tracks
   - Full set of glyphs on canvas renderer
   - Walk the glyphtree to produce SVG for export
@@ -19,6 +26,7 @@ For 0.8
   - Version track config blobs per-track.
   - Clean up track add/remove API.
   - Route feature clicks/taps through an event model (i.e. feature-popup is no longer part of Browser)
+  - Full binary support.
  
 Real Soon Now
 -------------
