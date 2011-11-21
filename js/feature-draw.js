@@ -291,7 +291,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
             continue;
         }
 
-	var g = glyphForFeature(f, 0, style, tier /* ,consHeight */);
+	var g = glyphForFeature(f, 0, style, tier, null, true);
 	if (g) {
 	    glyphs.push(g);
 	}
@@ -336,7 +336,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     return gg;
 }
 
-function glyphForFeature(feature, y, style, tier, forceHeight)
+function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 {
     var scale = tier.browser.scale, origin = tier.browser.viewStart;
     var gtype = style.glyph || 'BOX';
@@ -356,6 +356,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     var requiredHeight = height = 1.0 * height;
     var quant;
 
+    var gg;
     if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
         var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
@@ -406,12 +407,17 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 	    fill = grad[step];
         } 
 
-	return new BoxGlyph(minPos, requiredHeight - height, (maxPos - minPos), height,fill, stroke);
+	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
-	return new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
+	gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
     }
+
+    if (style.LABEL && label && !noLabel) {
+	gg = new LabelledGlyph(gg, label);
+    }
+    return gg;
 
 }
 
