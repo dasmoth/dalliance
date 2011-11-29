@@ -98,14 +98,18 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var left = Math.min((mx - 30), (winWidth - width - 10));
 
     var popup = makeElement('div');
+    // popup.setAttribute('style', 'box-shadow: 10px 10px 5px #888; -webkit-box-shadow: 10px 10px 5px #888; -moz-box-shadow: 10px 10px 5px #888');
     popup.style.position = 'absolute';
     popup.style.top = '' + top + 'px';
     popup.style.left = '' + left + 'px';
     popup.style.width = width + 'px';
     popup.style.backgroundColor = 'white';
-    popup.style.borderWidth = '2px';
-    popup.style.borderColor = 'black'
+    popup.style.borderWidth = '1px';
+    popup.style.borderColor = 'gray'
     popup.style.borderStyle = 'solid';
+    popup.style.boxShadow = '3px 3x 1px #888';
+    popup.style.MozBoxShadow = '3px 3px 1px #888';
+    popup.style.webkitBoxShadow = '3px 3px 1px #888';
 
     if (name) {
         var closeButton = makeElement('div', 'X', null, {

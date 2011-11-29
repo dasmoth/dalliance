@@ -425,7 +425,7 @@ Browser.prototype.touchCancelHandler = function(ev) {
 Browser.prototype.makeTier = function(source) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
-    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"}, {padding: '0px', margin: '-1px', border: '0px'});
+    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"}, {padding: '0px', margin: '1px', border: '1px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ borderBottomStyle: 'solid', borderBottomColor: 'rgb(180,180,180)', borderRightStyle: 'solid', borderRightColor: 'rgb(180,180,180)'});
     var tier = new DasTier(this, source, viewport);
     tier.background = background;
     
