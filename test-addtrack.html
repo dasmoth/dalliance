@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC
 	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
      xmlns:svg="http://www.w3.org/2000/svg"
@@ -8,7 +8,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
-<title>Human NCBI36 :: Dalliance</title> 
+<title>Human NCBI36 :: Dalliance</title>
 <style>
 body {font-family: 'helvetica'}
 </style>
@@ -53,25 +53,25 @@ body {font-family: 'helvetica'}
                                })
     },
 
-    sources:     [{name:                 'Genome',      
-                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
+    sources:     [{name:                 'Genome',
+                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',
                    tier_type:            'sequence',
                    provides_entrypoints: true},
-                  {name:                 'TwoBitSeq',      
+                  {name:                 'TwoBitSeq',
                    twoBitURI:            'http://www.biodalliance.org/datasets/hg18.2bit',
                    tier_type:            'sequence'},
-                  {name:                 'Genes',     
+                  {name:                 'Genes',
                    desc:                 'Gene structures from Ensembl 54',
-                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',
                    collapseSuperGroups:  true,
                    provides_karyotype:   true,
                    provides_search:      true,
-                   maxbins:              false}, 
-                  {name:                 'Repeats',     
-                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
-                   stylesheet_uri:       'http://www.biodalliance.org/stylesheets/repeats-L1.xml'}, 
-                  {name:                 'CpG Density', 
-                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
+                   maxbins:              false},
+                  {name:                 'Repeats',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',
+                   stylesheet_uri:       'http://www.biodalliance.org/stylesheets/repeats-L1.xml'},
+                  {name:                 'CpG Density',
+                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',
                    stylesheet_uri:       'http://www.biodalliance.org/stylesheets/cpg-hist.xml'},
                   {name:                 'BWG test',
                    bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
@@ -89,7 +89,7 @@ function testAddTrack() {
   var nds = {name:                 'BBD test',
              bwgURI:               'http://www.biodalliance.org/datasets/ensGene.bb',
             collapseSuperGroups:  true};
-  
+
   b.sources.push(nds);
   b.makeTier(nds);
   b.storeStatus();

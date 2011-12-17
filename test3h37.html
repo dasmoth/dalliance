@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC
 	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
      xmlns:svg="http://www.w3.org/2000/svg"
@@ -8,7 +8,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
-<title>Human GRCh37 :: Dalliance</title> 
+<title>Human GRCh37 :: Dalliance</title>
 <style>
 body {font-family: 'helvetica'}
 </style>
@@ -48,7 +48,7 @@ body {font-family: 'helvetica'}
       auth: 'GRCh',
       version: '37'
     },
- 
+
     chains: {
       hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',
                                {
@@ -68,11 +68,11 @@ body {font-family: 'helvetica'}
                         desc: 'Gene structures from Ensembl 59 (GENCODE 4)',
                         uri: 'http://www.derkholm.net:8080/das/hsa_59_37d/',
                         collapseSuperGroups: true,
-                        provides_karyotype: true,     
+                        provides_karyotype: true,
                         provides_search: true,
-                        maxbins: false}, 
+                        maxbins: false},
                        {name: 'Repeats',
-                        desc: 'Repeat annotation from Ensembl 59', 
+                        desc: 'Repeat annotation from Ensembl 59',
                         uri: 'http://www.derkholm.net:8080/das/hsa_59_37d/',
                         stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'},
                        {name: 'CpG Density',
@@ -84,7 +84,7 @@ body {font-family: 'helvetica'}
                    bwgURI:               'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwDgf/wgEncodeUwDgfGm06990Raw.bigWig'},
                   {name:                 'BAM test',
                    bamURI:               'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwDgf/wgEncodeUwDgfGm06990Aln.bam'}],
- 
+
                    // stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet'},
 
     browserLinks: {
@@ -92,7 +92,7 @@ body {font-family: 'helvetica'}
       UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
       Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
     },
- 
+
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
     karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')
 

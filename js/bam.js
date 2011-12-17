@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2011
 //
@@ -103,7 +103,7 @@ function makeBam(data, bai, callback) {
             p += (nintv * 8);
             if (nbin > 0) {
                 bam.indices[ref] = new Uint8Array(header, blockStart, p - blockStart);
-            }                     
+            }
         }
         if (bam.chrToIndex) {
             return callback(bam);
@@ -160,7 +160,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         }
     }
     // dlog('Lowest LB = ' + lowest);
-    
+
     var prunedOtherChunks = [];
     if (lowest != null) {
         for (var i = 0; i < otherChunks.length; ++i) {
@@ -221,7 +221,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
             callback(null, 'Error in index fetch');
         }
     }
-    
+
     var records = [];
     var index = 0;
     var data;
@@ -267,7 +267,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
 
         var refID = readInt(ba, offset + 4);
         var pos = readInt(ba, offset + 8);
-        
+
         var bmn = readInt(ba, offset + 12);
         var bin = (bmn & 0xffff0000) >> 16;
         var mq = (bmn & 0xff00) >> 8;
@@ -276,19 +276,19 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         var flag_nc = readInt(ba, offset + 16);
         var flag = (flag_nc & 0xffff0000) >> 16;
         var nc = flag_nc & 0xffff;
-    
+
         var lseq = readInt(ba, offset + 20);
-        
+
         var nextRef  = readInt(ba, offset + 24);
         var nextPos = readInt(ba, offset + 28);
-        
+
         var tlen = readInt(ba, offset + 32);
-    
+
         var readName = '';
         for (var j = 0; j < nl-1; ++j) {
             readName += String.fromCharCode(ba[offset + 36 + j]);
         }
-    
+
         var p = offset + 36 + nl;
 
         var cigar = '';
@@ -298,7 +298,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
             p += 4;
         }
         record.cigar = cigar;
-    
+
         var seq = '';
         var seqBytes = (lseq + 1) >> 1;
         for (var j = 0; j < seqBytes; ++j) {
@@ -315,7 +315,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         }
         p += lseq;
         record.quals = qseq;
-        
+
         record.pos = pos;
         record.mq = mq;
         record.readName = readName;
@@ -434,7 +434,7 @@ function reg2bin(beg, end)
 
 /* calculate the list of bins that may overlap with region [beg,end) (zero-based) */
 var MAX_BIN = (((1<<18)-1)/7);
-function reg2bins(beg, end) 
+function reg2bins(beg, end)
 {
     var i = 0, k, list = [];
     --end;

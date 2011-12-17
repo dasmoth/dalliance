@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2011
 //
@@ -74,10 +74,10 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     this.pool = new FetchPool();
     this.awaitedSeq = new Awaited();
     this.seqWasFetched = false;
-    
+
     this.startFetchesForTiers(this.tierMap);
 }
-    
+
 function filterFeatures(features, min, max) {
     var ff = [];
     featuresByGroup = {};
@@ -139,18 +139,18 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 if (this.cs.start == smin && this.cs.end == smax) {
                     cachedSeq = this.cs;
                 } else {
-                    cachedSeq = new DASSequence(this.cs.name, smin, smax, this.cs.alphabet, 
+                    cachedSeq = new DASSequence(this.cs.name, smin, smax, this.cs.alphabet,
                                                 this.cs.seq.substring(smin - this.cs.start, smax + 1 - this.cs.start));
                 }
                 return awaitedSeq.provide(cachedSeq);
             }
         }
-        
+
         this.seqSource.fetch(this.chr, smin, smax, this.pool, function(err, seq) {
             if (seq) {
-                if (!thisB.cs || (smin <= thisB.cs.start && smax >= thisB.cs.end) || 
-                    (smin >= thisB.cs.end) || (smax <= thisB.cs.start) || 
-                    ((smax - smin) > (thisB.cs.end - thisB.cs.start))) 
+                if (!thisB.cs || (smin <= thisB.cs.start && smax >= thisB.cs.end) ||
+                    (smin >= thisB.cs.end) || (smax <= thisB.cs.start) ||
+                    ((smax - smin) > (thisB.cs.end - thisB.cs.start)))
                 {
                     thisB.cs = seq;
                 }
@@ -159,7 +159,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 dlog('Noseq: ' + miniJSONify(err));
             }
         });
-    } 
+    }
 }
 
 KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
@@ -181,7 +181,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         if (baton.min < this.min || baton.max > this.max) {
             cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
         }
-        
+
         // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
 //      if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
 //          cachedFeatures = downsample(cachedFeatures, thisB.scale);
@@ -229,7 +229,7 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
             mayDownsample = true;
         }
 
-        if ((actualScale < (this.scale/2) && features.length > 200) || 
+        if ((actualScale < (this.scale/2) && features.length > 200) ||
             (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
         {
             features = downsample(features, this.scale);
@@ -267,7 +267,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     if (tryMaxBins) {
         fops.maxbins = 1 + (((max - min) / scale) | 0);
     }
-    
+
     this.dasSource.features(
         new DASSegment(chr, min, max),
         fops,
@@ -337,7 +337,7 @@ function BWGFeatureSource(bwgSource, opts) {
     var thisB = this;
     this.bwgSource = bwgSource;
     this.opts = opts || {};
-    
+
     thisB.bwgHolder = new Awaited();
 
     if (this.opts.preflight) {
@@ -466,7 +466,7 @@ function BAMFeatureSource(bamSource, opts) {
     this.bamSource = bamSource;
     this.opts = opts || {};
     this.bamHolder = new Awaited();
-    
+
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
         if (!pfs) {

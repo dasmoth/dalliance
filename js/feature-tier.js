@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -8,7 +8,7 @@
 //
 
 var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires making
-                        // drawing of joined-up groups a bit smarter.   
+                        // drawing of joined-up groups a bit smarter.
 
 var MIN_PADDING = 3;
 
@@ -62,7 +62,7 @@ function dasColourForName(name) {
     return c;
 }
 
-// 
+//
 // Wrapper for glyph plus metrics
 //
 
@@ -76,7 +76,7 @@ function DGlyph(glyph, min, max, height) {
 
 //
 // Set of bumped glyphs
-// 
+//
 
 function DSubTier() {
     this.glyphs = [];
@@ -166,7 +166,7 @@ function drawLine(featureGroupElement, features, style, tier, y)
             pathOps = 'M ' + px + ' ' + py;
         } else {
             pathOps += ' L ' + px + ' ' + py;
-        }       
+        }
     }
     path.setAttribute('d', pathOps);
     featureGroupElement.appendChild(path);
@@ -182,7 +182,7 @@ function drawLine(featureGroupElement, features, style, tier, y)
     clip.appendChild(clipRect);
     featureGroupElement.appendChild(clip);
     path.setAttribute('clip-path', 'url(#' + clipId + ')');
-   
+
     if (!tier.isQuantitative) {
         tier.isQuantitative = true;
         tier.isLabelValid = false;
@@ -227,7 +227,7 @@ function sortFeatures(tier)
             }
         }
     };
-    
+
     var superParentsOf = function(f) {
         // FIXME: should recur.
         var spids = [];
@@ -249,7 +249,7 @@ function sortFeatures(tier)
 
 
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
-        // var f = eval('[' + miniJSONify(tier.currentFeatures[fi]) + ']')[0]; 
+        // var f = eval('[' + miniJSONify(tier.currentFeatures[fi]) + ']')[0];
         var f = tier.currentFeatures[fi];
         if (f.parts) {
             continue;
@@ -278,7 +278,7 @@ function sortFeatures(tier)
                 var gid = g.id;
                 if (g.type == 'gene') {
                     // Like a super-grouper...
-                    fSuperGroup = gid; 
+                    fSuperGroup = gid;
                     groups[gid] = shallowCopy(g);
                 } else if (g.type == 'translation') {
                     // have to ignore this to get sensible results from bj-e :-(.
@@ -306,7 +306,7 @@ function sortFeatures(tier)
                 }
                 pushnewo(groupedFeatures, pid, p);
                 pusho(groupedFeatures, pid, f);
-                
+
                 if (!groups[pid]) {
                     groups[pid] = {
                         type: p.type,
@@ -330,7 +330,7 @@ function sortFeatures(tier)
                         tier.isLabelValid = false;
                     }
                 }
-            }   
+            }
         }
 
         if (fGroups.length == 0) {
@@ -340,8 +340,8 @@ function sortFeatures(tier)
                 var gid = fGroups[g];
                 pushnewo(superGroups, fSuperGroup, gid);
                 groupsToSupers[gid] = fSuperGroup;
-            } 
-        }       
+            }
+        }
     }
 
     tier.ungroupedFeatures = ungroupedFeatures;
@@ -375,13 +375,13 @@ function drawFeatureTier(tier)
     }
     featureGroupElement.appendChild(tier.background);
     drawGuidelines(tier, featureGroupElement);
-        
+
     var lh = MIN_PADDING;
     var glyphs = [];
     var specials = false;
 
     // Glyphify ungrouped.
-        
+
     for (var uft in tier.ungroupedFeatures) {
         var ufl = tier.ungroupedFeatures[uft];
         // var style = styles[uft] || styles['default'];
@@ -403,7 +403,7 @@ function drawFeatureTier(tier)
     }
 
     // Merge supergroups
-    
+
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
         for (var sg in tier.superGroups) {
             var sgg = tier.superGroups[sg];
@@ -470,7 +470,7 @@ function drawFeatureTier(tier)
             }
 
             delete tier.superGroups[sg]; // Do we want this?
-        }       
+        }
     }
 
     // Glyphify groups.
@@ -532,7 +532,7 @@ function drawFeatureTier(tier)
     var bumpedSTs = [];
     var hasBumpedFeatures = false;
     var subtierMax = tier.dasSource.subtierMax || DEFAULT_SUBTIER_MAX;
-    
+
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
         var g = glyphs[i];
@@ -569,7 +569,7 @@ function drawFeatureTier(tier)
     var stBoundaries = [];
     if (specials) {
         stBoundaries.push(lh);
-    } 
+    }
     for (var bsi = 0; bsi < bumpedSTs.length; ++bsi) {
         var st = bumpedSTs[bsi];
         var stg = st.glyphs;
@@ -589,7 +589,7 @@ function drawFeatureTier(tier)
                 featureGroupElement.appendChild(g.glyph);
             }
         }
-        
+
         if (g.quant) {
             tier.isLabelValid = false;    // FIXME
             tier.isQuantitative = true;
@@ -607,7 +607,7 @@ function drawFeatureTier(tier)
     if (stBoundaries.length < 2) {
         var bumped = false;
         var minHeight = lh;
-        
+
         var ss = tier.stylesheet;
         if (ss) {
             var ssScale = zoomForScale(tier.browser.scale);
@@ -627,7 +627,7 @@ function drawFeatureTier(tier)
                 lh = 2 * minHeight;
             }
         }
-    }                   
+    }
 
     tier.wantedLayoutHeight = lh;
     if (!tier.layoutWasDone || tier.browser.autoSizeTiers) {
@@ -654,7 +654,7 @@ function drawFeatureTier(tier)
             spand.setAttribute('font-family', 'helvetica');
             spand.setAttribute('font-size', '10pt');
 
-            if (tier.layoutHeight < lh) { 
+            if (tier.layoutHeight < lh) {
                 var dispST = 0;
                 while ((tier.layoutHeight - 20) >= stBoundaries[dispST]) { // NB allowance for placard!
                     ++dispST;
@@ -663,7 +663,7 @@ function drawFeatureTier(tier)
             } else {
                 spand.appendChild(document.createTextNode('Show less'));
             }
-            
+
             spand.setAttribute('x', 80);
             spand.setAttribute('y', -6);
             spandPlacard.appendChild(spand);
@@ -680,7 +680,7 @@ function drawFeatureTier(tier)
                                    ' L ' + 36 + ' ' + -16 + ' Z');
             }
             spandPlacard.appendChild(arrow);
-            
+
             spandPlacard.addEventListener('mousedown', function(ev) {
                 tier.layoutHeight = tier.wantedLayoutHeight;
                 tier.placard = null;
@@ -704,7 +704,7 @@ function drawFeatureTier(tier)
             spandPlacard.appendChild(dismiss);
 
             tier.placard = spandPlacard;
-        } 
+        }
     }
 
     var statusMsg = tier.error || tier.status;
@@ -750,7 +750,7 @@ function drawFeatureTier(tier)
     }
 
     tier.clipTier();
-            
+
     tier.scale = 1;
 }
 
@@ -783,7 +783,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var quant = null;
     var consHeight;
     var gstyle = tier.styleForFeature(groupElement);
-    
+
 
     for (var i = 0; i < features.length; ++i) {
         var feature = features[i];
@@ -800,7 +800,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
             }
         }
     }
-  
+
     var glyphGroup = document.createElementNS(NS_SVG, 'g');
     var glyphChildren = [];
     glyphGroup.dalliance_group = groupElement;
@@ -836,7 +836,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     featureDGlyphs = featureDGlyphs.sort(function(g1, g2) {
         return g1.zindex - g2.zindex;
     });
-    
+
     for (var i = 0; i < featureDGlyphs.length; ++i) {
         var glyph = featureDGlyphs[i];
         glyph.glyph.dalliance_group = groupElement;
@@ -869,7 +869,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
                 path.setAttribute('fill', 'none');
                 path.setAttribute('stroke', 'black');
                 path.setAttribute('stroke-width', '1');
-                
+
                 var hh = height/2;
                 var pathops = "M " + lmin + " " + (y + hh) + " L " + lmax + " " + (y + hh);
                 if (lmax - lmin > 8) {
@@ -877,11 +877,11 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
                     if (strand == '+') {
                         pathops += ' M ' + (lmid - 2) + ' ' + (y+hh-4) +
                             ' L ' + (lmid + 2) + ' ' + (y+hh) +
-                            ' L ' + (lmid - 2) + ' ' + (y+hh+4); 
+                            ' L ' + (lmid - 2) + ' ' + (y+hh+4);
                     } else if (strand == '-') {
                         pathops += ' M ' + (lmid + 2) + ' ' + (y+hh-4) +
                             ' L ' + (lmid - 2) + ' ' + (y+hh) +
-                            ' L ' + (lmid + 2) + ' ' + (y+hh+4); 
+                            ' L ' + (lmid + 2) + ' ' + (y+hh+4);
                     }
                 }
                 path.setAttribute('d', pathops);
@@ -890,7 +890,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
                 path.setAttribute('fill', 'none');
                 path.setAttribute('stroke', 'black');
                 path.setAttribute('stroke-width', '1');
-                
+
                 var vee = true;
                 if (gstyle && gstyle.STYLE && gstyle.STYLE != 'hat') {
                     vee = false;
@@ -982,8 +982,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             mark.setAttribute('fill', 'none');
             mark.setAttribute('stroke', stroke);
             mark.setAttribute('stroke-width', 1);
-            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y+hh) + 
-                              ' L ' + (mid+hh) + ' ' + (y+hh) + 
+            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y+hh) +
+                              ' L ' + (mid+hh) + ' ' + (y+hh) +
                               ' M ' + mid + ' ' + y +
                               ' L ' + mid + ' ' + (y+height));
             bMinPos = Math.min(minPos, mid-hh);
@@ -993,10 +993,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             mark.setAttribute('fill', 'none');
             mark.setAttribute('stroke', stroke);
             mark.setAttribute('stroke-width', 1);
-            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y) + 
-                              ' L ' + (mid+hh) + ' ' + (y+height) + 
+            mark.setAttribute('d', 'M ' + (mid-hh) + ' ' + (y) +
+                              ' L ' + (mid+hh) + ' ' + (y+height) +
                               ' M ' + (mid+hh) + ' ' + (y) +
-                              ' L ' + (mid-hh) + ' ' + (y+height));  
+                              ' L ' + (mid-hh) + ' ' + (y+height));
             bMinPos = Math.min(minPos, mid-hh);
             bMaxPos = Math.max(maxPos, mid+hh);
         } else if (gtype == 'SPAN') {
@@ -1060,19 +1060,19 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             halfWidth = 0.5 * width;
             mark = document.createElementNS(NS_SVG, 'path');
             if (dir == 'E') {
-            mark.setAttribute('d', 'M ' + (mid - halfWidth) + ' ' + 0 + 
+            mark.setAttribute('d', 'M ' + (mid - halfWidth) + ' ' + 0 +
                               ' L ' + (mid - halfWidth) + ' ' + height +
                               ' L ' + (mid + halfWidth) + ' ' + halfHeight + ' Z');
             } else if (dir == 'W') {
-                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 +
                                   ' L ' + (mid + halfWidth) + ' ' + height +
                                   ' L ' + (mid - halfWidth) + ' ' + halfHeight + ' Z');
             } else if (dir == 'S') {
-                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 + 
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + 0 +
                                   ' L ' + (mid - halfWidth) + ' ' + 0 +
                                   ' L ' + mid + ' ' + height + ' Z');
             } else {
-                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + height + 
+                mark.setAttribute('d', 'M ' + (mid + halfWidth) + ' ' + height +
                                   ' L ' + (mid - halfWidth) + ' ' + height +
                                   ' L ' + mid + ' ' + 0 + ' Z');
             }
@@ -1109,7 +1109,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
 /*
         if (bMinPos < minPos) {
             min = bMinPos/scale + origin;
-        } 
+        }
         if (bMaxPos > maxPos) {
             max = (bMaxPos-1)/scale + origin;
         } */
@@ -1147,7 +1147,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         var headInset = parallel ? 0.5 *height : 0.25 * height;
         var midPos = (maxPos + minPos)/2;
         var instep = parallel ? 0.25 * height : 0.4 * height;
-        
+
         if (parallel) {
             if (ne && (maxPos - midPos < height)) {
                 maxPos = midPos + height;
@@ -1173,7 +1173,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         if (parallel) {
             pathops = 'M ' + midPos + ' ' + instep;
             if (ne) {
-                pathops += ' L ' + (maxPos - headInset) + ' ' + instep + 
+                pathops += ' L ' + (maxPos - headInset) + ' ' + instep +
                     ' L ' + (maxPos - headInset) + ' 0' +
                     ' L ' + maxPos + ' ' + (height/2) +
                     ' L ' + (maxPos - headInset) + ' ' + height +
@@ -1184,7 +1184,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             }
             if (sw) {
                 pathops += ' L ' + (minPos + headInset) + ' ' + (height-instep) +
-                    ' L ' + (minPos + headInset) + ' ' + height + 
+                    ' L ' + (minPos + headInset) + ' ' + height +
                     ' L ' + minPos + ' ' + (height/2) +
                     ' L ' + (minPos + headInset) + ' ' + ' 0' +
                     ' L ' + (minPos + headInset) + ' ' + instep;
@@ -1208,7 +1208,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             if (sw) {
                 pathops += ' L ' + (maxPos - instep) + ' ' + (height - headInset) +
                     ' L ' + maxPos + ' ' + (height - headInset) +
-                    ' L ' + midPos + ' ' + height + 
+                    ' L ' + midPos + ' ' + height +
                     ' L ' + minPos + ' ' + (height - headInset) +
                     ' L ' + (minPos + instep) + ' ' + (height - headInset);
             } else {
@@ -1229,7 +1229,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         var rInset = 0;
         var minLength = height + 2;
         var instep = 0.333333 * height;
-        
+
 
         if (feature.orientation) {
             if (feature.orientation == '+') {
@@ -1250,7 +1250,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         if (stroke != 'none') {
             path.setAttribute("stroke-width", 1);
         }
-        
+
         path.setAttribute('d', 'M ' + ((minPos + lInset)) + ' ' + ((y+instep)) +
                           ' L ' + ((maxPos - rInset)) + ' ' + ((y+instep)) +
                           ' L ' + ((maxPos - rInset)) + ' ' + (y) +
@@ -1308,7 +1308,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     } else {
         // BOX plus other rectangular stuff
         // Also handles HISTOGRAM, GRADIENT, and TOOMANY.
-    
+
         var stroke = style.FGCOLOR || 'none';
         var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
         var height = style.HEIGHT || forceHeight || 12;
@@ -1369,7 +1369,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     ((loc.green * (1.0 - frac)) + (hic.green * frac))|0,
                     ((loc.blue * (1.0 - frac)) + (hic.blue * frac))|0
                 ).toSvgString();
-            } 
+            }
 
             if (gtype == 'HISTOGRAM') {
                 if (true) {
@@ -1386,7 +1386,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                     height = relScore * height;
                     y = y + (requiredHeight - height);
                 }
-                
+
                 quant = {
                     min: smin,
                     max: smax
@@ -1396,7 +1396,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
             minPos -= 0.25
             maxPos += 0.25;   // Fudge factor to mitigate pixel-jitter.
         }
- 
+
         // dlog('min=' + min + '; max=' + max + '; minPos=' + minPos + '; maxPos=' + maxPos);
 
         var rect = document.createElementNS(NS_SVG, 'rect');
@@ -1407,14 +1407,14 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         rect.setAttribute('stroke', stroke);
         rect.setAttribute('stroke-width', 1);
         rect.setAttribute('fill', fill);
-        
+
         if (feature.visualWeight && feature.visualWeight < 1.0) {
             rect.setAttribute('fill-opacity', feature.visualWeight);
             if (stroke != 'none') {
                 rect.setAttribute('stroke-opacity', feature.visualWeight);
             }
         }
-        
+
         if (gtype == 'TOOMANY') {
             var bits = [rect];
             for (var i = 3; i < height; i += 3) {
@@ -1480,7 +1480,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 min = Math.floor(min - (1 / scale))|0;
                 max = Math.ceil(max + (1/scale))|0;
             }
-            
+
             glyph = makeElementNS(NS_SVG, 'g', gg);
         } else {
             glyph = rect;
@@ -1540,7 +1540,7 @@ function labelGlyph(tier, dglyph, featureTier) {
             g.appendChild(labelText);
             dglyph.glyph = g;
             dglyph.height = dglyph.height + 20;
-            
+
             var textMax = (dglyph.min|0) + ((width + 10) / scale)
             if (textMax > dglyph.max) {
                 var adj = (textMax - dglyph.max)/2;

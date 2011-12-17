@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -68,7 +68,7 @@ Karyoscape.prototype.redraw = function() {
         if (!this.chrLen) {
             alert('Warning: insufficient data to set up spatial navigator');
             this.chrLen = 200000000;
-        } 
+        }
         this.karyos.push({
             min: 1,
             max: this.chrLen,
@@ -112,7 +112,7 @@ Karyoscape.prototype.redraw = function() {
 
         var pathopsT = 'M 0 10 L 0 0';
         var pathopsB = 'M 0 5 L 0 15';
-        
+
         var curx = 0;
         for (var ri = 0; ri < r.length; ++ri) {
             var rr = r[ri];
@@ -185,5 +185,5 @@ Karyoscape.prototype.setThumb = function() {
         this.thumb.setAttribute('x', gpos - 4);
     }
 }
-            
+
 

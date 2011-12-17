@@ -1,4 +1,4 @@
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -51,7 +51,7 @@ function DSlider(width, opts) {
             v = 0;
         } else if (v > this.width) {
             v = this.width;
-        } 
+        }
         value = v;
         this.handle.setAttribute('x', value - 4);
     }

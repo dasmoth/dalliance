@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -141,7 +141,7 @@ function makeElement(tag, children, attribs, styles)
             ele.appendChild(c);
         }
     }
-    
+
     if (attribs) {
         for (var l in attribs) {
             ele[l] = attribs[l];
@@ -170,7 +170,7 @@ function makeElementNS(namespace, tag, children, attribs)
             ele.appendChild(c);
         }
     }
-    
+
     setAttrs(ele, attribs);
     return ele;
 }
@@ -321,7 +321,7 @@ Awaited.prototype.await = function(f) {
 
 //
 // Missing APIs
-// 
+//
 
 if (!('trim' in String.prototype)) {
     String.prototype.trim = function() {

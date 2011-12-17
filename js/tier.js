@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -20,7 +20,7 @@ function DasTier(browser, source, viewport, background)
     this.background = background;
     this.req = null;
     this.layoutHeight = 25;
-    this.bumped = true; 
+    this.bumped = true;
     if (this.dasSource.collapseSuperGroups) {
         this.bumped = false;
     }
@@ -63,7 +63,7 @@ function DasTier(browser, source, viewport, background)
 
                 if (bwg.type == 'bigbed') {
                     thisTier.stylesheet = new DASStylesheet();
-                    
+
                     var wigStyle = new DASStyle();
                     wigStyle.glyph = 'BOX';
                     wigStyle.FGCOLOR = 'black';
@@ -81,7 +81,7 @@ function DasTier(browser, source, viewport, background)
                     wigStyle.BUMP = true;
                     wigStyle.ZINDEX = 20;
                     thisTier.stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
-                    
+
                     var tsStyle = new DASStyle();
                     tsStyle.glyph = 'BOX';
                     tsStyle.FGCOLOR = 'black';
@@ -119,7 +119,7 @@ function DasTier(browser, source, viewport, background)
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bamHolder.await(function(bam) {
                 thisTier.stylesheet = new DASStylesheet();
-                
+
                 var densStyle = new DASStyle();
                 densStyle.glyph = 'HISTOGRAM';
                 densStyle.COLOR1 = 'black';
@@ -174,7 +174,7 @@ function DasTier(browser, source, viewport, background)
             };
         }
     }
-    
+
     if (this.dasSource.mapping) {
         fs = new MappedFeatureSource(fs, this.browser.chains[this.dasSource.mapping]);
     }
@@ -281,7 +281,7 @@ DasTier.prototype.setStatus = function(status) {
 DasTier.prototype.viewFeatures = function(chr, min, max, scale, features, sequence) {
     this.currentFeatures = features;
     this.currentSequence = sequence;
-    
+
     this.knownChr = chr;
     this.knownStart = min; this.knownEnd = max;
     this.status = null; this.error = null;
@@ -304,7 +304,7 @@ DasTier.prototype.draw = function() {
     var features = this.currentFeatures;
     var seq = this.currentSequence;
     if (this.dasSource.tier_type === 'sequence') {
-        drawSeqTier(this, seq); 
+        drawSeqTier(this, seq);
     } else {
         drawFeatureTier(this);
     }
@@ -325,14 +325,14 @@ function zoomForScale(scale) {
 }
 
 
-DasTier.prototype.setBackground = function() {            
+DasTier.prototype.setBackground = function() {
 //    if (this.knownStart) {
 
     var ks = this.knownStart || -100000000;
     var ke = this.knownEnd || -100000001;
         this.background.setAttribute('x', (ks - this.browser.origin) * this.browser.scale);
         this.background.setAttribute('width', (ke - this.knownStart + 1) * this.browser.scale);
-//    }    
+//    }
 }
 
 DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
@@ -358,11 +358,11 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
                             bestFeature = f;
                         }
                     } else if (f.max < pos) {
-                        if (!bestFeature || f.max > bestFeature.max || 
+                        if (!bestFeature || f.max > bestFeature.max ||
                             (f.max == bestFeature.max && f.min < bestFeature.min) ||
                             (f.min == bestFeature.mmin && bestFeature.max >= pos)) {
                             bestFeature = f;
-                        } 
+                        }
                     }
                 } else {
                     if (fedge == 1 && f.min <= pos && f.max > pos) {

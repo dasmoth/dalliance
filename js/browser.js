@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -68,7 +68,7 @@ function Browser(opts) {
 
     this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
     this.minTierHeight = 25;
-    
+
     this.tabMargin = 120;
 
     this.browserLinks = {
@@ -115,7 +115,7 @@ function formatQuantLabel(v) {
 Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
     var labelWidth = this.tabMargin;
     var viewportBackground = document.createElementNS(NS_SVG, 'path');
-    viewportBackground.setAttribute('d', 'M 15 ' + 2 + 
+    viewportBackground.setAttribute('d', 'M 15 ' + 2 +
                                     ' L 10 ' + 7 +
                                     ' L 10 ' + 18 +
                                     ' L 15 ' + 22 +
@@ -135,7 +135,7 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
     if (tier.dasSource.collapseSuperGroups || tier.hasBumpedFeatures) {
         hasWidget = true;
         this.makeToggleButton(labelGroup, tier, 0);
-    } 
+    }
 
     if (tier.isQuantitative) {
         hasWidget = true;
@@ -188,7 +188,7 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
         var mqbb = minQ.getBBox();
         minQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
         minQ.setAttribute('y', (tier.clientMin|0) + (mqbb.height/2) - 4);
-                    
+
         var maxQ = makeElementNS(NS_SVG, 'text', formatQuantLabel(tier.max), {
             x: 80,
             y: (tier.clientMax|0),
@@ -201,10 +201,10 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
         mqbb = maxQ.getBBox();
         maxQ.setAttribute('x', this.tabMargin - mqbb.width - 7);
         maxQ.setAttribute('y', (tier.clientMax|0) + (mqbb.height/2) -1 );
-        
+
         var button = this.icons.createIcon('magnifier', labelGroup);
         button.setAttribute('transform', 'translate(' + (this.tabMargin - 18) + ', ' + ((tier.layoutHeight/2) - 8) + '), scale(0.6,0.6)');
-        
+
         // FIXME style-changes don't currently work because of the way icons get grouped.
         button.addEventListener('mouseover', function(ev) {
             button.setAttribute('fill', 'red');
@@ -212,7 +212,7 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
         button.addEventListener('mouseout', function(ev) {
             button.setAttribute('stroke', 'gray');
         }, false);
-                
+
         quantTools.appendChild(button);
         this.makeQuantConfigButton(quantTools, tier, 0);
         this.makeTooltip(quantTools, 'Click to adjust how this data is displayed');
@@ -248,12 +248,12 @@ Browser.prototype.arrangeTiers = function() {
     this.placards = [];
 
     var labelGroup = this.dasLabelHolder;
-        
+
     var clh = 50;
     for (ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         tier.y = clh;
-        
+
         if (!tier.isLabelValid) {
             if (tier.label) {
                 labelGroup.removeChild(tier.label);
@@ -264,7 +264,7 @@ Browser.prototype.arrangeTiers = function() {
         }
 
         this.xfrmTier(tier, this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale), -1);
-            
+
         if (tier.placard) {
             tier.placard.setAttribute('transform', 'translate(' + this.tabMargin + ', ' + (clh + tier.layoutHeight - 4) + ')');
             browserSvg.appendChild(tier.placard);
@@ -273,13 +273,13 @@ Browser.prototype.arrangeTiers = function() {
 
         clh += tier.layoutHeight;
     }
-        
+
     this.featureBackground.setAttribute('height', ((clh | 0) - 50));
 
     if (clh < 150) {
         clh = 150;
     }
-        
+
     if (this.browserFrameHeight != clh) {
         this.svgRoot.setAttribute("height", "" + ((clh | 0) + 10) + "px");
         this.svgBackground.setAttribute("height", "" + ((clh | 0) + 10));
@@ -318,7 +318,7 @@ Browser.prototype.tierInfoPopup = function(tier, ev) {
         for (var ri = 0; ri < srcs.length; ++ri) {
             var re = srcs[ri];
             if (re.uri == tier.dasSource.uri && re.source_uri) {
-                regel = makeElement('p', makeElement('a', 'Registry entry: ' + re.name, {href: 'http://www.dasregistry.org/showdetails.jsp?auto_id=' + re.source_uri, target: '_new'})); 
+                regel = makeElement('p', makeElement('a', 'Registry entry: ' + re.name, {href: 'http://www.dasregistry.org/showdetails.jsp?auto_id=' + re.source_uri, target: '_new'}));
                 break;
             }
         }
@@ -339,7 +339,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
     var targetTier;
     var clickTimeout = null;
     var tier = this.tiers[ti];
-    
+
     var moveHandler = function(ev) {
         var cly = ((ev.clientY + window.scrollY - dragOriginY) | 0) - 50;
         var destTier = 0;
@@ -352,7 +352,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             dragFeedbackRect.setAttribute('y', thisB.offsetForTier(targetTier) - 2);
         }
     };
-    
+
     var binned = false;
     var binEnterHandler = function(ev) {
         thisB.bin.setAttribute('stroke', 'red');
@@ -364,7 +364,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
         dragFeedbackRect.setAttribute('fill', 'red');
         binned = false;
     }
-    
+
     var upHandler = function(ev) {
         window.removeEventListener('mousemove', moveHandler, true);
         window.removeEventListener('mouseup', upHandler, true);
@@ -386,7 +386,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             // Nothing at all.
         } else {
             var newTiers = [];
-            
+
             var fromCnt = 0;
             if (targetTier > ti) {
                 --targetTier;
@@ -401,7 +401,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
                     ++fromCnt;
                 }
             }
-            
+
             thisB.tiers = newTiers;
             if (thisB.knownSpace) {
                 thisB.knownSpace.tierMap = thisB.tiers;
@@ -410,16 +410,16 @@ Browser.prototype.setupTierDrag = function(element, ti) {
                 thisB.tiers[nti].background.setAttribute("fill", thisB.tierBackgroundColors[nti % thisB.tierBackgroundColors.length]);
                 thisB.tiers[nti].isLabelValid = false;
             }
-            
+
             thisB.arrangeTiers();
             thisB.storeStatus();
         }
     }
-    
+
     element.addEventListener('mousedown', function(ev) {
         thisB.removeAllPopups();
         ev.stopPropagation(); ev.preventDefault();
-        
+
         var origin = thisB.svgHolder.getBoundingClientRect();
         dragOriginX = origin.left + window.scrollX; dragOriginY = origin.top + window.scrollY;
         window.addEventListener('mousemove', moveHandler, true);
@@ -435,7 +435,7 @@ Browser.prototype.setupTierDrag = function(element, ti) {
             fill: 'red',
             stroke: 'none'
         });
-        
+
         clickTimeout = setTimeout(function() {
             clickTimeout = null;
             // We can do all the setup on click, but don't show the feedback rectangle
@@ -503,7 +503,7 @@ Browser.prototype.refresh = function() {
     var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;
 
-    
+
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
     this.origin = newOrigin;
@@ -534,7 +534,7 @@ Browser.prototype.refresh = function() {
         }
         this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
-    
+
     var seg = this.knownSpace.bestCacheOverlapping(this.chr, innerDrawnStart, innerDrawnEnd);
     if (seg && seg.min <= innerDrawnStart && seg.max >= innerDrawnEnd) {
         this.drawnStart = Math.max(seg.min, outerDrawnStart);
@@ -585,7 +585,7 @@ Browser.prototype.mouseDownHandler = function(ev)
 
             var width = this.viewEnd - this.viewStart;
             this.setLocation(newMid - (width/2), newMid + (width/2));
-            
+
             var extraPix = this.featurePanelWidth - ((width+1)*this.scale);
             // alert(extraPix);
             if (Math.abs(extraPix) > 1) {
@@ -704,7 +704,7 @@ Browser.prototype.mouseUpHandler = function(ev) {
         var origin = svgHolder.getBoundingClientRect();
         var ppos = ev.clientX - origin.left - this.tabMargin;
         var spos = (((1.0*ppos)/this.scale) + this.viewStart)|0;
-        
+
         var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         var popup = makeElement('div', '' + spos, {}, {
             position: 'absolute',
@@ -729,7 +729,7 @@ Browser.prototype.mouseUpHandler = function(ev) {
         }
         window.addEventListener('mousemove', moveHandler, false);
     }
-    
+
     ev.stopPropagation(); ev.preventDefault();
 
     document.removeEventListener('mousemove', this.__mouseMoveHandler, true);
@@ -750,14 +750,14 @@ Browser.prototype.touchStartHandler = function(ev)
 {
     removeAllPopups();
     ev.stopPropagation(); ev.preventDefault();
-    
+
     this.touchOriginX = ev.touches[0].pageX;
 }
 
 Browser.prototype.touchMoveHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
-    
+
     var touchX = ev.touches[0].pageX;
     // dlog('tl=' + ev.touches.length + 'tx=' + touchX + '; ox=' + this.touchOriginX);
     if (this.touchOriginX && touchX != this.touchOriginX) {
@@ -833,7 +833,7 @@ Browser.prototype.realInit = function(opts) {
     var overrideSources;
     var reset = false;
     var qChr = null, qMin = null, qMax = null;
-    
+
     //
     // Configuration processing
     //
@@ -850,7 +850,7 @@ Browser.prototype.realInit = function(opts) {
             }
             queryDict[k] = v;
         }
-        
+
         reset = queryDict.reset;
     }
 
@@ -885,7 +885,7 @@ Browser.prototype.realInit = function(opts) {
             overrideSources = JSON.parse(maybeSourceConfig);
         }
     }
-    
+
     var region_exp = /([\d+,\w,\.,\_,\-]+):(\d+)[\-,\,](\d+)/;
 
     var queryRegion = false;
@@ -920,7 +920,7 @@ Browser.prototype.realInit = function(opts) {
         }
         queryRegion = true;
     }
-        
+
     if (qMax < qMin) {
         qMax = qMin + 10000;
     }
@@ -935,7 +935,7 @@ Browser.prototype.realInit = function(opts) {
     //
     // Set up the UI (factor out?)
     //
-           
+
     this.svgHolder = document.getElementById(this.pageName);
     this.svgRoot = makeElementNS(NS_SVG, 'svg', null, {
         version: '1.1',
@@ -973,10 +973,10 @@ Browser.prototype.realInit = function(opts) {
 
     this.svgBackground = makeElementNS(NS_SVG, 'rect', null,  {id: 'background', fill: 'white' /*'url(#bgpattern-' + this.pageName + ')' */});
     var main = makeElementNS(NS_SVG, 'g', this.svgBackground, {
-        fillOpacity: 1.0, 
-        stroke: 'black', 
-        strokeWidth: '0.1cm', 
-        fontFamily: 'helvetica', 
+        fillOpacity: 1.0,
+        stroke: 'black',
+        strokeWidth: '0.1cm',
+        fontFamily: 'helvetica',
         fontSize: '10pt'
     });
     this.svgRoot.appendChild(main);
@@ -1013,7 +1013,7 @@ Browser.prototype.realInit = function(opts) {
         ev.stopPropagation(); ev.preventDefault();
         var showing = savePopupHandle && savePopupHandle.displayed;
         thisB.removeAllPopups();
-        
+
         if (showing) {
             return;
         }
@@ -1040,7 +1040,7 @@ Browser.prototype.realInit = function(opts) {
         dallianceAnchor.setAttribute('x', saveWidth - daWidth - 60);
         saveRoot.appendChild(dallianceAnchor);
         // dallianceAnchor.setAttributeNS(NS_XLINK, 'xlink:href', 'http://www.biodalliance.org/');
-        
+
         var chrLabel = thisB.chr;
         if (chrLabel.indexOf('chr') < 0) {
             chrLabel = 'chr' + chrLabel;
@@ -1052,7 +1052,7 @@ Browser.prototype.realInit = function(opts) {
             strokeWidth: 0,
             fill: 'black',
             fontSize: '12pt'
-        })); 
+        }));
 
         saveRoot.appendChild(labelClip.cloneNode(true));
         saveRoot.appendChild(thisB.dasLabelHolder.cloneNode(true));
@@ -1097,7 +1097,7 @@ Browser.prototype.realInit = function(opts) {
     this.bin.setAttribute('transform', 'translate(10, 18)');
     main.appendChild(this.bin);
     this.makeTooltip(this.bin, 'Drag tracks here to discard');
-    
+
     this.featureClipRect = makeElementNS(NS_SVG, 'rect', null, {
         x: this.tabMargin,
         y: 50,
@@ -1114,7 +1114,7 @@ Browser.prototype.realInit = function(opts) {
     });
     var labelClip = makeElementNS(NS_SVG, 'clipPath', this.labelClipRect, {id: 'labelClip-' + this.pageName});
     main.appendChild(labelClip);
-    
+
     this.featureBackground = makeElementNS(NS_SVG, 'rect', null, {
         x: this.tabMargin,
         y: 50,
@@ -1131,10 +1131,10 @@ Browser.prototype.realInit = function(opts) {
     this.dasTierHolder.appendChild(dasTiers);
 
     this.makeHighlight();
-    
-    this.dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip-' + this.pageName + ')'}); 
+
+    this.dasLabelHolder = makeElementNS(NS_SVG, 'g', makeElementNS(NS_SVG, 'g', null, {id: 'dasLabels'}), {clipPath: 'url(#labelClip-' + this.pageName + ')'});
     main.appendChild(this.dasLabelHolder);
-    
+
     {
         var plusIcon = this.icons.createIcon('magnifier-plus', main);
         var minusIcon = this.icons.createIcon('magnifier-minus', main);
@@ -1190,20 +1190,20 @@ Browser.prototype.realInit = function(opts) {
         thisB.setLocation(newStart, newEnd);
     };
     main.appendChild(this.karyo.svg);
-    
+
     this.popupHolder = makeElementNS(NS_SVG, 'g');
     main.appendChild(this.popupHolder);
     this.hPopupHolder = makeElement('div');
     this.hPopupHolder.style['font-family'] = 'helvetica';
     this.hPopupHolder.style['font-size'] = '12pt';
     this.svgHolder.appendChild(this.hPopupHolder);
-  
+
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
         this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
     }
     this.svgHolder.appendChild(this.bhtmlRoot);
-    
+
     if (this.guidelineStyle == 'foreground') {
         this.fgGuide = document.createElementNS(NS_SVG, 'line');
         this.fgGuide.setAttribute('x1', 500);
@@ -1215,7 +1215,7 @@ Browser.prototype.realInit = function(opts) {
         this.fgGuide.setAttribute('pointer-events', 'none');
         main.appendChild(this.fgGuide);
     }
-    
+
     // set up the linker
 
     var linkPopupHandle;
@@ -1253,7 +1253,7 @@ Browser.prototype.realInit = function(opts) {
     this.regionLabel.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         var showing = navPopupHandle && navPopupHandle.displayed;
-        thisB.removeAllPopups(); 
+        thisB.removeAllPopups();
         if (showing) {
             return;
         }
@@ -1279,7 +1279,7 @@ Browser.prototype.realInit = function(opts) {
                     var dif = n0[idx] - n1[idx];
                     if (dif != 0) {
                         return dif;
-                    } 
+                    }
                 }
                 ++idx;
             }
@@ -1288,10 +1288,10 @@ Browser.prototype.realInit = function(opts) {
         var popup = makeElement('div');
         popup.style.padding = '5px';
         popup.style.paddingRight = '9px';
-       
+
         {
             var form = makeElement('form');
-            
+
             form.appendChild(document.createTextNode('Location:'));
             var locWarning = makeElement('div', null, {}, {'color': 'red'});
             form.appendChild(locWarning);
@@ -1318,12 +1318,12 @@ Browser.prototype.realInit = function(opts) {
                     nmin = nmin - (wid/2)|0;
                     nmax = nmin + wid;
                 }
-	        
+
                 if (nchr != thisB.chr) {
                     thisB.highlightMin = -1;
                     thisB.highlightMax = -1;
                 }
-                
+
                 try {
                     thisB.setLocation(nmin, nmax, nchr);
                     thisB.removeAllPopups();
@@ -1347,8 +1347,8 @@ Browser.prototype.realInit = function(opts) {
             geneForm.appendChild(makeElement('br'));
             geneForm.appendChild(makeElement('input', null, {type: 'submit', value: 'Go'}));
             popup.appendChild(geneForm);
-        
-        
+
+
             geneForm.addEventListener('submit', function(ev) {
                 ev.stopPropagation(); ev.preventDefault();
                 var g = geneInput.value;
@@ -1388,14 +1388,14 @@ Browser.prototype.realInit = function(opts) {
                         thisB.setLocation(min - padding, max + padding, nchr);
                     }
                 }, false);
-                
+
                 return false;
             }, false);
         }
 
     }, false);
 
-  
+
     var addPopupHandle;
     addButton.addEventListener('mousedown', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -1425,7 +1425,7 @@ Browser.prototype.realInit = function(opts) {
         thisB.highlightMin = thisB.highlightMax = -1;
         thisB.setLocation(thisB.defaultStart, thisB.defaultEnd, thisB.defaultChr);
     }, false);
-        
+
     this.tierHolder = dasTiers;
     this.tiers = [];
     if (overrideSources) {
@@ -1443,7 +1443,7 @@ Browser.prototype.realInit = function(opts) {
         this.makeTier(source);
     }
     thisB.arrangeTiers();
-    
+
     //
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
     //
@@ -1463,7 +1463,7 @@ Browser.prototype.realInit = function(opts) {
             this.highlightMin = qMin;  this.highlightMax = qMax;
         }
     }
-    
+
     if ((this.viewEnd - this.viewStart) > MAX_VIEW_SIZE) {
         var mid = ((this.viewEnd + this.viewStart) / 2)|0;
         this.viewStart = mid - (MAX_VIEW_SIZE/2);
@@ -1484,7 +1484,7 @@ Browser.prototype.realInit = function(opts) {
 
     this.makeZoomerTicks();
 
-    // 
+    //
     // Set up interactivity handlers
     //
 
@@ -1557,7 +1557,7 @@ Browser.prototype.realInit = function(opts) {
                 }
                 thisB.snapZoomLockout = true;
             }
-            ev.stopPropagation(); ev.preventDefault();      
+            ev.stopPropagation(); ev.preventDefault();
         } else if (ev.keyCode == 39 || ev.keyCode == 68) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
@@ -1613,7 +1613,7 @@ Browser.prototype.realInit = function(opts) {
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
-                              if (fedge) { 
+                              if (fedge) {
                                   if (nmin>pos+1) {
                                       nmax=nmin;
                                   } else {
@@ -1732,7 +1732,7 @@ Browser.prototype.realInit = function(opts) {
         window.addEventListener('keypress', keyHandler, false);
         thisB.svgRoot.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
-    
+
     // Low-priority stuff
     this.storeStatus();   // to make sure things like resets are permanent.
 
@@ -1804,7 +1804,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
             }
         }
     }
-            
+
     new DASRegistry(this.registry).sources(function(sources) {
         var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
@@ -1815,13 +1815,13 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
             var scoords = source.coords[0];
             if (scoords.taxon != coords.taxon || scoords.auth != coords.auth || scoords.version != coords.version) {
                 continue;
-            }   
+            }
             availableSources.push(source);
         }
 
         localStorage['dalliance.registry.' + cacheHash + '.sources'] = JSON.stringify(availableSources);
         localStorage['dalliance.registry.' + cacheHash + '.last_queried'] = '' + Date.now();
-        
+
         setSources(msh, availableSources, maybeMapping);
     }, function(error) {
         // msh.set(null);
@@ -1849,11 +1849,11 @@ Browser.prototype.realMakeTier = function(source) {
     viewportBackground.setAttribute('stroke-width', "0");
     viewport.appendChild(viewportBackground);
     viewport.setAttribute("transform", "translate(200, " + ((2 * 200) + 50) + ")");
-    
+
     var tier = new DasTier(this, source, viewport, viewportBackground);
     tier.init(); // fetches stylesheet
 
-    this.tierHolder.appendChild(viewport);    
+    this.tierHolder.appendChild(viewport);
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
     this.arrangeTiers();
@@ -1864,13 +1864,13 @@ Browser.prototype.removeTier = function(tier) {
     if (ti < 0) {
         return dlog("Couldn't find tier");
     }
-            
+
     var deadTier = this.tiers[ti];
     this.tierHolder.removeChild(deadTier.viewport);
     if (deadTier.label) {
         this.dasLabelHolder.removeChild(deadTier.label);
     }
-            
+
     this.tiers.splice(ti, 1);
     for (var nti = 0; nti < this.tiers.length; ++nti) {
         this.tiers[nti].background.setAttribute("fill", this.tierBackgroundColors[nti % this.tierBackgroundColors.length]);
@@ -1952,7 +1952,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     this.regionLabelMax = (width - this.zoomSlider.width - 120)
     var oldFPW = this.featurePanelWidth;
     this.featurePanelWidth = (width - this.tabMargin - 40)|0;
-    
+
     if (oldFPW != this.featurePanelWidth) {
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
@@ -1969,7 +1969,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
             this.viewStart = 1;
             this.viewEnd = this.viewStart + wid - 1;
         }
-    
+
         this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
         this.updateRegion();
         if (!skipRefresh) {
@@ -1981,7 +1981,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         this.fgGuide.setAttribute('x1', (this.featurePanelWidth/2) + this.tabMargin);
         this.fgGuide.setAttribute('x2', (this.featurePanelWidth/2) + this.tabMargin);
     }
-        
+
 
     for (var pi = 0; pi < this.placards.length; ++pi) {
         var placard = this.placards[pi];
@@ -2005,7 +2005,7 @@ Browser.prototype.xfrmTiers = function(x, xs) {
         this.highlight.setAttribute('transform', xfrm);
         this.highlight.setAttribute('x', (this.highlightMin - this.origin) * this.scale);
         this.highlight.setAttribute('width', (this.highlightMax - this.highlightMin + 1) * this.scale);
-    } 
+    }
 }
 
 Browser.prototype.jiggleLabels = function(tier) {
@@ -2018,12 +2018,12 @@ Browser.prototype.jiggleLabels = function(tier) {
             }
         }
 }
-        
+
 Browser.prototype.xfrmTier = function(tier, x , xs) {
     if (tier.originHaxx && tier.originHaxx != 0) {
         x -= ((1.0 * tier.originHaxx) * this.scale);
     }
-   
+
     var axs = xs;
     if (axs < 0) {
         axs = tier.scale;
@@ -2032,7 +2032,7 @@ Browser.prototype.xfrmTier = function(tier, x , xs) {
     }
 
     var y = tier.y;
-        
+
     if (x != tier.xfrmX || y != tier.xfrmY || axs != tier.xfrmS) {
         var xfrm = 'translate(' + x + ',' + tier.y + ')';
         if (axs != 1) {
@@ -2060,7 +2060,7 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
         this.refresh();
         return;
-    } 
+    }
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
     var minExtraW = (width * this.minExtra) | 0;
@@ -2085,7 +2085,7 @@ Browser.prototype.move = function(pos)
         this.viewStart = 1;
         this.viewEnd = this.viewStart + wid;
     }
-    
+
     this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
     this.updateRegion();
     this.karyo.update(this.chr, this.viewStart, this.viewEnd);
@@ -2111,7 +2111,7 @@ Browser.prototype.zoom = function(factor) {
     this.updateRegion();
 
     var width = this.viewEnd - this.viewStart + 1;
-    
+
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
     this.xfrmTiers(this.tabMargin - ((1.0 * (this.viewStart - this.origin)) * this.scale),  (this.scale / this.scaleAtLastRedraw));
 
