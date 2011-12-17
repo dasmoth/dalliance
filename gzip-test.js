@@ -35,7 +35,7 @@ function handle() {
 		nresult = new Uint8Array(jszlib_inflate_buffer(bb.buffer));
 	    }
 	    var afterNew = Date.now();
-	    
+
 	    dlog('NUncompress: ' + nresult.length);
 	    dlog('Nuncompress took: ' + (afterNew - beforeNew) + 'ms');
 	    var s = ''

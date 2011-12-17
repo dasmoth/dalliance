@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -13,7 +13,7 @@ var BIG_BED_MAGIC = -2021002517;
 var BIG_WIG_TYPE_GRAPH = 1;
 var BIG_WIG_TYPE_VSTEP = 2;
 var BIG_WIG_TYPE_FSTEP = 3;
-    
+
 function BigWig() {
 }
 
@@ -37,7 +37,7 @@ BigWig.prototype.readChromTree = function(callback) {
         var valSize = la[3];
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
-        
+
         // dlog('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
 
         var bptReadNode = function(offset) {
@@ -128,7 +128,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             var blockSpan = new Range(offset[i], Math.min(offset[i] + maxCirBlockSpan, thisB.cirTreeOffset + thisB.cirTreeLength));
             spans = spans ? union(spans, blockSpan) : blockSpan;
         }
-        
+
         var fetchRanges = spans.ranges();
         // dlog('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
@@ -201,7 +201,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             }
         }
     };
-    
+
 
     var cirCompleted = function() {
         blocksToFetch.sort(function(b0, b1) {
@@ -218,17 +218,17 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 if (!opts) {
                     opts = {};
                 }
-            
+
                 var f = new DASFeature();
                 f.segment = thisB.bwg.idsToChroms[chr];
                 f.min = fmin;
                 f.max = fmax;
                 f.type = 'bigwig';
-                
+
                 for (k in opts) {
                     f[k] = opts[k];
                 }
-                
+
                 features.push(f);
             };
             var maybeCreateFeature = function(fmin, fmax, opts) {
@@ -262,7 +262,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var maxVal    = fa[(i*8)+5];
                                 var sumData   = fa[(i*8)+6];
                                 var sumSqData = fa[(i*8)+7];
-                                
+
                                 if (chromId == chr) {
                                     var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
                                     if (thisB.bwg.type == 'bigbed') {
@@ -285,7 +285,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             var itemCount = sa[11];
 
                             // dlog('processing bigwig block, type=' + blockType + '; count=' + itemCount);
-                            
+
                             if (blockType == BIG_WIG_TYPE_FSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var score = fa[i + 6];
@@ -328,7 +328,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 }
 
                                 var featureOpts = {};
-                                
+
                                 var bedColumns = rest.split('\t');
                                 if (bedColumns.length > 0) {
                                     featureOpts.label = bedColumns[0];
@@ -359,7 +359,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     var blockCount = bedColumns[6]|0;
                                     var blockSizes = bedColumns[7].split(',');
                                     var blockStarts = bedColumns[8].split(',');
-                                    
+
                                     featureOpts.type = 'bb-transcript'
                                     var grp = new DASGroup();
                                     grp.id = bedColumns[0];
@@ -388,7 +388,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                             spans = span;
                                         }
                                     }
-                                    
+
                                     var tsList = spans.ranges();
                                     for (var s = 0; s < tsList.length; ++s) {
                                         var ts = tsList[s];
@@ -427,7 +427,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             var bi = 0;
                             while (offset < fetchSize) {
                                 var fb = blocksToFetch[bi];
-                            
+
                                 var data;
                                 if (thisB.bwg.uncompressBufSize > 0) {
                                     // var beforeInf = Date.now();
@@ -440,7 +440,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     data = tmp.buffer;
                                 }
                                 fb.data = data;
-                                
+
                                 offset += fb.size;
                                 ++bi;
                             }
@@ -503,7 +503,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             var blockSpan = new Range(offset[i], Math.min(offset[i] + maxCirBlockSpan, thisB.cirTreeOffset + thisB.cirTreeLength));
             spans = spans ? union(spans, blockSpan) : blockSpan;
         }
-        
+
         var fetchRanges = spans.ranges();
         // dlog('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
@@ -520,7 +520,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 
 // This is now handled in URLFetchable instead.
 //
-//            if (resultBuffer.byteLength != length) {           
+//            if (resultBuffer.byteLength != length) {
 //                dlog("Didn't get expected size: " + resultBuffer.byteLength + " != " + length);
 //                return cirFobStartFetch(offset, fr, level, attempts + 1);
 //            }
@@ -606,12 +606,12 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             }
         }
     };
-    
+
 
     var cirCompleted = function() {
         if (blockToFetch == null) {
             return dlog('got nothing');
-        } 
+        }
         var blocksToFetch = [blockToFetch];
 
         blocksToFetch.sort(function(b0, b1) {
@@ -630,17 +630,17 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 if (!opts) {
                     opts = {};
                 }
-            
+
                 var f = new DASFeature();
                 f.segment = thisB.bwg.idsToChroms[chrx];
                 f.min = fmin;
                 f.max = fmax;
                 f.type = 'bigwig';
-                
+
                 for (k in opts) {
                     f[k] = opts[k];
                 }
-                
+
                 if (bestFeature == null || ((dir < 0) && (chrx > bestChr || fmax > bestPos)) || ((dir > 0) && (chrx < bestChr || fmin < bestPos))) {
                     bestFeature = f;
                     bestPos = (dir < 0) ? fmax : fmin;
@@ -681,7 +681,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                 var maxVal    = fa[(i*8)+5];
                                 var sumData   = fa[(i*8)+6];
                                 var sumSqData = fa[(i*8)+7];
-                                
+
                                 var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
                                 if (thisB.bwg.type == 'bigbed') {
                                     summaryOpts.type = 'density';
@@ -702,7 +702,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                             var itemCount = sa[11];
 
                             // dlog('processing bigwig block, type=' + blockType + '; count=' + itemCount);
-                            
+
                             if (blockType == BIG_WIG_TYPE_FSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var score = fa[i + 6];
@@ -745,7 +745,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                 }
 
                                 var featureOpts = {};
-                                
+
                                 var bedColumns = rest.split('\t');
                                 if (bedColumns.length > 0) {
                                     featureOpts.label = bedColumns[0];
@@ -778,7 +778,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                             var bi = 0;
                             while (offset < fetchSize) {
                                 var fb = blocksToFetch[bi];
-                            
+
                                 var data;
                                 if (thisB.bwg.uncompressBufSize > 0) {
                                     // var beforeInf = Date.now()
@@ -791,7 +791,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                     data = tmp.buffer;
                                 }
                                 fb.data = data;
-                                
+
                                 offset += fb.size;
                                 ++bi;
                             }
@@ -880,7 +880,7 @@ function makeBwg(data, callback, name) {
         bwg.asOffset = (la[9] << 32) | (la[10]);    // 36 (unaligned longlong)
         bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
         bwg.uncompressBufSize = la[13];  // 52
-         
+
         // dlog('bigType: ' + bwg.type);
         // dlog('chromTree at: ' + bwg.chromTreeOffset);
         // dlog('uncompress: ' + bwg.uncompressBufSize);

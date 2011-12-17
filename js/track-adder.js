@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -85,9 +85,9 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(binButton);
     activateButton(addModeButtons, regButton);
     popup.appendChild(makeElement('div', addModeButtons), null);
-    
+
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
-    
+
     var addButtons = [];
     var custURL, custName, custCS, custQuant, custFile;
     var customMode = false;
@@ -98,7 +98,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             doAdd();
             return false;
-    }, true); 
+    }, true);
     var stabHolder = document.createElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'auto';
@@ -117,7 +117,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         __mapping = mapping;
         __sourceHolder = msources;
         __sourceHolder.addListenerAndFire(makeStabObserver);
-       
+
     }
 
     makeStabObserver = function(msources) {
@@ -136,7 +136,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         for (var i = 0; i < msources.length; ++i) {
             sources.push(msources[i]);
         }
-        
+
         sources.sort(function(a, b) {
             return a.name.toLowerCase().trim().localeCompare(b.name.toLowerCase().trim());
         });
@@ -177,7 +177,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         stabHolder.appendChild(stab);
     };
-    
+
 
     regButton.addEventListener('mousedown', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -218,14 +218,14 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(document.createTextNode('File: '));
             custFile = makeElement('input', null, {type: 'file'});
             stabHolder.appendChild(custFile);
-            
+
 
             stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
         } else {
             stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
             stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
         }
-        
+
     }
 
     custButton.addEventListener('mousedown', function(ev) {
@@ -243,7 +243,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         var customForm = makeElement('div');
         customForm.appendChild(makeElement('h2', 'Add custom DAS data'));
         customForm.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
-                
+
         customForm.appendChild(document.createTextNode('URL: '));
         customForm.appendChild(makeElement('br'));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
@@ -299,7 +299,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (customMode === 'reset') {
                 switchToCustomMode();
             } else if (customMode === 'reset-bin') {
-                switchToBinMode(); 
+                switchToBinMode();
             } else if (customMode === 'prompt-bai') {
                 var fileList = custFile.files;
                 if (fileList && fileList.length > 0 && fileList[0]) {
@@ -395,7 +395,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             function(sources) {
                 if (!sources || sources.length == 0) {
                     return sqfail();
-                } 
+                }
 //                dlog('got ' + sources.length + ' sources');
 
                 var fs = null;
@@ -424,7 +424,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                         nds.capabilities = fs.capabilities;
                     }
                     quantDetermined = true
-                    
+
                     if (fs.coords && fs.coords.length == 1) {
                         var coords = fs.coords[0];
                         if (coordsMatch(coords, thisB.coordSystem)) {
@@ -438,7 +438,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                             }
                         }
                     }
-                    
+
                 }
                 return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
             },
@@ -542,7 +542,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     nds.bamBlob = nds.bwgBlob;
                     nds.bwgURI = undefined;
                     nds.bwgBlob = undefined;
-                            
+
                     return addDasCompletionPage(nds, false, false, true);
                 } else {
                     return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
@@ -559,7 +559,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = 'reset-bin';
         return;
     }
-                     
+
     var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('h2', 'Add custom data: step 2'));

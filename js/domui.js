@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -158,7 +158,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
             window.addEventListener('mousemove', moveHandler, false);
             window.addEventListener('mouseup', upHandler, false);
         }, false);
-                              
+
 
         popup.appendChild(tbar);
     }
@@ -224,7 +224,7 @@ IconSet.prototype.createButton = function(name, parent, bx, by)
             fill: 'rgb(230,230,250)',
             stroke: 'rgb(150,150,220)',
             strokeWidth: 2
-        }), 
+        }),
         copy ]);
     return button;
 }

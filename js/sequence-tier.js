@@ -1,4 +1,4 @@
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -67,7 +67,7 @@ function drawSeqTier(tier, seq)
     }
     featureGroupElement.appendChild(tier.background);
     drawGuidelines(tier, featureGroupElement);
-    
+
     var tile = tileSizeForScale(scale);
     var pos = Math.max(0, ((knownStart / tile)|0) * tile);
 
@@ -75,7 +75,7 @@ function drawSeqTier(tier, seq)
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
         seqTierMax = currentSeqMax;
     }
-        
+
     var height = 35;
     var drawCheckers = false;
     if (seq && seq.seq) {
@@ -85,7 +85,7 @@ function drawSeqTier(tier, seq)
             if (!color) {
                 color = 'gray';
             }
-            
+
             if (scale >= 8) {
                 var labelText = document.createElementNS(NS_SVG, "text");
                 labelText.setAttribute("x", ((i - origin) * scale));
@@ -122,7 +122,7 @@ function drawSeqTier(tier, seq)
             rect.setAttribute('stroke-width', 1);
             featureGroupElement.appendChild(rect);
         }
-        
+
         if ((pos / tile) % 2 == 0) {
             var fudge = 0;
             if (!drawCheckers) {
@@ -147,7 +147,7 @@ function drawSeqTier(tier, seq)
             labelText.appendChild(document.createTextNode('' + pos));
             featureGroupElement.appendChild(labelText);
         }
-             
+
         pos += tile;
     }
 

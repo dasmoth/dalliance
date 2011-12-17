@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -30,7 +30,7 @@ function makeTwoBit(fetchable, cnt) {
         if (version != 0) {
             return cnt(null, 'Unsupported version ' + version);
         }
-        
+
         tb.seqCount = readInt(ba, 8);
         tb.seqDict = {};
         var p = 16;
@@ -137,7 +137,7 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
                     nSpans = intr.ranges();
                 }
             }
-            
+
             var seqstr = '';
             var ptr = min;
             function fillSeq(fsm) {
@@ -159,7 +159,7 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
                     ++ptr;
                 }
             }
-            
+
             for (var b = 0; b < nSpans.length; ++b) {
                 var nb = nSpans[b];
                 if (ptr > nb.min()) {

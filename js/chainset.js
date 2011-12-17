@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -152,8 +152,8 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
                 cpos = c.destMax - pos;
             } else {
                 cpos = pos - c.destMin;
-            }    
-            
+            }
+
             var blocks = c.blocks;
             for (var bi = 0; bi < blocks.length; ++bi) {
                 var b = blocks[bi];

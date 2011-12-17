@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -20,7 +20,7 @@ Browser.prototype.makeQuantConfigButton = function(quantTools, tier, ypos) {
         form.appendChild(makeElement('tr', [makeElement('td', 'Min:'), makeElement('td', minInput)]));
         var maxInput = makeElement('input', '', {value: tier.max});
         form.appendChild(makeElement('tr', [makeElement('td', 'Max:'), makeElement('td', maxInput)]));
-        
+
         var updateButton = makeElement('div', 'Update');
         updateButton.style.backgroundColor = 'rgb(230,230,250)';
         updateButton.style.borderStyle = 'solid';

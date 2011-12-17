@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -124,7 +124,7 @@ function intersection(s0, s1) {
             ++i0;
         }
     }
-    
+
     if (or.length == 0) {
         return null; // FIXME
     } else if (or.length == 1) {

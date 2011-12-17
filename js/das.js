@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -84,12 +84,12 @@ DASSource.prototype.entryPoints = function(callback) {
             }
 
                 var entryPoints = new Array();
-                
+
                 var segs = responseXML.getElementsByTagName('SEGMENT');
                 for (var i = 0; i < segs.length; ++i) {
                     var seg = segs[i];
                     var segId = seg.getAttribute('id');
-                    
+
                     var segSize = seg.getAttribute('size');
                     var segMin, segMax;
                     if (segSize) {
@@ -103,9 +103,9 @@ DASSource.prototype.entryPoints = function(callback) {
                         segDesc = seg.firstChild.nodeValue;
                     }
                     entryPoints.push(new DASSegment(segId, segMin, segMax, segDesc));
-                }          
+                }
                callback(entryPoints);
-    });         
+    });
 }
 
 //
@@ -129,7 +129,7 @@ DASSource.prototype.sequence = function(segment, callback) {
             return;
         } else {
                 var seqs = new Array();
-                
+
                 var segs = responseXML.getElementsByTagName('SEQUENCE');
                 for (var i = 0; i < segs.length; ++i) {
                     var seg = segs[i];
@@ -155,7 +155,7 @@ DASSource.prototype.sequence = function(segment, callback) {
                     }
                     seqs.push(new DASSequence(segId, segMin, segMax, segAlpha, segSeq));
                 }
-                
+
                 callback(seqs);
         }
     });
@@ -217,11 +217,11 @@ DASSource.prototype.features = function(segment, options, callback) {
                 }
             }
         }
-        
+
         if (options.maxbins) {
             filters.push('maxbins=' + options.maxbins);
         }
-        
+
         if (filters.length > 0) {
             dasURI = this.uri + 'features?' + filters.join(';');
         } else {
@@ -230,7 +230,7 @@ DASSource.prototype.features = function(segment, options, callback) {
     } else {
         dasURI = this.uri;
     }
-   
+
     // dlog(dasURI);
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
@@ -263,12 +263,12 @@ DASSource.prototype.features = function(segment, options, callback) {
                 min: segmentXML.getAttribute('start'),
                 max: segmentXML.getAttribute('stop')
             };
-            
+
             var featureXMLs = segmentXML.getElementsByTagName('FEATURE');
             for (var i = 0; i < featureXMLs.length; ++i) {
                 var feature = featureXMLs[i];
                 var dasFeature = new DASFeature();
-                
+
                 dasFeature.segment = segmentID;
                 dasFeature.id = feature.getAttribute('id');
                 dasFeature.label = feature.getAttribute('label');
@@ -296,7 +296,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 if (!dasFeature.type && dasFeature.typeId) {
                     dasFeature.type = dasFeature.typeId; // FIXME?
                 }
-                
+
                 dasFeature.method = elementValue(feature, "METHOD");
                 {
                     var ori = elementValue(feature, "ORIENTATION");
@@ -308,7 +308,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                 dasFeature.score = elementValue(feature, "SCORE");
                 dasFeature.links = dasLinksOf(feature);
                 dasFeature.notes = dasNotesOf(feature);
-                
+
                 var groups = feature.getElementsByTagName("GROUP");
                 for (var gi  = 0; gi < groups.length; ++gi) {
                     var groupXML = groups[gi];
@@ -340,7 +340,7 @@ DASSource.prototype.features = function(segment, options, callback) {
                         }
                     }
                 }
-                
+
                 {
                     var pec = feature.getElementsByTagName('PART');
                     if (pec.length > 0) {
@@ -361,11 +361,11 @@ DASSource.prototype.features = function(segment, options, callback) {
                         dasFeature.parents = parents;
                     }
                 }
-                
+
                 features.push(dasFeature);
             }
         }
-                
+
         callback(features, undefined, segmentMap);
     });
 }
@@ -401,7 +401,7 @@ DASSource.prototype.alignments = function(segment, options, callback) {
                 };
                 ali.objects[obj.id] = obj;
             }
-            
+
             var blockXMLs = aliXML.getElementsByTagName('block');
             for (var bi = 0; bi < blockXMLs.length; ++bi) {
                 var blockXML = blockXMLs[bi];
@@ -422,8 +422,8 @@ DASSource.prototype.alignments = function(segment, options, callback) {
                     block.segments.push(seg);
                 }
                 ali.blocks.push(block);
-            }       
-                    
+            }
+
             alignments.push(ali);
         }
         callback(alignments);
@@ -485,14 +485,14 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
         if (!responseXML) {
             if (failureCB) {
                 failureCB();
-            } 
+            }
             return;
         }
         var stylesheet = new DASStylesheet();
         var typeXMLs = responseXML.getElementsByTagName('TYPE');
         for (var i = 0; i < typeXMLs.length; ++i) {
             var typeStyle = typeXMLs[i];
-            
+
             var filter = {};
             filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
             filter.label = typeStyle.getAttribute('label');
@@ -505,7 +505,7 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
                 var style = new DASStyle();
                 style.glyph = glyph.localName;
                 var child = glyph.firstChild;
-        
+
                 while (child) {
                     if (child.nodeType == Node.ELEMENT_NODE) {
                         // alert(child.localName);
@@ -522,13 +522,13 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
 
 //
 // sources command
-// 
+//
 
 function DASRegistry(uri, opts)
 {
     opts = opts || {};
     this.uri = uri;
-    this.opts = opts;   
+    this.opts = opts;
 }
 
 DASRegistry.prototype.sources = function(callback, failure, opts)
@@ -558,7 +558,7 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
             return;
         }
 
-        var sources = [];       
+        var sources = [];
         var sourceXMLs = responseXML.getElementsByTagName('SOURCE');
         for (var si = 0; si < sourceXMLs.length; ++si) {
             var sourceXML = sourceXMLs[si];
@@ -578,13 +578,13 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
                 coord.version = coordXML.getAttribute('version');
                 coords.push(coord);
             }
-            
+
             var caps = [];
             var capXMLs = versionXML.getElementsByTagName('CAPABILITY');
             var uri;
             for (var ci = 0; ci < capXMLs.length; ++ci) {
                 var capXML = capXMLs[ci];
-                
+
                 caps.push(capXML.getAttribute('type'));
 
                 if (capXML.getAttribute('type') == 'das1:features') {
@@ -598,7 +598,7 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
             for (var pi = 0; pi < propXMLs.length; ++pi) {
                 pusho(props, propXMLs[pi].getAttribute('name'), propXMLs[pi].getAttribute('value'));
             }
-            
+
             if (uri) {
                 var source = new DASSource(uri, {
                     source_uri: sourceXML.getAttribute('uri'),
@@ -611,7 +611,7 @@ DASRegistry.prototype.sources = function(callback, failure, opts)
                 sources.push(source);
             }
         }
-        
+
         callback(sources);
     });
 }
@@ -638,7 +638,7 @@ function childElementOf(element)
         do {
             if (child.nodeType == Node.ELEMENT_NODE) {
                 return child;
-            } 
+            }
             child = child.nextSibling;
         } while (child != null);
     }
@@ -656,7 +656,7 @@ function dasLinksOf(element)
             links.push(new DASLink(linkXML.firstChild ? linkXML.firstChild.nodeValue : 'Unknown', linkXML.getAttribute('href')));
         }
     }
-    
+
     return links;
 }
 
