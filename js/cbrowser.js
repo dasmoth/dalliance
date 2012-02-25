@@ -59,7 +59,7 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
+    this.tierBackgroundColors = ["rgb(245,245,245)", 'white' /* , "rgb(230,230,250)" */];
     this.minTierHeight = 25;
     
     this.tabMargin = 120;
