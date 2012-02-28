@@ -231,10 +231,8 @@ DASSource.prototype.features = function(segment, options, callback) {
         dasURI = this.uri;
     }
    
-    // dlog(dasURI);
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
-
         if (!responseXML) {
             var msg;
             if (req.status == 0) {
@@ -672,7 +670,7 @@ function dasNotesOf(element)
     return notes;
 }
 
-function doCrossDomainRequest(url, handler, credentials) {
+function doCrossDomainRequest(url, handler, credentials, custAuth) {
     // TODO: explicit error handlers?
 
     if (window.XDomainRequest) {
@@ -690,7 +688,7 @@ function doCrossDomainRequest(url, handler, credentials) {
 
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
-              if (req.status == 200 || req.status == 0) {
+              if (req.status >= 200 || req.status == 0) {
                   handler(req.responseXML, req);
               }
             }
@@ -699,10 +697,17 @@ function doCrossDomainRequest(url, handler, credentials) {
         if (credentials) {
             req.withCredentials = true;
         }
+        if (custAuth) {
+            req.setRequestHeader('X-DAS-Authorisation', custAuth);
+        }
         req.send('');
     }
 }
 
 DASSource.prototype.doCrossDomainRequest = function(url, handler) {
-    return doCrossDomainRequest(url, handler, this.credentials);
+    var custAuth;
+    if (this.xUser) {
+        custAuth = 'Basic ' + btoa(this.xUser + ':' + this.xPass);
+    }
+    return doCrossDomainRequest(url, handler, this.credentials, custAuth);
 }
