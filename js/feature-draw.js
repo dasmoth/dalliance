@@ -235,13 +235,15 @@ DasTier.prototype.paint = function() {
 	return;
     }
 
-    var fpw = this.browser.featurePanelWidth;
+    var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
 
     var lh = MIN_PADDING;
     for (var s = 0; s < subtiers.length; ++s) {
 	lh = lh + subtiers[s].height + MIN_PADDING;
     }
     this.viewport.setAttribute('height', lh);
+    this.viewport.style.left = '-1000px';
+    this.norigin = (this.browser.viewStart + this.browser.viewEnd)/2;
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = this.background;
@@ -249,7 +251,7 @@ DasTier.prototype.paint = function() {
     gc.restore();
 
     gc.save();
-    var offset = (this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale;
+    var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
     gc.translate(offset, MIN_PADDING);
    
     for (var s = 0; s < subtiers.length; ++s) {

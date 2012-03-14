@@ -9,7 +9,7 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, background)
+function DasTier(browser, source, viewport, holder, background)
 {
     var thisTier = this;
 
@@ -17,6 +17,7 @@ function DasTier(browser, source, viewport, background)
     this.browser = browser;
     this.dasSource = new DASSource(source);
     this.viewport = viewport;
+    this.holder = holder;
     this.background = background;
     this.req = null;
     this.layoutHeight = 25;
