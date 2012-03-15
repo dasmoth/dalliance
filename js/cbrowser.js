@@ -59,7 +59,7 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)"];
+    this.tierBackgroundColors = ["rgb(245,245,245)", 'white' /* , "rgb(230,230,250)" */];
     this.minTierHeight = 25;
     
     this.tabMargin = 120;
@@ -113,6 +113,8 @@ Browser.prototype.realInit = function() {
     // Dimension stuff
 
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
+    this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
     // Event handlers
 
@@ -273,7 +275,6 @@ Browser.prototype.realInit = function() {
             var nz = thisB.zoomSliderValue;
             if (nz != oz) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-//                thisB.scheduleRefresh(500);
             }
         } else if (ev.charCode == 45) {
             ev.stopPropagation(); ev.preventDefault();
@@ -283,7 +284,6 @@ Browser.prototype.realInit = function() {
             var nz = thisB.zoomSliderValue;
             if (nz != oz) {
                 thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-//                thisB.scheduleRefresh(500);
             }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) {
             ev.stopPropagation(); ev.preventDefault();
@@ -425,8 +425,9 @@ Browser.prototype.touchCancelHandler = function(ev) {
 Browser.prototype.makeTier = function(source) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
-    var viewport = makeElement('canvas', null, {width: '' + this.featurePanelWidth, height: "50"}, {padding: '0px', margin: '1px', border: '1px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ borderBottomStyle: 'solid', borderBottomColor: 'rgb(180,180,180)', borderRightStyle: 'solid', borderRightColor: 'rgb(180,180,180)'});
-    var tier = new DasTier(this, source, viewport);
+    var viewport = makeElement('canvas', null, {width: '' + ((this.featurePanelWidth|0) + 2000), height: "50"}, {position: 'relative', padding: '0px', margin: '0px', border: '0px', left: '-1000px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ borderBottomStyle: 'solid', borderBottomColor: 'rgb(180,180,180)', borderRightStyle: 'solid', borderRightColor: 'rgb(180,180,180)'});
+    var vph = makeElement('div', viewport, {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '1px', borderStyle: 'solid'});
+    var tier = new DasTier(this, source, viewport, vph);
     tier.background = background;
     
     viewport.addEventListener('mousedown', function(ev) {
@@ -472,7 +473,7 @@ Browser.prototype.makeTier = function(source) {
     label.style['display'] = 'inline-block';
     label.style['background'] = background;
     label.style['vertical-align'] = 'top';
-    this.tierHolder.appendChild(makeElement('div', [label, viewport], {}, {margin: '-2px'}));    
+    this.tierHolder.appendChild(makeElement('div', [label, vph], {} /*, {margin: '-2px'} */));    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
     this.arrangeTiers();
@@ -492,8 +493,10 @@ Browser.prototype.arrangeTiers = function() {
 
 Browser.prototype.refresh = function() {
     var width = (this.viewEnd - this.viewStart) + 1;
-    var minExtraW = (width * this.minExtra) | 0;
-    var maxExtraW = (width * this.maxExtra) | 0;
+    /* var minExtraW = (width * this.minExtra) | 0;
+    var maxExtraW = (width * this.maxExtra) | 0;*/
+    var minExtraW = (100.0/this.scale)|0;
+    var maxExtraW = (1000.0/this.scale)|0;
 
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
@@ -533,7 +536,8 @@ Browser.prototype.refresh = function() {
         this.drawnStart = outerDrawnStart;
         this.drawnEnd = outerDrawnEnd;
     }
-
+    
+    // dlog('ref ' + this.chr + ':' + this.drawnStart + '..' + this.drawnEnd);
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
 }
 
@@ -556,9 +560,20 @@ Browser.prototype.move = function(pos)
         this.viewEnd = this.viewStart + wid;
     }
     
+    var viewCenter = (this.viewStart + this.viewEnd)/2;
+    
+    for (var i = 0; i < this.tiers.length; ++i) {
+        var offset = (viewCenter - this.tiers[i].norigin)*this.scale;
+	this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+    }
+
+    /*
+    
     for (var i = 0; i < this.tiers.length; ++i) {
 	this.tiers[i].paint();
     }
+
+    */
 
 /*    this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
     this.updateRegion();
@@ -601,8 +616,11 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     } 
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
-    var minExtraW = (width * this.minExtra) | 0;
-    var maxExtraW = (width * this.maxExtra) | 0;
+    // var minExtraW = (width * this.minExtra) | 0;
+    // var maxExtraW = (width * this.maxExtra) | 0;
+    var minExtraW = (100.0/this.scale)|0;
+    var maxExtraW = (1000.0/this.scale)|0;
+
     if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
         this.refresh();
     }
@@ -634,13 +652,13 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
 
     var oldFPW = this.featurePanelWidth;
-    this.featurePanelWidth = (width - this.tabMargin - 40)|0;
+    this.featurePanelWidth = (width - this.tabMargin - 50)|0;
     
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
-            tier.viewport.setAttribute('width', '' + this.featurePanelWidth);
-            tier.paint();
+            tier.holder.style.width = '' + this.featurePanelWidth + 'px';
+            // tier.paint();
         }
 
         var viewWidth = this.viewEnd - this.viewStart;
