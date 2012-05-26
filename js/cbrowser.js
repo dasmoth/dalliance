@@ -17,6 +17,8 @@ function Browser(opts) {
     this.sources = [];
     this.tiers = [];
 
+    this.featureListeners = [];
+
     this.cookieKey = 'browser';
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
     this.registry = 'http://www.dasregistry.org/das/sources';
@@ -488,7 +490,14 @@ Browser.prototype.makeTier = function(source) {
         }
 
         if (hit) {
-            thisB.featurePopup(ev, hit);
+            for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
+                try {
+                    thisB.featureListeners[fli](ev, hit);
+                } catch (ex) {
+                    console.log(ex);
+                }
+            }
+            // thisB.featurePopup(ev, hit);
         }
     }, false);
 
@@ -756,4 +765,9 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     // this.updateRegion();
     // this.karyo.update(this.chr, this.viewStart, this.viewEnd);
     this.spaceCheck();
+}
+
+Browser.prototype.addFeatureListener = function(handler, opts) {
+    opts = opts || {};
+    this.featureListeners.push(handler);
 }
