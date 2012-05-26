@@ -117,6 +117,8 @@ Browser.prototype.realInit = function() {
     this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
+
+
     // Event handlers
 
     this.tierHolder.addEventListener('mousewheel', function(ev) {   // FIXME does this need to be on the document?
@@ -369,6 +371,28 @@ Browser.prototype.realInit = function() {
     }
     thisB.arrangeTiers();
     thisB.refresh();
+
+    var epSource;
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var s = this.tiers[ti].dasSource;
+        if (s.provides_entrypoints) {
+            epSource = this.tiers[ti].dasSource;
+            break;
+        }
+    }
+    if (epSource) {
+        epSource.entryPoints(
+            function(ep) {
+                thisB.entryPoints = ep;
+                for (var epi = 0; epi < thisB.entryPoints.length; ++epi) {
+                    if (thisB.entryPoints[epi].name == thisB.chr) {
+                        thisB.currentSeqMax = thisB.entryPoints[epi].end;
+                        break;
+                    }
+                }
+            }
+        );
+    }
 }
 
 // 
@@ -411,6 +435,8 @@ Browser.prototype.touchMoveHandler = function(ev)
         }
         this.zoomLastSep = sep;
     }
+
+
 }
 
 Browser.prototype.touchEndHandler = function(ev)
