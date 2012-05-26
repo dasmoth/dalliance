@@ -396,6 +396,8 @@ Browser.prototype.realInit = function() {
             }
         );
     }
+
+    this.queryRegistry();
 }
 
 // 
@@ -613,6 +615,69 @@ Browser.prototype.refresh = function() {
     this.drawOverlays();
 }
 
+function setSources(msh, availableSources, maybeMapping) {
+    if (maybeMapping) {
+        for (var s = 0; s < availableSources.length; ++s) {
+            availableSources[s].mapping = maybeMapping;
+        }
+    }
+    msh.set(availableSources);
+}
+
+Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
+    var thisB = this;
+    var coords, msh;
+    if (maybeMapping) {
+        coords = this.chains[maybeMapping].coords;
+        if (!thisB.mappableSources[maybeMapping]) {
+            thisB.mappableSources[maybeMapping] = new Observed();
+        }
+        msh = thisB.mappableSources[maybeMapping];
+    } else {
+        coords = this.coordSystem;
+        msh = this.availableSources;
+    }
+    var cacheHash = hex_sha1(miniJSONify(coords));
+    if (tryCache) {
+        var cacheTime = localStorage['dalliance.registry.' + cacheHash + '.last_queried'];
+        if (cacheTime) {
+            try {
+                setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
+                var cacheAge = (Date.now()|0) - (cacheTime|0);
+                if (cacheAge < (12 * 60 * 60 * 1000)) {
+                    // alert('Using cached registry data');
+                    return;
+                } else {
+                    // alert('Registry data is stale, refetching');
+                }
+            } catch (rex) {
+                dlog('Bad registry cache: ' + rex);
+            }
+        }
+    }
+            
+    new DASRegistry(this.registry).sources(function(sources) {
+        var availableSources = [];
+        for (var s = 0; s < sources.length; ++s) {
+            var source = sources[s];
+            if (!source.coords || source.coords.length == 0) {
+                continue;
+            }
+            var scoords = source.coords[0];
+            if (scoords.taxon != coords.taxon || scoords.auth != coords.auth || scoords.version != coords.version) {
+                continue;
+            }   
+            availableSources.push(source);
+        }
+
+        localStorage['dalliance.registry.' + cacheHash + '.sources'] = JSON.stringify(availableSources);
+        localStorage['dalliance.registry.' + cacheHash + '.last_queried'] = '' + Date.now();
+        
+        setSources(msh, availableSources, maybeMapping);
+    }, function(error) {
+        // msh.set(null);
+    }, coords);
+}
 
 //
 // Navigation
