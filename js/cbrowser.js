@@ -460,7 +460,7 @@ Browser.prototype.makeTier = function(source) {
     tier.background = background;
     
     viewport.addEventListener('mousedown', function(ev) {
-        ev.stopPropagation(); ev.preventDefault();
+            // ev.stopPropagation(); ev.preventDefault();
 
         var br = viewport.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
@@ -771,4 +771,14 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
 Browser.prototype.addFeatureListener = function(handler, opts) {
     opts = opts || {};
     this.featureListeners.push(handler);
+}
+
+Browser.prototype.highlightRegion = function(chr, min, max) {
+    if (chr == this.chr) {
+        this.highlightMin = min;
+        this.highlightMax = max;
+        this.highlight = true;
+    } else {
+        this.highlight = false;
+    }
 }

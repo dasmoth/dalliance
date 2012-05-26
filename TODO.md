@@ -5,7 +5,6 @@ For 0.8
   - Pick a UI toolkit!
      + Still looking like 'none'....
   - Performance:
-     + Scrolling and zoom-preview using CSS
      + Consider tiled rendering.
      + Spin event loop between drawing ops.
   - Missing UI elements (w.r.t. 0.7)
@@ -15,7 +14,6 @@ For 0.8
      + Chromosome overview (can we be less special-casey about this...?)
      + Zoom slider (necessary?  some way to hide it when not in use?)
      + Location/search tool.
-  - Reinstate sequence tracks
   - Full set of glyphs on canvas renderer
   - Walk the glyphtree to produce SVG for export
   - Incremental fetch
@@ -25,12 +23,10 @@ For 0.8
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - JSON-DAS support?
   - Work out the kinks in security/preflighting.
-  - Binary data on Safari 5.1/Mobile (looks like a Webkit bug?)
   - Vertical resizing
   - Track style configuration (Ron/Julie)
   - Version track config blobs per-track.
   - Clean up track add/remove API.
-  - Route feature clicks/taps through an event model (i.e. feature-popup is no longer part of Browser)
   - Full binary support.
  
 Real Soon Now
