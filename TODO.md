@@ -2,8 +2,6 @@
 For 0.8
 -------
 
-  - Pick a UI toolkit!
-     + Still looking like 'none'....
   - Performance:
      + Consider tiled rendering.
      + Spin event loop between drawing ops.

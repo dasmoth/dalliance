@@ -18,6 +18,7 @@ function Browser(opts) {
     this.tiers = [];
 
     this.featureListeners = [];
+    this.viewListeners = [];
 
     this.cookieKey = 'browser';
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
@@ -561,6 +562,7 @@ Browser.prototype.arrangeTiers = function() {
 
 
 Browser.prototype.refresh = function() {
+    this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
     /* var minExtraW = (width * this.minExtra) | 0;
     var maxExtraW = (width * this.maxExtra) | 0;*/
@@ -629,6 +631,7 @@ Browser.prototype.move = function(pos)
         this.viewStart = 1;
         this.viewEnd = this.viewStart + wid;
     }
+    this.notifyLocation();
     
     var viewCenter = (this.viewStart + this.viewEnd)/2;
     
@@ -675,8 +678,6 @@ Browser.prototype.zoom = function(factor) {
     var width = this.viewEnd - this.viewStart + 1;
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
-    
-
 
     this.refresh();
 }
@@ -796,6 +797,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     this.viewStart = newMin|0;
     this.viewEnd = newMax|0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    this.notifyLocation();
     // this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
     // this.updateRegion();
@@ -806,6 +808,21 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
 Browser.prototype.addFeatureListener = function(handler, opts) {
     opts = opts || {};
     this.featureListeners.push(handler);
+}
+
+Browser.prototype.addViewListener = function(handler, opts) {
+    opts = opts || {};
+    this.viewListeners.push(handler);
+}
+
+Browser.prototype.notifyLocation = function() {
+    for (var lli = 0; lli < this.viewListeners.length; ++lli) {
+        try {
+            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0);
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
 }
 
 Browser.prototype.highlightRegion = function(chr, min, max) {

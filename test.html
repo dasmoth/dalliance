@@ -91,7 +91,11 @@ body {font-family: 'helvetica'}
   });
 
   b.addFeatureListener(function(ev, hit) {
-     dlog(miniJSONify(hit));
+     console.log(miniJSONify(hit));
+  });
+
+  b.addViewListener(function(chr, min, max) {
+      document.getElementById('locfield').value = ('chr' + chr + ':' + min + '..' + max);
   });
 </script>
 </head>
@@ -99,6 +103,8 @@ body {font-family: 'helvetica'}
 <body>
 
 <h2>Human NCBI36</h2>
+
+<input type='text' value='chr22:3000000..30010000    ' style='width: 500px' ' id='locfield'></input>
 
 <div id='svgHolder' style='overflow: hidden'>
 </div>
