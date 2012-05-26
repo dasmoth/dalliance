@@ -460,6 +460,42 @@ BWGFeatureSource.prototype.getScales = function() {
     }
 }
 
+function BamblrFeatureSource(bamblrSource) {
+    this.bamblr = bamblrSource;
+}
+
+BamblrFeatureSource.prototype.getScales = function() {
+    return [];
+}
+
+BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var rez = scale|0;
+    if (rez < 1) {
+        rez = 1;
+    }
+    var url = this.bamblr + '?seq=' + chr + '&min=' + min + '&max=' + max + '&rez=' + rez;
+    new URLFetchable(url).fetch(function(data) {
+        if (data == null) {
+            dlog('failing bamblr');
+            return;
+        } else {
+            var id = new Int32Array(data);
+            var features = [];
+            for (var ri = 0; ri < id.length; ++ri) {
+                var f = new DASFeature();
+                f.min = min + (ri * rez)
+                f.max = f.min + rez - 1;
+                f.segment = chr;
+                f.type = 'bamblr';
+                f.score = id[ri];
+                features.push(f);
+            }
+            callback(null, features, rez);
+            return;
+        }
+    });
+}
+
 function BAMFeatureSource(bamSource, opts) {
     var thisB = this;
     this.bamSource = bamSource;

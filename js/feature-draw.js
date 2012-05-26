@@ -414,6 +414,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
 	gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
+	gg.bump = true;
     }
 
     if (style.LABEL && label && !noLabel) {

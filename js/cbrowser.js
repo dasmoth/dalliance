@@ -63,6 +63,7 @@ function Browser(opts) {
     this.minTierHeight = 25;
     
     this.tabMargin = 120;
+    this.embedMargin = 50;
 
     this.browserLinks = {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -652,7 +653,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
 
     var oldFPW = this.featurePanelWidth;
-    this.featurePanelWidth = (width - this.tabMargin - 50)|0;
+    this.featurePanelWidth = (width - this.tabMargin - this.embedMargin)|0;
     
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {

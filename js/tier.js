@@ -143,6 +143,21 @@ function DasTier(browser, source, viewport, holder, background)
                 thisTier.browser.refreshTier(thisTier);
             });
         }
+    } else if (this.dasSource.bamblrURI) {
+        fs = new BamblrFeatureSource(this.dasSource.bamblrURI);
+
+        if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
+            thisTier.stylesheet = new DASStylesheet();
+            
+            var densStyle = new DASStyle();
+            densStyle.glyph = 'HISTOGRAM';
+            densStyle.COLOR1 = 'black';
+            densStyle.COLOR2 = 'red';
+            densStyle.HEIGHT=30;
+            thisTier.stylesheet.pushStyle({type: 'default'}, null, densStyle);
+            
+            thisTier.browser.refreshTier(thisTier);
+        }
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);

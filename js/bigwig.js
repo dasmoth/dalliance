@@ -268,7 +268,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     if (thisB.bwg.type == 'bigbed') {
                                         summaryOpts.type = 'density';
                                     }
-                                    maybeCreateFeature(start, end, summaryOpts);
+                                    maybeCreateFeature(start + 1, end, summaryOpts);
                                 }
                             }
                         } else if (thisB.bwg.type == 'bigwig') {
@@ -289,13 +289,13 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             if (blockType == BIG_WIG_TYPE_FSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var score = fa[i + 6];
-                                    maybeCreateFeature(blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, {score: score});
+                                    maybeCreateFeature(blockStart + (i*itemStep) + 1, blockStart + (i*itemStep) + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_VSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var start = la[(i*2) + 6];
                                     var score = fa[(i*2) + 7];
-                                    maybeCreateFeature(start, start + itemSpan, {score: score});
+                                    maybeCreateFeature(start + 1, start + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_GRAPH) {
                                 for (var i = 0; i < itemCount; ++i) {
@@ -305,7 +305,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     if (start > end) {
                                         start = end;
                                     }
-                                    maybeCreateFeature(start, end, {score: score});
+                                    maybeCreateFeature(start + 1, end, {score: score});
                                 }
                             } else {
                                 dlog('Currently not handling bwgType=' + blockType);
@@ -686,7 +686,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                 if (thisB.bwg.type == 'bigbed') {
                                     summaryOpts.type = 'density';
                                 }
-                                maybeCreateFeature(chromId, start, end, summaryOpts);
+                                maybeCreateFeature(chromId, start + 1, end, summaryOpts);
                             }
                         } else if (thisB.bwg.type == 'bigwig') {
                             var sa = new Int16Array(block.data);
@@ -706,13 +706,13 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                             if (blockType == BIG_WIG_TYPE_FSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var score = fa[i + 6];
-                                    maybeCreateFeature(chromId, blockStart + (i*itemStep), blockStart + (i*itemStep) + itemSpan, {score: score});
+                                    maybeCreateFeature(chromId, blockStart + (i*itemStep) + 1, blockStart + (i*itemStep) + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_VSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var start = la[(i*2) + 6];
                                     var score = fa[(i*2) + 7];
-                                    maybeCreateFeature(start, start + itemSpan, {score: score});
+                                    maybeCreateFeature(start + 1, start + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_GRAPH) {
                                 for (var i = 0; i < itemCount; ++i) {
@@ -722,7 +722,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                                     if (start > end) {
                                         start = end;
                                     }
-                                    maybeCreateFeature(start, end, {score: score});
+                                    maybeCreateFeature(start + 1, end, {score: score});
                                 }
                             } else {
                                 dlog('Currently not handling bwgType=' + blockType);
