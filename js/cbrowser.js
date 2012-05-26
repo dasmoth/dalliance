@@ -477,12 +477,13 @@ Browser.prototype.makeTier = function(source) {
         }
 
         var glyphs = st[sti].glyphs;
-        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale;
+        var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
+        var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
+        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
         rx -= offset;
         var hit;
         for (var gi = 0; gi < glyphs.length; ++gi) {
             var g = glyphs[gi];
-//            dlog(rx + ':    ' + g.min() + '...' + g.max());
             if (g.min() <= rx && g.max() >= rx) {
                 hit = g.group || g.feature;
                 break;
