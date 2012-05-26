@@ -454,9 +454,41 @@ Browser.prototype.touchCancelHandler = function(ev) {
 Browser.prototype.makeTier = function(source) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
-    var viewport = makeElement('canvas', null, {width: '' + ((this.featurePanelWidth|0) + 2000), height: "50"}, {position: 'relative', padding: '0px', margin: '0px', border: '0px', left: '-1000px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ borderBottomStyle: 'solid', borderBottomColor: 'rgb(180,180,180)', borderRightStyle: 'solid', borderRightColor: 'rgb(180,180,180)'});
-    var vph = makeElement('div', viewport, {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '1px', borderStyle: 'solid'});
-    var tier = new DasTier(this, source, viewport, vph);
+
+    var viewport = makeElement('canvas', null, 
+                               {width: '' + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
+                               {position: 'absolute', 
+                                padding: '0px', 
+                                margin: '0px',
+                                border: '0px', 
+                                left: '-1000px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ 
+                                borderBottomStyle: 'solid', 
+                                borderBottomColor: 'rgb(180,180,180)', 
+                                borderRightStyle: 'solid', 
+                                borderRightColor: 'rgb(180,180,180)'});
+
+    var viewportOverlay = makeElement('canvas', null,
+         {width: + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
+         {position: 'relative', 
+          padding: '0px', 
+          margin: '0px',
+          border: '0px', 
+          left: '-1000px',
+          zIndex: '1000',
+          pointerEvents: 'none'});
+
+    /*
+    var g = viewportOverlay.getContext('2d');
+    g.fillStyle = 'red';
+    g.globalAlpha = 0.3;
+    for (var i = 0; i < 5000; i += 300) {
+        g.fillRect(i, 0, 100, 50);
+    }
+    */
+    
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '1px', borderStyle: 'solid'});
+    var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
+    tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
     
     viewport.addEventListener('mousedown', function(ev) {
@@ -576,6 +608,7 @@ Browser.prototype.refresh = function() {
     
     // dlog('ref ' + this.chr + ':' + this.drawnStart + '..' + this.drawnEnd);
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
+    this.drawOverlays();
 }
 
 
@@ -602,6 +635,8 @@ Browser.prototype.move = function(pos)
     for (var i = 0; i < this.tiers.length; ++i) {
         var offset = (viewCenter - this.tiers[i].norigin)*this.scale;
 	this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+        var ooffset = (viewCenter - this.tiers[i].oorigin)*this.scale;
+        this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
     }
 
     /*
@@ -780,5 +815,28 @@ Browser.prototype.highlightRegion = function(chr, min, max) {
         this.highlight = true;
     } else {
         this.highlight = false;
+    }
+    this.drawOverlays();
+}
+
+Browser.prototype.drawOverlays = function() {
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        var g = t.overlay.getContext('2d');
+        
+        g.clearRect(0, 0, t.overlay.width, t.overlay.height);
+        
+        var origin = this.viewStart - (1000/this.scale);
+        if (this.highlight) {
+            g.globalAlpha = 0.4;
+            g.fillStyle = 'red';
+            g.fillRect((this.highlightMin - origin) * this.scale,
+                       0,
+                       (this.highlightMax - this.highlightMin) * this.scale,
+                       t.overlay.height);
+        }
+
+        t.oorigin = (this.viewStart + this.viewEnd)/2;
+        t.overlay.style.left = '-1000px'
     }
 }
