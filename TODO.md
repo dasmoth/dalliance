@@ -3,6 +3,11 @@ For 0.8
 -------
 
   - Pick a UI toolkit!
+     + Still looking like 'none'....
+  - Performance:
+     + Scrolling and zoom-preview using CSS
+     + Consider tiled rendering.
+     + Spin event loop between drawing ops.
   - Missing UI elements (w.r.t. 0.7)
      + Scales on quantitative tracks
      + Add/remove track mechanism.
