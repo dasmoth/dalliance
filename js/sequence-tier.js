@@ -54,7 +54,7 @@ function drawGuidelines(tier, featureGroupElement)
 }
 
 
-function drawSeqTier(tier, seq)
+function __drawSeqTier(tier, seq)
 {
     return; // FIXME let's punt on sequence tiers!
 

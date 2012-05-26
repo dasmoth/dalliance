@@ -13,6 +13,7 @@ Package.on_use(function (api, where) {
 	api.add_files("js/features.js","client");
 	api.add_files("js/color.js","client");
 	api.add_files("js/feature-draw.js","client");
+        api.add_files("js/sequence-draw.js","client");
 	api.add_files("js/slider.js","client");
 	api.add_files("js/domui.js","client");
 	api.add_files("js/karyoscape.js","client");

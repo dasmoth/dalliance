@@ -22,6 +22,7 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="js/features.js"></script>
 <script language="javascript" src="js/color.js"></script>
 <script language="javascript" src="js/feature-draw.js"></script>
+<script language="javascript" src="js/sequence-draw.js"></script>
 <script language="javascript" src="js/slider.js"></script>
 <script language="javascript" src="js/domui.js"></script>
 <script language="javascript" src="js/karyoscape.js"></script>
@@ -65,6 +66,7 @@ body {font-family: 'helvetica'}
                    collapseSuperGroups:  true,
                    provides_karyotype:   true,
                    provides_search:      true,
+                   provides_entrypoints: true,
                    maxbins:              false}, 
                   {name:                 'Repeats',     
                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
@@ -86,6 +88,10 @@ body {font-family: 'helvetica'}
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
         Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
     }
+  });
+
+  b.addFeatureListener(function(ev, hit) {
+     dlog(miniJSONify(hit));
   });
 </script>
 </head>
