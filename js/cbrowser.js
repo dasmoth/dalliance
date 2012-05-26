@@ -206,7 +206,7 @@ Browser.prototype.realInit = function() {
                               var newStart = (nmin + nmax - wid)/2 + 1;
                               var newEnd = newStart + wid - 1;
                               var pos2=pos;
-                              thisB.setLocation(newStart, newEnd, nxt.segment);
+                              thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
                               dlog('no next feature');
                           }
@@ -244,7 +244,7 @@ Browser.prototype.realInit = function() {
                               var newStart = (nmin + nmax - wid)/2 + 1;
                               var newEnd = newStart + wid - 1;
                               var pos2=pos;
-                              thisB.setLocation(newStart, newEnd, nxt.segment);
+                              thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
                               dlog('no next feature');
                           }
@@ -699,4 +699,35 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
             rects[0].setAttribute('width', this.featurePanelWidth);
         }
     } */
+}
+
+Browser.prototype.setLocation = function(newChr, newMin, newMax) {
+    if (newChr && (newChr !== this.chr)) {
+        if (!this.entryPoints) {
+            throw 'Need entry points';
+        }
+        var ep = null;
+        for (var epi = 0; epi < this.entryPoints.length; ++epi) {
+            var epName = this.entryPoints[epi].name;
+            if (epName === newChr || ('chr' + epName) === newChr || epName === ('chr' + newChr)) {
+                ep = this.entryPoints[epi];
+                break;
+            }
+        }
+        if (!ep) {
+            throw "Couldn't find chromosome " + newChr;
+        }
+
+        this.chr = ep.name;
+        this.currentSeqMax = ep.end;
+    }
+
+    this.viewStart = newMin|0;
+    this.viewEnd = newMax|0;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    // this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
+
+    // this.updateRegion();
+    // this.karyo.update(this.chr, this.viewStart, this.viewEnd);
+    this.spaceCheck();
 }
