@@ -97,6 +97,11 @@ body {font-family: 'helvetica'}
   b.addViewListener(function(chr, min, max) {
       document.getElementById('locfield').value = ('chr' + chr + ':' + min + '..' + max);
   });
+
+  b.addRegionSelectListener(function(chr, min, max) {
+      console.log('chr' + chr + ':' + min + '..' + max);
+      b.highlightRegion(chr, min, max);
+  });
 </script>
 </head>
 

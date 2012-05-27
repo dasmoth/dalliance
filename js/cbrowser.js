@@ -860,21 +860,13 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         }
     }
 
-/*
-    if (this.fgGuide) {
-        this.fgGuide.setAttribute('x1', (this.featurePanelWidth/2) + this.tabMargin);
-        this.fgGuide.setAttribute('x2', (this.featurePanelWidth/2) + this.tabMargin);
-    }
-        
-
-    for (var pi = 0; pi < this.placards.length; ++pi) {
-        var placard = this.placards[pi];
-        var rects = placard.getElementsByTagName('rect');
-        if (rects.length > 0) {
-            rects[0].setAttribute('width', this.featurePanelWidth);
-        }
-    } */
 }
+
+Browser.prototype.addTier = function(conf) {
+    this.sources.push(conf);
+    this.makeTier(conf);
+}
+
 
 Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     if (newChr && (newChr !== this.chr)) {
