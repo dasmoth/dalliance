@@ -434,7 +434,7 @@ function BoxGlyph(x, y, width, height, fill, stroke) {
 }
 
 BoxGlyph.prototype.draw = function(g) {
-    var r = 2;
+    var r = 1;
 
     g.beginPath();
     g.moveTo(this.x + r, this.y);
@@ -455,6 +455,7 @@ BoxGlyph.prototype.draw = function(g) {
     }
     if (this.stroke) {
 	g.strokeStyle = this.stroke;
+	g.lineWidth = 0.5;
 	// g.strokeRect(this.x, this.y, this._width, this._height);
 	g.stroke();
     }
