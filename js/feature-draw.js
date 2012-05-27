@@ -434,13 +434,29 @@ function BoxGlyph(x, y, width, height, fill, stroke) {
 }
 
 BoxGlyph.prototype.draw = function(g) {
+    var r = 2;
+
+    g.beginPath();
+    g.moveTo(this.x + r, this.y);
+    g.lineTo(this.x + this._width - r, this.y);
+    g.arcTo(this.x + this._width, this.y, this.x + this._width, this.y + r, r);
+    g.lineTo(this.x + this._width, this.y + this._height - r);
+    g.arcTo(this.x + this._width, this.y + this._height, this.x + this._width - r, this.y + this._height, r);
+    g.lineTo(this.x + r, this.y + this._height);
+    g.arcTo(this.x, this.y + this._height, this.x, this.y + this._height - r, r);
+    g.lineTo(this.x, this.y + r);
+    g.arcTo(this.x, this.y, this.x + r, this.y, r);
+    g.closePath();
+
     if (this.fill) {
 	g.fillStyle = this.fill;
-	g.fillRect(this.x, this.y, this._width, this._height);
+	//g.fillRect(this.x, this.y, this._width, this._height);
+	g.fill();
     }
     if (this.stroke) {
 	g.strokeStyle = this.stroke;
-	g.strokeRect(this.x, this.y, this._width, this._height);
+	// g.strokeRect(this.x, this.y, this._width, this._height);
+	g.stroke();
     }
 }
 
