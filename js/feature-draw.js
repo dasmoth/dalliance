@@ -434,7 +434,7 @@ function BoxGlyph(x, y, width, height, fill, stroke) {
 }
 
 BoxGlyph.prototype.draw = function(g) {
-    var r = 1;
+    var r = 1.0;
 
     g.beginPath();
     g.moveTo(this.x + r, this.y);
