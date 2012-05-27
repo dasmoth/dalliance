@@ -23,6 +23,7 @@ function Browser(opts) {
 
     this.featureListeners = [];
     this.viewListeners = [];
+    this.regionSelectListeners = [];
 
     this.cookieKey = 'browser';
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
@@ -496,11 +497,20 @@ Browser.prototype.makeTier = function(source) {
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
     
+    var isDragging = false;
+    var dragOrigin;
+
     viewport.addEventListener('mousedown', function(ev) {
             // ev.stopPropagation(); ev.preventDefault();
 
         var br = viewport.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        if (tier.dasSource.tier_type === 'sequence') {
+            isDragging = true;
+            dragOrigin = rx;
+        }
+
+
         var st = tier.subtiers;
         if (!st) {
             return;
@@ -536,6 +546,32 @@ Browser.prototype.makeTier = function(source) {
                 }
             }
             // thisB.featurePopup(ev, hit);
+        }
+    }, false);
+
+    viewport.addEventListener('mouseup', function(ev) {
+            // ev.stopPropagation(); ev.preventDefault();
+
+        var br = viewport.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        if (isDragging && rx != dragOrigin) {
+
+            var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
+            var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
+            var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
+            
+            console.log('offset=' + offset + '; scale=' + thisB.scale + '; rx=' + rx + '; ox=' + dragOrigin);
+
+            var a = (rx/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
+            var b = (dragOrigin/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
+            var min, max;
+            if (a < b) {
+                min = a|0; max = b|0;
+            } else {
+                min = b|0; max = a|0;
+            }
+
+            thisB.notifyRegionSelect(thisB.chr, min, max);
         }
     }, false);
 
@@ -891,6 +927,21 @@ Browser.prototype.notifyLocation = function() {
         }
     }
 }
+
+Browser.prototype.addRegionSelectListener = function(handler) {
+    this.regionSelectListeners.push(handler);
+}
+
+Browser.prototype.notifyRegionSelect = function(chr, min, max) {
+    for (var rli = 0; rli < this.regionSelectListeners.length; ++rli) {
+        try {
+            this.regionSelectListeners[rli](chr, min, max);
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
+}
+
 
 Browser.prototype.highlightRegion = function(chr, min, max) {
     this.highlights.push(new Region(chr, min, max));
