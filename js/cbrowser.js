@@ -7,7 +7,11 @@
 // cbrowser.js: canvas browser container
 //
 
-// constants
+function Region(chr, min, max) {
+    this.min = min;
+    this.max = max;
+    this.chr = chr;
+}
 
 function Browser(opts) {
     if (!opts) {
@@ -46,9 +50,7 @@ function Browser(opts) {
     this.entryPoints = null;
     this.currentSeqMax = -1; // init once EPs are fetched.
 
-    this.highlight = false;
-    this.highlightMin = -1
-    this.highlightMax = - 1;
+    this.highlights = [];
 
     this.autoSizeTiers = false;
     this.guidelineStyle = 'foreground';
@@ -891,14 +893,12 @@ Browser.prototype.notifyLocation = function() {
 }
 
 Browser.prototype.highlightRegion = function(chr, min, max) {
-    if (chr == this.chr) {
-        this.highlightMin = min;
-        this.highlightMax = max;
-        this.highlight = true;
-    } else {
-        this.highlight = false;
+    this.highlights.push(new Region(chr, min, max));
+    var visStart = this.viewStart - (1000/this.scale);
+    var visEnd = this.viewEnd + (1000/this.scale);
+    if (chr == this.chr && min < visEnd && max > visStart) {
+        this.drawOverlays();
     }
-    this.drawOverlays();
 }
 
 Browser.prototype.drawOverlays = function() {
@@ -909,13 +909,20 @@ Browser.prototype.drawOverlays = function() {
         g.clearRect(0, 0, t.overlay.width, t.overlay.height);
         
         var origin = this.viewStart - (1000/this.scale);
-        if (this.highlight) {
-            g.globalAlpha = 0.4;
-            g.fillStyle = 'red';
-            g.fillRect((this.highlightMin - origin) * this.scale,
-                       0,
-                       (this.highlightMax - this.highlightMin) * this.scale,
-                       t.overlay.height);
+        var visStart = this.viewStart - (1000/this.scale);
+        var visEnd = this.viewEnd + (1000/this.scale);
+
+
+        for (var hi = 0; hi < this.highlights.length; ++hi) {
+            var h = this.highlights[hi];
+            if (h.chr == this.chr && h.min < visEnd && h.max > visStart) {
+                g.globalAlpha = 0.4;
+                g.fillStyle = 'red';
+                g.fillRect((h.min - origin) * this.scale,
+                           0,
+                           (h.max - h.min) * this.scale,
+                           t.overlay.height);
+        }
         }
 
         t.oorigin = (this.viewStart + this.viewEnd)/2;
