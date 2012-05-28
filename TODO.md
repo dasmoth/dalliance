@@ -24,7 +24,6 @@ For 0.8
   - Vertical resizing
   - Track style configuration (Ron/Julie)
   - Version track config blobs per-track.
-  - Clean up track add/remove API.
   - Full binary support.
  
 Real Soon Now

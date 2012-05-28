@@ -583,7 +583,9 @@ Browser.prototype.makeTier = function(source) {
     label.style['display'] = 'inline-block';
     label.style['background'] = background;
     label.style['vertical-align'] = 'top';
-    this.tierHolder.appendChild(makeElement('div', [label, vph], {} /*, {margin: '-2px'} */));    
+    var row = makeElement('div', [label, vph], {} /*, {margin: '-2px'} */);
+    tier.row = row;
+    this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
     this.arrangeTiers();
@@ -865,6 +867,33 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
+}
+
+Browser.prototype.removeTier = function(conf) {
+    var target = -1;
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var ts = this.tiers[ti].dasSource;
+        if ((conf.uri && ts.uri === conf.uri) ||
+            (conf.bwgURI && ts.bwgURI === conf.bwgURI) ||
+            (conf.bamURI && ts.bamURI === conf.bamURI))
+        {
+            target = ti; break;
+        }
+    }
+
+    if (target < 0) {
+        throw "Couldn't find requested tier";
+    }
+
+    var victim = this.tiers[target];
+    this.tierHolder.removeChild(victim.row);
+    this.tiers.splice(target, 1);
+    this.sources.splice(target, 1);
+
+    for (var ti = target; ti < this.tiers.length; ++ti) {
+        this.tiers[ti].background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+    }
+    this.refresh();
 }
 
 
