@@ -65,10 +65,10 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ["rgb(245,245,245)", 'white' /* , "rgb(230,230,250)" */];
+    this.tierBackgroundColors = [/* "rgb(245,245,245)", */ 'white' /* , "rgb(230,230,250)" */];
     this.minTierHeight = 25;
     
-    this.tabMargin = 120;
+    this.tabMargin = 10;
     this.embedMargin = 50;
 
     this.browserLinks = {
@@ -492,7 +492,7 @@ Browser.prototype.makeTier = function(source) {
     }
     */
     
-    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '1px', borderStyle: 'solid'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
@@ -577,14 +577,24 @@ Browser.prototype.makeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
+    /*
     var label = makeElement('span', source.name);
     viewport.style['vertical-align'] = 'top';
     label.style['width'] = this.tabMargin + 'px';
     label.style['display'] = 'inline-block';
     label.style['background'] = background;
     label.style['vertical-align'] = 'top';
-    var row = makeElement('div', [label, vph], {} /*, {margin: '-2px'} */);
+    var row = makeElement('div', [label, vph], {});
     tier.row = row;
+    */
+
+    var label = makeElement('span', source.name, {}, {position: 'absolute', left: '2px', top: '2px', zIndex: '1000', background: 'rgba(255, 255, 255, 0.85)', padding: '2px'});
+    label.style['display'] = 'inline-block';
+    vph.appendChild(label);
+    var row = makeElement('div', [vph], {});
+    tier.row = row;
+
+
     this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
