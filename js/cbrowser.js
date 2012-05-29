@@ -588,8 +588,8 @@ Browser.prototype.makeTier = function(source) {
     tier.row = row;
     */
 
-    var label = makeElement('span', source.name, {}, {position: 'absolute', left: '2px', top: '2px', zIndex: '1000', background: 'rgba(255, 255, 255, 0.85)', padding: '2px'});
-    label.style['display'] = 'inline-block';
+    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '1000', background: 'rgba(220, 220, 220, 0.8)', padding: '3px'});
+    label.style['border-radius'] = '4px';
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});
     tier.row = row;
