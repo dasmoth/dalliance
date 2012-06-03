@@ -1044,3 +1044,21 @@ Browser.prototype.drawOverlays = function() {
         t.overlay.style.left = '-1000px'
     }
 }
+
+Browser.prototype.featuresInRegion = function(chr, min, max) {
+    var features = [];
+    if (chr !== this.chr) {
+        return [];
+    }
+
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var fl = this.tiers[ti].currentFeatures || [];
+        for (var fi = 0; fi < fl.length; ++fi) {
+            var f = fl[fi];
+            if (f.min <= max && f.max >= min) {
+                features.push(f);
+            }
+        }
+    }
+    return features;
+}

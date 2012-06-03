@@ -104,7 +104,8 @@ body {font-family: 'helvetica'}
 
   b.addRegionSelectListener(function(chr, min, max) {
       // console.log('chr' + chr + ':' + min + '..' + max);
-      b.highlightRegion(chr, min, max);
+      // b.highlightRegion(chr, min, max);
+      console.log('selected ' + b.featuresInRegion(chr, min, max).length);
   });
 </script>
 </head>
