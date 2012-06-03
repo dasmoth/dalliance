@@ -499,7 +499,7 @@ Browser.prototype.makeTier = function(source) {
     tier.background = background;
     
     var isDragging = false;
-    var dragOrigin;
+    var dragOrigin, dragMoveOrigin;
     var hoverTimeout;
 
     var featureLookup = function(rx, ry) {
@@ -510,15 +510,15 @@ Browser.prototype.makeTier = function(source) {
 
         var sti = 0;
         ry -= MIN_PADDING;
-        while (ry > st[sti].height) {
+        while (ry > st[sti].height && sti < (st.length - 1)) {
             ry = ry - st[sti].height - MIN_PADDING;
             ++sti;
         }
 
         var glyphs = st[sti].glyphs;
         var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-        var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
-        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
+        // var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
+        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale /* + canvOffset + 1000;*/
         rx -= offset;
         var hit;
         for (var gi = 0; gi < glyphs.length; ++gi) {
@@ -531,13 +531,9 @@ Browser.prototype.makeTier = function(source) {
         return hit;
     }
 
-    viewport.addEventListener('mousedown', function(ev) {
-        var br = viewport.getBoundingClientRect();
+    vph.addEventListener('mousedown', function(ev) {
+        var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
-        if (tier.dasSource.tier_type === 'sequence') {
-            isDragging = true;
-            dragOrigin = rx;
-        }
 
         var hit = featureLookup(rx, ry);
         if (hit) {
@@ -548,42 +544,49 @@ Browser.prototype.makeTier = function(source) {
                     console.log(ex);
                 }
             }
+        } else {
+            isDragging = true;
+            dragOrigin = dragMoveOrigin = rx;
         }
     }, false);
 
-    viewport.addEventListener('mousemove', function(ev) {
-        var br = viewport.getBoundingClientRect();
+    vph.addEventListener('mousemove', function(ev) {
+        var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
         }
-        hoverTimeout = setTimeout(function() {
-            var hit = featureLookup(rx, ry);
-            if (hit) {
-                for (var fli = 0; fli < thisB.featureHoverListeners.length; ++fli) {
-                    try {
-                        thisB.featureHoverListeners[fli](ev, hit);
-                    } catch (ex) {
-                        console.log(ex);
+
+        if (isDragging) {
+            if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
+                thisB.move((rx - dragMoveOrigin));
+                dragMoveOrigin = rx;
+            }
+        } else {
+            hoverTimeout = setTimeout(function() {
+                var hit = featureLookup(rx, ry);
+                if (hit) {
+                    for (var fli = 0; fli < thisB.featureHoverListeners.length; ++fli) {
+                        try {
+                            thisB.featureHoverListeners[fli](ev, hit);
+                        } catch (ex) {
+                            console.log(ex);
+                        }
                     }
                 }
-            }
-        }, 1000);
+            }, 1000);
+        }
     });
 
-    viewport.addEventListener('mouseup', function(ev) {
-        var br = viewport.getBoundingClientRect();
+    vph.addEventListener('mouseup', function(ev) {
+        var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
-        if (isDragging && rx != dragOrigin) {
 
-            var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-            var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
-            var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
-            
-            console.log('offset=' + offset + '; scale=' + thisB.scale + '; rx=' + rx + '; ox=' + dragOrigin);
+        if (isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
+            var a = thisB.viewStart + (rx/thisB.scale);
+            var b = thisB.viewStart + (dragOrigin/thisB.scale);
 
-            var a = (rx/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
-            var b = (dragOrigin/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
             var min, max;
             if (a < b) {
                 min = a|0; max = b|0;
@@ -593,7 +596,12 @@ Browser.prototype.makeTier = function(source) {
 
             thisB.notifyRegionSelect(thisB.chr, min, max);
         }
+        isDragging = false;
     }, false);
+
+    vph.addEventListener('mouseout', function(ev) {
+        isDragging = false;
+    });
 
     tier.init(); // fetches stylesheet
 
