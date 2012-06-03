@@ -94,6 +94,10 @@ body {font-family: 'helvetica'}
      console.log(miniJSONify(hit));
   });
 
+  b.addFeatureHoverListener(function(ev, hit) {
+     console.log('hover: ' + miniJSONify(hit));
+  });
+
   b.addViewListener(function(chr, min, max) {
       document.getElementById('locfield').value = ('chr' + chr + ':' + min + '..' + max);
   });

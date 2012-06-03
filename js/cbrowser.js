@@ -22,6 +22,7 @@ function Browser(opts) {
     this.tiers = [];
 
     this.featureListeners = [];
+    this.featureHoverListeners = [];
     this.viewListeners = [];
     this.regionSelectListeners = [];
 
@@ -499,18 +500,9 @@ Browser.prototype.makeTier = function(source) {
     
     var isDragging = false;
     var dragOrigin;
+    var hoverTimeout;
 
-    viewport.addEventListener('mousedown', function(ev) {
-            // ev.stopPropagation(); ev.preventDefault();
-
-        var br = viewport.getBoundingClientRect();
-        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
-        if (tier.dasSource.tier_type === 'sequence') {
-            isDragging = true;
-            dragOrigin = rx;
-        }
-
-
+    var featureLookup = function(rx, ry) {
         var st = tier.subtiers;
         if (!st) {
             return;
@@ -536,7 +528,18 @@ Browser.prototype.makeTier = function(source) {
                 break;
             }
         }
+        return hit;
+    }
 
+    viewport.addEventListener('mousedown', function(ev) {
+        var br = viewport.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        if (tier.dasSource.tier_type === 'sequence') {
+            isDragging = true;
+            dragOrigin = rx;
+        }
+
+        var hit = featureLookup(rx, ry);
         if (hit) {
             for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
                 try {
@@ -545,13 +548,30 @@ Browser.prototype.makeTier = function(source) {
                     console.log(ex);
                 }
             }
-            // thisB.featurePopup(ev, hit);
         }
     }, false);
 
-    viewport.addEventListener('mouseup', function(ev) {
-            // ev.stopPropagation(); ev.preventDefault();
+    viewport.addEventListener('mousemove', function(ev) {
+        var br = viewport.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+        }
+        hoverTimeout = setTimeout(function() {
+            var hit = featureLookup(rx, ry);
+            if (hit) {
+                for (var fli = 0; fli < thisB.featureHoverListeners.length; ++fli) {
+                    try {
+                        thisB.featureHoverListeners[fli](ev, hit);
+                    } catch (ex) {
+                        console.log(ex);
+                    }
+                }
+            }
+        }, 1000);
+    });
 
+    viewport.addEventListener('mouseup', function(ev) {
         var br = viewport.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
         if (isDragging && rx != dragOrigin) {
@@ -942,6 +962,11 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
 Browser.prototype.addFeatureListener = function(handler, opts) {
     opts = opts || {};
     this.featureListeners.push(handler);
+}
+
+Browser.prototype.addFeatureHoverListener = function(handler, opts) {
+    opts = opts || {};
+    this.featureHoverListeners.push(handler);
 }
 
 Browser.prototype.addViewListener = function(handler, opts) {
