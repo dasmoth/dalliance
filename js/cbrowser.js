@@ -22,6 +22,7 @@ function Browser(opts) {
     this.tiers = [];
 
     this.featureListeners = [];
+    this.featureHoverListeners = [];
     this.viewListeners = [];
     this.regionSelectListeners = [];
 
@@ -498,19 +499,10 @@ Browser.prototype.makeTier = function(source) {
     tier.background = background;
     
     var isDragging = false;
-    var dragOrigin;
+    var dragOrigin, dragMoveOrigin;
+    var hoverTimeout;
 
-    viewport.addEventListener('mousedown', function(ev) {
-            // ev.stopPropagation(); ev.preventDefault();
-
-        var br = viewport.getBoundingClientRect();
-        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
-        if (tier.dasSource.tier_type === 'sequence') {
-            isDragging = true;
-            dragOrigin = rx;
-        }
-
-
+    var featureLookup = function(rx, ry) {
         var st = tier.subtiers;
         if (!st) {
             return;
@@ -518,15 +510,15 @@ Browser.prototype.makeTier = function(source) {
 
         var sti = 0;
         ry -= MIN_PADDING;
-        while (ry > st[sti].height) {
+        while (ry > st[sti].height && sti < (st.length - 1)) {
             ry = ry - st[sti].height - MIN_PADDING;
             ++sti;
         }
 
         var glyphs = st[sti].glyphs;
         var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-        var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
-        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
+        // var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
+        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale /* + canvOffset + 1000;*/
         rx -= offset;
         var hit;
         for (var gi = 0; gi < glyphs.length; ++gi) {
@@ -536,7 +528,14 @@ Browser.prototype.makeTier = function(source) {
                 break;
             }
         }
+        return hit;
+    }
 
+    vph.addEventListener('mousedown', function(ev) {
+        var br = vph.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+
+        var hit = featureLookup(rx, ry);
         if (hit) {
             for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
                 try {
@@ -545,25 +544,49 @@ Browser.prototype.makeTier = function(source) {
                     console.log(ex);
                 }
             }
-            // thisB.featurePopup(ev, hit);
+        } else {
+            isDragging = true;
+            dragOrigin = dragMoveOrigin = rx;
         }
     }, false);
 
-    viewport.addEventListener('mouseup', function(ev) {
-            // ev.stopPropagation(); ev.preventDefault();
-
-        var br = viewport.getBoundingClientRect();
+    vph.addEventListener('mousemove', function(ev) {
+        var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
-        if (isDragging && rx != dragOrigin) {
 
-            var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-            var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
-            var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale + canvOffset + 1000;
-            
-            console.log('offset=' + offset + '; scale=' + thisB.scale + '; rx=' + rx + '; ox=' + dragOrigin);
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+        }
 
-            var a = (rx/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
-            var b = (dragOrigin/thisB.scale)+tier.norigin - ((1000 + (thisB.featurePanelWidth/2))/thisB.scale);
+        if (isDragging) {
+            if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
+                thisB.move((rx - dragMoveOrigin));
+                dragMoveOrigin = rx;
+            }
+        } else {
+            hoverTimeout = setTimeout(function() {
+                var hit = featureLookup(rx, ry);
+                if (hit) {
+                    for (var fli = 0; fli < thisB.featureHoverListeners.length; ++fli) {
+                        try {
+                            thisB.featureHoverListeners[fli](ev, hit);
+                        } catch (ex) {
+                            console.log(ex);
+                        }
+                    }
+                }
+            }, 1000);
+        }
+    });
+
+    vph.addEventListener('mouseup', function(ev) {
+        var br = vph.getBoundingClientRect();
+        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+
+        if (isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
+            var a = thisB.viewStart + (rx/thisB.scale);
+            var b = thisB.viewStart + (dragOrigin/thisB.scale);
+
             var min, max;
             if (a < b) {
                 min = a|0; max = b|0;
@@ -573,7 +596,12 @@ Browser.prototype.makeTier = function(source) {
 
             thisB.notifyRegionSelect(thisB.chr, min, max);
         }
+        isDragging = false;
     }, false);
+
+    vph.addEventListener('mouseout', function(ev) {
+        isDragging = false;
+    });
 
     tier.init(); // fetches stylesheet
 
@@ -950,6 +978,11 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
+Browser.prototype.addFeatureHoverListener = function(handler, opts) {
+    opts = opts || {};
+    this.featureHoverListeners.push(handler);
+}
+
 Browser.prototype.addViewListener = function(handler, opts) {
     opts = opts || {};
     this.viewListeners.push(handler);
@@ -1016,4 +1049,22 @@ Browser.prototype.drawOverlays = function() {
         t.oorigin = (this.viewStart + this.viewEnd)/2;
         t.overlay.style.left = '-1000px'
     }
+}
+
+Browser.prototype.featuresInRegion = function(chr, min, max) {
+    var features = [];
+    if (chr !== this.chr) {
+        return [];
+    }
+
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var fl = this.tiers[ti].currentFeatures || [];
+        for (var fi = 0; fi < fl.length; ++fi) {
+            var f = fl[fi];
+            if (f.min <= max && f.max >= min) {
+                features.push(f);
+            }
+        }
+    }
+    return features;
 }
