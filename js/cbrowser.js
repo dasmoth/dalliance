@@ -99,7 +99,7 @@ Browser.prototype.realInit = function() {
     this.svgHolder = document.getElementById(this.pageName);
     removeChildren(this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, null, {padding: '0px', margin: '0px', border: '0px'});
+    this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -492,7 +492,7 @@ Browser.prototype.makeTier = function(source) {
     }
     */
     
-    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '' + this.featurePanelWidth + 'px', overflow: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflow: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
@@ -818,12 +818,17 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
 
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
+
+    /*
     var width = window.innerWidth;
     width = Math.max(width, 640);
 
     if (this.forceWidth) {
         width = this.forceWidth;
     }
+    */
+
+    var width = this.tierHolder.getBoundingClientRect().width | 0;
 /*
     if (this.center) {
         this.svgHolder.style['margin-left'] = (((window.innerWidth - width) / 2)|0) + 'px';
@@ -845,7 +850,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
-            tier.holder.style.width = '' + this.featurePanelWidth + 'px';
+            // tier.holder.style.width = '' + this.featurePanelWidth + 'px';
             // tier.paint();
         }
 
@@ -870,6 +875,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         if (!skipRefresh) {
             this.spaceCheck();
         }
+        this.notifyLocation();
     }
 
 }
