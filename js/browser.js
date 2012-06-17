@@ -1430,6 +1430,14 @@ Browser.prototype.realInit = function(opts) {
     this.tiers = [];
     if (overrideSources) {
         this.sources = overrideSources;
+    } else {
+        this.sources = [];
+        for (var si = 0; si < this.defaultSources.length; ++si) {
+            var s = this.defaultSources[si];
+            if (!s.disable) {
+                this.sources.push(s);
+            }
+        }
     }
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
