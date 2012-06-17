@@ -243,6 +243,7 @@ DasTier.prototype.paint = function() {
     }
     this.viewport.setAttribute('height', lh);
     this.viewport.style.left = '-1000px';
+    this.holder.style.height = '' + Math.max(lh,35) + 'px';
     this.norigin = (this.browser.viewStart + this.browser.viewEnd)/2;
 
     var gc = this.viewport.getContext('2d');
