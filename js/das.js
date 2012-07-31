@@ -700,6 +700,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
         if (custAuth) {
             req.setRequestHeader('X-DAS-Authorisation', custAuth);
         }
+        req.setRequestHeader('Accept', 'application/xml,*/*');
         req.send('');
     }
 }
