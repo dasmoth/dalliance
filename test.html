@@ -91,11 +91,11 @@ body {font-family: 'helvetica'}
   });
 
   b.addFeatureListener(function(ev, hit) {
-     console.log(miniJSONify(hit));
+     // console.log(miniJSONify(hit));
   });
 
   b.addFeatureHoverListener(function(ev, hit) {
-     console.log('hover: ' + miniJSONify(hit));
+     // console.log('hover: ' + miniJSONify(hit));
   });
 
   b.addViewListener(function(chr, min, max) {
@@ -105,7 +105,7 @@ body {font-family: 'helvetica'}
   b.addRegionSelectListener(function(chr, min, max) {
       // console.log('chr' + chr + ':' + min + '..' + max);
       // b.highlightRegion(chr, min, max);
-      console.log('selected ' + b.featuresInRegion(chr, min, max).length);
+      // console.log('selected ' + b.featuresInRegion(chr, min, max).length);
   });
 </script>
 </head>
@@ -117,8 +117,7 @@ body {font-family: 'helvetica'}
 <input type='text' value='chr22:3000000..30010000    ' style='width: 500px' ' id='locfield'></input>
 
 <br>
-<div id='blah' style="background: red; width: 20%; height: 200px; display: inline-block; vertical-align: top">xxxx</div>
-<div id='svgHolder' style='overflow: hidden; display: inline-block; width: 79%'>
+<div id='svgHolder' style='overflow: hidden; display: inline-block; width: 95%'>
 </div>
 
 <div id="log">

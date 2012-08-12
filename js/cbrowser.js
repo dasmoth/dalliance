@@ -616,12 +616,29 @@ Browser.prototype.makeTier = function(source) {
     tier.row = row;
     */
 
-    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '1000', background: 'rgba(220, 220, 220, 0.8)', padding: '3px'});
+    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px'});
     label.style['border-radius'] = '4px';
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});
     tier.row = row;
 
+    
+    var dragLabel;
+
+    var labelDragHandler = function(ev) {
+    };
+
+    var labelReleaseHandler = function(ev) {
+        console.log('undrag');
+        document.removeEventListener('mousemove', labelDragHandler, false);
+        document.removeEventListener('mouseup', labelReleaseHandler, false);
+    };
+
+    label.addEventListener('mousedown', function(ev) {
+            console.log('drag');
+        document.addEventListener('mousemove', labelDragHandler, false);
+        document.addEventListener('mouseup', labelReleaseHandler, false);
+    }, false);
 
     this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
