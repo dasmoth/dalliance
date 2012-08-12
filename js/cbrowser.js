@@ -25,6 +25,7 @@ function Browser(opts) {
     this.featureHoverListeners = [];
     this.viewListeners = [];
     this.regionSelectListeners = [];
+    this.tierListeners = [];
 
     this.cookieKey = 'browser';
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
@@ -616,7 +617,7 @@ Browser.prototype.makeTier = function(source) {
     tier.row = row;
     */
 
-    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px'});
+    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px', cursor: 'default'});
     label.style['border-radius'] = '4px';
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});
@@ -657,6 +658,11 @@ Browser.prototype.makeTier = function(source) {
                     // console.log('wants to be at ' + ti);
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
+
+                    var ts = thisB.sources[tierOrdinal];
+                    thisB.sources.splice(tierOrdinal, 1);
+                    thisB.sources.splice(ti, 0, ts);
+
                     tierOrdinal = ti;
                     yAtLastReorder = ev.clientY;
                     removeChildren(thisB.tierHolder);
@@ -680,6 +686,7 @@ Browser.prototype.makeTier = function(source) {
         // console.log('undrag');
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
+        thisB.notifyTier();
     };
 
     label.addEventListener('mousedown', function(ev) {
@@ -1058,6 +1065,20 @@ Browser.prototype.notifyLocation = function() {
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
             this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0);
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
+}
+
+Browser.prototype.addTierListener = function(handler) {
+    this.tierListeners.push(handler);
+}
+
+Browser.prototype.notifyTier = function() {
+    for (var tli = 0; tli < this.tierListeners.length; ++tli) {
+        try {
+            this.tierListeners[tli]();
         } catch (ex) {
             console.log(ex);
         }

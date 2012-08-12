@@ -107,6 +107,10 @@ body {font-family: 'helvetica'}
       // b.highlightRegion(chr, min, max);
       // console.log('selected ' + b.featuresInRegion(chr, min, max).length);
   });
+
+  b.addTierListener(function() {
+    console.log('tiers have changed');
+  });
 </script>
 </head>
 
