@@ -625,6 +625,7 @@ Browser.prototype.makeTier = function(source) {
     
     var dragLabel;
     var tierOrdinal;
+    var yAtLastReorder;
 
     var labelDragHandler = function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -632,6 +633,8 @@ Browser.prototype.makeTier = function(source) {
             dragLabel = label.cloneNode(true);
             dragLabel.style.cursor = 'pointer';
             thisB.svgHolder.appendChild(dragLabel);
+            label.style.visibility = 'hidden';
+            
 
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 if (thisB.tiers[ti] === tier) {
@@ -639,8 +642,10 @@ Browser.prototype.makeTier = function(source) {
                     break;
                 }
             }
+
+            yAtLastReorder = ev.clientY;
         }
-        dragLabel.style.left = '20px'; dragLabel.style.top = ev.clientY - 10 + 'px';
+        dragLabel.style.left = label.getBoundingClientRect().left + 'px'; dragLabel.style.top = ev.clientY - 10 + 'px';
         
         var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -648,11 +653,12 @@ Browser.prototype.makeTier = function(source) {
             var ttr = tt.row.getBoundingClientRect();
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
-                if (ti != tierOrdinal) {
+                if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
                     // console.log('wants to be at ' + ti);
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
                     tierOrdinal = ti;
+                    yAtLastReorder = ev.clientY;
                     removeChildren(thisB.tierHolder);
                     for (var i = 0; i < thisB.tiers.length; ++i) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
@@ -669,6 +675,7 @@ Browser.prototype.makeTier = function(source) {
             dragLabel.style.cursor = 'auto';
             thisB.svgHolder.removeChild(dragLabel);
             dragLabel = null;
+            label.style.visibility = null;
         }
         // console.log('undrag');
         document.removeEventListener('mousemove', labelDragHandler, false);
