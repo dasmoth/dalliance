@@ -624,18 +624,60 @@ Browser.prototype.makeTier = function(source) {
 
     
     var dragLabel;
+    var tierOrdinal;
 
     var labelDragHandler = function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        if (!dragLabel) {
+            dragLabel = label.cloneNode(true);
+            dragLabel.style.cursor = 'pointer';
+            thisB.svgHolder.appendChild(dragLabel);
+
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                if (thisB.tiers[ti] === tier) {
+                    tierOrdinal = ti;
+                    break;
+                }
+            }
+        }
+        dragLabel.style.left = '20px'; dragLabel.style.top = ev.clientY - 10 + 'px';
+        
+        var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
+        for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+            var tt = thisB.tiers[ti];
+            var ttr = tt.row.getBoundingClientRect();
+            pty -= (ttr.bottom - ttr.top);
+            if (pty < 0) {
+                if (ti != tierOrdinal) {
+                    // console.log('wants to be at ' + ti);
+                    thisB.tiers.splice(tierOrdinal, 1);
+                    thisB.tiers.splice(ti, 0, tier);
+                    tierOrdinal = ti;
+                    removeChildren(thisB.tierHolder);
+                    for (var i = 0; i < thisB.tiers.length; ++i) {
+                        thisB.tierHolder.appendChild(thisB.tiers[i].row);
+                    }
+                }
+                break;
+            }
+        }
     };
 
     var labelReleaseHandler = function(ev) {
-        console.log('undrag');
+        ev.stopPropagation(); ev.preventDefault();
+        if (dragLabel) {
+            dragLabel.style.cursor = 'auto';
+            thisB.svgHolder.removeChild(dragLabel);
+            dragLabel = null;
+        }
+        // console.log('undrag');
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
     };
 
     label.addEventListener('mousedown', function(ev) {
-            console.log('drag');
+            ev.stopPropagation(); ev.preventDefault();
+            //    console.log('drag');
         document.addEventListener('mousemove', labelDragHandler, false);
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
