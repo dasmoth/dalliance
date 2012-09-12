@@ -14,6 +14,8 @@ var MIN_PADDING = 3;
 
 var DEFAULT_SUBTIER_MAX = 25;
 
+NULL_BBOX = {x: 0, y: 0, width: 0, height: 0};
+
 //
 // Colour handling
 //
@@ -1278,7 +1280,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 fill: textFill
             });
             tier.viewport.appendChild(txt);
-            var bbox = txt.getBBox();
+            var bbox = NULL_BBOX;
+            try {
+                bbox = txt.getBBox();
+            } catch (e) {}
             tier.viewport.removeChild(txt);
             txt.setAttribute('x', (minPos + maxPos - bbox.width)/2);
             txt.setAttribute('y', height - 2);

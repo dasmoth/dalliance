@@ -232,11 +232,13 @@ Browser.prototype.labelForTier = function(tier, ti, labelGroup) {
     labelText.setAttribute('pointer-events', 'none');
     labelGroup.appendChild(labelText);
 
-    while (labelText.getBBox().width > labelMaxWidth) {
-        removeChildren(labelText);
-        labelString = labelString.substring(0, labelString.length - 1);
-        labelText.appendChild(document.createTextNode(labelString + '...'));
-    }
+    try {
+        while (labelText.getBBox().width > labelMaxWidth) {
+            removeChildren(labelText);
+            labelString = labelString.substring(0, labelString.length - 1);
+            labelText.appendChild(document.createTextNode(labelString + '...'));
+        }
+    } catch (e) {/* probably means that the BBox isn't available yet due to hidden components */}
     return labelGroup;
 }
 
@@ -490,7 +492,10 @@ Browser.prototype.realUpdateRegion = function()
 
     removeChildren(this.regionLabel);
     this.regionLabel.appendChild(document.createTextNode(fullLabel));
-    var bb = this.regionLabel.getBBox();
+    var bb = NULL_BBOX;
+    try { 
+        this.regionLabel.getBBox();
+    } catch (e) {};
     var rlm = bb.x + bb.width;
     if (this.regionLabelMax && rlm > this.regionLabelMax) {
         removeChildren(this.regionLabel);
@@ -1920,7 +1925,8 @@ Browser.prototype.makeZoomerTicks = function() {
         });
         thisB.zoomTickMarks.appendChild(smark);
         thisB.zoomTickMarks.appendChild(slabel);
-        slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
+        // slabel.setAttribute('x', 29 + markPos - (slabel.getBBox().width/2));
+        slabel.setAttribute('text-anchor', 'middle');
     }
 
     makeSliderMark(1000000);
