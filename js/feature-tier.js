@@ -1496,10 +1496,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         glyph.dalliance_feature = feature;
     }
     var dg = new DGlyph(glyph, min, max, requiredHeight);
-    if (style.LABEL && (feature.label || feature.id)) {
+    if (style.LABEL == 'yes' && (feature.label || feature.id)) {
         dg.label = feature.label || feature.id;
     }
-    if (style.BUMP) {
+    if (style.BUMP == 'yes') {
         dg.bump = true;
     }
     dg.strand = feature.orientation || '0';
