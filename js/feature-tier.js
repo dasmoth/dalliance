@@ -367,6 +367,8 @@ var clipIdSeed = 0;
 
 function drawFeatureTier(tier)
 {
+    var before = Date.now();
+
     sortFeatures(tier);
     tier.placard = null;
     tier.isQuantitative = false;         // gets reset later if we have any HISTOGRAMs.
@@ -754,6 +756,9 @@ function drawFeatureTier(tier)
     tier.clipTier();
             
     tier.scale = 1;
+
+    var after = Date.now();
+    // console.log('draw(' + tier.currentFeatures.length + ') took ' + (after-before) + 'ms');
 }
 
 DasTier.prototype.clipTier = function() {
