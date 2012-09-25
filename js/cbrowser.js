@@ -511,9 +511,12 @@ Browser.prototype.makeTier = function(source) {
 
         var sti = 0;
         ry -= MIN_PADDING;
-        while (ry > st[sti].height && sti < (st.length - 1)) {
+        while (sti < st.length && ry > st[sti].height && sti < (st.length - 1)) {
             ry = ry - st[sti].height - MIN_PADDING;
             ++sti;
+        }
+        if (sti >= st.length) {
+            return;
         }
 
         var glyphs = st[sti].glyphs;
@@ -532,23 +535,33 @@ Browser.prototype.makeTier = function(source) {
         return hit;
     }
 
+    var dragMoveHandler = function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        var rx = ev.clientX;
+        if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
+            thisB.move((rx - dragMoveOrigin));
+            dragMoveOrigin = rx;
+        }
+        thisB.isDragging = true;
+    }
+
+    var dragUpHandler = function(ev) {
+        window.removeEventListener('mousemove', dragMoveHandler, true);
+        window.removeEventListener('mouseup', dragUpHandler, true);
+        // thisB.isDragging = false;    // Can't clear here before the per-tier mouseups get called later :-(.
+                                        // Shouldn't matter because cleared on next mousedown. 
+    }
+        
+
     vph.addEventListener('mousedown', function(ev) {
+        ev.preventDefault();
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
-        var hit = featureLookup(rx, ry);
-        if (hit) {
-            for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
-                try {
-                    thisB.featureListeners[fli](ev, hit);
-                } catch (ex) {
-                    console.log(ex);
-                }
-            }
-        } else {
-            isDragging = true;
-            dragOrigin = dragMoveOrigin = rx;
-        }
+        window.addEventListener('mousemove', dragMoveHandler, true);
+        window.addEventListener('mouseup', dragUpHandler, true);
+        dragOrigin = dragMoveOrigin = rx;
+        thisB.isDragging = false; // Not dragging until a movement event arrives.
     }, false);
 
     vph.addEventListener('mousemove', function(ev) {
@@ -584,7 +597,18 @@ Browser.prototype.makeTier = function(source) {
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
-        if (isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
+        var hit = featureLookup(rx, ry);
+        if (hit && !thisB.isDragging) {
+            for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
+                try {
+                    thisB.featureListeners[fli](ev, hit);
+                } catch (ex) {
+                    console.log(ex);
+                }
+            }
+        }
+
+        if (thisB.isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
             var a = thisB.viewStart + (rx/thisB.scale);
             var b = thisB.viewStart + (dragOrigin/thisB.scale);
 
@@ -597,7 +621,7 @@ Browser.prototype.makeTier = function(source) {
 
             thisB.notifyRegionSelect(thisB.chr, min, max);
         }
-        isDragging = false;
+        thisB.isDragging = false;
     }, false);
 
     vph.addEventListener('mouseout', function(ev) {
