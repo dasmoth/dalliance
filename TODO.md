@@ -3,28 +3,47 @@ For 0.8
 -------
 
   - Performance:
-     + Consider tiled rendering.
+     + Consider tiled rendering (rendering oversized canvases helps, but
+       tiles would probably cut latency).
      + Spin event loop between drawing ops.
   - Missing UI elements (w.r.t. 0.7)
-     + Scales on quantitative tracks
+     + Placards for per-tier errors.
+     + Some sort of per-tier loading spinner (do at the same time as
+       placards... please?)
+     + Per-tier configs:
+       - Expand/collapse of bumped tiers.
+       - Vertical scales on quantitative tracks.
      + Add/remove track mechanism.
-     + "Selected track"
+     + "Selected track" (should be doable with mouse AND kbd)
      + Chromosome overview (can we be less special-casey about this...?)
      + Zoom slider (necessary?  some way to hide it when not in use?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
   - Walk the glyphtree to produce SVG for export
-  - Incremental fetch
+  - Incremental fetch?
   - Refactor next/prev support in big* code.
   - Out-to-chromosome zooming
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
-  - JSON-DAS support?
+
   - Work out the kinks in security/preflighting.
-  - Vertical resizing
-  - Track style configuration (Ron/Julie)
-  - Version track config blobs per-track.
-  - Full binary support.
+  - Vertical resizing?
+  - Persistence system (currently broken...)
+    + Version config blobs per-tier.
+  - Full binary support (nearly, nearly, there, just need to not
+    freak out of entry_points aren't available).
+
+For 0.9 (?)
+-----------
+
+  - Clean separation between genome canvases and UI chrome.
+  - Some sort of full-bleed mode?
+  - Track-hub support
+  - VCF+Tabix support
+     - Anything else in Tabix envelopes?  GFF?  BED?
+  - Small BED/WIG support
+  - JSON-DAS support??? (any closer to having a server for this?)
+  - Stylesheet editor.
  
 Real Soon Now
 -------------
