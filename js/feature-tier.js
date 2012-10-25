@@ -12,7 +12,7 @@ var MIN_FEATURE_PX = 1; // FIXME: slightly higher would be nice, but requires ma
 
 var MIN_PADDING = 3;
 
-var DEFAULT_SUBTIER_MAX = 25;
+var DEFAULT_SUBTIER_MAX = 100;
 
 var NULL_BBOX = {x: 0, y: 0, width: 0, height: 0};
 
