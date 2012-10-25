@@ -8,8 +8,6 @@ For 0.8
      + Spin event loop between drawing ops.
   - Missing UI elements (w.r.t. 0.7)
      + Placards for per-tier errors.
-     + Some sort of per-tier loading spinner (do at the same time as
-       placards... please?)
      + Per-tier configs:
        - Expand/collapse of bumped tiers.
        - Vertical scales on quantitative tracks.
@@ -23,6 +21,8 @@ For 0.8
   - Incremental fetch?
   - Refactor next/prev support in big* code.
   - Out-to-chromosome zooming
+    + Probably needs a better set of semantic zoom hints in the
+      stylesheet language.
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
 

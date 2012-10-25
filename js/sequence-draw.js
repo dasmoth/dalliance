@@ -11,6 +11,8 @@ function drawSeqTier(tier, seq)
 
     var fpw = tier.viewport.width|0; 
 
+    tier.viewport.height = 80;
+
     var gc = tier.viewport.getContext('2d');
     gc.fillStyle = tier.background;
     gc.fillRect(0, 0, fpw, tier.viewport.height);

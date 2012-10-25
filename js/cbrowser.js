@@ -495,6 +495,7 @@ Browser.prototype.makeTier = function(source) {
     */
     
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflow: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
+    vph.className = 'tier-viewport-background';
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
