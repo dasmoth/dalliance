@@ -1962,7 +1962,7 @@ Browser.prototype.makeZoomerTicks = function() {
 
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
-    var width = window.innerWidth;
+    var width = this.svgHolder.offsetWidth;
     width = Math.max(width, 640);
 
     if (this.forceWidth) {
