@@ -216,6 +216,39 @@ makeComparisonChart = function() {
     });
 }
 
+pingaSelectionChange = function(listItem) {
+    var completeList = listItem.parentElement.parentElement.children;
+    for (var i = 0; i < completeList.length; i++) {
+        var item = completeList[i];
+        item.className = item.className.replace(/\bactive\b/, '');
+    }
+    if (listItem.parentElement.className == '')
+        listItem.parentElement.className = 'active';
+    else
+        listItem.parentElement.className = listItem.parentElement.className + ' active';
+
+    var id = listItem.parentElement.id;
+    if (id)
+        pingaSetQueryConstraints('Methylation',
+            document.getElementsByClassName('sex active')[0].id.substr(3) +
+            ',' +
+            document.getElementsByClassName('group active')[0].id.substr(5));
+}
+
+pingaSetQueryConstraints = function(name, query) {
+    if (!query || query == '')
+        query = '/';
+    else
+        query = '__' + query + '/';
+
+    b.tiers.forEach(function(tier) {
+        if (tier.dasSource.name === name) {
+            tier.dasSource.uri = tier.dasSource.uri.replace(/(__[^/]*)?\/$/, '') + query;
+            b.refreshTier(tier);
+        }
+    });
+}
+
 Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
 Browser.prototype.registerHighlightHandler(pingaSaveRangeCallback);
 
