@@ -249,6 +249,40 @@ pingaSetQueryConstraints = function(name, query) {
     });
 }
 
+pingaShowSitePlot = function() {
+    $('#showsideplot')[0].setAttribute('class', 'active');
+    $('#showrangeplot')[0].removeAttribute('class');
+    $('#comparison').animate(
+        {
+            opacity: 0
+        }, {
+            complete: function() {
+                $('#comparison').hide();
+                $('#chart').show();
+                $('#chart').animate({
+                    opacity: 1
+                });
+            }
+        });
+}
+
+pingaShowRangePlot = function() {
+    $('#showrangeplot')[0].setAttribute('class', 'active');
+    $('#showsideplot')[0].removeAttribute('class');
+    $('#chart').animate(
+        {
+            opacity: 0
+        }, {
+            complete: function() {
+                $('#chart').hide();
+                $('#comparison').show();
+                $('#comparison').animate({
+                    opacity: 1
+                });
+            }
+        });
+}
+
 Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
 Browser.prototype.registerHighlightHandler(pingaSaveRangeCallback);
 
@@ -260,5 +294,20 @@ $(document).ready(function() {
     makeComparisonChart();
 
     $('#savedvalues').dataTable();
+
+    // jQuery Datatables UI tweaking:
+    $('#savedvalues_length')[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('#savedvalues_length')[0].children[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('#savedvalues_length')[0].children[0].children[0].removeAttribute('size');
+    $('.dataTables_filter')[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('.dataTables_filter')[0].children[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('.dataTables_filter')[0].children[0].children[0].setAttribute('class', 'search-query')
+
+    // Show only one kind of plot, hide the other one:
+    $('#comparison').animate(
+        {
+            opacity: 0,
+            height: 'toggle'
+        });
 });
 
