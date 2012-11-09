@@ -634,7 +634,7 @@ Browser.prototype.featurePopup = function(ev, feature, group){
     this.removeAllPopups();
 
     for (var handler = 0; handler < FEATURE_POPUP_HANDLERS.length; handler++) {
-        if (FEATURE_POPUP_HANDLERS[handler](ev, feature, group))
+        if (FEATURE_POPUP_HANDLERS[handler](ev, feature, group, false))
             return;
     }
 

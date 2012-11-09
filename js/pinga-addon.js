@@ -15,10 +15,12 @@ var selectedSite = '';
 var casesMean = 0.0;
 var controlsMean = 0.0;
 
+var methylationtable = null;
+
 var comparisonChart;
 
-pingaFeatureDetailsCallback = function(ev, feature, group) {
-    if (!feature.id.match(/^cg\d+\/\d+/))
+pingaFeatureDetailsCallback = function(ev, feature, group, graphOnly) {
+    if (!feature.id.match(/^cg\d+(\/\d+)?/))
         return false;
 
     $.ajax({
@@ -87,10 +89,48 @@ pingaFeatureDetailsCallback = function(ev, feature, group) {
 
             for (i = 0; i < quantileSeries.length; i++)
                 chart.addSeries({ type: 'scatter', name: 'Quantile ' + (i + 1) + '/' + quantileSeries.length, data: [ quantileSeries[i] ] });
+
+            if (!graphOnly)
+                pingaSaveValue(feature.segment, feature.min);
+            pingaFlashTab($('#methylationtab'));
+            pingaUpdateMethylationtableClickCallbacks();
         }
     });
 
     return true;
+}
+
+pingaUpdateMethylationtableClickCallbacks = function() {
+    $('#savedmethylationvalues tbody tr').unbind('click');
+    $('#savedmethylationvalues tbody tr').click(function(e) {
+        if ($(this).hasClass('row_selected')) {
+            $(this).removeClass('row_selected');
+        } else {
+            methylationtable.$('tr.row_selected').removeClass('row_selected');
+            $(this).addClass('row_selected');
+            var feature = {
+                id: $(this)[0].children[0].innerHTML,
+                segment: $(this)[0].children[1].innerHTML,
+                min: $(this)[0].children[2].innerHTML,
+                max: $(this)[0].children[2].innerHTML
+            };
+            pingaFeatureDetailsCallback(null, feature, {}, true);
+        }
+    });
+}
+
+pingaFlashTab = function(element) {
+    if (element.hasClass('active'))
+        return;
+    element.effect('highlight', { color: '#fff', queue: false, complete: function() { pingaEffectiveFlashTab($('#methylationtab')); }}, 10);
+}
+
+// Private function:
+pingaEffectiveFlashTab = function(element) {
+    element.effect('highlight', { color: '#08c' }, 100);
+    element.effect('highlight', { color: '#08c' }, 200);
+    element.effect('highlight', { color: '#08c' }, 100);
+    element.effect('highlight', { color: '#08c' }, 200);
 }
 
 pingaSaveTable = function() {
@@ -98,7 +138,7 @@ pingaSaveTable = function() {
         type: 'POST',
         url: 'http://' + host + '/pinga/service/csv/table',
         contentType: 'text/csv',
-        data: { table: $('#savedvalues').dataTable().fnGetData() },
+        data: { table: $('#savedmethylationvalues').dataTable().fnGetData() },
         success: function(data) {
             window.location = 'http://' + host + '/pinga/service/fetch/' + data
         }
@@ -106,21 +146,25 @@ pingaSaveTable = function() {
 }
 
 pingaClearTable = function() {
-    $('#savedvalues').dataTable().fnClearTable();
+    $('#savedmethylationvalues').dataTable().fnClearTable();
     comparisonChart.destroy();
     makeComparisonChart();
 }
 
-pingaSaveValue = function() {
-    $('#savedvalues').dataTable().fnAddData([
+pingaSaveValue = function(chromosome, coordinate) {
+    $('#savedmethylationvalues').dataTable().fnAddData([
         selectedSite,
+        chromosome,
+        coordinate,
         casesMean,
         controlsMean
     ]);
     comparisonChart.addSeries({ type: 'scatter', name: 'Site ' + selectedSite, data: [ [ casesMean, controlsMean ] ] });
+    $('#savedmethylationvalues tbody tr').removeClass('row_selected');
 }
 
 pingaSaveRangeCallback = function(segment, min, max) {
+    b.refresh();
     $.ajax({
         url: 'http://' + host + '/das/pinga_means/features?segment=' + segment + ':' + min + ',' + max,
         success: function(data) {
@@ -129,12 +173,16 @@ pingaSaveRangeCallback = function(segment, min, max) {
             if (features.length == 0)
                 return;
 
+            var coordinates = {};
             var casesBySite = {};
             var controlsBySite = {};
             for (var i = 0; i < features.length; i++) {
                 var site = features[i].getAttribute('id').replace(/\/.*$/, '');
                 var isCase = features[i].getAttribute('id').indexOf(site + '/1') === 0;
+                var coordinate = parseFloat(features[i].getElementsByTagName('START')[0].childNodes[0].nodeValue);
                 var value = parseFloat(features[i].getElementsByTagName('SCORE')[0].childNodes[0].nodeValue);
+
+                coordinates[site] = coordinate;
 
                 if (isCase)
                     casesBySite[site] = value;
@@ -148,8 +196,10 @@ pingaSaveRangeCallback = function(segment, min, max) {
                 var site = sites[i];
 
                 if (casesBySite[site] != null && controlsBySite[site] != null) {
-                    $('#savedvalues').dataTable().fnAddData([
+                    $('#savedmethylationvalues').dataTable().fnAddData([
                         site,
+                        segment,
+                        coordinates[site],
                         casesBySite[site],
                         controlsBySite[site]
                     ]);
@@ -157,6 +207,8 @@ pingaSaveRangeCallback = function(segment, min, max) {
                 }
             }
             comparisonChart.addSeries({ type: 'scatter', name: 'Chr' + segment + ':' + min + '-' + max , data: data });
+            pingaFlashTab($('#methylationtab'));
+            pingaUpdateMethylationtableClickCallbacks();
         }
     });
 }
@@ -183,7 +235,7 @@ makeSiteChart = function(site) {
                         { from: 0.9, to: 1.0, color: 'rgba(255, 0, 0, 0.05)', label: { text: 'Methylated', style: { color: '#666666' } } }
                     ]
                 },
-                chart: { renderTo: 'chart', zoomType: 'xy' },
+                chart: { renderTo: 'chart', zoomType: 'xy', width: 500 },
                 series: [
                     {
                         type: 'line',
@@ -203,7 +255,7 @@ makeComparisonChart = function() {
         title: { text: 'Case/Control Comparison' },
         xAxis: { title: { text: 'Beta Value (Cases)' }, min: 0.0, max: 1.0 },
         yAxis: { title: { text: 'Beta Value (Controls)' }, min: 0.0, max: 1.0 },
-        chart: { renderTo: 'comparison', zoomType: 'xy' },
+        chart: { renderTo: 'comparison', zoomType: 'xy', width: 500 },
         colors: seriesColors,
         series: [{
             type: 'line',
@@ -293,12 +345,12 @@ $(document).ready(function() {
     // Aggregated data:
     makeComparisonChart();
 
-    $('#savedvalues').dataTable();
+    methylationtable = $('#savedmethylationvalues').dataTable();
 
     // jQuery Datatables UI tweaking:
-    $('#savedvalues_length')[0].children[0].setAttribute('style', 'vertical-align: baseline');
-    $('#savedvalues_length')[0].children[0].children[0].setAttribute('style', 'vertical-align: baseline');
-    $('#savedvalues_length')[0].children[0].children[0].removeAttribute('size');
+    $('#savedmethylationvalues_length')[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('#savedmethylationvalues_length')[0].children[0].children[0].setAttribute('style', 'vertical-align: baseline');
+    $('#savedmethylationvalues_length')[0].children[0].children[0].removeAttribute('size');
     $('.dataTables_filter')[0].children[0].setAttribute('style', 'vertical-align: baseline');
     $('.dataTables_filter')[0].children[0].children[0].setAttribute('style', 'vertical-align: baseline');
     $('.dataTables_filter')[0].children[0].children[0].setAttribute('class', 'search-query')
