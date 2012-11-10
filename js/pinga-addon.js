@@ -339,6 +339,11 @@ Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
 Browser.prototype.registerHighlightHandler(pingaSaveRangeCallback);
 
 $(document).ready(function() {
+    // Make all removable table rows, well, removable:
+    $('.removabletablerow').click(function() {
+        $(this).parent().parent().remove();
+    });
+
     // Site data:
     makeSiteChart('- none selected -');
 
