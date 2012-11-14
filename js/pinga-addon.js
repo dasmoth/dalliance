@@ -335,13 +335,33 @@ pingaShowRangePlot = function() {
         });
 }
 
+var tableRowCounter = 0;
+
+pingaAddColumn = function(table, name, type, description) {
+    var ordinal = $('#methylation_table').children('tbody').children().length + 1;
+    var row = tableRowCounter++;
+
+    $(table).children('tbody').append('<tr><td>' + ordinal + '</td><td>' + $(name)[0].value + '</td><<td>' + $(type)[0].value + '</td><<td>' + $(description)[0].value + '</td><<td><i id="removetablerow' + row + '" class="icon-remove-circle"></i></td><</tr>');
+    $('#removetablerow' + row).click(function() {
+        var table = $(this).parent().parent().parent();
+        $(this).parent().parent().remove();
+        for (var ordinal = 0; ordinal < table.children().length; ordinal++) {
+            table.children()[ordinal].children[0].innerHTML = ordinal + 1;
+        }
+    });
+}
+
 Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
 Browser.prototype.registerHighlightHandler(pingaSaveRangeCallback);
 
 $(document).ready(function() {
     // Make all removable table rows, well, removable:
     $('.removabletablerow').click(function() {
+        var table = $(this).parent().parent().parent();
         $(this).parent().parent().remove();
+        for (var ordinal = 0; ordinal < table.children().length; ordinal++) {
+            table.children()[ordinal].children[0].innerHTML = ordinal + 1;
+        }
     });
 
     // Site data:
