@@ -337,17 +337,108 @@ pingaShowRangePlot = function() {
 
 var tableRowCounter = 0;
 
-pingaAddColumn = function(table, name, type, description) {
-    var ordinal = $('#methylation_table').children('tbody').children().length + 1;
+pingaAddColumn = function(table, name, type, description, required, defaultrow, prepend) {
+    var ordinal = $(table).children('tbody').children().length + 1;
     var row = tableRowCounter++;
 
-    $(table).children('tbody').append('<tr><td>' + ordinal + '</td><td>' + $(name)[0].value + '</td><<td>' + $(type)[0].value + '</td><<td>' + $(description)[0].value + '</td><<td><i id="removetablerow' + row + '" class="icon-remove-circle"></i></td><</tr>');
+    var removeIcon = '';
+    var rowKind = 'class="requiredrow';
+    if (!required) {
+        rowKind = 'class="optionalrow';
+        removeIcon = '<i id="removetablerow' + row + '" class="icon-remove-circle"></i>';
+    }
+    if (!defaultrow)
+        rowKind += '"';
+    else
+        rowKind += ' defaultrow"';
+
+    var rowHTML = '<tr ' + rowKind + '><td>' + ordinal + '</td><td>' + name + '</td><<td>' + type + '</td><<td>' + description + '</td><<td>' + removeIcon + '</td><</tr>';
+
+    if (!prepend)
+        $(table).children('tbody').append(rowHTML);
+    else
+        $(table).children('tbody').prepend(rowHTML);
+
     $('#removetablerow' + row).click(function() {
         var table = $(this).parent().parent().parent();
         $(this).parent().parent().remove();
         for (var ordinal = 0; ordinal < table.children().length; ordinal++) {
             table.children()[ordinal].children[0].innerHTML = ordinal + 1;
         }
+    });
+
+    if (prepend)
+        for (var ordinal = 0; ordinal < $(table).children('tbody').children().length; ordinal++) {
+            $(table).children('tbody').children()[ordinal].children[0].innerHTML = ordinal + 1;
+        }
+}
+
+pingaMakeGenotypeAlleleTable = function(table) {
+    $(table).children('tbody').children('.defaultrow').remove();
+    pingaAddColumn(table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
+    pingaAddColumn(table, 'genotype', 'text (up to 2 characters)', '', true, true, true);
+    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
+    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+}
+
+pingaMakeMethylationSignalTable = function(table) {
+    $(table).children('tbody').children('.defaultrow').remove();
+    pingaAddColumn(table, 'pvalue', 'rational number', '', false, true, true);
+    pingaAddColumn(table, 'signal_b', 'integer', '', false, true, true);
+    pingaAddColumn(table, 'signal_a', 'integer', '', false, true, true);
+    pingaAddColumn(table, 'intensity', 'integer', '', false, true, true);
+    pingaAddColumn(table, 'beta', 'rational number', '', true, true, true);
+    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
+    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+}
+
+pingaSelectUploadTable = function(table, selection) {
+    if (selection.selectedIndex === 0)
+        pingaMakeGenotypeAlleleTable(table);
+    else if (selection.selectedIndex === 1)
+        pingaMakeMethylationSignalTable(table);
+    else
+        $(table).children('tbody').children().remove();
+}
+
+pingaSubmitUpload = function(table, destination, newTableName) {
+    var payload = {};
+
+    if (destination.match(/\.\.\./))
+        payload['tablename'] = newTableName;
+    else
+        payload['tablename'] = destination;
+
+    for (var ordinal = 0; ordinal < $(table).children('tbody').children().length; ordinal++) {
+        var columnNo = $(table).children('tbody').children()[ordinal].children[0].innerHTML;
+        var name = $(table).children('tbody').children()[ordinal].children[1].innerHTML;
+        var type = $(table).children('tbody').children()[ordinal].children[2].innerHTML;
+        var description = $(table).children('tbody').children()[ordinal].children[3].innerHTML;
+
+        if (ordinal != columnNo) {
+            // Uh-oh! This should not be possible, because it indicates that the column numbers
+            // have not been updated properly. The data in the table might be corrupt.
+            return;
+        }
+
+        if (type === 'integer') {
+            type = 'INTEGER';
+        } else if (type === 'rational number') {
+            type = 'REAL';
+        } else if (type.match(/text \(up to [0-9]+ characters\)/)) {
+            type = 'VARCHAR(' + type.replace(/[^0-9]+/g, '') + ')';
+        } else {
+            // Some invalid type sneaked in, which could mean that the table is corrupt.
+            return;
+        }
+
+        payload['' + columnNo] = [ name, type, description ];
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/upload',
+        data: payload
     });
 }
 
