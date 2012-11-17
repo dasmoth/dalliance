@@ -415,7 +415,7 @@ pingaSubmitUpload = function(table, destination, newTableName) {
         var type = $(table).children('tbody').children()[ordinal].children[2].innerHTML;
         var description = $(table).children('tbody').children()[ordinal].children[3].innerHTML;
 
-        if (ordinal != columnNo) {
+        if (ordinal + 1 != columnNo) {
             // Uh-oh! This should not be possible, because it indicates that the column numbers
             // have not been updated properly. The data in the table might be corrupt.
             return;
@@ -432,7 +432,7 @@ pingaSubmitUpload = function(table, destination, newTableName) {
             return;
         }
 
-        payload['' + columnNo] = [ name, type, description ];
+        payload['' + ordinal] = [ name, type, description ];
     }
 
     $.ajax({
