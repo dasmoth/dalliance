@@ -374,6 +374,7 @@ pingaAddColumn = function(table, name, type, description, required, defaultrow, 
 }
 
 pingaMakeGenotypeAlleleTable = function(table) {
+    $('#tablechoice')[0].selectedIndex = 0;
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
     pingaAddColumn(table, 'genotype', 'text (up to 2 characters)', '', true, true, true);
@@ -382,6 +383,7 @@ pingaMakeGenotypeAlleleTable = function(table) {
 }
 
 pingaMakeMethylationSignalTable = function(table) {
+    $('#tablechoice')[0].selectedIndex = 2;
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'pvalue', 'rational number', '', false, true, true);
     pingaAddColumn(table, 'signal_b', 'integer', '', false, true, true);
@@ -392,13 +394,69 @@ pingaMakeMethylationSignalTable = function(table) {
     pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
 }
 
+pingaMakeSampleTable = function(table) {
+    $('#tablechoice')[0].selectedIndex = 3;
+    $(table).children('tbody').children('.defaultrow').remove();
+    pingaAddColumn(table, 'age_diagnosis', 'integer', '', false, true, true);
+    pingaAddColumn(table, 'is_male', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
+    pingaAddColumn(table, 'is_case', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
+    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+}
+
+pingaMakeLocusTable = function(table) {
+    $('#tablechoice')[0].selectedIndex = 1;
+    $(table).children('tbody').children('.defaultrow').remove();
+    pingaAddColumn(table, 'coordinate', 'integer', '', true, true, true);
+    pingaAddColumn(table, 'chromosome', 'text (up to 24 characters)', '', true, true, true);
+    pingaAddColumn(table, 'build', 'integer', '', true, true, true);
+    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
+}
+
 pingaSelectUploadTable = function(table, selection) {
     if (selection.selectedIndex === 0)
         pingaMakeGenotypeAlleleTable(table);
     else if (selection.selectedIndex === 1)
+        pingaMakeLocusTable(table);
+    else if (selection.selectedIndex === 2)
         pingaMakeMethylationSignalTable(table);
-    else
+    else if (selection.selectedIndex === 3)
+        pingaMakeSampleTable(table);
+    else {
+        $('#tablechoice')[0].selectedIndex = selection.selectedIndex;
         $(table).children('tbody').children().remove();
+        $.ajax({
+            type: 'POST',
+            url: 'http://' + host + '/pinga/metatable',
+            data: { 'tablename' : selection.value },
+            success: function(data) {
+                    var i = 0;
+                    while (data.hasOwnProperty('' + i))
+                        i++;
+                    while (--i >= 0) {
+                        var row = data['' + i];
+                        pingaAddColumn(table, row[0], pingaSQLTypeToInformativeText(row[1]), row[2], true, true, true);
+                    }
+                }
+            });
+    }
+}
+
+pingaSQLTypeToInformativeText = function(sql) {
+    var text = '';
+
+    if (sql === 'INT' || sql === 'INTEGER') {
+        text = 'integer';
+    } else if (sql === 'REAL') {
+        text = 'rational number';
+    } else if (sql === 'BOOLEAN') {
+        text = 'boolean (yes/no, on/off, etc.)';
+    } else if (sql.match(/^VARCHAR\(/)) {
+        text = 'text (up to ' + sql.replace(/[^0-9]+/g, '') + ' characters)';
+    } else {
+        // TODO Handle error.
+    }
+
+    return text;
 }
 
 pingaSubmitUpload = function(table, destination, newTableName) {
@@ -425,6 +483,8 @@ pingaSubmitUpload = function(table, destination, newTableName) {
             type = 'INTEGER';
         } else if (type === 'rational number') {
             type = 'REAL';
+        } else if (type === 'boolean (yes/no, on/off, etc.)') {
+            type = 'BOOLEAN';
         } else if (type.match(/text \(up to [0-9]+ characters\)/)) {
             type = 'VARCHAR(' + type.replace(/[^0-9]+/g, '') + ')';
         } else {
