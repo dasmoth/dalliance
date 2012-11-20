@@ -1,6 +1,11 @@
 
 var host = 'localhost';
 
+var TABLE_GENOTYPE_INDEX    = 0;
+var TABLE_LOCUS_INDEX       = 1;
+var TABLE_METHYLATION_INDEX = 2;
+var TABLE_SAMPLE_INDEX      = 3;
+
 var seriesColors = [
         '#4572A7',
         'rgba(255, 0, 0, 0.3)',
@@ -373,8 +378,34 @@ pingaAddColumn = function(table, name, type, description, required, defaultrow, 
         }
 }
 
+pingaUpdateAvailableTables = function(selection) {
+    var items = $(selection)[0].length;
+    for (var i = items - 1; i >= 0; i--)
+        if (!$(selection)[0][i].value.match(/ /))
+            $('#' + $(selection)[0][i].id).remove();
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/metatables',
+        data: {},
+        success: function(data) {
+                var tables = [];
+                for (var tablename in data) {
+                    if (!data.hasOwnProperty(tablename))
+                        continue;
+                    tables.push(tablename);
+                }
+                tables = tables.sort();
+                for (var tableNo = 0; tableNo < tables.length; tableNo++) {
+                    tablename = tables[tableNo];
+                    $('#tablechoice').append('<option id="tablechoice' + tables.indexOf(tablename) + '">' + tablename + '&nbsp;(' + data[tablename].replace(/;.*$/, '') + ')</option>');
+                }
+            }
+        });
+}
+
 pingaMakeGenotypeAlleleTable = function(table) {
-    $('#tablechoice')[0].selectedIndex = 0;
+    $('#tablechoice')[0].selectedIndex = TABLE_GENOTYPE_INDEX;
+    pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
     pingaAddColumn(table, 'genotype', 'text (up to 2 characters)', '', true, true, true);
@@ -383,7 +414,8 @@ pingaMakeGenotypeAlleleTable = function(table) {
 }
 
 pingaMakeMethylationSignalTable = function(table) {
-    $('#tablechoice')[0].selectedIndex = 2;
+    $('#tablechoice')[0].selectedIndex = TABLE_METHYLATION_INDEX;
+    pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'pvalue', 'rational number', '', false, true, true);
     pingaAddColumn(table, 'signal_b', 'integer', '', false, true, true);
@@ -395,7 +427,8 @@ pingaMakeMethylationSignalTable = function(table) {
 }
 
 pingaMakeSampleTable = function(table) {
-    $('#tablechoice')[0].selectedIndex = 3;
+    $('#tablechoice')[0].selectedIndex = TABLE_SAMPLE_INDEX;
+    pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'age_diagnosis', 'integer', '', false, true, true);
     pingaAddColumn(table, 'is_male', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
@@ -404,7 +437,8 @@ pingaMakeSampleTable = function(table) {
 }
 
 pingaMakeLocusTable = function(table) {
-    $('#tablechoice')[0].selectedIndex = 1;
+    $('#tablechoice')[0].selectedIndex = TABLE_LOCUS_INDEX;
+    pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, 'coordinate', 'integer', '', true, true, true);
     pingaAddColumn(table, 'chromosome', 'text (up to 24 characters)', '', true, true, true);
@@ -413,13 +447,13 @@ pingaMakeLocusTable = function(table) {
 }
 
 pingaSelectUploadTable = function(table, selection) {
-    if (selection.selectedIndex === 0)
+    if (selection.selectedIndex === TABLE_GENOTYPE_INDEX)
         pingaMakeGenotypeAlleleTable(table);
-    else if (selection.selectedIndex === 1)
+    else if (selection.selectedIndex === TABLE_LOCUS_INDEX)
         pingaMakeLocusTable(table);
-    else if (selection.selectedIndex === 2)
+    else if (selection.selectedIndex === TABLE_METHYLATION_INDEX)
         pingaMakeMethylationSignalTable(table);
-    else if (selection.selectedIndex === 3)
+    else if (selection.selectedIndex === TABLE_SAMPLE_INDEX)
         pingaMakeSampleTable(table);
     else {
         $('#tablechoice')[0].selectedIndex = selection.selectedIndex;
@@ -427,7 +461,7 @@ pingaSelectUploadTable = function(table, selection) {
         $.ajax({
             type: 'POST',
             url: 'http://' + host + '/pinga/metatable',
-            data: { 'tablename' : selection.value },
+            data: { 'tablename' : selection.value.replace(/\(.*\)/g, '').trim() },
             success: function(data) {
                     var i = 0;
                     while (data.hasOwnProperty('' + i))
@@ -459,13 +493,24 @@ pingaSQLTypeToInformativeText = function(sql) {
     return text;
 }
 
-pingaSubmitUpload = function(table, destination, newTableName) {
+pingaSubmitUpload = function(table, selection, destination, newTableName) {
     var payload = {};
+
+    selection = $(selection)[0];
 
     if (destination.match(/\.\.\./))
         payload['tablename'] = newTableName;
     else
-        payload['tablename'] = destination;
+        payload['tablename'] = destination.replace(/&.*;/g, '').replace(/\(.*\)/g, '');
+
+    if (selection.selectedIndex === TABLE_GENOTYPE_INDEX)
+        payload['tabletype'] = 'Genotyping; Format 1';
+    else if (selection.selectedIndex === TABLE_LOCUS_INDEX)
+        payload['tabletype'] = 'Locus; Format 1';
+    else if (selection.selectedIndex === TABLE_METHYLATION_INDEX)
+        payload['tabletype'] = 'Methylation; Format 1';
+    else if (selection.selectedIndex === TABLE_SAMPLE_INDEX)
+        payload['tabletype'] = 'Sample; Format 1';
 
     for (var ordinal = 0; ordinal < $(table).children('tbody').children().length; ordinal++) {
         var columnNo = $(table).children('tbody').children()[ordinal].children[0].innerHTML;
