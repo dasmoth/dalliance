@@ -501,7 +501,11 @@ pingaSubmitUpload = function(table, selection, destination, newTableName) {
     if (destination.match(/\.\.\./))
         payload['tablename'] = newTableName;
     else
-        payload['tablename'] = destination.replace(/&.*;/g, '').replace(/\(.*\)/g, '');
+        payload['tablename'] = destination.replace(/&.*;/g, '').replace(/\(.*\)/g, '').trim();
+
+    // Set tablename for actual file upload form (so that the POST handler knows where
+    // to store the data):
+    $('#uploaddestination')[0].value = payload['tablename'];
 
     if (selection.selectedIndex === TABLE_GENOTYPE_INDEX)
         payload['tabletype'] = 'Genotyping; Format 1';
@@ -582,5 +586,11 @@ $(document).ready(function() {
             opacity: 0,
             height: 'toggle'
         });
+
+    $('#uploaddialog').on('show', function() {
+        $('#tableconfig').show(0);
+        $('#uploaddatafooter').show(0);
+        $('#attachments').hide(0);
+    });
 });
 
