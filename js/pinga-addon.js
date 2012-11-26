@@ -342,7 +342,14 @@ pingaShowRangePlot = function() {
 
 var tableRowCounter = 0;
 
-pingaAddColumn = function(table, name, type, description, required, defaultrow, prepend) {
+pingaUpdateAnnotationCounts = function(reference_table, annotation_table) {
+    var offset = $(reference_table).children('tbody').children().length;
+    for (var ordinal = 0; ordinal < $(annotation_table).children('tbody').children().length; ordinal++) {
+        $(annotation_table).children('tbody').children()[ordinal].children[0].innerHTML = ordinal + offset + 1;
+    }
+}
+
+pingaAddColumn = function(table, annotation_table, name, type, description, required, defaultrow, prepend) {
     var ordinal = $(table).children('tbody').children().length + 1;
     var row = tableRowCounter++;
 
@@ -370,12 +377,15 @@ pingaAddColumn = function(table, name, type, description, required, defaultrow, 
         for (var ordinal = 0; ordinal < table.children().length; ordinal++) {
             table.children()[ordinal].children[0].innerHTML = ordinal + 1;
         }
+        pingaUpdateAnnotationCounts('#uploadtable', '#locustable');
     });
 
     if (prepend)
         for (var ordinal = 0; ordinal < $(table).children('tbody').children().length; ordinal++) {
             $(table).children('tbody').children()[ordinal].children[0].innerHTML = ordinal + 1;
         }
+
+    pingaUpdateAnnotationCounts(table, annotation_table);
 }
 
 pingaUpdateAvailableTables = function(selection) {
@@ -403,58 +413,66 @@ pingaUpdateAvailableTables = function(selection) {
         });
 }
 
-pingaMakeGenotypeAlleleTable = function(table) {
+pingaMakeGenotypeAlleleTable = function(table, annotation_table) {
+    $('#locusannotationtoggle').hide();
+    $('#locusannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_GENOTYPE_INDEX;
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
-    pingaAddColumn(table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
-    pingaAddColumn(table, 'genotype', 'text (up to 2 characters)', '', true, true, true);
-    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
-    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'genotype', 'text (up to 2 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'target', 'text (up to 20 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'sample', 'text (up to 10 characters)', '', true, true, true);
 }
 
-pingaMakeMethylationSignalTable = function(table) {
+pingaMakeMethylationSignalTable = function(table, annotation_table) {
+    $('#locusannotationtoggle').hide();
+    $('#locusannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_METHYLATION_INDEX;
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
-    pingaAddColumn(table, 'pvalue', 'rational number', '', false, true, true);
-    pingaAddColumn(table, 'signal_b', 'integer', '', false, true, true);
-    pingaAddColumn(table, 'signal_a', 'integer', '', false, true, true);
-    pingaAddColumn(table, 'intensity', 'integer', '', false, true, true);
-    pingaAddColumn(table, 'beta', 'rational number', '', true, true, true);
-    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
-    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'pvalue', 'rational number', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'signal_b', 'integer', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'signal_a', 'integer', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'intensity', 'integer', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'beta', 'rational number', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'target', 'text (up to 20 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'sample', 'text (up to 10 characters)', '', true, true, true);
 }
 
-pingaMakeSampleTable = function(table) {
+pingaMakeSampleTable = function(table, annotation_table) {
+    $('#locusannotationtoggle').hide();
+    $('#locusannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_SAMPLE_INDEX;
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
-    pingaAddColumn(table, 'age_diagnosis', 'integer', '', false, true, true);
-    pingaAddColumn(table, 'is_male', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
-    pingaAddColumn(table, 'is_case', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
-    pingaAddColumn(table, 'sample', 'text (up to 10 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'age_diagnosis', 'integer', '', false, true, true);
+    pingaAddColumn(table, annotation_table, 'is_male', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'is_case', 'boolean (yes/no, on/off, etc.)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'sample', 'text (up to 10 characters)', '', true, true, true);
 }
 
-pingaMakeLocusTable = function(table) {
+pingaMakeLocusTable = function(table, annotation_table) {
+    $('#locusannotationtoggle').show();
+    $('#locusannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_LOCUS_INDEX;
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
-    pingaAddColumn(table, 'coordinate', 'integer', '', true, true, true);
-    pingaAddColumn(table, 'chromosome', 'text (up to 24 characters)', '', true, true, true);
-    pingaAddColumn(table, 'build', 'integer', '', true, true, true);
-    pingaAddColumn(table, 'target', 'text (up to 20 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'coordinate', 'integer', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'chromosome', 'text (up to 24 characters)', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'build', 'integer', '', true, true, true);
+    pingaAddColumn(table, annotation_table, 'target', 'text (up to 20 characters)', '', true, true, true);
 }
 
-pingaSelectUploadTable = function(table, selection) {
+pingaSelectUploadTable = function(table, annotation_table, selection) {
     if (selection.selectedIndex === TABLE_GENOTYPE_INDEX)
-        pingaMakeGenotypeAlleleTable(table);
+        pingaMakeGenotypeAlleleTable(table, annotation_table);
     else if (selection.selectedIndex === TABLE_LOCUS_INDEX)
-        pingaMakeLocusTable(table);
+        pingaMakeLocusTable(table, annotation_table);
     else if (selection.selectedIndex === TABLE_METHYLATION_INDEX)
-        pingaMakeMethylationSignalTable(table);
+        pingaMakeMethylationSignalTable(table, annotation_table);
     else if (selection.selectedIndex === TABLE_SAMPLE_INDEX)
-        pingaMakeSampleTable(table);
+        pingaMakeSampleTable(table, annotation_table);
     else {
         $('#tablechoice')[0].selectedIndex = selection.selectedIndex;
         $(table).children('tbody').children().remove();
@@ -468,7 +486,7 @@ pingaSelectUploadTable = function(table, selection) {
                         i++;
                     while (--i >= 0) {
                         var row = data['' + i];
-                        pingaAddColumn(table, row[0], pingaSQLTypeToInformativeText(row[1]), row[2], true, true, true);
+                        pingaAddColumn(table, annotation_table, row[0], pingaSQLTypeToInformativeText(row[1]), row[2], true, true, true);
                     }
                 }
             });
@@ -562,6 +580,7 @@ $(document).ready(function() {
         for (var ordinal = 0; ordinal < table.children().length; ordinal++) {
             table.children()[ordinal].children[0].innerHTML = ordinal + 1;
         }
+        pingaUpdateAnnotationCounts('#uploadtable', '#locustable');
     });
 
     // Site data:
