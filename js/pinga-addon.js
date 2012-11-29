@@ -388,6 +388,31 @@ pingaAddColumn = function(table, annotation_table, name, type, description, requ
     pingaUpdateAnnotationCounts(table, annotation_table);
 }
 
+pingaUpdateAvailableProjects = function(selection) {
+    var items = $(selection)[0].length;
+    for (var i = items - 1; i >= 0; i--)
+        if (!$(selection)[0][i].value.match(/\.\.\./))
+            $('#' + $(selection)[0][i].id).remove();
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/metaprojects',
+        data: {},
+        success: function(data) {
+                var tables = [];
+                for (var tablename in data) {
+                    if (!data.hasOwnProperty(tablename))
+                        continue;
+                    tables.push(tablename);
+                }
+                tables = tables.sort();
+                for (var tableNo = 0; tableNo < tables.length; tableNo++) {
+                    projectname = tables[tableNo];
+                    $('#projectchoice').append('<option id="projectchoice' + tables.indexOf(projectname) + '">' + projectname + '</option>');
+                }
+            }
+        });
+}
+
 pingaUpdateAvailableTables = function(selection) {
     var items = $(selection)[0].length;
     for (var i = items - 1; i >= 0; i--)
@@ -415,8 +440,13 @@ pingaUpdateAvailableTables = function(selection) {
 
 pingaMakeGenotypeAlleleTable = function(table, annotation_table) {
     $('#locusannotationtoggle').hide();
+    $('#genomethannotationtoggle').show();
+    $('#sampleannotationtoggle').hide();
+    $('#genomethannotation').hide();
     $('#locusannotation').hide();
+    $('#sampleannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_GENOTYPE_INDEX;
+    pingaUpdateAvailableProjects('#projectchoice');
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, annotation_table, 'enzyme', 'text (up to 20 characters)', '', false, true, true);
@@ -427,8 +457,13 @@ pingaMakeGenotypeAlleleTable = function(table, annotation_table) {
 
 pingaMakeMethylationSignalTable = function(table, annotation_table) {
     $('#locusannotationtoggle').hide();
+    $('#genomethannotationtoggle').show();
+    $('#sampleannotationtoggle').hide();
+    $('#genomethannotation').hide();
     $('#locusannotation').hide();
+    $('#sampleannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_METHYLATION_INDEX;
+    pingaUpdateAvailableProjects('#projectchoice');
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, annotation_table, 'pvalue', 'rational number', '', false, true, true);
@@ -442,8 +477,13 @@ pingaMakeMethylationSignalTable = function(table, annotation_table) {
 
 pingaMakeSampleTable = function(table, annotation_table) {
     $('#locusannotationtoggle').hide();
+    $('#genomethannotationtoggle').hide();
+    $('#sampleannotationtoggle').show();
+    $('#genomethannotation').hide();
     $('#locusannotation').hide();
+    $('#sampleannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_SAMPLE_INDEX;
+    pingaUpdateAvailableProjects('#projectchoice');
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, annotation_table, 'age_diagnosis', 'integer', '', false, true, true);
@@ -454,8 +494,13 @@ pingaMakeSampleTable = function(table, annotation_table) {
 
 pingaMakeLocusTable = function(table, annotation_table) {
     $('#locusannotationtoggle').show();
+    $('#genomethannotationtoggle').hide();
+    $('#sampleannotationtoggle').hide();
+    $('#genomethannotation').hide();
     $('#locusannotation').hide();
+    $('#sampleannotation').hide();
     $('#tablechoice')[0].selectedIndex = TABLE_LOCUS_INDEX;
+    pingaUpdateAvailableProjects('#projectchoice');
     pingaUpdateAvailableTables('#tablechoice');
     $(table).children('tbody').children('.defaultrow').remove();
     pingaAddColumn(table, annotation_table, 'coordinate', 'integer', '', true, true, true);
