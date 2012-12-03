@@ -509,22 +509,43 @@ pingaMakeLocusTable = function(table, annotation_table) {
     pingaAddColumn(table, annotation_table, 'target', 'text (up to 20 characters)', '', true, true, true);
 }
 
-pingaSelectUploadTable = function(table, annotation_table, selection) {
-    if (selection.selectedIndex === TABLE_GENOTYPE_INDEX)
+pingaSelectProject = function(projectname, selection) {
+    if (selection.value.match(/\.\.\./)) {
+        $(projectname).attr('readonly', null);
+        $(projectname)[0].value = '';
+    } else {
+        $(projectname)[0].value = selection.value;
+        $(projectname).attr('readonly', 'readonly');
+    }
+}
+
+pingaSelectUploadTable = function(table, annotation_table, tablename, selection) {
+    if (selection.selectedIndex === TABLE_GENOTYPE_INDEX) {
+        $(tablename)[0].value = ''
+        $(tablename).attr('readonly', null);
         pingaMakeGenotypeAlleleTable(table, annotation_table);
-    else if (selection.selectedIndex === TABLE_LOCUS_INDEX)
+    } else if (selection.selectedIndex === TABLE_LOCUS_INDEX) {
+        $(tablename)[0].value = ''
+        $(tablename).attr('readonly', null);
         pingaMakeLocusTable(table, annotation_table);
-    else if (selection.selectedIndex === TABLE_METHYLATION_INDEX)
+    } else if (selection.selectedIndex === TABLE_METHYLATION_INDEX) {
+        $(tablename)[0].value = ''
+        $(tablename).attr('readonly', null);
         pingaMakeMethylationSignalTable(table, annotation_table);
-    else if (selection.selectedIndex === TABLE_SAMPLE_INDEX)
+    } else if (selection.selectedIndex === TABLE_SAMPLE_INDEX) {
+        $(tablename)[0].value = ''
+        $(tablename).attr('readonly', null);
         pingaMakeSampleTable(table, annotation_table);
-    else {
+    } else {
+        db_tablename = selection.value.replace(/\(.*\)/g, '').trim();
+        $(tablename)[0].value = db_tablename;
+        $(tablename).attr('readonly', 'readonly');
         $('#tablechoice')[0].selectedIndex = selection.selectedIndex;
         $(table).children('tbody').children().remove();
         $.ajax({
             type: 'POST',
             url: 'http://' + host + '/pinga/metatable',
-            data: { 'tablename' : selection.value.replace(/\(.*\)/g, '').trim() },
+            data: { 'tablename' : db_tablename },
             success: function(data) {
                     var i = 0;
                     while (data.hasOwnProperty('' + i))
