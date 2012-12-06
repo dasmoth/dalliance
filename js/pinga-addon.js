@@ -138,6 +138,7 @@ pingaEffectiveFlashTab = function(element) {
     element.effect('highlight', { color: '#08c' }, 200);
 }
 
+/* Currently non-functional way of saving DataTable contents. */
 pingaSaveTable = function() {
     $.ajax({
         type: 'POST',
@@ -635,6 +636,51 @@ pingaSubmitUpload = function(table, selection, destination, newTableName) {
     });
 }
 
+pingaAddTrack = function(table, selection, destination, newTableName) {
+    var payload = {};
+
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/addtrack',
+        data: payload
+    });
+}
+
+pingaUpdateTrackTable = function(table, sampleSelection, locusSelection, genomethSelection) {
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/metatables',
+        data: {},
+        success: function(data) {
+                var tables = [];
+                for (var tablename in data) {
+                    if (!data.hasOwnProperty(tablename))
+                        continue;
+                    tables.push(tablename);
+                }
+                tables = tables.sort();
+
+                $(table).find('tbody').find('tr').remove();
+                $(sampleSelection).find('option').remove();
+                $(locusSelection).find('option').remove();
+                $(genomethSelection).find('option').remove();
+
+                for (var tableNo = 0; tableNo < tables.length; tableNo++) {
+                    tablename = tables[tableNo];
+                    if (data[tablename].match(/^Sample;/)) {
+                        $(sampleSelection).append('<option id="sampletablechoice' + tables.indexOf(tablename) + '">' + tablename + '</option>');
+                    } else if (data[tablename].match(/^Locus;/)) {
+                        $(locusSelection).append('<option id="locustablechoice' + tables.indexOf(tablename) + '">' + tablename + '</option>');
+                    } else if (data[tablename].match(/^(Genotype|Methylation);/)) {
+                        $(genomethSelection).append('<option id="genomethtablechoice' + tables.indexOf(tablename) + '">' + tablename + '</option>');
+                    } else {
+                        // TODO Woops...
+                    }
+                }
+            }
+        });
+}
+
 Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
 Browser.prototype.registerHighlightHandler(pingaSaveRangeCallback);
 
@@ -677,5 +723,7 @@ $(document).ready(function() {
         $('#uploaddatafooter').show(0);
         $('#attachments').hide(0);
     });
+
+    $('#tracktable').dataTable({ "sPaginationType": "bootstrap" });
 });
 
