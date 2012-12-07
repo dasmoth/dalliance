@@ -350,6 +350,34 @@ pingaUpdateAnnotationCounts = function(reference_table, annotation_table) {
     }
 }
 
+pingaAddTrack = function(table, name, sample_table, locus_table, genometh_table, description) {
+    var row = tableRowCounter++;
+
+    var removeIcon = '<i id="removetablerow' + row + '" class="icon-remove-circle"></i>';
+    var rowKind = 'class="optionalrow';
+
+    var tables = sample_table + '<br />' + locus_table + '<br />' + genometh_table;
+
+    /*
+    var rowHTML = '<tr ' + rowKind + '><td>' + name + '</td><td>' + tables + '</td><td>' + description + '</td><td>' + removeIcon + '</td></tr>';
+
+    $(table).children('tbody').append(rowHTML);
+     */
+    $(table).dataTable().fnAddData([ [ name, tables, description, removeIcon ] ]);
+
+    $('#removetablerow' + row).click(function() {
+        var index = $(table).find('tr').index($(this).parent().parent()) - 1;
+
+        /*
+         * Note: Docs say that you can also pass the TR element for removal.
+         *       Well, that's not working though. In order to remove a row,
+         *       you really only can pass it the row's index (zero based).
+         */
+        if (index >= 0)
+            $(table).dataTable().fnDeleteRow(index);
+    });
+}
+
 pingaAddColumn = function(table, annotation_table, name, type, description, required, defaultrow, prepend) {
     var ordinal = $(table).children('tbody').children().length + 1;
     var row = tableRowCounter++;
@@ -636,12 +664,12 @@ pingaSubmitUpload = function(table, selection, destination, newTableName) {
     });
 }
 
-pingaAddTrack = function(table, selection, destination, newTableName) {
+pingaCreateTrack = function(table, selection, destination, newTableName) {
     var payload = {};
 
     $.ajax({
         type: 'POST',
-        url: 'http://' + host + '/pinga/addtrack',
+        url: 'http://' + host + '/pinga/createtrack',
         data: payload
     });
 }
@@ -660,7 +688,6 @@ pingaUpdateTrackTable = function(table, sampleSelection, locusSelection, genomet
                 }
                 tables = tables.sort();
 
-                $(table).find('tbody').find('tr').remove();
                 $(sampleSelection).find('option').remove();
                 $(locusSelection).find('option').remove();
                 $(genomethSelection).find('option').remove();
@@ -678,6 +705,29 @@ pingaUpdateTrackTable = function(table, sampleSelection, locusSelection, genomet
                     }
                 }
             }
+        });
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/metatracks',
+        data: {},
+        success: function(data) {
+                var tracks = [];
+                for (var trackname in data) {
+                    if (!data.hasOwnProperty(trackname))
+                        continue;
+                    tracks.push(trackname);
+                }
+                tracks = tracks.sort();
+
+                $(table).dataTable().fnClearTable();
+
+                for (var trackNo = 0; trackNo < tracks.length; trackNo++) {
+                    trackname = tracks[trackNo];
+                    pingaAddTrack(table, trackname, data[trackname][1], data[trackname][2], data[trackname][3], data[trackname][0]);
+                }
+
+                $(table).dataTable().fnDraw();
+        }
         });
 }
 
@@ -724,6 +774,10 @@ $(document).ready(function() {
         $('#attachments').hide(0);
     });
 
-    $('#tracktable').dataTable({ "sPaginationType": "bootstrap" });
+    $('#tracktable').dataTable({
+        "sDom": "tip",
+        "sPaginationType": "bootstrap",
+        "iDisplayLength": 5
+    });
 });
 
