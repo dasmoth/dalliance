@@ -350,10 +350,32 @@ pingaUpdateAnnotationCounts = function(reference_table, annotation_table) {
     }
 }
 
+pingaConfirmationDialog = function(id, proceedProgram, abortProgram, message, proceedLabel, abortLabel) {
+    var html = '<div id="' + id + '" class="modal hide fade">' +
+                 '<div class="modal-header">' + 
+                   '<h3>Confirmation</h3>' +
+                 '</div>' +
+                 '<div class="modal-body">' + 
+                   message +
+                 '</div>' +
+                 '<div class="modal-footer">' + 
+                   '<button class="btn btn-danger" data-toggle="modal" href="#' + id + '" onclick="' + proceedProgram + '"><i class="icon-fire icon-white"></i> ' + proceedLabel + '</button>' +
+                   '<button class="btn" data-toggle="modal" href="#' + id + '" onclick="' + abortProgram + '">' + abortLabel + '</button>' +
+                 '</div>' +
+               '</div>';
+    return html; 
+}
+
 pingaAddTrack = function(table, name, sample_table, locus_table, genometh_table, description) {
     var row = tableRowCounter++;
 
-    var removeIcon = '<i id="removetablerow' + row + '" class="icon-remove-circle"></i>';
+    var removeIcon = pingaConfirmationDialog('confirmation' + row,
+                                             "alert('DELETE');",
+                                             "alert('KEEP');",
+                                             'Deleting a track is permanent and cannot be undone. It will be gone for good.',
+                                             'Delete Track',
+                                             'Keep Track') +
+                     '<i id="removetablerow' + row + '" class="icon-remove-circle" role="button" data-toggle="modal" href="#confirmation' + row + '"></i>';
     var rowKind = 'class="optionalrow';
 
     var tables = sample_table + '<br />' + locus_table + '<br />' + genometh_table;
@@ -368,13 +390,14 @@ pingaAddTrack = function(table, name, sample_table, locus_table, genometh_table,
     $('#removetablerow' + row).click(function() {
         var index = $(table).find('tr').index($(this).parent().parent()) - 1;
 
+return;
         /*
          * Note: Docs say that you can also pass the TR element for removal.
          *       Well, that's not working though. In order to remove a row,
          *       you really only can pass it the row's index (zero based).
          */
-        if (index >= 0)
-            $(table).dataTable().fnDeleteRow(index);
+        // if (index >= 0)
+        //     $(table).dataTable().fnDeleteRow(index);
     });
 }
 
@@ -659,18 +682,40 @@ pingaSubmitUpload = function(table, selection, destination, newTableName) {
 
     $.ajax({
         type: 'POST',
-        url: 'http://' + host + '/pinga/upload',
+        url: 'http://' + host + '/pinga/createtable',
         data: payload
     });
 }
 
-pingaCreateTrack = function(table, selection, destination, newTableName) {
-    var payload = {};
-
+pingaCreateTrack = function(table, newTrackName, sampleTable, locusTable, genomethTable, description) {
     $.ajax({
         type: 'POST',
         url: 'http://' + host + '/pinga/createtrack',
-        data: payload
+        data: {
+            'trackname': newTrackName,
+            'sampletable': sampleTable,
+            'locustable': locusTable,
+            'genomethtable': genomethTable,
+            'description': description
+        },
+        success: pingaUpdateTrackTable('#tracktable', '#newtracksample', '#newtracklocus', '#newtrackgenometh')
+    });
+}
+
+pingaDeleteTrack = function(element) {
+    
+    return;
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/createtrack',
+        data: {
+            'trackname': newTrackName,
+            'sampletable': sampleTable,
+            'locustable': locusTable,
+            'genomethtable': genomethTable,
+            'description': description
+        },
+        success: pingaUpdateTrackTable('#tracktable', '#newtracksample', '#newtracklocus', '#newtrackgenometh')
     });
 }
 
