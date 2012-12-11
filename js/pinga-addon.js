@@ -6,6 +6,8 @@ var TABLE_LOCUS_INDEX       = 1;
 var TABLE_METHYLATION_INDEX = 2;
 var TABLE_SAMPLE_INDEX      = 3;
 
+var TABLES_PER_SIDEBARPAGE  = 10;
+
 var seriesColors = [
         '#4572A7',
         'rgba(255, 0, 0, 0.3)',
@@ -276,15 +278,12 @@ makeComparisonChart = function() {
 
 pingaSelectionChange = function(listItem) {
     var completeList = listItem.parentElement.parentElement.children;
-    for (var i = 0; i < completeList.length; i++) {
-        var item = completeList[i];
-        item.className = item.className.replace(/\bactive\b/, '');
-    }
-    if (listItem.parentElement.className == '')
-        listItem.parentElement.className = 'active';
+    if (listItem.parentElement.className.match(/\bactive\b/))
+        listItem.parentElement.className = listItem.parentElement.className.replace(/active/g, '').replace(/ +/g, ' ').replace(/^ +| +$/, '');
     else
         listItem.parentElement.className = listItem.parentElement.className + ' active';
 
+    return;
     var id = listItem.parentElement.id;
     if (id)
         pingaSetQueryConstraints('Methylation',
@@ -772,7 +771,40 @@ pingaUpdateTrackTable = function(table, sampleSelection, locusSelection, genomet
                 }
 
                 $(table).dataTable().fnDraw();
-        }
+            }
+        });
+}
+
+pingaUpdateSidebarTrack = function(tracklist, trackpages, selectAll) {
+    var active = selectAll ? ' active' : '';
+
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + host + '/pinga/metatracks',
+        data: {},
+        success: function(data) {
+                var tracks = [];
+                for (var trackname in data) {
+                    if (!data.hasOwnProperty(trackname))
+                        continue;
+                    tracks.push(trackname);
+                }
+                tracks = tracks.sort();
+
+                $(tracklist).find('.tracks').remove();
+                $(trackpages).children().remove();
+
+                if (tracks.length > TABLES_PER_SIDEBARPAGE)
+                    $(trackpages).append('<li class="active"><a>1</a></li>');
+
+                for (var trackNo = 0; trackNo < tracks.length; trackNo++) {
+                    trackname = tracks[trackNo];
+                    $(tracklist).append('<li class="tracks' + active + '"><a onclick="pingaSelectionChange(this)">' + trackname + '</a></li>');
+
+                    if (trackNo > 0 && trackNo % TABLES_PER_SIDEBARPAGE == 0)
+                        $(trackpages).append('<li><a>' + (trackNo / TABLES_PER_SIDEBARPAGE + 1) + '</a></li>');
+                }
+            }
         });
 }
 
@@ -824,5 +856,7 @@ $(document).ready(function() {
         "sPaginationType": "bootstrap",
         "iDisplayLength": 5
     });
+
+    pingaUpdateSidebarTrack('#tracklist', '#trackpages', true);
 });
 
