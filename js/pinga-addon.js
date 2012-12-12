@@ -1,5 +1,6 @@
 
-var host = 'localhost';
+var b;
+var host = '10.0.3.216';
 
 var TABLE_GENOTYPE_INDEX    = 0;
 var TABLE_LOCUS_INDEX       = 1;
@@ -23,6 +24,8 @@ var casesMean = 0.0;
 var controlsMean = 0.0;
 
 var methylationtable = null;
+
+var trackSummary = {};
 
 var comparisonChart;
 
@@ -370,7 +373,7 @@ pingaAddTrack = function(table, name, sample_table, locus_table, genometh_table,
 
     var removeIcon = pingaConfirmationDialog('confirmation' + row,
                                              "alert('DELETE');",
-                                             "alert('KEEP');",
+                                             ";",
                                              'Deleting a track is permanent and cannot be undone. It will be gone for good.',
                                              'Delete Track',
                                              'Keep Track') +
@@ -379,11 +382,6 @@ pingaAddTrack = function(table, name, sample_table, locus_table, genometh_table,
 
     var tables = sample_table + '<br />' + locus_table + '<br />' + genometh_table;
 
-    /*
-    var rowHTML = '<tr ' + rowKind + '><td>' + name + '</td><td>' + tables + '</td><td>' + description + '</td><td>' + removeIcon + '</td></tr>';
-
-    $(table).children('tbody').append(rowHTML);
-     */
     $(table).dataTable().fnAddData([ [ name, tables, description, removeIcon ] ]);
 
     $('#removetablerow' + row).click(function() {
@@ -799,13 +797,112 @@ pingaUpdateSidebarTrack = function(tracklist, trackpages, selectAll) {
 
                 for (var trackNo = 0; trackNo < tracks.length; trackNo++) {
                     trackname = tracks[trackNo];
-                    $(tracklist).append('<li class="tracks' + active + '"><a onclick="pingaSelectionChange(this)">' + trackname + '</a></li>');
+                    $(tracklist).append('<li class="tracks' + active + '"><a onclick="pingaSelectionChange(this); pingaUpdateBrowserTracks()">' + trackname + '</a></li>');
 
                     if (trackNo > 0 && trackNo % TABLES_PER_SIDEBARPAGE == 0)
                         $(trackpages).append('<li><a>' + (trackNo / TABLES_PER_SIDEBARPAGE + 1) + '</a></li>');
+
+                    // Store track information for later quick retrieval. Note that the
+                    // track information is representing an accumulation of all tracks
+                    // ever available during a browsing-session, so it may also represent
+                    // tracks that have been deleted. However, that is no problem, because
+                    // only the initially populated map needs to be accurate for the
+                    // browser creation:
+                    trackSummary[trackname] = data[trackname];
                 }
+
+                if (b)
+                  pingaUpdateBrowserTracks();
+                else
+                  pingaCreateBrowser();
             }
         });
+}
+
+pingaUpdateBrowserTracks = function() {
+    var tiersToBeRemoved = new Array();
+    var sidebarTracks = $('.tracks.active').children().map(function() { return this.text; });
+
+    for (var tierNo = 0; tierNo < b.tiers.length; tierNo++) {
+        // Check whether this is a tier unrelated to us:
+        if (!(b.tiers[tierNo].featureSource instanceof DASFeatureSource &&
+              b.tiers[tierNo].featureSource.dasSource.uri.indexOf('http://' + host + '/') == 0))
+            continue;
+
+        // If the tier is not present in the sidebar, schedule it for removal:
+        var positionInSidebarTracks = $.inArray(b.tiers[tierNo].featureSource.dasSource.name, sidebarTracks);
+        if (positionInSidebarTracks == -1) {
+            tiersToBeRemoved.push(b.tiers[tierNo]);
+            continue;
+        }
+
+        // Otherwise, refresh it and remove it from the sidebarTracks array (mark as present):
+        b.refreshTier(b.tiers[tierNo]);
+        sidebarTracks.splice(positionInSidebarTracks, 1);
+    }
+
+    // Remove tiers that have not been listed in the sidebar:
+    for (tierNo = 0; tierNo < tiersToBeRemoved.length; tierNo++)
+        b.removeTier(tiersToBeRemoved[tierNo]);
+
+    // Add tiers that are in the sidebar, but do not appear in the browser:
+    for (tierNo = 0; tierNo < sidebarTracks.length; tierNo++)
+        b.makeTier({
+            name:           sidebarTracks[tierNo],
+            uri:            'http://' + host + '/das/genotypes;' + sidebarTracks[tierNo] + '/',
+            stylesheet_uri: 'http://' + host + '/pinga/genotypes.xml'
+        });
+}
+
+pingaCreateTier = function(trackname) {
+    return {
+        name: trackname,
+        uri: 'http://' + host + '/das/genotypes;' + trackname + '/',
+        stylesheet_uri: 'http://' + host + '/pinga/genotypes.xml'
+    };
+}
+
+pingaCreateBrowser = function() {
+    var sources = [
+                  { name:                 'Genome',
+                    uri:                  'http://www.derkholm.net:8080/das/hg19comp/',
+                    tier_type:            'sequence',
+                    provides_entrypoints: true },
+                  { name:                 'Genes',
+                    desc:                 'Gene structures from Ensembl 59',
+                    uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',
+                    collapseSuperGroups:  true,
+                    provides_karyotype:   true,
+                    provides_search:      true,
+                    maxbins:              false },
+                  { name:                 'Repeats',
+                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',
+                    stylesheet_uri:       'http://www.biodalliance.org/stylesheets/repeats-L1.xml' },
+                  { name:                 'CpG Islands',
+                    bwgURI:               'http://' + host + '/pinga/files/cpgIslandsGRCh37.bb' }
+    ];
+
+    var tracknames = Object.keys(trackSummary);
+    for (var trackNo = 0; trackNo < tracknames.length; trackNo++)
+        sources.push(pingaCreateTier(tracknames[trackNo]));
+
+    b = new Browser({
+        chr:          '16',
+        viewStart:    49400000,
+        viewEnd:      49940000,
+        cookieKey:    'human',
+
+        chains: {},
+
+        sources: sources,
+
+        searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+        browserLinks: {
+            Ensembl: 'http://ncbi37.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+            UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
+            Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
+        }
+    });
 }
 
 Browser.prototype.registerFeaturePopupHandler(pingaFeatureDetailsCallback);
