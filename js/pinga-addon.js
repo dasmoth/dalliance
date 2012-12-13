@@ -2,12 +2,18 @@
 var b;
 var host = '10.0.3.216';
 
-var TABLE_GENOTYPE_INDEX    = 0;
-var TABLE_LOCUS_INDEX       = 1;
-var TABLE_METHYLATION_INDEX = 2;
-var TABLE_SAMPLE_INDEX      = 3;
+var TABLE_GENOTYPE_INDEX    =  0;
+var TABLE_LOCUS_INDEX       =  1;
+var TABLE_METHYLATION_INDEX =  2;
+var TABLE_SAMPLE_INDEX      =  3;
 
 var TABLES_PER_SIDEBARPAGE  = 10;
+
+var TRACK_SUMMARY_DESCRIPTION        =  0;
+var TRACK_SUMMARY_SAMPLE_TABLENAME   =  1;
+var TRACK_SUMMARY_LOCI_TABLENAME     =  2;
+var TRACK_SUMMARY_GENOMETH_TABLENAME =  3;
+var TRACK_SUMMARY_TYPE               =  4;
 
 var seriesColors = [
         '#4572A7',
@@ -285,14 +291,6 @@ pingaSelectionChange = function(listItem) {
         listItem.parentElement.className = listItem.parentElement.className.replace(/active/g, '').replace(/ +/g, ' ').replace(/^ +| +$/, '');
     else
         listItem.parentElement.className = listItem.parentElement.className + ' active';
-
-    return;
-    var id = listItem.parentElement.id;
-    if (id)
-        pingaSetQueryConstraints('Methylation',
-            document.getElementsByClassName('sex active')[0].id.substr(3) +
-            ',' +
-            document.getElementsByClassName('group active')[0].id.substr(5));
 }
 
 pingaSetQueryConstraints = function(name, query) {
@@ -797,7 +795,12 @@ pingaUpdateSidebarTrack = function(tracklist, trackpages, selectAll) {
 
                 for (var trackNo = 0; trackNo < tracks.length; trackNo++) {
                     trackname = tracks[trackNo];
-                    $(tracklist).append('<li class="tracks' + active + '"><a onclick="pingaSelectionChange(this); pingaUpdateBrowserTracks()">' + trackname + '</a></li>');
+
+                    var type = '<span class="badge badge-info">G</span>';
+                    if (data[trackname][TRACK_SUMMARY_TYPE].match(/^Methylation;/))
+                        type = '<span class="label label-inverse">M</span>';
+
+                    $(tracklist).append('<li class="tracks' + active + '"><a onclick="pingaSelectionChange(this); pingaUpdateBrowserTracks()">' + type + '&nbsp;&nbsp;' + trackname + '</a></li>');
 
                     if (trackNo > 0 && trackNo % TABLES_PER_SIDEBARPAGE == 0)
                         $(trackpages).append('<li><a>' + (trackNo / TABLES_PER_SIDEBARPAGE + 1) + '</a></li>');
@@ -821,7 +824,7 @@ pingaUpdateSidebarTrack = function(tracklist, trackpages, selectAll) {
 
 pingaUpdateBrowserTracks = function() {
     var tiersToBeRemoved = new Array();
-    var sidebarTracks = $('.tracks.active').children().map(function() { return this.text; });
+    var sidebarTracks = $('.tracks.active').children().map(function() { return this.text.replace(/^.\s+/, ''); });
 
     for (var tierNo = 0; tierNo < b.tiers.length; tierNo++) {
         // Check whether this is a tier unrelated to us:
@@ -836,7 +839,9 @@ pingaUpdateBrowserTracks = function() {
             continue;
         }
 
-        // Otherwise, refresh it and remove it from the sidebarTracks array (mark as present):
+        // Otherwise, update URI, refresh it and remove it from the sidebarTracks array (mark as present):
+        var trackname = b.tiers[tierNo].dasSource.name;
+        b.tiers[tierNo].featureSource.dasSource.uri = pingaCreateTierURI(trackname, pingaGetTrackType(trackname));
         b.refreshTier(b.tiers[tierNo]);
         sidebarTracks.splice(positionInSidebarTracks, 1);
     }
@@ -847,18 +852,40 @@ pingaUpdateBrowserTracks = function() {
 
     // Add tiers that are in the sidebar, but do not appear in the browser:
     for (tierNo = 0; tierNo < sidebarTracks.length; tierNo++)
-        b.makeTier({
-            name:           sidebarTracks[tierNo],
-            uri:            'http://' + host + '/das/genotypes;' + sidebarTracks[tierNo] + '/',
-            stylesheet_uri: 'http://' + host + '/pinga/genotypes.xml'
-        });
+        b.makeTier(pingaCreateTier(sidebarTracks[tierNo]));
+}
+
+pingaCreateTierURI = function(trackname, type) {
+    var sidebarHighlights = $('.highlights.active').children().map(function() { return this.text });
+    var queryParameters = new Array();
+
+    if ($.inArray('Genes', sidebarHighlights) >= 0)
+        queryParameters.push('is_intragene');
+    if ($.inArray('Promoters', sidebarHighlights) >= 0)
+        queryParameters.push('is_intrapromoter');
+    if ($.inArray('Exons', sidebarHighlights) >= 0)
+        queryParameters.push('is_intraexon');
+    if ($.inArray('CpG Islands', sidebarHighlights) >= 0)
+        queryParameters.push('is_intracpgisland');
+
+    return 'http://' + host + '/das/' + type + '&' + trackname + '&' + queryParameters.join(',') + '/';
+}
+
+pingaGetTrackType = function(trackname) {
+    return trackSummary[trackname][TRACK_SUMMARY_TYPE].replace(/;.*$/, '').toLowerCase();
 }
 
 pingaCreateTier = function(trackname) {
+    var type = pingaGetTrackType(trackname);
+    var stylesheet = 'genotypes.xml';
+
+    if (type == 'methylation')
+        stylesheet = 'rainbow.xml';
+
     return {
         name: trackname,
-        uri: 'http://' + host + '/das/genotypes;' + trackname + '/',
-        stylesheet_uri: 'http://' + host + '/pinga/genotypes.xml'
+        uri: pingaCreateTierURI(trackname, type),
+        stylesheet_uri: 'http://' + host + '/pinga/' + stylesheet
     };
 }
 
