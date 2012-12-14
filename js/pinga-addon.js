@@ -624,10 +624,15 @@ pingaSQLTypeToInformativeText = function(sql) {
     return text;
 }
 
-pingaSubmitUpload = function(table, selection, destination, newTableName) {
+pingaSubmitUpload = function(table, selection, origin, destination, newProjectName, newTableName) {
     var payload = {};
 
     selection = $(selection)[0];
+
+    if (origin.match(/\.\.\./))
+        payload['newproject'] = newProjectName;
+    else
+        payload['project'] = origin.trim();
 
     if (destination.match(/\.\.\./))
         payload['tablename'] = newTableName;
@@ -859,6 +864,8 @@ pingaCreateTierURI = function(trackname, type) {
     var sidebarHighlights = $('.highlights.active').children().map(function() { return this.text });
     var queryParameters = new Array();
 
+    var dsn = 'pinga_' + type;
+
     if ($.inArray('Genes', sidebarHighlights) >= 0)
         queryParameters.push('is_intragene');
     if ($.inArray('Promoters', sidebarHighlights) >= 0)
@@ -868,7 +875,7 @@ pingaCreateTierURI = function(trackname, type) {
     if ($.inArray('CpG Islands', sidebarHighlights) >= 0)
         queryParameters.push('is_intracpgisland');
 
-    return 'http://' + host + '/das/' + type + '&' + trackname + '&' + queryParameters.join(',') + '/';
+    return 'http://' + host + '/das/' + dsn + '!' + type + '!' + trackname + '!' + queryParameters.join(',') + '/';
 }
 
 pingaGetTrackType = function(trackname) {
