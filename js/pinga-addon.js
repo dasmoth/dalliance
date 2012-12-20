@@ -2,12 +2,14 @@
 var b;
 var host = '10.0.3.216';
 
-var TABLE_GENOTYPE_INDEX    =  0;
-var TABLE_LOCUS_INDEX       =  1;
-var TABLE_METHYLATION_INDEX =  2;
-var TABLE_SAMPLE_INDEX      =  3;
+var GENOME_BUILD                     = 37;
 
-var TABLES_PER_SIDEBARPAGE  = 10;
+var TABLE_GENOTYPE_INDEX             =  0;
+var TABLE_LOCUS_INDEX                =  1;
+var TABLE_METHYLATION_INDEX          =  2;
+var TABLE_SAMPLE_INDEX               =  3;
+
+var TABLES_PER_SIDEBARPAGE           = 10;
 
 var TRACK_SUMMARY_DESCRIPTION        =  0;
 var TRACK_SUMMARY_SAMPLE_TABLENAME   =  1;
@@ -875,7 +877,7 @@ pingaCreateTierURI = function(trackname, type) {
     if ($.inArray('CpG Islands', sidebarHighlights) >= 0)
         queryParameters.push('is_intracpgisland');
 
-    return 'http://' + host + '/das/' + dsn + '!' + type + '!' + trackname + '!' + queryParameters.join(',') + '/';
+    return 'http://' + host + '/das/' + dsn + '!' + GENOME_BUILD + '!' + type + '!' + trackname + '!' + trackSummary[trackname][TRACK_SUMMARY_LOCI_TABLENAME] + '!' + queryParameters.join(',') + '/';
 }
 
 pingaGetTrackType = function(trackname) {
