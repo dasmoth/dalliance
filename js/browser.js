@@ -7,6 +7,18 @@
 // browser.js: browser setup and UI.
 //
 
+// plugins
+var FEATURE_POPUP_HANDLERS = new Array();
+var HIGHLIGHT_HANDLERS = new Array();
+
+Browser.prototype.registerFeaturePopupHandler = function(callback){
+    FEATURE_POPUP_HANDLERS.push(callback);
+}
+
+Browser.prototype.registerHighlightHandler = function(callback){
+    HIGHLIGHT_HANDLERS.push(callback);
+}
+
 // constants
 
 var NS_SVG = 'http://www.w3.org/2000/svg';
@@ -493,7 +505,7 @@ Browser.prototype.realUpdateRegion = function()
     removeChildren(this.regionLabel);
     this.regionLabel.appendChild(document.createTextNode(fullLabel));
     var bb = NULL_BBOX;
-    try { 
+    try {
         this.regionLabel.getBBox();
     } catch (e) {};
     var rlm = bb.x + bb.width;
@@ -620,6 +632,11 @@ Browser.prototype.featurePopup = function(ev, feature, group){
     if (!group) group = {};
 
     this.removeAllPopups();
+
+    for (var handler = 0; handler < FEATURE_POPUP_HANDLERS.length; handler++) {
+        if (FEATURE_POPUP_HANDLERS[handler](ev, feature, group, false))
+            return;
+    }
 
     var table = makeElement('table', null);
     table.style.width = '100%';
@@ -808,7 +825,11 @@ Browser.prototype.makeHighlight = function() {
         this.highlight.setAttribute('fill-opacity', 0.15);
         this.highlight.setAttribute('pointer-events', 'none');
         this.dasTierHolder.appendChild(this.highlight);
-    }
+        for (var handler = 0; handler < HIGHLIGHT_HANDLERS.length; handler++) {
+            if (HIGHLIGHT_HANDLERS[handler](this.chr, this.highlightMin, this.highlightMax))
+                return;
+        }
+   }
 }
 
 Browser.prototype.init = function() {
