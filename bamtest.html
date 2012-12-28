@@ -1,36 +1,57 @@
 <html>
-<script language="javascript" src="js/utils.js"></script>
-<script language="javascript" src="js/bin.js"></script>
-<script language="javascript" src="js/das.js"></script>
-<script language="javascript" src="jszlib/js/inflate.js"></script>
-<script language="javascript" src="js/bam.js"></script>
-<script language="javascript">
-function dlog(msg) {
-    var logHolder = document.getElementById('log');
-    if (logHolder) {
-	logHolder.appendChild(makeElement('p', msg));
-    }
-}
-
-makeBam(new URLFetchable('http://localhost/subset22-sorted.bam'), 
-        new URLFetchable('http://localhost/subset22-sorted.bam.bai'),
-        function(bam) {
-            dlog('built BAM obj');
-            bam.fetch('22', 30000000, 30010000, function(r, e) {
-                if (r) {
-                    dlog('got ' + r.length +' records');
-                    for (var ri = 0; ri < r.length; ri += 100) {
-                        dlog(miniJSONify(r[ri]));
-                    }
-                }
-                if (e) {
-                    dlog('err: ' + e);
-                }
-            });
-        });
-</script>
 <head>
-<h1>BAM test</h1>
-<div id='log'>
-</div>
+    <script language="javascript" src="js/utils.js"></script>
+    <script language="javascript" src="js/bin.js"></script>
+    <script language="javascript" src="js/das.js"></script>
+    <script language="javascript" src="jszlib/js/inflate.js"></script>
+    <script language="javascript" src="js/bam.js"></script>
+
+    <style type="text/css">
+          #log{
+              font:normal 12px 'andale mono', 'monaco', monospace;
+          }
+    </style>
+
+    <script language="javascript">
+
+
+    function dlog(msg) {
+        var logHolder = document.getElementById('log');
+        if (logHolder) {
+	        logHolder.appendChild(makeElement('p', msg));
+        }
+    }
+
+
+    // Public data sets from Illumina
+    // http://www.illumina.com/truseq/tru_resources/datasets.ilmn
+
+    var BAM = 'https://s3.amazonaws.com/kodi_test_public/NA19240_GAIIx_100_chr21.bam';
+    var BAI = 'https://s3.amazonaws.com/kodi_test_public/NA19240_GAIIx_100_chr21.bam.bai';
+
+    makeBam(new URLFetchable(BAM),
+            new URLFetchable(BAI),
+            function(bam) {
+                dlog('built BAM obj');
+                bam.fetch('21',  32127456,  32127696, function(r, e) {
+                    if (r) {
+                        dlog('got ' + r.length +' records');
+                        for (var ri = 0; ri < r.length; ri += 50) {
+
+                            dlog(miniJSONify(r[ri]));
+                            //console.log(r[ri]);
+                        }
+                    }
+                    if (e) {
+                        dlog('err: ' + e);
+                    }
+                });
+            });
+    </script>
+</head>
+<body>
+    <h1>BAM test</h1>
+    <div id='log'>
+    </div>
+</body>
 </html>
