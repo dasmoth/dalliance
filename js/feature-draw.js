@@ -241,7 +241,7 @@ DasTier.prototype.paint = function() {
     for (var s = 0; s < subtiers.length; ++s) {
 	lh = lh + subtiers[s].height + MIN_PADDING;
     }
-    this.viewport.setAttribute('height', Math.max(lh, 200));
+    this.viewport.setAttribute('height', Math.max(lh, 50));
     this.viewport.style.left = '-1000px';
     this.holder.style.height = '' + Math.max(lh,35) + 'px';
     this.norigin = (this.browser.viewStart + this.browser.viewEnd)/2;

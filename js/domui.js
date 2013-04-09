@@ -98,30 +98,19 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var left = Math.min((mx - 30), (winWidth - width - 10));
 
     var popup = makeElement('div');
-    // popup.setAttribute('style', 'box-shadow: 10px 10px 5px #888; -webkit-box-shadow: 10px 10px 5px #888; -moz-box-shadow: 10px 10px 5px #888');
+    popup.className = 'popover fade bottom in';
+    popup.style.display = 'block';
     popup.style.position = 'absolute';
     popup.style.top = '' + top + 'px';
     popup.style.left = '' + left + 'px';
     popup.style.width = width + 'px';
-    popup.style.backgroundColor = 'white';
-    popup.style.borderWidth = '1px';
-    popup.style.borderColor = 'gray'
-    popup.style.borderStyle = 'solid';
-    popup.style.boxShadow = '3px 3x 1px #888';
-    popup.style.MozBoxShadow = '3px 3px 1px #888';
-    popup.style.webkitBoxShadow = '3px 3px 1px #888';
+
+    popup.appendChild(makeElement('div', null, {className: 'arrow'}));
 
     if (name) {
-        var closeButton = makeElement('div', 'X', null, {
-            marginTop: '-3px',
-            padding: '3px',
-            borderStyle: 'none',
-            borderLeftStyle: 'solid',
-            borderWidth: '1px',
-            borderColor: 'rgb(128,128,128)',
-            cssFloat: 'right'
-        });
-        closeButton.style['float'] = 'right';
+        var closeButton = makeElement('button', '', {className: 'close'});
+        closeButton.innerHTML = '&times;'
+
         closeButton.addEventListener('mouseover', function(ev) {
             closeButton.style.color = 'red';
         }, false);
@@ -131,14 +120,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         closeButton.addEventListener('mousedown', function(ev) {
             thisB.removeAllPopups();
         }, false);
-        var tbar = makeElement('div', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], null, {
-            backgroundColor: 'rgb(230,230,250)',
-            borderColor: 'rgb(128,128,128)',
-            borderStyle: 'none',
-            borderBottomStyle: 'solid',
-            borderWidth: '1px',
-            padding: '3px'
-        });
+        var tbar = makeElement('h3', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {className: 'popover-title'}, {});
 
         var dragOX, dragOY;
         var moveHandler, upHandler;
@@ -172,9 +154,9 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         popup.appendChild(tbar);
     }
 
-    popup.appendChild(makeElement('div', ele, null, {
-        padding: '3px',
-        clear: 'both'
+    popup.appendChild(makeElement('div', ele, {className: 'popover-content'}, {
+        padding: '0px',
+        // clear: 'both'
     }));
     this.hPopupHolder.appendChild(popup);
 

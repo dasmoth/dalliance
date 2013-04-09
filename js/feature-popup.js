@@ -13,8 +13,9 @@ Browser.prototype.featurePopup = function(ev, feature, group){
 
     this.removeAllPopups();
 
-    var table = makeElement('table', null);
+    var table = makeElement('table', null, {className: 'table table-striped table-condensed'});
     table.style.width = '100%';
+    table.style.margin = '0px';
 
     var name = pick(group.type, feature.type);
     var fid = pick(group.label, feature.label, group.id, feature.id);

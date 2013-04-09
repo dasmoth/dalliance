@@ -499,6 +499,32 @@ Browser.prototype.makeTier = function(source) {
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
+
+    if (tier.dasSource.quantHack) {
+        tier.quantOverlay = makeElement(
+            'canvas', null, 
+            {width: '50', height: "56"}, 
+            {position: 'absolute', 
+             padding: '0px', 
+             margin: '0px',
+             border: '0px', 
+             left: '0px', top: '0px'});
+        var ctx = tier.quantOverlay.getContext('2d');
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(8, 3);
+        ctx.lineTo(0,3);
+        ctx.lineTo(0,53);
+        ctx.lineTo(8,53);
+        ctx.stroke();
+
+        ctx.fillStyle = 'black';
+        ctx.fillText('1.2', 8, 8);
+        ctx.fillText('0.0', 8, 51);
+
+        tier.holder.appendChild(tier.quantOverlay);
+    }
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
@@ -642,7 +668,7 @@ Browser.prototype.makeTier = function(source) {
     tier.row = row;
     */
 
-    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px', cursor: 'default'});
+    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px', cursor: 'default'});
     label.style['border-radius'] = '4px';
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});

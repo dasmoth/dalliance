@@ -17,6 +17,7 @@ For 0.8
      + Zoom slider (necessary?  some way to hide it when not in use?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
+  - Reinstate sequences!
   - Walk the glyphtree to produce SVG for export
   - Incremental fetch?
   - Refactor next/prev support in big* code.
