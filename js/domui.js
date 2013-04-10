@@ -104,6 +104,10 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     popup.style.top = '' + top + 'px';
     popup.style.left = '' + left + 'px';
     popup.style.width = width + 'px';
+    if (width > 276) {
+        // HACK Bootstrappification...
+        popup.style.maxWidth = width + 'px';
+    }
 
     popup.appendChild(makeElement('div', null, {className: 'arrow'}));
 

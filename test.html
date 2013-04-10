@@ -117,6 +117,13 @@ body {font-family: 'helvetica'}
   b.addTierListener(function() {
     console.log('tiers have changed');
   });
+
+  window.addEventListener('load', function() {
+    document.getElementById('add-track-button').addEventListener('click', function(ev) {
+      b.showTrackAdder(ev);
+    }, false);
+
+  }, false);
 </script>
 </head>
 
@@ -135,7 +142,7 @@ body {font-family: 'helvetica'}
   </div>
 
   <div class='btn-group'>
-    <a class='btn' href='#'><i class='icon-plus-sign'></i></a>
+    <a class='btn' href='#' id='add-track-button'><i class='icon-plus-sign'></i></a>
     <a class='btn' href='#'><i class='icon-bookmark'></i></a>
     <a class='btn' href='#'><i class='icon-screenshot'></i></a>
   </div>
