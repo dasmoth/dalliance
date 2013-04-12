@@ -121,9 +121,14 @@ body {font-family: 'helvetica'}
   });
 
   window.addEventListener('load', function() {
-    document.getElementById('add-track-button').addEventListener('click', function(ev) {
+
+    var addTrack = document.getElementById('add-track-button');
+    addTrack.addEventListener('click', function(ev) {
       b.showTrackAdder(ev);
     }, false);
+    b.makeTooltip(addTrack, 'Add a track!');
+
+    
 
   }, false);
 </script>

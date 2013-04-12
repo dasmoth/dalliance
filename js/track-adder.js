@@ -313,7 +313,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
                 thisB.sources.push(dataToFinalize);
                 thisB.makeTier(dataToFinalize);
-                thisB.storeStatus();
+                //thisB.storeStatus();
                 thisB.removeAllPopups();
             }
         } else {
@@ -323,7 +323,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var nds = b.dalliance_source;
                     thisB.sources.push(nds);
                     thisB.makeTier(nds);
-                    thisB.storeStatus();
+                    // thisB.storeStatus();
                 }
             }
             thisB.removeAllPopups();

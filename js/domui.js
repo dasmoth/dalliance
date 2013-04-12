@@ -32,16 +32,13 @@ Browser.prototype.makeTooltip = function(ele, text)
         var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         if (!timer) {
             timer = setTimeout(function() {
-                var popup = makeElement('div', text, {}, {
-                    position: 'absolute',
+                var popup = makeElement('div',
+                    [makeElement('div', null, {className: 'tooltip-arrow'}),
+                     makeElement('div', text, {className: 'tooltip-inner'})], 
+                    {className: 'tooltip bottom in'}, {
+                    display: 'block',
                     top: '' + (my + 20) + 'px',
                     left: '' + Math.max(mx - 30, 20) + 'px',
-                    backgroundColor: 'rgb(250, 240, 220)',
-                    borderWidth: '1px',
-                    borderColor: 'black',
-                    borderStyle: 'solid',
-                    padding: '2px',
-                    maxWidth: '400px'
                 });
                 thisB.hPopupHolder.appendChild(popup);
                 var moveHandler;
