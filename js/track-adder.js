@@ -85,7 +85,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
-    var custURL, custName, custCS, custQuant, custFile;
+    var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
     var customMode = false;
     var dataToFinalize = null;
 
@@ -303,6 +303,12 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
                 if (custQuant) {
                     dataToFinalize.maxbins = custQuant.checked;
+                }
+
+                if (custUser.value.length > 1 && custPass.value.length > 1) {
+                    dlog('password');
+                    dataToFinalize.xUser = custUser.value;
+                    dataToFinalize.xPass = custPass.value;
                 }
 
                 thisB.sources.push(dataToFinalize);
@@ -551,6 +557,16 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(document.createTextNode('Label: '));
         custName = makeElement('input', '', {value: nds.name});
         stabHolder.appendChild(custName);
+
+
+        stabHolder.appendChild(document.createTextNode('User: '));
+        custUser = makeElement('input', '');
+        stabHolder.appendChild(custUser);
+        stabHolder.appendChild(document.createTextNode('Pass: '));
+        custPass = makeElement('input', '');
+        stabHolder.appendChild(custPass);
+        
+
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('h4', 'Coordinate system: '));

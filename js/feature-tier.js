@@ -14,6 +14,8 @@ var MIN_PADDING = 3;
 
 var DEFAULT_SUBTIER_MAX = 25;
 
+var NULL_BBOX = {x: 0, y: 0, width: 0, height: 0};
+
 //
 // Colour handling
 //
@@ -365,6 +367,8 @@ var clipIdSeed = 0;
 
 function drawFeatureTier(tier)
 {
+    var before = Date.now();
+
     sortFeatures(tier);
     tier.placard = null;
     tier.isQuantitative = false;         // gets reset later if we have any HISTOGRAMs.
@@ -752,6 +756,9 @@ function drawFeatureTier(tier)
     tier.clipTier();
             
     tier.scale = 1;
+
+    var after = Date.now();
+    // console.log('draw(' + tier.currentFeatures.length + ') took ' + (after-before) + 'ms');
 }
 
 DasTier.prototype.clipTier = function() {
@@ -1278,7 +1285,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
                 fill: textFill
             });
             tier.viewport.appendChild(txt);
-            var bbox = txt.getBBox();
+            var bbox = NULL_BBOX;
+            try {
+                bbox = txt.getBBox();
+            } catch (e) {}
             tier.viewport.removeChild(txt);
             txt.setAttribute('x', (minPos + maxPos - bbox.width)/2);
             txt.setAttribute('y', height - 2);
@@ -1491,10 +1501,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
         glyph.dalliance_feature = feature;
     }
     var dg = new DGlyph(glyph, min, max, requiredHeight);
-    if (style.LABEL && (feature.label || feature.id)) {
+
+    if (isDasBooleanTrue(style.LABEL) && (feature.label || feature.id)) {
         dg.label = feature.label || feature.id;
     }
-    if (style.BUMP) {
+    if (isDasBooleanTrue(style.BUMP)) {
         dg.bump = true;
     }
     dg.strand = feature.orientation || '0';
@@ -1504,6 +1515,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight)
     dg.zindex = style.ZINDEX || 0;
 
     return dg;
+}
+
+function isDasBooleanTrue(s) {
+    s = ('' + s).toLowerCase();
+    return s==='yes' || s==='true';
 }
 
 function labelGlyph(tier, dglyph, featureTier) {

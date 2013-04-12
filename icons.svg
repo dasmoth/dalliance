@@ -40,7 +40,9 @@
   </g>
   <g transform='translate(30,30)'>
     <g id='reset'>
-      <path fill='red' stroke='none' d='M 24 1 L 10 15 L 18 15 L 10 25 L 30 10 L 20 10 Z' />
+      <g transform='translate(-4,2)'>
+        <path fill='red' stroke='none' d='M 24 1 L 10 15 L 18 15 L 10 25 L 30 10 L 20 10 Z' />
+      </g>
     </g>
   </g>
   <g transform='translate(0,60)'>
@@ -62,8 +64,10 @@
   </g>
   <g transform='translate(60,60)'>
     <g id='export' stroke='gray' fill='none'>
-      <circle cx='30' cy='20' r='10' stroke-width='3' fill='grey' />
-      <path d='M 15 15 L 25 15 L 25 12 L 30 17 L 25 22 L 25 19 L 15 19 Z' fill='red' stroke='none'/>
+      <g transform='translate(-13,-5)'>
+        <circle cx='30' cy='20' r='10' stroke-width='3' fill='grey' />
+        <path d='M 15 15 L 25 15 L 25 12 L 30 17 L 25 22 L 25 19 L 15 19 Z' fill='red' stroke='none'/>
+      </g>
     </g>
   </g>
 </svg>

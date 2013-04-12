@@ -190,10 +190,10 @@ IconSet.prototype.createIcon = function(name, parent)
         return;
     }
     var copy = document.importNode(master, true);
-    parent.appendChild(copy);
-    var bbox = copy.getBBox();
-    parent.removeChild(copy);
-    copy.setAttribute('transform', 'translate(' + (-bbox.x)  + ',' + (-bbox.y)+ ')');
+    // parent.appendChild(copy);
+    // var bbox = copy.getBBox();
+    // parent.removeChild(copy);
+    // copy.setAttribute('transform', 'translate(' + (-bbox.x)  + ',' + (-bbox.y)+ ')');
     var icon = makeElementNS(NS_SVG, 'g', copy);
     return icon;
 }
@@ -206,10 +206,10 @@ IconSet.prototype.createButton = function(name, parent, bx, by)
 
     var master = this.icons.getElementById(name);
     var copy = document.importNode(master, true);
-    parent.appendChild(copy);
-    var bbox = copy.getBBox();
-    parent.removeChild(copy);
-    copy.setAttribute('transform', 'translate(' + (((bx - bbox.width - 2)/2) - bbox.x)  + ',' + (((by - bbox.height - 2)/2) - bbox.y)+ ')');
+    // parent.appendChild(copy);
+    // var bbox = copy.getBBox();
+    // parent.removeChild(copy);
+    // copy.setAttribute('transform', 'translate(' + (((bx - bbox.width - 2)/2) - bbox.x)  + ',' + (((by - bbox.height - 2)/2) - bbox.y)+ ')');
     var button = makeElementNS(NS_SVG, 'g', [
         makeElementNS(NS_SVG, 'rect', null, {
             x: 0,

@@ -232,11 +232,8 @@ DASSource.prototype.features = function(segment, options, callback) {
         dasURI = this.uri;
     }
    
-    // dlog(dasURI);
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
-        var beforeProcess = Date.now();
-
         if (!responseXML) {
             var msg;
             if (req.status == 0) {
@@ -385,10 +382,6 @@ DASSource.prototype.features = function(segment, options, callback) {
             }
         }
                 
-        if (thisB.timings) {
-            var afterProcess = Date.now();
-            dlog('Processing took ' + (afterProcess - beforeProcess) + 'ms');
-        }
         callback(features, undefined, segmentMap);
     });
 }
@@ -695,7 +688,7 @@ function dasNotesOf(element)
     return notes;
 }
 
-function doCrossDomainRequest(url, handler, credentials, timings) {
+function doCrossDomainRequest(url, handler, credentials, custAuth) {
     // TODO: explicit error handlers?
 
     if (window.XDomainRequest) {
@@ -714,13 +707,7 @@ function doCrossDomainRequest(url, handler, credentials, timings) {
 
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
-              if (req.status == 200 || req.status == 0) {
-                  var reqFetched = Date.now();
-                  var xml = req.responseXML;
-                  var reqParsed = Date.now();
-                  if (timings) {
-                      dlog('fetch=' + (reqFetched-reqStart) + 'ms; parse=' + (reqParsed-reqFetched) + 'ms');
-                  }
+              if (req.status >= 200 || req.status == 0) {
                   handler(req.responseXML, req);
               }
             }
@@ -729,10 +716,18 @@ function doCrossDomainRequest(url, handler, credentials, timings) {
         if (credentials) {
             req.withCredentials = true;
         }
+        if (custAuth) {
+            req.setRequestHeader('X-DAS-Authorisation', custAuth);
+        }
+        req.setRequestHeader('Accept', 'application/xml,*/*');
         req.send('');
     }
 }
 
 DASSource.prototype.doCrossDomainRequest = function(url, handler) {
-    return doCrossDomainRequest(url, handler, this.credentials, this.timings);
+    var custAuth;
+    if (this.xUser) {
+        custAuth = 'Basic ' + btoa(this.xUser + ':' + this.xPass);
+    }
+    return doCrossDomainRequest(url, handler, this.credentials, custAuth);
 }

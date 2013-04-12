@@ -40,6 +40,7 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="js/bigwig.js"></script>
 <script language="javascript" src="js/bam.js"></script>
 <script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript" src="js/thub.js"></script>
 <script language="javascript" src="jszlib/js/inflate.js"></script>
 
 <script language="javascript">
@@ -82,7 +83,8 @@ body {font-family: 'helvetica'}
                   {name:                 'BBD test',
                    bwgURI:               'http://www.biodalliance.org/datasets/ensGene.bb',
                    link:                 'http://ncbi36.ensembl.org/Homo_sapiens/Gene/Summary?t=$$',
-                   collapseSuperGroups:  true}],
+                   collapseSuperGroups:  true,
+                   disable: true}],
 
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
     browserLinks: {

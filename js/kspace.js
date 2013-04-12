@@ -210,7 +210,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         //}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
         //tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
-        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, thisB.scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
     return needsSeq;
 }
@@ -227,6 +227,8 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
         }
+        
+        // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);
 
         if ((actualScale < (this.scale/2) && features.length > 200) || 
             (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
@@ -428,12 +430,12 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         }
         data.readWigData(chr, min, max, function(features) {
             var fs = 1000000000;
-            // if (bwg.type === 'bigwig') {
+            if (bwg.type === 'bigwig') {
                 var is = (max - min) / features.length / 2;
                 if (is < fs) {
                     fs = is;
                 }
-            // }
+            }
             if (thisB.opts.link) {
                 for (var fi = 0; fi < features.length; ++fi) {
                     var f = features[fi];
