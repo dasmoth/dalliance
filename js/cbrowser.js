@@ -665,19 +665,9 @@ Browser.prototype.makeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
-    /*
-    var label = makeElement('span', source.name);
-    viewport.style['vertical-align'] = 'top';
-    label.style['width'] = this.tabMargin + 'px';
-    label.style['display'] = 'inline-block';
-    label.style['background'] = background;
-    label.style['vertical-align'] = 'top';
-    var row = makeElement('div', [label, vph], {});
-    tier.row = row;
-    */
-
-    var label = makeElement('span', source.name, {}, {fontSize: '10pt', position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', zIndex: '999', background: 'rgba(220, 220, 220, 0.8)', padding: '3px', cursor: 'default'});
-    label.style['border-radius'] = '4px';
+    var label = makeElement('span', source.name, {className: 'track-label'}, 
+                            {left: tier.quantOverlay ? '35px' : '2px', 
+                             top: '2px'});
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});
     tier.row = row;

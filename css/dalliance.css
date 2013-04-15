@@ -7,3 +7,13 @@
   background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position:-15px -15px, -15px -15px, -14px -14px, -14px -14px
 }
+
+.track-label {
+  font-size: 10pt;
+  position: absolute;
+  z-index: 999;
+  background: rgba(220, 220, 220, 0.8);
+  padding: 3px;
+  cursor: default;
+  border-radius: 4px;
+}

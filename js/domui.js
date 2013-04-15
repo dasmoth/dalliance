@@ -38,7 +38,7 @@ Browser.prototype.makeTooltip = function(ele, text)
                     {className: 'tooltip bottom in'}, {
                     display: 'block',
                     top: '' + (my + 20) + 'px',
-                    left: '' + Math.max(mx - 30, 20) + 'px',
+                    left: '' + Math.max(mx - 30, 20) + 'px'
                 });
                 thisB.hPopupHolder.appendChild(popup);
                 var moveHandler;
@@ -156,8 +156,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     }
 
     popup.appendChild(makeElement('div', ele, {className: 'popover-content'}, {
-        padding: '0px',
-        // clear: 'both'
+        padding: '0px'
     }));
     this.hPopupHolder.appendChild(popup);
 
