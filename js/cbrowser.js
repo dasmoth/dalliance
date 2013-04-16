@@ -502,7 +502,7 @@ Browser.prototype.makeTier = function(source) {
     }
     */
     
-    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflow: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     vph.className = 'tier-viewport-background';
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
@@ -674,18 +674,30 @@ Browser.prototype.makeTier = function(source) {
 
 
     var removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
+    var nameButton = makeElement('a', source.name, {className: 'btn'});
     var label = makeElement('span',
-       [makeElement('a', source.name, {className: 'btn'}),
-        removeButton],
+       [removeButton,
+        nameButton],
        {className: 'btn-group'},
-       {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8});
-    vph.appendChild(label);
-    var row = makeElement('div', [vph], {});
+       {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+    // vph.appendChild(label);
+    var row = makeElement('div', [vph, label], {}, {position: 'relative', display: 'inline-block'});
     tier.row = row;
 
     removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.removeTier(source);
+    }, false);
+    nameButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        // nameButton.style.backgroundImage = 'linear-gradient(rgb(255,200,200), rgb(255,150,150))';
+        console.log('before: ' + nameButton.clientHeight);
+        nameButton.appendChild(makeElement('p', 'Really interesting stuff'));
+        nameButton.appendChild(makeElement('p', 'And more stuff'));
+        console.log('after: ' + nameButton.clientHeight);
+        if (nameButton.clientHeight > row.clientHeight) {
+            row.style.height = '' + (nameButton.clientHeight + 4) + 'px';
+        }
     }, false);
 
     
