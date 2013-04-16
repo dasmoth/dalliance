@@ -665,12 +665,28 @@ Browser.prototype.makeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
-    var label = makeElement('span', source.name, {className: 'track-label'}, 
+/*
+    var label = makeElement('span', 
+                            [source.name, makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'})], 
+                            {className: 'track-label'}, 
                             {left: tier.quantOverlay ? '35px' : '2px', 
-                             top: '2px'});
+                             top: '2px'}); */
+
+
+    var removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
+    var label = makeElement('span',
+       [makeElement('a', source.name, {className: 'btn'}),
+        removeButton],
+       {className: 'btn-group'},
+       {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8});
     vph.appendChild(label);
     var row = makeElement('div', [vph], {});
     tier.row = row;
+
+    removeButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        thisB.removeTier(source);
+    }, false);
 
     
     var dragLabel;
@@ -1041,7 +1057,8 @@ Browser.prototype.removeTier = function(conf) {
         var ts = this.tiers[ti].dasSource;
         if ((conf.uri && ts.uri === conf.uri) ||
             (conf.bwgURI && ts.bwgURI === conf.bwgURI) ||
-            (conf.bamURI && ts.bamURI === conf.bamURI))
+            (conf.bamURI && ts.bamURI === conf.bamURI) ||
+            (conf.twoBitURI && ts.twoBitURI === conf.twoBitURI))
         {
             target = ti; break;
         }
