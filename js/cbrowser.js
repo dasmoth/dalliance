@@ -616,13 +616,7 @@ Browser.prototype.makeTier = function(source) {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
                 if (hit) {
-                    for (var fli = 0; fli < thisB.featureHoverListeners.length; ++fli) {
-                        try {
-                            thisB.featureHoverListeners[fli](ev, hit);
-                        } catch (ex) {
-                            console.log(ex);
-                        }
-                    }
+                    thisB.notifyFeatureHover(ev, hit); // FIXME group
                 }
             }, 1000);
         }
@@ -634,13 +628,7 @@ Browser.prototype.makeTier = function(source) {
 
         var hit = featureLookup(rx, ry);
         if (hit && !thisB.isDragging) {
-            for (var fli = 0; fli < thisB.featureListeners.length; ++fli) {
-                try {
-                    thisB.featureListeners[fli](ev, hit);
-                } catch (ex) {
-                    console.log(ex);
-                }
-            }
+            thisB.notifyFeature(ev, hit);
         }
 
         if (thisB.isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
@@ -1129,9 +1117,29 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
+Browser.prototype.notifyFeature = function(ev, feature, group) {
+  for (var fli = 0; fli < this.featureListeners.length; ++fli) {
+      try {
+          this.featureListeners[fli](ev, feature, group);
+      } catch (ex) {
+          console.log(ex);
+      }
+  }
+}
+
 Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     opts = opts || {};
     this.featureHoverListeners.push(handler);
+}
+
+Browser.prototype.notifyFeatureHover = function(ev, feature, group) {
+    for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
+        try {
+            this.featureHoverListeners[fli](ev, feature, group);
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
 }
 
 Browser.prototype.addViewListener = function(handler, opts) {
@@ -1142,7 +1150,7 @@ Browser.prototype.addViewListener = function(handler, opts) {
 Browser.prototype.notifyLocation = function() {
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
-            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0);
+            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue);
         } catch (ex) {
             console.log(ex);
         }
