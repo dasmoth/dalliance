@@ -44,6 +44,8 @@ function Browser(opts) {
     this.maxExtra = 2.5;
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
+    this.zoomMin = 100.0;
+    this.zoomMax = 220.0;
     this.origin = 0;
     this.targetQuantRes = 5.0;
     this.featurePanelWidth = 750;
@@ -288,22 +290,10 @@ Browser.prototype.realInit = function() {
             }
         } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
-
-            var oz = thisB.zoomSliderValue;
-            thisB.zoomSliderValue=oz - 10;
-            var nz = thisB.zoomSliderValue;
-            if (nz != oz) {
-                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-            }
+            thisB.zoomStep(-10);
         } else if (ev.charCode == 45) {
             ev.stopPropagation(); ev.preventDefault();
-
-            var oz = thisB.zoomSliderValue;
-            thisB.zoomSliderValue=oz + 10;
-            var nz = thisB.zoomSliderValue;
-            if (nz != oz) {
-                thisB.zoom(Math.exp((1.0 * nz) / thisB.zoomExpt));
-            }
+            thisB.zoomStep(10);
         } else if (ev.keyCode == 84 || ev.keyCode == 116) {
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
@@ -936,6 +926,24 @@ Browser.prototype.move = function(pos)
     this.karyo.update(this.chr, this.viewStart, this.viewEnd); */
 
     this.spaceCheck();
+}
+
+Browser.prototype.zoomStep = function(delta) {
+    var oz = 1.0 * this.zoomSliderValue;
+    var nz = oz + delta;
+    if (nz < this.zoomMin) {
+        nz= this.zoomMin;
+    }
+    if (nz > this.zoomMax) {
+        nz = this.zoomMax;
+    }
+
+    // console.log('zoom ' + oz + ' -> ' + nz);
+
+    if (nz != oz) {
+        this.zoomSliderValue = nz; // FIXME maybe ought to set inside zoom!
+        this.zoom(Math.exp((1.0 * nz) / this.zoomExpt));
+    }
 }
 
 Browser.prototype.zoom = function(factor) {

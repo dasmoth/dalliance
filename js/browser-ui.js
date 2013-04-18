@@ -48,13 +48,7 @@ window.addEventListener('load', function() {
     zoomInBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
-      var oz = b.zoomSliderValue;
-      b.zoomSliderValue=oz - 10;
-      var nz = b.zoomSliderValue;
-      // regionField.value = 'zoom: ' + nz;
-      if (nz != oz) {
-          b.zoom(Math.exp((1.0 * nz) / b.zoomExpt));
-      }
+      b.zoomStep(-10);
     }, false);
     b.makeTooltip(zoomInBtn, 'Zoom in');
 
@@ -64,21 +58,18 @@ window.addEventListener('load', function() {
     zoomOutBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
-      var oz = b.zoomSliderValue;
-      b.zoomSliderValue=oz + 10;
-      var nz = b.zoomSliderValue;
-      // regionField.value = 'zoom: ' + nz;
-      if (nz != oz) {
-          b.zoom(Math.exp((1.0 * nz) / b.zoomExpt));
-      }
+      b.zoomStep(10);
     }, false);
     b.makeTooltip(zoomOutBtn, 'Zoom out');
 
     var zoomSlider = document.getElementById('zoom-slider');
     zoomSlider.addEventListener('change', function(ev) {
-	b.zoomSliderValue = zoomSlider.value;
+	b.zoomSliderValue = (1.0 * zoomSlider.value);
 	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
     }, false);
+    dlog('' + b.zoomSliderValue);
+    zoomSlider.min = b.zoomMin;
+    zoomSlider.max = b.zoomMax;
 
     var favBtn = document.getElementById('favourites-button');
     b.makeTooltip(favBtn, 'Favourite regions');
