@@ -67,7 +67,6 @@ window.addEventListener('load', function() {
 	b.zoomSliderValue = (1.0 * zoomSlider.value);
 	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
     }, false);
-    dlog('' + b.zoomSliderValue);
     zoomSlider.min = b.zoomMin;
     zoomSlider.max = b.zoomMax;
 

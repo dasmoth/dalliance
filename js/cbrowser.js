@@ -342,14 +342,14 @@ Browser.prototype.realInit = function() {
     mouseLeaveHandler = function(ev) {
         window.removeEventListener('keydown', keyHandler, false);
         window.removeEventListener('keyup', keyUpHandler, false);
-        window.removeEventListener('keypress', keyHandler, false);
+        // window.removeEventListener('keypress', keyHandler, false);
         thisB.svgHolder.removeEventListener('mouseout', mouseLeaveHandler, false);
     }
 
     this.svgHolder.addEventListener('mouseover', function(ev) {
         window.addEventListener('keydown', keyHandler, false);
         window.addEventListener('keyup', keyUpHandler, false);
-        window.addEventListener('keypress', keyHandler, false);
+        // window.addEventListener('keypress', keyHandler, false);
         thisB.svgHolder.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
 
