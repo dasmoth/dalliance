@@ -276,17 +276,13 @@ Browser.prototype.realInit = function() {
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier > 0) {
                 --thisB.selectedTier;
-                thisB.tiers[thisB.selectedTier].isLabelValid = false;
-                thisB.tiers[thisB.selectedTier + 1].isLabelValid = false;
-                thisB.arrangeTiers();
+                thisB.markSelectedTier();
             }
         } else if (ev.keyCode == 40 || ev.keyCode == 83) {
             ev.stopPropagation(); ev.preventDefault();
             if (thisB.selectedTier < thisB.tiers.length -1) {
                 ++thisB.selectedTier;
-                thisB.tiers[thisB.selectedTier].isLabelValid = false;
-                thisB.tiers[thisB.selectedTier - 1].isLabelValid = false;
-                thisB.arrangeTiers();
+                thisB.markSelectedTier();
             }
         } else if (ev.charCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
@@ -651,39 +647,49 @@ Browser.prototype.makeTier = function(source) {
                              top: '2px'}); */
 
 
-    var removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
-    var nameButton = makeElement('a', source.name, {className: 'btn'});
-    var label = makeElement('span',
-       [removeButton,
-        nameButton],
+    tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
+    tier.nameButton = makeElement('a', source.name, {className: 'tier-tab'});
+    tier.label = makeElement('span',
+       [tier.removeButton,
+        tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    // vph.appendChild(label);
-    var row = makeElement('div', [vph, label], {}, {position: 'relative', display: 'inline-block'});
+    var row = makeElement('div', [vph, tier.label], {}, {position: 'relative', display: 'inline-block'});
     tier.row = row;
 
-    removeButton.addEventListener('click', function(ev) {
+    tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.removeTier(source);
     }, false);
-    nameButton.addEventListener('click', function(ev) {
+    tier.nameButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        // nameButton.style.backgroundImage = 'linear-gradient(rgb(255,200,200), rgb(255,150,150))';
+        thisB.selectedTier = -1;
+        for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+            if (thisB.tiers[ti] === tier) {
+                thisB.selectedTier = ti;
+                break;
+            }
+        }
+        thisB.markSelectedTier();
+
+        /*
         console.log('before: ' + nameButton.clientHeight);
         nameButton.appendChild(makeElement('p', 'Really interesting stuff'));
         nameButton.appendChild(makeElement('p', 'And more stuff'));
         console.log('after: ' + nameButton.clientHeight);
         if (nameButton.clientHeight > row.clientHeight) {
             row.style.height = '' + (nameButton.clientHeight + 4) + 'px';
-        }
+        }*/
     }, false);
 
     
     var dragLabel;
     var tierOrdinal;
     var yAtLastReorder;
+    var tiersWereReordered = false;
 
     var labelDragHandler = function(ev) {
+        var label = tier.label;
         ev.stopPropagation(); ev.preventDefault();
         if (!dragLabel) {
             dragLabel = label.cloneNode(true);
@@ -710,13 +716,20 @@ Browser.prototype.makeTier = function(source) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    // console.log('wants to be at ' + ti);
+                    var st = thisB.tiers[thisB.selectedTier];
+
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
-
                     var ts = thisB.sources[tierOrdinal];
                     thisB.sources.splice(tierOrdinal, 1);
                     thisB.sources.splice(ti, 0, ts);
+
+                    // FIXME probably shouldn't be recorded selected tier by index (!)
+                    for (var sti = 0; sti < thisB.tiers.length; ++sti) {
+                        if (thisB.tiers[sti] === st) {
+                            thisB.selectedTier = sti; break;
+                        }
+                    }
 
                     tierOrdinal = ti;
                     yAtLastReorder = ev.clientY;
@@ -724,6 +737,7 @@ Browser.prototype.makeTier = function(source) {
                     for (var i = 0; i < thisB.tiers.length; ++i) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
                     }
+                    tiersWereReordered = true;
                 }
                 break;
             }
@@ -731,6 +745,7 @@ Browser.prototype.makeTier = function(source) {
     };
 
     var labelReleaseHandler = function(ev) {
+        var label = tier.label;
         ev.stopPropagation(); ev.preventDefault();
         if (dragLabel) {
             dragLabel.style.cursor = 'auto';
@@ -738,15 +753,16 @@ Browser.prototype.makeTier = function(source) {
             dragLabel = null;
             label.style.visibility = null;
         }
-        // console.log('undrag');
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
-        thisB.notifyTier();
+
+        if (tiersWereReordered)
+            thisB.notifyTier();
     };
 
-    label.addEventListener('mousedown', function(ev) {
-            ev.stopPropagation(); ev.preventDefault();
-            //    console.log('drag');
+    tier.label.addEventListener('mousedown', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        tiersWereReordered = false;
         document.addEventListener('mousemove', labelDragHandler, false);
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
@@ -962,8 +978,6 @@ Browser.prototype.zoom = function(factor) {
         this.viewEnd = this.viewStart + len - 1;
     }
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart)
-//    this.updateRegion();
-
     var width = this.viewEnd - this.viewStart + 1;
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
@@ -1091,6 +1105,7 @@ Browser.prototype.removeTier = function(conf) {
 Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     if (newChr && (newChr !== this.chr)) {
         if (!this.entryPoints) {
+            // FIXME is this too strict?
             throw 'Need entry points';
         }
         var ep = null;
@@ -1113,10 +1128,8 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     this.viewEnd = newMax|0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     this.notifyLocation();
-    // this.zoomSlider.setValue(this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase));
 
-    // this.updateRegion();
-    // this.karyo.update(this.chr, this.viewStart, this.viewEnd);
+    this.refresh();
     this.spaceCheck();
 }
 
@@ -1248,4 +1261,15 @@ Browser.prototype.featuresInRegion = function(chr, min, max) {
         }
     }
     return features;
+}
+
+Browser.prototype.markSelectedTier = function() {
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var button = this.tiers[ti].nameButton;
+        if (ti == this.selectedTier) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    }
 }
