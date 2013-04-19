@@ -80,8 +80,6 @@ function Browser(opts) {
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
     }
 
-    this.iconsURI = 'http://www.biodalliance.org/resources/icons.svg'
-
     // Registry
 
     this.availableSources = new Observed();

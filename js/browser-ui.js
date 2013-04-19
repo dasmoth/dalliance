@@ -78,8 +78,8 @@ window.addEventListener('load', function() {
        ev.stopPropagation(); ev.preventDefault();
   
         var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
-        saveDoc.documentElement.setAttribute('width', 400);
-        saveDoc.documentElement.setAttribute('height', 400);
+        saveDoc.documentElement.setAttribute('width', 800);
+        saveDoc.documentElement.setAttribute('height', 800);
 
         var saveRoot = makeElementNS(NS_SVG, 'g', null, {
             fontFamily: 'helvetica'
@@ -93,6 +93,26 @@ window.addEventListener('load', function() {
                 fontSize: '12pt'
         });
         saveRoot.appendChild(dallianceAnchor);
+
+        var pos = 50;
+        for (var ti = 0; ti < b.tiers.length; ++ti) {
+            var tier = b.tiers[ti];
+            if (!tier.subtiers) {
+                continue;
+            }
+        
+            for (var sti = 0; sti < tier.subtiers.length; ++sti) {
+                var subtier = tier.subtiers[sti];
+                
+                var glyphElements = [];
+                for (var gi = 0; gi < subtier.glyphs.length; ++gi) {
+                    var glyph = subtier.glyphs[gi];
+                    glyphElements.push(glyph.toSVG());
+                }
+                saveRoot.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(0, ' + pos + ')'}));
+                pos += subtier.height + 20;
+            }
+        }
 
         var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)]);
         var fr = new FileReader();

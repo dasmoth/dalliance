@@ -28,9 +28,11 @@ SubTier.prototype.hasSpaceFor = function(glyph) {
     return true;
 }
 
+var GLOBAL_GC;
 
 function drawFeatureTier(tier)
 {
+    GLOBAL_GC = tier.viewport.getContext('2d'); // Should only be used for metrics.
     sortFeatures(tier);
 
     var glyphs = [];
@@ -196,7 +198,6 @@ function drawFeatureTier(tier)
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
         var g = glyphs[i];
-        // g = labelGlyph(tier, g, featureGroupElement);
         if (g.bump) {
             hasBumpedFeatures = true;
         }
@@ -223,7 +224,6 @@ function drawFeatureTier(tier)
     if (unbumpedST.glyphs.length > 0) {
         bumpedSTs = [unbumpedST].concat(bumpedSTs);
     }
-
 
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
@@ -462,6 +462,16 @@ BoxGlyph.prototype.draw = function(g) {
     }
 }
 
+BoxGlyph.prototype.toSVG = function() {
+    return makeElementNS(NS_SVG, 'rect', null,
+			 {x: this.x, 
+			  y: this.y, 
+			  width: this._width, 
+			  height: this._height,
+			  stroke: this.stroke || 'none',
+			  fill: this.fill || 'none'});
+}
+
 BoxGlyph.prototype.min = function() {
     return this.x;
 }
@@ -537,6 +547,14 @@ GroupGlyph.prototype.draw = function(g) {
 	}
 	last = gl;
     }
+}
+
+GroupGlyph.prototype.toSVG = function() {
+    var g = makeElementNS(NS_SVG, 'g');
+    for (var i = 0; i < this.glyphs.length; ++i) {
+	g.appendChild(this.glyphs[i].toSVG());
+    }
+    return g;
 }
 
 GroupGlyph.prototype.min = function() {
@@ -669,6 +687,14 @@ LineGraphGlyph.prototype.draw = function(g) {
 function LabelledGlyph(glyph, text) {
     this.glyph = glyph;
     this.text = text;
+    this.textLen = GLOBAL_GC.measureText(text).width + 10;
+    this.bump = glyph.bump;
+}
+
+LabelledGlyph.prototype.toSVG = function() {
+    return makeElementNS(NS_SVG, 'g',
+        [this.glyph.toSVG(),
+         makeElementNS(NS_SVG, 'text', this.text, {x: this.glyph.min(), y: this.glyph.height() + 15})]);
 }
 
 LabelledGlyph.prototype.min = function() {
@@ -676,7 +702,7 @@ LabelledGlyph.prototype.min = function() {
 }
 
 LabelledGlyph.prototype.max = function() {
-    return this.glyph.max();
+    return Math.max(this.glyph.max(), (1.0*this.glyph.min()) + this.textLen);
 }
 
 LabelledGlyph.prototype.height = function() {
