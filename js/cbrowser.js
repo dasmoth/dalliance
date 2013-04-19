@@ -284,10 +284,10 @@ Browser.prototype.realInit = function() {
                 ++thisB.selectedTier;
                 thisB.markSelectedTier();
             }
-        } else if (ev.charCode == 61) {
+        } else if (ev.keyCode == 187 || ev.keyCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(-10);
-        } else if (ev.charCode == 45) {
+        } else if (ev.keyCode == 189 || ev.keyCode == 173) {
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
         } else if (ev.keyCode == 84 || ev.keyCode == 116) {
@@ -319,7 +319,7 @@ Browser.prototype.realInit = function() {
                 }
             }
         } else {
-            //dlog('key: ' + ev.keyCode)
+            console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
     };
     var keyUpHandler = function(ev) {

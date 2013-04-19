@@ -11,10 +11,7 @@ For 0.8
      + Per-tier configs:
        - Expand/collapse of bumped tiers.
        - Vertical scales on quantitative tracks.
-     + Add/remove track mechanism.
-     + "Selected track" (should be doable with mouse AND kbd)
      + Chromosome overview (can we be less special-casey about this...?)
-     + Zoom slider (necessary?  some way to hide it when not in use?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
   - Reinstate sequences!
