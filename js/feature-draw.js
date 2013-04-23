@@ -754,6 +754,27 @@ LineGraphGlyph.prototype.draw = function(g) {
     g.restore();
 }
 
+LineGraphGlyph.prototype.toSVG = function() {
+    var p = new SVGPath();
+    for (var i = 0; i < this.points.length; i += 2) {
+	var x = this.points[i];
+	var y = this.points[i + 1];
+	if (i == 0) {
+	    p.moveTo(x, y);
+	} else {
+	    p.lineTo(x, y);
+	}
+    }
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: p.toPathData(),
+	 fill: 'none',
+	 stroke: this.color,
+	 strokeWidth: '2px'});
+}
+
 function LabelledGlyph(glyph, text) {
     this.glyph = glyph;
     this.text = text;

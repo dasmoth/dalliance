@@ -12,7 +12,6 @@ For 0.8
   - Full set of glyphs on canvas renderer
   - Reinstate sequences!
   - Walk the glyphtree to produce SVG for export
-  - Refactor next/prev support in big* code.
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - Work out the kinks in security/preflighting.
@@ -38,6 +37,7 @@ For 0.9 (?)
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
+  - Refactor next/prev support in big* code.
   - Incremental data fetching
 
  
