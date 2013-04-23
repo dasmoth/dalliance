@@ -76,52 +76,7 @@ window.addEventListener('load', function() {
     var svgBtn = document.getElementById('export-svg-button');
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
-  
-        var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
-        saveDoc.documentElement.setAttribute('width', 800);
-        saveDoc.documentElement.setAttribute('height', 800);
-
-        var saveRoot = makeElementNS(NS_SVG, 'g', null, {
-            fontFamily: 'helvetica'
-        });
-        saveDoc.documentElement.appendChild(saveRoot);
-        var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-                x: 80,
-                y: 30,
-                strokeWidth: 0,
-                fill: 'black',
-                fontSize: '12pt'
-        });
-        saveRoot.appendChild(dallianceAnchor);
-
-        var pos = 50;
-        for (var ti = 0; ti < b.tiers.length; ++ti) {
-            var tier = b.tiers[ti];
-            if (!tier.subtiers) {
-                continue;
-            }
-        
-            for (var sti = 0; sti < tier.subtiers.length; ++sti) {
-                var subtier = tier.subtiers[sti];
-                
-                var glyphElements = [];
-                for (var gi = 0; gi < subtier.glyphs.length; ++gi) {
-                    var glyph = subtier.glyphs[gi];
-                    glyphElements.push(glyph.toSVG());
-                }
-                saveRoot.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(0, ' + pos + ')'}));
-                pos += subtier.height + 20;
-            }
-        }
-
-        var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)]);
-        var fr = new FileReader();
-        fr.onload = function(fre) {
-           // console.log(fre.target.result.substring(6));
-           window.open('data:image/svg+xml;' + fre.target.result.substring(6), 'Dalliance graphics');
-        };
-        fr.readAsDataURL(svgBlob);
-        // window.location.href=svgURL;
+       saveSVG(b);
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG');
   }, false);

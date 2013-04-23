@@ -12,6 +12,8 @@ For 0.8
   - Full set of glyphs on canvas renderer
   - Reinstate sequences!
   - Walk the glyphtree to produce SVG for export
+     + Mostly working now, final details pending a fix for
+       https://code.google.com/p/chromium/issues/detail?id=234595
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - Work out the kinks in security/preflighting.
