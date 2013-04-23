@@ -2,10 +2,6 @@
 For 0.8
 -------
 
-  - Performance:
-     + Consider tiled rendering (rendering oversized canvases helps, but
-       tiles would probably cut latency).
-     + Spin event loop between drawing ops.
   - Missing UI elements (w.r.t. 0.7)
      + Placards for per-tier errors.
      + Per-tier configs:
@@ -16,34 +12,36 @@ For 0.8
   - Full set of glyphs on canvas renderer
   - Reinstate sequences!
   - Walk the glyphtree to produce SVG for export
-  - Incremental fetch?
   - Refactor next/prev support in big* code.
-  - Out-to-chromosome zooming
-    + Probably needs a better set of semantic zoom hints in the
-      stylesheet language.
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
-
   - Work out the kinks in security/preflighting.
   - Vertical resizing?
   - Persistence system (currently broken...)
     + Version config blobs per-tier.
   - Full binary support (nearly, nearly, there, just need to not
     freak out of entry_points aren't available).
+  - Refactor browser_ui.js
+  - Remove dead SVGUI code!
 
 For 0.9 (?)
 -----------
 
+  - True tiled rendering.
   - Clean separation between genome canvases and UI chrome.
   - Some sort of full-bleed mode?
   - Track-hub support
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
-  - JSON-DAS support??? (any closer to having a server for this?)
   - Stylesheet editor.
+  - Out-to-chromosome zooming
+    + Probably needs a better set of semantic zoom hints in the
+      stylesheet language.  
+  - Incremental data fetching
+
  
-Real Soon Now
+Future
 -------------
 
  - Better configuration of quantitative tracks.
@@ -56,6 +54,7 @@ Real Soon Now
  - Better dialogs.
  - Improved karyoscape.
  - Factor out browser tiers from UI chrome.
+ - Consider JSON-DAS -- is this alive???
 
 Nice to have
 ------------
