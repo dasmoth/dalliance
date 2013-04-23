@@ -549,12 +549,82 @@ GroupGlyph.prototype.draw = function(g) {
     }
 }
 
+function SVGPath() {
+    this.ops = [];
+}
+
+SVGPath.prototype.moveTo = function(x, y) {
+    this.ops.push('M ' + x + ' ' + y);
+}
+
+SVGPath.prototype.lineTo = function(x, y) {
+    this.ops.push('L ' + x + ' ' + y);
+}
+
+SVGPath.prototype.toPathData = function() {
+    return this.ops.join(' ');
+}
+
 GroupGlyph.prototype.toSVG = function() {
     var g = makeElementNS(NS_SVG, 'g');
     for (var i = 0; i < this.glyphs.length; ++i) {
 	g.appendChild(this.glyphs[i].toSVG());
     }
+
+    var ranges = this.coverage.ranges();
+    for (var r = 1; r < ranges.length; ++r) {
+	var gl = ranges[r];
+	var last = ranges[r - 1];
+	if (last && gl.min() > last.max()) {
+	    var start = last.max();
+	    var end = gl.min();
+	    var mid = (start+end)/2
+
+	    var p = new SVGPath();
+
+	    if (this.connector === 'hat+') {
+		p.moveTo(start, this.h/2);
+		p.lineTo(mid, 0);
+		p.lineTo(end, this.h/2);
+	    } else if (this.connector === 'hat-') {
+		p.moveTo(start, this.h/2);
+		p.lineTo(mid, this.h);
+		p.lineTo(end, this.h/2);
+	    } else if (this.connector === 'collapsed+') {
+		p.moveTo(start, this.h/2);
+		p.lineTo(end, this.h/2);
+		if (end - start > 4) {
+		    p.moveTo(mid - 2, (this.h/2) - 5);
+		    p.lineTo(mid + 2, this.h/2);
+		    p.lineTo(mid - 2, (this.h/2) + 5);
+		}
+	    } else if (this.connector === 'collapsed-') {
+		p.moveTo(start, this.h/2);
+		p.lineTo(end, this.h/2);
+		if (end - start > 4) {
+		    p.moveTo(mid + 2, (this.h/2) - 5);
+		    p.lineTo(mid - 2, this.h/2);
+		    p.lineTo(mid + 2, (this.h/2) + 5);
+		}
+	    } else {
+		p.moveTo(start, this.h/2);
+		p.lineTo(end, this.h/2);
+	    }
+
+	    var path = makeElementNS(
+		NS_SVG, 'path',
+		null,
+		{d: p.toPathData(),
+		 fill: 'none',
+		 stroke: 'black',
+		 strokeWidth: '1px'});
+	    g.appendChild(path);
+	}
+    }
+
     return g;
+
+    
 }
 
 GroupGlyph.prototype.min = function() {
