@@ -361,7 +361,28 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var quant;
 
     var gg;
-    if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
+
+    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE') {
+	var stroke = style.FGCOLOR || 'black';
+        var fill = style.BGCOLOR || 'none';
+        var height = style.HEIGHT || forceHeight || 12;
+        requiredHeight = height = 1.0 * height;
+
+        var mid = (minPos + maxPos)/2;
+        var hh = height/2;
+
+        var mark;
+        var bMinPos = minPos, bMaxPos = maxPos;
+
+	if (gtype === 'EX') {
+	    gg = new ExGlyph(mid, height, stroke);
+	} else if (gtype === 'TRIANGLE') {
+	    var dir = style.DIRECTION || 'N';
+	    return new TriangleGlyph(mid, height, dir, stroke);
+	} else {
+	    gg = new CrossGlyph(mid, height, stroke);
+	}
+    } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
         var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
@@ -560,6 +581,10 @@ SVGPath.prototype.moveTo = function(x, y) {
 
 SVGPath.prototype.lineTo = function(x, y) {
     this.ops.push('L ' + x + ' ' + y);
+}
+
+SVGPath.prototype.closePath = function() {
+    this.ops.pusH('Z');
 }
 
 SVGPath.prototype.toPathData = function() {
@@ -805,4 +830,160 @@ LabelledGlyph.prototype.draw = function(g) {
     this.glyph.draw(g);
     g.fillStyle = 'black';
     g.fillText(this.text, this.glyph.min(), this.glyph.height() + 15);
+}
+
+
+
+function CrossGlyph(x, height, stroke) {
+    this._x = x;
+    this._height = height;
+    this._stroke = stroke;
+}
+
+CrossGlyph.prototype.draw = function(g) {
+    var hh = this._height/2;
+    
+    g.beginPath();
+    g.moveTo(this._x, 0);
+    g.lineTo(this._x, this._height);
+    g.moveTo(this._x - hh, hh);
+    g.lineTo(this._x + hh, hh);
+
+    g.strokeStyle = this._stroke;
+    g.lineWidth = 1;
+
+    g.stroke();
+}
+
+CrossGlyph.prototype.toSVG = function() {
+    var hh = this._height/2;
+
+    var g = new SVGPath();
+    g.moveTo(this._x, 0);
+    g.lineTo(this._x, this._height);
+    g.moveTo(this._x - hh, hh);
+    g.lineTo(this._x + hh, hh);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: 'none',
+	 stroke: this._stroke,
+	 strokeWidth: '1px'});
+}
+
+CrossGlyph.prototype.min = function() {
+    return this._x - this._height/2;
+}
+
+CrossGlyph.prototype.max = function() {
+    return this._x + this._height/2;
+}
+
+CrossGlyph.prototype.height = function() {
+    return this._height;
+}
+
+function ExGlyph(x, height, stroke) {
+    this._x = x;
+    this._height = height;
+    this._stroke = stroke;
+}
+
+ExGlyph.prototype.draw = function(g) {
+    var hh = this._height/2;
+    
+    g.beginPath();
+    g.moveTo(this._x - hh, 0);
+    g.lineTo(this._x + hh, this._height);
+    g.moveTo(this._x - hh, this._height);
+    g.lineTo(this._x + hh, 0);
+
+    g.strokeStyle = this._stroke;
+    g.lineWidth = 1;
+
+    g.stroke();
+}
+
+ExGlyph.prototype.toSVG = function() {
+    var hh = this._height/2;
+
+    var g = new SVGPath();
+    g.moveTo(this._x - hh, 0);
+    g.lineTo(this._x + hh, this._height);
+    g.moveTo(this._x - hh, this._height);
+    g.lineTo(this._x + hh, 0);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: 'none',
+	 stroke: this._stroke,
+	 strokeWidth: '1px'});
+}
+
+ExGlyph.prototype.min = function() {
+    return this._x - this._height/2;
+}
+
+ExGlyph.prototype.max = function() {
+    return this._x + this._height/2;
+}
+
+ExGlyph.prototype.height = function() {
+    return this._height;
+}
+
+function TriangleGlyph(x, height, dir, stroke) {
+    this._x = x;
+    this._height = height;
+    this._dir = dir;
+    this._stroke = stroke;
+}
+
+TriangleGlyph.prototype.draw = function(g) {
+    var hh = this._height/2;
+    
+    g.beginPath();
+
+
+    g.moveTo(this._x , 0);
+    g.lineTo(this._x + hh, this._height);
+    g.lineTo(this._x - hh, this._height);
+    g.closePath();
+
+    g.fillStyle = this._stroke;
+    g.fill();
+}
+
+TriangleGlyph.prototype.toSVG = function() {
+    var hh = this._height/2;
+
+    var g = new SVGPath();
+    g.moveTo(this._x , 0);
+    g.lineTo(this._x + hh, this._height);
+    g.lineTo(this._x - hh, this._height);
+    g.closePath();
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: 'none',
+	 stroke: this._stroke,
+	 strokeWidth: '1px'});
+}
+
+TriangleGlyph.prototype.min = function() {
+    return this._x - this._height/2;
+}
+
+TriangleGlyph.prototype.max = function() {
+    return this._x + this._height/2;
+}
+
+TriangleGlyph.prototype.height = function() {
+    return this._height;
 }

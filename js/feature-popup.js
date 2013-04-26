@@ -9,7 +9,7 @@
 
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
-Browser.prototype.featurePopup = function(ev, feature, group){
+Browser.prototype.featurePopup = function(ev, feature, group) {
     if (!feature) feature = {};
     if (!group) group = {};
 
