@@ -8,15 +8,15 @@
 function saveSVG(b) {
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
 
-
     var saveRoot = makeElementNS(NS_SVG, 'g', null, {
         fontFamily: 'helvetica'
     });
     saveDoc.documentElement.appendChild(saveRoot);
 
+    var margin = 200;
 
     var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-        x: 80,
+        x: 300,
         y: 30,
         strokeWidth: 0,
         fill: 'black',
@@ -25,7 +25,7 @@ function saveSVG(b) {
     saveRoot.appendChild(dallianceAnchor);
     
     var clipRect = makeElementNS(NS_SVG, 'rect', null, {
-	x: 200,
+	x: margin,
 	y: 50,
 	width: b.featurePanelWidth,
 	height: 100000
@@ -33,7 +33,7 @@ function saveSVG(b) {
     var clip = makeElementNS(NS_SVG, 'clipPath', clipRect, {id: 'featureClip'});
     saveRoot.appendChild(clip);
 
-    var pos = 50;
+    var pos = 70;
     var tierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
 
 
@@ -43,6 +43,13 @@ function saveSVG(b) {
             continue;
         }
         
+	saveRoot.appendChild(
+	    makeElementNS(
+		NS_SVG, 'text',
+		tier.dasSource.name,
+		{x: 20, y: pos + 10}));
+	
+	var offset = ((tier.glyphCacheOrigin - b.viewStart) * b.scale);
         for (var sti = 0; sti < tier.subtiers.length; ++sti) {
             var subtier = tier.subtiers[sti];
             
@@ -51,7 +58,7 @@ function saveSVG(b) {
                 var glyph = subtier.glyphs[gi];
                 glyphElements.push(glyph.toSVG());
             }
-            tierHolder.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(0, ' + pos + ')'}));
+            tierHolder.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
             pos += subtier.height + 20;
         }
     }
