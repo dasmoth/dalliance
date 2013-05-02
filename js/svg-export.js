@@ -39,28 +39,38 @@ function saveSVG(b) {
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
-        if (!tier.subtiers) {
-            continue;
-        }
-        
+
 	saveRoot.appendChild(
 	    makeElementNS(
 		NS_SVG, 'text',
 		tier.dasSource.name,
 		{x: 20, y: pos + 10}));
-	
-	var offset = ((tier.glyphCacheOrigin - b.viewStart) * b.scale);
-        for (var sti = 0; sti < tier.subtiers.length; ++sti) {
-            var subtier = tier.subtiers[sti];
-            
-            var glyphElements = [];
-            for (var gi = 0; gi < subtier.glyphs.length; ++gi) {
-                var glyph = subtier.glyphs[gi];
-                glyphElements.push(glyph.toSVG());
+
+
+	if (tier.dasSource.tier_type === 'sequence') {
+	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
+	    
+	    tierHolder.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(0, ' + pos + ')'}));
+	    pos += 80;
+	} else {
+            if (!tier.subtiers) {
+		continue;
             }
-            tierHolder.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
-            pos += subtier.height + 20;
-        }
+	
+	    var offset = ((tier.glyphCacheOrigin - b.viewStart) * b.scale);
+            for (var sti = 0; sti < tier.subtiers.length; ++sti) {
+		var subtier = tier.subtiers[sti];
+            
+		var glyphElements = [];
+		for (var gi = 0; gi < subtier.glyphs.length; ++gi) {
+                    var glyph = subtier.glyphs[gi];
+                    glyphElements.push(glyph.toSVG());
+		}
+		tierHolder.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
+		pos += subtier.height + 3;
+            }
+	    pos += 10;
+	}
     }
     saveRoot.appendChild(tierHolder);
 
