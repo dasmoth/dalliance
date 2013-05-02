@@ -5,6 +5,8 @@
 // sequence-draw.js: renderers for sequence-related data
 //
 
+var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
+
 function drawSeqTier(tier, seq)
 {
     var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale), knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
@@ -26,25 +28,43 @@ function drawSeqTier(tier, seq)
     
     var origin = tier.browser.viewStart - (1000/scale);
 
-    while (pos <= seqTierMax) {
-	gc.fillStyle = ((pos / tile) % 2 == 0) ? 'white' : 'black';
-	gc.strokeStyle = 'black';
-	gc.fillRect((pos - origin) * scale,
-                    8,
-                    tile*scale,
-                    3);
-	gc.strokeRect((pos - origin) * scale,
-                    8,
-                    tile*scale,
-                    3);
+    if (seq && seq.seq) {
+	for (var p = knownStart; p <= knownEnd; ++p) {
+	    if (p >= seq.start && p <= seq.end) {
+		var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
+		var color = baseColors[base];
+		if (!color) {
+                    color = 'gray';
+		}
 
-	gc.fillStyle = 'black';
-	gc.fillText('' + pos, ((pos - origin) * scale), 22);
-	
+		gc.fillStyle = color;
 
-	pos += tile;
+		if (scale >= 8) {
+		    gc.fillText(base, (p - origin) * scale, 12);
+		} else {
+		    gc.fillRect((p - origin) * scale, 5, scale, 10); 
+		}
+	    }
+	}
+    } else {
+	while (pos <= seqTierMax) {
+	    gc.fillStyle = ((pos / tile) % 2 == 0) ? 'white' : 'black';
+	    gc.strokeStyle = 'black';
+	    gc.fillRect((pos - origin) * scale,
+			8,
+			tile*scale,
+			3);
+	    gc.strokeRect((pos - origin) * scale,
+			  8,
+			  tile*scale,
+			  3);
 
+	    gc.fillStyle = 'black';
+	    gc.fillText('' + pos, ((pos - origin) * scale), 22);
+	    
 
+	    pos += tile;
+	}
     }
 
     tier.norigin = (tier.browser.viewStart + tier.browser.viewEnd) / 2;

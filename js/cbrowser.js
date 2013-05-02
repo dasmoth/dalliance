@@ -44,7 +44,7 @@ function Browser(opts) {
     this.maxExtra = 2.5;
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
-    this.zoomMin = 100.0;
+    this.zoomMin = 10.0;
     this.zoomMax = 220.0;
     this.origin = 0;
     this.targetQuantRes = 5.0;
@@ -175,21 +175,21 @@ Browser.prototype.realInit = function() {
                 if (!thisB.isSnapZooming) {
                     thisB.isSnapZooming = true;
                     var newZoom = thisB.savedZoom || 1.0;
-                    thisB.savedZoom = thisB.zoomSlider.getValue();
-                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.savedZoom = thisB.zoomSliderValue;
+                    thisB.zoomSliderValue = newZoom;
                     thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    thisB.invalidateLayouts();
-                    thisB.zoomSlider.setColor('red');
-                    thisB.refresh();
+                    // thisB.invalidateLayouts();
+                    // thisB.zoomSlider.setColor('red');
+                    // thisB.refresh();
                 } else {
                     thisB.isSnapZooming = false;
                     var newZoom = thisB.savedZoom || 10.0;
-                    thisB.savedZoom = thisB.zoomSlider.getValue();
-                    thisB.zoomSlider.setValue(newZoom);
+                    thisB.savedZoom = thisB.zoomSliderValue;
+                    thisB.zoomSliderValue = newZoom;
                     thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    thisB.invalidateLayouts();
-                    thisB.zoomSlider.setColor('blue');
-                    thisB.refresh();
+                    // thisB.invalidateLayouts();
+                    // thisB.zoomSlider.setColor('blue');
+                    // thisB.refresh();
                 }
                 thisB.snapZoomLockout = true;
             }

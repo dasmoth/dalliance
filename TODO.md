@@ -24,6 +24,7 @@ For 0.8
     freak out of entry_points aren't available).
   - Refactor browser_ui.js
   - Remove dead SVGUI code!
+  - Fix scrolling on newer macs.
 
 For 0.9 (?)
 -----------

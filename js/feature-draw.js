@@ -943,29 +943,26 @@ function TriangleGlyph(x, height, dir, stroke) {
     this._stroke = stroke;
 }
 
-TriangleGlyph.prototype.draw = function(g) {
+TriangleGlyph.prototype.drawPath = function(g) {
     var hh = this._height/2;
-    
-    g.beginPath();
-
-
     g.moveTo(this._x , 0);
     g.lineTo(this._x + hh, this._height);
     g.lineTo(this._x - hh, this._height);
     g.closePath();
+}
 
+TriangleGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
     g.fillStyle = this._stroke;
     g.fill();
 }
 
 TriangleGlyph.prototype.toSVG = function() {
-    var hh = this._height/2;
+
 
     var g = new SVGPath();
-    g.moveTo(this._x , 0);
-    g.lineTo(this._x + hh, this._height);
-    g.lineTo(this._x - hh, this._height);
-    g.closePath();
+    this.drawPath(g);
     
     return makeElementNS(
 	NS_SVG, 'path',
