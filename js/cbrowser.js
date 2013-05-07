@@ -477,7 +477,8 @@ Browser.prototype.makeTier = function(source) {
           zIndex: '1000',
           pointerEvents: 'none'});
 
-    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), document.createTextNode('Something bad has happened ' + source.name)], {}, {
+    var placardContent = makeElement('span', 'blah');
+    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), placardContent], {}, {
         display: 'none',
         position: 'relative',
         width: '100%',
@@ -490,7 +491,7 @@ Browser.prototype.makeTier = function(source) {
     
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     vph.className = 'tier-viewport-background';
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard);
+    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
 
