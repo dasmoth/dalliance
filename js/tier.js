@@ -9,7 +9,7 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, holder, overlay)
+function DasTier(browser, source, viewport, holder, overlay, placard)
 {
     var thisTier = this;
 
@@ -19,6 +19,7 @@ function DasTier(browser, source, viewport, holder, overlay)
     this.viewport = viewport;
     this.holder = holder;
     this.overlay = overlay;
+    this.placard = placard;
     this.req = null;
     this.layoutHeight = 25;
     this.bumped = true; 
@@ -314,6 +315,9 @@ DasTier.prototype.updateStatus = function(status) {
         this.currentFeatures = [];
         this.currentSequence = null;
         this.error = status;
+        console.log(status);
+        this.placard.style.display = 'block';
+        this.holder.style.display = 'none';
     }
     this.setBackground();
     this.draw();

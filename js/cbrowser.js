@@ -477,18 +477,20 @@ Browser.prototype.makeTier = function(source) {
           zIndex: '1000',
           pointerEvents: 'none'});
 
-    /*
-    var g = viewportOverlay.getContext('2d');
-    g.fillStyle = 'red';
-    g.globalAlpha = 0.3;
-    for (var i = 0; i < 5000; i += 300) {
-        g.fillRect(i, 0, 100, 50);
-    }
-    */
+    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), document.createTextNode('Something bad has happened ' + source.name)], {}, {
+        display: 'none',
+        position: 'relative',
+        width: '100%',
+        height: '50px',
+        textAlign: 'center',
+        lineHeight: '50px',
+        borderStyle: 'solid',
+        borderColor: 'red',
+        borderWidth: '1px'});
     
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     vph.className = 'tier-viewport-background';
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay);
+    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard);
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
 
@@ -652,7 +654,7 @@ Browser.prototype.makeTier = function(source) {
         tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, tier.label], {}, {position: 'relative', display: 'inline-block'});
+    var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block'});
     tier.row = row;
 
     tier.removeButton.addEventListener('click', function(ev) {
