@@ -500,3 +500,31 @@ DotGlyph.prototype.max = function() {
 DotGlyph.prototype.height = function() {
     return this._height;
 }
+
+
+function PaddedGlyph(glyph, minp, maxp) {
+    this.glyph = glyph;
+    this._min = minp;
+    this._max = maxp;
+    this.bump = glyph.bump;
+}
+
+PaddedGlyph.prototype.draw = function(g) {
+    this.glyph.draw(g);
+}
+
+PaddedGlyph.prototype.toSVG = function() {
+    return glyph.toSVG();
+}
+
+PaddedGlyph.prototype.min = function() {
+    return this._min;
+}
+
+PaddedGlyph.prototype.max = function() {
+    return this._max;
+}
+
+PaddedGlyph.prototype.height = function() {
+    return this.glyph.height();
+}

@@ -170,15 +170,13 @@ function drawFeatureTier(tier)
             groupGlyphs[sgg[sgi]] = null;
             if (gg) {
                 sgGlyphs.push(gg);
-                sgMin = Math.min(sgMin, gg.min);
-                sgMax = Math.max(sgMax, gg.max);
+                sgMin = Math.min(sgMin, gg.min());
+                sgMax = Math.max(sgMax, gg.max());
             }
         }
         for (var sgi = 0; sgi < sgGlyphs.length; ++sgi) {
             var gg = sgGlyphs[sgi];
-            gg.min = sgMin;
-            gg.max = sgMax;
-            glyphs.push(gg);
+            glyphs.push(new PaddedGlyph(gg, sgMin, sgMax));
         }
     }
     for (var g in groupGlyphs) {
