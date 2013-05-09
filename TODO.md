@@ -3,7 +3,6 @@ For 0.8
 -------
 
   - Missing UI elements (w.r.t. 0.7)
-     + Placards for per-tier errors.
      + Per-tier configs:
        - Expand/collapse of bumped tiers.
        - Vertical scales on quantitative tracks.
@@ -12,7 +11,6 @@ For 0.8
   - Full set of glyphs on canvas renderer
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
-  - Work out the kinks in security/preflighting.
   - Vertical resizing?
   - Persistence system (currently broken...)
     + Version config blobs per-tier.
@@ -38,6 +36,7 @@ For 0.9 (?)
       stylesheet language.  
   - Refactor next/prev support in big* code.
   - Incremental data fetching
+  - Work out the kinks in security/preflighting.
 
  
 Future
