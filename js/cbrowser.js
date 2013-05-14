@@ -194,7 +194,7 @@ Browser.prototype.realInit = function() {
                 thisB.snapZoomLockout = true;
             }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 39 || ev.keyCode == 68) {
+        } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -232,7 +232,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
-        } else if (ev.keyCode == 37 || ev.keyCode == 65) {
+        } else if (ev.keyCode == 37) {
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -341,14 +341,14 @@ Browser.prototype.realInit = function() {
         window.removeEventListener('keydown', keyHandler, false);
         window.removeEventListener('keyup', keyUpHandler, false);
         // window.removeEventListener('keypress', keyHandler, false);
-        thisB.svgHolder.removeEventListener('mouseout', mouseLeaveHandler, false);
+        thisB.tierHolder.removeEventListener('mouseout', mouseLeaveHandler, false);
     }
 
-    this.svgHolder.addEventListener('mouseover', function(ev) {
+    this.tierHolder.addEventListener('mouseover', function(ev) {
         window.addEventListener('keydown', keyHandler, false);
         window.addEventListener('keyup', keyUpHandler, false);
         // window.addEventListener('keypress', keyHandler, false);
-        thisB.svgHolder.addEventListener('mouseout', mouseLeaveHandler, false);
+        thisB.tierHolder.addEventListener('mouseout', mouseLeaveHandler, false);
     }, false);
 
 
