@@ -302,6 +302,7 @@ Browser.prototype.realInit = function() {
                         t.isLabelValid = false;
                         t.layoutWasDone = false;
                         t.draw();
+                        t.updateLabel();
                     }
                 }
             } else {
@@ -314,6 +315,7 @@ Browser.prototype.realInit = function() {
                     t.layoutWasDone = false;
                     t.isLabelValid = false;
                     t.draw();
+                    t.updateLabel();
                 }
             }
         } else {
@@ -649,7 +651,8 @@ Browser.prototype.makeTier = function(source) {
 
 
     tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
-    tier.nameButton = makeElement('a', [source.name + ' ', makeElement('i', null, {className: 'icon-plus-sign'})], {className: 'tier-tab'});
+    tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
+    tier.nameButton = makeElement('a', [source.name + ' ', tier.bumpButton], {className: 'tier-tab'});
     tier.label = makeElement('span',
        [tier.removeButton,
         tier.nameButton],
@@ -681,6 +684,23 @@ Browser.prototype.makeTier = function(source) {
         if (nameButton.clientHeight > row.clientHeight) {
             row.style.height = '' + (nameButton.clientHeight + 4) + 'px';
         }*/
+    }, false);
+    tier.bumpButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        var bumpStatus;
+        var t = tier;
+        if (t.dasSource.collapseSuperGroups) {
+            
+            if (bumpStatus === undefined) {
+                bumpStatus = !t.bumped;
+            }
+            t.bumped = bumpStatus;
+            t.layoutWasDone = false;
+            t.isLabelValid = false;
+            t.draw();
+            
+            t.updateLabel();
+        }
     }, false);
 
     
@@ -772,6 +792,7 @@ Browser.prototype.makeTier = function(source) {
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     this.refreshTier(tier);
     this.arrangeTiers();
+    tier.updateLabel();
 }
 
 Browser.prototype.refreshTier = function(tier) {

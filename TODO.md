@@ -3,9 +3,7 @@ For 0.8
 -------
 
   - Missing UI elements (w.r.t. 0.7)
-     + Per-tier configs:
-       - Expand/collapse of bumped tiers.
-       - Vertical scales on quantitative tracks.
+     + Per-tier info?
      + Chromosome overview (can we be less special-casey about this...?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer

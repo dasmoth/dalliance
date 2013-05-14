@@ -420,3 +420,13 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
 //    dlog('delegating to source: ' + pos);
     this.sourceFindNextFeature(chr, pos, dir, callback);
 }
+
+
+DasTier.prototype.updateLabel = function() {
+   this.bumpButton.className = this.bumped ? 'icon-minus-sign' : 'icon-plus-sign';
+   if (this.dasSource.collapseSuperGroups) {
+        this.bumpButton.style.display = 'inline-block';
+    } else {
+        this.bumpButton.style.display = 'none';
+    }
+}
