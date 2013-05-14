@@ -649,7 +649,7 @@ Browser.prototype.makeTier = function(source) {
 
 
     tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
-    tier.nameButton = makeElement('a', source.name, {className: 'tier-tab'});
+    tier.nameButton = makeElement('a', [source.name + ' ', makeElement('i', null, {className: 'icon-plus-sign'})], {className: 'tier-tab'});
     tier.label = makeElement('span',
        [tier.removeButton,
         tier.nameButton],

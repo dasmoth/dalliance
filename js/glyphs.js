@@ -514,7 +514,7 @@ PaddedGlyph.prototype.draw = function(g) {
 }
 
 PaddedGlyph.prototype.toSVG = function() {
-    return glyph.toSVG();
+    return this.glyph.toSVG();
 }
 
 PaddedGlyph.prototype.min = function() {
