@@ -440,6 +440,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var fill = style.BGCOLOR || 'green';
 	gg = new AArrowGlyph(minPos, maxPos, height, fill, stroke, strand);
 	gg.bump = true;
+    } else if (gtype === 'SPAN') {
+	var stroke = style.FGCOLOR || 'black';
+	gg = new SpanGlyph(minPos, maxPos, height, stroke);
+    } else if (gtype === 'LINE') {
+	var stroke = style.FGCOLOR || 'black';
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';

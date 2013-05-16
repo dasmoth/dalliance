@@ -623,3 +623,47 @@ AArrowGlyph.prototype.toSVG = function() {
 	 fill: this._fill || 'none',
 	 stroke: this._stroke || 'none'});
 }
+
+function SpanGlyph(min, max, height, stroke) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._stroke = _stroke;
+}
+
+SpanGlyph.prototype.min = function() {return this._min};
+SpanGlyph.prototype.max = function() {return this._max};
+SpanGlyph.prototype.height = function() {return this._height};
+
+SpanGlyph.prototype.drawPath = function(g) {
+}
+
+SpanGlyph.prototype.drawPath(g) {
+    var minPos = this._min, maxPos = this._max;
+    var height = this._height, hh = height/2;
+    g.moveTo(minPos, hh);
+    g.lineTo(maxPos, hh);
+    g.moveTo(minPos, 0);
+    g.lineTo(minPos, height);
+    g.moveTo(maxPos, 0);
+    g.lineTo(maxPos, height);
+}
+
+
+SpanGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+    g.strokeStyle = this._stroke;
+    g.stroke();
+}
+
+SpanGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 stroke: this._stroke || 'none'});
+}
