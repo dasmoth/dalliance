@@ -445,6 +445,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg = new SpanGlyph(minPos, maxPos, height, stroke);
     } else if (gtype === 'LINE') {
 	var stroke = style.FGCOLOR || 'black';
+	var lineStyle = style.STYLE || 'solid';
+	gg = new LineGlyph(minPos, maxPos, height, lineStyle, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';

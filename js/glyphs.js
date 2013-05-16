@@ -628,17 +628,15 @@ function SpanGlyph(min, max, height, stroke) {
     this._min = min;
     this._max = max;
     this._height = height;
-    this._stroke = _stroke;
+    this._stroke = stroke;
 }
 
 SpanGlyph.prototype.min = function() {return this._min};
 SpanGlyph.prototype.max = function() {return this._max};
 SpanGlyph.prototype.height = function() {return this._height};
 
-SpanGlyph.prototype.drawPath = function(g) {
-}
 
-SpanGlyph.prototype.drawPath(g) {
+SpanGlyph.prototype.drawPath = function(g) {
     var minPos = this._min, maxPos = this._max;
     var height = this._height, hh = height/2;
     g.moveTo(minPos, hh);
@@ -666,4 +664,61 @@ SpanGlyph.prototype.toSVG = function() {
 	null,
 	{d: g.toPathData(),
 	 stroke: this._stroke || 'none'});
+}
+
+
+
+
+function LineGlyph(min, max, height, style, strand, stroke) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._style = style;
+    this._strand = strand;
+    this._stroke = stroke;
+}
+
+LineGlyph.prototype.min = function() {return this._min};
+LineGlyph.prototype.max = function() {return this._max};
+LineGlyph.prototype.height = function() {return this._height};
+
+LineGlyph.prototype.drawPath = function(g) {
+    var minPos = this._min, maxPos = this._max;
+    var height = this._height, hh = height/2;
+
+    if (this._style === 'hat') {
+	g.moveTo(minPos, hh);
+	g.lineTo((minPos + maxPos)/2, this._strand === '-' ? height : 0);
+	g.lineTo(maxPos, hh);
+    } else {
+	g.moveto(minPos, hh);
+	g.lineTo(maxPos, hh);
+    }
+}
+
+
+LineGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+    g.strokeStyle = this._stroke;
+    if (this._style === 'dashed' && g.setLineDash) {
+	g.setLineDash([3]);
+    }
+    g.stroke();
+}
+
+LineGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    var opts = {d: g.toPathData(),
+	    stroke: this._stroke || 'none'};
+    if (this._style === 'dashed') {
+	opts['strokeDasharray'] = '3';
+    }
+
+    return makeElementNS(
+	NS_SVG, 'path',
+	null, opts
+    );
 }

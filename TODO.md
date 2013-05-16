@@ -14,7 +14,7 @@ For 0.8
      + DOT [done]
      + EX [done]
      + HIDDEN [done]
-     + LINE
+     + LINE [done]
      + SPAN [done]
      + TEXT
      + TOOMANY
