@@ -528,3 +528,87 @@ PaddedGlyph.prototype.max = function() {
 PaddedGlyph.prototype.height = function() {
     return this.glyph.height();
 }
+
+
+function AArrowGlyph(min, max, height, fill, stroke, ori) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._fill = fill;
+    this._stroke = stroke;
+    this._ori = ori;
+}
+
+AArrowGlyph.prototype.min = function() {
+    return this._min;
+}
+
+AArrowGlyph.prototype.max = function() {
+    return this._max;
+}
+
+AArrowGlyph.prototype.height = function() {
+    return this._height;
+}
+
+AArrowGlyph.prototype.makePath = function(g) {
+    var maxPos = this._max;
+    var minPos = this._min;
+    var height = this._height;
+    var lInset = 0;
+    var rInset = 0;
+    var minLength = this._height + 2;
+    var instep = 0.333333 * this._height;
+    var y = 0;
+
+    if (this._ori) {
+	if (this._ori === '+') {
+	    rInset = 0.5 * this._height;
+	} else if (this._ori === '-') {
+	    lInset = 0.5 * this._height;
+	}
+    }
+
+    if (maxPos - minPos < minLength) {
+        minPos = (maxPos + minPos - minLength) / 2;
+        maxPos = minPos + minLength;
+    }
+
+    g.moveTo(minPos + lInset, y+instep);
+    g.lineTo(maxPos - rInset, y+instep);
+    g.lineTo(maxPos - rInset, y);
+    g.lineTo(maxPos, y + this._height/2);
+    g.lineTo(maxPos - rInset, y+height);
+    g.lineTo(maxPos - rInset, y+instep+instep);
+    g.lineTo(minPos + lInset, y+instep+instep);
+    g.lineTo(minPos + lInset, y+height);
+    g.lineTo(minPos, y+height/2);
+    g.lineTo(minPos + lInset, y);
+    g.lineTo(minPos + lInset, y+instep);
+}
+
+AArrowGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.makePath(g);
+
+    if (this._fill) {
+	g.fillStyle = this._fill;
+	g.fill();
+    } 
+    if (this._stroke) {
+	g.strokeStyle = this._stroke;
+	g.stroke();
+    }
+}
+
+AArrowGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.makePath(g);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: this._fill || 'none',
+	 stroke: this._stroke || 'none'});
+}

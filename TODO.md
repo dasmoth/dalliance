@@ -7,6 +7,23 @@ For 0.8
      + Chromosome overview (can we be less special-casey about this...?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
+     + ARROW [?]
+     + ANCHORED_ARROW [done!]
+     + BOX [done]
+     + CROSS [done]
+     + DOT [done]
+     + EX [done]
+     + HIDDEN 
+     + LINE
+     + SPAN
+     + TEXT
+     + TOOMANY
+     + TRIANGLE [done]
+     + PRIMERS
+     + GRADIENT [done]
+     + HISTOGRAM [done]
+     + LINEPLOT [done]
+     + Sequence-reads
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - Vertical resizing?

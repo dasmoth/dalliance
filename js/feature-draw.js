@@ -433,6 +433,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         } 
 
 	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
+    } else if (gtype === 'ANCHORED_ARROW') {
+	var stroke = style.FGCOLOR || 'none';
+        var fill = style.BGCOLOR || 'green';
+	gg = new AArrowGlyph(minPos, maxPos, height, fill, stroke, strand);
+	gg.bump = true;
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
