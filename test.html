@@ -101,7 +101,12 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
                    bwgURI:               'http://www.biodalliance.org/datasets/ensGene.bb',
                    link:                 'http://ncbi36.ensembl.org/Homo_sapiens/Gene/Summary?t=$$',
                    collapseSuperGroups:  true,
-                   disable: true}],
+                   disable: true},
+                  {name:                 'Style test',
+                   uri:                  './glyph-test/',
+                   features_uri:         './glyph-test/features.xml',
+                   stylesheet_uri:       './glyph-test/stylesheet.xml'}
+                ],
 
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
     browserLinks: {

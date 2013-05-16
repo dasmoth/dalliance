@@ -9,10 +9,10 @@ For 0.8
   - Full set of glyphs on canvas renderer
      + ARROW [?]
      + ANCHORED_ARROW [done]
-     + BOX [done]
-     + CROSS [done]
+     + BOX [OK]
+     + CROSS [OK]
      + DOT [done]
-     + EX [done]
+     + EX [OK]
      + HIDDEN [done]
      + LINE [done]
      + SPAN [done]
@@ -24,7 +24,6 @@ For 0.8
      + HISTOGRAM [done]
      + LINEPLOT [done]
      + Sequence-reads
-     + Better way to test the more obscure ones!
   - Review bumping behaviour in new renderer.
   - UI for next/prev
   - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)

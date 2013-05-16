@@ -1,0 +1,45 @@
+<DASGFF>
+<GFF version="1.0" href="http://www.derkholm.net:8080/das/hg18comp/features?segment=22:30000000,30010000">
+  <SEGMENT id="22" version="null" start="30000000" stop="40000000">
+    <FEATURE id="test1" label="test1">
+      <TYPE id="test1">test1</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30000001</START>
+      <END>30002000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="test2" label="test2">
+      <TYPE id="test2">test2</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30003001</START>
+      <END>30004000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="test3" label="test3">
+      <TYPE id="test3">test3</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30005001</START>
+      <END>30006000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="test4" label="test4">
+      <TYPE id="test4">test4</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30007001</START>
+      <END>30008000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+  </SEGMENT>
+</GFF>
+</DASGFF>

@@ -1,0 +1,52 @@
+<?xml version="1.0" standalone="yes"?>
+
+<DASSTYLE>
+  <STYLESHEET>
+    <CATEGORY id="default">
+
+      <TYPE id='test2'>
+        <GLYPH>
+          <EX>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>red</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </EX>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='test3'>
+        <GLYPH>
+          <CROSS>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>red</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </CROSS>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='test4'>
+        <GLYPH>
+          <DOT>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>green</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </DOT>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='default'>
+        <GLYPH>
+          <BOX>
+            <HEIGHT>10</HEIGHT>
+            <BGCOLOR>blue</BGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </BOX>
+        </GLYPH>
+      </TYPE>
+    </CATEGORY>
+  </STYLESHEET>
+</DASSTYLE>

@@ -183,7 +183,9 @@ DASSource.prototype.features = function(segment, options, callback) {
     var thisB = this;
 
     var dasURI;
-    if (this.uri.indexOf('http://') == 0) {
+    if (this.features_uri) {
+        dasURI = this.features_uri;
+    } else {
         var filters = [];
 
         if (segment) {
@@ -228,9 +230,7 @@ DASSource.prototype.features = function(segment, options, callback) {
         } else {
             callback([], 'No filters specified');
         }
-    } else {
-        dasURI = this.uri;
-    }
+    } 
    
 
     this.doCrossDomainRequest(dasURI, function(responseXML, req) {
