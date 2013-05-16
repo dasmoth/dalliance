@@ -433,6 +433,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         } 
 
 	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
+    } else if (gtype === 'HIDDEN') {
+	gg = new PaddedGlyph(null, minPos, maxPos);
     } else if (gtype === 'ANCHORED_ARROW') {
 	var stroke = style.FGCOLOR || 'none';
         var fill = style.BGCOLOR || 'green';

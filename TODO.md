@@ -13,7 +13,7 @@ For 0.8
      + CROSS [done]
      + DOT [done]
      + EX [done]
-     + HIDDEN 
+     + HIDDEN [done]
      + LINE
      + SPAN
      + TEXT

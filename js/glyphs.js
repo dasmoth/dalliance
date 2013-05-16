@@ -506,15 +506,22 @@ function PaddedGlyph(glyph, minp, maxp) {
     this.glyph = glyph;
     this._min = minp;
     this._max = maxp;
-    this.bump = glyph.bump;
+    if (glyph) {
+	this.bump = glyph.bump;
+    }
 }
 
 PaddedGlyph.prototype.draw = function(g) {
-    this.glyph.draw(g);
+    if (this.glyph) 
+	this.glyph.draw(g);
 }
 
 PaddedGlyph.prototype.toSVG = function() {
-    return this.glyph.toSVG();
+    if (this.glyph) {
+	return this.glyph.toSVG();
+    } else {
+	return makeElementNS(NS_SVG, 'g');
+    }
 }
 
 PaddedGlyph.prototype.min = function() {
@@ -526,7 +533,11 @@ PaddedGlyph.prototype.max = function() {
 }
 
 PaddedGlyph.prototype.height = function() {
-    return this.glyph.height();
+    if (this.glyph) {
+	return this.glyph.height();
+    } else {
+	return 1;
+    }
 }
 
 
