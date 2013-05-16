@@ -19,7 +19,7 @@ For 0.8
      + TEXT
      + TOOMANY
      + TRIANGLE [done]
-     + PRIMERS
+     + PRIMERS [done]
      + GRADIENT [done]
      + HISTOGRAM [done]
      + LINEPLOT [done]

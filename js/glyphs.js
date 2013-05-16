@@ -722,3 +722,72 @@ LineGlyph.prototype.toSVG = function() {
 	null, opts
     );
 }
+
+
+
+
+
+function PrimersGlyph(min, max, height, fill, stroke) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._fill = _fill;
+    this._stroke = stroke;
+}
+
+PrimersGlyph.prototype.min = function() {return this._min};
+PrimersGlyph.prototype.max = function() {return this._max};
+PrimersGlyph.prototype.height = function() {return this._height};
+
+
+PrimersGlyph.prototype.drawStemPath = function(g) {
+    var minPos = this._min, maxPos = this._max;
+    var height = this._height, hh = height/2;
+    g.moveTo(minPos, hh);
+    g.lineTo(maxPos, hh);
+}
+
+PrimersGlyph.prototype.drawTrigsPath = function(g) {
+    var minPos = this._min, maxPos = this._max;
+    var height = this._height, hh = height/2;
+    g.moveTo(minPos, 0);
+    g.lineTo(minPos + height, hh);
+    g.lineto(minPos, height);
+    g.lineto(minPos, 0);
+    g.moveTo(maxPos, 0);
+    g.lineTo(maxPos - height, hh);
+    g.lineto(maxPos, height);
+    g.lineto(maxPos, 0);
+}
+
+
+PrimersGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawStemPath(g);
+    g.strokeStyle = this._stroke;
+    g.stroke();
+    g.beginPath();
+    this.drawTrigsPath(g);
+    g.fillStyle = this._fill;
+    g.fill();
+}
+
+PrimersGlyph.prototype.toSVG = function() {
+    var s = new SVGPath();
+    this.drawStemPath(s);
+    var t = new SVGPath();
+    this.drawTrigsPath(t);
+    
+    return makeElementNS(
+	NS_SVG, 'g',
+	[makeElementNS(
+	    NS_SVG, 'path',
+	    null,
+	    {d: s.toPathData(),
+	     stroke: this._stroke || 'none'}),
+	 makeElementNS(
+	     NS_SVG, 'path',
+	     null,
+	     {d: t.toPathData(),
+	      fill: this._fill || 'none'})]);
+}
