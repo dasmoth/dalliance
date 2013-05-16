@@ -465,7 +465,7 @@ TriangleGlyph.prototype.height = function() {
 
 
 
-function DotGlyph(x, height, dir, stroke) {
+function DotGlyph(x, height, stroke) {
     this._x = x;
     this._height = height;
     this._stroke = stroke;

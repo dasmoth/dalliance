@@ -360,7 +360,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
     var gg;
 
-    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE') {
+    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT') {
 	var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
         var height = style.HEIGHT || forceHeight || 12;
@@ -376,9 +376,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	    gg = new ExGlyph(mid, height, stroke);
 	} else if (gtype === 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
-	    return new TriangleGlyph(mid, height, dir, stroke);
+	    gg = new TriangleGlyph(mid, height, dir, stroke);
 	} else if (gtype === 'DOT') {
-	    return new DotGlyph(mid, height, stroke);
+	    gg = new DotGlyph(mid, height, stroke);
 	} else {
 	    gg = new CrossGlyph(mid, height, stroke);
 	}
