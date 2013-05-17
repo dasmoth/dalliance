@@ -126,6 +126,58 @@
         </GLYPH>
       </TYPE>
 
+     <TYPE id='trigN'>
+        <GLYPH>
+          <TRIANGLE>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </TRIANGLE>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='trigS'>
+        <GLYPH>
+          <TRIANGLE>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>green</FGCOLOR>
+	    <DIRECTION>S</DIRECTION>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </TRIANGLE>
+        </GLYPH>
+      </TYPE>
+
+    <TYPE id='trigE'>
+        <GLYPH>
+          <TRIANGLE>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+	    <DIRECTION>E</DIRECTION>
+	    <LINEWIDTH>40</LINEWIDTH>
+          </TRIANGLE>
+        </GLYPH>
+      </TYPE>
+
+    <TYPE id='trigW'>
+        <GLYPH>
+          <TRIANGLE>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+	    <DIRECTION>W</DIRECTION>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </TRIANGLE>
+        </GLYPH>
+      </TYPE>
+
       <TYPE id='default'>
         <GLYPH>
           <BOX>

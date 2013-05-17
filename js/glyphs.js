@@ -415,18 +415,36 @@ ExGlyph.prototype.height = function() {
     return this._height;
 }
 
-function TriangleGlyph(x, height, dir, stroke) {
+function TriangleGlyph(x, height, dir, width, stroke) {
     this._x = x;
     this._height = height;
     this._dir = dir;
+    this._width = width;
     this._stroke = stroke;
 }
 
 TriangleGlyph.prototype.drawPath = function(g) {
     var hh = this._height/2;
-    g.moveTo(this._x , 0);
-    g.lineTo(this._x + hh, this._height);
-    g.lineTo(this._x - hh, this._height);
+    var hw = this._width/2;
+
+    if (this._dir === 'S') {
+	g.moveTo(this._x, this._height);
+	g.lineTo(this._x - hw, 0);
+	g.lineTo(this._x + hw, 0);
+    } else if (this._dir === 'W') {
+	g.moveTo(this._x + hw, hh);
+	g.lineTo(this._x - hw, 0);
+	g.lineTo(this._x - hw, this._height);
+    } else if (this._dir === 'E') {
+	g.moveTo(this._x - hw, hh);
+	g.lineTo(this._x + hw, 0);
+	g.lineTo(this._x + hw, this._height);
+    } else {
+	g.moveTo(this._x , 0);
+	g.lineTo(this._x + hw, this._height);
+	g.lineTo(this._x - hw, this._height);
+    }
+
     g.closePath();
 }
 

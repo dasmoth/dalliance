@@ -18,7 +18,7 @@ For 0.8
      + SPAN [OK]
      + TEXT
      + TOOMANY
-     + TRIANGLE [done]
+     + TRIANGLE [OK]
      + PRIMERS [OK]
      + GRADIENT [OK]
      + HISTOGRAM [OK]

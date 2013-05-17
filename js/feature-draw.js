@@ -382,7 +382,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	    gg = new ExGlyph(mid, height, stroke);
 	} else if (gtype === 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
-	    gg = new TriangleGlyph(mid, height, dir, stroke);
+	    var width = style.LINEWIDTH || height;
+	    gg = new TriangleGlyph(mid, height, dir, width, stroke);
 	} else if (gtype === 'DOT') {
 	    gg = new DotGlyph(mid, height, stroke);
 	} else {

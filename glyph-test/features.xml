@@ -112,6 +112,46 @@
       <ORIENTATION>0</ORIENTATION>
       <PHASE>-</PHASE>
     </FEATURE>
+
+    <FEATURE id="trigN" label="trigN">
+      <TYPE id="trigN">trigN</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30017000</START>
+      <END>30018000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="trigS" label="trigS">
+      <TYPE id="trigS">trigS</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30017000</START>
+      <END>30018000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="trigE" label="trigE">
+      <TYPE id="trigE">trigE</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30018500</START>
+      <END>30019500</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="trigW" label="trigW">
+      <TYPE id="trigW">trigW</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30019000</START>
+      <END>30019600</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
   </SEGMENT>
 </GFF>
 </DASGFF>
