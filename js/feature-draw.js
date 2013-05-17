@@ -441,6 +441,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
     } else if (gtype === 'HIDDEN') {
 	gg = new PaddedGlyph(null, minPos, maxPos);
+	noLabel = true;
     } else if (gtype === 'ARROW') {
 	var color = style.FGCOLOR || 'purple';
 	var parallel = isDasBooleanTrue(style.PARALLEL);
@@ -458,11 +459,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === 'LINE') {
 	var stroke = style.FGCOLOR || 'black';
 	var lineStyle = style.STYLE || 'solid';
-	gg = new LineGlyph(minPos, maxPos, height, lineStyle, stroke);
+	gg = new LineGlyph(minPos, maxPos, height, lineStyle, strand, stroke);
     } else if (gtype === 'PRIMERS') {
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'red';
-	gg = new PrimersGlyph(min, max, height, fill, stroke);
+	gg = new PrimersGlyph(minPos, maxPos, height, fill, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';

@@ -70,6 +70,48 @@
       <ORIENTATION>0</ORIENTATION>
       <PHASE>-</PHASE>
     </FEATURE>
+
+
+
+    <FEATURE id="testH" label="testH">
+      <TYPE id="testH">testH</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30013501</START>
+      <END>30015000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+  
+
+    <FEATURE id="test5" label="test5">
+      <TYPE id="test5">test5</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30013501</START>
+      <END>30015000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+  <FEATURE id="test6" label="test6">
+      <TYPE id="test6">test6</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30015500</START>
+      <END>30016500</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="test7" label="test7">
+      <TYPE id="test7">test7</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30015500</START>
+      <END>30016500</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
   </SEGMENT>
 </GFF>
 </DASGFF>

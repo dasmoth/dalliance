@@ -691,7 +691,7 @@ LineGlyph.prototype.drawPath = function(g) {
 	g.lineTo((minPos + maxPos)/2, this._strand === '-' ? height : 0);
 	g.lineTo(maxPos, hh);
     } else {
-	g.moveto(minPos, hh);
+	g.moveTo(minPos, hh);
 	g.lineTo(maxPos, hh);
     }
 }
@@ -702,9 +702,13 @@ LineGlyph.prototype.draw = function(g) {
     this.drawPath(g);
     g.strokeStyle = this._stroke;
     if (this._style === 'dashed' && g.setLineDash) {
+	g.save();
 	g.setLineDash([3]);
+	g.stroke();
+	g.restore();
+    } else {
+	g.stroke();
     }
-    g.stroke();
 }
 
 LineGlyph.prototype.toSVG = function() {
@@ -731,7 +735,7 @@ function PrimersGlyph(min, max, height, fill, stroke) {
     this._min = min;
     this._max = max;
     this._height = height;
-    this._fill = _fill;
+    this._fill = fill;
     this._stroke = stroke;
 }
 
@@ -752,12 +756,12 @@ PrimersGlyph.prototype.drawTrigsPath = function(g) {
     var height = this._height, hh = height/2;
     g.moveTo(minPos, 0);
     g.lineTo(minPos + height, hh);
-    g.lineto(minPos, height);
-    g.lineto(minPos, 0);
+    g.lineTo(minPos, height);
+    g.lineTo(minPos, 0);
     g.moveTo(maxPos, 0);
     g.lineTo(maxPos - height, hh);
-    g.lineto(maxPos, height);
-    g.lineto(maxPos, 0);
+    g.lineTo(maxPos, height);
+    g.lineTo(maxPos, 0);
 }
 
 

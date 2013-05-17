@@ -76,6 +76,56 @@
         </GLYPH>
       </TYPE>
 
+      <TYPE id='testH'>
+        <GLYPH>
+          <HIDDEN>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </HIDDEN>
+        </GLYPH>
+      </TYPE>
+
+      
+      <TYPE id='test5'>
+        <GLYPH>
+          <PRIMERS>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </PRIMERS>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='test6'>
+        <GLYPH>
+          <LINE>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>green</FGCOLOR>
+	    <STYLE>dashed</STYLE>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </LINE>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='test7'>
+        <GLYPH>
+          <SPAN>
+            <HEIGHT>10</HEIGHT>
+	    <BGCOLOR>blue</BGCOLOR>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </SPAN>
+        </GLYPH>
+      </TYPE>
+
       <TYPE id='default'>
         <GLYPH>
           <BOX>

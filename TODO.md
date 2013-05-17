@@ -13,16 +13,16 @@ For 0.8
      + CROSS [OK]
      + DOT [OK]
      + EX [OK]
-     + HIDDEN [done]
-     + LINE [done]
-     + SPAN [done]
+     + HIDDEN [OK]
+     + LINE [OK]
+     + SPAN [OK]
      + TEXT
      + TOOMANY
      + TRIANGLE [done]
-     + PRIMERS [done]
-     + GRADIENT [done]
-     + HISTOGRAM [done]
-     + LINEPLOT [done]
+     + PRIMERS [OK]
+     + GRADIENT [OK]
+     + HISTOGRAM [OK]
+     + LINEPLOT [OK]
      + Sequence-reads
   - Review bumping behaviour in new renderer.
   - UI for next/prev
