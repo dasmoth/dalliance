@@ -465,6 +465,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'red';
 	gg = new PrimersGlyph(minPos, maxPos, height, fill, stroke);
+    } else if (gtype === 'TEXT') {
+	var string = style.STRING || 'text';
+	var fill = style.FGCOLOR || 'black';
+	gg = new TextGlyph(minPos, maxPos, height, fill, string);
     } else if (gtype === 'TOOMANY') {
 	var stroke = style.FGCOLOR || 'gray';
 	var fill = style.BGCOLOR || 'orange';

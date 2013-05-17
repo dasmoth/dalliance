@@ -941,3 +941,25 @@ TooManyGlyph.prototype.draw = function(g) {
 	g.stroke();
     }
 }
+
+function TextGlyph(min, max, height, fill, string) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._fill = fill;
+    this._string = string;
+    this._textLen = GLOBAL_GC.measureText(string).width;
+}
+
+TextGlyph.prototype.min = function() {return this._min};
+TextGlyph.prototype.max = function() {return Math.max(this._max, this._min + this._textLen)};
+TextGlyph.prototype.height = function() {return this._height};
+
+TextGlyph.prototype.draw = function(g) {
+    g.fillStyle = this._fill;
+    g.fillText(this._string, this._min, this._height - 4);
+}
+
+TextGlyph.prototype.toSVG = function() {
+    return makeElementNS(NS_SVG, 'text', this._string, {x: this._min, y: this._height - 4});
+}

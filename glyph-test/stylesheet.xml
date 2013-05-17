@@ -189,6 +189,18 @@
         </GLYPH>
       </TYPE>
 
+      <TYPE id='test9'>
+        <GLYPH>
+          <TEXT>
+	    <STRING>fubar</STRING>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>black</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </TEXT>
+        </GLYPH>
+      </TYPE>
+
       <TYPE id='default'>
         <GLYPH>
           <BOX>

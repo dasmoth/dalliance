@@ -7,26 +7,10 @@ For 0.8
      + Chromosome overview (can we be less special-casey about this...?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
-     + ARROW [OK]
-     + ANCHORED_ARROW [OK]
-     + BOX [OK]
-     + CROSS [OK]
-     + DOT [OK]
-     + EX [OK]
-     + HIDDEN [OK]
-     + LINE [OK]
-     + SPAN [OK]
-     + TEXT
-     + TOOMANY
-     + TRIANGLE [OK]
-     + PRIMERS [OK]
-     + GRADIENT [OK]
-     + HISTOGRAM [OK]
-     + LINEPLOT [OK]
+     + DAS-spec glyphs DONE.
      + Sequence-reads
   - Review bumping behaviour in new renderer.
   - UI for next/prev
-  - Stylesheet overrides in config blobs.  (working now, syntax could be improved...)
   - Vertical resizing?
   - Persistence system (currently broken...)
     + Version config blobs per-tier.
@@ -53,6 +37,7 @@ For 0.9 (?)
   - Refactor next/prev support in big* code.
   - Incremental data fetching
   - Work out the kinks in security/preflighting.
+  - Config syntax?
 
  
 Future
