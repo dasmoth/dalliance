@@ -465,6 +465,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || 'black';
 	var fill = style.BGCOLOR || 'red';
 	gg = new PrimersGlyph(minPos, maxPos, height, fill, stroke);
+    } else if (gtype === 'TOOMANY') {
+	var stroke = style.FGCOLOR || 'gray';
+	var fill = style.BGCOLOR || 'orange';
+	gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';

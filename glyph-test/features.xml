@@ -152,6 +152,16 @@
       <ORIENTATION>0</ORIENTATION>
       <PHASE>-</PHASE>
     </FEATURE>
+
+    <FEATURE id="test8" label="test8">
+      <TYPE id="test8">test8</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30020000</START>
+      <END>30022000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
   </SEGMENT>
 </GFF>
 </DASGFF>

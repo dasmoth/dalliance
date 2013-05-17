@@ -901,3 +901,43 @@ ArrowGlyph.prototype.toSVG = function() {
 	{d: g.toPathData(),
 	 fill: this._color});
 }
+
+
+function TooManyGlyph(min, max, height, fill, stroke) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._fill = fill;
+    this._stroke = stroke;
+}
+
+TooManyGlyph.prototype.min = function() {return this._min};
+TooManyGlyph.prototype.max = function() {return this._max};
+TooManyGlyph.prototype.height = function() {return this._height};
+
+TooManyGlyph.prototype.toSVG = function() {
+    return makeElementNS(NS_SVG, 'rect', null,
+			 {x: this._min, 
+			  y: 0, 
+			  width: this._max - this._min, 
+			  height: this._height,
+			  stroke: this._stroke || 'none',
+			  fill: this._fill || 'none'});
+}
+
+TooManyGlyph.prototype.draw = function(g) {
+    if (this._fill) {
+	g.fillStyle = this._fill;
+	g.fillRect(this._min, 0, this._max - this._min, this._height);
+    }
+    if (this._stroke) {
+	g.strokeStyle = this._stroke;
+	g.strokeRect(this._min, 0, this._max - this._min, this._height);
+	g.beginPath();
+	for (var n = 2; n < this._height; n += 3) {
+	    g.moveTo(this._min, n);
+	    g.lineTo(this._max, n);
+	}
+	g.stroke();
+    }
+}

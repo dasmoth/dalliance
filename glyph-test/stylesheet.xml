@@ -178,6 +178,17 @@
         </GLYPH>
       </TYPE>
 
+      <TYPE id='test8'>
+        <GLYPH>
+          <TOOMANY>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>red</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+          </TOOMANY>
+        </GLYPH>
+      </TYPE>
+
       <TYPE id='default'>
         <GLYPH>
           <BOX>
