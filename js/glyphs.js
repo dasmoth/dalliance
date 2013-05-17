@@ -142,7 +142,7 @@ SVGPath.prototype.lineTo = function(x, y) {
 }
 
 SVGPath.prototype.closePath = function() {
-    this.ops.pusH('Z');
+    this.ops.push('Z');
 }
 
 SVGPath.prototype.toPathData = function() {
@@ -480,11 +480,11 @@ DotGlyph.prototype.draw = function(g) {
 }
 
 DotGlyph.prototype.toSVG = function() {
-    var gg = this._height/2;
+    var hh = this._height/2;
     return makeElementNS(
 	NS_SVG, 'circle',
 	null,
-	{cx: x, cy: hh, r: hh,
+	{cx: this._x, cy: hh, r: hh,
 	 fill: this._stroke,
 	 strokeWidth: '1px'});
 }
@@ -790,4 +790,92 @@ PrimersGlyph.prototype.toSVG = function() {
 	     null,
 	     {d: t.toPathData(),
 	      fill: this._fill || 'none'})]);
+}
+
+function ArrowGlyph(min, max, height, color, parallel, sw, ne) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._color = color;
+    this._parallel = parallel;
+    this._sw = sw;
+    this._ne = ne;
+}
+
+ArrowGlyph.prototype.min = function() {return this._min};
+ArrowGlyph.prototype.max = function() {return this._max};
+ArrowGlyph.prototype.height = function() {return this._height};
+
+ArrowGlyph.prototype.drawPath = function(g) {
+    var min = this._min, max = this._max, height = this._height;
+    
+    if (this._parallel) {
+	var hh = height/2;
+	var instep = 0.4 * height;
+	if (this._sw) {
+	    g.moveTo(min + hh, height-instep);
+	    g.lineTo(min + hh, height);
+	    g.lineTo(min, hh);
+	    g.lineTo(min + hh, 0);
+	    g.lineTo(min + hh, instep);
+	} else {
+	    g.moveTo(min, height-instep);
+	    g.lineTo(min, instep);
+	}
+	if (this._ne) {
+	    g.lineTo(max - hh, instep);
+	    g.lineTo(max - hh, 0);
+	    g.lineTo(max, hh);
+	    g.lineTo(max - hh, height);
+	    g.lineTo(max - hh, height - instep);
+	} else {
+	    g.lineTo(max, instep);
+	    g.lineTo(max, height-instep);
+	}
+	g.closePath();
+    } else {
+	var mid = (min+max)/2;
+	var instep = 0.4*(max-min);
+	var th = height/3;
+
+	if (this._ne) {
+	    g.moveTo(min + instep, th);
+	    g.lineTo(min, th);
+	    g.lineTo(mid, 0);
+	    g.lineTo(max, th);
+	    g.lineTo(max - instep, th);
+	} else {
+	    g.moveTo(min+instep, 0);
+	    g.lineTo(max-instep, 0);
+	}
+	if (this._sw) {
+	    g.lineTo(max - instep, height-th);
+	    g.lineTo(max, height-th);
+	    g.lineTo(mid, height);
+	    g.lineTo(min, height-th)
+	    g.lineTo(min + instep, height-th);
+	} else {
+	    g.lineTo(max - instep, height);
+	    g.lineTo(min + instep, height);
+	}
+	g.closePath();
+    }
+}
+
+ArrowGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+    g.fillStyle = this._color;
+    g.fill();
+}
+
+ArrowGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: this._color});
 }

@@ -40,6 +40,36 @@
       <ORIENTATION>0</ORIENTATION>
       <PHASE>-</PHASE>
     </FEATURE>
+
+    <FEATURE id="arrow1" label="arrow1">
+      <TYPE id="arrow1">arrow1</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30009001</START>
+      <END>30010000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="arrow2" label="arrow2">
+      <TYPE id="arrow2">arrow2</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30009001</START>
+      <END>30010000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
+
+    <FEATURE id="arrow3" label="arrow3">
+      <TYPE id="arrow3">arrow3</TYPE>
+      <METHOD id="comp">comp</METHOD>
+      <START>30011001</START>
+      <END>30012000</END>
+      <SCORE>0.504</SCORE>
+      <ORIENTATION>0</ORIENTATION>
+      <PHASE>-</PHASE>
+    </FEATURE>
   </SEGMENT>
 </GFF>
 </DASGFF>

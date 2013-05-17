@@ -37,6 +37,45 @@
         </GLYPH>
       </TYPE>
 
+      <TYPE id='arrow1'>
+        <GLYPH>
+          <ARROW>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>green</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+	    <PARALLEL>yes</PARALLEL>
+	    <NORTHEAST>yes</NORTHEAST>
+          </ARROW>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='arrow2'>
+        <GLYPH>
+          <ARROW>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>green</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+	    <PARALLEL>yes</PARALLEL>
+	    <SOUTHWEST>yes</SOUTHWEST>
+          </ARROW>
+        </GLYPH>
+      </TYPE>
+
+      <TYPE id='arrow3'>
+        <GLYPH>
+          <ARROW>
+            <HEIGHT>10</HEIGHT>
+            <FGCOLOR>green</FGCOLOR>
+            <LABEL>no</LABEL>
+            <BUMP>yes</BUMP>
+	    <PARALLEL>no</PARALLEL>
+	    <SOUTHWEST>yes</SOUTHWEST>
+          </ARROW>
+        </GLYPH>
+      </TYPE>
+
       <TYPE id='default'>
         <GLYPH>
           <BOX>

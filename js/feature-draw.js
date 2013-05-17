@@ -8,6 +8,11 @@
 var MIN_PADDING = 3;
 var DEFAULT_SUBTIER_MAX = 25;
 
+function isDasBooleanTrue(s) {
+    s = ('' + s).toLowerCase();
+    return s==='yes' || s==='true';
+}
+
 function SubTier() {
     this.glyphs = [];
     this.height = 0;
@@ -357,6 +362,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var height = style.HEIGHT || forceHeight || 12;;
     var requiredHeight = height = 1.0 * height;
     var quant;
+    var bump = style.BUMP && isDasBooleanTrue(style.BUMP);
 
     var gg;
 
@@ -435,6 +441,12 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
     } else if (gtype === 'HIDDEN') {
 	gg = new PaddedGlyph(null, minPos, maxPos);
+    } else if (gtype === 'ARROW') {
+	var color = style.FGCOLOR || 'purple';
+	var parallel = isDasBooleanTrue(style.PARALLEL);
+	var sw = isDasBooleanTrue(style.SOUTHWEST);
+	var ne = isDasBooleanTrue(style.NORTHEAST);
+	gg = new ArrowGlyph(minPos, maxPos, height, color, parallel, sw, ne);
     } else if (gtype === 'ANCHORED_ARROW') {
 	var stroke = style.FGCOLOR || 'none';
         var fill = style.BGCOLOR || 'green';
@@ -461,6 +473,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (style.LABEL && label && !noLabel) {
 	gg = new LabelledGlyph(gg, label);
     }
+
+    if (bump) {
+	gg.bump = true;
+    }
+
     return gg;
 
 }

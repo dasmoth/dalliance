@@ -7,11 +7,11 @@ For 0.8
      + Chromosome overview (can we be less special-casey about this...?)
      + Location/search tool.
   - Full set of glyphs on canvas renderer
-     + ARROW [?]
-     + ANCHORED_ARROW [done]
+     + ARROW [OK]
+     + ANCHORED_ARROW [OK]
      + BOX [OK]
      + CROSS [OK]
-     + DOT [done]
+     + DOT [OK]
      + EX [OK]
      + HIDDEN [done]
      + LINE [done]
