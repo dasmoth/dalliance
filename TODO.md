@@ -38,6 +38,7 @@ For 0.9 (?)
   - Incremental data fetching
   - Work out the kinks in security/preflighting.
   - Config syntax?
+  - Tracks via Ensembl-REST?
 
  
 Future
