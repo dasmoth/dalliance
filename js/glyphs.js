@@ -963,3 +963,70 @@ TextGlyph.prototype.draw = function(g) {
 TextGlyph.prototype.toSVG = function() {
     return makeElementNS(NS_SVG, 'text', this._string, {x: this._min, y: this._height - 4});
 }
+
+
+
+function SequenceGlyph(min, max, height, seq) {
+    this._min = min;
+    this._max = max;
+    this._height = height;
+    this._seq = seq;
+}
+
+SequenceGlyph.prototype.min = function() {return this._min};
+SequenceGlyph.prototype.max = function() {return this._max};
+SequenceGlyph.prototype.height = function() {return this._height};
+
+
+SequenceGlyph.prototype.draw = function(gc) {
+    var seq = this._seq;
+    var scale = (this._max - this._min + 1) / this._seq.length;
+
+    for (var p = 0; p < seq.length; ++p) {
+	var base = seq.substr(p, 1).toUpperCase();
+	var color = baseColors[base];
+	if (!color) {
+	    color = 'gray';
+	}
+	gc.fillStyle = color;
+
+	if (scale >= 8) {
+	    gc.fillText(base, this._min + p*scale, 8);
+	} else {
+	    gc.fillRect(this._min + p*scale, 0, scale, this._height);
+	}
+    }
+}
+
+SequenceGlyph.prototype.toSVG = function() {
+    var seq = this._seq;
+    var scale = (this._max - this._min + 1) / this._seq.length;
+    var  g = makeElementNS(NS_SVG, 'g'); 
+
+    for (var p = 0; p < seq.length; ++p) {
+	var base = seq.substr(p, 1).toUpperCase();
+	var color = baseColors[base];
+	if (!color) {
+	    color = 'gray';
+	}
+
+	if (scale >= 8) {
+	    g.appendChild(
+		    makeElementNS(NS_SVG, 'text', base, {
+			x: this._min + p*scale,
+			y: 8,
+			fill: color}));
+	} else {
+	    g.appendChild(
+		    makeElementNS(NS_SVG, 'rect', null, {
+			x:this._min + p*scale,
+			y: 0,
+			width: scale,
+			height: this._height,
+	                fill: color}));
+
+	}
+    }
+
+    return g;
+}

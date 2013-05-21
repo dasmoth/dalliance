@@ -2,20 +2,15 @@
 For 0.8
 -------
 
-  - Missing UI elements (w.r.t. 0.7)
+  - Missing UI elements
      + Per-tier info?
-     + Chromosome overview (can we be less special-casey about this...?)
      + Location/search tool.
-  - Full set of glyphs on canvas renderer
-     + DAS-spec glyphs DONE.
-     + Sequence-reads
-  - Review bumping behaviour in new renderer.
   - UI for next/prev
   - Vertical resizing?
   - Persistence system (currently broken...)
-    + Version config blobs per-tier.
   - Full binary support (nearly, nearly, there, just need to not
     freak out of entry_points aren't available).
+  - Fix feature popups for grouped features.
   - Refactor browser_ui.js
   - Remove dead SVGUI code!
   - Fix scrolling on newer macs.
@@ -37,7 +32,7 @@ For 0.9 (?)
   - Refactor next/prev support in big* code.
   - Incremental data fetching
   - Work out the kinks in security/preflighting.
-  - Config syntax?
+  - Chromosome overviews
   - Tracks via Ensembl-REST?
 
  

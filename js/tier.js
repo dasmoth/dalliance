@@ -132,7 +132,7 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
                 thisTier.stylesheet.pushStyle({type: 'density'}, 'medium', densStyle);
 
                 var wigStyle = new DASStyle();
-                wigStyle.glyph = 'BOX';
+                wigStyle.glyph = '__SEQUENCE';
                 wigStyle.FGCOLOR = 'black';
                 wigStyle.BGCOLOR = 'blue'
                 wigStyle.HEIGHT = 8;

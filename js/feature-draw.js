@@ -473,6 +473,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || 'gray';
 	var fill = style.BGCOLOR || 'orange';
 	gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
+    } else if (gtype === '__SEQUENCE') {
+	gg = new SequenceGlyph(minPos, maxPos, height, feature.seq);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
