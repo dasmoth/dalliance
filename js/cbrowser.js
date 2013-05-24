@@ -610,13 +610,23 @@ Browser.prototype.makeTier = function(source) {
         }
     });
 
+    var doubleClickTimeout = null;
     vph.addEventListener('mouseup', function(ev) {
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
         if (hit && !thisB.isDragging) {
-            thisB.notifyFeature(ev, hit);
+            if (doubleClickTimeout) {
+                clearTimeout(doubleClickTimeout);
+                doubleClickTimeout = null;
+                console.log('doubleclick');
+            } else {
+                doubleClickTimeout = setTimeout(function() {
+                    doubleClickTimeout = null;
+                    thisB.notifyFeature(ev, hit);
+                }, 500);
+            }
         }
 
         if (thisB.isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
