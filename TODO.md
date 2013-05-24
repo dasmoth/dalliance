@@ -1,4 +1,3 @@
-
 For 0.8
 -------
 
@@ -14,6 +13,8 @@ For 0.8
   - Refactor browser_ui.js
   - Remove dead SVGUI code!
   - Fix scrolling on newer macs.
+  - Restore doubleclick to centre/align to edge of feature; centring hair; 
+  - Restore ctrl arrow to navigate to next feature in focus track?
 
 For 0.9 (?)
 -----------
