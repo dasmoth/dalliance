@@ -5,39 +5,47 @@
 // feature-draw.js: new feature-tier renderer
 //
 
-function BoxGlyph(x, y, width, height, fill, stroke) {
+function BoxGlyph(x, y, width, height, fill, stroke, radius) {
     this.x = x;
     this.y = y;
     this._width = width;
     this._height = height;
     this.fill = fill;
     this.stroke = stroke;
+    this._radius = radius || 0;
 }
 
 BoxGlyph.prototype.draw = function(g) {
-    var r = 1.0;
+    var r = this._radius;
 
     g.beginPath();
-    g.moveTo(this.x + r, this.y);
-    g.lineTo(this.x + this._width - r, this.y);
-    g.arcTo(this.x + this._width, this.y, this.x + this._width, this.y + r, r);
-    g.lineTo(this.x + this._width, this.y + this._height - r);
-    g.arcTo(this.x + this._width, this.y + this._height, this.x + this._width - r, this.y + this._height, r);
-    g.lineTo(this.x + r, this.y + this._height);
-    g.arcTo(this.x, this.y + this._height, this.x, this.y + this._height - r, r);
-    g.lineTo(this.x, this.y + r);
-    g.arcTo(this.x, this.y, this.x + r, this.y, r);
+
+    if (r > 0) {
+	g.moveTo(this.x + r, this.y);
+	g.lineTo(this.x + this._width - r, this.y);
+	g.arcTo(this.x + this._width, this.y, this.x + this._width, this.y + r, r);
+	g.lineTo(this.x + this._width, this.y + this._height - r);
+	g.arcTo(this.x + this._width, this.y + this._height, this.x + this._width - r, this.y + this._height, r);
+	g.lineTo(this.x + r, this.y + this._height);
+	g.arcTo(this.x, this.y + this._height, this.x, this.y + this._height - r, r);
+	g.lineTo(this.x, this.y + r);
+	g.arcTo(this.x, this.y, this.x + r, this.y, r);
+    } else {
+	g.moveTo(this.x, this.y);
+	g.lineTo(this.x + this._width, this.y);
+	g.lineTo(this.x + this._width, this.y + this._height);
+	g.lineTo(this.x, this.y + this._height);
+    }
+
     g.closePath();
 
     if (this.fill) {
 	g.fillStyle = this.fill;
-	//g.fillRect(this.x, this.y, this._width, this._height);
 	g.fill();
     }
     if (this.stroke) {
 	g.strokeStyle = this.stroke;
 	g.lineWidth = 0.5;
-	// g.strokeRect(this.x, this.y, this._width, this._height);
 	g.stroke();
     }
 }
