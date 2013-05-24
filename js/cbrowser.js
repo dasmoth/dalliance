@@ -552,18 +552,10 @@ Browser.prototype.realMakeTier = function(source) {
 
         var glyphs = st[sti].glyphs;
         var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-        // var canvOffset = (viewCenter - tier.norigin)*thisB.scale;
-        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale /* + canvOffset + 1000;*/
+        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale;
         rx -= offset;
-        var hit;
-        for (var gi = 0; gi < glyphs.length; ++gi) {
-            var g = glyphs[gi];
-            if (g.min() <= rx && g.max() >= rx) {
-                hit = g.group || g.feature;
-                break;
-            }
-        }
-        return hit;
+       
+        return glyphLookup(glyphs, rx);
     }
 
     var dragMoveHandler = function(ev) {
@@ -1307,4 +1299,25 @@ Browser.prototype.featureDoubleClick = function(f, rx, ry) {
 
     var width = this.viewEnd - this.viewStart;
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
+}
+
+
+
+
+function glyphLookup(glyphs, rx) {
+    for (var gi = 0; gi < glyphs.length; ++gi) {
+        var g = glyphs[gi];
+        if (g.min() <= rx && g.max() >= rx) {
+            if (g.feature) {
+                return g.feature;
+            } else if (g.glyphs) {
+                return glyphLookup(g.glyphs, rx) || g.group;
+            } else if (g.glyph) {
+                return glyphLookup([g.glyph], rx) || g.group;
+            } else {
+                return g.group;
+            }
+        }
+    }
+    return null;
 }

@@ -9,11 +9,9 @@ For 0.8
   - Persistence system (currently broken...)
   - Full binary support (nearly, nearly, there, just need to not
     freak out of entry_points aren't available).
-  - Fix feature popups for grouped features.
   - Refactor browser_ui.js
   - Remove dead SVGUI code!
   - Fix scrolling on newer macs.
-  - Restore doubleclick to centre/align to edge of feature; centring hair; 
   - Restore ctrl arrow to navigate to next feature in focus track?
 
 For 0.9 (?)

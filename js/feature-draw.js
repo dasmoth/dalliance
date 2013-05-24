@@ -58,7 +58,6 @@ function drawFeatureTier(tier)
                     continue;
                 }
                 var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
-		g.feature = f;
                 glyphs.push(g);
             }
         }
@@ -489,6 +488,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (bump) {
 	gg.bump = true;
     }
+
+    gg.feature = feature;
 
     return gg;
 
