@@ -453,6 +453,14 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 
 Browser.prototype.makeTier = function(source) {
+    try {
+        this.realMakeTier(source);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+Browser.prototype.realMakeTier = function(source) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
@@ -620,7 +628,7 @@ Browser.prototype.makeTier = function(source) {
             if (doubleClickTimeout) {
                 clearTimeout(doubleClickTimeout);
                 doubleClickTimeout = null;
-                console.log('doubleclick');
+                thisB.featureDoubleClick(hit, rx, ry);
             } else {
                 doubleClickTimeout = setTimeout(function() {
                     doubleClickTimeout = null;
@@ -1277,4 +1285,26 @@ Browser.prototype.markSelectedTier = function() {
             button.classList.remove('active');
         }
     }
+}
+
+Browser.prototype.featureDoubleClick = function(f, rx, ry) {
+    if (!f.min || !f.max) {
+        return;
+    }
+
+    var fstart = (((f.min|0) - (this.viewStart|0)) * this.scale);
+    var fwidth = (((f.max - f.min) + 1) * this.scale);
+    
+    var newMid = (((f.min|0) + (f.max|0)))/2;
+    if (fwidth > 10) {
+        var frac = (1.0 * (rx - fstart)) / fwidth;
+        if (frac < 0.3) {
+            newMid = (f.min|0);
+        } else  if (frac > 0.7) {
+            newMid = (f.max|0) + 1;
+        }
+    }
+
+    var width = this.viewEnd - this.viewStart;
+    this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
