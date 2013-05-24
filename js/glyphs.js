@@ -31,10 +31,13 @@ BoxGlyph.prototype.draw = function(g) {
 	g.lineTo(this.x, this.y + r);
 	g.arcTo(this.x, this.y, this.x + r, this.y, r);
     } else {
+	g.lineJoin = 'miter';
+	g.lineCap = 'square';
 	g.moveTo(this.x, this.y);
 	g.lineTo(this.x + this._width, this.y);
 	g.lineTo(this.x + this._width, this.y + this._height);
 	g.lineTo(this.x, this.y + this._height);
+	g.lineTo(this.x, this.y);
     }
 
     g.closePath();

@@ -101,8 +101,12 @@ Browser.prototype.realInit = function() {
     this.svgHolder = document.getElementById(this.pageName);
     removeChildren(this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px'});
+    this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative'});
     this.svgHolder.appendChild(this.tierHolder);
+
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '10000', left: '500px', top: '0px'});
+    this.tierHolder.appendChild(this.ruler);
+    
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
@@ -125,11 +129,8 @@ Browser.prototype.realInit = function() {
     this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
-
-
     // Event handlers
-
-    this.tierHolder.addEventListener('mousewheel', function(ev) {   // FIXME does this need to be on the document?
+    this.tierHolder.addEventListener('mousewheel', function(ev) {
         if (!ev.wheelDeltaX) {
             return;
         }
@@ -145,8 +146,6 @@ Browser.prototype.realInit = function() {
             }
         }
     }, false);
-
-
 
     this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
     this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
@@ -1028,31 +1027,7 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
 
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
-
-    /*
-    var width = window.innerWidth;
-    width = Math.max(width, 640);
-
-    if (this.forceWidth) {
-        width = this.forceWidth;
-    }
-    */
-
     var width = this.tierHolder.getBoundingClientRect().width | 0;
-/*
-    if (this.center) {
-        this.svgHolder.style['margin-left'] = (((window.innerWidth - width) / 2)|0) + 'px';
-    } */
-
-/*
-    this.zoomWidget.setAttribute('transform', 'translate(' + (width - this.zoomSlider.width - 100) + ', 0)');
-    if (width < 1075) {
-        this.karyo.svg.setAttribute('transform', 'translate(2000, 15)');
-    } else {
-        this.karyo.svg.setAttribute('transform', 'translate(450, 20)');
-    }
-    this.regionLabelMax = (width - this.zoomSlider.width - 120) */
-
 
     var oldFPW = this.featurePanelWidth;
     this.featurePanelWidth = (width - this.tabMargin - this.embedMargin)|0;
@@ -1060,8 +1035,6 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
-            // tier.holder.style.width = '' + this.featurePanelWidth + 'px';
-            // tier.paint();
         }
 
         var viewWidth = this.viewEnd - this.viewStart;
@@ -1079,15 +1052,15 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
             this.viewStart = 1;
             this.viewEnd = this.viewStart + wid - 1;
         }
-    
-        // this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
-        // this.updateRegion();
+        
+
+        this.ruler.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+   
         if (!skipRefresh) {
             this.spaceCheck();
         }
         this.notifyLocation();
     }
-
 }
 
 Browser.prototype.addTier = function(conf) {
