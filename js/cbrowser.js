@@ -72,6 +72,7 @@ function Browser(opts) {
     this.tierBackgroundColors = [/* "rgb(245,245,245)", */ 'white' /* , "rgb(230,230,250)" */];
     this.minTierHeight = 25;
     
+    // FIXME are either of these needed any more?
     this.tabMargin = 10;
     this.embedMargin = 50;
 
@@ -1040,8 +1041,9 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = this.tierHolder.getBoundingClientRect().width | 0;
 
     var oldFPW = this.featurePanelWidth;
-    this.featurePanelWidth = (width - this.tabMargin - this.embedMargin)|0;
-    
+    // this.featurePanelWidth = (width - this.tabMargin - this.embedMargin)|0;
+    this.featurePanelWidth = width|0;
+
     if (oldFPW != this.featurePanelWidth) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
