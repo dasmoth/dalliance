@@ -235,9 +235,10 @@ GroupGlyph.prototype.height = function() {
 }
 
 
-function LineGraphGlyph(points, color) {
+function LineGraphGlyph(points, color, height) {
     this.points = points;
     this.color = color;
+    this._height = height || 50;
 }
 
 LineGraphGlyph.prototype.min = function() {
@@ -249,11 +250,21 @@ LineGraphGlyph.prototype.max = function() {
 };
 
 LineGraphGlyph.prototype.height = function() {
-    return 50;
+    return this._height;
 }
 
 LineGraphGlyph.prototype.draw = function(g) {
     g.save();
+    g.strokeStyle = 'black'
+    g.lineWidth = 0.1;
+
+    g.beginPath();
+    for (var y = 0; y <= this._height; y += 10) {
+	g.moveTo(-5000, y);
+	g.lineTo(5000, y);
+    }
+    g.stroke();
+
     g.strokeStyle = this.color;
     g.lineWidth = 2;
     g.beginPath();

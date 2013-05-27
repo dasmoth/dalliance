@@ -513,8 +513,15 @@ Browser.prototype.realMakeTier = function(source) {
              padding: '0px', 
              margin: '0px',
              border: '0px', 
-             left: '0px', top: '0px'});
+             left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
         var ctx = tier.quantOverlay.getContext('2d');
+
+        ctx.fillStyle = 'white'
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(0, 0, 30, 20);
+        ctx.fillRect(0, 36, 30, 20);
+        ctx.globalAlpha = 1.0;
+
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -667,7 +674,7 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.removeButton,
         tier.nameButton],
        {className: 'btn-group'},
-       {zIndex: 1001, position: 'absolute', left: tier.quantOverlay ? '35px' : '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+       {zIndex: 1001, position: 'absolute', left: /* tier.quantOverlay ? '35px' :*/ '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
     var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block'});
     tier.row = row;
 
@@ -1067,7 +1074,13 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         
 
         this.ruler.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-   
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            var q = this.tiers[ti].quantOverlay;
+            if (q) {
+                q.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+            }
+        }
+
         if (!skipRefresh) {
             this.spaceCheck();
         }
