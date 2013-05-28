@@ -24,6 +24,9 @@ window.addEventListener('load', function() {
   b.addViewListener(function(chr, min, max, zoom) {
       document.getElementById('locfield').value = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
       zoomSlider.value = zoom;
+      if (b.storeStatus) {
+          b.storeStatus();
+      }
   });
 
   b.addRegionSelectListener(function(chr, min, max) {
@@ -33,7 +36,9 @@ window.addEventListener('load', function() {
   });
 
   b.addTierListener(function() {
-    console.log('tiers have changed');
+      if (b.storeStatus) {
+          b.storeStatus();
+      }
   });
 
 

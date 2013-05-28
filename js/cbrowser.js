@@ -97,6 +97,10 @@ function Browser(opts) {
 
 Browser.prototype.realInit = function() {
     this.supportsBinary = true; /* (typeof Int8Array === 'function');*/ 
+    
+    if (this.restoreStatus) {
+        this.restoreStatus();
+    }
 
     var thisB = this;
     this.svgHolder = document.getElementById(this.pageName);
