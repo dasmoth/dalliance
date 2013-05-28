@@ -98,6 +98,14 @@ function Browser(opts) {
 Browser.prototype.realInit = function() {
     this.supportsBinary = true; /* (typeof Int8Array === 'function');*/ 
     
+    this.defaultChr = this.chr;
+    this.defaultStart = this.viewStart;
+    this.defaultEnd = this.viewEnd;
+    this.defaultSources = [];
+    for (var i = 0; i < this.sources.length; ++i) {
+        this.defaultSources.push(this.sources[i]);
+    }
+
     if (this.restoreStatus) {
         this.restoreStatus();
     }
@@ -1099,14 +1107,19 @@ Browser.prototype.addTier = function(conf) {
 
 Browser.prototype.removeTier = function(conf) {
     var target = -1;
-    for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var ts = this.tiers[ti].dasSource;
-        if ((conf.uri && ts.uri === conf.uri) ||
-            (conf.bwgURI && ts.bwgURI === conf.bwgURI) ||
-            (conf.bamURI && ts.bamURI === conf.bamURI) ||
-            (conf.twoBitURI && ts.twoBitURI === conf.twoBitURI))
-        {
-            target = ti; break;
+
+    if (typeof conf.index !== 'undefined' && conf.index >=0 && conf.index < this.tiers.length) {
+        target = conf.index;
+    } else {
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            var ts = this.tiers[ti].dasSource;
+            if ((conf.uri && ts.uri === conf.uri) ||
+                (conf.bwgURI && ts.bwgURI === conf.bwgURI) ||
+                (conf.bamURI && ts.bamURI === conf.bamURI) ||
+                (conf.twoBitURI && ts.twoBitURI === conf.twoBitURI))
+            {
+                target = ti; break;
+            }
         }
     }
 

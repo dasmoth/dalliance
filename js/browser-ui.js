@@ -76,6 +76,9 @@ window.addEventListener('load', function() {
     zoomSlider.max = b.zoomMax;
 
     var favBtn = document.getElementById('favourites-button');
+    favBtn.addEventListener('click', function(ev) {
+       ev.stopPropagation(); ev.preventDefault();
+    }, false);
     b.makeTooltip(favBtn, 'Favourite regions');
 
     var svgBtn = document.getElementById('export-svg-button');
@@ -83,5 +86,20 @@ window.addEventListener('load', function() {
        ev.stopPropagation(); ev.preventDefault();
        saveSVG(b);
     }, false);
-    b.makeTooltip(svgBtn, 'Export publication-quality SVG');
+    b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
+
+    var resetBtn = document.getElementById('reset-button');
+    resetBtn.addEventListener('click', function(ev) {
+       ev.stopPropagation(); ev.preventDefault();
+
+       for (var i = b.tiers.length - 1; i >= 0; --i) {
+           b.removeTier({index: i});
+       }
+       for (var i = 0; i < b.defaultSources.length; ++i) {
+           b.addTier(b.defaultSources[i]);
+       }
+
+        b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
+    }, false);
+    b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
   }, false);
