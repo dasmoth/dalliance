@@ -109,10 +109,6 @@ Browser.prototype.realInit = function() {
     this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative'});
     this.svgHolder.appendChild(this.tierHolder);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '10000', left: '500px', top: '0px'});
-    this.tierHolder.appendChild(this.ruler);
-    
-
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
         this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
@@ -123,10 +119,14 @@ Browser.prototype.realInit = function() {
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
     //
 
-    this.resizeViewer(true);
+    // this.resizeViewer(true);
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
+
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '10000', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
+    this.tierHolder.appendChild(this.ruler);
 
     // Dimension stuff
 
