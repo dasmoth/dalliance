@@ -787,6 +787,7 @@ Browser.prototype.realMakeTier = function(source) {
                     for (var i = 0; i < thisB.tiers.length; ++i) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
                     }
+                    thisB.tierHolder.appendChild(thisB.ruler);
                     tiersWereReordered = true;
                 }
                 break;
