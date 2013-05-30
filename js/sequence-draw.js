@@ -5,7 +5,27 @@
 // sequence-draw.js: renderers for sequence-related data
 //
 
+var MIN_TILE = 75;
+var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
+var steps = [1,2,5];
+
+
+function tileSizeForScale(scale, min)
+{
+    if (!min) {
+        min = MIN_TILE;
+    }
+
+    function ts(p) {
+        return steps[p % steps.length] * Math.pow(10, (p / steps.length)|0);
+    }
+    var pow = steps.length;
+    while (scale * ts(pow) < min) {
+        ++pow;
+    }
+    return ts(pow);
+}
 
 function drawSeqTier(tier, seq)
 {

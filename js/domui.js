@@ -170,59 +170,6 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     return popupHandle;
 }
 
-function IconSet(uri)
-{
-    var req = new XMLHttpRequest();
-    req.open('get', uri, false);
-    req.send();
-    this.icons = req.responseXML;
-}
-
-IconSet.prototype.createIcon = function(name, parent)
-{
-    var master = this.icons.getElementById(name);
-    if (!master) {
-        alert("couldn't find " + name);
-        return;
-    }
-    var copy = document.importNode(master, true);
-    // parent.appendChild(copy);
-    // var bbox = copy.getBBox();
-    // parent.removeChild(copy);
-    // copy.setAttribute('transform', 'translate(' + (-bbox.x)  + ',' + (-bbox.y)+ ')');
-    var icon = makeElementNS(NS_SVG, 'g', copy);
-    return icon;
-}
-
-
-IconSet.prototype.createButton = function(name, parent, bx, by)
-{
-    bx = bx|0;
-    by = by|0;
-
-    var master = this.icons.getElementById(name);
-    var copy = document.importNode(master, true);
-    // parent.appendChild(copy);
-    // var bbox = copy.getBBox();
-    // parent.removeChild(copy);
-    // copy.setAttribute('transform', 'translate(' + (((bx - bbox.width - 2)/2) - bbox.x)  + ',' + (((by - bbox.height - 2)/2) - bbox.y)+ ')');
-    var button = makeElementNS(NS_SVG, 'g', [
-        makeElementNS(NS_SVG, 'rect', null, {
-            x: 0,
-            y: 0,
-            width: bx,
-            height: by,
-            fill: 'rgb(230,230,250)',
-            stroke: 'rgb(150,150,220)',
-            strokeWidth: 2
-        }), 
-        copy ]);
-    return button;
-}
-
 function dlog(msg) {
-    var logHolder = document.getElementById('log');
-    if (logHolder) {
-        logHolder.appendChild(makeElement('p', msg));
-    }
+    console.log(msg);
 }
