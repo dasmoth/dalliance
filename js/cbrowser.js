@@ -981,18 +981,6 @@ Browser.prototype.move = function(pos)
         this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
     }
 
-    /*
-    
-    for (var i = 0; i < this.tiers.length; ++i) {
-	this.tiers[i].paint();
-    }
-
-    */
-
-/*    this.xfrmTiers((this.tabMargin - (1.0 * (this.viewStart - this.origin)) * this.scale), 1);
-    this.updateRegion();
-    this.karyo.update(this.chr, this.viewStart, this.viewEnd); */
-
     this.spaceCheck();
 }
 
@@ -1164,10 +1152,24 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
 
     this.viewStart = newMin|0;
     this.viewEnd = newMax|0;
-    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    var scaleChanged = (Math.abs(newScale - this.scale)) > 0.0001;
+    this.scale = newScale;
     this.notifyLocation();
 
-    this.refresh();
+    if (scaleChanged) {
+        this.refresh();
+    } else {
+        var viewCenter = (this.viewStart + this.viewEnd)/2;
+    
+        for (var i = 0; i < this.tiers.length; ++i) {
+            var offset = (viewCenter - this.tiers[i].norigin)*this.scale;
+	    this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+            var ooffset = (viewCenter - this.tiers[i].oorigin)*this.scale;
+            this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
+        }
+    }
+
     this.spaceCheck();
 }
 

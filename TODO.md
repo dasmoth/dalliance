@@ -26,6 +26,8 @@ For 0.9 (?)
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
   - Refactor next/prev support in big* code.
+  - next/prev peak support for quantitative tracks
+    + Needs a UI for setting thresholds.
   - Incremental data fetching
   - Work out the kinks in security/preflighting.
   - Chromosome overviews
