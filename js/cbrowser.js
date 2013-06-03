@@ -133,7 +133,7 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '10000', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
     this.tierHolder.appendChild(this.ruler);
 
     // Dimension stuff
