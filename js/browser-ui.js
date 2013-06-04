@@ -21,13 +21,61 @@ window.addEventListener('load', function() {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
+    var locField = document.getElementById('locfield');
   b.addViewListener(function(chr, min, max, zoom) {
-      document.getElementById('locfield').value = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
+      locField.value = '';
+      locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
       zoomSlider.value = zoom;
       if (b.storeStatus) {
           b.storeStatus();
       }
   });
+
+    locField.addEventListener('keypress', function(ev) {
+        console.log(ev);
+        if (ev.keyCode == 10 || ev.keyCode == 13) {
+            ev.preventDefault();
+
+
+            var g = locField.value;
+
+            if (!g || g.length == 0) {
+                return false;
+            }
+
+            b.searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
+                if (!found) found = [];
+                var min = 500000000, max = -100000000;
+                var nchr = null;
+                for (var fi = 0; fi < found.length; ++fi) {
+                    var f = found[fi];
+                    
+                    if (f.label != g) {
+                        // ...because Dazzle can return spurious overlapping features.
+                        continue;
+                    }
+
+                    if (nchr == null) {
+                        nchr = f.segment;
+                    }
+                    min = Math.min(min, f.min);
+                    max = Math.max(max, f.max);
+                }
+
+                if (!nchr) {
+                    alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+                } else {
+                    b.highlightMin = min;
+                    b.highlightMax = max;
+                    // thisB.makeHighlight();
+                    
+                    var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
+                    b.setLocation(nchr, min - padding, max + padding);
+                }
+            }, false);
+
+        }
+    }, false); 
 
   b.addRegionSelectListener(function(chr, min, max) {
       // console.log('chr' + chr + ':' + min + '..' + max);
