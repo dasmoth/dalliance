@@ -1261,7 +1261,8 @@ Browser.prototype.drawOverlays = function() {
         var t = this.tiers[ti];
         var g = t.overlay.getContext('2d');
         
-        g.clearRect(0, 0, t.overlay.width, t.overlay.height);
+        t.overlay.height = t.viewport.height;
+        // g.clearRect(0, 0, t.overlay.width, t.overlay.height);
         
         var origin = this.viewStart - (1000/this.scale);
         var visStart = this.viewStart - (1000/this.scale);
@@ -1271,7 +1272,7 @@ Browser.prototype.drawOverlays = function() {
         for (var hi = 0; hi < this.highlights.length; ++hi) {
             var h = this.highlights[hi];
             if (h.chr == this.chr && h.min < visEnd && h.max > visStart) {
-                g.globalAlpha = 0.4;
+                g.globalAlpha = 0.3;
                 g.fillStyle = 'red';
                 g.fillRect((h.min - origin) * this.scale,
                            0,

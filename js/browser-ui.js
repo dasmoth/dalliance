@@ -32,7 +32,6 @@ window.addEventListener('load', function() {
   });
 
     locField.addEventListener('keypress', function(ev) {
-        console.log(ev);
         if (ev.keyCode == 10 || ev.keyCode == 13) {
             ev.preventDefault();
 
@@ -65,9 +64,7 @@ window.addEventListener('load', function() {
                 if (!nchr) {
                     alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
                 } else {
-                    b.highlightMin = min;
-                    b.highlightMax = max;
-                    // thisB.makeHighlight();
+                    b.highlightRegion(nchr, min, max);
                     
                     var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
                     b.setLocation(nchr, min - padding, max + padding);
