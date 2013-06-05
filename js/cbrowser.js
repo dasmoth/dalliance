@@ -1155,6 +1155,9 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
     var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     var scaleChanged = (Math.abs(newScale - this.scale)) > 0.0001;
     this.scale = newScale;
+    this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
+    this.isSnapZooming = false;
+    this.savedZoom = null;
     this.notifyLocation();
 
     if (scaleChanged) {
