@@ -988,11 +988,12 @@ TextGlyph.prototype.toSVG = function() {
 
 
 
-function SequenceGlyph(min, max, height, seq) {
+function SequenceGlyph(min, max, height, seq, ref) {
     this._min = min;
     this._max = max;
     this._height = height;
     this._seq = seq;
+    this._ref = ref;
 }
 
 SequenceGlyph.prototype.min = function() {return this._min};
@@ -1010,6 +1011,17 @@ SequenceGlyph.prototype.draw = function(gc) {
 	if (!color) {
 	    color = 'gray';
 	}
+
+	/*
+	if (this._ref) {
+	    var refbase = seq.substr(p, 1).toUpperCase();
+	    if (refbase === base) {
+		color = 'gray';
+	    } else {
+		color = 'red';
+            }
+        }*/
+
 	gc.fillStyle = color;
 
 	if (scale >= 8) {

@@ -559,12 +559,12 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(custName);
 
 
-        stabHolder.appendChild(document.createTextNode('User: '));
+        // stabHolder.appendChild(document.createTextNode('User: '));
         custUser = makeElement('input', '');
-        stabHolder.appendChild(custUser);
-        stabHolder.appendChild(document.createTextNode('Pass: '));
+        // stabHolder.appendChild(custUser);
+        //stabHolder.appendChild(document.createTextNode('Pass: '));
         custPass = makeElement('input', '');
-        stabHolder.appendChild(custPass);
+        // stabHolder.appendChild(custPass);
         
 
         stabHolder.appendChild(makeElement('br'));

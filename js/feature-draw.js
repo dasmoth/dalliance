@@ -473,7 +473,15 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var fill = style.BGCOLOR || 'orange';
 	gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
     } else if (gtype === '__SEQUENCE') {
-	gg = new SequenceGlyph(minPos, maxPos, height, feature.seq);
+	var refSeq = null;
+	if (tier.currentSequence) {
+	    var csStart = tier.currentSequence.start|0;
+	    var csEnd = tier.currentSequence.end|0;
+	    if (csStart < min && csEnd > max) {
+		refSeq = tier.currentSequence.seq.substr(min - csStart, max - min + 1);
+	    }
+	}
+	gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq);
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';

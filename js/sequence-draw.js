@@ -29,7 +29,7 @@ function tileSizeForScale(scale, min)
 
 function drawSeqTier(tier, seq)
 {
-    var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale), knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
+    var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
 
     var fpw = tier.viewport.width|0; 
 
@@ -37,6 +37,7 @@ function drawSeqTier(tier, seq)
     tier.holder.style.height = '80px';
 
     var gc = tier.viewport.getContext('2d');
+    gc.translate(1000,0);
     gc.fillStyle = tier.background;
     gc.fillRect(0, 0, fpw, tier.viewport.height);
 
@@ -47,7 +48,7 @@ function drawSeqTier(tier, seq)
     var tile = tileSizeForScale(scale);
     var pos = Math.max(0, ((knownStart / tile)|0) * tile);
     
-    var origin = tier.browser.viewStart - (1000/scale);
+    var origin = tier.browser.viewStart;
 
     if (seq && seq.seq) {
 	for (var p = knownStart; p <= knownEnd; ++p) {
