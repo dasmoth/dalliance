@@ -271,6 +271,31 @@ DasTier.prototype.paint = function() {
 	gc.translate(0, subtiers[s].height + MIN_PADDING);
     }
     gc.restore();
+
+    if (this.quantOverlay) {
+	var h = this.viewport.height;
+	this.quantOverlay.height = this.viewport.height;
+	var ctx = this.quantOverlay.getContext('2d');
+
+        ctx.fillStyle = 'white'
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(0, 0, 30, 20);
+        ctx.fillRect(0, h-20, 30, 20);
+        ctx.globalAlpha = 1.0;
+
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(8, 3);
+        ctx.lineTo(0,3);
+        ctx.lineTo(0,h-3);
+        ctx.lineTo(8,h-3);
+        ctx.stroke();
+
+        ctx.fillStyle = 'black';
+        ctx.fillText('1.2', 8, 8);
+        ctx.fillText('0.0', 8, h-5);
+    }
 }
 
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
@@ -562,9 +587,8 @@ DasTier.prototype.styleForFeature = function(f) {
 }
 
 function makeLineGlyph(features, style, tier) {
-    // return new BoxGlyph(-1000, 5, 3000, 15, 'red', 'black');
     var origin = tier.browser.viewStart, scale = tier.browser.scale;
-    var height = style.HEIGHT || 30;
+    var height = tier.forceHeight || style.HEIGHT || 30;
     var min = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
     var max = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
     var yscale = ((1.0 * height) / (max - min));
@@ -581,6 +605,6 @@ function makeLineGlyph(features, style, tier) {
         points.push(px);
 	points.push(py);
     }
-    var lgg = new LineGraphGlyph(points, color);
+    var lgg = new LineGraphGlyph(points, color, height);
     return lgg;
 }

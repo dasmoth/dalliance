@@ -284,15 +284,33 @@ Browser.prototype.realInit = function() {
             }
         } else if (ev.keyCode == 38 || ev.keyCode == 87) {
             ev.stopPropagation(); ev.preventDefault();
-            if (thisB.selectedTier > 0) {
-                --thisB.selectedTier;
-                thisB.markSelectedTier();
+
+            if (ev.shiftKey) {
+                var tt = thisB.tiers[thisB.selectedTier];
+                var ch = tt.forceHeight || tt.subtiers[0].height;
+                if (ch >= 20) {
+                    tt.forceHeight = ch - 20;
+                    tt.draw();
+                }
+            } else {
+                if (thisB.selectedTier > 0) {
+                    --thisB.selectedTier;
+                    thisB.markSelectedTier();
+                }
             }
         } else if (ev.keyCode == 40 || ev.keyCode == 83) {
             ev.stopPropagation(); ev.preventDefault();
-            if (thisB.selectedTier < thisB.tiers.length -1) {
-                ++thisB.selectedTier;
-                thisB.markSelectedTier();
+
+            if (ev.shiftKey) {
+                var tt = thisB.tiers[thisB.selectedTier];
+                var ch = tt.forceHeight || tt.subtiers[0].height;
+                tt.forceHeight = ch + 10;
+                tt.draw();
+            } else {
+                if (thisB.selectedTier < thisB.tiers.length -1) {
+                    ++thisB.selectedTier;
+                    thisB.markSelectedTier();
+                }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) {
             ev.stopPropagation(); ev.preventDefault();
@@ -526,27 +544,6 @@ Browser.prototype.realMakeTier = function(source) {
              margin: '0px',
              border: '0px', 
              left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
-        var ctx = tier.quantOverlay.getContext('2d');
-
-        ctx.fillStyle = 'white'
-        ctx.globalAlpha = 0.6;
-        ctx.fillRect(0, 0, 30, 20);
-        ctx.fillRect(0, 36, 30, 20);
-        ctx.globalAlpha = 1.0;
-
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(8, 3);
-        ctx.lineTo(0,3);
-        ctx.lineTo(0,53);
-        ctx.lineTo(8,53);
-        ctx.stroke();
-
-        ctx.fillStyle = 'black';
-        ctx.fillText('1.2', 8, 8);
-        ctx.fillText('0.0', 8, 51);
-
         tier.holder.appendChild(tier.quantOverlay);
     }
     
