@@ -288,6 +288,13 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 
 function DASSequenceSource(dasSource) {
     this.dasSource = dasSource;
+    this.awaitedEntryPoints = new Awaited();
+
+    var thisB = this;
+    this.dasSource.entryPoints(
+        function(ep) {
+            thisB.awaitedEntryPoints.provide(ep);
+        });
 }
 
 
@@ -303,6 +310,17 @@ DASSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
         }
     );
 }
+
+DASSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
+    this.awaitedEntryPoints.await(function(ep) {
+        for (var epi = 0; epi < ep.length; ++epi) {
+            if (ep[epi].name == chr) {
+                return cnt({length: ep[epi].end});
+            }
+        }
+    });
+}
+    
 
 function TwoBitSequenceSource(source) {
     var thisB = this;
@@ -331,6 +349,13 @@ TwoBitSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
         });
 }
 
+TwoBitSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
+    this.twoBit.await(function(tb) {
+        tb.getSeq(chr).length(function(l) {
+            cnt({length: l});
+        });
+    });
+}
 
 DASFeatureSource.prototype.getScales = function() {
     return [];

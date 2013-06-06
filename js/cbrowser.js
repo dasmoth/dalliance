@@ -404,26 +404,18 @@ Browser.prototype.realInit = function() {
     thisB.arrangeTiers();
     thisB.refresh();
 
-    var epSource;
+
     for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var s = this.tiers[ti].dasSource;
-        if (s.provides_entrypoints) {
-            epSource = this.tiers[ti].dasSource;
+        var t = this.tiers[ti];
+        if (t.sequenceSource) {
+            t.sequenceSource.getSeqInfo(this.chr, function(si) {
+                if (si) {
+                    // console.log(si);
+                    thisB.currentSeqMax = si.length;
+                }
+            });
             break;
         }
-    }
-    if (epSource) {
-        epSource.entryPoints(
-            function(ep) {
-                thisB.entryPoints = ep;
-                for (var epi = 0; epi < thisB.entryPoints.length; ++epi) {
-                    if (thisB.entryPoints[epi].name == thisB.chr) {
-                        thisB.currentSeqMax = thisB.entryPoints[epi].end;
-                        break;
-                    }
-                }
-            }
-        );
     }
 
     this.queryRegistry();
@@ -1126,25 +1118,34 @@ Browser.prototype.removeTier = function(conf) {
 
 
 Browser.prototype.setLocation = function(newChr, newMin, newMax) {
-    if (newChr && (newChr !== this.chr)) {
-        if (!this.entryPoints) {
-            // FIXME is this too strict?
-            throw 'Need entry points';
-        }
-        var ep = null;
-        for (var epi = 0; epi < this.entryPoints.length; ++epi) {
-            var epName = this.entryPoints[epi].name;
-            if (epName === newChr || ('chr' + epName) === newChr || epName === ('chr' + newChr)) {
-                ep = this.entryPoints[epi];
+    var thisB = this;
+
+    if (!newChr || newChr == this.chr) {
+        return this._setLocation(null, newMin, newMax);
+    } else {
+        var ss;
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            if (this.tiers[ti].sequenceSource) {
+                ss = this.tiers[ti].sequenceSource;
                 break;
             }
         }
-        if (!ep) {
-            throw "Couldn't find chromosome " + newChr;
+        if (!ss) {
+            throw 'Need sequence source';
         }
 
-        this.chr = ep.name;
-        this.currentSeqMax = ep.end;
+        ss.getSeqInfo(newChr, function(si) {
+            console.log(si);
+            return thisB._setLocation(newChr, newMin, newMax, si);
+        });
+    }
+}
+
+
+Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo) {
+    if (newChr) {
+        this.chr = newChr;
+        this.currentSeqMax = newChrInfo.length;
     }
 
     newMin|=0; newMax|=0;

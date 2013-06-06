@@ -3,11 +3,8 @@ For 0.8
 
   - Missing UI elements
      + Per-tier info?
-     + Location/search tool.
   - UI for next/prev
   - Vertical resizing?
-  - Full binary support (nearly, nearly, there, just need to not
-    freak out of entry_points aren't available).
   - Refactor browser_ui.js
   - Fix scrolling on newer macs.
 
