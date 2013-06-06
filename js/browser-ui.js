@@ -47,7 +47,6 @@ window.addEventListener('load', function() {
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
                     var start = ((m[2]|0) - (width/2))|0;
-                    console.log('jump ' + m[1] + ':' + start + ','  + (start + width - 1));
                     b.setLocation(m[1], start, start + width - 1);
                 }
             } else {
