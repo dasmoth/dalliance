@@ -9,67 +9,81 @@
 
 window.addEventListener('load', function() {
 
+    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
+
   b.addFeatureListener(function(ev, hit) {
     b.featurePopup(ev, hit, null);
   });
 
+/*
   b.addFeatureHoverListener(function(ev, hit) {
      // console.log('hover: ' + miniJSONify(hit));
-  });
+  });*/
 
   function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
     var locField = document.getElementById('locfield');
-  b.addViewListener(function(chr, min, max, zoom) {
-      locField.value = '';
-      locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
-      zoomSlider.value = zoom;
-      if (b.storeStatus) {
-          b.storeStatus();
-      }
-  });
+    b.addViewListener(function(chr, min, max, zoom) {
+        locField.value = '';
+        locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
+        zoomSlider.value = zoom;
+        if (b.storeStatus) {
+            b.storeStatus();
+        }
+    });
 
     locField.addEventListener('keypress', function(ev) {
         if (ev.keyCode == 10 || ev.keyCode == 13) {
             ev.preventDefault();
 
-
             var g = locField.value;
-
-            if (!g || g.length == 0) {
-                return false;
-            }
-
-            b.searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
-                if (!found) found = [];
-                var min = 500000000, max = -100000000;
-                var nchr = null;
-                for (var fi = 0; fi < found.length; ++fi) {
-                    var f = found[fi];
-                    
-                    if (f.label != g) {
-                        // ...because Dazzle can return spurious overlapping features.
-                        continue;
-                    }
-
-                    if (nchr == null) {
-                        nchr = f.segment;
-                    }
-                    min = Math.min(min, f.min);
-                    max = Math.max(max, f.max);
-                }
-
-                if (!nchr) {
-                    alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+            var m = REGION_PATTERN.exec(g);
+            if (m) {
+                console.log(m);
+                if (m[4]) {
+                    b.setLocation(m[1], m[2]|0, m[3]|0);
                 } else {
-                    b.highlightRegion(nchr, min, max);
-                    
-                    var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-                    b.setLocation(nchr, min - padding, max + padding);
+                    var width = b.viewEnd - b.viewStart + 1;
+                    var start = ((m[2]|0) - (width/2))|0;
+                    console.log('jump ' + m[1] + ':' + start + ','  + (start + width - 1));
+                    b.setLocation(m[1], start, start + width - 1);
                 }
-            }, false);
+            } else {
+                if (!g || g.length == 0) {
+                    return false;
+                }
+
+                b.searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
+                    if (!found) found = [];
+                    var min = 500000000, max = -100000000;
+                    var nchr = null;
+                    for (var fi = 0; fi < found.length; ++fi) {
+                        var f = found[fi];
+                        
+                        if (f.label.toLowerCase() != g.toLowerCase()) {
+                            // ...because Dazzle can return spurious overlapping features.
+                            continue;
+                        }
+
+                        if (nchr == null) {
+                            nchr = f.segment;
+                        }
+                        min = Math.min(min, f.min);
+                        max = Math.max(max, f.max);
+                    }
+
+                    if (!nchr) {
+                        alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+                    } else {
+                        b.highlightRegion(nchr, min, max);
+                    
+                        var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
+                        b.setLocation(nchr, min - padding, max + padding);
+                    }
+                }, false);
+            }
 
         }
     }, false); 
