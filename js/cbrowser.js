@@ -1150,8 +1150,18 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
         this.currentSeqMax = ep.end;
     }
 
-    this.viewStart = newMin|0;
-    this.viewEnd = newMax|0;
+    newMin|=0; newMax|=0;
+    var newWidth = Math.max(10, newMax-newMin+1);
+    if (newMin < 1) {
+        newMin = 1; newMax = newMin + newWidth - 1;
+    }
+    if (newMax > this.currentSeqMax) {
+        newMax = this.currentSeqMax;
+        newMin = Math.max(1, newMax - newWidth + 1);
+    }
+
+    this.viewStart = newMin;
+    this.viewEnd = newMax;
     var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     var scaleChanged = (Math.abs(newScale - this.scale)) > 0.0001;
     this.scale = newScale;

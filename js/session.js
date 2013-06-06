@@ -1,3 +1,20 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2013
+//
+// session.js
+//
+
+Browser.prototype.nukeStatus = function() {
+    delete localStorage['dalliance.' + this.cookieKey + '.view-chr'];
+    delete localStorage['dalliance.' + this.cookieKey + '.view-start'];
+    delete localStorage['dalliance.' + this.cookieKey + '.view-end'];
+    delete localStorage['dalliance.' + this.cookieKey + '.sources'];
+    delete localStorage['dalliance.' + this.cookieKey + '.version'];
+}
+
 Browser.prototype.storeStatus = function() {
     if (!this.cookieKey || this.noPersist) {
         return;
@@ -6,6 +23,9 @@ Browser.prototype.storeStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.view-chr'] = this.chr;
     localStorage['dalliance.' + this.cookieKey + '.view-start'] = this.viewStart|0;
     localStorage['dalliance.' + this.cookieKey + '.view-end'] = this.viewEnd|0
+    if (this.currentSeqMax) {
+	localStorage['dalliance.' + this.cookieKey + '.current-seq-length'] = this.currentSeqMax;
+    }
 
     var currentSourceList = [];
     for (var t = 0; t < this.tiers.length; ++t) {
@@ -36,6 +56,11 @@ Browser.prototype.restoreStatus = function() {
 	this.chr = qChr;
 	this.viewStart = qMin;
 	this.viewEnd = qMax;
+	
+	var csm = localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
+	if (csm) {
+	    this.currentSeqMax = csm|0;
+	}
     }
 
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];

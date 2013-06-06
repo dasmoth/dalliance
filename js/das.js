@@ -93,10 +93,16 @@ DASSource.prototype.entryPoints = function(callback) {
                     var segSize = seg.getAttribute('size');
                     var segMin, segMax;
                     if (segSize) {
-                        segMin = 1; segMax = segSize;
+                        segMin = 1; segMax = segSize|0;
                     } else {
                         segMin = seg.getAttribute('start');
+                        if (segMin) {
+                            segMin |= 0;
+                        }
                         segMax = seg.getAttribute('stop');
+                        if (segMax) {
+                            segMax |= 0;
+                        }
                     }
                     var segDesc = null;
                     if (seg.firstChild) {

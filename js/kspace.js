@@ -64,6 +64,10 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     if (chr != this.chr) {
         throw "Can't extend Known Space to a new chromosome";
     }
+    if (min < 1) {
+        min = 1;
+    }
+
     this.min = min;
     this.max = max;
     this.scale = scale;
