@@ -3,15 +3,19 @@ For 0.8
 
   - Missing UI elements
      + Per-tier info?
-  - UI for next/prev
   - Vertical resizing?
   - Refactor browser_ui.js
   - Fix scrolling on newer macs.
+  - Keyboard navigation to to the location field
+  - Reinstate Defaults tab in track adder
+  - Close track-added by clicking button
+  - Automatically determine when to draw y-scales for quantitative tiers.
 
 For 0.9 (?)
 -----------
 
   - True tiled rendering.
+  - UI for next/prev
   - Clean separation between genome canvases and UI chrome.
   - Some sort of full-bleed mode?
   - Track-hub support
@@ -29,6 +33,8 @@ For 0.9 (?)
   - Work out the kinks in security/preflighting.
   - Chromosome overviews
   - Tracks via Ensembl-REST?
+  - Try to preserve layout when expanding/collapsing variants.
+  - Abbreviations when typing locations.
 
  
 Future
