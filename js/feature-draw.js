@@ -497,6 +497,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || 'gray';
 	var fill = style.BGCOLOR || 'orange';
 	gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
+    } else if (gtype === 'POINT') {
+	var height = tier.forceHeight || style.HEIGHT || 30;
+	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
+	var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+	var yscale = ((1.0 * height) / (smax - smin));
+	var sc = ((score - (1.0*smin)) * yscale)|0;
+	gg = new PointGlyph((minPos + maxPos)/2, height-sc, height);
     } else if (gtype === '__SEQUENCE') {
 	var refSeq = null;
 	if (tier.currentSequence) {
@@ -514,7 +521,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg.bump = true;
     }
 
-    if (style.LABEL && label && !noLabel) {
+    if (isDasBooleanTrue(style.LABEL) && label && !noLabel) {
 	gg = new LabelledGlyph(gg, label);
     }
 

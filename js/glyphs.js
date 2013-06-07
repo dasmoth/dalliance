@@ -1064,3 +1064,33 @@ SequenceGlyph.prototype.toSVG = function() {
 
     return g;
 }
+
+
+function PointGlyph(x, y, height) {
+    this._x = x;
+    this._y = y;
+    this._height = height;
+}
+
+PointGlyph.prototype.min = function() {
+    return this._x - 2;
+}
+
+PointGlyph.prototype.max = function() {
+    return this._x + 2;
+}
+
+PointGlyph.prototype.height = function() {
+    return this._height;
+}
+
+PointGlyph.prototype.draw = function(g) {
+    g.fillStyle = 'black';
+    g.beginPath();
+    g.arc(this._x, this._y, 2, 0, 6.29);
+    g.fill();
+}
+
+PointGlyph.prototype.toSVG = function() {
+    return makeElementNS(NS_SVG, 'g');
+}
