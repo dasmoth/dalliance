@@ -25,6 +25,7 @@ window.addEventListener('load', function() {
   }
 
     var locField = document.getElementById('locfield');
+    var locStatusField = document.getElementById('loc-status');
     b.addViewListener(function(chr, min, max, zoom) {
         locField.value = '';
         locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
@@ -40,15 +41,27 @@ window.addEventListener('load', function() {
 
             var g = locField.value;
             var m = REGION_PATTERN.exec(g);
+
+            var setLocationCB = function(err) {
+                    if (err) {
+                        locStatusField.innerText = '' + err;
+                    } else {
+                        locStatusField.innerText = '';
+                    }
+                };
+
             if (m) {
                 console.log(m);
+                var chr = m[1], start, end;
                 if (m[4]) {
-                    b.setLocation(m[1], m[2]|0, m[3]|0);
+                    start = m[2]|0;
+                    end = m[4]|0;
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
-                    var start = ((m[2]|0) - (width/2))|0;
-                    b.setLocation(m[1], start, start + width - 1);
+                    start = ((m[2]|0) - (width/2))|0;
+                    end = start + width - 1;
                 }
+                b.setLocation(chr, start, end, setLocationCB);
             } else {
                 if (!g || g.length == 0) {
                     return false;
@@ -74,12 +87,12 @@ window.addEventListener('load', function() {
                     }
 
                     if (!nchr) {
-                        alert("no match for '" + g + "' (NB. server support for search is currently rather limited...)");
+                        locStatusField.innerText = "no match for '" + g + "' (search should improve soon!)";
                     } else {
                         b.highlightRegion(nchr, min, max);
                     
                         var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-                        b.setLocation(nchr, min - padding, max + padding);
+                        b.setLocation(nchr, min - padding, max + padding, setLocationCB);
                     }
                 }, false);
             }

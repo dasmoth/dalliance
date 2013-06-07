@@ -318,6 +318,7 @@ DASSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
                 return cnt({length: ep[epi].end});
             }
         }
+        return cnt();
     });
 }
     
@@ -351,9 +352,14 @@ TwoBitSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
 
 TwoBitSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
     this.twoBit.await(function(tb) {
-        tb.getSeq(chr).length(function(l) {
-            cnt({length: l});
-        });
+        var seq = tb.getSeq(chr);
+        if (seq) {
+            tb.getSeq(chr).length(function(l) {
+                cnt({length: l});
+            });
+        } else {
+            cnt();
+        }
     });
 }
 

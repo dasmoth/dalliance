@@ -1117,11 +1117,18 @@ Browser.prototype.removeTier = function(conf) {
 }
 
 
-Browser.prototype.setLocation = function(newChr, newMin, newMax) {
+Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
+    if (!callback) {
+        callback = function(err) {
+            if (err) {
+                throw err;
+            }
+        }
+    }
     var thisB = this;
 
     if (!newChr || newChr == this.chr) {
-        return this._setLocation(null, newMin, newMax);
+        return this._setLocation(null, newMin, newMax, null, callback);
     } else {
         var ss;
         for (var ti = 0; ti < this.tiers.length; ++ti) {
@@ -1131,18 +1138,20 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax) {
             }
         }
         if (!ss) {
-            throw 'Need sequence source';
+            return callback('Need a sequence source');
         }
 
         ss.getSeqInfo(newChr, function(si) {
-            console.log(si);
-            return thisB._setLocation(newChr, newMin, newMax, si);
+            if (!si) {
+                callback("Couldn't find sequence '" + newChr + "'");
+            }
+            return thisB._setLocation(newChr, newMin, newMax, si, callback);
         });
     }
 }
 
 
-Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo) {
+Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
     if (newChr) {
         this.chr = newChr;
         this.currentSeqMax = newChrInfo.length;
@@ -1182,6 +1191,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo) {
     }
 
     this.spaceCheck();
+    return callback();
 }
 
 Browser.prototype.addFeatureListener = function(handler, opts) {

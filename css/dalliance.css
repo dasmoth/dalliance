@@ -5,7 +5,8 @@
     -webkit-linear-gradient(rgba(0,0,0,.3) 1px, transparent 1px),
     -webkit-linear-gradient(0, rgba(0,0,0,.3) 1px, transparent 1px);
   background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
-  background-position:-15px -15px, -15px -15px, -14px -14px, -14px -14px
+  background-position:-15px -15px, -15px -15px, -14px -14px, -14px -14px;
+  transition: height 0.2s ease-in-out;
 }
 
 .track-label {
@@ -63,3 +64,7 @@
   background-image: linear-gradient(to bottom, #ffaaaa, #e6aaaa);
 }
 
+.loc-status {
+    font-size: 8pt;
+    color: red
+}
