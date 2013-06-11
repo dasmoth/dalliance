@@ -116,9 +116,13 @@ window.addEventListener('load', function() {
 
     var addTrackBtn = document.getElementById('add-track-button');
     addTrackBtn.addEventListener('click', function(ev) {
-      b.showTrackAdder(ev);
+        if (b.trackAdderVisible) {
+            b.removeAllPopups();
+        } else {
+            b.showTrackAdder(ev);
+        }
     }, false);
-    b.makeTooltip(addTrackBtn, 'Add a track!');
+    b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
 
     var zoomInBtn = document.getElementById('zoom-in');
     zoomInBtn.addEventListener('click', function(ev) {
