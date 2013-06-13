@@ -4,7 +4,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
-// browser-us.js: standard UI wiring (needs refactoring!)
+// browser-us.js: standard UI wiring
 //
 
 function formatLongInt(n) {
@@ -17,19 +17,41 @@ function formatLongInt(n) {
  * with constructing it all in Javascript for now...
  */
 
-Browser.prototype.initUI = function(b) {
-
+Browser.prototype.initUI = function(holder, genomePanel) {
+    var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
 
-  b.addFeatureListener(function(ev, hit) {
-    b.featurePopup(ev, hit, null);
-  });
+    this.addFeatureListener(function(ev, hit) {
+        b.featurePopup(ev, hit, null);
+    });
 
+    holder.className = 'dalliance';
+    var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
 
+    var locField = makeElement('input', '', {className: 'loc-field'});
+    var locStatusField = makeElement('p', '', {className: 'loc-status'});
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}));
 
-    var locField = document.getElementById('locfield');
-    var locStatusField = document.getElementById('loc-status');
-    b.addViewListener(function(chr, min, max, zoom) {
+    var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250});
+    var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
+    toolbar.appendChild(makeElement('div', [zoomInBtn,
+                                            makeElement('span', zoomSlider, {className: 'btn'}),
+                                            zoomOutBtn], {className: 'btn-group'}));
+
+    var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
+    var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
+    var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
+    var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
+    toolbar.appendChild(makeElement('div', [addTrackBtn,
+                                            favBtn,
+                                            svgBtn,
+                                            resetBtn], {className: 'btn-group'}));
+
+    holder.appendChild(toolbar);
+    holder.appendChild(genomePanel);
+
+    this.addViewListener(function(chr, min, max, zoom) {
         locField.value = '';
         locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.value = zoom;
@@ -103,13 +125,14 @@ Browser.prototype.initUI = function(b) {
         }
     }, false); 
 
-  b.addRegionSelectListener(function(chr, min, max) {
+
+  this.addRegionSelectListener(function(chr, min, max) {
       // console.log('chr' + chr + ':' + min + '..' + max);
       // b.highlightRegion(chr, min, max);
       // console.log('selected ' + b.featuresInRegion(chr, min, max).length);
   });
 
-  b.addTierListener(function() {
+  this.addTierListener(function() {
       if (b.storeStatus) {
           b.storeStatus();
       }
@@ -117,7 +140,6 @@ Browser.prototype.initUI = function(b) {
 
 
 
-    var addTrackBtn = document.getElementById('add-track-button');
     addTrackBtn.addEventListener('click', function(ev) {
         if (b.trackAdderVisible) {
             b.removeAllPopups();
@@ -127,7 +149,6 @@ Browser.prototype.initUI = function(b) {
     }, false);
     b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
 
-    var zoomInBtn = document.getElementById('zoom-in');
     zoomInBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
@@ -135,9 +156,6 @@ Browser.prototype.initUI = function(b) {
     }, false);
     b.makeTooltip(zoomInBtn, 'Zoom in');
 
-    var regionField = document.getElementById('locfield');
-
-    var zoomOutBtn = document.getElementById('zoom-out');
     zoomOutBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
@@ -145,7 +163,6 @@ Browser.prototype.initUI = function(b) {
     }, false);
     b.makeTooltip(zoomOutBtn, 'Zoom out');
 
-    var zoomSlider = document.getElementById('zoom-slider');
     zoomSlider.addEventListener('change', function(ev) {
 	b.zoomSliderValue = (1.0 * zoomSlider.value);
 	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
@@ -153,20 +170,17 @@ Browser.prototype.initUI = function(b) {
     zoomSlider.min = b.zoomMin;
     zoomSlider.max = b.zoomMax;
 
-    var favBtn = document.getElementById('favourites-button');
     favBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
     }, false);
     b.makeTooltip(favBtn, 'Favourite regions');
 
-    var svgBtn = document.getElementById('export-svg-button');
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
        saveSVG(b);
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
 
-    var resetBtn = document.getElementById('reset-button');
     resetBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
 
@@ -180,4 +194,5 @@ Browser.prototype.initUI = function(b) {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
+
   }

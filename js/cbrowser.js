@@ -111,8 +111,11 @@ Browser.prototype.realInit = function() {
     }
 
     var thisB = this;
-    this.svgHolder = document.getElementById(this.pageName);
-    removeChildren(this.svgHolder);
+    this.browserHolder = document.getElementById(this.pageName);
+    removeChildren(this.browserHolder);
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '95%', fontSize: '10pt'});
+
+    this.initUI(this.browserHolder, this.svgHolder);
 
     this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative'});
     this.svgHolder.appendChild(this.tierHolder);
@@ -418,7 +421,6 @@ Browser.prototype.realInit = function() {
         }
     }
 
-    this.initUI(this);
     this.queryRegistry();
 }
 

@@ -57,6 +57,10 @@
   background-image: -o-linear-gradient(top, #faa, #e6aaaa);
   background-image: linear-gradient(to bottom, #faa, #e6aaaa);
 }
+*.dalliance .loc-field {
+  width: 300px;
+  margin-bottom: 0px;
+}
 *.dalliance .loc-status {
   font-size: 8pt;
   color: #f00;

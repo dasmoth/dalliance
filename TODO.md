@@ -4,7 +4,6 @@ For 0.8
   - Missing UI elements
      + Per-tier info?
   - Vertical resizing?
-  - Refactor browser_ui.js
   - Fix scrolling on newer macs.
   - Keyboard navigation to to the location field
   - Reinstate Defaults tab in track adder
