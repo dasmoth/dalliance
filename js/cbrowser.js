@@ -418,6 +418,7 @@ Browser.prototype.realInit = function() {
         }
     }
 
+    this.initUI(this);
     this.queryRegistry();
 }
 

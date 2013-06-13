@@ -34,6 +34,7 @@ For 0.9 (?)
   - Tracks via Ensembl-REST?
   - Try to preserve layout when expanding/collapsing variants.
   - Abbreviations when typing locations.
+  - Construct as a web-component.
 
  
 Future

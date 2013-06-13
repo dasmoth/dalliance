@@ -8,8 +8,8 @@
 
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
-<link rel='stylesheet' href='css/bootstrap.css'>
-<link rel='stylesheet' href='css/dalliance.css'>
+<link rel='stylesheet' href='css/bootstrap-scoped.css'>
+<link rel='stylesheet' href='css/dalliance-scoped.css'>
 <title>Human NCBI36 :: Dalliance</title> 
 <style>
 body {font-family: 'helvetica'}
@@ -122,6 +122,7 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
 
 <h2>Human NCBI36</h2>
 
+<div id='bdh' class='dalliance'>
 <div class='btn-toolbar'>
   <div class='btn-group'>
     <input type='text' value='chr22:3000000..30010000    ' style='width: 300px; margin-bottom: 0px' ' id='locfield'></input>
@@ -147,11 +148,10 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
 
 
 <br>
-<div id='svgHolder' style='overflow: hidden; display: inline-block; width: 95%; font-size: 10pt'>
+<div id='svgHolder' style='overflow: hidden; display: inline-block; width: 95%; font-size: 10pt' class='bd'>
+</div>
 </div>
 
-<div id="log">
-</div>
 
 </body>
 </html>

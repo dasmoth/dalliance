@@ -7,7 +7,17 @@
 // browser-us.js: standard UI wiring (needs refactoring!)
 //
 
-window.addEventListener('load', function() {
+function formatLongInt(n) {
+    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+/*
+ * Quite a bit of this ought to be done using a templating system, but
+ * since web-components isn't quite ready for prime time yet we'll stick
+ * with constructing it all in Javascript for now...
+ */
+
+Browser.prototype.initUI = function(b) {
 
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
 
@@ -15,14 +25,7 @@ window.addEventListener('load', function() {
     b.featurePopup(ev, hit, null);
   });
 
-/*
-  b.addFeatureHoverListener(function(ev, hit) {
-     // console.log('hover: ' + miniJSONify(hit));
-  });*/
 
-  function formatLongInt(n) {
-    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
 
     var locField = document.getElementById('locfield');
     var locStatusField = document.getElementById('loc-status');
@@ -177,4 +180,4 @@ window.addEventListener('load', function() {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
-  }, false);
+  }
