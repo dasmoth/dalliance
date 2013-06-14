@@ -662,13 +662,6 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
-/*
-    var label = makeElement('span', 
-                            [source.name, makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'})], 
-                            {className: 'track-label'}, 
-                            {left: tier.quantOverlay ? '35px' : '2px', 
-                             top: '2px'}); */
-
 
     tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});

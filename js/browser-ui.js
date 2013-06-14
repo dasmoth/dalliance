@@ -18,6 +18,9 @@ function formatLongInt(n) {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/bootstrap-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/dalliance-scoped.css'}));
+
     var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
 
@@ -25,7 +28,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.featurePopup(ev, hit, null);
     });
 
-    holder.className = 'dalliance';
+    holder.classList.add('dalliance');
     var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
 
     var locField = makeElement('input', '', {className: 'loc-field'});

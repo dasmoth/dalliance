@@ -3,10 +3,8 @@ For 0.8
 
   - Missing UI elements
      + Per-tier info?
-  - Vertical resizing?
   - Fix scrolling on newer macs.
   - Keyboard navigation to to the location field
-  - Reinstate Defaults tab in track adder
 
 For 0.9 (?)
 -----------
@@ -33,7 +31,8 @@ For 0.9 (?)
   - Try to preserve layout when expanding/collapsing variants.
   - Abbreviations when typing locations.
   - Construct as a web-component.
-
+  - History of recently-viewed tracks.
+  - Better control of vertical resize.
  
 Future
 -------------
