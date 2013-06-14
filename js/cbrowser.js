@@ -113,7 +113,7 @@ Browser.prototype.realInit = function() {
     var thisB = this;
     this.browserHolder = document.getElementById(this.pageName);
     removeChildren(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '95%', fontSize: '10pt'});
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
