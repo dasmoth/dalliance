@@ -12,7 +12,6 @@ For 0.9 (?)
   - True tiled rendering.
   - UI for next/prev
   - Clean separation between genome canvases and UI chrome.
-  - Some sort of full-bleed mode?
   - Track-hub support
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?

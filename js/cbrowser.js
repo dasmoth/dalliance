@@ -38,8 +38,6 @@ function Browser(opts) {
     };
     this.chains = {};
 
-    this.exportServer = 'http://www.biodalliance.org:8765/'
-
     this.pageName = 'svgHolder'
     this.maxExtra = 2.5;
     this.minExtra = 0.5;
@@ -69,12 +67,8 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = [/* "rgb(245,245,245)", */ 'white' /* , "rgb(230,230,250)" */];
+    this.tierBackgroundColors = ['white'];
     this.minTierHeight = 25;
-    
-    // FIXME are either of these needed any more?
-    this.tabMargin = 10;
-    this.embedMargin = 50;
 
     this.browserLinks = {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -170,7 +164,6 @@ Browser.prototype.realInit = function() {
 
 
     var keyHandler = function(ev) {
-//        dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -241,7 +234,7 @@ Browser.prototype.realInit = function() {
                               var pos2=pos;
                               thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
-                              dlog('no next feature');
+                              alert('no next feature');
                           }
                       });
             } else {
@@ -279,7 +272,7 @@ Browser.prototype.realInit = function() {
                               var pos2=pos;
                               thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
-                              dlog('no next feature');
+                              alert('no next feature'); // FIXME better reporting would be nice!
                           }
                       });
             } else {
@@ -422,6 +415,9 @@ Browser.prototype.realInit = function() {
     }
 
     this.queryRegistry();
+    for (var m in this.chains) {
+        this.queryRegistry(m, true);
+    }
 }
 
 // 
@@ -455,7 +451,6 @@ Browser.prototype.touchMoveHandler = function(ev)
         if (sep != this.zoomLastSep) {
             var cp = (ev.touches[0].pageX + ev.touches[1].pageX)/2;
             var scp = this.viewStart + (cp/this.scale)|0
-            // dlog('sep=' + sep + '; zis=' + this.zoomInitialScale);
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
@@ -471,7 +466,6 @@ Browser.prototype.touchMoveHandler = function(ev)
 Browser.prototype.touchEndHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
-//    this.storeStatus();
 }
 
 Browser.prototype.touchCancelHandler = function(ev) {
@@ -868,7 +862,6 @@ Browser.prototype.refresh = function() {
         this.drawnEnd = outerDrawnEnd;
     }
     
-    // dlog('ref ' + this.chr + ':' + this.drawnStart + '..' + this.drawnEnd);
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
     this.drawOverlays();
 }
@@ -909,7 +902,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
                     // alert('Registry data is stale, refetching');
                 }
             } catch (rex) {
-                dlog('Bad registry cache: ' + rex);
+                console.log('Bad registry cache: ' + rex);
             }
         }
     }
