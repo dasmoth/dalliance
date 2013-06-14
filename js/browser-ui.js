@@ -31,16 +31,23 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.classList.add('dalliance');
     var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
 
+    var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
+    if (this.setDocumentTitle) {
+        document.title = title + ' :: dalliance';
+    }
+    
+    toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+
     var locField = makeElement('input', '', {className: 'loc-field'});
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
-    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}));
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
     var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250});
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
-                                            zoomOutBtn], {className: 'btn-group'}));
+                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
@@ -49,7 +56,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             favBtn,
                                             svgBtn,
-                                            resetBtn], {className: 'btn-group'}));
+                                            resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);

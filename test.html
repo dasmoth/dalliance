@@ -40,12 +40,6 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="polyfills/html5slider.js"></script>
 
 <script language="javascript">
-
-var NS_SVG = 'http://www.w3.org/2000/svg';
-var NS_HTML = 'http://www.w3.org/1999/xhtml';
-var NS_XLINK = 'http://www.w3.org/1999/xlink';
-
-
   var b = new Browser({
     chr:          '22',
     viewStart:    30000000,
@@ -100,6 +94,8 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
                    stylesheet_uri:       './glyph-test/stylesheet.xml'}
                 ],
 
+    setDocumentTitle: true,
+
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
     browserLinks: {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -111,11 +107,7 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
 </head>
 
 <body>
-
-<h2>Human NCBI36</h2>
-
-<div id='svgHolder'>Dalliance goes here!</div>
-
+<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
 </body>
 </html>
 
