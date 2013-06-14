@@ -70,8 +70,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
-    locField.addEventListener('keypress', function(ev) {
-        if (ev.keyCode == 10 || ev.keyCode == 13) {
+    locField.addEventListener('keydown', function(ev) {
+        if (ev.keyCode == 40) {
+            ev.preventDefault(); ev.stopPropagation();
+            b.setSelectedTier(0);
+        } if (ev.keyCode == 10 || ev.keyCode == 13) {
             ev.preventDefault();
 
             var g = locField.value;
@@ -204,5 +207,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
+
+    b.addTierSelectionWrapListener(function(dir) {
+        if (dir < 0) {
+            b.setSelectedTier(null);
+            locField.focus();
+        }
+    });
 
   }

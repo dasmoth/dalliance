@@ -4,7 +4,6 @@ For 0.8
   - Missing UI elements
      + Per-tier info?
   - Fix scrolling on newer macs.
-  - Keyboard navigation to to the location field
 
 For 0.9 (?)
 -----------
