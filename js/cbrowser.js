@@ -530,17 +530,16 @@ Browser.prototype.realMakeTier = function(source) {
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
 
-    if (tier.dasSource.quantHack) {
-        tier.quantOverlay = makeElement(
-            'canvas', null, 
-            {width: '50', height: "56"}, 
-            {position: 'absolute', 
-             padding: '0px', 
-             margin: '0px',
-             border: '0px', 
-             left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
-        tier.holder.appendChild(tier.quantOverlay);
-    }
+    tier.quantOverlay = makeElement(
+        'canvas', null, 
+        {width: '50', height: "56"}, 
+        {position: 'absolute', 
+         padding: '0px', 
+         margin: '0px',
+         border: '0px', 
+         left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px',
+         display: 'none'});
+    tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;

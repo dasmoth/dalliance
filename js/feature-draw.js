@@ -63,8 +63,6 @@ function drawFeatureTier(tier)
         }
     }
 
-
-
     // Merge supergroups
     
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
@@ -231,6 +229,25 @@ function drawFeatureTier(tier)
     tier.glyphCacheOrigin = tier.browser.viewStart;
 }
 
+function formatQuantLabel(v) {
+    var t = '' + v;
+    var dot = t.indexOf('.');
+    if (dot < 0) {
+        return t;
+    } else {
+        var dotThreshold = 2;
+        if (t.substring(0, 1) == '-') {
+            ++dotThreshold;
+        }
+
+        if (dot >= dotThreshold) {
+            return t.substring(0, dot);
+        } else {
+            return t.substring(0, dot + 2);
+        }
+    }
+}
+
 DasTier.prototype.paint = function() {
     var subtiers = this.subtiers;
     if (!subtiers) {
@@ -258,21 +275,25 @@ DasTier.prototype.paint = function() {
     gc.translate(offset, MIN_PADDING);
    
     for (var s = 0; s < subtiers.length; ++s) {
+	var quant = null;
 	var glyphs = subtiers[s].glyphs;
-	var drawn = 0;
 	for (var i = 0; i < glyphs.length; ++i) {
 	    var glyph = glyphs[i];
 	    if (glyph.min() < fpw-offset && glyph.max() > -offset) { 
-		glyphs[i].draw(gc);
-		++drawn;
+		var glyph = glyphs[i];
+		glyph.draw(gc);
+		if (glyph.quant) {
+		    quant = glyph.quant;
+		}
 	    }
 	}
-	// dlog('drawn ' + drawn + '/' + glyphs.length);
 	gc.translate(0, subtiers[s].height + MIN_PADDING);
     }
     gc.restore();
 
-    if (this.quantOverlay) {
+    if (quant && this.quantOverlay) {
+	this.quantOverlay.style.display = 'block';
+
 	var h = this.viewport.height;
 	this.quantOverlay.height = this.viewport.height;
 	var ctx = this.quantOverlay.getContext('2d');
@@ -284,7 +305,7 @@ DasTier.prototype.paint = function() {
         ctx.globalAlpha = 1.0;
 
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(8, 3);
         ctx.lineTo(0,3);
@@ -293,8 +314,8 @@ DasTier.prototype.paint = function() {
         ctx.stroke();
 
         ctx.fillStyle = 'black';
-        ctx.fillText('1.2', 8, 8);
-        ctx.fillText('0.0', 8, h-5);
+        ctx.fillText(formatQuantLabel(quant.max), 8, 8);
+        ctx.fillText(formatQuantLabel(quant.min), 8, h-5);
     }
 }
 
@@ -385,10 +406,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
     var height = style.HEIGHT || forceHeight || 12;;
     var requiredHeight = height = 1.0 * height;
-    var quant;
     var bump = style.BUMP && isDasBooleanTrue(style.BUMP);
 
-    var gg;
+    var gg, quant;
 
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT') {
 	var stroke = style.FGCOLOR || 'black';
@@ -445,6 +465,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 		height = Math.max(1, (relOrigin - relScore) * requiredHeight);
 		y = y + ((1.0 - relOrigin) * requiredHeight);
 	    }
+	    quant = {min: smin, max: smax};
 	}
 
 	var stroke = style.FGCOLOR || null;
@@ -530,6 +551,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     gg.feature = feature;
+    if (quant) {
+	gg.quant = quant;
+    }
 
     return gg;
 
@@ -613,5 +637,6 @@ function makeLineGlyph(features, style, tier) {
 	points.push(py);
     }
     var lgg = new LineGraphGlyph(points, color, height);
+    lgg.quant = {min: min, max: max};
     return lgg;
 }

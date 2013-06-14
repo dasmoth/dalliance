@@ -7,7 +7,6 @@ For 0.8
   - Fix scrolling on newer macs.
   - Keyboard navigation to to the location field
   - Reinstate Defaults tab in track adder
-  - Automatically determine when to draw y-scales for quantitative tiers.
 
 For 0.9 (?)
 -----------
