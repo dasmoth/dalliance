@@ -369,11 +369,11 @@ Browser.prototype.realInit = function() {
         } */
     }
 
-    this.svgHolder.addEventListener('focusin', function(ev) {
+    this.svgHolder.addEventListener('focus', function(ev) {
         // console.log('holder focussed');
         thisB.svgHolder.addEventListener('keydown', keyHandler, false);
     }, false);
-    this.svgHolder.addEventListener('focusout', function(ev) {
+    this.svgHolder.addEventListener('blur', function(ev) {
         // console.log('holder blurred');
         thisB.svgHolder.removeEventListener('keydown', keyHandler, false);
     }, false);
