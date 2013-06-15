@@ -4,29 +4,64 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
-// browser-us.js: standard UI wiring (needs refactoring!)
+// browser-us.js: standard UI wiring
 //
 
-window.addEventListener('load', function() {
-
-    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
-
-  b.addFeatureListener(function(ev, hit) {
-    b.featurePopup(ev, hit, null);
-  });
+function formatLongInt(n) {
+    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 /*
-  b.addFeatureHoverListener(function(ev, hit) {
-     // console.log('hover: ' + miniJSONify(hit));
-  });*/
+ * Quite a bit of this ought to be done using a templating system, but
+ * since web-components isn't quite ready for prime time yet we'll stick
+ * with constructing it all in Javascript for now...
+ */
 
-  function formatLongInt(n) {
-    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
+Browser.prototype.initUI = function(holder, genomePanel) {
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/bootstrap-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/dalliance-scoped.css'}));
 
-    var locField = document.getElementById('locfield');
-    var locStatusField = document.getElementById('loc-status');
-    b.addViewListener(function(chr, min, max, zoom) {
+    var b = this;
+    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
+
+    this.addFeatureListener(function(ev, hit) {
+        b.featurePopup(ev, hit, null);
+    });
+
+    holder.classList.add('dalliance');
+    var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
+
+    var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
+    if (this.setDocumentTitle) {
+        document.title = title + ' :: dalliance';
+    }
+    
+    toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    var locField = makeElement('input', '', {className: 'loc-field'});
+    var locStatusField = makeElement('p', '', {className: 'loc-status'});
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
+
+    var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250});
+    var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
+    toolbar.appendChild(makeElement('div', [zoomInBtn,
+                                            makeElement('span', zoomSlider, {className: 'btn'}),
+                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
+    var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
+    var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
+    var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
+    toolbar.appendChild(makeElement('div', [addTrackBtn,
+                                            favBtn,
+                                            svgBtn,
+                                            resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    holder.appendChild(toolbar);
+    holder.appendChild(genomePanel);
+
+    this.addViewListener(function(chr, min, max, zoom) {
         locField.value = '';
         locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.value = zoom;
@@ -35,8 +70,11 @@ window.addEventListener('load', function() {
         }
     });
 
-    locField.addEventListener('keypress', function(ev) {
-        if (ev.keyCode == 10 || ev.keyCode == 13) {
+    locField.addEventListener('keydown', function(ev) {
+        if (ev.keyCode == 40) {
+            ev.preventDefault(); ev.stopPropagation();
+            b.setSelectedTier(0);
+        } if (ev.keyCode == 10 || ev.keyCode == 13) {
             ev.preventDefault();
 
             var g = locField.value;
@@ -100,13 +138,14 @@ window.addEventListener('load', function() {
         }
     }, false); 
 
-  b.addRegionSelectListener(function(chr, min, max) {
+
+  this.addRegionSelectListener(function(chr, min, max) {
       // console.log('chr' + chr + ':' + min + '..' + max);
       // b.highlightRegion(chr, min, max);
       // console.log('selected ' + b.featuresInRegion(chr, min, max).length);
   });
 
-  b.addTierListener(function() {
+  this.addTierListener(function() {
       if (b.storeStatus) {
           b.storeStatus();
       }
@@ -114,13 +153,15 @@ window.addEventListener('load', function() {
 
 
 
-    var addTrackBtn = document.getElementById('add-track-button');
     addTrackBtn.addEventListener('click', function(ev) {
-      b.showTrackAdder(ev);
+        if (b.trackAdderVisible) {
+            b.removeAllPopups();
+        } else {
+            b.showTrackAdder(ev);
+        }
     }, false);
-    b.makeTooltip(addTrackBtn, 'Add a track!');
+    b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
 
-    var zoomInBtn = document.getElementById('zoom-in');
     zoomInBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
@@ -128,9 +169,6 @@ window.addEventListener('load', function() {
     }, false);
     b.makeTooltip(zoomInBtn, 'Zoom in');
 
-    var regionField = document.getElementById('locfield');
-
-    var zoomOutBtn = document.getElementById('zoom-out');
     zoomOutBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
@@ -138,7 +176,6 @@ window.addEventListener('load', function() {
     }, false);
     b.makeTooltip(zoomOutBtn, 'Zoom out');
 
-    var zoomSlider = document.getElementById('zoom-slider');
     zoomSlider.addEventListener('change', function(ev) {
 	b.zoomSliderValue = (1.0 * zoomSlider.value);
 	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
@@ -146,20 +183,17 @@ window.addEventListener('load', function() {
     zoomSlider.min = b.zoomMin;
     zoomSlider.max = b.zoomMax;
 
-    var favBtn = document.getElementById('favourites-button');
     favBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
     }, false);
     b.makeTooltip(favBtn, 'Favourite regions');
 
-    var svgBtn = document.getElementById('export-svg-button');
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
        saveSVG(b);
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
 
-    var resetBtn = document.getElementById('reset-button');
     resetBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
 
@@ -173,4 +207,12 @@ window.addEventListener('load', function() {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
-  }, false);
+
+    b.addTierSelectionWrapListener(function(dir) {
+        if (dir < 0) {
+            b.setSelectedTier(null);
+            locField.focus();
+        }
+    });
+
+  }

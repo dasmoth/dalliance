@@ -1,15 +1,8 @@
-<!DOCTYPE html PUBLIC
-	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+<!DOCTYPE html> 
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-     xmlns:svg="http://www.w3.org/2000/svg"
-     >
+<html>
 
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
-<link rel='stylesheet' href='css/bootstrap.css'>
-<link rel='stylesheet' href='css/dalliance.css'>
 <title>Human NCBI36 :: Dalliance</title> 
 <style>
 body {font-family: 'helvetica'}
@@ -47,12 +40,6 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="polyfills/html5slider.js"></script>
 
 <script language="javascript">
-
-var NS_SVG = 'http://www.w3.org/2000/svg';
-var NS_HTML = 'http://www.w3.org/1999/xhtml';
-var NS_XLINK = 'http://www.w3.org/1999/xlink';
-
-
   var b = new Browser({
     chr:          '22',
     viewStart:    30000000,
@@ -89,8 +76,7 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
                    // stylesheet_uri:       'http://www.biodalliance.org/stylesheets/cpg-hist.xml',
                    style:                [{type: 'cpgoe',
                                            style: {glyph: 'LINEPLOT',
-                                                   FGCOLOR: 'green', HEIGHT: '50'}}],
-                   quantHack:            true},
+                                                   FGCOLOR: 'green', HEIGHT: '50'}}]},
                     {name: 'MeDIP-raw',
                      desc: 'MeDIP-seq reads from Nature Biotech. 26:779-785',
                      uri: 'http://www.derkholm.net:8080/das/medipseq_reads/'},
@@ -108,6 +94,8 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
                    stylesheet_uri:       './glyph-test/stylesheet.xml'}
                 ],
 
+    setDocumentTitle: true,
+
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
     browserLinks: {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -119,40 +107,7 @@ var NS_XLINK = 'http://www.w3.org/1999/xlink';
 </head>
 
 <body>
-
-<h2>Human NCBI36</h2>
-
-<div class='btn-toolbar'>
-  <div class='btn-group'>
-    <input type='text' value='chr22:3000000..30010000    ' style='width: 300px; margin-bottom: 0px' ' id='locfield'></input>
-    <p id='loc-status' class='loc-status'></p>
-  </div>
-  <div class='btn-group'>
-    <a class='btn' id='zoom-in' href='#'><i class='icon-zoom-in'></i></a>
-    <span class='btn'><input id='zoom-slider' type='range' min='100' max='250'></input></span>
-    <a class='btn' id='zoom-out' href='#'><i class='icon-zoom-out'></i></a>
-  </div>
-
-  <div class='btn-group'>
-    <a class='btn' href='#' id='add-track-button'><i class='icon-plus'></i></a>
-    <a class='btn' href='#' id='favourites-button'><i class='icon-bookmark'></i></a>
-    <a class='btn' href='#' id='export-svg-button'><i class='icon-print'></i></a>
-    <a class='btn' href='#' id='reset-button'><i class='icon-refresh'></i></a>
-    <!-- <a class='btn' href='#' id='undo-button'><i class='icon-share-alt' style='-webkit-transform: scaleX(-1)'></i></a>
-    <a class='btn' href='#' id='redo-button'><i class='icon-share-alt'></i></a> -->
-  </div>
-</div>
-                
-
-
-
-<br>
-<div id='svgHolder' style='overflow: hidden; display: inline-block; width: 95%; font-size: 10pt'>
-</div>
-
-<div id="log">
-</div>
-
+<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
 </body>
 </html>
 

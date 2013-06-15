@@ -64,7 +64,13 @@
   background-image: linear-gradient(to bottom, #ffaaaa, #e6aaaa);
 }
 
+.loc-field {
+  width: 300px;
+  margin-bottom: 0px
+}
+
 .loc-status {
     font-size: 8pt;
     color: red
 }
+

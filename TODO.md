@@ -3,13 +3,7 @@ For 0.8
 
   - Missing UI elements
      + Per-tier info?
-  - Vertical resizing?
-  - Refactor browser_ui.js
   - Fix scrolling on newer macs.
-  - Keyboard navigation to to the location field
-  - Reinstate Defaults tab in track adder
-  - Close track-added by clicking button
-  - Automatically determine when to draw y-scales for quantitative tiers.
 
 For 0.9 (?)
 -----------
@@ -17,7 +11,6 @@ For 0.9 (?)
   - True tiled rendering.
   - UI for next/prev
   - Clean separation between genome canvases and UI chrome.
-  - Some sort of full-bleed mode?
   - Track-hub support
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
@@ -35,7 +28,9 @@ For 0.9 (?)
   - Tracks via Ensembl-REST?
   - Try to preserve layout when expanding/collapsing variants.
   - Abbreviations when typing locations.
-
+  - Construct as a web-component.
+  - History of recently-viewed tracks.
+  - Better control of vertical resize.
  
 Future
 -------------

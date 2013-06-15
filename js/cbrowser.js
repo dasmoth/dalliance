@@ -7,6 +7,10 @@
 // cbrowser.js: canvas browser container
 //
 
+var NS_SVG = 'http://www.w3.org/2000/svg';
+var NS_HTML = 'http://www.w3.org/1999/xhtml';
+var NS_XLINK = 'http://www.w3.org/1999/xlink';
+
 function Region(chr, min, max) {
     this.min = min;
     this.max = max;
@@ -26,6 +30,7 @@ function Browser(opts) {
     this.viewListeners = [];
     this.regionSelectListeners = [];
     this.tierListeners = [];
+    this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
     this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
@@ -37,8 +42,6 @@ function Browser(opts) {
         version: '36'
     };
     this.chains = {};
-
-    this.exportServer = 'http://www.biodalliance.org:8765/'
 
     this.pageName = 'svgHolder'
     this.maxExtra = 2.5;
@@ -69,12 +72,8 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = [/* "rgb(245,245,245)", */ 'white' /* , "rgb(230,230,250)" */];
+    this.tierBackgroundColors = ['white'];
     this.minTierHeight = 25;
-    
-    // FIXME are either of these needed any more?
-    this.tabMargin = 10;
-    this.embedMargin = 50;
 
     this.browserLinks = {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
@@ -111,10 +110,13 @@ Browser.prototype.realInit = function() {
     }
 
     var thisB = this;
-    this.svgHolder = document.getElementById(this.pageName);
-    removeChildren(this.svgHolder);
+    this.browserHolder = document.getElementById(this.pageName);
+    removeChildren(this.browserHolder);
+    this.svgHolder = makeElement('div', null, {tabIndex: 100}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
 
-    this.tierHolder = makeElement('div', null, null, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative'});
+    this.initUI(this.browserHolder, this.svgHolder);
+
+    this.tierHolder = makeElement('div', null, {}, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative', outline: 'none'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -167,7 +169,6 @@ Browser.prototype.realInit = function() {
 
 
     var keyHandler = function(ev) {
-//        dlog('keycode=' + ev.keyCode + '; charCode=' + ev.charCode);
         if (ev.keyCode == 13) {
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -238,7 +239,7 @@ Browser.prototype.realInit = function() {
                               var pos2=pos;
                               thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
-                              dlog('no next feature');
+                              alert('no next feature');
                           }
                       });
             } else {
@@ -276,7 +277,7 @@ Browser.prototype.realInit = function() {
                               var pos2=pos;
                               thisB.setLocation(nxt.segment, newStart, newEnd);
                           } else {
-                              dlog('no next feature');
+                              alert('no next feature'); // FIXME better reporting would be nice!
                           }
                       });
             } else {
@@ -294,8 +295,9 @@ Browser.prototype.realInit = function() {
                 }
             } else {
                 if (thisB.selectedTier > 0) {
-                    --thisB.selectedTier;
-                    thisB.markSelectedTier();
+                    thisB.setSelectedTier(thisB.selectedTier - 1);
+                } else {
+                    thisB.notifyTierSelectionWrap(-1);
                 }
             }
         } else if (ev.keyCode == 40 || ev.keyCode == 83) {
@@ -308,8 +310,7 @@ Browser.prototype.realInit = function() {
                 tt.draw();
             } else {
                 if (thisB.selectedTier < thisB.tiers.length -1) {
-                    ++thisB.selectedTier;
-                    thisB.markSelectedTier();
+                    thisB.setSelectedTier(thisB.selectedTier + 1);
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) {
@@ -368,21 +369,14 @@ Browser.prototype.realInit = function() {
         } */
     }
 
-    var mouseLeaveHandler;
-    mouseLeaveHandler = function(ev) {
-        window.removeEventListener('keydown', keyHandler, false);
-        window.removeEventListener('keyup', keyUpHandler, false);
-        // window.removeEventListener('keypress', keyHandler, false);
-        thisB.tierHolder.removeEventListener('mouseout', mouseLeaveHandler, false);
-    }
-
-    this.tierHolder.addEventListener('mouseover', function(ev) {
-        window.addEventListener('keydown', keyHandler, false);
-        window.addEventListener('keyup', keyUpHandler, false);
-        // window.addEventListener('keypress', keyHandler, false);
-        thisB.tierHolder.addEventListener('mouseout', mouseLeaveHandler, false);
+    this.svgHolder.addEventListener('focus', function(ev) {
+        // console.log('holder focussed');
+        thisB.svgHolder.addEventListener('keydown', keyHandler, false);
     }, false);
-
+    this.svgHolder.addEventListener('blur', function(ev) {
+        // console.log('holder blurred');
+        thisB.svgHolder.removeEventListener('keydown', keyHandler, false);
+    }, false);
 
     // Popup support (does this really belong here? FIXME)
     this.hPopupHolder = makeElement('div');
@@ -404,6 +398,7 @@ Browser.prototype.realInit = function() {
     thisB.arrangeTiers();
     thisB.markSelectedTier();
     thisB.refresh();
+    thisB.setSelectedTier(1);
 
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
@@ -420,6 +415,9 @@ Browser.prototype.realInit = function() {
     }
 
     this.queryRegistry();
+    for (var m in this.chains) {
+        this.queryRegistry(m, true);
+    }
 }
 
 // 
@@ -453,7 +451,6 @@ Browser.prototype.touchMoveHandler = function(ev)
         if (sep != this.zoomLastSep) {
             var cp = (ev.touches[0].pageX + ev.touches[1].pageX)/2;
             var scp = this.viewStart + (cp/this.scale)|0
-            // dlog('sep=' + sep + '; zis=' + this.zoomInitialScale);
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
@@ -469,7 +466,6 @@ Browser.prototype.touchMoveHandler = function(ev)
 Browser.prototype.touchEndHandler = function(ev)
 {
     ev.stopPropagation(); ev.preventDefault();
-//    this.storeStatus();
 }
 
 Browser.prototype.touchCancelHandler = function(ev) {
@@ -528,17 +524,16 @@ Browser.prototype.realMakeTier = function(source) {
     tier.oorigin = (this.viewStart + this.viewEnd)/2;
     tier.background = background;
 
-    if (tier.dasSource.quantHack) {
-        tier.quantOverlay = makeElement(
-            'canvas', null, 
-            {width: '50', height: "56"}, 
-            {position: 'absolute', 
-             padding: '0px', 
-             margin: '0px',
-             border: '0px', 
-             left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
-        tier.holder.appendChild(tier.quantOverlay);
-    }
+    tier.quantOverlay = makeElement(
+        'canvas', null, 
+        {width: '50', height: "56"}, 
+        {position: 'absolute', 
+         padding: '0px', 
+         margin: '0px',
+         border: '0px', 
+         left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px',
+         display: 'none'});
+    tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
@@ -661,13 +656,6 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.init(); // fetches stylesheet
 
-/*
-    var label = makeElement('span', 
-                            [source.name, makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'})], 
-                            {className: 'track-label'}, 
-                            {left: tier.quantOverlay ? '35px' : '2px', 
-                             top: '2px'}); */
-
 
     tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
@@ -689,11 +677,10 @@ Browser.prototype.realMakeTier = function(source) {
         thisB.selectedTier = -1;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             if (thisB.tiers[ti] === tier) {
-                thisB.selectedTier = ti;
+                thisB.setSelectedTier(ti);
                 break;
             }
         }
-        thisB.markSelectedTier();
 
         /*
         console.log('before: ' + nameButton.clientHeight);
@@ -874,7 +861,6 @@ Browser.prototype.refresh = function() {
         this.drawnEnd = outerDrawnEnd;
     }
     
-    // dlog('ref ' + this.chr + ':' + this.drawnStart + '..' + this.drawnEnd);
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
     this.drawOverlays();
 }
@@ -915,7 +901,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
                     // alert('Registry data is stale, refetching');
                 }
             } catch (rex) {
-                dlog('Bad registry cache: ' + rex);
+                console.log('Bad registry cache: ' + rex);
             }
         }
     }
@@ -1326,13 +1312,31 @@ Browser.prototype.featuresInRegion = function(chr, min, max) {
     return features;
 }
 
-Browser.prototype.markSelectedTier = function() {
+Browser.prototype.setSelectedTier = function(t) {
+    this.selectedTier = t;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var button = this.tiers[ti].nameButton;
         if (ti == this.selectedTier) {
             button.classList.add('active');
         } else {
             button.classList.remove('active');
+        }
+    }
+    if (t != null) {
+        this.svgHolder.focus();
+    }
+}
+
+Browser.prototype.addTierSelectionWrapListener = function(f) {
+    this.tierSelectionWrapListeners.push(f);
+}
+
+Browser.prototype.notifyTierSelectionWrap = function(i) {
+    for (var fli = 0; fli < this.tierSelectionWrapListeners.length; ++fli) {
+        try {
+            this.tierSelectionWrapListeners[fli](i);
+        } catch (ex) {
+            console.log(ex);
         }
     }
 }
