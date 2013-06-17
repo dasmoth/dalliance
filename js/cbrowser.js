@@ -184,7 +184,7 @@ Browser.prototype.realInit = function() {
                 thisB.arrangeTiers();
             }
         } else if (ev.keyCode == 32 || ev.charCode == 32) {
-            if (!thisB.snapZoomLockout) {
+            // if (!thisB.snapZoomLockout) {
                 if (!thisB.isSnapZooming) {
                     thisB.isSnapZooming = true;
                     var newZoom = thisB.savedZoom || 1.0;
@@ -205,7 +205,7 @@ Browser.prototype.realInit = function() {
                     // thisB.refresh();
                 }
                 thisB.snapZoomLockout = true;
-            }
+            // }
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) {
             ev.stopPropagation(); ev.preventDefault();
