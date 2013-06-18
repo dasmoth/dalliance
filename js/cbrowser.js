@@ -70,6 +70,10 @@ function Browser(opts) {
 
     this.placards = [];
 
+    // Options.
+    
+    this.reverseScrolling = false;
+
     // Visual config.
 
     this.tierBackgroundColors = ['white'];
@@ -151,13 +155,22 @@ Browser.prototype.realInit = function() {
         }
 
         ev.stopPropagation(); ev.preventDefault();
-        thisB.move(-ev.wheelDeltaX/5);
+        var delta = ev.wheelDelta/5;
+        if (!thisB.reverseScrolling) {
+            delta = -delta;
+        }
+        thisB.move(delta);
     }, false);
     this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
         if (ev.axis == 1) {
             ev.stopPropagation(); ev.preventDefault();
+
             if (ev.detail != 0) {
-                thisB.move(ev.detail/4);
+                var delta = ev.detail/4;
+                if (thisB.reverseScrolling) {
+                    delta = -delta;
+                }
+                thisB.move(delta);
             }
         }
     }, false);
