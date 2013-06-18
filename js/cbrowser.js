@@ -155,13 +155,14 @@ Browser.prototype.realInit = function() {
         }
 
         ev.stopPropagation(); ev.preventDefault();
-        var delta = ev.wheelDelta/5;
+        var delta = ev.wheelDeltaX/5;
         if (!thisB.reverseScrolling) {
             delta = -delta;
         }
         thisB.move(delta);
     }, false);
     this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
+        console.log('mps');
         if (ev.axis == 1) {
             ev.stopPropagation(); ev.preventDefault();
 
