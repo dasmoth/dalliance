@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cat js/{bam,bigwig,bin,cbrowser,feature-popup,chainset,color,das,domui,feature-draw,sequence-draw,features,karyoscape,kspace,quant-config,sample,sequence-tier,sha1,slider,spans,tier,track-adder,twoBit,utils,version}.js json/json2.js jszlib/js/inflate.js >dalliance-all.js
+cat js/{bam,bigwig,bin,cbrowser,feature-popup,chainset,color,das,domui,feature-draw,sequence-draw,features,feature-popup,karyoscape,kspace,quant-config,sample,sha1,svg-export,spans,thub,tier,track-adder,twoBit,utils,version,browser-ui,glyphs,session}.js jszlib/js/inflate.js polyfills/html5slider.js >dalliance-all.js
 java -jar compiler.jar --js dalliance-all.js >dalliance-compiled.js
