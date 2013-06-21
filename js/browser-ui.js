@@ -53,10 +53,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
+    var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             favBtn,
                                             svgBtn,
-                                            resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+                                            resetBtn,
+                                            optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -207,6 +209,19 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
+
+    optsButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+
+        var optsBox = makeElement('div');
+        var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
+        scrollModeButton.addEventListener('change', function(ev) {
+            b.reverseScrolling = scrollModeButton.checked;
+        }, false);
+        optsBox.appendChild(makeElement('p', ['Reverse trackpad scrolling', scrollModeButton]));
+        b.removeAllPopups();
+        b.popit(ev, 'Options', optsBox, {width: 300});
+    }, false);
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {

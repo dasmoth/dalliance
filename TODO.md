@@ -4,13 +4,16 @@ For 0.8
   - Missing UI elements
      + Per-tier info?
   - Fix scrolling on newer macs.
+  - Update web site.
 
 For 0.9 (?)
 -----------
 
   - True tiled rendering.
   - UI for next/prev
-  - Clean separation between genome canvases and UI chrome.
+  - Undo/redo.
+  - Animate when leaping.
+  - Cleaner separation between genome canvases and UI chrome.
   - Track-hub support
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
