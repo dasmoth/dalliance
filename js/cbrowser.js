@@ -410,7 +410,6 @@ Browser.prototype.realInit = function() {
         this.makeTier(source);
     }
     thisB.arrangeTiers();
-    thisB.markSelectedTier();
     thisB.refresh();
     thisB.setSelectedTier(1);
 

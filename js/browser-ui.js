@@ -18,8 +18,9 @@ function formatLongInt(n) {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/bootstrap-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'css/dalliance-scoped.css'}));
+    // FIXME shouldn't be hard-coded...
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://www.biodalliance.org/canvas/css/bootstrap-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://www.biodalliance.org/canvas/css/dalliance-scoped.css'}));
 
     var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
@@ -36,14 +37,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         document.title = title + ' :: dalliance';
     }
     
-    toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+    if (!this.noTitle) {
+        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+    }
 
     var locField = makeElement('input', '', {className: 'loc-field'});
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
     toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250});
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
@@ -55,7 +58,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
     var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [addTrackBtn,
-                                            favBtn,
+                                            // favBtn,
                                             svgBtn,
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
