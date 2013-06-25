@@ -671,12 +671,11 @@ Browser.prototype.realMakeTier = function(source) {
     tier.init(); // fetches stylesheet
 
 
-    tier.removeButton =  makeElement('a', makeElement('i', null, {className: 'icon-remove'}), {className: 'btn'});
+    tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
-    tier.nameButton = makeElement('a', [source.name + ' ', tier.bumpButton], {className: 'tier-tab'});
+    tier.nameButton = makeElement('a', [tier.removeButton, ' ' + source.name + ' ', tier.bumpButton], {className: 'tier-tab'});
     tier.label = makeElement('span',
-       [tier.removeButton,
-        tier.nameButton],
+       [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: /* tier.quantOverlay ? '35px' :*/ '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
     var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block'});
