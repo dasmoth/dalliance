@@ -1315,8 +1315,10 @@ Browser.prototype.setSelectedTier = function(t) {
     this.selectedTier = t;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var button = this.tiers[ti].nameButton;
+
         if (ti == this.selectedTier) {
             button.classList.add('active');
+            this.tiers[ti].label.focus();
         } else {
             button.classList.remove('active');
         }

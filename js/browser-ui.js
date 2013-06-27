@@ -228,7 +228,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             b.removeAllPopups();
             b.popit(ev, 'Options', optsForm, {width: 300});
             b.optionsVisible = true;
-            optsBox.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
+            optsForm.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
                 b.optionsVisible = false;
             }, false);
         }

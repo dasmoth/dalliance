@@ -57,11 +57,15 @@
 }
 
 .tier-tab.active {
-  background-image: -moz-linear-gradient(top, #ffaaaa, #e6aaaa);
+
+
+/*  background-image: -moz-linear-gradient(top, #ffaaaa, #e6aaaa);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffaaaa), to(#e6aaaa));
   background-image: -webkit-linear-gradient(top, #ffaaaa, #e6aaaa);
   background-image: -o-linear-gradient(top, #ffaaaa, #e6aaaa);
-  background-image: linear-gradient(to bottom, #ffaaaa, #e6aaaa);
+  background-image: linear-gradient(to bottom, #ffaaaa, #e6aaaa); */
+
+    border: 3px solid rgb(150,150,230);
 }
 
 .loc-field {
