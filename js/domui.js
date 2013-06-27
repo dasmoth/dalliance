@@ -91,8 +91,8 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
     var winWidth = window.innerWidth;
 
-    var top = (my + 30);
-    var left = Math.min((mx - 30), (winWidth - width - 10));
+    var top = (my + 20);
+    var left = Math.min(mx - (width/2), (winWidth - width - 10));
 
     var popup = makeElement('div');
     popup.className = 'popover fade bottom in';

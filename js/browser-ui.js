@@ -216,14 +216,22 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     optsButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
-        var optsBox = makeElement('div');
-        var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
-        scrollModeButton.addEventListener('change', function(ev) {
-            b.reverseScrolling = scrollModeButton.checked;
-        }, false);
-        optsBox.appendChild(makeElement('p', ['Reverse trackpad scrolling', scrollModeButton]));
-        b.removeAllPopups();
-        b.popit(ev, 'Options', optsBox, {width: 300});
+        if (b.optionsVisible) {
+            b.removeAllPopups();
+        } else {
+            var optsBox = makeElement('div');
+            var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
+            scrollModeButton.addEventListener('change', function(ev) {
+                b.reverseScrolling = scrollModeButton.checked;
+            }, false);
+            optsBox.appendChild(makeElement('p', ['Reverse trackpad scrolling', scrollModeButton]));
+            b.removeAllPopups();
+            b.popit(ev, 'Options', optsBox, {width: 300});
+            b.optionsVisible = true;
+            optsBox.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
+                b.optionsVisible = false;
+            }, false);
+        }
     }, false);
 
     b.addTierSelectionWrapListener(function(dir) {
