@@ -1,3 +1,6 @@
+*.dalliance * {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
 *.dalliance .tier-viewport-background {
   background-color: #fff;
   background-image: -webkit-linear-gradient(#000 2px, transparent 2px), -webkit-linear-gradient(0, #000 2px, transparent 2px), -webkit-linear-gradient(rgba(0, 0, 0, .3) 1px, transparent 1px), -webkit-linear-gradient(0, rgba(0, 0, 0, .3) 1px, transparent 1px);

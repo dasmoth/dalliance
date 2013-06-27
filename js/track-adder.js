@@ -124,6 +124,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             return;
         }
         var stab = document.createElement('table');
+        stab.className = 'table table-striped table-condensed';
         stab.style.width='100%';
         var idx = 0;
 
