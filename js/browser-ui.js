@@ -219,14 +219,14 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (b.optionsVisible) {
             b.removeAllPopups();
         } else {
-            var optsBox = makeElement('div');
+            var optsForm = makeElement('form', null, {className: 'popover-content'});
             var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
             scrollModeButton.addEventListener('change', function(ev) {
                 b.reverseScrolling = scrollModeButton.checked;
             }, false);
-            optsBox.appendChild(makeElement('p', ['Reverse trackpad scrolling', scrollModeButton]));
+            optsForm.appendChild(makeElement('label', [scrollModeButton, 'Reverse trackpad scrolling'], {className: 'checkbox'}));
             b.removeAllPopups();
-            b.popit(ev, 'Options', optsBox, {width: 300});
+            b.popit(ev, 'Options', optsForm, {width: 300});
             b.optionsVisible = true;
             optsBox.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
                 b.optionsVisible = false;
