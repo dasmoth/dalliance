@@ -22,6 +22,8 @@ function Browser(opts) {
         opts = {};
     }
 
+    this.uiPrefix = 'http://www.biodalliance.org/canvas/';
+
     this.sources = [];
     this.tiers = [];
 
@@ -520,10 +522,12 @@ Browser.prototype.realMakeTier = function(source) {
           pointerEvents: 'none'});
 
     var placardContent = makeElement('span', 'blah');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), placardContent], {}, {
+    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {}, {
         display: 'none',
         position: 'relative',
-        width: '100%',
+//        width: '100%',
+        borderCollapse: 'collapse',
+        marginTop: '-1px',
         height: '50px',
         textAlign: 'center',
         lineHeight: '50px',

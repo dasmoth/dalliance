@@ -19,8 +19,8 @@ function formatLongInt(n) {
 
 Browser.prototype.initUI = function(holder, genomePanel) {
     // FIXME shouldn't be hard-coded...
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://www.biodalliance.org/canvas/css/bootstrap-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://www.biodalliance.org/canvas/css/dalliance-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
 
     var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
