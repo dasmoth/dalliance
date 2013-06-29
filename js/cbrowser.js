@@ -538,7 +538,7 @@ Browser.prototype.realMakeTier = function(source) {
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     vph.className = 'tier-viewport-background';
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
-    tier.oorigin = (this.viewStart + this.viewEnd)/2;
+    tier.oorigin = this.viewStart;
     tier.background = background;
 
     tier.quantOverlay = makeElement(
@@ -968,9 +968,9 @@ Browser.prototype.move = function(pos)
     var viewCenter = (this.viewStart + this.viewEnd)/2;
     
     for (var i = 0; i < this.tiers.length; ++i) {
-        var offset = (viewCenter - this.tiers[i].norigin)*this.scale;
+        var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
 	this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
-        var ooffset = (viewCenter - this.tiers[i].oorigin)*this.scale;
+        var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
         this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
     }
 
@@ -1047,9 +1047,13 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
-        var delta = nve - this.viewEnd;
-        this.viewStart = this.viewStart - (delta/2);
-        this.viewEnd = this.viewEnd + (delta/2);
+
+
+        // var delta = nve - this.viewEnd;
+        // this.viewStart = this.viewStart - (delta/2);
+        // this.viewEnd = this.viewEnd + (delta/2);
+
+        this.viewEnd = nve;
 
         var wid = this.viewEnd - this.viewStart + 1;
         if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
@@ -1173,9 +1177,9 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
         var viewCenter = (this.viewStart + this.viewEnd)/2;
     
         for (var i = 0; i < this.tiers.length; ++i) {
-            var offset = (viewCenter - this.tiers[i].norigin)*this.scale;
+            var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
 	    this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
-            var ooffset = (viewCenter - this.tiers[i].oorigin)*this.scale;
+            var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
             this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
         }
     }
@@ -1292,7 +1296,7 @@ Browser.prototype.drawOverlays = function() {
         }
         }
 
-        t.oorigin = (this.viewStart + this.viewEnd)/2;
+        t.oorigin = this.viewStart;
         t.overlay.style.left = '-1000px'
     }
 }

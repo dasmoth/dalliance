@@ -89,12 +89,12 @@ function drawSeqTier(tier, seq)
 	}
     }
 
-    tier.norigin = (tier.browser.viewStart + tier.browser.viewEnd) / 2;
+    tier.norigin = tier.browser.viewStart;
     tier.viewport.style.left = '-1000px';
 }
 
 function svgSeqTier(tier, seq) {
-    var scale = tier.browser.scale, knownStart = tier.browser.viewStart, knownEnd = tier.browser.viewEnd, currentSeqMax = tier.browser.currentSeqMax;
+    var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
 
     var fpw = tier.viewport.width|0; 
 

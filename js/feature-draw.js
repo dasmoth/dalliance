@@ -263,7 +263,7 @@ DasTier.prototype.paint = function() {
     this.viewport.setAttribute('height', Math.max(lh, 50));
     this.viewport.style.left = '-1000px';
     this.holder.style.height = '' + Math.max(lh,35) + 'px';
-    this.norigin = (this.browser.viewStart + this.browser.viewEnd)/2;
+    this.norigin = this.browser.viewStart;
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = this.background;

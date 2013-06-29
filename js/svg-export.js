@@ -50,7 +50,7 @@ function saveSVG(b) {
 	if (tier.dasSource.tier_type === 'sequence') {
 	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
 	    
-	    tierHolder.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(0, ' + pos + ')'}));
+	    tierHolder.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(' + (margin) + ', ' + pos + ')'}));
 	    pos += 80;
 	} else {
             if (!tier.subtiers) {
@@ -74,7 +74,7 @@ function saveSVG(b) {
     }
     saveRoot.appendChild(tierHolder);
 
-    saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20);
+    saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
     saveDoc.documentElement.setAttribute('height', pos + 50);
 
     var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)]);
