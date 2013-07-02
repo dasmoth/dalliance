@@ -9,18 +9,20 @@ function saveSVG(b) {
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
 
     var saveRoot = makeElementNS(NS_SVG, 'g', null, {
-        fontFamily: 'helvetica'
+        fontFamily: 'helvetica',
+	fontSize: '10pt'
     });
     saveDoc.documentElement.appendChild(saveRoot);
 
     var margin = 200;
 
     var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-        x: 300,
+        x: (b.featurePanelWidth + margin + 20)/2,
         y: 30,
         strokeWidth: 0,
         fill: 'black',
-        fontSize: '12pt'
+        fontSize: '12pt',
+	textAnchor: 'middle'
     });
     saveRoot.appendChild(dallianceAnchor);
     
@@ -80,7 +82,7 @@ function saveSVG(b) {
     var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)]);
     var fr = new FileReader();
     fr.onload = function(fre) {
-        window.open('data:image/svg+xml;' + fre.target.result.substring(6), 'Dalliance graphics');
+        window.open('data:image/svg+xml;' + fre.target.result.substring(6), 'Dalliance graphics', 'width=' + ( b.featurePanelWidth + 20 + margin + 'px'));
     };
     fr.readAsDataURL(svgBlob);
 }
