@@ -677,12 +677,14 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
-    tier.nameButton = makeElement('a', [tier.removeButton, ' ' + source.name + ' ', tier.bumpButton], {className: 'tier-tab'});
+    tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
+    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton], {className: 'tier-tab'});
+    
     tier.label = makeElement('span',
        [tier.nameButton],
        {className: 'btn-group'},
-       {zIndex: 1001, position: 'absolute', left: /* tier.quantOverlay ? '35px' :*/ '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block'});
+       {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+    var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
     tier.removeButton.addEventListener('click', function(ev) {
@@ -691,22 +693,26 @@ Browser.prototype.realMakeTier = function(source) {
     }, false);
     tier.nameButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        thisB.selectedTier = -1;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             if (thisB.tiers[ti] === tier) {
-                thisB.setSelectedTier(ti);
-                break;
+                if (ti != thisB.selectedTier) {
+                    thisB.setSelectedTier(ti);
+                    return;
+                }
             }
         }
 
-        /*
-        console.log('before: ' + nameButton.clientHeight);
-        nameButton.appendChild(makeElement('p', 'Really interesting stuff'));
-        nameButton.appendChild(makeElement('p', 'And more stuff'));
-        console.log('after: ' + nameButton.clientHeight);
-        if (nameButton.clientHeight > row.clientHeight) {
-            row.style.height = '' + (nameButton.clientHeight + 4) + 'px';
-        }*/
+        if (!tier.infoVisible) {
+            tier.infoElement.style.display = 'block';
+            if (tier.label.clientHeight > row.clientHeight) {
+                row.style.height = '' + (tier.label.clientHeight + 4) + 'px';
+            } 
+            tier.infoVisible = true;
+        } else {
+            tier.infoElement.style.display = 'none';
+            row.style.height = 'auto';
+            tier.infoVisible = false;
+        }
     }, false);
     tier.bumpButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();

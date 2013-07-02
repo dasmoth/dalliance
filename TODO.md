@@ -1,11 +1,3 @@
-For 0.8
--------
-
-  - Missing UI elements
-     + Per-tier info?
-  - Fix scrolling on newer macs.
-  - Update web site.
-
 For 0.9 (?)
 -----------
 
