@@ -118,7 +118,6 @@ function sortFeatures(tier)
                     };
                     if (!tier.dasSource.collapseSuperGroups) {
                         tier.dasSource.collapseSuperGroups = true;
-                        tier.isLabelValid = false;
                     }
                 }
             }   

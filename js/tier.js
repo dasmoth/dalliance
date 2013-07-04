@@ -60,7 +60,6 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
                     if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
                         thisTier.dasSource.collapseSuperGroups = true;
                         thisTier.bumped = false;
-                        thisTier.isLabelValid = false;
                     }
                 }
 

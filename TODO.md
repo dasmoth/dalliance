@@ -7,6 +7,7 @@ For 0.9 (?)
   - Animate when leaping.
   - Cleaner separation between genome canvases and UI chrome.
   - Track-hub support
+  - Assembly hub support
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support

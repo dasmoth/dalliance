@@ -349,7 +349,6 @@ Browser.prototype.realInit = function() {
                             bumpStatus = !t.bumped;
                         }
                         t.bumped = bumpStatus;
-                        t.isLabelValid = false;
                         t.layoutWasDone = false;
                         t.draw();
                         t.updateLabel();
@@ -363,7 +362,6 @@ Browser.prototype.realInit = function() {
                     }
                     t.bumped = bumpStatus;
                     t.layoutWasDone = false;
-                    t.isLabelValid = false;
                     t.draw();
                     t.updateLabel();
                 }
@@ -735,7 +733,6 @@ Browser.prototype.realMakeTier = function(source) {
             }
             t.bumped = bumpStatus;
             t.layoutWasDone = false;
-            t.isLabelValid = false;
             t.draw();
             
             t.updateLabel();
