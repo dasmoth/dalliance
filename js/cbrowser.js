@@ -178,11 +178,14 @@ Browser.prototype.realInit = function() {
         }
     }, false);
 
+
+    /*
     this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
     this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
     this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
     this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
 
+    */
 
     var keyHandler = function(ev) {
         if (ev.keyCode == 13) {
@@ -537,6 +540,12 @@ Browser.prototype.realMakeTier = function(source) {
     
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
     vph.className = 'tier-viewport-background';
+
+    vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    vph.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    vph.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    vph.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
+
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
     tier.oorigin = this.viewStart;
     tier.background = background;
@@ -687,6 +696,7 @@ Browser.prototype.realMakeTier = function(source) {
     var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
+
     tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         thisB.removeTier(source);
@@ -817,6 +827,12 @@ Browser.prototype.realMakeTier = function(source) {
         document.addEventListener('mousemove', labelDragHandler, false);
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
+
+
+/*    tier.label.addEventListener('touchstart', function(ev) {
+        console.log('touchStartInLabel');
+        ev.stopPropagation(); ev.preventDefault();
+    }, false); */
 
     this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
