@@ -24,16 +24,14 @@ the block of configuration javascript within the HTML file.
 Adding extra data
 -----------------
 
-Dalliance loads data via the [DAS](http://biodas.org/) protocol, and
-aims towards full DAS/1.53 and DAS/1.6 support.  There's a button to
-click that will let you add DAS sources.  If what you're after is in
-the registry, you should just be able to select and add, otherwise
-you'll need to type a URL.
+Dalliance loads data via the [DAS](http://biodas.org/) protocol.
+There's a button to click that will let you add DAS sources.  If what
+you're after is in the registry, you should just be able to select and
+add, otherwise you'll need to type a URL.
 
-If you are running a very recent web browser, you can also add data
-directly from indexed binary files (currently bigwig and bigbed, perhaps
-other formats in the future).  Binary files can either be hosted on a
-web server or loaded from local disk.
+You can also add data directly from indexed binary files (currently
+bigwig, bigbed and BAM, probably other formats in the future).  Binary files
+can either be hosted on a web server or loaded from local disk.
 
 However, there is one caveat.  Since Dalliance is a pure Javascript
 program running in your web browser, it is normally subject to the
@@ -42,12 +40,6 @@ resources on the same server.  To get round this, DAS servers need to
 support the W3C [CORS](http://www.w3.org/TR/cors/) extension.  The
 latest versions of Dazzle, Proserver and MyDAS should implement this by
 default.
-
-Dalliance has a nearly-complete implementation of the DAS/1.53 and
-DAS/1.6 stylesheet system, but is currently a little bit fussy about
-exactly how it interprets DAS stylesheets, so if your data doesn't
-appear, it's worth taking a careful look at your stylesheet and/or
-temporarily replacing it with something simple.
 
 Reporting bugs
 --------------
