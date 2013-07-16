@@ -399,7 +399,8 @@ Browser.prototype.realInit = function() {
     this.hPopupHolder = makeElement('div');
     this.hPopupHolder.style['font-family'] = 'helvetica';
     this.hPopupHolder.style['font-size'] = '12pt';
-    this.svgHolder.appendChild(this.hPopupHolder);
+    this.hPopupHolder.classList.add('dalliance');
+    document.body.appendChild(this.hPopupHolder);
 
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
