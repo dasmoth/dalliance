@@ -609,7 +609,7 @@ Browser.prototype.realMakeTier = function(source) {
     vph.addEventListener('mousedown', function(ev) {
         ev.preventDefault();
         var br = vph.getBoundingClientRect();
-        var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+        var rx = ev.clientX, ry = ev.clientY;
 
         window.addEventListener('mousemove', dragMoveHandler, true);
         window.addEventListener('mouseup', dragUpHandler, true);
@@ -626,10 +626,10 @@ Browser.prototype.realMakeTier = function(source) {
         }
 
         if (isDragging) {
-            if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
-                thisB.move((rx - dragMoveOrigin));
-                dragMoveOrigin = rx;
-            }
+            // if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
+            //    thisB.move((rx - dragMoveOrigin));
+            //    dragMoveOrigin = rx;
+            // }
         } else {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
