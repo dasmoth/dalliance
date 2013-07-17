@@ -3,7 +3,6 @@ For 0.9 (?)
 
   - True tiled rendering.
   - UI for next/prev
-  - Undo/redo.
   - Animate when leaping.
     + Also snap-zooming?
   - Cleaner separation between genome canvases and UI chrome.
@@ -19,29 +18,35 @@ For 0.9 (?)
   - Refactor next/prev support in big* code.
   - next/prev peak support for quantitative tracks
     + Needs a UI for setting thresholds.
-  - Incremental data fetching
   - Work out the kinks in security/preflighting.
-  - Chromosome overviews
   - Tracks via Ensembl-REST?
-  - Try to preserve layout when expanding/collapsing variants.
   - Abbreviations when typing locations.
-  - Construct as a web-component.
-  - History of recently-viewed tracks.
-  - Better control of vertical resize.
+  
  
+For 0.10
+--------
+
+   
+  - Undo/redo.  
+  - History of recently-viewed tracks.
+  - Chromosome overviews
+  - RDF/FALDO support?
+  - Incremental data fetching
+  - Try to preserve layout when expanding/collapsing variants.
+  - Better search
+
 Future
 -------------
 
+ - Construct as a web-component
+   + (web component polyfills aren't quite ready yet).
+ - Better control of vertical resize.
  - Better configuration of quantitative tracks.
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
      + Switch between bars/colourways? [Leave this for now]
      + Increase/decrease viewed height of quant tracks?
  - Non-positional annotation.
- - Undo.
  - Alignment improvements.
- - Better dialogs.
- - Improved karyoscape.
- - Factor out browser tiers from UI chrome.
  - Consider JSON-DAS -- is this alive???
 
 Nice to have
