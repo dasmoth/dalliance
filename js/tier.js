@@ -430,3 +430,36 @@ DasTier.prototype.updateLabel = function() {
         this.bumpButton.style.display = 'none';
     }
 }
+
+DasTier.prototype.updateHeight = function() {
+    this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
+ }
+
+DasTier.prototype.drawOverlay = function() {
+    var t = this;
+    var b = this.browser;
+    var g = t.overlay.getContext('2d');
+    
+    t.overlay.height = t.viewport.height;
+    // g.clearRect(0, 0, t.overlay.width, t.overlay.height);
+    
+    var origin = b.viewStart - (1000/b.scale);
+    var visStart = b.viewStart - (1000/b.scale);
+    var visEnd = b.viewEnd + (1000/b.scale);
+
+
+    for (var hi = 0; hi < b.highlights.length; ++hi) {
+        var h = b.highlights[hi];
+        if (h.chr == b.chr && h.min < visEnd && h.max > visStart) {
+            g.globalAlpha = 0.3;
+            g.fillStyle = 'red';
+            g.fillRect((h.min - origin) * b.scale,
+                       0,
+                       (h.max - h.min) * b.scale,
+                       t.overlay.height);
+        }
+    }
+
+    t.oorigin = b.viewStart;
+    t.overlay.style.left = '-1000px'
+}

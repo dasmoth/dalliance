@@ -34,7 +34,8 @@ function drawSeqTier(tier, seq)
     var fpw = tier.viewport.width|0; 
 
     tier.viewport.height = 80;
-    tier.holder.style.height = '80px';
+    tier.holder.style.height = '80px'
+    tier.updateHeight();
 
     var gc = tier.viewport.getContext('2d');
     gc.fillStyle = tier.background;

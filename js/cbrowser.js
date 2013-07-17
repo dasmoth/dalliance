@@ -537,7 +537,7 @@ Browser.prototype.realMakeTier = function(source) {
         borderColor: 'red',
         borderWidth: '1px'});
     
-    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden', border: '0px', borderBottom: '0px', borderStyle: 'solid'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden'});
     vph.className = 'tier-viewport-background';
 
     vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
@@ -693,7 +693,7 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, placard, tier.label], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [vph, placard , tier.label ], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
@@ -714,13 +714,11 @@ Browser.prototype.realMakeTier = function(source) {
 
         if (!tier.infoVisible) {
             tier.infoElement.style.display = 'block';
-            if (tier.label.clientHeight > row.clientHeight) {
-                row.style.height = '' + (tier.label.clientHeight + 4) + 'px';
-            } 
+            tier.updateHeight();
             tier.infoVisible = true;
         } else {
             tier.infoElement.style.display = 'none';
-            row.style.height = 'auto';
+            tier.updateHeight();
             tier.infoVisible = false;
         }
     }, false);
@@ -1302,31 +1300,7 @@ Browser.prototype.highlightRegion = function(chr, min, max) {
 
 Browser.prototype.drawOverlays = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var t = this.tiers[ti];
-        var g = t.overlay.getContext('2d');
-        
-        t.overlay.height = t.viewport.height;
-        // g.clearRect(0, 0, t.overlay.width, t.overlay.height);
-        
-        var origin = this.viewStart - (1000/this.scale);
-        var visStart = this.viewStart - (1000/this.scale);
-        var visEnd = this.viewEnd + (1000/this.scale);
-
-
-        for (var hi = 0; hi < this.highlights.length; ++hi) {
-            var h = this.highlights[hi];
-            if (h.chr == this.chr && h.min < visEnd && h.max > visStart) {
-                g.globalAlpha = 0.3;
-                g.fillStyle = 'red';
-                g.fillRect((h.min - origin) * this.scale,
-                           0,
-                           (h.max - h.min) * this.scale,
-                           t.overlay.height);
-        }
-        }
-
-        t.oorigin = this.viewStart;
-        t.overlay.style.left = '-1000px'
+        this.tiers[ti].drawOverlay();
     }
 }
 
