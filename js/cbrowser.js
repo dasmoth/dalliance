@@ -608,6 +608,7 @@ Browser.prototype.realMakeTier = function(source) {
         
 
     vph.addEventListener('mousedown', function(ev) {
+        this.svgHolder.focus();
         ev.preventDefault();
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
@@ -1354,7 +1355,7 @@ Browser.prototype.setSelectedTier = function(t) {
 
         if (ti == this.selectedTier) {
             button.classList.add('active');
-            this.tiers[ti].label.focus();
+            // this.tiers[ti].label.focus();
         } else {
             button.classList.remove('active');
         }
