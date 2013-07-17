@@ -141,7 +141,7 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', left: 'calc(50% - 1px)', top: '0px'});
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
     this.tierHolder.appendChild(this.ruler);
 
     // Dimension stuff
@@ -556,7 +556,7 @@ Browser.prototype.realMakeTier = function(source) {
          padding: '0px', 
          margin: '0px',
          border: '0px', 
-         left: 'calc(50% - 1px)',
+         left: '' + ((this.featurePanelWidth/2)|0) + 'px',
          top: '0px',
          display: 'none'});
     tier.holder.appendChild(tier.quantOverlay);
@@ -1083,6 +1083,14 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         if (this.viewStart < 1) {
             this.viewStart = 1;
             this.viewEnd = this.viewStart + wid - 1;
+        }
+
+        this.ruler.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            var q = this.tiers[ti].quantOverlay;
+            if (q) {
+                q.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+            }
         }
 
         if (!skipRefresh) {
