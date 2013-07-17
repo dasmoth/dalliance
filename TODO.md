@@ -5,6 +5,7 @@ For 0.9 (?)
   - UI for next/prev
   - Undo/redo.
   - Animate when leaping.
+    + Also snap-zooming?
   - Cleaner separation between genome canvases and UI chrome.
   - Track-hub support
   - Assembly hub support
