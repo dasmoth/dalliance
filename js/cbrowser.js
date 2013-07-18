@@ -490,11 +490,11 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 
 Browser.prototype.makeTier = function(source) {
-    try {
+    //try {
         this.realMakeTier(source);
-    } catch (e) {
-        console.log(e);
-    }
+    //} catch (e) {
+    //    console.log(e);
+    //}
 }
 
 Browser.prototype.realMakeTier = function(source) {
@@ -608,7 +608,7 @@ Browser.prototype.realMakeTier = function(source) {
         
 
     vph.addEventListener('mousedown', function(ev) {
-        this.svgHolder.focus();
+        thisB.svgHolder.focus();
         ev.preventDefault();
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;

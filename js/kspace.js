@@ -695,3 +695,24 @@ function DummySequenceSource() {
 DummySequenceSource.prototype.fetch = function(chr, min, max, pool, cnt) {
     return cnt(null, null);
 }
+
+function JBrowseFeatureSource(base, query) {
+    this.store = new JBrowseStore(base, query);
+}
+
+JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (types && types.length == 0) {
+        callback(null, [], scale);
+        return;
+    }
+    
+    var fops = {};
+
+    this.store.features(
+        new DASSegment(chr, min, max),
+        fops,
+        function(features, status) {
+            callback(status, features, 100000);
+        }
+    );
+}

@@ -159,6 +159,19 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
             
             thisTier.browser.refreshTier(thisTier);
         }
+    } else if (this.dasSource.jbURI) {
+        fs = new JBrowseFeatureSource(this.dasSource.jbURI, this.dasSource.jbQuery);
+
+        this.stylesheet = new DASStylesheet();
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = 'BOX';
+        wigStyle.FGCOLOR = 'black';
+        wigStyle.BGCOLOR = 'green'
+        wigStyle.HEIGHT = 8;
+        wigStyle.BUMP = true;
+        wigStyle.LABEL = true;
+        wigStyle.ZINDEX = 20;
+        this.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);
@@ -432,7 +445,8 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
+    //if (this.row)
+        this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
  }
 
 DasTier.prototype.drawOverlay = function() {
