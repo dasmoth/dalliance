@@ -172,6 +172,19 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
         wigStyle.LABEL = true;
         wigStyle.ZINDEX = 20;
         this.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+    } else if (this.dasSource.tabixURI) {
+        fs = new TabixFeatureSource(this.dasSource.tabixURI);
+
+        this.stylesheet = new DASStylesheet();
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = 'BOX';
+        wigStyle.FGCOLOR = 'black';
+        wigStyle.BGCOLOR = 'purple'
+        wigStyle.HEIGHT = 8;
+        wigStyle.BUMP = true;
+        wigStyle.LABEL = true;
+        wigStyle.ZINDEX = 20;
+        this.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);

@@ -716,3 +716,23 @@ JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
         }
     );
 }
+
+function TabixFeatureSource(url, payload) {
+    var holder = this.fetcherHolder = new Awaited();
+    
+    createTabixSource(url, function(fetcher) {
+        holder.provide(fetcher);
+    });
+}
+
+TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    this.fetcherHolder.await(function(fetcher) {
+        fetcher(chr, min, max, function(result) {
+            callback(null, result, 10000000000);
+        });
+    });
+}
+
+BAMFeatureSource.prototype.getScales = function() {
+    return 1000000000;
+}

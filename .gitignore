@@ -1,1 +1,5 @@
 *~
+dart_backends/packages
+dart_backends/**/packages
+pubspec.lock
+dart_backends/**/*.js*
