@@ -40,6 +40,11 @@
 <script language="javascript" src="js/session.js"></script>
 <script language="javascript" src="js/jbjson.js"></script>
 <script language="javascript" src="polyfills/html5slider.js"></script>
+<!-- <script language="javascript" src="dart_backends/web/packages/browser/dart.js"></script>
+<script language="javascript" src="dart_backends/web/packages/browser/interop.js"></script> -->
+<script language="javascript" src="dart.js"></script>
+<script language="javascript" src="interop.js"></script>
+<script language="javascript" src="dart_backends/web/dalliance_dart_stub.dart.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -93,7 +98,13 @@
                   {name:                 'Style test',
                    uri:                  './glyph-test/',
                    features_uri:         './glyph-test/features.xml',
-                   stylesheet_uri:       './glyph-test/stylesheet.xml'},
+                   stylesheet_uri:       './glyph-test/stylesheet.xml'}
+
+                  ,{name:                 'TabixTest',
+                   tabixURI:             'http://www.biodalliance.org/datasets/batman-SP.sort.gff.gz',
+                   tabixPayload:         'gff',
+                   stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet'}
+
                 ],
 
     setDocumentTitle: true,

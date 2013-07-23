@@ -8,15 +8,6 @@ import 'package:bud/gff.dart';
 
 void main() {
   js.context.createTabixSource = new js.Callback.many(createTabixSource);
-  int j = 1;
-  for (int i = 0; i < 64; ++i) {
-    print(' 1<<$i = $j');
-    j = j * 2;
-  }
-  print(0x1000 * 42);
-  print(0x1000000 * 42);
-  print(0x10000000 * 42);
-  print(0x1000 * 0x1000 * 42);
 }
 
 void createTabixSource(String url, callback) {
