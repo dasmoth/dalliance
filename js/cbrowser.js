@@ -681,7 +681,6 @@ Browser.prototype.realMakeTier = function(source) {
         isDragging = false;
     });
 
-    tier.init(); // fetches stylesheet
 
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
@@ -833,7 +832,8 @@ Browser.prototype.realMakeTier = function(source) {
 
     this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
-    this.refreshTier(tier);
+    
+    tier.init(); // fetches stylesheet
     this.arrangeTiers();
     tier.updateLabel();
 }
@@ -1134,7 +1134,7 @@ Browser.prototype.removeTier = function(conf) {
     for (var ti = target; ti < this.tiers.length; ++ti) {
         this.tiers[ti].background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
     }
-    this.refresh();
+    // this.refresh();
 }
 
 
