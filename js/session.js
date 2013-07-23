@@ -43,6 +43,9 @@ Browser.prototype.storeStatus = function() {
 }
 
 Browser.prototype.restoreStatus = function() {
+    if (this.noPersist)
+        return;
+    
     var storedConfigVersion = localStorage['dalliance.' + this.cookieKey + '.version'];
     if (storedConfigVersion) {
         storedConfigVersion = storedConfigVersion|0;
@@ -50,6 +53,13 @@ Browser.prototype.restoreStatus = function() {
         storedConfigVersion = -100;
     }
     if (VERSION.CONFIG != storedConfigVersion) {
+        return;
+    }
+
+    var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
+    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
+    if (pageConfigHash != storedConfigHash) {
+        localStorage['dalliance.' + this.cookieKey + '.configHash'] = pageConfigHash;
         return;
     }
 
