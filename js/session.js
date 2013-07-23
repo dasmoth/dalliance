@@ -43,6 +43,9 @@ Browser.prototype.storeStatus = function() {
 }
 
 Browser.prototype.restoreStatus = function() {
+    if (this.noPersist)
+        return;
+    
     var storedConfigVersion = localStorage['dalliance.' + this.cookieKey + '.version'];
     if (storedConfigVersion) {
         storedConfigVersion = storedConfigVersion|0;
