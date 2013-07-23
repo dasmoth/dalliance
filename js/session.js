@@ -56,6 +56,13 @@ Browser.prototype.restoreStatus = function() {
         return;
     }
 
+    var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
+    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
+    if (pageConfigHash != storedConfigHash) {
+        localStorage['dalliance.' + this.cookieKey + '.configHash'] = pageConfigHash;
+        return;
+    }
+
     var qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     var qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
     var qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
