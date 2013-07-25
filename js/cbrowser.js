@@ -240,6 +240,9 @@ Browser.prototype.realInit = function() {
                       -1,
                       fedge,
                       function(nxt) {
+
+                          console.log(nxt);
+
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
@@ -1164,9 +1167,22 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
 
         ss.getSeqInfo(newChr, function(si) {
             if (!si) {
-                callback("Couldn't find sequence '" + newChr + "'");
+                var altChr;
+                if (newChr.indexOf('chr') == 0) {
+                    altChr = newChr.substr(3);
+                } else {
+                    altChr = 'chr' + newChr;
+                }
+                ss.getSeqInfo(altChr, function(si2) {
+                    if (!si2) {
+                        return callback("Couldn't find sequence '" + newChr + "'");
+                    } else {
+                        return thisB._setLocation(altChr, newMin, newMax, si2, callback);
+                    }
+                });
+            } else {
+                return thisB._setLocation(newChr, newMin, newMax, si, callback);
             }
-            return thisB._setLocation(newChr, newMin, newMax, si, callback);
         });
     }
 }

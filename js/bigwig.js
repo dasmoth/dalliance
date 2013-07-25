@@ -903,3 +903,42 @@ function makeBwg(data, callback, name) {
         });
     });
 }
+
+
+BigWig.prototype.thresholdSearch = function(chr, referencePoint, dir, threshold, callback) {
+    var bwg = this;
+    var candidates = [{zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
+       
+    function fbThresholdSearchRecur() {
+	if (candidates.length == 0) {
+	    callback(null);
+	}
+	candidates.sort(function(c1, c2) {
+	    var d = c1.zoom - c2.zoom;
+	    if (d != 0)
+		return d;
+	    else
+		return c1.min - c2.min;
+	});
+
+	var candidate = candidates.splice(0, 1)[0];
+
+        bwg.getZoomedView(candidate.zoom).readWigData(chr, candidate.min, candidate.max, function(feats) {
+            for (var fi = 0; fi < feats.length; ++fi) {
+	        var f = feats[fi];
+                
+	        if (f.maxScore > threshold) {
+		    if (candidate.zoom == 0) {
+		        if (f.min > referencePoint)
+			    return callback(f);
+		    } else if (f.max > referencePoint) {
+		        candidates.push({zoom: candidate.zoom - 1, min: f.min, max: f.max});
+		    }
+	        }
+	    }
+            fbThresholdSearchRecur();
+        });
+    }
+    
+    fbThresholdSearchRecur();
+}
