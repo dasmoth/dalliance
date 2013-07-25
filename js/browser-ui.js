@@ -94,7 +94,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                 };
 
             if (m) {
-                console.log(m);
                 var chr = m[1], start, end;
                 if (m[4]) {
                     start = m[2]|0;

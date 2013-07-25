@@ -164,7 +164,6 @@ Browser.prototype.realInit = function() {
         thisB.move(delta);
     }, false);
     this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
-        console.log('mps');
         if (ev.axis == 1) {
             ev.stopPropagation(); ev.preventDefault();
 
@@ -240,9 +239,6 @@ Browser.prototype.realInit = function() {
                       -1,
                       fedge,
                       function(nxt) {
-
-                          console.log(nxt);
-
                           if (nxt) {
                               var nmin = nxt.min;
                               var nmax = nxt.max;
@@ -370,7 +366,7 @@ Browser.prototype.realInit = function() {
                 }
             }
         } else {
-            console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
+            // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
     };
     var keyUpHandler = function(ev) {
@@ -493,11 +489,11 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 
 Browser.prototype.makeTier = function(source) {
-    //try {
+    try {
         this.realMakeTier(source);
-    //} catch (e) {
-    //    console.log(e);
-    //}
+    } catch (e) {
+        console.log(e.stack);
+    }
 }
 
 Browser.prototype.realMakeTier = function(source) {
@@ -827,12 +823,6 @@ Browser.prototype.realMakeTier = function(source) {
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
 
-
-/*    tier.label.addEventListener('touchstart', function(ev) {
-        console.log('touchStartInLabel');
-        ev.stopPropagation(); ev.preventDefault();
-    }, false); */
-
     this.tierHolder.appendChild(row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
@@ -1008,8 +998,6 @@ Browser.prototype.zoomStep = function(delta) {
     if (nz > this.zoomMax) {
         nz = this.zoomMax;
     }
-
-    // console.log('zoom ' + oz + ' -> ' + nz);
 
     if (nz != oz) {
         this.zoomSliderValue = nz; // FIXME maybe ought to set inside zoom!
@@ -1241,7 +1229,7 @@ Browser.prototype.notifyFeature = function(ev, feature, group) {
       try {
           this.featureListeners[fli](ev, feature, group);
       } catch (ex) {
-          console.log(ex);
+          console.log(ex.stack);
       }
   }
 }
@@ -1256,7 +1244,7 @@ Browser.prototype.notifyFeatureHover = function(ev, feature, group) {
         try {
             this.featureHoverListeners[fli](ev, feature, group);
         } catch (ex) {
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 }
@@ -1271,7 +1259,7 @@ Browser.prototype.notifyLocation = function() {
         try {
             this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue);
         } catch (ex) {
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 }
@@ -1285,7 +1273,7 @@ Browser.prototype.notifyTier = function() {
         try {
             this.tierListeners[tli]();
         } catch (ex) {
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 }
@@ -1299,7 +1287,7 @@ Browser.prototype.notifyRegionSelect = function(chr, min, max) {
         try {
             this.regionSelectListeners[rli](chr, min, max);
         } catch (ex) {
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 }
@@ -1364,7 +1352,7 @@ Browser.prototype.notifyTierSelectionWrap = function(i) {
         try {
             this.tierSelectionWrapListeners[fli](i);
         } catch (ex) {
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 }
