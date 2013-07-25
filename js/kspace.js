@@ -718,9 +718,10 @@ JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 }
 
 function TabixFeatureSource(url, payload) {
+    payload = payload || 'gff';
     var holder = this.fetcherHolder = new Awaited();
     
-    createTabixSource(url, function(fetcher) {
+    createTabixSource(url, payload, function(fetcher) {
         holder.provide(fetcher);
     });
 }
@@ -728,7 +729,11 @@ function TabixFeatureSource(url, payload) {
 TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     this.fetcherHolder.await(function(fetcher) {
         fetcher(chr, min, max, function(result) {
-            callback(null, result, 10000000000);
+            try {
+                callback(null, result, 10000000000);
+            } catch (e) {
+                console.log(e.stack);
+            }
         });
     });
 }

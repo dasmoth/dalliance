@@ -173,9 +173,31 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
         wigStyle.ZINDEX = 20;
         this.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
     } else if (this.dasSource.tabixURI) {
-        fs = new TabixFeatureSource(this.dasSource.tabixURI);
+        fs = new TabixFeatureSource(this.dasSource.tabixURI, this.dasSource.tabixPayload);
 
-        this.stylesheet = new DASStylesheet();
+        thisTier.stylesheet = new DASStylesheet();
+        
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = 'BOX';
+        wigStyle.FGCOLOR = 'black';
+        wigStyle.BGCOLOR = 'red'
+        wigStyle.HEIGHT = 10;
+        wigStyle.BUMP = true;
+        wigStyle.ZINDEX = 20;
+        thisTier.stylesheet.pushStyle({type: 'translation'}, null, wigStyle);
+        
+        var tsStyle = new DASStyle();
+        tsStyle.glyph = '__NONE';
+        thisTier.stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
+        thisTier.stylesheet.pushStyle({type: 'gene'}, null, tsStyle);
+
+        var densStyle = new DASStyle();
+        densStyle.glyph = 'HISTOGRAM';
+        densStyle.COLOR1 = 'white';
+        densStyle.COLOR2 = 'black';
+        densStyle.HEIGHT=30;
+        thisTier.stylesheet.pushStyle({type: 'density'}, null, densStyle);
+
         var wigStyle = new DASStyle();
         wigStyle.glyph = 'BOX';
         wigStyle.FGCOLOR = 'black';
@@ -184,7 +206,7 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
         wigStyle.BUMP = true;
         wigStyle.LABEL = true;
         wigStyle.ZINDEX = 20;
-        this.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+        thisTier.stylesheet.pushStyle({type: 'default'}, null, wigStyle);
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);
