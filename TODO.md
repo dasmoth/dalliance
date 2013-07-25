@@ -11,7 +11,6 @@ For 0.9 (?)
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
-  - Stylesheet editor.
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
@@ -34,6 +33,7 @@ For 0.10
   - Incremental data fetching
   - Try to preserve layout when expanding/collapsing variants.
   - Better search
+  - Stylesheet editor.
 
 Future
 -------------

@@ -58,7 +58,8 @@ function drawFeatureTier(tier)
                     continue;
                 }
                 var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
-                glyphs.push(g);
+		if (g)
+                    glyphs.push(g);
             }
         }
     }
@@ -350,6 +351,9 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 	    glyphs.push(g);
 	}
     }
+
+    if (glyphs.length == 0)
+	return null;
     
     var connector = 'flat';
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
@@ -538,6 +542,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	    }
 	}
 	gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq);
+    } else if (gtype === '__NONE') {
+	return null;
     } else /* default to BOX */ {
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
