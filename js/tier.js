@@ -47,6 +47,9 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
                     }
                 });
         };
+        this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
+        };
 
         if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
             fs.bwgHolder.await(function(bwg) {
@@ -414,59 +417,67 @@ DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
     callback(null);
 }
 
+DasTier.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    callback(null);
+}
+
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
-    if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
-        if (this.currentFeatures) {
-            var bestFeature = null;
-            for (var fi = 0; fi < this.currentFeatures.length; ++fi) {
-                var f = this.currentFeatures[fi];
-                if (!f.min || !f.max) {
-                    continue;
+    if (this.dasSource.quantLeapThreshold) {
+        this.quantFindNextFeature(chr, pos, dir, this.dasSource.quantLeapThreshold, callback);
+    } else {
+        if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
+            if (this.currentFeatures) {
+                var bestFeature = null;
+                for (var fi = 0; fi < this.currentFeatures.length; ++fi) {
+                    var f = this.currentFeatures[fi];
+                    if (!f.min || !f.max) {
+                        continue;
+                    }
+                    if (f.parents && f.parents.length > 0) {
+                        continue;
+                    }
+                    if (dir < 0) {
+                        if (fedge == 1 && f.max >= pos && f.min < pos) {
+                            if (!bestFeature || f.min > bestFeature.min ||
+                                (f.min == bestFeature.min && f.max < bestFeature.max)) {
+                                bestFeature = f;
+                            }
+                        } else if (f.max < pos) {
+                            if (!bestFeature || f.max > bestFeature.max || 
+                                (f.max == bestFeature.max && f.min < bestFeature.min) ||
+                                (f.min == bestFeature.mmin && bestFeature.max >= pos)) {
+                                bestFeature = f;
+                            } 
+                        }
+                    } else {
+                        if (fedge == 1 && f.min <= pos && f.max > pos) {
+                            if (!bestFeature || f.max < bestFeature.max ||
+                                (f.max == bestFeature.max && f.min > bestFeature.min)) {
+                                bestFeature = f;
+                            }
+                        } else if (f.min > pos) {
+                            if (!bestFeature || f.min < bestFeature.min ||
+                                (f.min == bestFeature.min && f.max > bestFeature.max) ||
+                                (f.max == bestFeature.max && bestFeature.min <= pos)) {
+                                bestFeature = f;
+                            }
+                        }
+                    }
                 }
-                if (f.parents && f.parents.length > 0) {
-                    continue;
+                if (bestFeature) {
+                    //                dlog('bestFeature = ' + miniJSONify(bestFeature));
+                    return callback(bestFeature);
                 }
                 if (dir < 0) {
-                    if (fedge == 1 && f.max >= pos && f.min < pos) {
-                        if (!bestFeature || f.min > bestFeature.min ||
-                            (f.min == bestFeature.min && f.max < bestFeature.max)) {
-                            bestFeature = f;
-                        }
-                    } else if (f.max < pos) {
-                        if (!bestFeature || f.max > bestFeature.max || 
-                            (f.max == bestFeature.max && f.min < bestFeature.min) ||
-                            (f.min == bestFeature.mmin && bestFeature.max >= pos)) {
-                            bestFeature = f;
-                        } 
-                    }
+                    pos = this.knownStart;
                 } else {
-                    if (fedge == 1 && f.min <= pos && f.max > pos) {
-                        if (!bestFeature || f.max < bestFeature.max ||
-                            (f.max == bestFeature.max && f.min > bestFeature.min)) {
-                            bestFeature = f;
-                        }
-                    } else if (f.min > pos) {
-                        if (!bestFeature || f.min < bestFeature.min ||
-                            (f.min == bestFeature.min && f.max > bestFeature.max) ||
-                            (f.max == bestFeature.max && bestFeature.min <= pos)) {
-                            bestFeature = f;
-                        }
-                    }
+                    pos = this.knownEnd;
                 }
             }
-            if (bestFeature) {
-//                dlog('bestFeature = ' + miniJSONify(bestFeature));
-                return callback(bestFeature);
-            }
-            if (dir < 0) {
-                pos = this.knownStart;
-            } else {
-                pos = this.knownEnd;
-            }
         }
+
+        this.sourceFindNextFeature(chr, pos, dir, callback);
     }
-//    dlog('delegating to source: ' + pos);
-    this.sourceFindNextFeature(chr, pos, dir, callback);
 }
 
 

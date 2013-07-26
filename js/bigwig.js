@@ -125,12 +125,12 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
         var maxCirBlockSpan = 4 +  (thisB.cirBlockSize * 32);   // Upper bound on size, based on a completely full leaf node.
         var spans;
         for (var i = 0; i < offset.length; ++i) {
-            var blockSpan = new Range(offset[i], Math.min(offset[i] + maxCirBlockSpan, thisB.cirTreeOffset + thisB.cirTreeLength));
+            var blockSpan = new Range(offset[i], offset[i] + maxCirBlockSpan);
             spans = spans ? union(spans, blockSpan) : blockSpan;
         }
         
         var fetchRanges = spans.ranges();
-        // dlog('fetchRanges: ' + fetchRanges);
+        // console.log('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
             var fr = fetchRanges[r];
             cirFobStartFetch(offset, fr, level);
@@ -139,7 +139,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
     var cirFobStartFetch = function(offset, fr, level, attempts) {
         var length = fr.max() - fr.min();
-        // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
+        // console.log('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
         thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(resultBuffer) {
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
@@ -264,7 +264,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var sumSqData = fa[(i*8)+7];
                                 
                                 if (chromId == chr) {
-                                    var summaryOpts = {type: 'bigwig', score: sumData/validCnt};
+                                    var summaryOpts = {type: 'bigwig', score: sumData/validCnt, maxScore: maxVal};
                                     if (thisB.bwg.type == 'bigbed') {
                                         summaryOpts.type = 'density';
                                     }
@@ -835,7 +835,7 @@ BigWig.prototype.getUnzoomedView = function() {
 BigWig.prototype.getZoomedView = function(z) {
     var zh = this.zoomLevels[z];
     if (!zh.view) {
-        zh.view = new BigWigView(this, zh.indexOffset, this.zoomLevels[z + 1].dataOffset - zh.indexOffset, true);
+        zh.view = new BigWigView(this, zh.indexOffset, /* this.zoomLevels[z + 1].dataOffset - zh.indexOffset */ 4000, true);
     }
     return zh.view;
 }
@@ -902,4 +902,43 @@ function makeBwg(data, callback, name) {
             return callback(bwg);
         });
     });
+}
+
+
+BigWig.prototype.thresholdSearch = function(chr, referencePoint, dir, threshold, callback) {
+    var bwg = this;
+    var candidates = [{zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
+       
+    function fbThresholdSearchRecur() {
+	if (candidates.length == 0) {
+	    callback(null);
+	}
+	candidates.sort(function(c1, c2) {
+	    var d = c1.zoom - c2.zoom;
+	    if (d != 0)
+		return d;
+	    else
+		return c1.min - c2.min;
+	});
+
+	var candidate = candidates.splice(0, 1)[0];
+
+        bwg.getZoomedView(candidate.zoom).readWigData(chr, candidate.min, candidate.max, function(feats) {
+            for (var fi = 0; fi < feats.length; ++fi) {
+	        var f = feats[fi];
+                
+	        if (f.maxScore > threshold) {
+		    if (candidate.zoom == 0) {
+		        if (f.min > referencePoint)
+			    return callback(f);
+		    } else if (f.max > referencePoint) {
+		        candidates.push({zoom: candidate.zoom - 1, min: f.min, max: f.max});
+		    }
+	        }
+	    }
+            fbThresholdSearchRecur();
+        });
+    }
+    
+    fbThresholdSearchRecur();
 }
