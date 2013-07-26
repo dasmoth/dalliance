@@ -11,6 +11,17 @@ function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+function parseLocCardinal(n, m) {
+    var i = n|0;
+    if (m === 'k' || m === 'K') {
+        return i * 1000;
+    } else if (m == 'm' || m === 'M') {
+        return i * 1000000;
+    } else {
+        return i;
+    }
+}
+
 /*
  * Quite a bit of this ought to be done using a templating system, but
  * since web-components isn't quite ready for prime time yet we'll stick
@@ -23,7 +34,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
 
     var b = this;
-    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
+    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([KkMmGg])?([\-,\,.](\d+)([KkMmGg])?)?/;
 
     this.addFeatureListener(function(ev, hit) {
         b.featurePopup(ev, hit, null);
@@ -84,6 +95,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
             var g = locField.value;
             var m = REGION_PATTERN.exec(g);
+            // console.log(m);
 
             var setLocationCB = function(err) {
                     if (err) {
@@ -95,12 +107,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
             if (m) {
                 var chr = m[1], start, end;
-                if (m[4]) {
-                    start = m[2]|0;
-                    end = m[4]|0;
+                if (m[5]) {
+                    start = parseLocCardinal(m[2],  m[3]);
+                    end = parseLocCardinal(m[5], m[6]);
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
-                    start = ((m[2]|0) - (width/2))|0;
+                    start = (parseLocCardinal(m[2], m[3]) - (width/2))|0;
                     end = start + width - 1;
                 }
                 b.setLocation(chr, start, end, setLocationCB);

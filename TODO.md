@@ -1,7 +1,6 @@
 For 0.9 (?)
 -----------
 
-  - True tiled rendering.
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?
@@ -11,20 +10,15 @@ For 0.9 (?)
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
-  - Out-to-chromosome zooming
-    + Probably needs a better set of semantic zoom hints in the
-      stylesheet language.  
   - Refactor next/prev support in big* code.
   - next/prev peak support for quantitative tracks
     + Needs a UI for setting thresholds.
   - Work out the kinks in security/preflighting.
   - Tracks via Ensembl-REST?
-  - Abbreviations when typing locations.
-  
+  - Abbreviations when typing locations. [DONE]
  
 For 0.10
 --------
-
    
   - Undo/redo.  
   - History of recently-viewed tracks.
@@ -34,12 +28,16 @@ For 0.10
   - Try to preserve layout when expanding/collapsing variants.
   - Better search
   - Stylesheet editor.
+  - Out-to-chromosome zooming
+    + Probably needs a better set of semantic zoom hints in the
+      stylesheet language.  
 
 Future
 -------------
 
  - Construct as a web-component
    + (web component polyfills aren't quite ready yet).
+ - Better tiling in renderer.
  - Better control of vertical resize.
  - Better configuration of quantitative tracks.
      + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
