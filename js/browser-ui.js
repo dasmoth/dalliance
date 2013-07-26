@@ -86,6 +86,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
+    this.addTierListener(function() {
+        if (b.storeStatus) {
+            b.storeStatus();
+        }
+    });
+
     locField.addEventListener('keydown', function(ev) {
         if (ev.keyCode == 40) {
             ev.preventDefault(); ev.stopPropagation();
