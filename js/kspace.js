@@ -127,8 +127,13 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
     var needSeq = false;
 
     for (var t = 0; t < tiers.length; ++t) {
-        if (this.startFetchesFor(tiers[t], awaitedSeq)) {
-            needSeq = true;
+        try {
+            if (this.startFetchesFor(tiers[t], awaitedSeq)) {
+                needSeq = true;
+            }
+        } catch (ex) {
+            console.log('Error fetching tier source');
+            console.log(ex.stack);
         }
     }
 
