@@ -1093,6 +1093,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
+    this.notifyTier();
 }
 
 Browser.prototype.removeTier = function(conf) {
@@ -1125,7 +1126,8 @@ Browser.prototype.removeTier = function(conf) {
     for (var ti = target; ti < this.tiers.length; ++ti) {
         this.tiers[ti].background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
     }
-    // this.refresh();
+    
+    this.notifyTier();
 }
 
 
