@@ -81,7 +81,7 @@ TwoBitSeq.prototype.init = function(cnt) {
             return cnt('Fetch failed');
         }
         var ba = new Uint8Array(r1);
-        thisB.length = readInt(ba, 0);
+        thisB._length = readInt(ba, 0);
         thisB.nBlockCnt = readInt(ba, 4);
         thisB.tbf.data.slice(thisB.offset + 8, thisB.nBlockCnt*8 + 4).fetch(function(r2) {
             if (!r2) {
@@ -101,7 +101,7 @@ TwoBitSeq.prototype.init = function(cnt) {
             }
             thisB.nBlocks = nbs;
             thisB.mBlockCnt = readInt(ba, thisB.nBlockCnt*8);
-            thisB.seqLength = ((thisB.length + 3)/4)|0;
+            thisB.seqLength = ((thisB._length + 3)/4)|0;
             thisB.seqOffset = thisB.offset + 16 + ((thisB.nBlockCnt + thisB.mBlockCnt) * 8);
             return cnt();
         });
@@ -188,7 +188,7 @@ TwoBitSeq.prototype.length = function(cnt) {
         if (error) {
             return cnt(null, error);
         } else {
-            return cnt(thisB.length);
+            return cnt(thisB._length);
         }
     });
 }
