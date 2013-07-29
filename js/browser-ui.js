@@ -25,9 +25,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
 
-    this.addFeatureListener(function(ev, hit) {
-        b.featurePopup(ev, hit, null);
-    });
+    if (!b.disableDefaultFeaturePopup) {
+        this.addFeatureListener(function(ev, hit) {
+            b.featurePopup(ev, hit, null);
+        });
+    }
 
     holder.classList.add('dalliance');
     var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
@@ -42,11 +44,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     var locField = makeElement('input', '', {className: 'loc-field'});
+    b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
     toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
