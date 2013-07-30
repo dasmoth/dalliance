@@ -531,6 +531,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
 	var yscale = ((1.0 * height) / (smax - smin));
 	var sc = ((score - (1.0*smin)) * yscale)|0;
+	quant = {min: smin, max: smax};
 	gg = new PointGlyph((minPos + maxPos)/2, height-sc, height);
     } else if (gtype === '__SEQUENCE') {
 	var refSeq = null;
