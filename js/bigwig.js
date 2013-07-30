@@ -908,13 +908,16 @@ function makeBwg(data, callback, name) {
 
 
 BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
+    dir = (dir<0) ? -1 : 1;
     var bwg = this;
     var initialChr = this.chromsToIDs[chrName];
-    var candidates = [{chr: initialChr, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
-    for (var i = 1; i <= this.maxID; ++i) {
-        candidates.push({chr: (initialChr + i) % (this.maxID+1), zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000})
+    var candidates = [{chrOrd: 0, chr: initialChr, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000, fromRef: true}]
+    for (var i = 1; i <= this.maxID + 1; ++i) {
+        var chrId = (initialChr + (dir*i)) % (this.maxID + 1);
+        if (chrId < 0) 
+            chrId += (this.maxID + 1);
+        candidates.push({chrOrd: i, chr: chrId, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000})
     }
-    console.log(miniJSONify(candidates));
        
     function fbThresholdSearchRecur() {
 	if (candidates.length == 0) {
@@ -924,16 +927,20 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 	    var d = c1.zoom - c2.zoom;
 	    if (d != 0)
 		return d;
+
+            d = c1.chrOrd - c2.chrOrd;
+            if (d != 0)
+                return d;
 	    else
-		return c1.min - c2.min;
+		return c1.min - c2.min * dir;
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
-        console.log('trying ' + miniJSONify(candidate));
+        // console.log('trying ' + miniJSONify(candidate));
 
         bwg.getZoomedView(candidate.zoom).readWigDataById(candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = 0;
-            if (candidate.chr == initialChr)
+            if (candidate.fromRef)
                 rp = referencePoint;
             
             for (var fi = 0; fi < feats.length; ++fi) {
@@ -944,7 +951,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 		        if (f.min > rp)
 			    return callback(f);
 		    } else if (f.max > rp) {
-		        candidates.push({chr: candidate.chr, zoom: candidate.zoom - 1, min: f.min, max: f.max});
+		        candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 1, min: f.min, max: f.max, fromRef: candidate.fromRef});
 		    }
 	        }
 	    }
