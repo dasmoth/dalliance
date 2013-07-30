@@ -78,7 +78,7 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ['white'];
+    this.tierBackgroundColors = [ /* "rgb(245,245,245)", "rgb(230,230,250)"  */ 'white'];
     this.minTierHeight = 25;
 
     this.browserLinks = {

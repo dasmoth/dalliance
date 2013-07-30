@@ -5,7 +5,7 @@
 // sequence-draw.js: renderers for sequence-related data
 //
 
-var MIN_TILE = 75;
+var MIN_TILE = 100;
 var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
 var steps = [1,2,5];
@@ -83,7 +83,7 @@ function drawSeqTier(tier, seq)
 			  3);
 
 	    gc.fillStyle = 'black';
-	    gc.fillText('' + pos, ((pos - origin) * scale), 22);
+	    gc.fillText(formatLongInt(pos), ((pos - origin) * scale), 22);
 	    
 
 	    pos += tile;
