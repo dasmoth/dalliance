@@ -21,6 +21,7 @@ BigWig.prototype.readChromTree = function(callback) {
     var thisB = this;
     this.chromsToIDs = {};
     this.idsToChroms = {};
+    this.maxID = 0;
 
     var udo = this.unzoomedDataOffset;
     while ((udo % 4) != 0) {
@@ -70,6 +71,7 @@ BigWig.prototype.readChromTree = function(callback) {
                         thisB.chromsToIDs[key.substr(3)] = chromId;
                     }
                     thisB.idsToChroms[chromId] = key;
+                    thisB.maxID = Math.max(thisB.maxID, chromId);
                 }
             }
         };
@@ -905,13 +907,18 @@ function makeBwg(data, callback, name) {
 }
 
 
-BigWig.prototype.thresholdSearch = function(chr, referencePoint, dir, threshold, callback) {
+BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
     var bwg = this;
-    var candidates = [{zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
+    var initialChr = this.chromsToIDs[chrName];
+    var candidates = [{chr: initialChr, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
+    for (var i = 1; i <= this.maxID; ++i) {
+        candidates.push({chr: (initialChr + i) % (this.maxID+1), zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000})
+    }
+    console.log(miniJSONify(candidates));
        
     function fbThresholdSearchRecur() {
 	if (candidates.length == 0) {
-	    callback(null);
+	    return callback(null);
 	}
 	candidates.sort(function(c1, c2) {
 	    var d = c1.zoom - c2.zoom;
@@ -922,17 +929,22 @@ BigWig.prototype.thresholdSearch = function(chr, referencePoint, dir, threshold,
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
+        console.log('trying ' + miniJSONify(candidate));
 
-        bwg.getZoomedView(candidate.zoom).readWigData(chr, candidate.min, candidate.max, function(feats) {
+        bwg.getZoomedView(candidate.zoom).readWigDataById(candidate.chr, candidate.min, candidate.max, function(feats) {
+            var rp = 0;
+            if (candidate.chr == initialChr)
+                rp = referencePoint;
+            
             for (var fi = 0; fi < feats.length; ++fi) {
 	        var f = feats[fi];
                 
 	        if (f.maxScore > threshold) {
 		    if (candidate.zoom == 0) {
-		        if (f.min > referencePoint)
+		        if (f.min > rp)
 			    return callback(f);
-		    } else if (f.max > referencePoint) {
-		        candidates.push({zoom: candidate.zoom - 1, min: f.min, max: f.max});
+		    } else if (f.max > rp) {
+		        candidates.push({chr: candidate.chr, zoom: candidate.zoom - 1, min: f.min, max: f.max});
 		    }
 	        }
 	    }
