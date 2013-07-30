@@ -38,12 +38,12 @@ BigWig.prototype.readChromTree = function(callback) {
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
         
-        // dlog('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
+        // console.log('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
 
         var bptReadNode = function(offset) {
             var nodeType = ba[offset];
             var cnt = sa[(offset/2) + 1];
-            // dlog('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
+            // console.log('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
             offset += 4;
             for (var n = 0; n < cnt; ++n) {
                 if (nodeType == 0) {
@@ -64,7 +64,7 @@ BigWig.prototype.readChromTree = function(callback) {
                     var chromSize = (ba[offset + 7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
                     offset += 8;
 
-                    // dlog(key + ':' + chromId + ',' + chromSize);
+                    // console.log(key + ':' + chromId + ',' + chromSize);
                     thisB.chromsToIDs[key] = chromId;
                     if (key.indexOf('chr') == 0) {
                         thisB.chromsToIDs[key.substr(3)] = chromId;

@@ -51,7 +51,7 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
             fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
         };
 
-        if (!this.dasSource.uri && !this.dasSource.stylesheet_uri) {
+        if (!this.dasSource.uri && !this.dasSource.stylesheet_uri && !this.dasSource.style) {
             fs.bwgHolder.await(function(bwg) {
                 if (!bwg) {
                     // Dummy version so that an error placard gets shown.
