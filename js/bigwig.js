@@ -870,7 +870,7 @@ function makeBwg(data, callback, name) {
         } else {
             callback(null, "Not a supported format");
         }
-//        dlog('magic okay');
+        // console.log('magic okay');
 
         bwg.version = sa[2];             // 4
         bwg.numZoomLevels = sa[3];       // 6
