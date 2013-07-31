@@ -1099,6 +1099,9 @@ Browser.prototype.addTier = function(conf) {
 Browser.prototype.removeTier = function(conf) {
     var target = -1;
 
+    // FIXME can this be done in a way that doesn't need changing every time we add
+    // new datasource types.
+
     if (typeof conf.index !== 'undefined' && conf.index >=0 && conf.index < this.tiers.length) {
         target = conf.index;
     } else {
@@ -1109,7 +1112,9 @@ Browser.prototype.removeTier = function(conf) {
                 (conf.bamURI && ts.bamURI === conf.bamURI) ||
                 (conf.twoBitURI && ts.twoBitURI === conf.twoBitURI))
             {
-                target = ti; break;
+                 if (ts.stylesheet_uri == conf.stylesheet_uri) {
+                    target = ti; break;
+                }
             }
         }
     }
@@ -1180,6 +1185,9 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
 
 Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
     if (newChr) {
+        if (newChr.indexOf('chr') == 0)
+            newChr = newChr.substring(3);
+
         this.chr = newChr;
         this.currentSeqMax = newChrInfo.length;
     }
