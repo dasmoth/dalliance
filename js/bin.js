@@ -63,7 +63,7 @@ URLFetchable.prototype.slice = function(s, l) {
 }
 
 var seed=0;
-var isIOS = navigator.userAgent.indexOf('Mobile') >= 0;
+var isIOS = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
 
 URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var thisB = this;
@@ -77,7 +77,7 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var length;
     var url = this.url;
     if (isIOS) {
-        // dlog('On IOS');
+        // console.log('Safari hack');
         url = url + '?salt=' + (++seed);
     }
     req.open('GET', url, true);
