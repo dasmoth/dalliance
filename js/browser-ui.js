@@ -11,6 +11,10 @@ function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+function parseIntCommas(s) {
+    return s.replace(/,/g, '')|0
+}
+
 /*
  * Quite a bit of this ought to be done using a templating system, but
  * since web-components isn't quite ready for prime time yet we'll stick
@@ -23,7 +27,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
 
     var b = this;
-    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([\-,\,.](\d+))?/;
+    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([\-,\,.]+([0-9,]+))?/;
 
     if (!b.disableDefaultFeaturePopup) {
         this.addFeatureListener(function(ev, hit) {
@@ -97,14 +101,14 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                 };
 
             if (m) {
-                console.log(m);
+                // console.log(m);
                 var chr = m[1], start, end;
                 if (m[4]) {
-                    start = m[2]|0;
-                    end = m[4]|0;
+                    start = parseIntCommas(m[2]);
+                    end = parseIntCommas(m[4]);
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
-                    start = ((m[2]|0) - (width/2))|0;
+                    start = (parseIntCommas(m[2]) - (width/2))|0;
                     end = start + width - 1;
                 }
                 b.setLocation(chr, start, end, setLocationCB);

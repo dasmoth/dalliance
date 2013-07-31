@@ -1181,6 +1181,9 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
 
 Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
     if (newChr) {
+        if (newChr.indexOf('chr') == 0)
+            newChr = newChr.substring(3);
+
         this.chr = newChr;
         this.currentSeqMax = newChrInfo.length;
     }
