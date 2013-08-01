@@ -295,6 +295,15 @@ DasTier.prototype.paint = function() {
     }
     gc.restore();
 
+    if (quant && this.dasSource.quantLeapThreshold) {
+	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+
+	gc.strokeStyle = 'red';
+	gc.moveTo(0, ry);
+	gc.lineTo(3000, ry);
+	gc.stroke();
+    }
+
     if (quant && this.quantOverlay) {
 	this.quantOverlay.style.display = 'block';
 

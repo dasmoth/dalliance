@@ -308,9 +308,15 @@ Browser.prototype.realInit = function() {
                 var tt = thisB.tiers[thisB.selectedTier];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 if (ch >= 20) {
-                    tt.forceHeight = ch - 20;
+                    tt.forceHeight = ch - 10;
                     tt.draw();
                 }
+            } else if (ev.ctrlKey) {
+                var tt = thisB.tiers[thisB.selectedTier];
+                if (tt.dasSource.quantLeapThreshold) {
+                    tt.dasSource.quantLeapThreshold += 0.5;
+                    tt.draw();
+                }                
             } else {
                 if (thisB.selectedTier > 0) {
                     thisB.setSelectedTier(thisB.selectedTier - 1);
@@ -326,6 +332,12 @@ Browser.prototype.realInit = function() {
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 tt.forceHeight = ch + 10;
                 tt.draw();
+            } else if (ev.ctrlKey) {
+                var tt = thisB.tiers[thisB.selectedTier];
+                if (tt.dasSource.quantLeapThreshold && tt.dasSource.quantLeapThreshold > 2) {
+                    tt.dasSource.quantLeapThreshold -= 0.5;
+                    tt.draw();
+                }                
             } else {
                 if (thisB.selectedTier < thisB.tiers.length -1) {
                     thisB.setSelectedTier(thisB.selectedTier + 1);

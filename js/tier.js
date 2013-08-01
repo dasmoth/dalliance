@@ -48,6 +48,8 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
                 });
         };
         this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+            var width = this.browser.viewEnd - this.browser.viewStart + 1;
+            pos = (pos +  ((width * dir) / 2))|0
             fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
         };
 
