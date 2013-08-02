@@ -78,7 +78,7 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = [ /* "rgb(245,245,245)", "rgb(230,230,250)"  */ 'white'];
+    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
     this.minTierHeight = 25;
 
     this.browserLinks = {
@@ -549,7 +549,8 @@ Browser.prototype.realMakeTier = function(source) {
         borderWidth: '1px'});
     
     var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden'});
-    vph.className = 'tier-viewport-background';
+    // vph.className = 'tier-viewport-background';
+    vph.style.background = background;
 
     vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
     vph.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
@@ -806,6 +807,7 @@ Browser.prototype.realMakeTier = function(source) {
                     }
                     thisB.tierHolder.appendChild(thisB.ruler);
                     tiersWereReordered = true;
+                    thisB.arrangeTiers();
                 }
                 break;
             }
@@ -850,7 +852,11 @@ Browser.prototype.refreshTier = function(tier) {
 }
 
 Browser.prototype.arrangeTiers = function() {
-    // Do we need anything like this now?
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+        t.holder.style.background = t.background;
+    }
 }
 
 
@@ -1140,9 +1146,7 @@ Browser.prototype.removeTier = function(conf) {
     this.tiers.splice(target, 1);
     this.sources.splice(target, 1);
 
-    for (var ti = target; ti < this.tiers.length; ++ti) {
-        this.tiers[ti].background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
-    }
+    this.arrangeTiers();
     
     this.notifyTier();
 }

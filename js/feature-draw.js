@@ -271,7 +271,7 @@ DasTier.prototype.paint = function() {
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = this.background;
-    gc.fillRect(0, 0, fpw, Math.max(lh, 200));
+    gc.clearRect(0, 0, fpw, Math.max(lh, 200));
     gc.restore();
 
     gc.save();
