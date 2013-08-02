@@ -38,8 +38,7 @@ function drawSeqTier(tier, seq)
     tier.updateHeight();
 
     var gc = tier.viewport.getContext('2d');
-    gc.fillStyle = tier.background;
-    gc.fillRect(0, 0, fpw, tier.viewport.height);
+    gc.clearRect(0, 0, fpw, tier.viewport.height);
     gc.translate(1000,0);
 
     var seqTierMax = knownEnd;
