@@ -7,9 +7,91 @@
 // sourceadapters.js
 //
 
+DasTier.prototype.initSources = function() {
+    var thisTier = this;
+    var fs, ss;
+
+    if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
+        fs = new BWGFeatureSource(this.dasSource, {
+            credentials: this.dasSource.credentials,
+            preflight: this.dasSource.preflight,
+            clientBin: this.dasSource.clientBin,
+            forceReduction: this.dasSource.forceReduction,
+            link: this.dasSource.link
+        });
+        this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+            fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
+                    if (res.length > 0 && res[0] != null) {
+                        callback(res[0]);
+                    }
+                });
+        };
+        this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+            var width = this.browser.viewEnd - this.browser.viewStart + 1;
+            pos = (pos +  ((width * dir) / 2))|0
+            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
+        };
+    } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
+        fs = new BAMFeatureSource(this.dasSource, {
+            credentials: this.dasSource.credentials,
+            preflight: this.dasSource.preflight
+        });
+    } else if (this.dasSource.bamblrURI) {
+        fs = new BamblrFeatureSource(this.dasSource.bamblrURI);
+    } else if (this.dasSource.jbURI) {
+        fs = new JBrowseFeatureSource(this.dasSource.jbURI, this.dasSource.jbQuery);
+    } else if (this.dasSource.tier_type == 'sequence') {
+        if (this.dasSource.twoBitURI) {
+            ss = new TwoBitSequenceSource(this.dasSource);
+        } else {
+            ss = new DASSequenceSource(this.dasSource);
+        }
+    } else {
+        fs = new DASFeatureSource(this.dasSource);
+        var dasAdjLock = false;
+        if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
+            this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+                if (dasAdjLock) {
+                    return dlog('Already looking for a next feature, be patient!');
+                }
+                dasAdjLock = true;
+                var fops = {
+                    adjacent: chr + ':' + (pos|0) + ':' + (dir > 0 ? 'F' : 'B')
+                }
+                var types = thisTier.getDesiredTypes(thisTier.browser.scale);
+                if (types) {
+                    fops.types = types;
+                }
+                thisTier.dasSource.features(null, fops, function(res) {
+                    dasAdjLock = false;
+                    if (res.length > 0 && res[0] != null) {
+                        dlog('DAS adjacent seems to be working...');
+                        callback(res[0]);
+                    }
+                });
+            };
+        }
+    }
+    
+    if (this.dasSource.mapping) {
+        fs = new MappedFeatureSource(fs, this.browser.chains[this.dasSource.mapping]);
+    }
+
+    this.featureSource = fs;
+    this.sequenceSource = ss;
+}
+
 
 function DASFeatureSource(dasSource) {
     this.dasSource = dasSource;
+}
+
+DASFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.dasSource.stylesheet(function(stylesheet) {
+	callback(stylesheet);
+    }, function() {
+	callback(null, "Couldn't fetch DAS stylesheet");
+    });
 }
 
 DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -254,12 +336,88 @@ BWGFeatureSource.prototype.getScales = function() {
     }
 }
 
+BWGFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.bwgHolder.await(function(bwg) {
+        if (!bwg) {
+            return callback(null, 'bbi error');
+        }
+
+	/* What to do about this...?
+        if (thisTier.dasSource.collapseSuperGroups === undefined) {
+            if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+                thisTier.dasSource.collapseSuperGroups = true;
+                thisTier.bumped = false;
+            }
+        }*/
+
+	var stylesheet = new DASStylesheet();
+        if (bwg.type == 'bigbed') {
+            var wigStyle = new DASStyle();
+            wigStyle.glyph = 'BOX';
+            wigStyle.FGCOLOR = 'black';
+            wigStyle.BGCOLOR = 'blue'
+            wigStyle.HEIGHT = 8;
+            wigStyle.BUMP = true;
+            wigStyle.LABEL = true;
+            wigStyle.ZINDEX = 20;
+            stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+	    
+            wigStyle.glyph = 'BOX';
+            wigStyle.FGCOLOR = 'black';
+            wigStyle.BGCOLOR = 'red'
+            wigStyle.HEIGHT = 10;
+            wigStyle.BUMP = true;
+            wigStyle.ZINDEX = 20;
+            stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
+                    
+            var tsStyle = new DASStyle();
+            tsStyle.glyph = 'BOX';
+            tsStyle.FGCOLOR = 'black';
+            tsStyle.BGCOLOR = 'white';
+            tsStyle.HEIGHT = 10;
+            tsStyle.ZINDEX = 10;
+            tsStyle.BUMP = true;
+            tsStyle.LABEL = true;
+            stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+
+            var densStyle = new DASStyle();
+            densStyle.glyph = 'HISTOGRAM';
+            densStyle.COLOR1 = 'white';
+            densStyle.COLOR2 = 'black';
+            densStyle.HEIGHT=30;
+            stylesheet.pushStyle({type: 'density'}, null, densStyle);
+        } else {
+            var wigStyle = new DASStyle();
+            wigStyle.glyph = 'HISTOGRAM';
+            wigStyle.COLOR1 = 'white';
+            wigStyle.COLOR2 = 'black';
+            wigStyle.HEIGHT=30;
+            stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+        }
+
+	return callback(stylesheet);
+    });
+}
+
 function BamblrFeatureSource(bamblrSource) {
     this.bamblr = bamblrSource;
 }
 
 BamblrFeatureSource.prototype.getScales = function() {
     return [];
+}
+
+BamblrFeatureSource.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+
+    var densStyle = new DASStyle();
+    densStyle.glyph = 'HISTOGRAM';
+    densStyle.COLOR1 = 'black';
+    densStyle.COLOR2 = 'red';
+    densStyle.HEIGHT=30;
+    stylesheet.pushStyle({type: 'default'}, null, densStyle);
+
+    return callback(stylesheet);
 }
 
 BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -374,9 +532,40 @@ BAMFeatureSource.prototype.getScales = function() {
     return 1000000000;
 }
 
+BAMFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.bamHolder.await(function(bam) {
+	var stylesheet = new DASStyleSheet();
+                
+        var densStyle = new DASStyle();
+        densStyle.glyph = 'HISTOGRAM';
+        densStyle.COLOR1 = 'black';
+        densStyle.COLOR2 = 'red';
+        densStyle.HEIGHT=30;
+        stylesheet.pushStyle({type: 'density'}, 'low', densStyle);
+        stylesheet.pushStyle({type: 'density'}, 'medium', densStyle);
+
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = '__SEQUENCE';
+        wigStyle.FGCOLOR = 'black';
+        wigStyle.BGCOLOR = 'blue'
+        wigStyle.HEIGHT = 8;
+        wigStyle.BUMP = true;
+        wigStyle.LABEL = false;
+        wigStyle.ZINDEX = 20;
+        thisTier.stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
+	//                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
+
+	return callback(stylesheet);
+    });
+}
+
 function MappedFeatureSource(source, mapping) {
     this.source = source;
     this.mapping = mapping;
+}
+
+MappedFeatureSource.prototype.getStyleSheet = function(callback) {
+    return this.source.getStyleSheet(callback);
 }
 
 MappedFeatureSource.prototype.getScales = function() {
@@ -455,6 +644,21 @@ DummySequenceSource.prototype.fetch = function(chr, min, max, pool, cnt) {
 
 function JBrowseFeatureSource(base, query) {
     this.store = new JBrowseStore(base, query);
+}
+
+JBrowseFeatureSource.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+    var wigStyle = new DASStyle();
+    wigStyle.glyph = 'BOX';
+    wigStyle.FGCOLOR = 'black';
+    wigStyle.BGCOLOR = 'green'
+    wigStyle.HEIGHT = 8;
+    wigStyle.BUMP = true;
+    wigStyle.LABEL = true;
+    wigStyle.ZINDEX = 20;
+    stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+
+    return callback(stylesheet);
 }
 
 JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
