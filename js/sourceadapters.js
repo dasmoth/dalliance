@@ -12,13 +12,8 @@ DasTier.prototype.initSources = function() {
     var fs = new DummyFeatureSource(), ss;
 
     if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
-        fs = new BWGFeatureSource(this.dasSource, {
-            credentials: this.dasSource.credentials,
-            preflight: this.dasSource.preflight,
-            clientBin: this.dasSource.clientBin,
-            forceReduction: this.dasSource.forceReduction,
-            link: this.dasSource.link
-        });
+        fs = new BWGFeatureSource(this.dasSource);
+
         this.sourceFindNextFeature = function(chr, pos, dir, callback) {
             fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
                     if (res.length > 0 && res[0] != null) {
@@ -32,14 +27,11 @@ DasTier.prototype.initSources = function() {
             fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
         };
     } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
-        fs = new BAMFeatureSource(this.dasSource, {
-            credentials: this.dasSource.credentials,
-            preflight: this.dasSource.preflight
-        });
+        fs = new BAMFeatureSource(this.dasSource);
     } else if (this.dasSource.bamblrURI) {
-        fs = new BamblrFeatureSource(this.dasSource.bamblrURI);
+        fs = new BamblrFeatureSource(this.dasSource);
     } else if (this.dasSource.jbURI) {
-        fs = new JBrowseFeatureSource(this.dasSource.jbURI, this.dasSource.jbQuery);
+        fs = new JBrowseFeatureSource(this.dasSource);
     } else if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);
@@ -208,11 +200,9 @@ DASFeatureSource.prototype.getScales = function() {
 
 var bwg_preflights = {};
 
-function BWGFeatureSource(bwgSource, opts) {
+function BWGFeatureSource(bwgSource) {
     var thisB = this;
-    this.bwgSource = bwgSource;
-    this.opts = opts || {};
-    
+    this.bwgSource = this.opts = bwgSource;    
     thisB.bwgHolder = new Awaited();
 
     if (this.opts.preflight) {
@@ -231,7 +221,6 @@ function BWGFeatureSource(bwgSource, opts) {
                     }
                 }
             };
-            // req.setRequestHeader('cache-control', 'no-cache');    /* Doesn't work, not an allowed request header in CORS */
             req.open('get', this.opts.preflight + '?' + hex_sha1('salt' + Date.now()), true);    // Instead, ensure we always preflight a unique URI.
             if (this.opts.credentials) {
                 req.withCredentials = true;
@@ -400,7 +389,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
 }
 
 function BamblrFeatureSource(bamblrSource) {
-    this.bamblr = bamblrSource;
+    this.bamblr = bamblrSource.bamblrURI;
 }
 
 BamblrFeatureSource.prototype.getScales = function() {
@@ -448,10 +437,10 @@ BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
     });
 }
 
-function BAMFeatureSource(bamSource, opts) {
+function BAMFeatureSource(bamSource) {
     var thisB = this;
     this.bamSource = bamSource;
-    this.opts = opts || {};
+    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
     this.bamHolder = new Awaited();
     
     if (this.opts.preflight) {
@@ -652,8 +641,8 @@ DummySequenceSource.prototype.fetch = function(chr, min, max, pool, cnt) {
     return cnt(null, null);
 }
 
-function JBrowseFeatureSource(base, query) {
-    this.store = new JBrowseStore(base, query);
+function JBrowseFeatureSource(source) {
+    this.store = new JBrowseStore(source.jbURI, source.jbQuery);
 }
 
 JBrowseFeatureSource.prototype.getStyleSheet = function(callback) {
