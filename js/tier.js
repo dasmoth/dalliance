@@ -41,7 +41,7 @@ DasTier.prototype.init = function() {
     if (tier.dasSource.style) {
         this.stylesheet = {styles: tier.dasSource.style};
         this.browser.refreshTier(this);
-    } else if (tier.dasSource.twoBitURI) {
+    } else if (tier.dasSource.twoBitURI || tier.dasSource.tier_type === 'sequence') {
         tier.stylesheet = new DASStylesheet();
         var defStyle = new DASStyle();
         defStyle.glyph = 'BOX';
