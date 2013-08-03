@@ -128,7 +128,6 @@ DasTier.prototype.needsSequence = function(scale ) {
     if (this.dasSource.tier_type === 'sequence' && scale < 5) {
         return true;
     } else if ((this.dasSource.bamURI || this.dasSource.bamBlob) && scale < 20) {
-        dlog('reqSeq');
         return true
     }
     return false;

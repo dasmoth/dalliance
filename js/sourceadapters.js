@@ -534,7 +534,7 @@ BAMFeatureSource.prototype.getScales = function() {
 
 BAMFeatureSource.prototype.getStyleSheet = function(callback) {
     this.bamHolder.await(function(bam) {
-	var stylesheet = new DASStyleSheet();
+	var stylesheet = new DASStylesheet();
                 
         var densStyle = new DASStyle();
         densStyle.glyph = 'HISTOGRAM';
@@ -552,7 +552,7 @@ BAMFeatureSource.prototype.getStyleSheet = function(callback) {
         wigStyle.BUMP = true;
         wigStyle.LABEL = false;
         wigStyle.ZINDEX = 20;
-        thisTier.stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
+        stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
 	//                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
 
 	return callback(stylesheet);
