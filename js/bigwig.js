@@ -21,6 +21,7 @@ BigWig.prototype.readChromTree = function(callback) {
     var thisB = this;
     this.chromsToIDs = {};
     this.idsToChroms = {};
+    this.maxID = 0;
 
     var udo = this.unzoomedDataOffset;
     while ((udo % 4) != 0) {
@@ -38,12 +39,12 @@ BigWig.prototype.readChromTree = function(callback) {
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
         
-        // dlog('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
+        // console.log('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
 
         var bptReadNode = function(offset) {
             var nodeType = ba[offset];
             var cnt = sa[(offset/2) + 1];
-            // dlog('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
+            // console.log('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
             offset += 4;
             for (var n = 0; n < cnt; ++n) {
                 if (nodeType == 0) {
@@ -64,12 +65,13 @@ BigWig.prototype.readChromTree = function(callback) {
                     var chromSize = (ba[offset + 7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
                     offset += 8;
 
-                    // dlog(key + ':' + chromId + ',' + chromSize);
+                    // console.log(key + ':' + chromId + ',' + chromSize);
                     thisB.chromsToIDs[key] = chromId;
                     if (key.indexOf('chr') == 0) {
                         thisB.chromsToIDs[key.substr(3)] = chromId;
                     }
                     thisB.idsToChroms[chromId] = key;
+                    thisB.maxID = Math.max(thisB.maxID, chromId);
                 }
             }
         };
@@ -868,7 +870,7 @@ function makeBwg(data, callback, name) {
         } else {
             callback(null, "Not a supported format");
         }
-//        dlog('magic okay');
+        // console.log('magic okay');
 
         bwg.version = sa[2];             // 4
         bwg.numZoomLevels = sa[3];       // 6
@@ -905,36 +907,68 @@ function makeBwg(data, callback, name) {
 }
 
 
-BigWig.prototype.thresholdSearch = function(chr, referencePoint, dir, threshold, callback) {
+BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
+    console.log('ref=' + referencePoint + '; dir=' + dir);
+
+
+    dir = (dir<0) ? -1 : 1;
     var bwg = this;
-    var candidates = [{zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000}]
+    var initialChr = this.chromsToIDs[chrName];
+    var candidates = [{chrOrd: 0, chr: initialChr, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000, fromRef: true}]
+    for (var i = 1; i <= this.maxID + 1; ++i) {
+        var chrId = (initialChr + (dir*i)) % (this.maxID + 1);
+        if (chrId < 0) 
+            chrId += (this.maxID + 1);
+        candidates.push({chrOrd: i, chr: chrId, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000})
+    }
        
     function fbThresholdSearchRecur() {
 	if (candidates.length == 0) {
-	    callback(null);
+	    return callback(null);
 	}
 	candidates.sort(function(c1, c2) {
 	    var d = c1.zoom - c2.zoom;
 	    if (d != 0)
 		return d;
+
+            d = c1.chrOrd - c2.chrOrd;
+            if (d != 0)
+                return d;
 	    else
-		return c1.min - c2.min;
+		return c1.min - c2.min * dir;
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
+        console.log('trying ' + miniJSONify(candidate));
 
-        bwg.getZoomedView(candidate.zoom).readWigData(chr, candidate.min, candidate.max, function(feats) {
+        bwg.getZoomedView(candidate.zoom).readWigDataById(candidate.chr, candidate.min, candidate.max, function(feats) {
+            var rp = dir > 0 ? 0 : 300000000;
+            if (candidate.fromRef)
+                rp = referencePoint;
+            
             for (var fi = 0; fi < feats.length; ++fi) {
 	        var f = feats[fi];
                 
-	        if (f.maxScore > threshold) {
-		    if (candidate.zoom == 0) {
-		        if (f.min > referencePoint)
-			    return callback(f);
-		    } else if (f.max > referencePoint) {
-		        candidates.push({zoom: candidate.zoom - 1, min: f.min, max: f.max});
-		    }
-	        }
+
+                if (dir > 0) {
+	            if (f.maxScore > threshold) {
+		        if (candidate.zoom == 0) {
+		            if (f.min > rp)
+			        return callback(f);
+		        } else if (f.max > rp) {
+		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 1, min: f.min, max: f.max, fromRef: candidate.fromRef});
+		        }
+	            }
+                } else {
+                    if (f.maxScore > threshold) {
+		        if (candidate.zoom == 0) {
+		            if (f.max < rp)
+			        return callback(f);
+		        } else if (f.min < rp) {
+		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 1, min: f.min, max: f.max, fromRef: candidate.fromRef});
+		        }
+	            }
+                }
 	    }
             fbThresholdSearchRecur();
         });

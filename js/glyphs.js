@@ -1066,10 +1066,11 @@ SequenceGlyph.prototype.toSVG = function() {
 }
 
 
-function PointGlyph(x, y, height) {
+function PointGlyph(x, y, height, fill) {
     this._x = x;
     this._y = y;
     this._height = height;
+    this._fill = fill;
 }
 
 PointGlyph.prototype.min = function() {
@@ -1085,12 +1086,17 @@ PointGlyph.prototype.height = function() {
 }
 
 PointGlyph.prototype.draw = function(g) {
-    g.fillStyle = 'black';
+    g.fillStyle = this._fill;
     g.beginPath();
     g.arc(this._x, this._y, 2, 0, 6.29);
     g.fill();
 }
 
 PointGlyph.prototype.toSVG = function() {
-    return makeElementNS(NS_SVG, 'g');
+    return makeElementNS(
+	NS_SVG, 'circle',
+	null,
+	{cx: this._x, cy: this._y, r: 2,
+	 fill: this._fill,
+	 stroke: 'none'});
 }

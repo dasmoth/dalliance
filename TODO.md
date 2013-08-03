@@ -1,6 +1,7 @@
 For 0.9 (?)
 -----------
 
+  - Tidy up feature source creation [DONE, except for leap handlers]
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?

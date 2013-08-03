@@ -271,7 +271,7 @@ DasTier.prototype.paint = function() {
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = this.background;
-    gc.fillRect(0, 0, fpw, Math.max(lh, 200));
+    gc.clearRect(0, 0, fpw, Math.max(lh, 200));
     gc.restore();
 
     gc.save();
@@ -294,6 +294,15 @@ DasTier.prototype.paint = function() {
 	gc.translate(0, subtiers[s].height + MIN_PADDING);
     }
     gc.restore();
+
+    if (quant && this.dasSource.quantLeapThreshold) {
+	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+
+	gc.strokeStyle = 'red';
+	gc.moveTo(0, ry);
+	gc.lineTo(3000, ry);
+	gc.stroke();
+    }
 
     if (quant && this.quantOverlay) {
 	this.quantOverlay.style.display = 'block';
@@ -530,8 +539,25 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
 	var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
 	var yscale = ((1.0 * height) / (smax - smin));
+	var relScore = ((1.0 * score) - smin) / (smax-smin);
 	var sc = ((score - (1.0*smin)) * yscale)|0;
-	gg = new PointGlyph((minPos + maxPos)/2, height-sc, height);
+	quant = {min: smin, max: smax};
+
+	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'black';
+	if (style.COLOR2) {
+	    var grad = style._gradient;
+	    if (!grad) {
+		grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+		style._gradient = grad;
+	    }
+
+	    var step = (relScore*grad.length)|0;
+	    if (step < 0) step = 0;
+	    if (step >= grad.length) step = grad.length - 1;
+	    fill = grad[step];
+        } 
+
+	gg = new PointGlyph((minPos + maxPos)/2, height-sc, height, fill);
     } else if (gtype === '__SEQUENCE') {
 	var refSeq = null;
 	if (tier.currentSequence) {

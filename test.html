@@ -39,6 +39,7 @@
 <script language="javascript" src="js/glyphs.js"></script>
 <script language="javascript" src="js/session.js"></script>
 <script language="javascript" src="js/jbjson.js"></script>
+<script language="javascript" src="js/sourceadapters.js"></script>
 <script language="javascript" src="polyfills/html5slider.js"></script>
 <script language="javascript" src="dart_backends/web/packages/browser/dart.js"></script>
 <script language="javascript" src="dart_backends/web/packages/browser/interop.js"></script>
@@ -81,7 +82,7 @@
                    // stylesheet_uri:       'http://www.biodalliance.org/stylesheets/cpg-hist.xml',
                    style:                [{type: 'cpgoe',
                                            style: {glyph: 'LINEPLOT',
-                                                   FGCOLOR: 'green', HEIGHT: '50'}}]},
+                                                   FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]},
                     {name: 'MeDIP-raw',
                      desc: 'MeDIP-seq reads from Nature Biotech. 26:779-785',
                      uri: 'http://www.derkholm.net:8080/das/medipseq_reads/'},
@@ -92,11 +93,11 @@
                    bwgURI:               'http://www.biodalliance.org/datasets/ensGene.bb',
                    link:                 'http://ncbi36.ensembl.org/Homo_sapiens/Gene/Summary?t=$$',
                    collapseSuperGroups:  true,
-                   disable: true},
-                  {name:                 'Style test',
+                   disable: true}
+                  /* ,{name:                 'Style test',
                    uri:                  './glyph-test/',
                    features_uri:         './glyph-test/features.xml',
-                   stylesheet_uri:       './glyph-test/stylesheet.xml'}
+                   stylesheet_uri:       './glyph-test/stylesheet.xml'} */
                   ,{name:                 'TabixTest',
                    tabixURI:             'http://www.biodalliance.org/datasets/batman-SP.sort.gff.gz',
                    tabixPayload:         'gff',

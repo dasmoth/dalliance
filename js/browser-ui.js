@@ -12,7 +12,7 @@ function formatLongInt(n) {
 }
 
 function parseLocCardinal(n, m) {
-    var i = n|0;
+    var i = n.replace(/,/g, '');
     if (m === 'k' || m === 'K') {
         return i * 1000;
     } else if (m == 'm' || m === 'M') {
@@ -34,11 +34,14 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
 
     var b = this;
-    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):(\d+)([KkMmGg])?([\-,\,.](\d+)([KkMmGg])?)?/;
+    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;
+    // var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([\-,\,.]+([0-9,]+))?/;
 
-    this.addFeatureListener(function(ev, hit) {
-        b.featurePopup(ev, hit, null);
-    });
+    if (!b.disableDefaultFeaturePopup) {
+        this.addFeatureListener(function(ev, hit) {
+            b.featurePopup(ev, hit, null);
+        });
+    }
 
     holder.classList.add('dalliance');
     var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
@@ -53,11 +56,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     var locField = makeElement('input', '', {className: 'loc-field'});
+    b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
     toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
@@ -118,7 +122,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                     end = parseLocCardinal(m[5], m[6]);
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
-                    start = (parseLocCardinal(m[2], m[3]) - (width/2))|0;
                     end = start + width - 1;
                 }
                 b.setLocation(chr, start, end, setLocationCB);
