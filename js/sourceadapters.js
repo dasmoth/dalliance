@@ -9,7 +9,7 @@
 
 DasTier.prototype.initSources = function() {
     var thisTier = this;
-    var fs, ss;
+    var fs = new DummyFeatureSource(), ss;
 
     if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
         fs = new BWGFeatureSource(this.dasSource, {
@@ -633,6 +633,16 @@ DummyFeatureSource.prototype.getScales = function() {
 
 DummyFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, cnt) {
     return cnt(null, [], 1000000000);
+}
+
+DummyFeatureSource.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+    var defStyle = new DASStyle();
+    defStyle.glyph = 'BOX';
+    defStyle.BGCOLOR = 'blue';
+    defStyle.FGCOLOR = 'black';
+    stylesheet.pushStyle({type: 'default'}, null, defStyle);
+    return callback(stylesheet);
 }
 
 function DummySequenceSource() {
