@@ -16,11 +16,15 @@ function isDasBooleanTrue(s) {
 function SubTier() {
     this.glyphs = [];
     this.height = 0;
+    this.quant = null;
 }
 
 SubTier.prototype.add = function(glyph) {
     this.glyphs.push(glyph);
     this.height = Math.max(this.height, glyph.height());
+    if (glyph.quant && this.quant == null) {
+	this.quant = glyph.quant;
+    }
 }
 
 SubTier.prototype.hasSpaceFor = function(glyph) {
@@ -224,6 +228,13 @@ function drawFeatureTier(tier)
 
     if (unbumpedST.glyphs.length > 0) {
         bumpedSTs = [unbumpedST].concat(bumpedSTs);
+    }
+
+    for (var sti = 0; sti < bumpedSTs.length; ++sti) {
+	var st = bumpedSTs[sti];
+	if (st.quant) {
+	    st.glyphs.unshift(new GridGlyph(st.height));
+	}
     }
 
     tier.subtiers = bumpedSTs;
