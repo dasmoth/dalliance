@@ -15,7 +15,7 @@ For 0.9 (?)
   - next/prev peak support for quantitative tracks
     + Needs a UI for setting thresholds.
   - Work out the kinks in security/preflighting.
-  - Tracks via Ensembl-REST?
+  - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
  
 For 0.10

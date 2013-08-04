@@ -309,10 +309,13 @@ DasTier.prototype.paint = function() {
     if (quant && this.dasSource.quantLeapThreshold) {
 	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
+	gc.save();
 	gc.strokeStyle = 'red';
+	gc.lineWidth = 0.3;
 	gc.moveTo(0, ry);
-	gc.lineTo(3000, ry);
+	gc.lineTo(5000, ry);
 	gc.stroke();
+	gc.restore();
     }
 
     if (quant && this.quantOverlay) {

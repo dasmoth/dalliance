@@ -43,6 +43,8 @@ DasTier.prototype.initSources = function() {
         } else {
             ss = new DASSequenceSource(this.dasSource);
         }
+    } else if (this.dasSource.tier_type == 'ensembl') {
+        fs = new EnsemblFeatureSource(this.dasSource);
     } else {
         fs = new DASFeatureSource(this.dasSource);
         var dasAdjLock = false;
