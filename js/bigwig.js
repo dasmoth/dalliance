@@ -174,10 +174,10 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 var endBase = la[lo + 3];
                 var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
                 var blockSize = (la[lo + 6]<<32) | (la[lo + 7]);
-                if ((startChrom < chr || (startChrom == chr && startBase <= max)) &&
-                    (endChrom   > chr || (endChrom == chr && endBase >= min)))
+                if (((chr < 0 || startChrom < chr) || (startChrom == chr && startBase <= max)) &&
+                    ((chr < 0 || endChrom   > chr) || (endChrom == chr && endBase >= min)))
                 {
-                    // dlog('Got an interesting block: startBase=' + startBase + '; endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
+                    // console.log('Got an interesting block: startChrom=' + startChrom + '; startBase=' + startBase + '; endChrom=' + endChrom + ' ;endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                     blocksToFetch.push({offset: blockOffset, size: blockSize});
                 }
                 offset += 32;
@@ -191,10 +191,11 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 var endChrom = la[lo + 2];
                 var endBase = la[lo + 3];
                 var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
-                if ((startChrom < chr || (startChrom == chr && startBase <= max)) &&
-                    (endChrom   > chr || (endChrom == chr && endBase >= min)))
+                if ((chr < 0 || startChrom < chr || (startChrom == chr && startBase <= max)) &&
+                    (chr < 0 || endChrom   > chr || (endChrom == chr && endBase >= min)))
                 {
                     recurOffsets.push(blockOffset);
+                    // console.log('interesting inner: startChrom=' + startChrom + '; endChrom=' + endChrom);
                 }
                 offset += 24;
             }
@@ -214,7 +215,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             callback([]);
         } else {
             var features = [];
-            var createFeature = function(fmin, fmax, opts) {
+            var createFeature = function(chr, fmin, fmax, opts) {
                 // dlog('createFeature(' + fmin +', ' + fmax + ')');
 
                 if (!opts) {
@@ -222,6 +223,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 }
             
                 var f = new DASFeature();
+                f._chromId = chr;
                 f.segment = thisB.bwg.idsToChroms[chr];
                 f.min = fmin;
                 f.max = fmax;
@@ -233,9 +235,9 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 
                 features.push(f);
             };
-            var maybeCreateFeature = function(fmin, fmax, opts) {
-                if (fmin <= max && fmax >= min) {
-                    createFeature(fmin, fmax, opts);
+            var maybeCreateFeature = function(chromId, fmin, fmax, opts) {
+                if ((chr < 0 || chromId == chr) && fmin <= max && fmax >= min) {
+                    createFeature(chromId, fmin, fmax, opts);
                 }
             };
             var tramp = function() {
@@ -265,12 +267,12 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var sumData   = fa[(i*8)+6];
                                 var sumSqData = fa[(i*8)+7];
                                 
-                                if (chromId == chr) {
+                                if (chr < 0 || chromId == chr) {
                                     var summaryOpts = {type: 'bigwig', score: sumData/validCnt, maxScore: maxVal};
                                     if (thisB.bwg.type == 'bigbed') {
                                         summaryOpts.type = 'density';
                                     }
-                                    maybeCreateFeature(start + 1, end, summaryOpts);
+                                    maybeCreateFeature(chromId, start + 1, end, summaryOpts);
                                 }
                             }
                         } else if (thisB.bwg.type == 'bigwig') {
@@ -291,13 +293,13 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             if (blockType == BIG_WIG_TYPE_FSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var score = fa[i + 6];
-                                    maybeCreateFeature(blockStart + (i*itemStep) + 1, blockStart + (i*itemStep) + itemSpan, {score: score});
+                                    maybeCreateFeature(chromId, blockStart + (i*itemStep) + 1, blockStart + (i*itemStep) + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_VSTEP) {
                                 for (var i = 0; i < itemCount; ++i) {
                                     var start = la[(i*2) + 6];
                                     var score = fa[(i*2) + 7];
-                                    maybeCreateFeature(start + 1, start + itemSpan, {score: score});
+                                    maybeCreateFeature(chromId, start + 1, start + itemSpan, {score: score});
                                 }
                             } else if (blockType == BIG_WIG_TYPE_GRAPH) {
                                 for (var i = 0; i < itemCount; ++i) {
@@ -307,7 +309,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     if (start > end) {
                                         start = end;
                                     }
-                                    maybeCreateFeature(start + 1, end, {score: score});
+                                    maybeCreateFeature(chromId, start + 1, end, {score: score});
                                 }
                             } else {
                                 dlog('Currently not handling bwgType=' + blockType);
@@ -350,7 +352,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
                                 if (bedColumns.length < 9) {
                                     if (chromId == chr) {
-                                        maybeCreateFeature(start + 1, end, featureOpts);
+                                        maybeCreateFeature(chromId, start + 1, end, featureOpts);
                                     }
                                 } else if (chromId == chr && start <= max && end >= min) {
                                     // Complex-BED?
@@ -394,7 +396,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     var tsList = spans.ranges();
                                     for (var s = 0; s < tsList.length; ++s) {
                                         var ts = tsList[s];
-                                        createFeature(ts.min() + 1, ts.max(), featureOpts);
+                                        createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
                                     }
 
                                     if (thickEnd > thickStart) {
@@ -404,7 +406,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                             var tlList = tl.ranges();
                                             for (var s = 0; s < tlList.length; ++s) {
                                                 var ts = tlList[s];
-                                                createFeature(ts.min() + 1, ts.max(), featureOpts);
+                                                createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
                                             }
                                         }
                                     }
@@ -907,6 +909,30 @@ function makeBwg(data, callback, name) {
 }
 
 
+BigWig.prototype._tsFetch = function(zoom, chr, min, max, callback) {
+    var bwg = this;
+    // console.log('tsFetch: ' + zoom + ', ' + chr + ', ' + min + ', ' + max);
+    if (zoom >= this.zoomLevels.length - 1) {
+        if (!this.topLevelReductionCache) {
+            this.getZoomedView(this.zoomLevels.length - 1).readWigDataById(-1, 0, 300000000, function(feats) {
+                bwg.topLevelReductionCache = feats;
+                return bwg._tsFetch(zoom, chr, min, max, callback);
+            });
+        } else {
+            var f = [];
+            var c = this.topLevelReductionCache;
+            for (var fi = 0; fi < c.length; ++fi) {
+                if (c[fi]._chromId == chr) {
+                    f.push(c[fi]);
+                }
+            }
+            return callback(f);
+        }
+    } else {
+        return this.getZoomedView(zoom).readWigDataById(chr, min, max, callback);
+    }
+}
+
 BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
     // console.log('ref=' + referencePoint + '; dir=' + dir);
 
@@ -918,7 +944,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
         var chrId = (initialChr + (dir*i)) % (this.maxID + 1);
         if (chrId < 0) 
             chrId += (this.maxID + 1);
-        candidates.push({chrOrd: i, chr: chrId, zoom: bwg.zoomLevels.length - 4, min: 0, max: 300000000})
+        candidates.push({chrOrd: i, chr: chrId, zoom: bwg.zoomLevels.length - 1, min: 0, max: 300000000})
     }
        
     function fbThresholdSearchRecur() {
@@ -940,7 +966,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 	var candidate = candidates.splice(0, 1)[0];
         // console.log('trying ' + miniJSONify(candidate));
 
-        bwg.getZoomedView(candidate.zoom).readWigDataById(candidate.chr, candidate.min, candidate.max, function(feats) {
+        bwg._tsFetch(candidate.zoom, candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = dir > 0 ? 0 : 300000000;
             if (candidate.fromRef)
                 rp = referencePoint;
