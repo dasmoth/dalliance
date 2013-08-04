@@ -908,8 +908,7 @@ function makeBwg(data, callback, name) {
 
 
 BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
-    console.log('ref=' + referencePoint + '; dir=' + dir);
-
+    // console.log('ref=' + referencePoint + '; dir=' + dir);
 
     dir = (dir<0) ? -1 : 1;
     var bwg = this;
@@ -939,7 +938,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
-        console.log('trying ' + miniJSONify(candidate));
+        // console.log('trying ' + miniJSONify(candidate));
 
         bwg.getZoomedView(candidate.zoom).readWigDataById(candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = dir > 0 ? 0 : 300000000;
@@ -956,7 +955,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 		            if (f.min > rp)
 			        return callback(f);
 		        } else if (f.max > rp) {
-		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 1, min: f.min, max: f.max, fromRef: candidate.fromRef});
+		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
 		        }
 	            }
                 } else {
@@ -965,7 +964,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 		            if (f.max < rp)
 			        return callback(f);
 		        } else if (f.min < rp) {
-		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 1, min: f.min, max: f.max, fromRef: candidate.fromRef});
+		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
 		        }
 	            }
                 }

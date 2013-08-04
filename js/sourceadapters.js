@@ -22,9 +22,14 @@ DasTier.prototype.initSources = function() {
                 });
         };
         this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+            var beforeQFNF = Date.now()|0;
             var width = this.browser.viewEnd - this.browser.viewStart + 1;
             pos = (pos +  ((width * dir) / 2))|0
-            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
+            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, function(a, b) {
+                var afterQFNF = Date.now()|0;
+                console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
+                return callback(a, b);
+            });
         };
     } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
         fs = new BAMFeatureSource(this.dasSource);
