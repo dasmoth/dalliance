@@ -216,7 +216,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
-       saveSVG(b);
+        b.saveSVG();
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
 

@@ -60,6 +60,7 @@ BoxGlyph.prototype.toSVG = function() {
 			  width: this._width, 
 			  height: this._height,
 			  stroke: this.stroke || 'none',
+			  strokeWidth: 0.5,
 			  fill: this.fill || 'none'});
 }
 
@@ -212,7 +213,7 @@ GroupGlyph.prototype.toSVG = function() {
 		{d: p.toPathData(),
 		 fill: 'none',
 		 stroke: 'black',
-		 strokeWidth: '1px'});
+		 strokeWidth: 0.5});
 	    g.appendChild(path);
 	}
     }

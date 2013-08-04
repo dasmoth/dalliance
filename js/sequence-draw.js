@@ -127,7 +127,7 @@ function svgSeqTier(tier, seq) {
 	g.appendChild(
 	    makeElementNS(
 		NS_SVG, 'text',
-		'' + pos,
+		formatLongInt(pos),
 		{x: (pos-origin)*scale,
 		 y: 28,
 		 fill: 'black', stroke: 'none'}));
