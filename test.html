@@ -107,6 +107,10 @@
         Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
     }
   });
+
+  b.addFeatureInfoPlugin(function(f, info) {
+      info.add('Testing', 'This is a test!');
+    });
 </script>
 </head>
 

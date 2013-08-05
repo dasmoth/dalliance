@@ -9,9 +9,42 @@
 
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
+Browser.prototype.addFeatureInfoPlugin = function(handler) {
+    if (!this.featureInfoPlugins) {
+        this.featureInfoPlugins = [];
+    }
+    this.featureInfoPlugins.push(handler);
+}
+
+function FeatureInfo(f) {
+    this.feature = f;
+    this.title = f.name;
+    this.sections = [];
+}
+
+FeatureInfo.prototype.setTitle = function(t) {
+    this.title = t;
+}
+
+FeatureInfo.prototype.add = function(label, info) {
+    if (typeof info === 'string') {
+        info = makeElement('span', info);
+    }
+    this.sections.push({label: label, info: info});
+}
+
 Browser.prototype.featurePopup = function(ev, feature, group) {
     if (!feature) feature = {};
     if (!group) group = {};
+    var featureInfo = new FeatureInfo(feature);
+    var fips = this.featureInfoPlugins || [];
+    for (fipi = 0; fipi < fips.length; ++fipi) {
+        try {
+            fips[fipi](feature, featureInfo);
+        } catch (e) {
+            console.log(e.stack || e);
+        }
+    }
 
     this.removeAllPopups();
 
@@ -31,7 +64,7 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
             makeElement('th', 'Method'),
             makeElement('td', feature.method)
         ]);
-        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
+        // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -55,7 +88,7 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
             makeElement('th', 'Score'),
             makeElement('td', '' + feature.score)
         ]);
-        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
+        // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -68,7 +101,7 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
                     return makeElement('div', makeElement('a', l.desc, {href: l.uri, target: '_new'}));
                 }))
             ]);
-            row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
+            // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }
@@ -88,11 +121,18 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
                 makeElement('th', k),
                 makeElement('td', v)
             ]);
-            row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
+            // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }
     }
 
-    this.popit(ev, name, table, {width: 400});
+    for (var fisi = 0; fisi < featureInfo.sections.length; ++fisi) {
+        var section = featureInfo.sections[fisi];
+        table.appendChild(makeElement('tr', [
+            makeElement('th', section.label),
+            makeElement('td', section.info)]));
+    }        
+
+    this.popit(ev, featureInfo.title, table, {width: 400});
 }

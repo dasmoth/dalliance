@@ -11,7 +11,6 @@ For 0.9 (?)
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
-  - Refactor next/prev support in big* code.
   - next/prev peak support for quantitative tracks
     + Needs a UI for setting thresholds.
   - Work out the kinks in security/preflighting.
