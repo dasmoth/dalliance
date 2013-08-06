@@ -652,6 +652,10 @@ function JBrowseFeatureSource(source) {
     this.store = new JBrowseStore(source.jbURI, source.jbQuery);
 }
 
+JBrowseFeatureSource.prototype.getScales = function() {
+    return null;
+}
+
 JBrowseFeatureSource.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();
     var wigStyle = new DASStyle();
