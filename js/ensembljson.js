@@ -29,6 +29,16 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     if (this.type.indexOf('exon') >= 0 || this.type.indexOf('transcript') >= 0)
         stylesheet.pushStyle({type: 'gene'}, null, tsStyle);
 
+    var cdsStyle = new DASStyle();
+    cdsStyle.glyph = 'BOX';
+    cdsStyle.FGCOLOR = 'black';
+    cdsStyle.BGCOLOR = 'red'
+    cdsStyle.HEIGHT = 8;
+    cdsStyle.BUMP = true;
+    cdsStyle.LABEL = true;
+    cdsStyle.ZINDEX = 10;
+    stylesheet.pushStyle({type: 'cds'}, null, cdsStyle);
+
     var wigStyle = new DASStyle();
     wigStyle.glyph = 'BOX';
     wigStyle.FGCOLOR = 'black';
