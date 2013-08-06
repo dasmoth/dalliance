@@ -16,9 +16,15 @@ Browser.prototype.addFeatureInfoPlugin = function(handler) {
     this.featureInfoPlugins.push(handler);
 }
 
-function FeatureInfo(f) {
-    this.feature = f;
-    this.title = f.name;
+function FeatureInfo(feature, group) {
+    var name = pick(group.type, feature.type);
+    var fid = pick(group.label, feature.label, group.id, feature.id);
+    if (fid && fid.indexOf('__dazzle') != 0) {
+        name = name + ': ' + fid;
+    }
+
+    this.feature = feature;
+    this.title = name;
     this.sections = [];
 }
 
@@ -36,7 +42,7 @@ FeatureInfo.prototype.add = function(label, info) {
 Browser.prototype.featurePopup = function(ev, feature, group) {
     if (!feature) feature = {};
     if (!group) group = {};
-    var featureInfo = new FeatureInfo(feature);
+    var featureInfo = new FeatureInfo(feature, group);
     var fips = this.featureInfoPlugins || [];
     for (fipi = 0; fipi < fips.length; ++fipi) {
         try {
@@ -52,19 +58,12 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
     table.style.width = '100%';
     table.style.margin = '0px';
 
-    var name = pick(group.type, feature.type);
-    var fid = pick(group.label, feature.label, group.id, feature.id);
-    if (fid && fid.indexOf('__dazzle') != 0) {
-        name = name + ': ' + fid;
-    }
-
     var idx = 0;
     if (feature.method) {
         var row = makeElement('tr', [
             makeElement('th', 'Method'),
             makeElement('td', feature.method)
         ]);
-        // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -88,7 +87,6 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
             makeElement('th', 'Score'),
             makeElement('td', '' + feature.score)
         ]);
-        // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }
@@ -101,7 +99,6 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
                     return makeElement('div', makeElement('a', l.desc, {href: l.uri, target: '_new'}));
                 }))
             ]);
-            // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }
@@ -121,7 +118,6 @@ Browser.prototype.featurePopup = function(ev, feature, group) {
                 makeElement('th', k),
                 makeElement('td', v)
             ]);
-            // row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
             table.appendChild(row);
             ++idx;
         }

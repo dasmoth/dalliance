@@ -11,8 +11,7 @@ For 0.9 (?)
   - VCF+Tabix support
      - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
-  - next/prev peak support for quantitative tracks
-    + Needs a UI for setting thresholds.
+  - next/prev peak support for quantitative tracks [DONE]
   - Work out the kinks in security/preflighting.
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
