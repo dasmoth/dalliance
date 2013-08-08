@@ -18,15 +18,15 @@ function BigWig() {
 }
 
 BigWig.prototype.readChromTree = function(callback) {
+    console.log('readChromTree: udo=' + this.unzoomedDataOffset + '; cto=' + this.chromTreeOffset);
     var thisB = this;
     this.chromsToIDs = {};
     this.idsToChroms = {};
     this.maxID = 0;
 
     var udo = this.unzoomedDataOffset;
-    while ((udo % 4) != 0) {
-        ++udo;
-    }
+    var eb = (udo - this.chromTreeOffset) & 3;
+    udo = udo + 4 - eb;
 
     this.data.slice(this.chromTreeOffset, udo - this.chromTreeOffset).fetch(function(bpt) {
         var ba = new Uint8Array(bpt);
@@ -884,7 +884,8 @@ function makeBwg(data, callback, name) {
         bwg.asOffset = (la[9] << 32) | (la[10]);    // 36 (unaligned longlong)
         bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
         bwg.uncompressBufSize = la[13];  // 52
-         
+        
+        // console.log('bwgVersion: ' + bwg.version);
         // dlog('bigType: ' + bwg.type);
         // dlog('chromTree at: ' + bwg.chromTreeOffset);
         // dlog('uncompress: ' + bwg.uncompressBufSize);
