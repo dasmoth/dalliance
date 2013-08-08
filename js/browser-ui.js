@@ -266,7 +266,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (b.helpVisible) {
             b.removeAllPopups();
         } else {
-            var helpFrame = makeElement('iframe', null, {src: 'http://www.biodalliance.org/help/index.html'}, {width: '490px', height: '500px'});
+            var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
 
             b.popit(ev, 'Help', helpFrame, {width: 500});
             b.helpVisible = true;
