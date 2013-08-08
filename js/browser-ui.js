@@ -72,11 +72,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
     var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
+
+    var helpButton = makeElement('a', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
+    
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             // favBtn,
                                             svgBtn,
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top', float: 'right'}))
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -254,6 +259,22 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             }, false);
         }
     }, false);
+
+    helpButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+
+        if (b.helpVisible) {
+            b.removeAllPopups();
+        } else {
+            var helpFrame = makeElement('iframe', null, {src: 'http://www.biodalliance.org/help/index.html'}, {width: '490px', height: '500px'});
+
+            b.popit(ev, 'Help', helpFrame, {width: 500});
+            b.helpVisible = true;
+            helpFrame.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
+                b.helpVisible = false;
+            }, false);
+        }
+    });
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {
