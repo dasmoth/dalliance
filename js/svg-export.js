@@ -45,13 +45,6 @@ Browser.prototype.saveSVG = function() {
 	var tierSVG = makeElementNS(NS_SVG, 'g');
 	var tierTopPos = pos;
 
-	saveRoot.appendChild(
-	    makeElementNS(
-		NS_SVG, 'text',
-		tier.dasSource.name,
-		{x: 20, y: pos + 15}));
-
-
 	if (tier.dasSource.tier_type === 'sequence') {
 	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
 	    
@@ -76,6 +69,13 @@ Browser.prototype.saveSVG = function() {
             }
 	    pos += 10;
 	}
+
+	saveRoot.appendChild(
+	    makeElementNS(
+		NS_SVG, 'text',
+		tier.dasSource.name,
+		{x: margin - 10, y: (pos+tierTopPos+12)/2, fontSize: '12pt', textAnchor: 'end'}));
+
 	tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: 0, y: tierTopPos, width: '10000', height: pos-tierTopPos, fill: tier.background}));
 	tierHolder.appendChild(tierSVG);
     }
