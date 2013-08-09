@@ -183,12 +183,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
   });
 
 
-
+    
+    var trackAddPopup;
     addTrackBtn.addEventListener('click', function(ev) {
-        if (b.trackAdderVisible) {
+        if (trackAddPopup && trackAddPopup.displayed) {
             b.removeAllPopups();
         } else {
-            b.showTrackAdder(ev);
+            trackAddPopup = b.showTrackAdder(ev);
         }
     }, false);
     b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
@@ -239,10 +240,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 
+    var optsPopup;
     optsButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
-        if (b.optionsVisible) {
+        if (optsPopup && optsPopup.displayed) {
             b.removeAllPopups();
         } else {
             var optsForm = makeElement('form', null, {className: 'popover-content'});
@@ -252,11 +254,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             }, false);
             optsForm.appendChild(makeElement('label', [scrollModeButton, 'Reverse trackpad scrolling'], {className: 'checkbox'}));
             b.removeAllPopups();
-            b.popit(ev, 'Options', optsForm, {width: 300});
-            b.optionsVisible = true;
-            optsForm.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
-                b.optionsVisible = false;
-            }, false);
+            optsPopup = b.popit(ev, 'Options', optsForm, {width: 300});
         }
     }, false);
 
