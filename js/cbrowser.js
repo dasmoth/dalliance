@@ -187,7 +187,7 @@ Browser.prototype.realInit = function() {
     */
 
     var keyHandler = function(ev) {
-        if (ev.keyCode == 13) {
+        if (ev.keyCode == 13) { // enter
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 var t = thisB.tiers[ti];
@@ -343,13 +343,13 @@ Browser.prototype.realInit = function() {
                     thisB.setSelectedTier(thisB.selectedTier + 1);
                 }
             }
-        } else if (ev.keyCode == 187 || ev.keyCode == 61) {
+        } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(-10);
-        } else if (ev.keyCode == 189 || ev.keyCode == 173) {
+        } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
-        } else if (ev.keyCode == 84 || ev.keyCode == 116) {
+        } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
