@@ -81,7 +81,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
-    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}))
+    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);

@@ -349,6 +349,18 @@ Browser.prototype.realInit = function() {
         } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
+        } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
+            ev.stopPropagation(); ev.preventDefault();
+            var t = thisB.tiers[thisB.selectedTier];
+            if (!t.infoVisible) {
+                t.infoElement.style.display = 'block';
+                t.updateHeight();
+                t.infoVisible = true;
+            } else {
+                t.infoElement.style.display = 'none';
+                t.updateHeight();
+                t.infoVisible = false;
+            }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
