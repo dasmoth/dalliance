@@ -633,10 +633,5 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-    this.popit(ev, 'Add DAS data', popup, {width: 500});
-    this.trackAdderVisible = true;
-    popup.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
-        // console.log('track-adder was removed');
-        thisB.trackAdderVisible = false;
-    }, false);
+    return this.popit(ev, 'Add DAS data', popup, {width: 500});
 }

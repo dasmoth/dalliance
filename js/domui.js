@@ -92,7 +92,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var winWidth = window.innerWidth;
 
     var top = (my + 20);
-    var left = Math.min(mx - (width/2), (winWidth - width - 10));
+    var left = Math.min(mx - (width/2), (winWidth - width - 30));
 
     var popup = makeElement('div');
     popup.className = 'popover fade bottom in';

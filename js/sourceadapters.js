@@ -22,9 +22,14 @@ DasTier.prototype.initSources = function() {
                 });
         };
         this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+            var beforeQFNF = Date.now()|0;
             var width = this.browser.viewEnd - this.browser.viewStart + 1;
             pos = (pos +  ((width * dir) / 2))|0
-            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, callback);
+            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, function(a, b) {
+                var afterQFNF = Date.now()|0;
+                console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
+                return callback(a, b);
+            });
         };
     } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
         fs = new BAMFeatureSource(this.dasSource);
@@ -40,6 +45,8 @@ DasTier.prototype.initSources = function() {
         } else {
             ss = new DASSequenceSource(this.dasSource);
         }
+    } else if (this.dasSource.tier_type == 'ensembl') {
+        fs = new EnsemblFeatureSource(this.dasSource);
     } else {
         fs = new DASFeatureSource(this.dasSource);
         var dasAdjLock = false;
@@ -645,6 +652,10 @@ DummySequenceSource.prototype.fetch = function(chr, min, max, pool, cnt) {
 
 function JBrowseFeatureSource(source) {
     this.store = new JBrowseStore(source.jbURI, source.jbQuery);
+}
+
+JBrowseFeatureSource.prototype.getScales = function() {
+    return null;
 }
 
 JBrowseFeatureSource.prototype.getStyleSheet = function(callback) {

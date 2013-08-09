@@ -16,11 +16,15 @@ function isDasBooleanTrue(s) {
 function SubTier() {
     this.glyphs = [];
     this.height = 0;
+    this.quant = null;
 }
 
 SubTier.prototype.add = function(glyph) {
     this.glyphs.push(glyph);
     this.height = Math.max(this.height, glyph.height());
+    if (glyph.quant && this.quant == null) {
+	this.quant = glyph.quant;
+    }
 }
 
 SubTier.prototype.hasSpaceFor = function(glyph) {
@@ -226,6 +230,13 @@ function drawFeatureTier(tier)
         bumpedSTs = [unbumpedST].concat(bumpedSTs);
     }
 
+    for (var sti = 0; sti < bumpedSTs.length; ++sti) {
+	var st = bumpedSTs[sti];
+	if (st.quant) {
+	    st.glyphs.unshift(new GridGlyph(st.height));
+	}
+    }
+
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
 }
@@ -298,10 +309,13 @@ DasTier.prototype.paint = function() {
     if (quant && this.dasSource.quantLeapThreshold) {
 	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
+	gc.save();
 	gc.strokeStyle = 'red';
+	gc.lineWidth = 0.3;
 	gc.moveTo(0, ry);
-	gc.lineTo(3000, ry);
+	gc.lineTo(5000, ry);
 	gc.stroke();
+	gc.restore();
     }
 
     if (quant && this.quantOverlay) {

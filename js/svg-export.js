@@ -5,12 +5,13 @@
 // svg-export.js
 //
 
-function saveSVG(b) {
+Browser.prototype.saveSVG = function() {
+    var b = this;
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
 
     var saveRoot = makeElementNS(NS_SVG, 'g', null, {
         fontFamily: 'helvetica',
-	fontSize: '10pt'
+	fontSize: '8pt'
     });
     saveDoc.documentElement.appendChild(saveRoot);
 
@@ -41,18 +42,13 @@ function saveSVG(b) {
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
-
-	saveRoot.appendChild(
-	    makeElementNS(
-		NS_SVG, 'text',
-		tier.dasSource.name,
-		{x: 20, y: pos + 10}));
-
+	var tierSVG = makeElementNS(NS_SVG, 'g');
+	var tierTopPos = pos;
 
 	if (tier.dasSource.tier_type === 'sequence') {
 	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
 	    
-	    tierHolder.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(' + (margin) + ', ' + pos + ')'}));
+	    tierSVG.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(' + (margin) + ', ' + pos + ')'}));
 	    pos += 80;
 	} else {
             if (!tier.subtiers) {
@@ -68,11 +64,20 @@ function saveSVG(b) {
                     var glyph = subtier.glyphs[gi];
                     glyphElements.push(glyph.toSVG());
 		}
-		tierHolder.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
+		tierSVG.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
 		pos += subtier.height + 3;
             }
 	    pos += 10;
 	}
+
+	saveRoot.appendChild(
+	    makeElementNS(
+		NS_SVG, 'text',
+		tier.dasSource.name,
+		{x: margin - 10, y: (pos+tierTopPos+12)/2, fontSize: '12pt', textAnchor: 'end'}));
+
+	tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: 0, y: tierTopPos, width: '10000', height: pos-tierTopPos, fill: tier.background}));
+	tierHolder.appendChild(tierSVG);
     }
     saveRoot.appendChild(tierHolder);
 

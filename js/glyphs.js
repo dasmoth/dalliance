@@ -60,6 +60,7 @@ BoxGlyph.prototype.toSVG = function() {
 			  width: this._width, 
 			  height: this._height,
 			  stroke: this.stroke || 'none',
+			  strokeWidth: 0.5,
 			  fill: this.fill || 'none'});
 }
 
@@ -212,7 +213,7 @@ GroupGlyph.prototype.toSVG = function() {
 		{d: p.toPathData(),
 		 fill: 'none',
 		 stroke: 'black',
-		 strokeWidth: '1px'});
+		 strokeWidth: 0.5});
 	    g.appendChild(path);
 	}
     }
@@ -255,16 +256,6 @@ LineGraphGlyph.prototype.height = function() {
 
 LineGraphGlyph.prototype.draw = function(g) {
     g.save();
-    g.strokeStyle = 'black'
-    g.lineWidth = 0.1;
-
-    g.beginPath();
-    for (var y = 0; y <= this._height; y += 10) {
-	g.moveTo(-5000, y);
-	g.lineTo(5000, y);
-    }
-    g.stroke();
-
     g.strokeStyle = this.color;
     g.lineWidth = 2;
     g.beginPath();
@@ -1099,4 +1090,51 @@ PointGlyph.prototype.toSVG = function() {
 	{cx: this._x, cy: this._y, r: 2,
 	 fill: this._fill,
 	 stroke: 'none'});
+}
+
+
+function GridGlyph(height) {
+    this._height = height || 50;
+}
+
+GridGlyph.prototype.min = function() {
+    return -100000;
+};
+
+GridGlyph.prototype.max = function() {
+    return 100000;
+};
+
+GridGlyph.prototype.height = function() {
+    return this._height;
+}
+
+GridGlyph.prototype.draw = function(g) {
+    g.save();
+    g.strokeStyle = 'black'
+    g.lineWidth = 0.1;
+
+    g.beginPath();
+    for (var y = 0; y <= this._height; y += 10) {
+	g.moveTo(-5000, y);
+	g.lineTo(5000, y);
+    }
+    g.stroke();
+    g.restore();
+}
+
+GridGlyph.prototype.toSVG = function() {
+    var p = new SVGPath();
+    for (var y = 0; y <= this._height; y += 10) {
+	p.moveTo(-5000, y);
+	p.lineTo(5000, y);
+    }
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: p.toPathData(),
+	 fill: 'none',
+	 stroke: 'black',
+	 strokeWidth: '0.1px'});
 }

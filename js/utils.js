@@ -299,7 +299,7 @@ function Awaited() {
 }
 
 Awaited.prototype.provide = function(x) {
-    if (this.res) {
+    if (this.res !== undefined) {
         throw "Resource has already been provided.";
     }
 
@@ -310,7 +310,7 @@ Awaited.prototype.provide = function(x) {
 }
 
 Awaited.prototype.await = function(f) {
-    if (this.res) {
+    if (this.res !== undefined) {
         f(this.res);
         return this.res;
     } else {

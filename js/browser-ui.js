@@ -72,11 +72,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
     var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
+
+    var helpButton = makeElement('a', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
+    
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             // favBtn,
                                             svgBtn,
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}))
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -122,6 +127,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                     end = parseLocCardinal(m[5], m[6]);
                 } else {
                     var width = b.viewEnd - b.viewStart + 1;
+                    start = (parseLocCardinal(m[2], m[3]) - (width/2))|0;
                     end = start + width - 1;
                 }
                 b.setLocation(chr, start, end, setLocationCB);
@@ -177,12 +183,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
   });
 
 
-
+    
+    var trackAddPopup;
     addTrackBtn.addEventListener('click', function(ev) {
-        if (b.trackAdderVisible) {
+        if (trackAddPopup && trackAddPopup.displayed) {
             b.removeAllPopups();
         } else {
-            b.showTrackAdder(ev);
+            trackAddPopup = b.showTrackAdder(ev);
         }
     }, false);
     b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
@@ -215,7 +222,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
-       saveSVG(b);
+        b.saveSVG();
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
 
@@ -233,10 +240,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 
+    var optsPopup;
     optsButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
-        if (b.optionsVisible) {
+        if (optsPopup && optsPopup.displayed) {
             b.removeAllPopups();
         } else {
             var optsForm = makeElement('form', null, {className: 'popover-content'});
@@ -246,13 +254,21 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             }, false);
             optsForm.appendChild(makeElement('label', [scrollModeButton, 'Reverse trackpad scrolling'], {className: 'checkbox'}));
             b.removeAllPopups();
-            b.popit(ev, 'Options', optsForm, {width: 300});
-            b.optionsVisible = true;
-            optsForm.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
-                b.optionsVisible = false;
-            }, false);
+            optsPopup = b.popit(ev, 'Options', optsForm, {width: 300});
         }
     }, false);
+
+    var helpPopup;
+    helpButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+
+        if (helpPopup && helpPopup.displayed) {
+            b.removeAllPopups();
+        } else {
+            var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+            helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+        }
+    });
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {

@@ -158,6 +158,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 awaitedSeq.provide(seq);
             } else {
                 dlog('Noseq: ' + miniJSONify(err));
+                awaitedSeq.provide(null);
             }
         });
     } 
