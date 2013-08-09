@@ -81,7 +81,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
-    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top', float: 'right'}))
+    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}))
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -258,19 +258,15 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     }, false);
 
+    var helpPopup;
     helpButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
-        if (b.helpVisible) {
+        if (helpPopup && helpPopup.displayed) {
             b.removeAllPopups();
         } else {
             var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-
-            b.popit(ev, 'Help', helpFrame, {width: 500});
-            b.helpVisible = true;
-            helpFrame.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
-                b.helpVisible = false;
-            }, false);
+            helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
         }
     });
 
