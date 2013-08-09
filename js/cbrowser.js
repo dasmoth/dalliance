@@ -201,7 +201,7 @@ Browser.prototype.realInit = function() {
             if (layoutsChanged) {
                 thisB.arrangeTiers();
             }
-        } else if (ev.keyCode == 32 || ev.charCode == 32) {
+        } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
             // if (!thisB.snapZoomLockout) {
                 if (!thisB.isSnapZooming) {
                     thisB.isSnapZooming = true;
@@ -225,7 +225,7 @@ Browser.prototype.realInit = function() {
                 thisB.snapZoomLockout = true;
             // }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 39) {
+        } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -263,7 +263,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
-        } else if (ev.keyCode == 37) {
+        } else if (ev.keyCode == 37) { // left arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -301,7 +301,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
-        } else if (ev.keyCode == 38 || ev.keyCode == 87) {
+        } else if (ev.keyCode == 38 || ev.keyCode == 87) { // up arrow | w
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
@@ -324,7 +324,7 @@ Browser.prototype.realInit = function() {
                     thisB.notifyTierSelectionWrap(-1);
                 }
             }
-        } else if (ev.keyCode == 40 || ev.keyCode == 83) {
+        } else if (ev.keyCode == 40 || ev.keyCode == 83) { // down arrow | s
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
