@@ -257,6 +257,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             optsPopup = b.popit(ev, 'Options', optsForm, {width: 300});
         }
     }, false);
+    b.makeTooltip(optsButton, 'Configure options.');
 
     var helpPopup;
     helpButton.addEventListener('click', function(ev) {
@@ -269,6 +270,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
         }
     });
+    b.makeTooltip(helpButton, 'Help; Keyboard shortcuts.');
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {
