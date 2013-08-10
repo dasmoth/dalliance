@@ -115,6 +115,7 @@ Browser.prototype.realInit = function() {
         this.restoreStatus();
     }
 
+    var helpPopup;
     var thisB = this;
     this.browserHolder = document.getElementById(this.pageName);
     removeChildren(this.browserHolder);
@@ -349,6 +350,14 @@ Browser.prototype.realInit = function() {
         } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
+        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
+            ev.stopPropagation(); ev.preventDefault();
+            if (helpPopup && helpPopup.displayed) {
+                b.removeAllPopups();
+            } else {
+                var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+                helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+            }
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
             var t = thisB.tiers[thisB.selectedTier];
