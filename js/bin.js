@@ -13,10 +13,19 @@ function BlobFetchable(b) {
 
 BlobFetchable.prototype.slice = function(start, length) {
     var b;
-    if (length) {
-        b = this.blob.slice(start, start + length);
+
+    if (this.blob.slice) {
+        if (length) {
+            b = this.blob.slice(start, start + length);
+        } else {
+            b = this.blob.slice(start);
+        }
     } else {
-        b = this.blob.slice(start);
+        if (length) {
+            b = this.blob.webkitSlice(start, start + length);
+        } else {
+            b = this.blob.webkitSlice(start);
+        }
     }
     return new BlobFetchable(b);
 }
