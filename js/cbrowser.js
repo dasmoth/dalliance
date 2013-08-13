@@ -115,6 +115,7 @@ Browser.prototype.realInit = function() {
         this.restoreStatus();
     }
 
+    var helpPopup;
     var thisB = this;
     this.browserHolder = document.getElementById(this.pageName);
     removeChildren(this.browserHolder);
@@ -187,7 +188,7 @@ Browser.prototype.realInit = function() {
     */
 
     var keyHandler = function(ev) {
-        if (ev.keyCode == 13) {
+        if (ev.keyCode == 13) { // enter
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 var t = thisB.tiers[ti];
@@ -201,7 +202,7 @@ Browser.prototype.realInit = function() {
             if (layoutsChanged) {
                 thisB.arrangeTiers();
             }
-        } else if (ev.keyCode == 32 || ev.charCode == 32) {
+        } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
             // if (!thisB.snapZoomLockout) {
                 if (!thisB.isSnapZooming) {
                     thisB.isSnapZooming = true;
@@ -225,7 +226,7 @@ Browser.prototype.realInit = function() {
                 thisB.snapZoomLockout = true;
             // }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 39) {
+        } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -263,7 +264,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
-        } else if (ev.keyCode == 37) {
+        } else if (ev.keyCode == 37) { // left arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -301,7 +302,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
-        } else if (ev.keyCode == 38 || ev.keyCode == 87) {
+        } else if (ev.keyCode == 38 || ev.keyCode == 87) { // up arrow | w
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
@@ -324,7 +325,7 @@ Browser.prototype.realInit = function() {
                     thisB.notifyTierSelectionWrap(-1);
                 }
             }
-        } else if (ev.keyCode == 40 || ev.keyCode == 83) {
+        } else if (ev.keyCode == 40 || ev.keyCode == 83) { // down arrow | s
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
@@ -343,13 +344,33 @@ Browser.prototype.realInit = function() {
                     thisB.setSelectedTier(thisB.selectedTier + 1);
                 }
             }
-        } else if (ev.keyCode == 187 || ev.keyCode == 61) {
+        } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(-10);
-        } else if (ev.keyCode == 189 || ev.keyCode == 173) {
+        } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
-        } else if (ev.keyCode == 84 || ev.keyCode == 116) {
+        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
+            ev.stopPropagation(); ev.preventDefault();
+            if (helpPopup && helpPopup.displayed) {
+                b.removeAllPopups();
+            } else {
+                var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+                helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+            }
+        } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
+            ev.stopPropagation(); ev.preventDefault();
+            var t = thisB.tiers[thisB.selectedTier];
+            if (!t.infoVisible) {
+                t.infoElement.style.display = 'block';
+                t.updateHeight();
+                t.infoVisible = true;
+            } else {
+                t.infoElement.style.display = 'none';
+                t.updateHeight();
+                t.infoVisible = false;
+            }
+        } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
