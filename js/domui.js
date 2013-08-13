@@ -165,7 +165,9 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         displayed: true
     };
     popup.addEventListener('DOMNodeRemoved', function(ev) {
-        popupHandle.displayed = false;
+        if (ev.target == popup) {
+            popupHandle.displayed = false;
+        }
     }, false);
     return popupHandle;
 }
