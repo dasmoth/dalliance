@@ -308,7 +308,7 @@ Browser.prototype.realInit = function() {
             if (ev.shiftKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
-                if (ch >= 20) {
+                if (ch >= 40) {
                     tt.forceHeight = ch - 10;
                     tt.draw();
                 }
