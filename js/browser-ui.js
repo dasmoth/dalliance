@@ -259,16 +259,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }, false);
     b.makeTooltip(optsButton, 'Configure options.');
 
-    var helpPopup;
     helpButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-
-        if (helpPopup && helpPopup.displayed) {
-            b.removeAllPopups();
-        } else {
-            var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-            helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
-        }
+        b.toggleHelpPopup(ev);
     });
     b.makeTooltip(helpButton, 'Help; Keyboard shortcuts.');
 
@@ -280,3 +273,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     });
 
   }
+
+Browser.prototype.toggleHelpPopup = function(ev) {
+    if (this.helpPopup && this.helpPopup.displayed) {
+        b.removeAllPopups();
+    } else {
+        var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+        this.helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+    }
+}

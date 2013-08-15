@@ -352,12 +352,7 @@ Browser.prototype.realInit = function() {
             thisB.zoomStep(10);
         } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
             ev.stopPropagation(); ev.preventDefault();
-            if (helpPopup && helpPopup.displayed) {
-                b.removeAllPopups();
-            } else {
-                var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-                helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
-            }
+            b.toggleHelpPopup(ev);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
             var t = thisB.tiers[thisB.selectedTier];
@@ -403,19 +398,7 @@ Browser.prototype.realInit = function() {
         }
     };
     var keyUpHandler = function(ev) {
-
         thisB.snapZoomLockout = false;
-/*
-        if (ev.keyCode == 32) {
-            if (thisB.isSnapZooming) {
-                thisB.isSnapZooming = false;
-                thisB.zoomSlider.setValue(thisB.savedZoom);
-                thisB.zoom(Math.exp((1.0 * thisB.savedZoom / thisB.zoomExpt)));
-                thisB.invalidateLayouts();
-                thisB.refresh();
-            }
-            ev.stopPropagation(); ev.preventDefault();
-        } */
     }
 
     this.svgHolder.addEventListener('focus', function(ev) {
