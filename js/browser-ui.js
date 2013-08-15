@@ -71,9 +71,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
-    var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
+    var optsButton = makeElement('div', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
 
-    var helpButton = makeElement('a', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
+    var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
     
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             // favBtn,

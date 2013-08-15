@@ -117,9 +117,11 @@ Browser.prototype.realInit = function() {
 
     var helpPopup;
     var thisB = this;
-    this.browserHolder = document.getElementById(this.pageName);
-    removeChildren(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {tabIndex: 100}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
+    this.browserHolderHolder = document.getElementById(this.pageName);
+    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none'});
+    removeChildren(this.browserHolderHolder);
+    this.browserHolderHolder.appendChild(this.browserHolder);
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
@@ -401,13 +403,14 @@ Browser.prototype.realInit = function() {
         thisB.snapZoomLockout = false;
     }
 
-    this.svgHolder.addEventListener('focus', function(ev) {
-        // console.log('holder focussed');
-        thisB.svgHolder.addEventListener('keydown', keyHandler, false);
+    this.browserHolder.addEventListener('focus', function(ev) {
+        console.log('holder focussed');
+        thisB.browserHolder.addEventListener('keydown', keyHandler, false);
     }, false);
-    this.svgHolder.addEventListener('blur', function(ev) {
-        // console.log('holder blurred');
-        thisB.svgHolder.removeEventListener('keydown', keyHandler, false);
+    this.browserHolder.addEventListener('blur', function(ev) {
+        console.log('holder blurred');
+        console.log(document.activeElement);
+        thisB.browserHolder.removeEventListener('keydown', keyHandler, false);
     }, false);
 
     // Popup support (does this really belong here? FIXME)
@@ -624,7 +627,7 @@ Browser.prototype.realMakeTier = function(source) {
         
 
     vph.addEventListener('mousedown', function(ev) {
-        thisB.svgHolder.focus();
+        thisB.browserHolder.focus();
         ev.preventDefault();
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
@@ -720,6 +723,7 @@ Browser.prototype.realMakeTier = function(source) {
         ev.stopPropagation(); ev.preventDefault();
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             if (thisB.tiers[ti] === tier) {
+                thisB.browserHolder.focus();
                 if (ti != thisB.selectedTier) {
                     thisB.setSelectedTier(ti);
                     return;
@@ -1369,7 +1373,7 @@ Browser.prototype.setSelectedTier = function(t) {
         }
     }
     if (t != null) {
-        this.svgHolder.focus();
+        this.browserHolder.focus();
     }
 }
 
