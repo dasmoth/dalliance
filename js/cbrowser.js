@@ -115,10 +115,13 @@ Browser.prototype.realInit = function() {
         this.restoreStatus();
     }
 
+    var helpPopup;
     var thisB = this;
-    this.browserHolder = document.getElementById(this.pageName);
-    removeChildren(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {tabIndex: 100}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
+    this.browserHolderHolder = document.getElementById(this.pageName);
+    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none'});
+    removeChildren(this.browserHolderHolder);
+    this.browserHolderHolder.appendChild(this.browserHolder);
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
@@ -187,7 +190,7 @@ Browser.prototype.realInit = function() {
     */
 
     var keyHandler = function(ev) {
-        if (ev.keyCode == 13) {
+        if (ev.keyCode == 13) { // enter
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 var t = thisB.tiers[ti];
@@ -201,7 +204,7 @@ Browser.prototype.realInit = function() {
             if (layoutsChanged) {
                 thisB.arrangeTiers();
             }
-        } else if (ev.keyCode == 32 || ev.charCode == 32) {
+        } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
             // if (!thisB.snapZoomLockout) {
                 if (!thisB.isSnapZooming) {
                     thisB.isSnapZooming = true;
@@ -225,7 +228,7 @@ Browser.prototype.realInit = function() {
                 thisB.snapZoomLockout = true;
             // }
             ev.stopPropagation(); ev.preventDefault();      
-        } else if (ev.keyCode == 39) {
+        } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -263,7 +266,7 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
-        } else if (ev.keyCode == 37) {
+        } else if (ev.keyCode == 37) { // left arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
                 var fedge = 0;
@@ -301,13 +304,13 @@ Browser.prototype.realInit = function() {
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
-        } else if (ev.keyCode == 38 || ev.keyCode == 87) {
+        } else if (ev.keyCode == 38 || ev.keyCode == 87) { // up arrow | w
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
-                if (ch >= 20) {
+                if (ch >= 40) {
                     tt.forceHeight = ch - 10;
                     tt.draw();
                 }
@@ -324,7 +327,7 @@ Browser.prototype.realInit = function() {
                     thisB.notifyTierSelectionWrap(-1);
                 }
             }
-        } else if (ev.keyCode == 40 || ev.keyCode == 83) {
+        } else if (ev.keyCode == 40 || ev.keyCode == 83) { // down arrow | s
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
@@ -343,13 +346,28 @@ Browser.prototype.realInit = function() {
                     thisB.setSelectedTier(thisB.selectedTier + 1);
                 }
             }
-        } else if (ev.keyCode == 187 || ev.keyCode == 61) {
+        } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(-10);
-        } else if (ev.keyCode == 189 || ev.keyCode == 173) {
+        } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
-        } else if (ev.keyCode == 84 || ev.keyCode == 116) {
+        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
+            ev.stopPropagation(); ev.preventDefault();
+            b.toggleHelpPopup(ev);
+        } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
+            ev.stopPropagation(); ev.preventDefault();
+            var t = thisB.tiers[thisB.selectedTier];
+            if (!t.infoVisible) {
+                t.infoElement.style.display = 'block';
+                t.updateHeight();
+                t.infoVisible = true;
+            } else {
+                t.infoElement.style.display = 'none';
+                t.updateHeight();
+                t.infoVisible = false;
+            }
+        } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
             ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
@@ -382,28 +400,17 @@ Browser.prototype.realInit = function() {
         }
     };
     var keyUpHandler = function(ev) {
-
         thisB.snapZoomLockout = false;
-/*
-        if (ev.keyCode == 32) {
-            if (thisB.isSnapZooming) {
-                thisB.isSnapZooming = false;
-                thisB.zoomSlider.setValue(thisB.savedZoom);
-                thisB.zoom(Math.exp((1.0 * thisB.savedZoom / thisB.zoomExpt)));
-                thisB.invalidateLayouts();
-                thisB.refresh();
-            }
-            ev.stopPropagation(); ev.preventDefault();
-        } */
     }
 
-    this.svgHolder.addEventListener('focus', function(ev) {
-        // console.log('holder focussed');
-        thisB.svgHolder.addEventListener('keydown', keyHandler, false);
+    this.browserHolder.addEventListener('focus', function(ev) {
+        console.log('holder focussed');
+        thisB.browserHolder.addEventListener('keydown', keyHandler, false);
     }, false);
-    this.svgHolder.addEventListener('blur', function(ev) {
-        // console.log('holder blurred');
-        thisB.svgHolder.removeEventListener('keydown', keyHandler, false);
+    this.browserHolder.addEventListener('blur', function(ev) {
+        console.log('holder blurred');
+        console.log(document.activeElement);
+        thisB.browserHolder.removeEventListener('keydown', keyHandler, false);
     }, false);
 
     // Popup support (does this really belong here? FIXME)
@@ -620,7 +627,7 @@ Browser.prototype.realMakeTier = function(source) {
         
 
     vph.addEventListener('mousedown', function(ev) {
-        thisB.svgHolder.focus();
+        thisB.browserHolder.focus();
         ev.preventDefault();
         var br = vph.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
@@ -716,6 +723,7 @@ Browser.prototype.realMakeTier = function(source) {
         ev.stopPropagation(); ev.preventDefault();
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             if (thisB.tiers[ti] === tier) {
+                thisB.browserHolder.focus();
                 if (ti != thisB.selectedTier) {
                     thisB.setSelectedTier(ti);
                     return;
@@ -1365,7 +1373,7 @@ Browser.prototype.setSelectedTier = function(t) {
         }
     }
     if (t != null) {
-        this.svgHolder.focus();
+        this.browserHolder.focus();
     }
 }
 

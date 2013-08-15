@@ -71,9 +71,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
-    var optsButton = makeElement('a', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
+    var optsButton = makeElement('div', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
 
-    var helpButton = makeElement('a', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
+    var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
     
     toolbar.appendChild(makeElement('div', [addTrackBtn,
                                             // favBtn,
@@ -81,7 +81,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                                             resetBtn,
                                             optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
-    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}))
+    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -257,18 +257,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             optsPopup = b.popit(ev, 'Options', optsForm, {width: 300});
         }
     }, false);
+    b.makeTooltip(optsButton, 'Configure options.');
 
-    var helpPopup;
     helpButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-
-        if (helpPopup && helpPopup.displayed) {
-            b.removeAllPopups();
-        } else {
-            var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-            helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
-        }
+        b.toggleHelpPopup(ev);
     });
+    b.makeTooltip(helpButton, 'Help; Keyboard shortcuts.');
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {
@@ -278,3 +273,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     });
 
   }
+
+Browser.prototype.toggleHelpPopup = function(ev) {
+    if (this.helpPopup && this.helpPopup.displayed) {
+        b.removeAllPopups();
+    } else {
+        var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+        this.helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+    }
+}

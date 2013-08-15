@@ -5,11 +5,8 @@ For 0.9 (?)
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?
-  - Cleaner separation between genome canvases and UI chrome.
   - Track-hub support
   - Assembly hub support
-  - VCF+Tabix support
-     - Anything else in Tabix envelopes?  GFF?  BED?
   - Small BED/WIG support
   - next/prev peak support for quantitative tracks [DONE]
   - Work out the kinks in security/preflighting.
@@ -19,6 +16,8 @@ For 0.9 (?)
 For 0.10
 --------
    
+
+  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Undo/redo.  
   - History of recently-viewed tracks.
   - Chromosome overviews

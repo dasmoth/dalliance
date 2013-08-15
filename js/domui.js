@@ -80,13 +80,20 @@ Browser.prototype.makeTooltip = function(ele, text)
 Browser.prototype.popit = function(ev, name, ele, opts)
 {
     var thisB = this;
-    if (!opts) {
+    if (!opts) 
         opts = {};
-    }
+    if (!ev) 
+        ev = {};
 
     var width = opts.width || 200;
 
-    var mx =  ev.clientX, my = ev.clientY;
+    var mx, my;
+
+    if (ev.clientX) {
+        var mx =  ev.clientX, my = ev.clientY;
+    } else {
+        mx = 500; my= 50;
+    }
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
     var winWidth = window.innerWidth;
@@ -95,7 +102,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     var left = Math.min(mx - (width/2), (winWidth - width - 30));
 
     var popup = makeElement('div');
-    popup.className = 'popover fade bottom in';
+    popup.className = 'popover fade ' + (ev.clientX ? 'bottom ' : '') + 'in';
     popup.style.display = 'block';
     popup.style.position = 'absolute';
     popup.style.top = '' + top + 'px';
@@ -165,7 +172,9 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         displayed: true
     };
     popup.addEventListener('DOMNodeRemoved', function(ev) {
-        popupHandle.displayed = false;
+        if (ev.target == popup) {
+            popupHandle.displayed = false;
+        }
     }, false);
     return popupHandle;
 }
