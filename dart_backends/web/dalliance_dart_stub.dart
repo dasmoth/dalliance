@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:js/js.dart' as js;
+import 'dart:js' as js;
 
 import 'package:bud/io_browser.dart';
 import 'package:bud/tabix.dart';
@@ -8,16 +8,13 @@ import 'package:bud/gff.dart';
 import 'package:bud/vcf.dart';
 
 void main() {
-  js.context.createTabixSource = new js.Callback.many(createTabixSource);
+  js.context['createTabixSource'] = new js.Callback(createTabixSource);
 }
 
 void createTabixSource(String url, String payload, callback) {
-  js.retain(callback);
-  
   TabixIndexedFile.open(new UrlResource('$url.tbi'), new UrlResource(url))
     .then((tif) {
-      callback(new js.Callback.many(new TabixIndexedSource(tif, payload).fetch));
-      js.release(callback);
+      callback.apply(null, [new js.Callback(new TabixIndexedSource(tif, payload).fetch)]);
     });
 }
 
@@ -44,9 +41,7 @@ class TabixIndexedSource {
     if (!names.contains(chr))
       chr = 'chr$chr';
     if (!names.contains(chr))
-      return callback(js.array([]));
-    
-    js.retain(callback);
+      return callback.apply(null, [js.jsify([])]);
     
     
     tif.fetch(chr, min, max)
@@ -57,8 +52,7 @@ class TabixIndexedSource {
           records.add(parser(l));
         }
         
-        callback(js.array(records));
-        js.release(callback);
+        callback.apply(null, [js.jsify(records)]);
       });
   }
 }
@@ -84,7 +78,7 @@ dallianceGFF(GFFRecord r) {
                     'type': 'gtf-transcript'}];
     }
           
-    return js.map(df);
+    return js.jsify(df);
 }
 
 dallianceVCF(String s) {
@@ -98,5 +92,5 @@ dallianceVCF(String s) {
       'id':     r.id
   };
   
-  return js.map(df);
+  return js.jsify(df);
 }
