@@ -244,18 +244,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     optsButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
-        if (optsPopup && optsPopup.displayed) {
-            b.removeAllPopups();
-        } else {
-            var optsForm = makeElement('form', null, {className: 'popover-content'});
-            var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
-            scrollModeButton.addEventListener('change', function(ev) {
-                b.reverseScrolling = scrollModeButton.checked;
-            }, false);
-            optsForm.appendChild(makeElement('label', [scrollModeButton, 'Reverse trackpad scrolling'], {className: 'checkbox'}));
-            b.removeAllPopups();
-            optsPopup = b.popit(ev, 'Options', optsForm, {width: 300});
-        }
+        b.toggleOptsPopup(ev);
     }, false);
     b.makeTooltip(optsButton, 'Configure options.');
 
@@ -276,9 +265,45 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
-        b.removeAllPopups();
+        this.removeAllPopups();
     } else {
         var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-        this.helpPopup = b.popit(ev, 'Help', helpFrame, {width: 500});
+        this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
 }
+
+Browser.prototype.toggleOptsPopup = function(ev) {
+    var b = this;
+
+    if (this.optsPopup && this.optsPopup.displayed) {
+        this.removeAllPopups();
+    } else {
+        var optsForm = makeElement('form', null, {className: 'popover-content form-horizontal'});
+
+        var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
+        scrollModeButton.addEventListener('change', function(ev) {
+            b.reverseScrolling = scrollModeButton.checked;
+        }, false);
+        optsForm.appendChild(makeElement('div', [makeElement('label', 'Reverse trackpad scrolling', {className: 'control-label'}), scrollModeButton], {className: 'control-group'}));
+
+        var rulerSelect = makeElement('select');
+        rulerSelect.appendChild(makeElement('option', 'Left', {value: 'left'}));
+        rulerSelect.appendChild(makeElement('option', 'Center', {value: 'center'}));
+        rulerSelect.appendChild(makeElement('option', 'Right', {value: 'right'}));
+        rulerSelect.appendChild(makeElement('option', 'None', {value: 'none'}));
+        rulerSelect.value = b.rulerLocation;
+        rulerSelect.addEventListener('change', function(ev) {
+            b.rulerLocation = rulerSelect.value;
+            b.positionRuler();
+            for (var ti = 0; ti < b.tiers.length; ++ti) {
+                b.tiers[ti].paintQuant();
+            }
+        }, false);
+        optsForm.appendChild(makeElement('div', [makeElement('label', 'Display ruler', {className: 'control-label'}), rulerSelect], {className: 'control-group'}));
+        
+
+        this.removeAllPopups();
+        this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
+    }
+}
+

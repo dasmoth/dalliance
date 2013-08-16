@@ -75,6 +75,7 @@ function Browser(opts) {
     // Options.
     
     this.reverseScrolling = false;
+    this.rulerLocation = 'center';
 
     // Visual config.
 
@@ -144,7 +145,7 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
     this.tierHolder.appendChild(this.ruler);
 
     // Dimension stuff
@@ -421,12 +422,9 @@ Browser.prototype.realInit = function() {
     }
 
     this.browserHolder.addEventListener('focus', function(ev) {
-        console.log('holder focussed');
         thisB.browserHolder.addEventListener('keydown', keyHandler, false);
     }, false);
     this.browserHolder.addEventListener('blur', function(ev) {
-        console.log('holder blurred');
-        console.log(document.activeElement);
         thisB.browserHolder.removeEventListener('keydown', keyHandler, false);
     }, false);
 
@@ -451,6 +449,8 @@ Browser.prototype.realInit = function() {
     thisB.arrangeTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
+
+    thisB.positionRuler();
 
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
@@ -1118,13 +1118,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
             this.viewEnd = this.viewStart + wid - 1;
         }
 
-        this.ruler.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-        for (var ti = 0; ti < this.tiers.length; ++ti) {
-            var q = this.tiers[ti].quantOverlay;
-            if (q) {
-                q.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-            }
-        }
+        this.positionRuler();
 
         if (!skipRefresh) {
             this.spaceCheck();
@@ -1404,6 +1398,38 @@ Browser.prototype.notifyTierSelectionWrap = function(i) {
             this.tierSelectionWrapListeners[fli](i);
         } catch (ex) {
             console.log(ex.stack);
+        }
+    }
+}
+
+Browser.prototype.positionRuler = function() {
+    var display = 'none';
+    var left = '';
+    var right = '';
+
+    if (this.rulerLocation == 'center') {
+        display = 'block';
+        left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+    } else if (this.rulerLocation == 'left') {
+        display = 'block';
+        left = '0px';
+    } else if (this.rulerLocation == 'right') {
+        display = 'block';
+        right = '0px'
+    } else {
+        display = 'none';
+    }
+
+    this.ruler.style.display = display;
+    this.ruler.style.left = left;
+    this.ruler.style.right = right;
+
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var q = this.tiers[ti].quantOverlay;
+        if (q) {
+            q.style.display = display;
+            q.style.left = left;
+            q.style.right = right;
         }
     }
 }
