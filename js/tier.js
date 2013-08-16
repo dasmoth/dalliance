@@ -183,17 +183,11 @@ function zoomForScale(scale) {
 }
 
 
-DasTier.prototype.sourceFindNextFeature = function(chr, pos, dir, callback) {
-    callback(null);
-}
-
-DasTier.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
-    callback(null);
-}
-
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
     if (this.quantLeapThreshold) {
-        this.quantFindNextFeature(chr, pos, dir, this.quantLeapThreshold, callback);
+        var width = this.browser.viewEnd - this.browser.viewStart + 1;
+        pos = (pos +  ((width * dir) / 2))|0
+        this.featureSource.quantFindNextFeature(chr, pos, dir, this.quantLeapThreshold, callback);
     } else {
         if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
             if (this.currentFeatures) {
@@ -246,7 +240,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
             }
         }
 
-        this.sourceFindNextFeature(chr, pos, dir, callback);
+        this.featureSource.findNextFeature(chr, pos, dir, callback);
     }
 }
 

@@ -13,24 +13,6 @@ DasTier.prototype.initSources = function() {
 
     if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
         fs = new BWGFeatureSource(this.dasSource);
-
-        this.sourceFindNextFeature = function(chr, pos, dir, callback) {
-            fs.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
-                    if (res.length > 0 && res[0] != null) {
-                        callback(res[0]);
-                    }
-                });
-        };
-        this.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
-            var beforeQFNF = Date.now()|0;
-            var width = this.browser.viewEnd - this.browser.viewStart + 1;
-            pos = (pos +  ((width * dir) / 2))|0
-            fs.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, function(a, b) {
-                var afterQFNF = Date.now()|0;
-                console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
-                return callback(a, b);
-            });
-        };
     } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
         fs = new BAMFeatureSource(this.dasSource);
     } else if (this.dasSource.bamblrURI) {
@@ -47,29 +29,6 @@ DasTier.prototype.initSources = function() {
         fs = new EnsemblFeatureSource(this.dasSource);
     } else {
         fs = new DASFeatureSource(this.dasSource);
-        var dasAdjLock = false;
-        if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
-            this.sourceFindNextFeature = function(chr, pos, dir, callback) {
-                if (dasAdjLock) {
-                    return dlog('Already looking for a next feature, be patient!');
-                }
-                dasAdjLock = true;
-                var fops = {
-                    adjacent: chr + ':' + (pos|0) + ':' + (dir > 0 ? 'F' : 'B')
-                }
-                var types = thisTier.getDesiredTypes(thisTier.browser.scale);
-                if (types) {
-                    fops.types = types;
-                }
-                thisTier.dasSource.features(null, fops, function(res) {
-                    dasAdjLock = false;
-                    if (res.length > 0 && res[0] != null) {
-                        dlog('DAS adjacent seems to be working...');
-                        callback(res[0]);
-                    }
-                });
-            };
-        }
     }
     
     if (this.dasSource.mapping) {
@@ -123,6 +82,30 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         }
     );
 }
+
+DASFeatureSource.prototype.findNextFeature = this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+    if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
+        var thisB = this;
+        if (this.dasAdjLock) {
+            return dlog('Already looking for a next feature, be patient!');
+        }
+        this.dasAdjLock = true;
+        var fops = {
+            adjacent: chr + ':' + (pos|0) + ':' + (dir > 0 ? 'F' : 'B')
+        }
+        var types = thisTier.getDesiredTypes(thisTier.browser.scale);
+        if (types) {
+            fops.types = types;
+        }
+        thisTier.dasSource.features(null, fops, function(res) {
+            thisB.dasAdjLock = false;
+            if (res.length > 0 && res[0] != null) {
+                dlog('DAS adjacent seems to be working...');
+                callback(res[0]);
+            }
+        });
+    }
+};
 
 function DASSequenceSource(dasSource) {
     this.dasSource = dasSource;
@@ -316,6 +299,23 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             }
             callback(null, features, fs);
         });
+    });
+}
+
+BWGFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    var beforeQFNF = Date.now()|0;
+    this.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, function(a, b) {
+        var afterQFNF = Date.now()|0;
+        console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
+        return callback(a, b);
+    });
+}
+
+BWGFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    this.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
+        if (res.length > 0 && res[0] != null) {
+            callback(res[0]);
+        }
     });
 }
 
