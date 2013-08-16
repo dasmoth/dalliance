@@ -316,8 +316,15 @@ Browser.prototype.realInit = function() {
                 }
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
+  
                 if (tt.quantLeapThreshold) {
-                    tt.quantLeapThreshold += 0.5;
+                    var th = tt.subtiers[0].height;
+                    var tq = tt.subtiers[0].quant;
+                    if (!tq)
+                        return;
+
+                    var qscale = (tq.max - tq.min) / th;
+                    tt.quantLeapThreshold = tq.min + ((((tt.quantLeapThreshold - tq.min)/qscale)|0)+1)*qscale;
                     tt.draw();
                 }                
             } else {
@@ -337,10 +344,20 @@ Browser.prototype.realInit = function() {
                 tt.draw();
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
-                if (tt.quantLeapThreshold && tt.quantLeapThreshold > 2) {
-                    tt.quantLeapThreshold -= 0.5;
-                    tt.draw();
-                }                
+
+                if (tt.quantLeapThreshold) {
+                    var th = tt.subtiers[0].height;
+                    var tq = tt.subtiers[0].quant;
+                    if (!tq)
+                        return;
+
+                    var qscale = (tq.max - tq.min) / th;
+                    var it = ((tt.quantLeapThreshold - tq.min)/qscale)|0;
+                    if (it > 1) {
+                        tt.quantLeapThreshold = tq.min + (it-1)*qscale;
+                        tt.draw();
+                    }
+                }
             } else {
                 if (thisB.selectedTier < thisB.tiers.length -1) {
                     thisB.setSelectedTier(thisB.selectedTier + 1);
