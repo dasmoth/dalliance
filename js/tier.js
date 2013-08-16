@@ -22,6 +22,9 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     this.req = null;
     this.layoutHeight = 25;
     this.bumped = true; 
+    if (source.quantLeapThreshold) {
+        this.quantLeapThreshold = source.quantLeapThreshold;
+    }
     if (this.dasSource.collapseSuperGroups) {
         this.bumped = false;
     }
@@ -189,8 +192,8 @@ DasTier.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, call
 }
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
-    if (this.dasSource.quantLeapThreshold) {
-        this.quantFindNextFeature(chr, pos, dir, this.dasSource.quantLeapThreshold, callback);
+    if (this.quantLeapThreshold) {
+        this.quantFindNextFeature(chr, pos, dir, this.quantLeapThreshold, callback);
     } else {
         if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
             if (this.currentFeatures) {

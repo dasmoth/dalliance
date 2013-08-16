@@ -306,8 +306,8 @@ DasTier.prototype.paint = function() {
     }
     gc.restore();
 
-    if (quant && this.dasSource.quantLeapThreshold) {
-	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+    if (quant && this.quantLeapThreshold) {
+	var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
 	gc.save();
 	gc.strokeStyle = 'red';

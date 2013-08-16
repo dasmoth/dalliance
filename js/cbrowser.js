@@ -316,8 +316,8 @@ Browser.prototype.realInit = function() {
                 }
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
-                if (tt.dasSource.quantLeapThreshold) {
-                    tt.dasSource.quantLeapThreshold += 0.5;
+                if (tt.quantLeapThreshold) {
+                    tt.quantLeapThreshold += 0.5;
                     tt.draw();
                 }                
             } else {
@@ -337,8 +337,8 @@ Browser.prototype.realInit = function() {
                 tt.draw();
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
-                if (tt.dasSource.quantLeapThreshold && tt.dasSource.quantLeapThreshold > 2) {
-                    tt.dasSource.quantLeapThreshold -= 0.5;
+                if (tt.quantLeapThreshold && tt.quantLeapThreshold > 2) {
+                    tt.quantLeapThreshold -= 0.5;
                     tt.draw();
                 }                
             } else {
@@ -1412,9 +1412,6 @@ Browser.prototype.featureDoubleClick = function(f, rx, ry) {
     var width = this.viewEnd - this.viewStart;
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
-
-
-
 
 function glyphLookup(glyphs, rx) {
     for (var gi = 0; gi < glyphs.length; ++gi) {
