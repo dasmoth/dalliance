@@ -18,7 +18,6 @@ function BigWig() {
 }
 
 BigWig.prototype.readChromTree = function(callback) {
-    console.log('readChromTree: udo=' + this.unzoomedDataOffset + '; cto=' + this.chromTreeOffset);
     var thisB = this;
     this.chromsToIDs = {};
     this.idsToChroms = {};
