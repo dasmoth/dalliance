@@ -1,26 +1,28 @@
-For 0.9 (?)
------------
+For 0.9
+--------
 
-  - Tidy up feature source creation [DONE, except for leap handlers]
+  - Tidy up feature source creation [DONE]
   - Overlay sources [DONE, at least for the merge-by-coords case]
-  - UI for next/prev
-  - Animate when leaping.
-    + Also snap-zooming?
   - Track-hub support
   - Assembly hub support
   - next/prev peak support for quantitative tracks [DONE]
   - Work out the kinks in security/preflighting.
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
+  - Thresholding/leaping on quantitative tracks [DONE]
+  - SVG export parity
+  - Configurability of ruler [DONE]
+  - Sort out feature popups for composite features
+  - Feature popup extensibility [DONE]
  
 For 0.10
 --------
    
-
+  - UI for next/prev
+  - Animate when leaping.
+    + Also snap-zooming?
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
-  - Undo/redo.  
-  - History of recently-viewed tracks.
   - Chromosome overviews
   - RDF/FALDO support?
   - Incremental data fetching
@@ -30,6 +32,13 @@ For 0.10
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
+
+For 0.11
+--------
+
+  - Undo/redo.  
+  - History of recently-viewed tracks.
+
 
 Future
 -------------
