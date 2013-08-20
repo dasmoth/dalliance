@@ -75,6 +75,7 @@ function Browser(opts) {
     // Options.
     
     this.reverseScrolling = false;
+    this.rulerLocation = 'center';
 
     // Visual config.
 
@@ -144,7 +145,7 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', left: '' + ((this.featurePanelWidth/2)|0) + 'px', top: '0px'});
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
     this.tierHolder.appendChild(this.ruler);
 
     // Dimension stuff
@@ -316,8 +317,15 @@ Browser.prototype.realInit = function() {
                 }
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
-                if (tt.dasSource.quantLeapThreshold) {
-                    tt.dasSource.quantLeapThreshold += 0.5;
+  
+                if (tt.quantLeapThreshold) {
+                    var th = tt.subtiers[0].height;
+                    var tq = tt.subtiers[0].quant;
+                    if (!tq)
+                        return;
+
+                    var qscale = (tq.max - tq.min) / th;
+                    tt.quantLeapThreshold = tq.min + ((((tt.quantLeapThreshold - tq.min)/qscale)|0)+1)*qscale;
                     tt.draw();
                 }                
             } else {
@@ -337,10 +345,20 @@ Browser.prototype.realInit = function() {
                 tt.draw();
             } else if (ev.ctrlKey) {
                 var tt = thisB.tiers[thisB.selectedTier];
-                if (tt.dasSource.quantLeapThreshold && tt.dasSource.quantLeapThreshold > 2) {
-                    tt.dasSource.quantLeapThreshold -= 0.5;
-                    tt.draw();
-                }                
+
+                if (tt.quantLeapThreshold) {
+                    var th = tt.subtiers[0].height;
+                    var tq = tt.subtiers[0].quant;
+                    if (!tq)
+                        return;
+
+                    var qscale = (tq.max - tq.min) / th;
+                    var it = ((tt.quantLeapThreshold - tq.min)/qscale)|0;
+                    if (it > 1) {
+                        tt.quantLeapThreshold = tq.min + (it-1)*qscale;
+                        tt.draw();
+                    }
+                }
             } else {
                 if (thisB.selectedTier < thisB.tiers.length -1) {
                     thisB.setSelectedTier(thisB.selectedTier + 1);
@@ -404,12 +422,9 @@ Browser.prototype.realInit = function() {
     }
 
     this.browserHolder.addEventListener('focus', function(ev) {
-        console.log('holder focussed');
         thisB.browserHolder.addEventListener('keydown', keyHandler, false);
     }, false);
     this.browserHolder.addEventListener('blur', function(ev) {
-        console.log('holder blurred');
-        console.log(document.activeElement);
         thisB.browserHolder.removeEventListener('keydown', keyHandler, false);
     }, false);
 
@@ -434,6 +449,8 @@ Browser.prototype.realInit = function() {
     thisB.arrangeTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
+
+    thisB.positionRuler();
 
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
@@ -1101,13 +1118,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
             this.viewEnd = this.viewStart + wid - 1;
         }
 
-        this.ruler.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-        for (var ti = 0; ti < this.tiers.length; ++ti) {
-            var q = this.tiers[ti].quantOverlay;
-            if (q) {
-                q.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-            }
-        }
+        this.positionRuler();
 
         if (!skipRefresh) {
             this.spaceCheck();
@@ -1391,6 +1402,38 @@ Browser.prototype.notifyTierSelectionWrap = function(i) {
     }
 }
 
+Browser.prototype.positionRuler = function() {
+    var display = 'none';
+    var left = '';
+    var right = '';
+
+    if (this.rulerLocation == 'center') {
+        display = 'block';
+        left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+    } else if (this.rulerLocation == 'left') {
+        display = 'block';
+        left = '0px';
+    } else if (this.rulerLocation == 'right') {
+        display = 'block';
+        right = '0px'
+    } else {
+        display = 'none';
+    }
+
+    this.ruler.style.display = display;
+    this.ruler.style.left = left;
+    this.ruler.style.right = right;
+
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var q = this.tiers[ti].quantOverlay;
+        if (q) {
+            q.style.display = display;
+            q.style.left = left;
+            q.style.right = right;
+        }
+    }
+}
+
 Browser.prototype.featureDoubleClick = function(f, rx, ry) {
     if (!f.min || !f.max) {
         return;
@@ -1412,9 +1455,6 @@ Browser.prototype.featureDoubleClick = function(f, rx, ry) {
     var width = this.viewEnd - this.viewStart;
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
-
-
-
 
 function glyphLookup(glyphs, rx) {
     for (var gi = 0; gi < glyphs.length; ++gi) {

@@ -15,6 +15,7 @@ Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.version'];
 
     delete localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
+    delete localStorage['dalliance.' + this.cookieKey + '.ruler-location'];
 }
 
 Browser.prototype.storeStatus = function() {
@@ -38,6 +39,7 @@ Browser.prototype.storeStatus = function() {
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
+    localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;
     
     localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;
 }
@@ -78,6 +80,10 @@ Browser.prototype.restoreStatus = function() {
     }
     var rs = localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
     this.reverseScrolling = (rs && rs == 'true');
+
+    var rl = localStorage['dalliance.' + this.cookieKey + '.ruler-location'];
+    if (rl)
+        this.rulerLocation = rl;
 
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];
     if (sourceStr) {

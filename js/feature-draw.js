@@ -306,8 +306,8 @@ DasTier.prototype.paint = function() {
     }
     gc.restore();
 
-    if (quant && this.dasSource.quantLeapThreshold) {
-	var ry = 3 + subtiers[0].height * (1.0 - ((this.dasSource.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+    if (quant && this.quantLeapThreshold && this.featureSource && this.featureSource.quantFindNextFeature) {
+	var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
 	gc.save();
 	gc.strokeStyle = 'red';
@@ -318,31 +318,60 @@ DasTier.prototype.paint = function() {
 	gc.restore();
     }
 
-    if (quant && this.quantOverlay) {
-	this.quantOverlay.style.display = 'block';
+    this.paintQuant();
+}
 
+DasTier.prototype.paintQuant = function() {
+    var quant;
+    if (this.subtiers && this.subtiers.length > 0)
+	quant = this.subtiers[0].quant;
+
+    if (quant && this.quantOverlay) {
 	var h = this.viewport.height;
+	var w = this.quantOverlay.width;
 	this.quantOverlay.height = this.viewport.height;
 	var ctx = this.quantOverlay.getContext('2d');
 
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;
-        ctx.fillRect(0, 0, 30, 20);
-        ctx.fillRect(0, h-20, 30, 20);
+
+	if (this.browser.rulerLocation == 'right') {
+	    ctx.fillRect(w-30, 0, 30, 20);
+            ctx.fillRect(w-30, h-20, 30, 20);
+	} else {
+            ctx.fillRect(0, 0, 30, 20);
+            ctx.fillRect(0, h-20, 30, 20);
+	}
         ctx.globalAlpha = 1.0;
 
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(8, 3);
-        ctx.lineTo(0,3);
-        ctx.lineTo(0,h-3);
-        ctx.lineTo(8,h-3);
+
+	if (this.browser.rulerLocation == 'right') {
+	    ctx.moveTo(w - 8, 3);
+            ctx.lineTo(w, 3);
+            ctx.lineTo(w, h-3);
+            ctx.lineTo(w - 8, h - 3);
+	} else {
+            ctx.moveTo(8, 3);
+            ctx.lineTo(0,3);
+            ctx.lineTo(0,h-3);
+            ctx.lineTo(8,h-3);
+	}
         ctx.stroke();
 
         ctx.fillStyle = 'black';
-        ctx.fillText(formatQuantLabel(quant.max), 8, 8);
-        ctx.fillText(formatQuantLabel(quant.min), 8, h-5);
+
+	if (this.browser.rulerLocation == 'right') {
+	    ctx.textAlign = 'right';
+	    ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
+            ctx.fillText(formatQuantLabel(quant.min), w-8, h-5);
+	} else {
+	    ctx.textAlign = 'left';
+            ctx.fillText(formatQuantLabel(quant.max), 8, 10);
+            ctx.fillText(formatQuantLabel(quant.min), 8, h-5);
+	}
     }
 }
 
@@ -557,7 +586,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var sc = ((score - (1.0*smin)) * yscale)|0;
 	quant = {min: smin, max: smax};
 
-	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'black';
+	var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
 	if (style.COLOR2) {
 	    var grad = style._gradient;
 	    if (!grad) {
