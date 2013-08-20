@@ -302,7 +302,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 }
                             } else if (blockType == BIG_WIG_TYPE_GRAPH) {
                                 for (var i = 0; i < itemCount; ++i) {
-                                    var start = la[(i*3) + 6] + 1;
+                                    var start = la[(i*3) + 6];
                                     var end   = la[(i*3) + 7];
                                     var score = fa[(i*3) + 8];
                                     if (start > end) {

@@ -2,12 +2,12 @@ For 0.9 (?)
 -----------
 
   - Tidy up feature source creation [DONE, except for leap handlers]
+  - Overlay sources [DONE, at least for the merge-by-coords case]
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?
   - Track-hub support
   - Assembly hub support
-  - Small BED/WIG support
   - next/prev peak support for quantitative tracks [DONE]
   - Work out the kinks in security/preflighting.
   - Tracks via Ensembl-REST? [DONE]
@@ -17,6 +17,7 @@ For 0.10
 --------
    
 
+  - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Undo/redo.  
   - History of recently-viewed tracks.

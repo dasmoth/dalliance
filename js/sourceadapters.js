@@ -11,32 +11,50 @@ DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
 
-    if (this.dasSource.bwgURI || this.dasSource.bwgBlob) {
-        fs = new BWGFeatureSource(this.dasSource);
-    } else if (this.dasSource.bamURI || this.dasSource.bamBlob) {
-        fs = new BAMFeatureSource(this.dasSource);
-    } else if (this.dasSource.bamblrURI) {
-        fs = new BamblrFeatureSource(this.dasSource);
-    } else if (this.dasSource.jbURI) {
-        fs = new JBrowseFeatureSource(this.dasSource);
-    } else if (this.dasSource.tier_type == 'sequence') {
+    if (this.dasSource.tier_type == 'sequence') {
         if (this.dasSource.twoBitURI) {
             ss = new TwoBitSequenceSource(this.dasSource);
         } else {
             ss = new DASSequenceSource(this.dasSource);
         }
-    } else if (this.dasSource.tier_type == 'ensembl') {
-        fs = new EnsemblFeatureSource(this.dasSource);
     } else {
-        fs = new DASFeatureSource(this.dasSource);
-    }
-    
-    if (this.dasSource.mapping) {
-        fs = new MappedFeatureSource(fs, this.browser.chains[this.dasSource.mapping]);
+        fs = this.browser.createFeatureSource(this.dasSource);
     }
 
     this.featureSource = fs;
     this.sequenceSource = ss;
+}
+
+Browser.prototype.createFeatureSource = function(config) {
+    var fs;
+
+    if (config.bwgURI || config.bwgBlob) {
+        fs =  new BWGFeatureSource(config);
+    } else if (config.bamURI || config.bamBlob) {
+        fs = new BAMFeatureSource(config);
+    } else if (config.bamblrURI) {
+        fs = new BamblrFeatureSource(config);
+    } else if (config.jbURI) {
+        fs = new JBrowseFeatureSource(config);
+    } else if (config.tier_type == 'ensembl') {
+        fs = new EnsemblFeatureSource(config);
+    } else {
+        fs = new DASFeatureSource(config);
+    }
+
+    if (fs && config.overlay) {
+        var sources = [fs]
+        for (var oi = 0; oi < config.overlay.length; ++oi) {
+            sources.push(this.createFeatureSource(config.overlay[oi]));
+        }
+        fs = new OverlayFeatureSource(sources, config);
+    }
+
+    if (config.mapping) {
+        fs = new MappedFeatureSource(fs, this.chains[config.mapping]);
+    }
+
+    return fs;
 }
 
 

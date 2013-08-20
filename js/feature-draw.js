@@ -586,7 +586,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var sc = ((score - (1.0*smin)) * yscale)|0;
 	quant = {min: smin, max: smax};
 
-	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'black';
+	var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
 	if (style.COLOR2) {
 	    var grad = style._gradient;
 	    if (!grad) {
