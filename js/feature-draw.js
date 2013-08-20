@@ -662,7 +662,7 @@ DasTier.prototype.styleForFeature = function(f) {
         }
 
 	var labelRE = sh._labelRE;
-	if (!labelRE) {
+	if (!labelRE || !labelRE.test) {
 	    labelRE = new RegExp('^' + sh.label + '$');
 	    sh._labelRE = labelRE;
 	}
@@ -670,7 +670,7 @@ DasTier.prototype.styleForFeature = function(f) {
             continue;
         }
 	var methodRE = sh._methodRE;
-	if (!methodRE) {
+	if (!methodRE || !methodRE.test) {
 	    methodRE = new RegExp('^' + sh.method + '$');
 	    sh._methodRE = methodRE;
 	}
