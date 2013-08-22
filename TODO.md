@@ -10,10 +10,11 @@ For 0.9
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
   - Thresholding/leaping on quantitative tracks [DONE]
-  - SVG export parity
+  - SVG export parity [DONE: Label placement, better grouping, quant-scales]
   - Configurability of ruler [DONE]
   - Sort out feature popups for composite features
   - Feature popup extensibility [DONE]
+  - Help popup [DONE]
  
 For 0.10
 --------
