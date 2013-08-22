@@ -1462,6 +1462,7 @@ function glyphLookup(glyphs, rx, matches) {
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
         if (g.min() <= rx && g.max() >= rx) {
+            console.log(g);
             if (g.feature) {
                 matches.push(g.feature);
             } else if (g.group) {
@@ -1470,12 +1471,12 @@ function glyphLookup(glyphs, rx, matches) {
     
             if (g.glyphs) {
                 return glyphLookup(g.glyphs, rx, matches);
-            } else if (g.glyph) {;
+            } else if (g.glyph) {
                 return glyphLookup([g.glyph], rx, matches);
             } else {
                 return matches;
             }
         }
     }
-    return null;
+    return matches;
 }
