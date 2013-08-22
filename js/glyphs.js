@@ -1097,6 +1097,8 @@ function GridGlyph(height) {
     this._height = height || 50;
 }
 
+GridGlyph.prototype.notSelectable = true;
+
 GridGlyph.prototype.min = function() {
     return -100000;
 };

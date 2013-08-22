@@ -1466,7 +1466,8 @@ function glyphLookup(glyphs, rx, matches) {
 
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
-        if (g.min() <= rx && g.max() >= rx) {
+        if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
+            console.log(g);
             if (g.feature) {
                 matches.push(g.feature);
             } else if (g.group) {
