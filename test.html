@@ -70,7 +70,11 @@
                    provides_karyotype:   true,
                    provides_search:      true,
                    provides_entrypoints: true,
-                   maxbins:              false}, 
+                   maxbins:              false,
+                   featureInfoPlugin: function(f, info) {
+                      info.add('Testing', 'This is another test!');
+                   }
+                  }, 
                   {name:                 'Repeats',     
                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
                    stylesheet_uri:       'http://www.biodalliance.org/stylesheets/repeats-L1.xml'}, 

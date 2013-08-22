@@ -38,8 +38,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     // var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([\-,\,.]+([0-9,]+))?/;
 
     if (!b.disableDefaultFeaturePopup) {
-        this.addFeatureListener(function(ev, feature, hit) {
-            b.featurePopup(ev, feature, hit);
+        this.addFeatureListener(function(ev, feature, hit, tier) {
+            b.featurePopup(ev, feature, hit, tier);
         });
     }
 

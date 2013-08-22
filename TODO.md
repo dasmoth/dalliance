@@ -3,10 +3,10 @@ For 0.9
 
   - Tidy up feature source creation [DONE]
   - Overlay sources [DONE, at least for the merge-by-coords case]
+  - Scatter-plot views [DONE]
   - Track-hub support
   - Assembly hub support
   - next/prev peak support for quantitative tracks [DONE]
-  - Work out the kinks in security/preflighting.
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
   - Thresholding/leaping on quantitative tracks [DONE]
@@ -23,10 +23,10 @@ For 0.10
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?
+  - Better zoom control
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Chromosome overviews
-  - RDF/FALDO support?
   - Incremental data fetching
   - Try to preserve layout when expanding/collapsing variants.
   - Better search
@@ -35,17 +35,20 @@ For 0.10
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
   - Bulk addition of local files.
+  - Replace feature popups with inspector.
 
 For 0.11
 --------
 
   - Undo/redo.  
   - History of recently-viewed tracks.
+  - RDF/FALDO support?
 
 
 Future
 -------------
 
+ - Work out the kinks in security/preflighting.
  - Construct as a web-component
    + (web component polyfills aren't quite ready yet).
  - Better tiling in renderer.

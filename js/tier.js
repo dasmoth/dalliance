@@ -31,11 +31,21 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     this.y = 0;
     this.layoutWasDone = false;
 
+    if (source.featureInfoPlugin) {
+        this.addFeatureInfoPlugin(source.featureInfoPlugin);
+    }
+
     this.initSources();
 }
 
 DasTier.prototype.toString = function() {
     return this.id;
+}
+
+DasTier.prototype.addFeatureInfoPlugin = function(p) {
+    if (!this.featureInfoPlugins) 
+        this.featureInfoPlugins = [];
+    this.featureInfoPlugins.push(p);
 }
 
 DasTier.prototype.init = function() {

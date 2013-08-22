@@ -41,13 +41,21 @@ FeatureInfo.prototype.add = function(label, info) {
     this.sections.push({label: label, info: info});
 }
 
-Browser.prototype.featurePopup = function(ev, __ignored_feature, hit) {
+Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     var hi = hit.length;
     var feature = --hi >= 0 ? hit[hi] : {};
     var group = --hi >= 0 ? hit[hi] : {};
 
     var featureInfo = new FeatureInfo(hit, feature, group);
     var fips = this.featureInfoPlugins || [];
+    for (fipi = 0; fipi < fips.length; ++fipi) {
+        try {
+            fips[fipi](feature, featureInfo);
+        } catch (e) {
+            console.log(e.stack || e);
+        }
+    }
+    fips = tier.featureInfoPlugins || [];
     for (fipi = 0; fipi < fips.length; ++fipi) {
         try {
             fips[fipi](feature, featureInfo);

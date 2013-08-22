@@ -65,6 +65,12 @@ Browser.prototype.restoreStatus = function() {
         return;
     }
 
+    var defaultSourcesByConfigHash = {};
+    for (var si = 0; si < this.sources.length; ++si) {
+        var source = this.sources[si];
+        defaultSourcesByConfigHash[hex_sha1(miniJSONify(source))] = source;
+    }
+
     var qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     var qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
     var qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
@@ -88,5 +94,16 @@ Browser.prototype.restoreStatus = function() {
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];
     if (sourceStr) {
 	this.sources = JSON.parse(sourceStr);
+        for (var si = 0; si < this.sources.length; ++si) {
+            var source = this.sources[si];
+            var hash = hex_sha1(miniJSONify(source, {props: true, coords: true}));
+            var oldSource = defaultSourcesByConfigHash[hash];
+            if (oldSource) {
+                if (oldSource.featureInfoPlugin) {
+                    // console.log('revivifying ' + hash);
+                    source.featureInfoPlugin = oldSource.featureInfoPlugin;
+                }
+            }
+        }
     }
 }

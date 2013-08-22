@@ -672,7 +672,7 @@ Browser.prototype.realMakeTier = function(source) {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
                 if (hit && hit.length > 0) {
-                    thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit);
+                    thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit, tier);
                 }
             }, 1000);
         }
@@ -692,7 +692,7 @@ Browser.prototype.realMakeTier = function(source) {
             } else {
                 doubleClickTimeout = setTimeout(function() {
                     doubleClickTimeout = null;
-                    thisB.notifyFeature(ev, hit[hit.length-1], hit);
+                    thisB.notifyFeature(ev, hit[hit.length-1], hit, tier);
                 }, 500);
             }
         }
@@ -1269,10 +1269,10 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
-Browser.prototype.notifyFeature = function(ev, feature, hit) {
+Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
-          this.featureListeners[fli](ev, feature, hit);
+          this.featureListeners[fli](ev, feature, hit, tier);
       } catch (ex) {
           console.log(ex.stack);
       }
@@ -1284,10 +1284,10 @@ Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     this.featureHoverListeners.push(handler);
 }
 
-Browser.prototype.notifyFeatureHover = function(ev, feature, hit) {
+Browser.prototype.notifyFeatureHover = function(ev, feature, hit, tier) {
     for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
         try {
-            this.featureHoverListeners[fli](ev, feature, hit);
+            this.featureHoverListeners[fli](ev, feature, hit, tier);
         } catch (ex) {
             console.log(ex.stack);
         }
@@ -1467,7 +1467,6 @@ function glyphLookup(glyphs, rx, matches) {
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
         if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
-            console.log(g);
             if (g.feature) {
                 matches.push(g.feature);
             } else if (g.group) {

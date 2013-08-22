@@ -225,7 +225,7 @@ function removeChildren(node)
 // WARNING: not for general use!
 //
 
-function miniJSONify(o) {
+function miniJSONify(o, exc) {
     if (typeof o === 'undefined') {
         return 'undefined';
     } else if (o == null) {
@@ -240,14 +240,17 @@ function miniJSONify(o) {
         if (o instanceof Array) {
             var s = null;
             for (var i = 0; i < o.length; ++i) {
-                s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
+                s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i], exc);
             }
             return '[' + (s?s:'') + ']';
         } else {
+            exc = exc || {};
             var s = null;
             for (var k in o) {
+                if (exc[k])
+                    continue;
                 if (k != undefined && typeof(o[k]) != 'function') {
-                    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
+                    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k], exc);
                 }
             }
             return '{' + (s?s:'') + '}';
