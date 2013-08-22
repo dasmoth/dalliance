@@ -16,14 +16,16 @@ Browser.prototype.addFeatureInfoPlugin = function(handler) {
     this.featureInfoPlugins.push(handler);
 }
 
-function FeatureInfo(feature, group) {
+function FeatureInfo(hit, feature, group) {
     var name = pick(group.type, feature.type);
     var fid = pick(group.label, feature.label, group.id, feature.id);
     if (fid && fid.indexOf('__dazzle') != 0) {
         name = name + ': ' + fid;
     }
 
+    this.hit = hit;
     this.feature = feature;
+    this.group = group;
     this.title = name;
     this.sections = [];
 }
@@ -39,10 +41,14 @@ FeatureInfo.prototype.add = function(label, info) {
     this.sections.push({label: label, info: info});
 }
 
-Browser.prototype.featurePopup = function(ev, feature, group) {
-    if (!feature) feature = {};
-    if (!group) group = {};
-    var featureInfo = new FeatureInfo(feature, group);
+Browser.prototype.featurePopup = function(ev, __ignored_feature, hit) {
+    var hi = hit.length;
+    var feature = --hi >= 0 ? hit[hi] : {};
+    var group = --hi >= 0 ? hit[hi] : {};
+
+    console.log(hit);
+
+    var featureInfo = new FeatureInfo(hit, feature, group);
     var fips = this.featureInfoPlugins || [];
     for (fipi = 0; fipi < fips.length; ++fipi) {
         try {

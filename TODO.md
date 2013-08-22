@@ -12,9 +12,10 @@ For 0.9
   - Thresholding/leaping on quantitative tracks [DONE]
   - SVG export parity [DONE: Label placement, better grouping, quant-scales]
   - Configurability of ruler [DONE]
-  - Sort out feature popups for composite features
+  - Sort out feature popups for composite features [DONE]
   - Feature popup extensibility [DONE]
   - Help popup [DONE]
+  - Better way of packaging CSS etc.?  (can we lose uiPrefix?)
  
 For 0.10
 --------
@@ -33,6 +34,7 @@ For 0.10
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
+  - Bulk addition of local files.
 
 For 0.11
 --------

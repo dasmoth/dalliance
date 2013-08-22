@@ -671,8 +671,8 @@ Browser.prototype.realMakeTier = function(source) {
         } else {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
-                if (hit) {
-                    thisB.notifyFeatureHover(ev, hit); // FIXME group
+                if (hit && hit.length > 0) {
+                    thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit);
                 }
             }, 1000);
         }
@@ -684,7 +684,7 @@ Browser.prototype.realMakeTier = function(source) {
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
-        if (hit && !thisB.isDragging) {
+        if (hit && hit.length > 0 && !thisB.isDragging) {
             if (doubleClickTimeout) {
                 clearTimeout(doubleClickTimeout);
                 doubleClickTimeout = null;
@@ -692,7 +692,7 @@ Browser.prototype.realMakeTier = function(source) {
             } else {
                 doubleClickTimeout = setTimeout(function() {
                     doubleClickTimeout = null;
-                    thisB.notifyFeature(ev, hit);
+                    thisB.notifyFeature(ev, hit[hit.length-1], hit);
                 }, 500);
             }
         }
@@ -1269,10 +1269,10 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
-Browser.prototype.notifyFeature = function(ev, feature, group) {
+Browser.prototype.notifyFeature = function(ev, feature, hit) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
-          this.featureListeners[fli](ev, feature, group);
+          this.featureListeners[fli](ev, feature, hit);
       } catch (ex) {
           console.log(ex.stack);
       }
@@ -1284,10 +1284,10 @@ Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     this.featureHoverListeners.push(handler);
 }
 
-Browser.prototype.notifyFeatureHover = function(ev, feature, group) {
+Browser.prototype.notifyFeatureHover = function(ev, feature, hit) {
     for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
         try {
-            this.featureHoverListeners[fli](ev, feature, group);
+            this.featureHoverListeners[fli](ev, feature, hit);
         } catch (ex) {
             console.log(ex.stack);
         }
@@ -1456,18 +1456,24 @@ Browser.prototype.featureDoubleClick = function(f, rx, ry) {
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
 
-function glyphLookup(glyphs, rx) {
+function glyphLookup(glyphs, rx, matches) {
+    matches = matches || [];
+
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
         if (g.min() <= rx && g.max() >= rx) {
             if (g.feature) {
-                return g.feature;
-            } else if (g.glyphs) {
-                return glyphLookup(g.glyphs, rx) || g.group;
-            } else if (g.glyph) {
-                return glyphLookup([g.glyph], rx) || g.group;
+                matches.push(g.feature);
+            } else if (g.group) {
+                matches.push(g.group);
+            }
+    
+            if (g.glyphs) {
+                return glyphLookup(g.glyphs, rx, matches);
+            } else if (g.glyph) {;
+                return glyphLookup([g.glyph], rx, matches);
             } else {
-                return g.group;
+                return matches;
             }
         }
     }
