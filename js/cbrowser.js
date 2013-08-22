@@ -1434,7 +1434,12 @@ Browser.prototype.positionRuler = function() {
     }
 }
 
-Browser.prototype.featureDoubleClick = function(f, rx, ry) {
+Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
+    if (!hit || hit.length == 0)
+        return;
+
+    f = hit[hit.length - 1];
+
     if (!f.min || !f.max) {
         return;
     }
@@ -1462,7 +1467,6 @@ function glyphLookup(glyphs, rx, matches) {
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
         if (g.min() <= rx && g.max() >= rx) {
-            console.log(g);
             if (g.feature) {
                 matches.push(g.feature);
             } else if (g.group) {
