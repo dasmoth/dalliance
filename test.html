@@ -8,9 +8,11 @@
 </style>
 
 <title>Human NCBI36 :: Dalliance</title> 
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/das.js"></script>
 <script language="javascript" src="js/spans.js"></script>
 <script language="javascript" src="js/utils.js"></script>
-<script language="javascript" src="js/das.js"></script>
 <script language="javascript" src="js/cbrowser.js"></script>
 <script language="javascript" src="js/feature-popup.js"></script>
 <script language="javascript" src="js/tier.js"></script>
@@ -29,8 +31,6 @@
 <script language="javascript" src="js/kspace.js"></script>
 <script language="javascript" src="json/json2.js"></script>
 <script language="javascript" src="js/bin.js"></script>
-<script language="javascript" src="js/bigwig.js"></script>
-<script language="javascript" src="js/bam.js"></script>
 <script language="javascript" src="js/twoBit.js"></script>
 <script language="javascript" src="js/thub.js"></script>
 <script language="javascript" src="js/svg-export.js"></script>
@@ -41,6 +41,8 @@
 <script language="javascript" src="js/jbjson.js"></script>
 <script language="javascript" src="js/sourceadapters.js"></script>
 <script language="javascript" src="polyfills/html5slider.js"></script>
+<script language="javascript" src="js/ensembljson.js"></script>
+<script language="javascript" src="js/overlay.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -63,6 +65,13 @@
                    twoBitURI:            'http://www.biodalliance.org/datasets/hg18.2bit',
                    // uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
                    tier_type:            'sequence'},
+                  {name:                 'e! transcripts',
+                   uri:                  'http://beta.rest.ensembl.org',
+                   tier_type:            'ensembl',
+                   species:              'human',
+                   type:                 ['transcript', 'exon', 'cds'],
+                   mapping: 'hg19toHg18',
+                  },
                   {name:                 'Genes',     
                    desc:                 'Gene structures from Ensembl 54',
                    uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
