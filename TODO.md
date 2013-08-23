@@ -15,7 +15,8 @@ For 0.9
   - Sort out feature popups for composite features [DONE]
   - Feature popup extensibility [DONE]
   - Help popup [DONE]
-  - Better way of packaging CSS etc.?  (can we lose uiPrefix?)
+  - Better way of packaging CSS etc.?  (can we lose uiPrefix?) [CORS on the css/ and img/ directories seems to fix most of the issues here]
+  - Reinstate MAX_VEW_SIZE in some configurable manner.
  
 For 0.10
 --------
