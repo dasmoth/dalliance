@@ -261,6 +261,13 @@ BWGFeatureSource.prototype.init = function() {
     }, this.opts.credentials);
 }
 
+BWGFeatureSource.prototype.capabilities = function() {
+    var caps = {leap: true};
+    if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
+        caps.quantLeap = true;
+    return caps;
+}
+
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
     this.bwgHolder.await(function(bwg) {
@@ -706,4 +713,8 @@ JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     );
 }
 
-
+function sourceAdapterIsCapable(s, cap) {
+    if (!s.capabilities)
+        return false;
+    else return s.capabilities()[cap];
+}

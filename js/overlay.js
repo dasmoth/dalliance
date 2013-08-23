@@ -20,6 +20,13 @@ OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
     return this.sources[0].getStyleSheet(callback);
 }
 
+OverlayFeatureSource.prototype.capabilities = function() {
+    var s0 = this.sources[0];
+    if (s0.capabilities) 
+        return s0.capabilities();
+    return {};
+}
+
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var baton = new OverlayBaton(callback, this.sources.length);
     for (var si = 0; si < this.sources.length; ++si) {
@@ -31,6 +38,14 @@ OverlayFeatureSource.prototype.fetchN = function(baton, si, chr, min, max, scale
     this.sources[si].fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
 	return baton.completed(si, status, features, scale);
     });
+}
+
+OverlayFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    return this.sources[0].quantFindNextFeature(chr, pos, dir, threshold, callback);
+}
+
+OverlayFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    return this.sources[0].findNextFeature(chr, pos, dir, callback);
 }
 
 function OverlayBaton(callback, count) {

@@ -1077,10 +1077,13 @@ PointGlyph.prototype.height = function() {
 }
 
 PointGlyph.prototype.draw = function(g) {
+    g.save();
+    g.globalAlpha = 0.3;
     g.fillStyle = this._fill;
     g.beginPath();
-    g.arc(this._x, this._y, 2, 0, 6.29);
+    g.arc(this._x, this._y, 1.5, 0, 6.29);
     g.fill();
+    g.restore();
 }
 
 PointGlyph.prototype.toSVG = function() {
