@@ -107,7 +107,8 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 	}
 	
     };
-    req.responseType = 'text';
+    
     req.open('GET', url, true);
+    req.responseType = 'text';
     req.send('');
 }
