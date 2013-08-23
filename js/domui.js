@@ -125,7 +125,8 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         closeButton.addEventListener('mouseout', function(ev) {
             closeButton.style.color = 'black';
         }, false);
-        closeButton.addEventListener('mousedown', function(ev) {
+        closeButton.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
             thisB.removeAllPopups();
         }, false);
         var tbar = makeElement('h3', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {className: 'popover-title'}, {});
