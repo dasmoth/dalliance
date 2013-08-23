@@ -6,7 +6,6 @@ For 0.9
   - Scatter-plot views [DONE]
   - Track-hub support
   - Assembly hub support
-  - next/prev peak support for quantitative tracks [DONE]
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
   - Thresholding/leaping on quantitative tracks [DONE]
@@ -24,6 +23,7 @@ For 0.10
   - UI for next/prev
   - Animate when leaping.
     + Also snap-zooming?
+    + Inform user of progress
   - Better zoom control
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
