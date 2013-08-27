@@ -4,8 +4,7 @@ For 0.9
   - Tidy up feature source creation [DONE]
   - Overlay sources [DONE, at least for the merge-by-coords case]
   - Scatter-plot views [DONE]
-  - Track-hub support
-  - Assembly hub support
+  - Track-hub support [Basics done, now lots more options to support...]
   - Tracks via Ensembl-REST? [DONE]
   - Abbreviations when typing locations. [DONE]
   - Thresholding/leaping on quantitative tracks [DONE]
@@ -30,13 +29,17 @@ For 0.10
   - Chromosome overviews
   - Incremental data fetching
   - Try to preserve layout when expanding/collapsing variants.
-  - Better search
+  - Better search (using TRIX?)
   - Stylesheet editor.
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.  
   - Bulk addition of local files.
-  - Replace feature popups with inspector.
+  - Assembly hub support.
+  - Track hub composite tracks.
+  - User interface for connecting to a track hub.
+  - Replace feature popups with inspector?
+     + Maybe a more general popupocalypse? (track-adder, help, etc.?)
 
 For 0.11
 --------

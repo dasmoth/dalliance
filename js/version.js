@@ -10,10 +10,10 @@
 var VERSION = {
     CONFIG: 3,
     MAJOR:  0,
-    MINOR:  8,
-    MICRO:  9,
+    MINOR:  9,
+    MICRO:  0,
     PATCH:  '',
-    BRANCH: 'dev'
+    BRANCH: 'pre1'
 }
 
 VERSION.toString = function() {
