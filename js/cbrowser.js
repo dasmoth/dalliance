@@ -41,7 +41,8 @@ function Browser(opts) {
         speciesName: 'Human',
         taxon: 9606,
         auth: 'NCBI',
-        version: '36'
+        version: '36',
+        ucscName: 'hg18'
     };
     this.chains = {};
 
@@ -92,6 +93,9 @@ function Browser(opts) {
     this.availableSources = new Observed();
     this.defaultSources = [];
     this.mappableSources = {};
+
+    this.hubs = [];
+    this.hubObjects = [];
 
     for (var k in opts) {
         this[k] = opts[k];
@@ -469,6 +473,18 @@ Browser.prototype.realInit = function() {
     this.queryRegistry();
     for (var m in this.chains) {
         this.queryRegistry(m, true);
+    }
+
+    if (this.hubs) {
+        for (var hi = 0; hi < this.hubs.length; ++hi) {
+            connectTrackHub(this.hubs[hi], function(hub, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    thisB.hubObjects.push(hub);
+                }
+            });
+        }
     }
 }
 

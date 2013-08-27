@@ -7,10 +7,17 @@
 // track-adder.js
 //
 
+function sourceURI(source) {
+    // FIXME
+    return source.uri || source.bwgURI || source.bamURI;
+}
+
 Browser.prototype.currentlyActive = function(source) {
+    var suri = sourceURI(source);
     for (var i = 0; i < this.tiers.length; ++i) {
         var ts = this.tiers[i].dasSource;
-        if (ts.uri == source.uri || ts.uri == source.uri + '/') {
+        var tsuri = sourceURI(ts);
+        if (tsuri == suri || tsuri == suri + '/') {
             // Special cases where we might meaningfully want two tiers of the same URI.
             if (ts.tier_type) {
                 if (!source.tier_type || source.tier_type != ts.tier_type) {
@@ -62,6 +69,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var makeStab, makeStabObserver;
     var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
     addModeButtons.push(regButton);
+    
     for (var m in this.mappableSources) {
         var mf  = function(mm) {
             var mapButton = thisB.makeButton(thisB.chains[mm].srcTag, 'Browse datasources mapped from ' + thisB.chains[mm].srcTag);
@@ -73,6 +81,37 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
         }; mf(m);
     }
+    
+
+    var makeHubButton = function(hub) {
+        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
+            var hubButton = thisB.makeButton(hub.shortLabel, hub.longLabel);
+            addModeButtons.push(hubButton);
+            hubButton.addEventListener('click', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+
+                hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    activateButton(addModeButtons, hubButton);
+                    var hubTracks = [];
+                    for (var ti = 0; ti < tracks.length; ++ti) {
+                        var t = tracks[ti].toDallianceSource();
+                        if (t)
+                            hubTracks.push(t);
+                    }
+                    makeStab(new Observed(hubTracks));
+                });
+            }, false);
+        }
+    }
+    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
+        var hub = this.hubObjects[hi];
+        makeHubButton(hub);
+    }
+
     var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
     addModeButtons.push(defButton);
     var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');

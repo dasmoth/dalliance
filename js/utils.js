@@ -321,6 +321,34 @@ Awaited.prototype.await = function(f) {
     }
 }
 
+function textXHR(url, callback) {
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+		callback(null, 'Error code ' + req.status);
+	    } else {
+		callback(req.responseText);
+	    }
+	}
+    };
+    
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send('');
+}
+
+function relativeURL(base, rel) {
+    // FIXME quite naive -- good enough for trackhubs?
+
+    var li = base.lastIndexOf('/');
+    if (li >= 0) {
+        return base.substr(0, li + 1) + rel;
+    } else {
+        return rel;
+    }
+}
+
 
 //
 // Missing APIs
