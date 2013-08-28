@@ -93,7 +93,7 @@ function connectTrackHub(hubURL, callback) {
 TrackHubTrack.prototype.toDallianceSource = function() {
     source = {
         name: this.shortLabel,
-        desc: this.longLabel,
+        desc: this.longLabel
     };
     
     typeToks = this.type.split(/\s+/);
