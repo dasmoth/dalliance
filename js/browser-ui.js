@@ -267,7 +267,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
         this.removeAllPopups();
     } else {
-        var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
         this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
 }
