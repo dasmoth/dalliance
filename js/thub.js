@@ -102,6 +102,34 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         return source;
     } else if (typeToks[0] == 'bigWig') {
         source.bwgURI = this.bigDataUrl;
+        var min, max;
+        if (typeToks.length >= 3) {
+            min = 1.0 * typeToks[1];
+            max = 1.0 * typeToks[2];
+        }
+        var height;
+        if (this.maxHeightPixels) {
+            var mhpToks = this.maxHeightPixels.split(/:/);
+            if (mhpToks.length == 3) {
+                height = mhpToks[1] | 0;
+            } else {
+                console.log('maxHeightPixels should be of the form max:default:min');
+            }
+        }
+        
+        var stylesheet = new DASStylesheet();
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = 'HISTOGRAM';
+        wigStyle.COLOR1 = 'white';
+        wigStyle.COLOR2 = 'black';
+        wigStyle.HEIGHT = height || 30;
+        if (min || max) {
+            wigStyle.MIN = min;
+            wigStyle.MAX = max;
+        }
+        stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+
+        source.style = stylesheet.styles;
         return source;
     } else if (typeToks[0] == 'bam') {
         source.bamURI = this.bigDataUrl;
