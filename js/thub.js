@@ -100,7 +100,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
     if (typeToks[0] == 'bigBed') {
         source.bwgURI = this.bigDataUrl;
         return source;
-    } else if (typeToks[0] == 'bigBed') {
+    } else if (typeToks[0] == 'bigWig') {
         source.bwgURI = this.bigDataUrl;
         return source;
     } else if (typeToks[0] == 'bam') {
