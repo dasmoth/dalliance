@@ -31,6 +31,8 @@ TrackHubDB.prototype.getTracks = function(callback) {
             return callback(null, err);
         }
 
+        trackFile = trackFile.replace('\\\n', ' ');
+
         var tracks = [];
         stanzas = trackFile.split(THUB_STANZA_REGEXP);
         for (var s = 0; s < stanzas.length; ++s) {
