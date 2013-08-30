@@ -25,6 +25,7 @@ var palette = {
 };
 
 var COLOR_RE = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
+var CSS_COLOR_RE = /rgb\(([0-9]+),([0-9]+),([0-9]+)\)/
 
 function dasColourForName(name) {
     var c = palette[name];
@@ -34,9 +35,15 @@ function dasColourForName(name) {
             c = new DColour(('0x' + match[1])|0, ('0x' + match[2])|0, ('0x' + match[3])|0, name);
             palette[name] = c;
         } else {
-            dlog("couldn't handle color: " + name);
-            c = palette.black;
-            palette[name] = c;
+	    match = CSS_COLOR_RE.exec(name);
+	    if (match) {
+		c = new DColour(match[1]|0, match[2]|0, match[3]|0, name);
+		palette[name] = c;
+	    } else {
+		console.log("couldn't handle color: " + name);
+		c = palette.black;
+		palette[name] = c;
+	    }
         }
     }
     return c;

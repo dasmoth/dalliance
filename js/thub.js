@@ -102,34 +102,12 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         return source;
     } else if (typeToks[0] == 'bigWig') {
         source.bwgURI = this.bigDataUrl;
-        var min, max;
-        if (typeToks.length >= 3) {
-            min = 1.0 * typeToks[1];
-            max = 1.0 * typeToks[2];
-        }
-        var height;
-        if (this.maxHeightPixels) {
-            var mhpToks = this.maxHeightPixels.split(/:/);
-            if (mhpToks.length == 3) {
-                height = mhpToks[1] | 0;
-            } else {
-                console.log('maxHeightPixels should be of the form max:default:min');
-            }
-        }
-        
-        var stylesheet = new DASStylesheet();
-        var wigStyle = new DASStyle();
-        wigStyle.glyph = 'HISTOGRAM';
-        wigStyle.COLOR1 = 'white';
-        wigStyle.COLOR2 = 'black';
-        wigStyle.HEIGHT = height || 30;
-        if (min || max) {
-            wigStyle.MIN = min;
-            wigStyle.MAX = max;
-        }
-        stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+        source.style = this.bigwigStyles();
 
-        source.style = stylesheet.styles;
+        if (this.yLineOnOff && this.yLineOnOff == 'on') {
+            source.quantLeapThreshold = this.yLineMark !== undefined ? (1.0 * this.yLineMark) : 0.0;
+        }
+
         return source;
     } else if (typeToks[0] == 'bam') {
         source.bamURI = this.bigDataUrl;
@@ -137,4 +115,58 @@ TrackHubTrack.prototype.toDallianceSource = function() {
     } else {
         console.log('Unsupported ' + this.type);
     }
+}
+
+TrackHubTrack.prototype.bigwigStyles = function() {
+    var min, max;
+    if (typeToks.length >= 3) {
+        min = 1.0 * typeToks[1];
+        max = 1.0 * typeToks[2];
+    }
+
+    var height;
+    if (this.maxHeightPixels) {
+        var mhpToks = this.maxHeightPixels.split(/:/);
+        if (mhpToks.length == 3) {
+            height = mhpToks[1] | 0;
+        } else {
+            console.log('maxHeightPixels should be of the form max:default:min');
+        }
+    }
+    
+    var gtype = 'bars';
+    if (this.graphTypeDefault) {
+        gtype = this.graphTypeDefault;
+    }
+    
+    var color = 'black';
+    var altColor = null;
+    if (this.color) {
+        color = 'rgb(' + this.color + ')';
+    }
+    if (this.altColor) {
+        altColor = 'rgb(' + this.altColor + ')';
+    }
+    
+    var stylesheet = new DASStylesheet();
+    var wigStyle = new DASStyle();
+    if (gtype == 'points') {
+        wigStyle.glyph = 'POINT';
+    } else {
+        wigStyle.glyph = 'HISTOGRAM';
+    }
+
+    if (altColor) {
+        wigStyle.COLOR1 = color;
+        wigStyle.COLOR2 = altColor;
+    } else {
+        wigStyle.BGCOLOR = color;
+    }
+    wigStyle.HEIGHT = height || 30;
+    if (min || max) {
+        wigStyle.MIN = min;
+        wigStyle.MAX = max;
+    }
+    stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+    return stylesheet.styles;
 }
