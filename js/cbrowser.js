@@ -51,12 +51,12 @@ function Browser(opts) {
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
     this.zoomMin = 10.0;
-    this.zoomMax = 220.0;
+    this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
     this.origin = 0;
     this.targetQuantRes = 5.0;
     this.featurePanelWidth = 750;
     this.zoomBase = 100;
-    this.zoomExpt = 30; // Now gets clobbered.
+    this.zoomExpt = 30.0; // Back to being fixed....
     this.zoomSliderValue = 100;
     this.entryPoints = null;
     this.currentSeqMax = -1; // init once EPs are fetched.
@@ -72,6 +72,8 @@ function Browser(opts) {
     this.selectedTier = 1;
 
     this.placards = [];
+
+    this.maxViewWidth = 500000;
 
     // Options.
     
@@ -155,7 +157,10 @@ Browser.prototype.realInit = function() {
     // Dimension stuff
 
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
-    this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
+    // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
+    if (!this.zoomMax) {
+        this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
+    }
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
     // Event handlers
@@ -1318,7 +1323,7 @@ Browser.prototype.addViewListener = function(handler, opts) {
 Browser.prototype.notifyLocation = function() {
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
-            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue);
+            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue, {current: this.zoomSliderValue, min: this.zoomMin, max: this.zoomMax});
         } catch (ex) {
             console.log(ex.stack);
         }

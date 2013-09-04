@@ -15,7 +15,7 @@ For 0.9
   - Feature popup extensibility [DONE]
   - Help popup [DONE]
   - Better way of packaging CSS etc.?  (can we lose uiPrefix?) [CORS on the css/ and img/ directories seems to fix most of the issues here]
-  - Reinstate MAX_VEW_SIZE in some configurable manner.
+  - Reinstate MAX_VEW_SIZE in some configurable manner. [DONE Browser.maxViewWidth]
  
 For 0.10
 --------

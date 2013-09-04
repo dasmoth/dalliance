@@ -86,10 +86,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
 
-    this.addViewListener(function(chr, min, max, zoom) {
+    this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = '';
         locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
-        zoomSlider.value = zoom;
+        zoomSlider.min = zoom.min;
+        zoomSlider.max = zoom.max;
+        zoomSlider.value = zoom.current;
         if (b.storeStatus) {
             b.storeStatus();
         }
