@@ -77,7 +77,12 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     }
 
     if (!this.dasSource.uri) {
+        // FIXME should this be making an error callback???
         return;
+    }
+
+    if (this.dasSource.dasStaticFeatures && this.cachedStaticFeatures) {
+        return callback(null, this.cachedStaticFeatures, this.cachedStaticScale);
     }
 
     var tryMaxBins = (this.dasSource.maxbins !== false);
@@ -88,6 +93,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         fops.maxbins = 1 + (((max - min) / scale) | 0);
     }
     
+    var thisB = this;
     this.dasSource.features(
         new DASSegment(chr, min, max),
         fops,
@@ -95,6 +101,10 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             var retScale = scale;
             if (!tryMaxBins) {
                 retScale = 0.1;
+            }
+            if (!status && thisB.dasSource.dasStaticFeatures) {
+                thisB.cachedStaticFeatures = features;
+                thisB.cachedStaticScale = retScale;
             }
             callback(status, features, retScale);
         }
