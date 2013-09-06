@@ -80,12 +80,12 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
 
     if (this.returnCount == this.count) {
 	if (this.statusCount > 0) {
-	    message = '';
+	    var message = '';
 	    for (var si = 0; si < this.count; ++si) {
 		var s = this.statuses[si];
 		if (s != 0) {
 		    if (message.length > 0) 
-			messsage += ', ';
+			message += ', ';
 		    message += s;
 		}
 	    }
