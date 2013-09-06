@@ -1,40 +1,19 @@
-For 0.9
---------
-
-  - Tidy up feature source creation [DONE]
-  - Overlay sources [DONE, at least for the merge-by-coords case]
-  - Scatter-plot views [DONE]
-  - Track-hub support [Basics done, now lots more options to support...]
-  - Tracks via Ensembl-REST [DONE]
-  - Tracks via JBrowse-JSON [DONE]
-  - Abbreviations when typing locations. [DONE]
-  - Thresholding/leaping on quantitative tracks [DONE]
-  - SVG export parity [DONE: Label placement, better grouping, quant-scales]
-  - Configurability of ruler [DONE]
-  - Sort out feature popups for composite features [DONE]
-  - Feature popup extensibility [DONE]
-  - Help popup [DONE]
-  - Better way of packaging CSS etc.?  (can we lose uiPrefix?) [CORS on the css/ and img/ directories seems to fix most of the issues here]
-  - Reinstate MAX_VEW_SIZE in some configurable manner. [DONE Browser.maxViewWidth]
- 
 For 0.10
 --------
    
-  - UI for next/prev
+  - UI for leaping.
   - Animate when leaping.
-    + Also snap-zooming?
+    + Also toggle-zooming?
     + Inform user of progress
   - Better zoom control
+    + Show all toggle levels.
+    + Some kind of feedback for toggling.
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Chromosome overviews
-  - Incremental data fetching
   - Try to preserve layout when expanding/collapsing variants.
   - Better search (using TRIX?)
   - Stylesheet editor.
-  - Out-to-chromosome zooming
-    + Probably needs a better set of semantic zoom hints in the
-      stylesheet language.  
   - Bulk addition of local files.
   - Assembly hub support.
   - Track hub composite tracks.
@@ -48,6 +27,11 @@ For 0.11
   - Undo/redo.  
   - History of recently-viewed tracks.
   - RDF/FALDO support?
+  - Out-to-chromosome zooming
+    + Probably needs a better set of semantic zoom hints in the
+      stylesheet language.
+  - Stylesheet language revamp???  
+  - Incremental data fetching
 
 
 Future
