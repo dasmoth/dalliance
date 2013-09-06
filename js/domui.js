@@ -129,7 +129,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
             ev.preventDefault(); ev.stopPropagation();
             thisB.removeAllPopups();
         }, false);
-        var tbar = makeElement('h3', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {className: 'popover-title'}, {});
+        var tbar = makeElement('h4', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {/*className: 'popover-title' */}, {});
 
         var dragOX, dragOY;
         var moveHandler, upHandler;
