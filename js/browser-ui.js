@@ -281,12 +281,14 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         this.removeAllPopups();
     } else {
         var optsForm = makeElement('form', null, {className: 'popover-content form-horizontal'});
-
+        var optsTable = makeElement('table');
+        optsTable.cellPadding = 5;
         var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
         scrollModeButton.addEventListener('change', function(ev) {
             b.reverseScrolling = scrollModeButton.checked;
         }, false);
-        optsForm.appendChild(makeElement('div', [makeElement('label', 'Reverse trackpad scrolling', {className: 'control-label'}), scrollModeButton], {className: 'control-group'}));
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Reverse trackpad scrolling', {align: 'right'}), makeElement('td', scrollModeButton)]));
+
 
         var rulerSelect = makeElement('select');
         rulerSelect.appendChild(makeElement('option', 'Left', {value: 'left'}));
@@ -301,9 +303,9 @@ Browser.prototype.toggleOptsPopup = function(ev) {
                 b.tiers[ti].paintQuant();
             }
         }, false);
-        optsForm.appendChild(makeElement('div', [makeElement('label', 'Display ruler', {className: 'control-label'}), rulerSelect], {className: 'control-group'}));
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
         
-
+        optsForm.appendChild(optsTable);
         this.removeAllPopups();
         this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
     }
