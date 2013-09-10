@@ -381,7 +381,7 @@ Browser.prototype.realInit = function() {
             thisB.zoomStep(10);
         } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
             ev.stopPropagation(); ev.preventDefault();
-            b.toggleHelpPopup(ev);
+            thisB.toggleHelpPopup(ev);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
             var t = thisB.tiers[thisB.selectedTier];
