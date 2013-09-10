@@ -15,8 +15,9 @@ For 0.10
   - Better search (using TRIX?)
   - Stylesheet editor.
   - Bulk addition of local files.
-  - Assembly hub support.
-  - Track hub composite tracks.
+  - More track-hub stuff:
+    + Assembly hub support.
+    + Track hub composite tracks.
   - User interface for connecting to a track hub.
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)

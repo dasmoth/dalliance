@@ -38,12 +38,15 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new JBrowseFeatureSource(config);
     } else if (config.tier_type == 'ensembl') {
         fs = new EnsemblFeatureSource(config);
-    } else {
+    } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
 
-    if (fs && config.overlay) {
-        var sources = [fs]
+    if (config.overlay) {
+        var sources = [];
+        if (fs)
+            sources.push(fs);
+
         for (var oi = 0; oi < config.overlay.length; ++oi) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
         }
@@ -52,6 +55,10 @@ Browser.prototype.createFeatureSource = function(config) {
 
     if (config.mapping) {
         fs = new MappedFeatureSource(fs, this.chains[config.mapping]);
+    }
+
+    if (config.name && !fs.name) {
+        fs.name = config.name;
     }
 
     return fs;
