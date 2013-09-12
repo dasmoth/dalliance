@@ -138,7 +138,7 @@ function OverlayFeatureSource_merge_concat(featureSets) {
         console.log(name);
         for (var fi = 0; fi < fs.length; ++fi) {
             var f = fs[fi];
-            f.source = name;
+            f.method = name;
             features.push(f);
         }
     }

@@ -5,13 +5,14 @@
 // feature-draw.js: new feature-tier renderer
 //
 
-function BoxGlyph(x, y, width, height, fill, stroke, radius) {
+function BoxGlyph(x, y, width, height, fill, stroke, alpha, radius) {
     this.x = x;
     this.y = y;
     this._width = width;
     this._height = height;
     this.fill = fill;
     this.stroke = stroke;
+    this._alpha = alpha;
     this._radius = radius || 0;
 }
 
@@ -42,6 +43,11 @@ BoxGlyph.prototype.draw = function(g) {
 
     g.closePath();
 
+    if (this._alpha != null) {
+	g.save();
+	g.globalAlpha = this._alpha;
+    }
+    
     if (this.fill) {
 	g.fillStyle = this.fill;
 	g.fill();
@@ -50,6 +56,10 @@ BoxGlyph.prototype.draw = function(g) {
 	g.strokeStyle = this.stroke;
 	g.lineWidth = 0.5;
 	g.stroke();
+    }
+
+    if (this._alpha != null) {
+	g.restore();
     }
 }
 

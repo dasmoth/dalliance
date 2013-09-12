@@ -529,6 +529,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+	var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
 
 	if (style.COLOR2) {
 	    var grad = style._gradient;
@@ -541,9 +542,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	    if (step < 0) step = 0;
 	    if (step >= grad.length) step = grad.length - 1;
 	    fill = grad[step];
-        } 
+        }
 
-	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
+	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
     } else if (gtype === 'HIDDEN') {
 	gg = new PaddedGlyph(null, minPos, maxPos);
 	noLabel = true;
