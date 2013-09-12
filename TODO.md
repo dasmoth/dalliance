@@ -21,6 +21,9 @@ For 0.10
   - User interface for connecting to a track hub.
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)
+  - Rethink tier-matching
+     + Should track-hub-derived sources have a URI associated with their
+       hub?
 
 For 0.11
 --------

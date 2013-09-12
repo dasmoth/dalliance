@@ -34,6 +34,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
         trackFile = trackFile.replace('\\\n', ' ');
 
         var tracks = [];
+        var tracksById = {};
         stanzas = trackFile.split(THUB_STANZA_REGEXP);
         for (var s = 0; s < stanzas.length; ++s) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
@@ -41,11 +42,34 @@ TrackHubDB.prototype.getTracks = function(callback) {
             for (var l = 0; l < toks.length - 2; l += 3) {
                 track[toks[l+1]] = toks[l+2];
             }
-            tracks.push(track);
+
+            if (track.track && (track.type || track.container)) {
+                tracks.push(track);
+                tracksById[track.track] = track;
+            }
+        }
+        
+        var toplevels = [];
+        for (var ti = 0; ti < tracks.length; ++ti) {
+            var track = tracks[ti];
+            var top = true;
+            if (track.parent) {
+                var parent = tracksById[track.parent];
+                if (parent) {
+                    if (!parent.children)
+                        parent.children = [];
+                    parent.children.push(track);
+
+                    if (parent.container == 'multiWig')
+                        top = false;
+                }
+            }
+            if (top)
+                toplevels.push(track);
         }
             
-        thisB._tracks = tracks;
-        return callback(tracks, null);
+        thisB._tracks = toplevels;
+        return callback(thisB._tracks, null);
     });
 }
 
@@ -93,29 +117,57 @@ function connectTrackHub(hubURL, callback) {
 
 
 TrackHubTrack.prototype.toDallianceSource = function() {
-    source = {
+    var source = {
         name: this.shortLabel,
         desc: this.longLabel
     };
-    
-    typeToks = this.type.split(/\s+/);
-    if (typeToks[0] == 'bigBed') {
-        source.bwgURI = this.bigDataUrl;
-        return source;
-    } else if (typeToks[0] == 'bigWig') {
-        source.bwgURI = this.bigDataUrl;
-        source.style = this.bigwigStyles();
 
-        if (this.yLineOnOff && this.yLineOnOff == 'on') {
-            source.quantLeapThreshold = this.yLineMark !== undefined ? (1.0 * this.yLineMark) : 0.0;
+    if (this.container == 'multiWig') {
+        source.merge = 'concat';
+        source.overlay = [];
+        var children = this.children || [];
+        source.style = [];
+        source.noDownsample = true;
+
+        for (var ci = 0; ci < children.length; ++ci) {
+            var ch = children[ci];
+            var cs = ch.toDallianceSource()
+            source.overlay.push(cs);
+
+            if (cs.style) {
+                for (var si = 0; si < cs.style.length; ++si) {
+                    var style = cs.style[si];
+                    style.method = ch.shortLabel;  // FIXME
+                    if (this.aggregate == 'transparentOverlay')
+                        style.style.ALPHA = 0.5;
+                    source.style.push(style);
+                }
+            }
         }
+        return source;
 
-        return source;
-    } else if (typeToks[0] == 'bam') {
-        source.bamURI = this.bigDataUrl;
-        return source;
+        
     } else {
-        console.log('Unsupported ' + this.type);
+        typeToks = this.type.split(/\s+/);
+        if (typeToks[0] == 'bigBed') {
+            source.bwgURI = this.bigDataUrl;
+            return source;
+        } else if (typeToks[0] == 'bigWig') {
+            source.bwgURI = this.bigDataUrl;
+            source.style = this.bigwigStyles();
+            source.noDownsample = true;     // FIXME seems like a blunt instrument...
+            
+            if (this.yLineOnOff && this.yLineOnOff == 'on') {
+                source.quantLeapThreshold = this.yLineMark !== undefined ? (1.0 * this.yLineMark) : 0.0;
+            }
+
+            return source;
+        } else if (typeToks[0] == 'bam') {
+            source.bamURI = this.bigDataUrl;
+            return source;
+        } else {
+            console.log('Unsupported ' + this.type);
+        }
     }
 }
 
