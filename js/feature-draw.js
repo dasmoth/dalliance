@@ -472,8 +472,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT') {
 	var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
-        var height = style.HEIGHT || forceHeight || 12;
+        var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
+	var size = style.SIZE || height;
+
         requiredHeight = height = 1.0 * height;
+	size = 1.0 * size;
 
         var mid = (minPos + maxPos)/2;
         var hh = height/2;
@@ -482,15 +485,51 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var bMinPos = minPos, bMaxPos = maxPos;
 
 	if (gtype === 'EX') {
-	    gg = new ExGlyph(mid, height, stroke);
+	    gg = new ExGlyph(mid, size, stroke);
 	} else if (gtype === 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
 	    var width = style.LINEWIDTH || height;
-	    gg = new TriangleGlyph(mid, height, dir, width, stroke);
+	    gg = new TriangleGlyph(mid, size, dir, width, stroke);
 	} else if (gtype === 'DOT') {
-	    gg = new DotGlyph(mid, height, stroke);
+	    gg = new DotGlyph(mid, size, stroke);
 	} else {
-	    gg = new CrossGlyph(mid, height, stroke);
+	    gg = new CrossGlyph(mid, size, stroke);
+	}
+
+	if (isDasBooleanTrue(style.SCATTER)) {
+	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+            var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+
+            if (!smax) {
+		if (smin < 0) {
+                    smax = 0;
+		} else {
+                    smax = 10;
+		}
+            }
+            if (!smin) {
+		smin = 0;
+            }
+
+            if ((1.0 * score) < (1.0 *smin)) {
+		score = smin;
+            }
+            if ((1.0 * score) > (1.0 * smax)) {
+		score = smax;
+            }
+            var relScore = ((1.0 * score) - smin) / (smax-smin);
+	    var relOrigin = (-1.0 * smin) / (smax - smin);
+
+	    if (relScore >= relOrigin) {
+		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+	    } else {
+		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight);
+	    }
+	    
+	    quant = {min: smin, max: smax};
+	    gg = new TranslatedGlyph(gg, 0, y, requiredHeight);
 	}
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;

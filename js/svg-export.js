@@ -83,7 +83,6 @@ Browser.prototype.saveSVG = function() {
 		    path.lineTo(margin, pos);
 		    path.lineTo(margin, pos + subtier.height);
 		    path.lineTo(margin + 5, pos + subtier.height);
-		    console.log(path.toPathData());
 		    tierLabels.appendChild(makeElementNS(NS_SVG, 'path', null, {d: path.toPathData(), fill: 'none', stroke: 'black', strokeWidth: '2px'}));
 		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.max), {x: margin - 3, y: pos + 8, textAnchor: 'end'}));
 		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.min), {x: margin - 3, y: pos +  subtier.height - 3, textAnchor: 'end'}));

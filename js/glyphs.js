@@ -1072,6 +1072,38 @@ SequenceGlyph.prototype.toSVG = function() {
 }
 
 
+function TranslatedGlyph(glyph, x, y, height) {
+    this.glyph = glyph;
+    this._height = height;
+    this._x = x;
+    this._y = y;
+}
+
+TranslatedGlyph.prototype.height = function() {
+    return this._height;
+}
+
+TranslatedGlyph.prototype.min = function() {
+    return this.glyph.min() + this._x;
+}
+
+TranslatedGlyph.prototype.max = function() {
+    return this.glyph.max() + this._x;
+}
+
+TranslatedGlyph.prototype.draw = function(g) {
+    g.save();
+    g.translate(this._x, this._y);
+    this.glyph.draw(g);
+    g.restore();
+}
+
+TranslatedGlyph.prototype.toSVG = function() {
+    var s =  this.glyph.toSVG();
+    s.setAttribute('transform', 'translate(' + this._x + ',' + this._y + ')');
+    return s;
+}
+
 function PointGlyph(x, y, height, fill) {
     this._x = x;
     this._y = y;

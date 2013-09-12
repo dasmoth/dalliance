@@ -27,7 +27,7 @@ For 0.10
   - Rethink tier-matching
      + Should track-hub-derived sources have a URI associated with their
        hub?
-  - Allow arbitrary glyphs to be used in scatter-plots.
+  - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
 
 For 0.11
 --------
