@@ -105,6 +105,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     makeStab(new Observed(hubTracks));
                 });
             }, false);
+            return hubButton;
         }
     }
     for (var hi = 0; hi < this.hubObjects.length; ++hi) {
@@ -118,8 +119,12 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
     addModeButtons.push(binButton);
+    var addHubButton = this.makeButton('+', 'Connect to a new track-hub');
+    addModeButtons.push(addHubButton);
+
     activateButton(addModeButtons, regButton);
-    popup.appendChild(makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}));
+    var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'});
+    popup.appendChild(modeButtonHolder);
     
     popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
@@ -229,6 +234,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         activateButton(addModeButtons, binButton);
         switchToBinMode();
     }, false);
+    addHubButton.addEventListener('click', function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        activateButton(addModeButtons, addHubButton);
+        switchToHubConnectMode();
+    }, false);
 
 
     function switchToBinMode() {
@@ -260,6 +270,20 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
         }
         
+    }
+
+    function switchToHubConnectMode() {
+        customMode = 'hub-connect';
+        refreshButton.style.visibility = 'hidden';
+
+        removeChildren(stabHolder);
+
+        stabHolder.appendChild(makeElement('h2', 'Connect to a track hub.'));
+        stabHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt" of a UCSC-style track hub']));
+        
+        custURL = makeElement('input', '', {size: 120, value: 'http://www.biodalliance.org/datasets/testhub/hub.txt'});
+        stabHolder.appendChild(custURL);
+        custURL.focus();
     }
 
     custButton.addEventListener('click', function(ev) {
@@ -325,6 +349,8 @@ Browser.prototype.showTrackAdder = function(ev) {
                 switchToCustomMode();
             } else if (customMode === 'reset-bin') {
                 switchToBinMode(); 
+            } else if (customMode === 'reset-hub') {
+                switchToHubConnectMode();
             } else if (customMode === 'prompt-bai') {
                 var fileList = custFile.files;
                 if (fileList && fileList.length > 0 && fileList[0]) {
@@ -355,6 +381,41 @@ Browser.prototype.showTrackAdder = function(ev) {
                 thisB.makeTier(dataToFinalize);
                 //thisB.storeStatus();
                 thisB.removeAllPopups();
+            } else if (customMode === 'hub-connect') {
+                var curi = custURL.value.trim();
+                if (!/^.+:\/\//.exec(curi)) {
+                    curi = 'http://' + curi;
+                }
+                console.log('hub: ' + curi);
+                connectTrackHub(curi, function(hub, err) {
+                    if (err) {
+                        removeChildren(stabHolder);
+                        stabHolder.appendChild(makeElement('h2', 'Error connecting to track hub'))
+                        stabHolder.appendChild(makeElement('p', err));
+                        customMode = 'reset-hub';
+                        return;
+                    } else {
+                        thisB.hubs.push(curi);
+                        thisB.hubObjects.push(hub);
+
+                        var hubButton = makeHubButton(hub);
+                        modeButtonHolder.appendChild(hubButton);
+                        activateButton(addModeButtons, hubButton);
+
+                        
+                        // FIXME redundant with hub-tab click handler.
+                        
+                        hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
+                            var hubTracks = [];
+                            for (var ti = 0; ti < tracks.length; ++ti) {
+                                var t = tracks[ti].toDallianceSource();
+                                if (t)
+                                    hubTracks.push(t);
+                            }
+                            makeStab(new Observed(hubTracks));
+                        });
+                    }
+                });
             }
         } else {
             for (var bi = 0; bi < addButtons.length; ++bi) {
