@@ -463,7 +463,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var rawMaxPos = ((max - origin + 1) * scale);
     var maxPos = Math.max(rawMaxPos, minPos + 1);
 
-    var height = style.HEIGHT || forceHeight || 12;;
+    var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
     var requiredHeight = height = 1.0 * height;
     var bump = style.BUMP && isDasBooleanTrue(style.BUMP);
 

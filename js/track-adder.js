@@ -377,9 +377,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     dataToFinalize.xPass = custPass.value;
                 }
 
-                thisB.sources.push(dataToFinalize);
-                thisB.makeTier(dataToFinalize);
-                //thisB.storeStatus();
+                thisB.addTier(dataToFinalize);
                 thisB.removeAllPopups();
             } else if (customMode === 'hub-connect') {
                 var curi = custURL.value.trim();
@@ -422,9 +420,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var b = addButtons[bi];
                 if (b.checked) {
                     var nds = b.dalliance_source;
-                    thisB.sources.push(nds);
-                    thisB.makeTier(nds);
-                    // thisB.storeStatus();
+                    thisB.addTier(nds);
                 }
             }
             thisB.removeAllPopups();

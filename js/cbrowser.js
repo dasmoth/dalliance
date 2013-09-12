@@ -1151,6 +1151,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
+    this.positionRuler();
     this.notifyTier();
 }
 

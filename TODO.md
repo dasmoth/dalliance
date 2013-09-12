@@ -2,6 +2,9 @@ For 0.10
 --------
    
   - UI for leaping.
+  - Progress/activity indicators
+    + ...when reloading.
+    + ...when leaping.
   - Animate when leaping.
     + Also toggle-zooming?
     + Inform user of progress
@@ -17,13 +20,14 @@ For 0.10
   - Bulk addition of local files.
   - More track-hub stuff:
     + Assembly hub support.
-    + Track hub composite tracks.
-  - User interface for connecting to a track hub.
+    + Track hub composite tracks. [DONE: multiWig]
+  - User interface for connecting to a track hub. [DONE]
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)
   - Rethink tier-matching
      + Should track-hub-derived sources have a URI associated with their
        hub?
+  - Allow arbitrary glyphs to be used in scatter-plots.
 
 For 0.11
 --------
