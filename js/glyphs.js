@@ -64,7 +64,7 @@ BoxGlyph.prototype.draw = function(g) {
 }
 
 BoxGlyph.prototype.toSVG = function() {
-    return makeElementNS(NS_SVG, 'rect', null,
+    var s = makeElementNS(NS_SVG, 'rect', null,
 			 {x: this.x, 
 			  y: this.y, 
 			  width: this._width, 
@@ -72,6 +72,11 @@ BoxGlyph.prototype.toSVG = function() {
 			  stroke: this.stroke || 'none',
 			  strokeWidth: 0.5,
 			  fill: this.fill || 'none'});
+    if (this._alpha != null) {
+	s.setAttribute('opacity', this._alpha);
+    }
+
+    return s;
 }
 
 BoxGlyph.prototype.min = function() {
