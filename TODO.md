@@ -1,7 +1,8 @@
 For 0.10
 --------
    
-  - UI for leaping.
+  - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
+  - UI for leaping (button to complement ctrl-arrow).
   - Progress/activity indicators
     + ...when reloading.
     + ...when leaping.
@@ -27,7 +28,6 @@ For 0.10
   - Rethink tier-matching
      + Should track-hub-derived sources have a URI associated with their
        hub?
-  - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
 
 For 0.11
 --------
