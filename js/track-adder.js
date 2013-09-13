@@ -393,25 +393,34 @@ Browser.prototype.showTrackAdder = function(ev) {
                         customMode = 'reset-hub';
                         return;
                     } else {
-                        thisB.hubs.push(curi);
-                        thisB.hubObjects.push(hub);
-
-                        var hubButton = makeHubButton(hub);
-                        modeButtonHolder.appendChild(hubButton);
-                        activateButton(addModeButtons, hubButton);
-
+                        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
+                            thisB.hubs.push(curi);
+                            thisB.hubObjects.push(hub);
+                            
+                            var hubButton = makeHubButton(hub);
+                            modeButtonHolder.appendChild(hubButton);
+                            activateButton(addModeButtons, hubButton);
+                            
                         
-                        // FIXME redundant with hub-tab click handler.
+                            // FIXME redundant with hub-tab click handler.
                         
-                        hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                            var hubTracks = [];
-                            for (var ti = 0; ti < tracks.length; ++ti) {
-                                var t = tracks[ti].toDallianceSource();
-                                if (t)
-                                    hubTracks.push(t);
-                            }
-                            makeStab(new Observed(hubTracks));
-                        });
+                            hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
+                                var hubTracks = [];
+                                for (var ti = 0; ti < tracks.length; ++ti) {
+                                    var t = tracks[ti].toDallianceSource();
+                                    if (t)
+                                        hubTracks.push(t);
+                                }
+                                makeStab(new Observed(hubTracks));
+                            });
+                        } else {
+                            removeChildren(stabHolder);
+                            stabHolder.appendChild(makeElement('h2', 'No data for this genome'))
+                            stabHolder.appendChild(makeElement('p', 'This URL appears to be a valid track-hub, but it doesn\'t contain any data for the coordinate system of this browser'));
+                            stabHolder.appendChild(makeElement('p', 'coordSystem.ucscName = ' + thisB.coordSystem.ucscName));
+                            customMode = 'reset-hub';
+                            return;
+                        }
                     }
                 });
             }

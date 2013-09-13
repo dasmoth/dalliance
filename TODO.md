@@ -2,6 +2,7 @@ For 0.10
 --------
    
   - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
+  - Extra small-glyph types [DONE SQUARE, STAR]
   - UI for leaping (button to complement ctrl-arrow).
   - Progress/activity indicators
     + ...when reloading.
@@ -40,7 +41,7 @@ For 0.11
       stylesheet language.
   - Stylesheet language revamp???  
   - Incremental data fetching
-
+  - New track-adder UI.
 
 Future
 -------------
