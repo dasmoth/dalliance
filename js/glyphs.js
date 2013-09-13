@@ -1190,3 +1190,60 @@ GridGlyph.prototype.toSVG = function() {
 	 stroke: 'black',
 	 strokeWidth: '0.1px'});
 }
+
+function StarGlyph(x, r, points, fill, stroke) {
+    this._x = x;
+    this._r = r;
+    this._points = points;
+    this._fill = fill;
+    this._stroke = stroke;
+}
+
+StarGlyph.prototype.min = function() {
+    return this._x - this._r;
+}
+
+StarGlyph.prototype.max = function() {
+    return this._x + this._r;
+}
+
+StarGlyph.prototype.height = function() {
+    return 2 * this._r;
+}
+
+StarGlyph.prototype.drawPath = function(g) {
+    var midX = this._x, midY = this._r, r = this._r;
+    for (var p = 0; p < this._points; ++p) {
+	var theta = (p * 6.28) / this._points;
+	var px = midX + r*Math.sin(theta);
+	var py = midY - r*Math.cos(theta);
+	if (p == 0) {
+	    g.moveTo(px, py);
+	} else {
+	    g.lineTo(px, py);
+	}
+	theta = ((p+0.5) * 6.28) / this._points;
+	px = midX + 0.4*r*Math.sin(theta);
+	py = midY - 0.4*r*Math.cos(theta);
+	g.lineTo(px, py);
+    }
+    g.closePath();
+}
+
+StarGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+    g.fillStyle = this._fill;
+    g.fill();
+}
+
+StarGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: this._fill});
+}
