@@ -188,19 +188,28 @@ Browser.prototype.showTrackAdder = function(ev) {
 
             var bd = document.createElement('td');
             bd.style.textAlign = 'center';
-            if (thisB.currentlyActive(source)) {
+            /* if (thisB.currentlyActive(source)) {
                 bd.appendChild(document.createTextNode('X'));
                 thisB.makeTooltip(bd, "This data source is already active.");
-            } else if (!source.props || source.props.cors) {
+            } else */ 
+            if (!source.props || source.props.cors) {
                 var b = document.createElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
                 if (__mapping) {
                     b.dalliance_mapping = __mapping;
                 }
+                b.checked = thisB.currentlyActive(source);
                 bd.appendChild(b);
                 addButtons.push(b);
-                thisB.makeTooltip(bd, "Check here then click 'Add' to activate.");
+                b.addEventListener('change', function(ev) {
+                    // console.log('flipping(' + ev.target.checked + ')  ' + miniJSONify(ev.target.dalliance_source));
+                    if (ev.target.checked) {
+                        thisB.addTier(ev.target.dalliance_source);
+                    } else {
+                        thisB.removeTier(ev.target.dalliance_source);
+                    }
+                });
             } else {
                 bd.appendChild(document.createTextNode('!'));
                 thisB.makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
@@ -425,6 +434,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                 });
             }
         } else {
+            // No longer needed because of instant addition....
+
+            /*
             for (var bi = 0; bi < addButtons.length; ++bi) {
                 var b = addButtons[bi];
                 if (b.checked) {
@@ -432,6 +444,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     thisB.addTier(nds);
                 }
             }
+            */
             thisB.removeAllPopups();
         }
     };
