@@ -29,6 +29,8 @@ For 0.10
   - Rethink tier-matching
      + Should track-hub-derived sources have a URI associated with their
        hub?
+  - Retina support
+  - Clean up glyph insertion into subtiers (performance-critical).
 
 For 0.11
 --------

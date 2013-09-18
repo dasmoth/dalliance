@@ -47,7 +47,6 @@ Browser.prototype.makeButton = function(name, tooltip) {
 function activateButton(addModeButtons, which) {
     for (var i = 0; i < addModeButtons.length; ++i) {
         var b = addModeButtons[i];
-        // HACK classList needs a polyfill for IE<10.
         if (b === which) {
             b.classList.add('active');
         } else {
@@ -85,8 +84,11 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeHubButton = function(hub) {
         if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-            var hubButton = thisB.makeButton(hub.shortLabel, hub.longLabel);
+            var hubRemove = makeElement('i', null, {className: 'icon-remove'});
+            var hbContent = makeElement('span', [hub.shortLabel, ' ', hubRemove]);
+            var hubButton = thisB.makeButton(hbContent, hub.longLabel);
             addModeButtons.push(hubButton);
+            
             hubButton.addEventListener('click', function(ev) {
                 ev.preventDefault(); ev.stopPropagation();
 
@@ -105,6 +107,29 @@ Browser.prototype.showTrackAdder = function(ev) {
                     makeStab(new Observed(hubTracks));
                 });
             }, false);
+
+            hubRemove.addEventListener('click', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                
+                for (var hi = 0; hi < thisB.hubs.length; ++hi) {
+                    if (thisB.hubs[hi] == hub.url) {
+                        console.log('index ' + hi);
+                        thisB.hubs.splice(hi, 1);
+                        break;
+                    }
+                }
+                for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
+                    if (thisB.hubObjects[hi].url == hub.url) {
+                        thisB.hubObjects.splice(hi, 1);
+                        break;
+                    }
+                }
+
+                modeButtonHolder.removeChild(hubButton);
+                activateButton(addModeButtons, addHubButton);
+                switchToHubConnectMode();
+            }, false);
+
             return hubButton;
         }
     }
@@ -139,7 +164,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             doAdd();
             return false;
     }, true); 
-    var stabHolder = document.createElement('div');
+    var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'auto';
     stabHolder.style.height = '400px';
@@ -167,9 +192,9 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
             return;
         }
-        var stab = document.createElement('table');
-        stab.className = 'table table-striped table-condensed';
-        stab.style.width='100%';
+        
+        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
+        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
         var idx = 0;
 
         var sources = [];
@@ -183,17 +208,12 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         for (var i = 0; i < sources.length; ++i) {
             var source = sources[i];
-            var r = document.createElement('tr');
-            r.style.backgroundColor = thisB.tierBackgroundColors[idx % thisB.tierBackgroundColors.length];
+            var r = makeElement('tr');
 
-            var bd = document.createElement('td');
+            var bd = makeElement('td');
             bd.style.textAlign = 'center';
-            /* if (thisB.currentlyActive(source)) {
-                bd.appendChild(document.createTextNode('X'));
-                thisB.makeTooltip(bd, "This data source is already active.");
-            } else */ 
             if (!source.props || source.props.cors) {
-                var b = document.createElement('input');
+                var b = makeElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
                 if (__mapping) {
@@ -203,7 +223,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 bd.appendChild(b);
                 addButtons.push(b);
                 b.addEventListener('change', function(ev) {
-                    // console.log('flipping(' + ev.target.checked + ')  ' + miniJSONify(ev.target.dalliance_source));
                     if (ev.target.checked) {
                         thisB.addTier(ev.target.dalliance_source);
                     } else {
@@ -215,13 +234,13 @@ Browser.prototype.showTrackAdder = function(ev) {
                 thisB.makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
             }
             r.appendChild(bd);
-            var ld = document.createElement('td');
+            var ld = makeElement('td');
             ld.appendChild(document.createTextNode(source.name));
             if (source.desc && source.desc.length > 0) {
                 thisB.makeTooltip(ld, source.desc);
             }
             r.appendChild(ld);
-            stab.appendChild(r);
+            stabBody.appendChild(r);
             ++idx;
         }
         stabHolder.appendChild(stab);
@@ -257,23 +276,26 @@ Browser.prototype.showTrackAdder = function(ev) {
         removeChildren(stabHolder);
 
         if (thisB.supportsBinary) {
-            stabHolder.appendChild(makeElement('h2', 'Add custom URL-based data'));
-            stabHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
+            var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
+            pageHolder.appendChild(makeElement('h3', 'Add custom URL-based data'));
+            pageHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
 
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(document.createTextNode('URL: '));
-            custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'});
-            stabHolder.appendChild(custURL);
-            custURL.focus();
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(makeElement('b', '- or -'));
-            stabHolder.appendChild(makeElement('br'));
-            stabHolder.appendChild(document.createTextNode('File: '));
-            custFile = makeElement('input', null, {type: 'file'});
-            stabHolder.appendChild(custFile);
+            pageHolder.appendChild(makeElement('br'));
+            pageHolder.appendChild(document.createTextNode('URL: '));
+            custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
+            pageHolder.appendChild(custURL);
             
+            pageHolder.appendChild(makeElement('br'));
+            pageHolder.appendChild(makeElement('b', '- or -'));
+            pageHolder.appendChild(makeElement('br'));
+            pageHolder.appendChild(document.createTextNode('File: '));
+            custFile = makeElement('input', null, {type: 'file'});
+            pageHolder.appendChild(custFile);
+            
+            pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
 
-            stabHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
+            stabHolder.appendChild(pageHolder);
+            custURL.focus();
         } else {
             stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
             stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
@@ -287,11 +309,15 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         removeChildren(stabHolder);
 
-        stabHolder.appendChild(makeElement('h2', 'Connect to a track hub.'));
-        stabHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt" of a UCSC-style track hub']));
+        var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
+        pageHolder.appendChild(makeElement('h3', 'Connect to a track hub.'));
+        pageHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt" of a UCSC-style track hub']));
         
-        custURL = makeElement('input', '', {size: 120, value: 'http://www.biodalliance.org/datasets/testhub/hub.txt'});
-        stabHolder.appendChild(custURL);
+        custURL = makeElement('input', '', {size: 120, value: 'http://www.biodalliance.org/datasets/testhub/hub.txt'}, {width: '100%'});
+        pageHolder.appendChild(custURL);
+        
+        stabHolder.appendChild(pageHolder);
+        
         custURL.focus();
     }
 
@@ -301,19 +327,19 @@ Browser.prototype.showTrackAdder = function(ev) {
         switchToCustomMode();
     }, false);
 
-    var switchToCustomMode = function() {
+    function switchToCustomMode() {
         customMode = 'das';
         refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
 
-        var customForm = makeElement('div');
-        customForm.appendChild(makeElement('h2', 'Add custom DAS data'));
+        var customForm = makeElement('div', null, {},  {paddingLeft: '10px', paddingRight: '10px'});
+        customForm.appendChild(makeElement('h3', 'Add custom DAS data'));
         customForm.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
                 
         customForm.appendChild(document.createTextNode('URL: '));
         customForm.appendChild(makeElement('br'));
-        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'});
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'}, {width: '100%'});
         customForm.appendChild(custURL);
 
         customForm.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.  If the source is password-protected, you may be prompted to enter credentials.'));
@@ -751,5 +777,5 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-    return this.popit(ev, 'Add DAS data', popup, {width: 500});
+    return this.popit(ev, 'Add data sources...', popup, {width: 500});
 }

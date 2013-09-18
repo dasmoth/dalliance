@@ -10,8 +10,9 @@
 var THUB_STANZA_REGEXP = /\n\n+/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
 
-function TrackHub() {
+function TrackHub(url) {
     this.genomes = {};
+    this.url = url;
 }
 
 function TrackHubTrack() {
@@ -80,7 +81,7 @@ function connectTrackHub(hubURL, callback) {
         }
 
         var toks = hubFile.split(THUB_PARSE_REGEXP);
-        var hub = new TrackHub();
+        var hub = new TrackHub(hubURL);
         for (var l = 0; l < toks.length - 2; l += 3) {
             hub[toks[l+1]] = toks[l+2];
         }
