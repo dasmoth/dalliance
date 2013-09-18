@@ -123,10 +123,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(addHubButton);
 
     activateButton(addModeButtons, regButton);
-    var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'});
+    var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
     
-    popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
+    // popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
     
     var addButtons = [];
     var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
