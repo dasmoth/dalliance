@@ -82,7 +82,8 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
+    // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
+    this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 25;
 
     this.browserLinks = {
@@ -742,8 +743,9 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
+    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
-    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton], {className: 'tier-tab'});
+    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton, tier.loaderButton], {className: 'tier-tab'});
     
     tier.label = makeElement('span',
        [tier.nameButton],
