@@ -40,12 +40,15 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new EnsemblFeatureSource(config);
     } else if (config.tabixURI) {
         fs = new TabixFeatureSource(config);
-    } else {
+    } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
 
-    if (fs && config.overlay) {
-        var sources = [fs]
+    if (config.overlay) {
+        var sources = [];
+        if (fs)
+            sources.push(fs);
+
         for (var oi = 0; oi < config.overlay.length; ++oi) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
         }
@@ -54,6 +57,10 @@ Browser.prototype.createFeatureSource = function(config) {
 
     if (config.mapping) {
         fs = new MappedFeatureSource(fs, this.chains[config.mapping]);
+    }
+
+    if (config.name && !fs.name) {
+        fs.name = config.name;
     }
 
     return fs;
@@ -79,7 +86,12 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     }
 
     if (!this.dasSource.uri) {
+        // FIXME should this be making an error callback???
         return;
+    }
+
+    if (this.dasSource.dasStaticFeatures && this.cachedStaticFeatures) {
+        return callback(null, this.cachedStaticFeatures, this.cachedStaticScale);
     }
 
     var tryMaxBins = (this.dasSource.maxbins !== false);
@@ -90,6 +102,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         fops.maxbins = 1 + (((max - min) / scale) | 0);
     }
     
+    var thisB = this;
     this.dasSource.features(
         new DASSegment(chr, min, max),
         fops,
@@ -97,6 +110,10 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             var retScale = scale;
             if (!tryMaxBins) {
                 retScale = 0.1;
+            }
+            if (!status && thisB.dasSource.dasStaticFeatures) {
+                thisB.cachedStaticFeatures = features;
+                thisB.cachedStaticScale = retScale;
             }
             callback(status, features, retScale);
         }
@@ -261,6 +278,13 @@ BWGFeatureSource.prototype.init = function() {
     make(arg, function(bwg) {
         thisB.bwgHolder.provide(bwg);
     }, this.opts.credentials);
+}
+
+BWGFeatureSource.prototype.capabilities = function() {
+    var caps = {leap: true};
+    if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
+        caps.quantLeap = true;
+    return caps;
 }
 
 BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -769,5 +793,12 @@ TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool,
 
 TabixFeatureSource.prototype.getScales = function() {
     return 1000000000;
+}
+
+
+function sourceAdapterIsCapable(s, cap) {
+    if (!s.capabilities)
+        return false;
+    else return s.capabilities()[cap];
 }
 

@@ -38,8 +38,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     // var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([\-,\,.]+([0-9,]+))?/;
 
     if (!b.disableDefaultFeaturePopup) {
-        this.addFeatureListener(function(ev, hit) {
-            b.featurePopup(ev, hit, null);
+        this.addFeatureListener(function(ev, feature, hit, tier) {
+            b.featurePopup(ev, feature, hit, tier);
         });
     }
 
@@ -86,10 +86,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
 
-    this.addViewListener(function(chr, min, max, zoom) {
+    this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = '';
         locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
-        zoomSlider.value = zoom;
+        zoomSlider.min = zoom.min;
+        zoomSlider.max = zoom.max;
+        zoomSlider.value = zoom.current;
         if (b.storeStatus) {
             b.storeStatus();
         }
@@ -267,7 +269,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
         this.removeAllPopups();
     } else {
-        var helpFrame = makeElement('iframe', null, {src: b.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
+        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
         this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
 }
@@ -279,12 +281,14 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         this.removeAllPopups();
     } else {
         var optsForm = makeElement('form', null, {className: 'popover-content form-horizontal'});
-
+        var optsTable = makeElement('table');
+        optsTable.cellPadding = 5;
         var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
         scrollModeButton.addEventListener('change', function(ev) {
             b.reverseScrolling = scrollModeButton.checked;
         }, false);
-        optsForm.appendChild(makeElement('div', [makeElement('label', 'Reverse trackpad scrolling', {className: 'control-label'}), scrollModeButton], {className: 'control-group'}));
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Reverse trackpad scrolling', {align: 'right'}), makeElement('td', scrollModeButton)]));
+
 
         var rulerSelect = makeElement('select');
         rulerSelect.appendChild(makeElement('option', 'Left', {value: 'left'}));
@@ -299,9 +303,9 @@ Browser.prototype.toggleOptsPopup = function(ev) {
                 b.tiers[ti].paintQuant();
             }
         }, false);
-        optsForm.appendChild(makeElement('div', [makeElement('label', 'Display ruler', {className: 'control-label'}), rulerSelect], {className: 'control-group'}));
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
         
-
+        optsForm.appendChild(optsTable);
         this.removeAllPopups();
         this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
     }

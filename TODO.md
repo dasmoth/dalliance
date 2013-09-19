@@ -1,39 +1,58 @@
-For 0.9 (?)
------------
-
-  - Tidy up feature source creation [DONE, except for leap handlers]
-  - Overlay sources [DONE, at least for the merge-by-coords case]
-  - UI for next/prev
-  - Animate when leaping.
-    + Also snap-zooming?
-  - Track-hub support
-  - Assembly hub support
-  - next/prev peak support for quantitative tracks [DONE]
-  - Work out the kinks in security/preflighting.
-  - Tracks via Ensembl-REST? [DONE]
-  - Abbreviations when typing locations. [DONE]
- 
 For 0.10
 --------
    
+  - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
+  - Extra small-glyph types [DONE SQUARE, STAR]
+  - UI for leaping (button to complement ctrl-arrow).
+  - Progress/activity indicators
+    + ...when reloading.
+    + ...when leaping.
+  - Animate when leaping.
+    + Also toggle-zooming?
+    + Inform user of progress
+  - Chromosome overviews
+  - Better search (using TRIX?)
+  - Per-track display customization ("Stylesheet editor")?
+  - Bulk addition of local files.
+  - More track-hub stuff:
+    + Assembly hub support.
+    + Multiwig [DONE]
+    + Grouping/compositeTrack [DONE]
+    + Views (leave for now?)
+    + Better support for visibility options.
+  - Matrix track selection.
+  - User interface for connecting to a track hub. [DONE]
+  - Replace feature popups with inspector?
+     + Maybe a more general popupocalypse? (track-adder, help, etc.?)
+  - Rethink tier-matching
+     + Should track-hub-derived sources have a URI associated with their
+       hub?
+  - Retina display support
+  - Clean up glyph insertion into subtiers (performance-critical).
 
-  - Small BED/WIG support
-  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
+For 0.11
+--------
+
   - Undo/redo.  
   - History of recently-viewed tracks.
-  - Chromosome overviews
   - RDF/FALDO support?
-  - Incremental data fetching
-  - Try to preserve layout when expanding/collapsing variants.
-  - Better search
-  - Stylesheet editor.
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
-      stylesheet language.  
+      stylesheet language.
+  - Stylesheet language revamp???  
+  - Incremental data fetching
+  - New track-adder UI.
+  - Better zoom control
+    + Show all toggle levels.
+    + Some kind of feedback for toggling.
+  - Try to preserve layout when expanding/collapsing variants.
+  - Small BED/WIG support
+  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
 
 Future
 -------------
 
+ - Work out the kinks in security/preflighting.
  - Construct as a web-component
    + (web component polyfills aren't quite ready yet).
  - Better tiling in renderer.

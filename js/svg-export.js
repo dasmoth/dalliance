@@ -17,14 +17,19 @@ Browser.prototype.saveSVG = function() {
 
     var margin = 200;
 
-    var dallianceAnchor = makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-        x: (b.featurePanelWidth + margin + 20)/2,
-        y: 30,
-        strokeWidth: 0,
-        fill: 'black',
-        fontSize: '12pt',
-	textAnchor: 'middle'
-    });
+    var dallianceAnchor = makeElementNS(NS_SVG, 'a',
+       makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
+           x: (b.featurePanelWidth + margin + 20)/2,
+           y: 30,
+           strokeWidth: 0,
+           fill: 'black',
+           fontSize: '12pt',
+	   textAnchor: 'middle',
+	   fill: 'blue'
+       }));
+    dallianceAnchor.setAttribute('xmlns:xlink', NS_XLINK);
+    dallianceAnchor.setAttribute('xlink:href', 'http://www.biodalliance.org/');
+  
     saveRoot.appendChild(dallianceAnchor);
     
     var clipRect = makeElementNS(NS_SVG, 'rect', null, {
@@ -37,13 +42,17 @@ Browser.prototype.saveSVG = function() {
     saveRoot.appendChild(clip);
 
     var pos = 70;
-    var tierHolder = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
+    var tierHolder = makeElementNS(NS_SVG, 'g', null, {/* clipPath: 'url(#featureClip)', clipRule: 'nonzero' */});
 
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
-	var tierSVG = makeElementNS(NS_SVG, 'g');
+	var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
+	var tierLabels = makeElementNS(NS_SVG, 'g');
 	var tierTopPos = pos;
+
+	var tierBackground = makeElementNS(NS_SVG, 'rect', null, {x: 0, y: tierTopPos, width: '10000', height: 50, fill: tier.background});
+	tierSVG.appendChild(tierBackground);
 
 	if (tier.dasSource.tier_type === 'sequence') {
 	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
@@ -64,20 +73,35 @@ Browser.prototype.saveSVG = function() {
                     var glyph = subtier.glyphs[gi];
                     glyphElements.push(glyph.toSVG());
 		}
+
 		tierSVG.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
+
+		if (subtier.quant) {
+		    var q = subtier.quant;
+		    var path = new SVGPath();
+		    path.moveTo(margin + 5, pos);
+		    path.lineTo(margin, pos);
+		    path.lineTo(margin, pos + subtier.height);
+		    path.lineTo(margin + 5, pos + subtier.height);
+		    tierLabels.appendChild(makeElementNS(NS_SVG, 'path', null, {d: path.toPathData(), fill: 'none', stroke: 'black', strokeWidth: '2px'}));
+		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.max), {x: margin - 3, y: pos + 8, textAnchor: 'end'}));
+		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.min), {x: margin - 3, y: pos +  subtier.height - 3, textAnchor: 'end'}));
+		}
+
 		pos += subtier.height + 3;
             }
 	    pos += 10;
 	}
 
-	saveRoot.appendChild(
+	tierLabels.appendChild(
 	    makeElementNS(
 		NS_SVG, 'text',
 		tier.dasSource.name,
-		{x: margin - 10, y: (pos+tierTopPos+12)/2, fontSize: '12pt', textAnchor: 'end'}));
+		{x: margin - 12, y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
 
-	tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: 0, y: tierTopPos, width: '10000', height: pos-tierTopPos, fill: tier.background}));
-	tierHolder.appendChild(tierSVG);
+	
+	tierBackground.setAttribute('height', pos - tierTopPos);
+	tierHolder.appendChild(makeElementNS(NS_SVG, 'g', [tierSVG, tierLabels]));
     }
     saveRoot.appendChild(tierHolder);
 

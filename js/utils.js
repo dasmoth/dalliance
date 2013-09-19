@@ -225,7 +225,7 @@ function removeChildren(node)
 // WARNING: not for general use!
 //
 
-function miniJSONify(o) {
+function miniJSONify(o, exc) {
     if (typeof o === 'undefined') {
         return 'undefined';
     } else if (o == null) {
@@ -240,14 +240,17 @@ function miniJSONify(o) {
         if (o instanceof Array) {
             var s = null;
             for (var i = 0; i < o.length; ++i) {
-                s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i]);
+                s = (s == null ? '' : (s + ', ')) + miniJSONify(o[i], exc);
             }
             return '[' + (s?s:'') + ']';
         } else {
+            exc = exc || {};
             var s = null;
             for (var k in o) {
+                if (exc[k])
+                    continue;
                 if (k != undefined && typeof(o[k]) != 'function') {
-                    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k]);
+                    s = (s == null ? '' : (s + ', ')) + k + ': ' + miniJSONify(o[k], exc);
                 }
             }
             return '{' + (s?s:'') + '}';
@@ -315,6 +318,34 @@ Awaited.prototype.await = function(f) {
         return this.res;
     } else {
         this.queue.push(f);
+    }
+}
+
+function textXHR(url, callback) {
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+		callback(null, 'Error code ' + req.status);
+	    } else {
+		callback(req.responseText);
+	    }
+	}
+    };
+    
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send('');
+}
+
+function relativeURL(base, rel) {
+    // FIXME quite naive -- good enough for trackhubs?
+
+    var li = base.lastIndexOf('/');
+    if (li >= 0) {
+        return base.substr(0, li + 1) + rel;
+    } else {
+        return rel;
     }
 }
 

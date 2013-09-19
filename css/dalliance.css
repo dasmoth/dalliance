@@ -10,7 +10,6 @@
     -webkit-linear-gradient(0, rgba(0,0,0,.3) 1px, transparent 1px);
   background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position:-15px -15px, -15px -15px, -14px -14px, -14px -14px;
-  transition: height 0.2s ease-in-out;
 }
 
 .track-label {
@@ -61,16 +60,13 @@
 }
 
 .tier-tab.active {
+    border: 3px solid rgb(180, 180, 180);
+}
 
-
-/*  background-image: -moz-linear-gradient(top, #ffaaaa, #e6aaaa);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffaaaa), to(#e6aaaa));
-  background-image: -webkit-linear-gradient(top, #ffaaaa, #e6aaaa);
-  background-image: -o-linear-gradient(top, #ffaaaa, #e6aaaa);
-  background-image: linear-gradient(to bottom, #ffaaaa, #e6aaaa); */
-
+*:focus .tier-tab.active {
     border: 3px solid rgb(150,150,230);
 }
+
 
 .loc-field {
   width: 300px;

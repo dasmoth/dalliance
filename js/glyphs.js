@@ -5,13 +5,14 @@
 // feature-draw.js: new feature-tier renderer
 //
 
-function BoxGlyph(x, y, width, height, fill, stroke, radius) {
+function BoxGlyph(x, y, width, height, fill, stroke, alpha, radius) {
     this.x = x;
     this.y = y;
     this._width = width;
     this._height = height;
     this.fill = fill;
     this.stroke = stroke;
+    this._alpha = alpha;
     this._radius = radius || 0;
 }
 
@@ -42,6 +43,11 @@ BoxGlyph.prototype.draw = function(g) {
 
     g.closePath();
 
+    if (this._alpha != null) {
+	g.save();
+	g.globalAlpha = this._alpha;
+    }
+    
     if (this.fill) {
 	g.fillStyle = this.fill;
 	g.fill();
@@ -51,10 +57,14 @@ BoxGlyph.prototype.draw = function(g) {
 	g.lineWidth = 0.5;
 	g.stroke();
     }
+
+    if (this._alpha != null) {
+	g.restore();
+    }
 }
 
 BoxGlyph.prototype.toSVG = function() {
-    return makeElementNS(NS_SVG, 'rect', null,
+    var s = makeElementNS(NS_SVG, 'rect', null,
 			 {x: this.x, 
 			  y: this.y, 
 			  width: this._width, 
@@ -62,6 +72,11 @@ BoxGlyph.prototype.toSVG = function() {
 			  stroke: this.stroke || 'none',
 			  strokeWidth: 0.5,
 			  fill: this.fill || 'none'});
+    if (this._alpha != null) {
+	s.setAttribute('opacity', this._alpha);
+    }
+
+    return s;
 }
 
 BoxGlyph.prototype.min = function() {
@@ -1057,6 +1072,38 @@ SequenceGlyph.prototype.toSVG = function() {
 }
 
 
+function TranslatedGlyph(glyph, x, y, height) {
+    this.glyph = glyph;
+    this._height = height;
+    this._x = x;
+    this._y = y;
+}
+
+TranslatedGlyph.prototype.height = function() {
+    return this._height;
+}
+
+TranslatedGlyph.prototype.min = function() {
+    return this.glyph.min() + this._x;
+}
+
+TranslatedGlyph.prototype.max = function() {
+    return this.glyph.max() + this._x;
+}
+
+TranslatedGlyph.prototype.draw = function(g) {
+    g.save();
+    g.translate(this._x, this._y);
+    this.glyph.draw(g);
+    g.restore();
+}
+
+TranslatedGlyph.prototype.toSVG = function() {
+    var s =  this.glyph.toSVG();
+    s.setAttribute('transform', 'translate(' + this._x + ',' + this._y + ')');
+    return s;
+}
+
 function PointGlyph(x, y, height, fill) {
     this._x = x;
     this._y = y;
@@ -1077,10 +1124,13 @@ PointGlyph.prototype.height = function() {
 }
 
 PointGlyph.prototype.draw = function(g) {
+    g.save();
+    g.globalAlpha = 0.3;
     g.fillStyle = this._fill;
     g.beginPath();
-    g.arc(this._x, this._y, 2, 0, 6.29);
+    g.arc(this._x, this._y, 1.5, 0, 6.29);
     g.fill();
+    g.restore();
 }
 
 PointGlyph.prototype.toSVG = function() {
@@ -1096,6 +1146,8 @@ PointGlyph.prototype.toSVG = function() {
 function GridGlyph(height) {
     this._height = height || 50;
 }
+
+GridGlyph.prototype.notSelectable = true;
 
 GridGlyph.prototype.min = function() {
     return -100000;
@@ -1137,4 +1189,61 @@ GridGlyph.prototype.toSVG = function() {
 	 fill: 'none',
 	 stroke: 'black',
 	 strokeWidth: '0.1px'});
+}
+
+function StarGlyph(x, r, points, fill, stroke) {
+    this._x = x;
+    this._r = r;
+    this._points = points;
+    this._fill = fill;
+    this._stroke = stroke;
+}
+
+StarGlyph.prototype.min = function() {
+    return this._x - this._r;
+}
+
+StarGlyph.prototype.max = function() {
+    return this._x + this._r;
+}
+
+StarGlyph.prototype.height = function() {
+    return 2 * this._r;
+}
+
+StarGlyph.prototype.drawPath = function(g) {
+    var midX = this._x, midY = this._r, r = this._r;
+    for (var p = 0; p < this._points; ++p) {
+	var theta = (p * 6.28) / this._points;
+	var px = midX + r*Math.sin(theta);
+	var py = midY - r*Math.cos(theta);
+	if (p == 0) {
+	    g.moveTo(px, py);
+	} else {
+	    g.lineTo(px, py);
+	}
+	theta = ((p+0.5) * 6.28) / this._points;
+	px = midX + 0.4*r*Math.sin(theta);
+	py = midY - 0.4*r*Math.cos(theta);
+	g.lineTo(px, py);
+    }
+    g.closePath();
+}
+
+StarGlyph.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+    g.fillStyle = this._fill;
+    g.fill();
+}
+
+StarGlyph.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+	NS_SVG, 'path',
+	null,
+	{d: g.toPathData(),
+	 fill: this._fill});
 }

@@ -10,6 +10,12 @@
 function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
+
+    if (opts.merge == 'concat') {
+        this.merge = OverlayFeatureSource_merge_concat;
+    } else {
+        this.merge = OverlayFeatureSource_merge_byKey;
+    }
 }
 
 OverlayFeatureSource.prototype.getScales = function() {
@@ -20,8 +26,15 @@ OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
     return this.sources[0].getStyleSheet(callback);
 }
 
+OverlayFeatureSource.prototype.capabilities = function() {
+    var s0 = this.sources[0];
+    if (s0.capabilities) 
+        return s0.capabilities();
+    return {};
+}
+
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    var baton = new OverlayBaton(callback, this.sources.length);
+    var baton = new OverlayBaton(this, callback, this.sources.length);
     for (var si = 0; si < this.sources.length; ++si) {
 	this.fetchN(baton, si, chr, min, max, scale, types, pool);
     }
@@ -33,7 +46,16 @@ OverlayFeatureSource.prototype.fetchN = function(baton, si, chr, min, max, scale
     });
 }
 
-function OverlayBaton(callback, count) {
+OverlayFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    return this.sources[0].quantFindNextFeature(chr, pos, dir, threshold, callback);
+}
+
+OverlayFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    return this.sources[0].findNextFeature(chr, pos, dir, callback);
+}
+
+function OverlayBaton(source, callback, count) {
+    this.source = source;
     this.callback = callback;
     this.count = count;
 
@@ -65,27 +87,27 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
 
     if (this.returnCount == this.count) {
 	if (this.statusCount > 0) {
-	    message = '';
+	    var message = '';
 	    for (var si = 0; si < this.count; ++si) {
 		var s = this.statuses[si];
 		if (s != 0) {
 		    if (message.length > 0) 
-			messsage += ', ';
+			message += ', ';
 		    message += s;
 		}
 	    }
 	    return this.callback(message, null, this.scale);
 	} else {
-	    this.callback(null, this.merge(this.features), this.scale);
+	    this.callback(null, this.source.merge(this.features), this.scale);
 	}
     }
 }
 
-OverlayBaton.prototype.keyForFeature = function(feature) {
+OverlayFeatureSource.prototype.keyForFeature = function(feature) {
     return '' + feature.min + '..' + feature.max;
 }
 
-OverlayBaton.prototype.merge = function(featureSets) {
+function OverlayFeatureSource_merge_byKey(featureSets) {
     var om = {};
     var of = featureSets[1];
     for (var fi = 0; fi < of.length; ++fi) {
@@ -108,3 +130,16 @@ OverlayBaton.prototype.merge = function(featureSets) {
     return mf;
 }
 
+function OverlayFeatureSource_merge_concat(featureSets) {
+    var features = [];
+    for (var fsi = 0; fsi < featureSets.length; ++fsi) {
+        var fs = featureSets[fsi];
+        var name = this.sources[fsi].name;
+        for (var fi = 0; fi < fs.length; ++fi) {
+            var f = fs[fi];
+            f.method = name;
+            features.push(f);
+        }
+    }
+    return features;
+}

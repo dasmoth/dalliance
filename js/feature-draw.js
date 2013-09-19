@@ -306,7 +306,7 @@ DasTier.prototype.paint = function() {
     }
     gc.restore();
 
-    if (quant && this.quantLeapThreshold && this.featureSource && this.featureSource.quantFindNextFeature) {
+    if (quant && this.quantLeapThreshold && this.featureSource && sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
 	var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
 	gc.save();
@@ -463,34 +463,80 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var rawMaxPos = ((max - origin + 1) * scale);
     var maxPos = Math.max(rawMaxPos, minPos + 1);
 
-    var height = style.HEIGHT || forceHeight || 12;;
+    var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
     var requiredHeight = height = 1.0 * height;
     var bump = style.BUMP && isDasBooleanTrue(style.BUMP);
 
     var gg, quant;
 
-    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT') {
+    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
 	var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
-        var height = style.HEIGHT || forceHeight || 12;
+        var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
+	var size = style.SIZE || height;
+
         requiredHeight = height = 1.0 * height;
+	size = 1.0 * size;
 
         var mid = (minPos + maxPos)/2;
-        var hh = height/2;
+        var hh = size/2;
 
         var mark;
         var bMinPos = minPos, bMaxPos = maxPos;
 
 	if (gtype === 'EX') {
-	    gg = new ExGlyph(mid, height, stroke);
+	    gg = new ExGlyph(mid, size, stroke);
 	} else if (gtype === 'TRIANGLE') {
 	    var dir = style.DIRECTION || 'N';
-	    var width = style.LINEWIDTH || height;
-	    gg = new TriangleGlyph(mid, height, dir, width, stroke);
+	    var width = style.LINEWIDTH || size;
+	    gg = new TriangleGlyph(mid, size, dir, width, stroke);
 	} else if (gtype === 'DOT') {
-	    gg = new DotGlyph(mid, height, stroke);
+	    gg = new DotGlyph(mid, size, stroke);
+	} else if (gtype === 'SQUARE') {
+	    gg = new BoxGlyph(mid - hh, 0, size, size, stroke, null);
+	} else if (gtype === 'STAR') {
+	    var points = 5;
+	    if (style.POINTS) 
+		points = style.POINTS | 0;
+	    gg = new StarGlyph(mid, hh, points, stroke, null);
 	} else {
-	    gg = new CrossGlyph(mid, height, stroke);
+	    gg = new CrossGlyph(mid, size, stroke);
+	}
+
+	if (isDasBooleanTrue(style.SCATTER)) {
+	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+            var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+
+            if (!smax) {
+		if (smin < 0) {
+                    smax = 0;
+		} else {
+                    smax = 10;
+		}
+            }
+            if (!smin) {
+		smin = 0;
+            }
+
+            if ((1.0 * score) < (1.0 *smin)) {
+		score = smin;
+            }
+            if ((1.0 * score) > (1.0 * smax)) {
+		score = smax;
+            }
+            var relScore = ((1.0 * score) - smin) / (smax-smin);
+	    var relOrigin = (-1.0 * smin) / (smax - smin);
+
+	    if (relScore >= relOrigin) {
+		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+	    } else {
+		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+		y = y + ((1.0 - relOrigin) * requiredHeight);
+	    }
+	    
+	    quant = {min: smin, max: smax};
+	    gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
 	}
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
 	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
@@ -529,6 +575,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+	var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
 
 	if (style.COLOR2) {
 	    var grad = style._gradient;
@@ -541,9 +588,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	    if (step < 0) step = 0;
 	    if (step >= grad.length) step = grad.length - 1;
 	    fill = grad[step];
-        } 
+        }
 
-	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height,fill, stroke);
+	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
     } else if (gtype === 'HIDDEN') {
 	gg = new PaddedGlyph(null, minPos, maxPos);
 	noLabel = true;
@@ -617,7 +664,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	var stroke = style.FGCOLOR || null;
 	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
 	gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
-	gg.bump = true;
+	// gg.bump = true;
     }
 
     if (isDasBooleanTrue(style.LABEL) && label && !noLabel) {
@@ -662,7 +709,7 @@ DasTier.prototype.styleForFeature = function(f) {
         }
 
 	var labelRE = sh._labelRE;
-	if (!labelRE) {
+	if (!labelRE || !labelRE.test) {
 	    labelRE = new RegExp('^' + sh.label + '$');
 	    sh._labelRE = labelRE;
 	}
@@ -670,7 +717,7 @@ DasTier.prototype.styleForFeature = function(f) {
             continue;
         }
 	var methodRE = sh._methodRE;
-	if (!methodRE) {
+	if (!methodRE || !methodRE.test) {
 	    methodRE = new RegExp('^' + sh.method + '$');
 	    sh._methodRE = methodRE;
 	}

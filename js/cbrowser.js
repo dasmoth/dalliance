@@ -22,7 +22,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = 'http://www.biodalliance.org/canvas/';
+    this.uiPrefix = 'http://www.biodalliance.org/release-0.9/';
 
     this.sources = [];
     this.tiers = [];
@@ -41,7 +41,8 @@ function Browser(opts) {
         speciesName: 'Human',
         taxon: 9606,
         auth: 'NCBI',
-        version: '36'
+        version: '36',
+        ucscName: 'hg18'
     };
     this.chains = {};
 
@@ -50,12 +51,12 @@ function Browser(opts) {
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
     this.zoomMin = 10.0;
-    this.zoomMax = 220.0;
+    this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
     this.origin = 0;
     this.targetQuantRes = 5.0;
     this.featurePanelWidth = 750;
     this.zoomBase = 100;
-    this.zoomExpt = 30; // Now gets clobbered.
+    this.zoomExpt = 30.0; // Back to being fixed....
     this.zoomSliderValue = 100;
     this.entryPoints = null;
     this.currentSeqMax = -1; // init once EPs are fetched.
@@ -72,6 +73,8 @@ function Browser(opts) {
 
     this.placards = [];
 
+    this.maxViewWidth = 500000;
+
     // Options.
     
     this.reverseScrolling = false;
@@ -79,7 +82,8 @@ function Browser(opts) {
 
     // Visual config.
 
-    this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
+    // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
+    this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 25;
 
     this.browserLinks = {
@@ -92,6 +96,9 @@ function Browser(opts) {
     this.availableSources = new Observed();
     this.defaultSources = [];
     this.mappableSources = {};
+
+    this.hubs = [];
+    this.hubObjects = [];
 
     for (var k in opts) {
         this[k] = opts[k];
@@ -151,7 +158,10 @@ Browser.prototype.realInit = function() {
     // Dimension stuff
 
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
-    this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
+    // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
+    if (!this.zoomMax) {
+        this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
+    }
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
     // Event handlers
@@ -372,7 +382,7 @@ Browser.prototype.realInit = function() {
             thisB.zoomStep(10);
         } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
             ev.stopPropagation(); ev.preventDefault();
-            b.toggleHelpPopup(ev);
+            thisB.toggleHelpPopup(ev);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
             var t = thisB.tiers[thisB.selectedTier];
@@ -469,6 +479,18 @@ Browser.prototype.realInit = function() {
     this.queryRegistry();
     for (var m in this.chains) {
         this.queryRegistry(m, true);
+    }
+
+    if (this.hubs) {
+        for (var hi = 0; hi < this.hubs.length; ++hi) {
+            connectTrackHub(this.hubs[hi], function(hub, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    thisB.hubObjects.push(hub);
+                }
+            });
+        }
     }
 }
 
@@ -671,8 +693,8 @@ Browser.prototype.realMakeTier = function(source) {
         } else {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
-                if (hit) {
-                    thisB.notifyFeatureHover(ev, hit); // FIXME group
+                if (hit && hit.length > 0) {
+                    thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit, tier);
                 }
             }, 1000);
         }
@@ -684,7 +706,7 @@ Browser.prototype.realMakeTier = function(source) {
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
-        if (hit && !thisB.isDragging) {
+        if (hit && hit.length > 0 && !thisB.isDragging) {
             if (doubleClickTimeout) {
                 clearTimeout(doubleClickTimeout);
                 doubleClickTimeout = null;
@@ -692,7 +714,7 @@ Browser.prototype.realMakeTier = function(source) {
             } else {
                 doubleClickTimeout = setTimeout(function() {
                     doubleClickTimeout = null;
-                    thisB.notifyFeature(ev, hit);
+                    thisB.notifyFeature(ev, hit[hit.length-1], hit, tier);
                 }, 500);
             }
         }
@@ -721,8 +743,9 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
+    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
-    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton], {className: 'tier-tab'});
+    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton, tier.loaderButton], {className: 'tier-tab'});
     
     tier.label = makeElement('span',
        [tier.nameButton],
@@ -1130,6 +1153,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
+    this.positionRuler();
     this.notifyTier();
 }
 
@@ -1269,10 +1293,10 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
-Browser.prototype.notifyFeature = function(ev, feature, group) {
+Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
-          this.featureListeners[fli](ev, feature, group);
+          this.featureListeners[fli](ev, feature, hit, tier);
       } catch (ex) {
           console.log(ex.stack);
       }
@@ -1284,10 +1308,10 @@ Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     this.featureHoverListeners.push(handler);
 }
 
-Browser.prototype.notifyFeatureHover = function(ev, feature, group) {
+Browser.prototype.notifyFeatureHover = function(ev, feature, hit, tier) {
     for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
         try {
-            this.featureHoverListeners[fli](ev, feature, group);
+            this.featureHoverListeners[fli](ev, feature, hit, tier);
         } catch (ex) {
             console.log(ex.stack);
         }
@@ -1302,7 +1326,7 @@ Browser.prototype.addViewListener = function(handler, opts) {
 Browser.prototype.notifyLocation = function() {
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
-            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue);
+            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue, {current: this.zoomSliderValue, min: this.zoomMin, max: this.zoomMax});
         } catch (ex) {
             console.log(ex.stack);
         }
@@ -1434,7 +1458,12 @@ Browser.prototype.positionRuler = function() {
     }
 }
 
-Browser.prototype.featureDoubleClick = function(f, rx, ry) {
+Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
+    if (!hit || hit.length == 0)
+        return;
+
+    f = hit[hit.length - 1];
+
     if (!f.min || !f.max) {
         return;
     }
@@ -1456,20 +1485,26 @@ Browser.prototype.featureDoubleClick = function(f, rx, ry) {
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
 
-function glyphLookup(glyphs, rx) {
+function glyphLookup(glyphs, rx, matches) {
+    matches = matches || [];
+
     for (var gi = 0; gi < glyphs.length; ++gi) {
         var g = glyphs[gi];
-        if (g.min() <= rx && g.max() >= rx) {
+        if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
             if (g.feature) {
-                return g.feature;
-            } else if (g.glyphs) {
-                return glyphLookup(g.glyphs, rx) || g.group;
+                matches.push(g.feature);
+            } else if (g.group) {
+                matches.push(g.group);
+            }
+    
+            if (g.glyphs) {
+                return glyphLookup(g.glyphs, rx, matches);
             } else if (g.glyph) {
-                return glyphLookup([g.glyph], rx) || g.group;
+                return glyphLookup([g.glyph], rx, matches);
             } else {
-                return g.group;
+                return matches;
             }
         }
     }
-    return null;
+    return matches;
 }

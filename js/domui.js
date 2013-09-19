@@ -125,10 +125,11 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         closeButton.addEventListener('mouseout', function(ev) {
             closeButton.style.color = 'black';
         }, false);
-        closeButton.addEventListener('mousedown', function(ev) {
+        closeButton.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
             thisB.removeAllPopups();
         }, false);
-        var tbar = makeElement('h3', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {className: 'popover-title'}, {});
+        var tbar = makeElement('h4', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {/*className: 'popover-title' */}, {paddingLeft: '10px', paddingRight: '10px'});
 
         var dragOX, dragOY;
         var moveHandler, upHandler;
@@ -177,6 +178,29 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         }
     }, false);
     return popupHandle;
+}
+
+function makeTreeTableSection(title, content, visible) {
+    var ttButton = makeElement('i');
+    function update() {
+        if (visible) {
+            ttButton.className = 'icon-chevron-down';
+            content.style.display = 'table';
+        } else {
+            ttButton.className = 'icon-chevron-right';
+            content.style.display = 'none';
+        }
+    }
+    update();
+
+    ttButton.addEventListener('click', function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        visible = !visible;
+        update();
+    }, false);
+
+    var heading = makeElement('h6', [ttButton, title]);
+    return makeElement('div', [heading, content]);
 }
 
 function dlog(msg) {
