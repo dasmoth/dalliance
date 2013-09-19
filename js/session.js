@@ -38,6 +38,7 @@ Browser.prototype.storeStatus = function() {
         }
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
+    localStorage['dalliance.' + this.cookieKey + '.hubs'] = JSON.stringify(this.hubs);
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
     localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;
     
@@ -105,5 +106,10 @@ Browser.prototype.restoreStatus = function() {
                 }
             }
         }
+    }
+
+    var hubStr = localStorage['dalliance.' + this.cookieKey + '.hubs'];
+    if (hubStr) {
+        this.hubs = JSON.parse(hubStr);
     }
 }

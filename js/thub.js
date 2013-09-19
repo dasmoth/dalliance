@@ -33,12 +33,10 @@ TrackHubDB.prototype.getTracks = function(callback) {
         }
 
         trackFile = trackFile.replace('\\\n', ' ');
-        __test__tf = trackFile;
 
         var tracks = [];
         var tracksById = {};
         stanzas = trackFile.split(THUB_STANZA_REGEXP);
-        __test_ts = stanzas;
         for (var s = 0; s < stanzas.length; ++s) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
@@ -52,8 +50,6 @@ TrackHubDB.prototype.getTracks = function(callback) {
             }
         }
         
-        __test__tbid = tracksById;
-
         var toplevels = [];
         for (var ti = 0; ti < tracks.length; ++ti) {
             var track = tracks[ti];
