@@ -316,7 +316,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 stabBody.appendChild(r);
                 ++idx;
             }
-            ttab.appendChild(makeElement('div', [makeElement('h6', group.shortLabel), stab]));
+            ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
         }
         stabHolder.appendChild(ttab);
     };
