@@ -68,10 +68,12 @@ TrackHubDB.prototype.getTracks = function(callback) {
                         top = false;
                     if (parent.container == 'multiWig')
                         top = false;
-                    if (track.compositeTrack && !track.view)
-                        top = false;  // FIXME How to handle composites properly?
                 }
+               
             }
+            if (track.compositeTrack && !track.view)
+                    top = false;  // FIXME How to handle composites properly?
+
             if (top)
                 toplevels.push(track);
         }
