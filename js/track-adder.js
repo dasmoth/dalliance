@@ -98,13 +98,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     }
 
                     activateButton(addModeButtons, hubButton);
-                    var hubTracks = [];
-                    for (var ti = 0; ti < tracks.length; ++ti) {
-                        var t = tracks[ti].toDallianceSource();
-                        if (t)
-                            hubTracks.push(t);
-                    }
-                    makeStab(new Observed(hubTracks));
+                    makeHubStab(tracks);
                 });
             }, false);
 
@@ -238,6 +232,61 @@ Browser.prototype.showTrackAdder = function(ev) {
             ld.appendChild(document.createTextNode(source.name));
             if (source.desc && source.desc.length > 0) {
                 thisB.makeTooltip(ld, source.desc);
+            }
+            r.appendChild(ld);
+            stabBody.appendChild(r);
+            ++idx;
+        }
+        stabHolder.appendChild(stab);
+    };
+
+    function makeHubStab(tracks) {
+        customMode = false;
+        addButtons = [];
+        removeChildren(stabHolder);
+        
+        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
+        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+        var idx = 0;
+
+        var sources = [];
+        for (var i = 0; i < tracks.length; ++i) {
+            sources.push(tracks[i]);
+        }
+        
+        sources.sort(function(a, b) {
+            return a.shortLabel.toLowerCase().trim().localeCompare(b.shortLabel.toLowerCase().trim());
+        });
+
+        for (var i = 0; i < sources.length; ++i) {
+            var track = sources[i];
+            var r = makeElement('tr');
+
+            var bd = makeElement('td');
+            bd.style.textAlign = 'center';
+
+                var b = makeElement('input');
+                b.type = 'checkbox';
+                b.dalliance_track = track;
+                if (__mapping) {
+                    b.dalliance_mapping = __mapping;
+                }
+                b.checked = thisB.currentlyActive(track.toDallianceSource()); // FIXME!
+                bd.appendChild(b);
+                addButtons.push(b);
+                b.addEventListener('change', function(ev) {
+                    if (ev.target.checked) {
+                        thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                    } else {
+                        thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                    }
+                });
+
+            r.appendChild(bd);
+            var ld = makeElement('td');
+            ld.appendChild(document.createTextNode(track.shortLabel));
+            if (track.longLabel && track.longLabel.length > 0) {
+                thisB.makeTooltip(ld, track.longLabel);
             }
             r.appendChild(ld);
             stabBody.appendChild(r);
