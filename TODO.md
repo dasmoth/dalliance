@@ -10,22 +10,24 @@ For 0.10
   - Animate when leaping.
     + Also toggle-zooming?
     + Inform user of progress
-  - Small BED/WIG support
-  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Chromosome overviews
   - Better search (using TRIX?)
-  - Stylesheet editor.
+  - Per-track display customization ("Stylesheet editor")?
   - Bulk addition of local files.
   - More track-hub stuff:
     + Assembly hub support.
-    + Track hub composite tracks. [DONE: multiWig]
+    + Multiwig [DONE]
+    + Grouping/compositeTrack [DONE]
+    + Views (leave for now?)
+    + Better support for visibility options.
+  - Matrix track selection.
   - User interface for connecting to a track hub. [DONE]
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)
   - Rethink tier-matching
      + Should track-hub-derived sources have a URI associated with their
        hub?
-  - Retina support
+  - Retina display support
   - Clean up glyph insertion into subtiers (performance-critical).
 
 For 0.11
@@ -44,6 +46,8 @@ For 0.11
     + Show all toggle levels.
     + Some kind of feedback for toggling.
   - Try to preserve layout when expanding/collapsing variants.
+  - Small BED/WIG support
+  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
 
 Future
 -------------

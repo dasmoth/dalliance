@@ -18,6 +18,13 @@ function TrackHub(url) {
 function TrackHubTrack() {
 }
 
+TrackHubTrack.prototype.get = function(k) {
+    if (this[k])
+        return this[k];
+    else if (this._parent) 
+        return this._parent.get(k);
+}
+
 function TrackHubDB() {
 }
 
@@ -161,6 +168,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         typeToks = this.type.split(/\s+/);
         if (typeToks[0] == 'bigBed') {
             source.bwgURI = this.bigDataUrl;
+            source.style = this.bigbedStyles();
             return source;
         } else if (typeToks[0] == 'bigWig') {
             source.bwgURI = this.bigDataUrl;
@@ -232,5 +240,54 @@ TrackHubTrack.prototype.bigwigStyles = function() {
         wigStyle.MAX = max;
     }
     stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+    return stylesheet.styles;
+}
+
+TrackHubTrack.prototype.bigbedStyles = function() {
+    var visibility = this.get('visibility') || 'full';
+    var color = this.get('color');
+    if (color)
+        color = 'rgb(' + color + ')';
+    else 
+        color = 'blue';
+    
+    var stylesheet = new DASStylesheet();
+    var wigStyle = new DASStyle();
+    wigStyle.glyph = 'BOX';
+    wigStyle.FGCOLOR = 'black';
+    wigStyle.BGCOLOR = color;
+    wigStyle.HEIGHT = (visibility == 'full' || visibility == 'pack') ? 12 : 8;
+    wigStyle.BUMP = (visibility == 'full' || visibility == 'pack');
+    wigStyle.LABEL = (visibility == 'full' || visibility == 'pack');
+    wigStyle.ZINDEX = 20;
+    stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+    
+    var tlStyle = new DASStyle();
+    tlStyle.glyph = 'BOX';
+    tlStyle.FGCOLOR = 'black';
+    tlStyle.BGCOLOR = 'red'
+    tlStyle.HEIGHT = 10;
+    tlStyle.BUMP = true;
+    tlStyle.ZINDEX = 20;
+    stylesheet.pushStyle({type: 'bb-translation'}, null, tlStyle);
+    
+    var tsStyle = new DASStyle();
+    tsStyle.glyph = 'BOX';
+    tsStyle.FGCOLOR = 'black';
+    tsStyle.BGCOLOR = 'white';
+    tsStyle.HEIGHT = 10;
+    tsStyle.ZINDEX = 10;
+    tsStyle.BUMP = true;
+    tsStyle.LABEL = true;
+    stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+
+/*
+    var densStyle = new DASStyle();
+    densStyle.glyph = 'HISTOGRAM';
+    densStyle.COLOR1 = 'white';
+    densStyle.COLOR2 = 'black';
+    densStyle.HEIGHT=30;
+    stylesheet.pushStyle({type: 'density'}, null, densStyle); */
+
     return stylesheet.styles;
 }
