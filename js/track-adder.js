@@ -245,10 +245,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         addButtons = [];
         removeChildren(stabHolder);
         
-        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
-        var idx = 0;
-
+        var ttab = makeElement('div');
         var sources = [];
         for (var i = 0; i < tracks.length; ++i) {
             sources.push(tracks[i]);
@@ -258,17 +255,39 @@ Browser.prototype.showTrackAdder = function(ev) {
             return a.shortLabel.toLowerCase().trim().localeCompare(b.shortLabel.toLowerCase().trim());
         });
 
-        for (var i = 0; i < sources.length; ++i) {
-            var track = sources[i];
-            var ds = track.toDallianceSource(); // FIXME
-            if (!ds) {
-                continue;
+        var groups = [];
+        var tops = [];
+        
+        for (var ti = 0; ti < sources.length; ++ti) {
+            var track = sources[ti];
+            if (track.children && track.children.length > 0 && track.container != 'multiWig') {
+                groups.push(track);
+            } else {
+                tops.push(track);
             }
+        }
+        if (tops.length > 0) {
+            groups.push({
+                shortLabel: 'Others',
+                children: tops});
+        }
+        
+        for (var gi = 0; gi < groups.length; ++gi) {
+            var group = groups[gi];
+            
+            var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
+            var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+            var idx = 0;
+            
+            for (var i = 0; i < group.children.length; ++i) {
+                var track = group.children[i];
+                var ds = track.toDallianceSource();
+                if (!ds)
+                    continue;
 
-            var r = makeElement('tr');
-
-            var bd = makeElement('td');
-            bd.style.textAlign = 'center';
+                var r = makeElement('tr');
+                var bd = makeElement('td');
+                bd.style.textAlign = 'center';
 
                 var b = makeElement('input');
                 b.type = 'checkbox';
@@ -287,17 +306,19 @@ Browser.prototype.showTrackAdder = function(ev) {
                     }
                 });
 
-            r.appendChild(bd);
-            var ld = makeElement('td');
-            ld.appendChild(document.createTextNode(track.shortLabel));
-            if (track.longLabel && track.longLabel.length > 0) {
-                thisB.makeTooltip(ld, track.longLabel);
+                r.appendChild(bd);
+                var ld = makeElement('td');
+                ld.appendChild(document.createTextNode(track.shortLabel));
+                if (track.longLabel && track.longLabel.length > 0) {
+                    thisB.makeTooltip(ld, track.longLabel);
+                }
+                r.appendChild(ld);
+                stabBody.appendChild(r);
+                ++idx;
             }
-            r.appendChild(ld);
-            stabBody.appendChild(r);
-            ++idx;
+            ttab.appendChild(makeElement('div', [makeElement('h6', group.shortLabel), stab]));
         }
-        stabHolder.appendChild(stab);
+        stabHolder.appendChild(ttab);
     };
     
 
