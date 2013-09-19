@@ -7,7 +7,7 @@
 // thub.js: support for track-hub style registries
 //
 
-var THUB_STANZA_REGEXP = /\n\n+/;
+var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
 
 function TrackHub(url) {
@@ -33,10 +33,12 @@ TrackHubDB.prototype.getTracks = function(callback) {
         }
 
         trackFile = trackFile.replace('\\\n', ' ');
+        __test__tf = trackFile;
 
         var tracks = [];
         var tracksById = {};
         stanzas = trackFile.split(THUB_STANZA_REGEXP);
+        __test_ts = stanzas;
         for (var s = 0; s < stanzas.length; ++s) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
@@ -50,19 +52,28 @@ TrackHubDB.prototype.getTracks = function(callback) {
             }
         }
         
+        __test__tbid = tracksById;
+
         var toplevels = [];
         for (var ti = 0; ti < tracks.length; ++ti) {
             var track = tracks[ti];
             var top = true;
             if (track.parent) {
-                var parent = tracksById[track.parent];
+                ptoks = track.parent.split(/\s+/);
+                var parent = tracksById[ptoks[0]];
                 if (parent) {
+                    track._parent = parent;
+
                     if (!parent.children)
                         parent.children = [];
                     parent.children.push(track);
 
+                    if (parent && (!parent.compositeTrack || parent.view))
+                        top = false;
                     if (parent.container == 'multiWig')
                         top = false;
+                    if (track.compositeTrack && !track.view)
+                        top = false;  // FIXME How to handle composites properly?
                 }
             }
             if (top)
