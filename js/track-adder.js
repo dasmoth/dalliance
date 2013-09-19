@@ -260,6 +260,11 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         for (var i = 0; i < sources.length; ++i) {
             var track = sources[i];
+            var ds = track.toDallianceSource(); // FIXME
+            if (!ds) {
+                continue;
+            }
+
             var r = makeElement('tr');
 
             var bd = makeElement('td');
@@ -271,7 +276,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (__mapping) {
                     b.dalliance_mapping = __mapping;
                 }
-                b.checked = thisB.currentlyActive(track.toDallianceSource()); // FIXME!
+                b.checked = thisB.currentlyActive(ds); // FIXME!
                 bd.appendChild(b);
                 addButtons.push(b);
                 b.addEventListener('change', function(ev) {
