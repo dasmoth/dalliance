@@ -743,7 +743,7 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
-    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'});
+    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
     tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton, tier.loaderButton], {className: 'tier-tab'});
     

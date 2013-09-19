@@ -10,13 +10,9 @@ For 0.10
   - Animate when leaping.
     + Also toggle-zooming?
     + Inform user of progress
-  - Better zoom control
-    + Show all toggle levels.
-    + Some kind of feedback for toggling.
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Chromosome overviews
-  - Try to preserve layout when expanding/collapsing variants.
   - Better search (using TRIX?)
   - Stylesheet editor.
   - Bulk addition of local files.
@@ -44,6 +40,10 @@ For 0.11
   - Stylesheet language revamp???  
   - Incremental data fetching
   - New track-adder UI.
+  - Better zoom control
+    + Show all toggle levels.
+    + Some kind of feedback for toggling.
+  - Try to preserve layout when expanding/collapsing variants.
 
 Future
 -------------
