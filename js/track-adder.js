@@ -301,16 +301,18 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
                 __test_trks = trks;
 
-                var matrix = makeElement('table');
+                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'});
                 {
                     var header = makeElement('tr');
                     header.appendChild(makeElement('td'));   // blank corner element
                     for (var si = 0; si < sgX.titles.length; ++si) {
-                        header.appendChild(makeElement('th', sgX.titles[si]));
+                        var h = makeElement('th', sgX.titles[si], {}, {transform: 'rotate(-45deg)', transformOrigin: '0px 0px', webkitTransform: 'rotate(-45deg)', webkitTransformOrigin: '0px 0px'});
+                        header.appendChild(h);
                     }
                     matrix.appendChild(header);
                 }
 
+                var mbody = makeElement('tbody', null, {className: 'table table-striped table-condensed'})
                 for (var yi = 0; yi < sgY.titles.length; ++yi) {
                     var vY = sgY.tags[yi];
                     var row = makeElement('tr');
@@ -348,9 +350,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                         }
                         row.appendChild(cell);
                     } 
-                    matrix.appendChild(row);
+                    mbody.appendChild(row);
                 }
-
+                matrix.appendChild(mbody);
                 ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
             } else {
                 var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});

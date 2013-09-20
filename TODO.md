@@ -19,8 +19,8 @@ For 0.10
     + Multiwig [DONE]
     + Grouping/compositeTrack [DONE]
     + Views (leave for now?)
-    + Better support for visibility options.
-  - Matrix track selection.
+    + Better support for visibility options. [DONE]
+  - Matrix track selection. [DONE]
   - User interface for connecting to a track hub. [DONE]
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)
