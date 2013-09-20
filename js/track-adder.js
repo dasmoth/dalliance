@@ -515,13 +515,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                             // FIXME redundant with hub-tab click handler.
                         
                             hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                                var hubTracks = [];
-                                for (var ti = 0; ti < tracks.length; ++ti) {
-                                    var t = tracks[ti].toDallianceSource();
-                                    if (t)
-                                        hubTracks.push(t);
-                                }
-                                makeStab(new Observed(hubTracks));
+                                makeHubStab(tracks);
                             });
                         } else {
                             removeChildren(stabHolder);
