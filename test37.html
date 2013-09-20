@@ -1,0 +1,160 @@
+<!DOCTYPE html> 
+
+<html>
+
+<head>
+
+<style>
+</style>
+
+<title>Human GRCh37 :: Dalliance</title> 
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="js/spans.js"></script>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/cbrowser.js"></script>
+<script language="javascript" src="js/feature-popup.js"></script>
+<script language="javascript" src="js/tier.js"></script>
+<script language="javascript" src="js/features.js"></script>
+<script language="javascript" src="js/color.js"></script>
+<script language="javascript" src="js/feature-draw.js"></script>
+<script language="javascript" src="js/sequence-draw.js"></script>
+<script language="javascript" src="js/domui.js"></script>
+<script language="javascript" src="js/karyoscape.js"></script>
+<script language="javascript" src="js/quant-config.js"></script>
+<script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
+<script language="javascript" src="js/version.js"></script>
+<script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="json/json2.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript" src="js/thub.js"></script>
+<script language="javascript" src="js/svg-export.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/browser-ui.js"></script>
+<script language="javascript" src="js/glyphs.js"></script>
+<script language="javascript" src="js/session.js"></script>
+<script language="javascript" src="js/jbjson.js"></script>
+<script language="javascript" src="js/sourceadapters.js"></script>
+<script language="javascript" src="polyfills/html5slider.js"></script>
+<script language="javascript" src="js/ensembljson.js"></script>
+<script language="javascript" src="js/overlay.js"></script>
+
+<script language="javascript">
+  var b = new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human-grc_h37',
+
+    coordSystem: {
+      speciesName: 'Human',
+      taxon: 9606,
+      auth: 'GRCh',
+      version: '37',
+      ucscName: 'hg19',
+    },
+
+    chains: {
+      hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',
+                               {
+                                  speciesName: 'Human',
+                                  taxon: 9606,
+                                  auth: 'GRCh',
+                                  version: 36
+                               })
+    },
+
+    sources:     [{name:                 'Genome',
+                   // twoBitURI:            'http://www.biodalliance.org/datasets/hg18.2bit',
+                   uri:                  'http://www.derkholm.net:8080/das/hg19comp/',      
+                   tier_type:            'sequence',
+                   provides_entrypoints: true,
+                  },
+                  {name:                 'e! transcripts',
+                   uri:                  'http://beta.rest.ensembl.org',
+                   tier_type:            'ensembl',
+                   species:              'human',
+                   type:                 ['transcript', 'exon', 'cds'],
+                  },
+                  {name:                 'Genes',     
+                   desc:                 'Gene structures from Ensembl 54',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
+                   collapseSuperGroups:  true,
+                   provides_karyotype:   true,
+                   provides_search:      true,
+                   provides_entrypoints: true,
+                   maxbins:              false,
+                   mapping:              'hg18ToHg19',
+                   featureInfoPlugin: function(f, info) {
+                      info.add('Testing', 'This is another test!');
+                   }
+                  },
+                  {name:                 'Repeats',
+                   desc:                 'Repeat annotation from Ensembl 59',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',      
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'
+                  },
+                  {name: 'CpG',
+                   desc: 'CpG observed/expected ratio',
+                   uri: 'http://www.derkholm.net:8080/das/hg19comp/',
+                   // stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'
+                   quantLeapThreshold: 0.8,
+                   forceReduction: -1,
+                   style:                [{type: 'cpgoe',
+                                           style: {glyph: 'LINEPLOT',
+                                                   FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]
+                  },
+                  {name:                 'MeDIP-raw',
+                   desc:                 'MeDIP-seq reads from Nature Biotech. 26:779-785',
+                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads/',
+                   mapping:              'hg18ToHg19',
+                  },
+                  {name:                 'BWG test',
+                   bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
+                   stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet',
+                   mapping:              'hg18ToHg19',
+                   quantLeapThreshold: 80
+                  },
+                  {name:                 'BWG hist',
+                   bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
+                   style:     [{type: 'default',
+                                style:  {glyph: 'HISTOGRAM', HEIGHT: 50, MIN: 0, MAX: 100}}],
+                   mapping:              'hg18ToHg19',
+                   quantLeapThreshold: 80
+                  }
+                ],
+
+    setDocumentTitle: true,
+    uiPrefix: '',
+
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+    karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+
+    browserLinks: {
+        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
+        Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
+    }
+  });
+  
+  b.hubs = [
+            'http://www.biodalliance.org/datasets/testhub/hub.txt',
+            'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt'
+           ];
+  
+  b.addFeatureInfoPlugin(function(f, info) {
+      info.add('Testing', 'This is a test!');
+  });
+</script>
+</head>
+
+<body>
+<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
+</body>
+</html>
+
