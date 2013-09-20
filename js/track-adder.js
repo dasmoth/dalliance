@@ -274,50 +274,131 @@ Browser.prototype.showTrackAdder = function(ev) {
         
         for (var gi = 0; gi < groups.length; ++gi) {
             var group = groups[gi];
-            
-            var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-            var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
-            var idx = 0;
-            
-            for (var i = 0; i < group.children.length; ++i) {
-                var track = group.children[i];
-                var ds = track.toDallianceSource();
-                if (!ds)
-                    continue;
+            var dg = group;
+            if (!dg.dimensions && dg._parent && dg._parent.dimensions)
+                dg = dg._parent;
 
-                var r = makeElement('tr');
-                var bd = makeElement('td');
-                bd.style.textAlign = 'center';
-
-                var b = makeElement('input');
-                b.type = 'checkbox';
-                b.dalliance_track = track;
-                if (__mapping) {
-                    b.dalliance_mapping = __mapping;
+            var dprops = {}
+            if (dg.dimensions) {
+                var dtoks = dg.dimensions.split(/(\w+)=(\w+)/);
+                for (var dti = 0; dti < dtoks.length - 2; dti += 3) {
+                    dprops[dtoks[dti + 1]] = dtoks[dti + 2];
                 }
-                b.checked = thisB.currentlyActive(ds); // FIXME!
-                bd.appendChild(b);
-                addButtons.push(b);
-                b.addEventListener('change', function(ev) {
-                    if (ev.target.checked) {
-                        thisB.addTier(ev.target.dalliance_track.toDallianceSource());
-                    } else {
-                        thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
-                    }
-                });
-
-                r.appendChild(bd);
-                var ld = makeElement('td');
-                ld.appendChild(document.createTextNode(track.shortLabel));
-                if (track.longLabel && track.longLabel.length > 0) {
-                    thisB.makeTooltip(ld, track.longLabel);
-                }
-                r.appendChild(ld);
-                stabBody.appendChild(r);
-                ++idx;
             }
-            ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+
+            if (dprops.dimX && dprops.dimY) {
+                var dimX = dprops.dimX, dimY = dprops.dimY;
+                var sgX = dg.subgroups[dimX];
+                var sgY = dg.subgroups[dimY];
+                
+                var trks = {};
+                for (var ci = 0; ci < group.children.length; ++ci) {
+                    var child = group.children[ci];
+                    var vX = child.sgm[dimX], vY = child.sgm[dimY];
+                    if (!trks[vX])
+                        trks[vX] = {};
+                    trks[vX][vY] = child;
+                }
+                __test_trks = trks;
+
+                var matrix = makeElement('table');
+                {
+                    var header = makeElement('tr');
+                    header.appendChild(makeElement('td'));   // blank corner element
+                    for (var si = 0; si < sgX.titles.length; ++si) {
+                        header.appendChild(makeElement('th', sgX.titles[si]));
+                    }
+                    matrix.appendChild(header);
+                }
+
+                for (var yi = 0; yi < sgY.titles.length; ++yi) {
+                    var vY = sgY.tags[yi];
+                    var row = makeElement('tr');
+                    row.appendChild(makeElement('th', sgY.titles[yi]));
+                    
+                    for (var xi = 0; xi < sgX.titles.length; ++xi) {
+                        var vX = sgX.tags[xi];
+                        var cell = makeElement('td');
+                        if (trks[vX] && trks[vX][vY]) {
+                            var track = trks[vX][vY];
+                            var ds = track.toDallianceSource();
+                            if (!ds)
+                                continue;
+                            
+                            var r = makeElement('tr');
+                            var bd = makeElement('td');
+                            bd.style.textAlign = 'center';
+                            
+                            var b = makeElement('input');
+                            b.type = 'checkbox';
+                            b.dalliance_track = track;
+                            if (__mapping) {
+                                b.dalliance_mapping = __mapping;
+                            }
+                            b.checked = thisB.currentlyActive(ds); // FIXME!
+                            cell.appendChild(b);
+                            b.addEventListener('change', function(ev) {
+                                if (ev.target.checked) {
+                                    thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                                } else {
+                                    thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                                }
+                            });
+
+                        }
+                        row.appendChild(cell);
+                    } 
+                    matrix.appendChild(row);
+                }
+
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
+            } else {
+                var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
+                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+                var idx = 0;
+            
+                for (var i = 0; i < group.children.length; ++i) {
+                    var track = group.children[i];
+                    var ds = track.toDallianceSource();
+                    if (!ds)
+                        continue;
+
+                    var r = makeElement('tr');
+                    var bd = makeElement('td');
+                    bd.style.textAlign = 'center';
+                    
+                    var b = makeElement('input');
+                    b.type = 'checkbox';
+                    b.dalliance_track = track;
+                    if (__mapping) {
+                        b.dalliance_mapping = __mapping;
+                    }
+                    b.checked = thisB.currentlyActive(ds); // FIXME!
+                    bd.appendChild(b);
+                    addButtons.push(b);
+                    b.addEventListener('change', function(ev) {
+                        if (ev.target.checked) {
+                            thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                        } else {
+                            thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                        }
+                    });
+
+                    r.appendChild(bd);
+                    var ld = makeElement('td');
+                    ld.appendChild(document.createTextNode(track.shortLabel));
+                    if (track.longLabel && track.longLabel.length > 0) {
+                        thisB.makeTooltip(ld, track.longLabel);
+                    }
+                    r.appendChild(ld);
+                    stabBody.appendChild(r);
+                    ++idx;
+                }
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+                
+            }
         }
+        
         stabHolder.appendChild(ttab);
     };
     

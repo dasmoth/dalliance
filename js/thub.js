@@ -9,6 +9,7 @@
 
 var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
+var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
 
 function TrackHub(url) {
     this.genomes = {};
@@ -48,7 +49,28 @@ TrackHubDB.prototype.getTracks = function(callback) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
             for (var l = 0; l < toks.length - 2; l += 3) {
-                track[toks[l+1]] = toks[l+2];
+                var k = toks[l+1], v = toks[l+2];
+                if (k.match(THUB_SUBGROUP_REGEXP)) {
+                    if (!track.subgroups)
+                        track.subgroups = {};
+                    var sgtoks = v.split(/\s/);
+                    var sgtag = sgtoks[0];
+                    var sgrecord = {name: sgtoks[1], tags: [], titles: []};
+                    for (var sgti = 2; sgti < sgtoks.length; ++sgti) {
+                        var grp = sgtoks[sgti].split(/=/);
+                        sgrecord.tags.push(grp[0]);
+                        sgrecord.titles.push(grp[1]);
+                    }
+                    track.subgroups[sgtag] = sgrecord;
+                } else if (k === 'subGroups') {
+                    var sgtoks = v.split(/(\w+)=(\w+)/);
+                    track.sgm = {};
+                    for (var sgti = 0; sgti < sgtoks.length - 2; sgti += 3) {
+                        track.sgm[sgtoks[sgti+1]] = sgtoks[sgti + 2];
+                    }
+                } else {
+                    track[toks[l+1]] = toks[l+2];
+                }
             }
 
             if (track.track && (track.type || track.container)) {
