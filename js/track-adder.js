@@ -36,12 +36,19 @@ function activateButton(addModeButtons, which) {
 }
 
 Browser.prototype.showTrackAdder = function(ev) {
+    if (this.activeTrackAdder) {
+        this.browserHolderHolder.removeChild(this.activeTrackAdder);
+        this.browserHolder.style.width = '100%';
+        this.activeTrackAdder = null;
+        return;
+    }
+
     var thisB = this;
     var mx =  ev.clientX, my = ev.clientY;
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
-    var popup = makeElement('div');
+    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', width: '40%', boxSizing: 'border-box', paddingLeft: '20px', verticalAlign: 'top'});
     popup.appendChild(makeElement('div', null));
 
     var addModeButtons = [];
@@ -915,5 +922,12 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-    return this.popit(ev, 'Add data sources...', popup, {width: 500});
+
+    /*
+
+    return this.popit(ev, 'Add data sources...', popup, {width: 500});*/
+
+    this.browserHolderHolder.appendChild(popup);
+    this.browserHolder.style.width = '60%';
+    this.activeTrackAdder = popup;
 }
