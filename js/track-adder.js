@@ -7,31 +7,11 @@
 // track-adder.js
 //
 
-function sourceURI(source) {
-    // FIXME
-    return source.uri || source.bwgURI || source.bamURI;
-}
 
 Browser.prototype.currentlyActive = function(source) {
-    var suri = sourceURI(source);
-    for (var i = 0; i < this.tiers.length; ++i) {
-        var ts = this.tiers[i].dasSource;
-        var tsuri = sourceURI(ts);
-        if (tsuri == suri || tsuri == suri + '/') {
-            // Special cases where we might meaningfully want two tiers of the same URI.
-            if (ts.tier_type) {
-                if (!source.tier_type || source.tier_type != ts.tier_type) {
-                    continue;
-                }
-            }
-            if (ts.stylesheet_uri) {
-                if (!source.stylesheet_uri || source.stylesheet_uri != ts.stylesheet_uri) {
-                    continue;
-                }
-            }
-
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (sourcesAreEqual(this.tiers[ti].dasSource, source))
             return true;
-        }
     }
     return false;
 }

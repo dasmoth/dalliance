@@ -1157,6 +1157,36 @@ Browser.prototype.addTier = function(conf) {
     this.notifyTier();
 }
 
+function sourceDataURI(conf) {
+    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI;
+}
+
+function sourceStyleURI(conf) {
+    if (conf.stylesheet_uri)
+        return conf.stylesheet_uri;
+    else if (conf.tier_type == 'sequence')
+        return 'http://www.biodalliance.org/magic/sequence'
+    else
+        return sourceDataURI(conf);
+}
+
+function sourcesAreEqual(a, b) {
+    if (sourceDataURI(a) != sourceDataURI(b) ||
+        sourceStyleURI(a) != sourceStyleURI(b))
+        return false;
+
+    if (a.overlays) {
+        if (!b.overlays && b.overlays.length != a.overlays.length)
+            return false;
+        for (var oi = 0; oi < a.overlays.length; ++oi) {
+            if (!sourcesAreEquals(a.overlays[oi], b.overlays[oi]))
+                return false;
+        }
+    }
+
+    return true;
+}
+
 Browser.prototype.removeTier = function(conf) {
     var target = -1;
 
@@ -1168,14 +1198,9 @@ Browser.prototype.removeTier = function(conf) {
     } else {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var ts = this.tiers[ti].dasSource;
-            if ((conf.uri && ts.uri === conf.uri) ||
-                (conf.bwgURI && ts.bwgURI === conf.bwgURI) ||
-                (conf.bamURI && ts.bamURI === conf.bamURI) ||
-                (conf.twoBitURI && ts.twoBitURI === conf.twoBitURI))
-            {
-                 if (ts.stylesheet_uri == conf.stylesheet_uri) {
-                    target = ti; break;
-                }
+            
+            if (sourcesAreEqual(conf, ts)) {
+                target = ti; break;
             }
         }
     }
