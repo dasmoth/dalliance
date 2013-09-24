@@ -281,12 +281,18 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
                 __test_trks = trks;
 
-                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'});
+                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'}, {tableLayout: 'fixed'});
                 {
                     var header = makeElement('tr');
-                    header.appendChild(makeElement('td'));   // blank corner element
+                    header.appendChild(makeElement('th', null, {}, {width: '150px', height: '100px'}));   // blank corner element
                     for (var si = 0; si < sgX.titles.length; ++si) {
-                        var h = makeElement('th', sgX.titles[si], {}, {transform: 'rotate(-45deg)', transformOrigin: '0px 0px', webkitTransform: 'rotate(-45deg)', webkitTransformOrigin: '0px 0px'});
+                        var h = makeElement('th', makeElement('div', sgX.titles[si], {}, {transform: 'rotate(-60deg)', 
+                                                                       transformOrigin: '0% 100%', 
+                                                                       webkitTransform: 'rotate(-60deg) translate(20px,10px)', 
+                                                                       webkitTransformOrigin: '0% 100%',
+                                                                       textAlign: 'left'}), {}, {width: '35px',
+                                                                                                 height: '100px',
+                                                                                                 verticalAlign: 'bottom'})
                         header.appendChild(h);
                     }
                     matrix.appendChild(header);
@@ -296,7 +302,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 for (var yi = 0; yi < sgY.titles.length; ++yi) {
                     var vY = sgY.tags[yi];
                     var row = makeElement('tr');
-                    row.appendChild(makeElement('th', sgY.titles[yi]));
+                    row.appendChild(makeElement('th', sgY.titles[yi]), {});
                     
                     for (var xi = 0; xi < sgX.titles.length; ++xi) {
                         var vX = sgX.tags[xi];
