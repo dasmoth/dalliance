@@ -11,6 +11,8 @@ var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
 var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
 
+var THUB_PENNANT_PREFIX = 'http://genome.ucsc.edu/images/';
+
 function TrackHub(url) {
     this.genomes = {};
     this.url = url;
@@ -160,6 +162,12 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         name: this.shortLabel,
         desc: this.longLabel
     };
+
+    var pennantIcon = this.get('pennantIcon');
+    if (pennantIcon) {
+        var ptoks = pennantIcon.split(/\s+/);
+        source.pennant = THUB_PENNANT_PREFIX + ptoks[0];
+    }
 
     if (this.container == 'multiWig') {
         source.merge = 'concat';

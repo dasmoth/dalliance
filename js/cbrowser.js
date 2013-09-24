@@ -745,7 +745,14 @@ Browser.prototype.realMakeTier = function(source) {
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
     tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
-    tier.nameButton = makeElement('a', [tier.removeButton, makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}), tier.bumpButton, tier.loaderButton], {className: 'tier-tab'});
+    tier.nameButton = makeElement('a', [], {className: 'tier-tab'});
+    tier.nameButton.appendChild(tier.removeButton);
+    if (source.pennant) {
+        tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
+    }
+    tier.nameButton.appendChild(makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    tier.nameButton.appendChild(tier.bumpButton);
+    tier.nameButton.appendChild(tier.loaderButton);
     
     tier.label = makeElement('span',
        [tier.nameButton],
