@@ -126,7 +126,7 @@ Browser.prototype.realInit = function() {
     var helpPopup;
     var thisB = this;
     this.browserHolderHolder = document.getElementById(this.pageName);
-    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block'});
+    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
     this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});

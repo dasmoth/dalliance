@@ -40,6 +40,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         this.browserHolderHolder.removeChild(this.activeTrackAdder);
         this.browserHolder.style.width = '100%';
         this.activeTrackAdder = null;
+        this.resizeViewer();
         return;
     }
 
@@ -929,5 +930,6 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     this.browserHolderHolder.appendChild(popup);
     this.browserHolder.style.width = '60%';
+    this.resizeViewer();
     this.activeTrackAdder = popup;
 }
