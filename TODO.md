@@ -4,12 +4,12 @@ For 0.10
   - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
   - Extra small-glyph types [DONE SQUARE, STAR]
   - UI for leaping (button to complement ctrl-arrow).
-  - Progress/activity indicators
+  - Progress/activity indicators [DONE]
     + ...when reloading.
     + ...when leaping.
   - Animate when leaping.
     + Also toggle-zooming?
-    + Inform user of progress
+    + Inform user of progress [Now shows an activity spinner -- is this good enough?]
   - Chromosome overviews
   - Better search (using TRIX?)
   - Per-track display customization ("Stylesheet editor")?

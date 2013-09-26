@@ -10,11 +10,49 @@
 function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
+    this.activityListeners = [];
+    this.business = [];
+
+    for (var i = 0; i < this.sources.length; ++i) {
+        this.initN(i);
+    }
 
     if (opts.merge == 'concat') {
         this.merge = OverlayFeatureSource_merge_concat;
     } else {
         this.merge = OverlayFeatureSource_merge_byKey;
+    }
+}
+
+OverlayFeatureSource.prototype.initN = function(n) {
+    var s = this.sources[n];
+    var thisB = this;
+    this.business[n] = 0;
+
+    if (s.addActivityListener) {
+        s.addActivityListener(function(b) {
+            thisB.business[n] = b;
+            thisB.notifyActivity();
+        });
+    }
+}
+
+OverlayFeatureSource.prototype.addActivityListener = function(l) {
+    this.activityListeners.push(l);
+}
+
+OverlayFeatureSource.prototype.notifyActivity = function() {
+    var busy = 0;
+    for (var i = 0; i < this.business.length; ++i) {
+        busy += this.business[i];
+    }
+
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](busy);
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 

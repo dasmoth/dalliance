@@ -898,6 +898,16 @@ Browser.prototype.realMakeTier = function(source) {
     tier.init(); // fetches stylesheet
     this.arrangeTiers();
     tier.updateLabel();
+
+    if (tier.featureSource && tier.featureSource.addActivityListener) {
+        tier.featureSource.addActivityListener(function(busy) {
+            if (busy > 0) {
+                tier.loaderButton.style.display = 'inline-block';
+            } else {
+                tier.loaderButton.style.display = 'none';
+            }
+        });
+    }
 }
 
 Browser.prototype.refreshTier = function(tier) {
