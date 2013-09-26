@@ -224,8 +224,12 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
     } else {
         var mayDownsample = false;
         var src = tier.getSource();
-        while (MappedFeatureSource.prototype.isPrototypeOf(src)) {
-            src = src.source;
+        while (MappedFeatureSource.prototype.isPrototypeOf(src) || CachingFeatureSource.prototype.isPrototypeOf(src) || OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+	    if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+		src = src.sources[0];
+	    } else {
+		src = src.source;
+	    }
         }
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
