@@ -2,6 +2,7 @@
 
 function FetchPool() {
     this.reqs = [];
+    this.awaitedFeatures = {};
 }
 
 FetchPool.prototype.addRequest = function(xhr) {

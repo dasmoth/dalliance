@@ -26,7 +26,10 @@ DasTier.prototype.initSources = function() {
 }
 
 Browser.prototype.createFeatureSource = function(config) {
-    var fs;
+    var fs = this.sourceCache.get(config);
+    if (fs) {
+        return fs;
+    }
 
     if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
@@ -61,8 +64,91 @@ Browser.prototype.createFeatureSource = function(config) {
         fs.name = config.name;
     }
 
+    if (fs != null) {
+        fs = new CachingFeatureSource(fs);
+        this.sourceCache.put(config, fs);
+    }
     return fs;
 }
+
+function SourceCache() {
+    this.sourcesByURI = {}
+}
+
+SourceCache.prototype.get = function(conf) {
+    var scb = this.sourcesByURI[sourceDataURI(conf)];
+    if (scb) {
+        for (var si = 0; si < scb.configs.length; ++si) {
+            if (sourcesAreEqual(scb.configs[si], conf)) {
+                return scb.sources[si];
+            }
+        }
+    }
+}
+
+SourceCache.prototype.put = function(conf, source) {
+    var uri = sourceDataURI(conf);
+    var scb = this.sourcesByURI[uri];
+    if (!scb) {
+        scb = {configs: [], sources: []};
+        this.sourcesByURI[uri] = scb;
+    }
+    scb.configs.push(conf);
+    scb.sources.push(source);
+}
+
+var __cfs_id_seed = 0;
+
+function CachingFeatureSource(source) {
+    this.source = source;
+    this.cfsid = 'cfs' + (++__cfs_id_seed);
+}
+
+CachingFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.source.getStyleSheet(callback);
+}
+
+CachingFeatureSource.prototype.getScales = function() {
+    return this.source.getScales();
+}
+
+CachingFeatureSource.prototype.addActivityListener = function(l) {
+    if (this.source.addActivityListener) {
+        this.source.addActivityListener(l);
+    }
+}
+
+CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    this.source.findNextFeature(chr, pos, dir, callback);
+}
+
+CachingFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    this.source.quantFindNextFeature(chr, pos, dir, threshold, callback);
+}
+
+CachingFeatureSource.prototype.capabilities = function() {
+    if (this.source.capabilities) {
+        return this.source.capabilities();
+    } else {
+        return {};
+    }
+}
+
+CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
+    if (!awaitedFeatures) {
+        var awaitedFeatures = new Awaited();
+        pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
+        this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
+            awaitedFeatures.provide({status: status, features: features, scale: scale});
+        });
+    } 
+
+    awaitedFeatures.await(function(af) {
+        callback(af.status, af.features, af.scale);
+    });
+}
+    
 
 
 function DASFeatureSource(dasSource) {

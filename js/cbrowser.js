@@ -100,6 +100,9 @@ function Browser(opts) {
     this.hubs = [];
     this.hubObjects = [];
 
+    this.sourceCache = new SourceCache();
+
+
     for (var k in opts) {
         this[k] = opts[k];
     }
@@ -1175,7 +1178,7 @@ Browser.prototype.addTier = function(conf) {
 }
 
 function sourceDataURI(conf) {
-    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI;
+    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
 }
 
 function sourceStyleURI(conf) {

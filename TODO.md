@@ -25,6 +25,7 @@ For 0.10
   - Replace feature popups with inspector?
      + Maybe a more general popupocalypse? (track-adder, help, etc.?)
   - Better tier-matching [DONE]
+  - Support for shared data sources. [DONE]
   - Retina display support
   - Clean up glyph insertion into subtiers (performance-critical).
 
