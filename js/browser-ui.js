@@ -75,13 +75,10 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
     
-    toolbar.appendChild(makeElement('div', [addTrackBtn,
-                                            // favBtn,
-                                            svgBtn,
-                                            resetBtn,
-                                            optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
+    toolbar.appendChild(makeElement('div', [svgBtn,
+                                            resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
-    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
+    toolbar.appendChild(makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'}, {verticalAlign: 'top'}));
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
