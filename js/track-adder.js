@@ -49,7 +49,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
-    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', width: '40%', boxSizing: 'border-box', paddingLeft: '20px', verticalAlign: 'top'});
+    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', paddingLeft: '20px', verticalAlign: 'top'});
     popup.appendChild(makeElement('div', null));
 
     var addModeButtons = [];
