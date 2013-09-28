@@ -133,8 +133,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
     
-    // popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
-    
     var addButtons = [];
     var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
     var customMode = false;
@@ -617,17 +615,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 });
             }
         } else {
-            // No longer needed because of instant addition....
-
-            /*
-            for (var bi = 0; bi < addButtons.length; ++bi) {
-                var b = addButtons[bi];
-                if (b.checked) {
-                    var nds = b.dalliance_source;
-                    thisB.addTier(nds);
-                }
-            }
-            */
             thisB.removeAllPopups();
         }
     };
@@ -640,9 +627,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         var tsm = Math.max(knownSpace.min, (knownSpace.min + knownSpace.max - 100) / 2)|0;
         var testSegment = new DASSegment(knownSpace.chr, tsm, Math.min(tsm + 99, knownSpace.max));
-//        dlog('test segment: ' + testSegment);
         nds.features(testSegment, {}, function(features, status) {
-            // dlog('status=' + status);
             if (status) {
                 if (!retry) {
                     dlog('retrying with credentials');
@@ -676,7 +661,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 uri = match[1] + '/sources';
             }
         }
-//        dlog('sourceQuery: ' + uri);
         function sqfail() {
             if (!retry) {
                 return tryAddDASxSources(nds, true);
@@ -689,7 +673,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (!sources || sources.length == 0) {
                     return sqfail();
                 } 
-//                dlog('got ' + sources.length + ' sources');
 
                 var fs = null;
                 if (sources.length == 1) {
@@ -697,7 +680,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     for (var i = 0; i < sources.length; ++i) {
                         if (sources[i].uri === nds.uri) {
-//                            dlog('got match!');
                             fs = sources[i];
                             break;
                         }

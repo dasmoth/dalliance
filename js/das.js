@@ -57,11 +57,9 @@ function DASSource(a1, a2) {
         this.props = {};
     }
 
-    // if (!this.uri || this.uri.length == 0) {
-    //    throw "URIRequired";
-    // }   FIXME
-    if (this.uri && this.uri.substr(this.uri.length - 1) != '/') {
-        this.uri = this.uri + '/';
+    this.dasBaseURI = this.uri;
+    if (this.dasBaseURI && this.dasBaseURI.substr(this.uri.length - 1) != '/') {
+        this.dasBaseURI = this.dasBaseURI + '/';
     }
 }
 
@@ -77,7 +75,7 @@ function coordsMatch(c1, c2) {
 //
 
 DASSource.prototype.entryPoints = function(callback) {
-    var dasURI = this.uri + 'entry_points';
+    var dasURI = this.dasBaseURI + 'entry_points';
     this.doCrossDomainRequest(dasURI, function(responseXML) {
             if (!responseXML) {
                 return callback([]);
@@ -128,7 +126,7 @@ function DASSequence(name, start, end, alpha, seq) {
 }
 
 DASSource.prototype.sequence = function(segment, callback) {
-    var dasURI = this.uri + 'sequence?' + segment.toDASQuery();
+    var dasURI = this.dasBaseURI + 'sequence?' + segment.toDASQuery();
     this.doCrossDomainRequest(dasURI, function(responseXML) {
         if (!responseXML) {
             callback([]);
@@ -232,7 +230,7 @@ DASSource.prototype.features = function(segment, options, callback) {
         }
         
         if (filters.length > 0) {
-            dasURI = this.uri + 'features?' + filters.join(';');
+            dasURI = this.dasBaseURI + 'features?' + filters.join(';');
         } else {
             callback([], 'No filters specified');
         }
@@ -399,7 +397,7 @@ function DASAlignment(type) {
 }
 
 DASSource.prototype.alignments = function(segment, options, callback) {
-    var dasURI = this.uri + 'alignment?query=' + segment;
+    var dasURI = this.dasBaseURI + 'alignment?query=' + segment;
     this.doCrossDomainRequest(dasURI, function(responseXML) {
         if (!responseXML) {
             callback([], 'Failed request ' + dasURI);
@@ -500,7 +498,7 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
         dasURI = this.stylesheet_uri;
         creds = false;
     } else {
-        dasURI = this.uri + 'stylesheet';
+        dasURI = this.dasBaseURI + 'stylesheet';
     }
 
     doCrossDomainRequest(dasURI, function(responseXML) {
