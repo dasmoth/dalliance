@@ -133,7 +133,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
     
-    var addButtons = [];
     var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
     var customMode = false;
     var dataToFinalize = null;
@@ -166,7 +165,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     makeStabObserver = function(msources) {
         customMode = false;
-        addButtons = [];
+        var buttons = [];
         removeChildren(stabHolder);
         if (!msources) {
             stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
@@ -199,9 +198,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (__mapping) {
                     b.dalliance_mapping = __mapping;
                 }
-                b.checked = thisB.currentlyActive(source);
+                // b.checked = thisB.currentlyActive(source);
                 bd.appendChild(b);
-                addButtons.push(b);
+                buttons.push(b);
                 b.addEventListener('change', function(ev) {
                     if (ev.target.checked) {
                         thisB.addTier(ev.target.dalliance_source);
@@ -223,12 +222,23 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabBody.appendChild(r);
             ++idx;
         }
+
+        function setChecks() {
+            for (var bi = 0; bi < buttons.length; ++bi) {
+                var b = buttons[bi];
+                b.checked = thisB.currentlyActive(b.dalliance_source);
+            }
+        }
+        setChecks();
+        thisB.addTierListener(function(l) {
+            setChecks();
+        });
+
         stabHolder.appendChild(stab);
     };
 
     function makeHubStab(tracks) {
         customMode = false;
-        addButtons = [];
         removeChildren(stabHolder);
         
         var ttab = makeElement('div');
@@ -369,7 +379,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                     }
                     buttons.push(b);
                     bd.appendChild(b);
-                    addButtons.push(b);
                     b.addEventListener('change', function(ev) {
                         if (ev.target.checked) {
                             thisB.addTier(ev.target.dalliance_source);
