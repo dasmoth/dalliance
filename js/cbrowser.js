@@ -1235,7 +1235,6 @@ Browser.prototype.removeTier = function(conf) {
     this.sources.splice(target, 1);
 
     this.arrangeTiers();
-    
     this.notifyTier();
 }
 

@@ -260,6 +260,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 children: tops});
         }
         
+        var buttons = [];
         for (var gi = 0; gi < groups.length; ++gi) {
             var group = groups[gi];
             var dg = group;
@@ -287,7 +288,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                         trks[vX] = {};
                     trks[vX][vY] = child;
                 }
-                __test_trks = trks;
 
                 var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'}, {tableLayout: 'fixed'});
                 {
@@ -327,17 +327,17 @@ Browser.prototype.showTrackAdder = function(ev) {
                             
                             var b = makeElement('input');
                             b.type = 'checkbox';
-                            b.dalliance_track = track;
+                            b.dalliance_source = ds;
                             if (__mapping) {
                                 b.dalliance_mapping = __mapping;
                             }
-                            b.checked = thisB.currentlyActive(ds); // FIXME!
+                            buttons.push(b);
                             cell.appendChild(b);
                             b.addEventListener('change', function(ev) {
                                 if (ev.target.checked) {
-                                    thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                                    thisB.addTier(ev.target.dalliance_source);
                                 } else {
-                                    thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                                    thisB.removeTier(ev.target.dalliance_source);
                                 }
                             });
 
@@ -365,18 +365,18 @@ Browser.prototype.showTrackAdder = function(ev) {
                     
                     var b = makeElement('input');
                     b.type = 'checkbox';
-                    b.dalliance_track = track;
+                    b.dalliance_source = ds;
                     if (__mapping) {
                         b.dalliance_mapping = __mapping;
                     }
-                    b.checked = thisB.currentlyActive(ds); // FIXME!
+                    buttons.push(b);
                     bd.appendChild(b);
                     addButtons.push(b);
                     b.addEventListener('change', function(ev) {
                         if (ev.target.checked) {
-                            thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                            thisB.addTier(ev.target.dalliance_source);
                         } else {
-                            thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                            thisB.removeTier(ev.target.dalliance_source);
                         }
                     });
 
@@ -394,6 +394,17 @@ Browser.prototype.showTrackAdder = function(ev) {
                 
             }
         }
+
+        function setChecks() {
+            for (var bi = 0; bi < buttons.length; ++bi) {
+                var b = buttons[bi];
+                b.checked = thisB.currentlyActive(b.dalliance_source);
+            }
+        }
+        setChecks();
+        thisB.addTierListener(function(l) {
+            setChecks();
+        });
         
         stabHolder.appendChild(ttab);
     };
