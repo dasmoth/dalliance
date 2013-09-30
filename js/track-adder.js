@@ -49,8 +49,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
-    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', paddingLeft: '20px', verticalAlign: 'top'});
-    popup.appendChild(makeElement('div', null));
+    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
 
     var addModeButtons = [];
     var makeStab, makeStabObserver;
@@ -137,7 +136,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var customMode = false;
     var dataToFinalize = null;
 
-    var asform = makeElement('form', null, {}, {clear: 'both'});
+    var asform = makeElement('form', null, {}, {display: 'inline-block'});
     asform.addEventListener('submit', function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             doAdd();
@@ -172,8 +171,8 @@ Browser.prototype.showTrackAdder = function(ev) {
             return;
         }
         
-        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'}, {width: '100%'});
+        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
         var idx = 0;
 
         var sources = [];
@@ -925,8 +924,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-    this.browserHolder.appendChild(popup);
+
+    var insert = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '800px', display: 'inline-block', marginLeft: '-10px'}), popup], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px'});
+    this.browserHolder.appendChild(insert);
     this.svgHolder.style.width = '60%';
     this.resizeViewer();
-    this.activeTrackAdder = popup;
+    this.activeTrackAdder = insert;
 }
