@@ -153,7 +153,9 @@ Browser.prototype.showTrackAdder = function(ev) {
 
 
     makeStab = function(msources, mapping) {
-        refreshButton.style.visibility = 'visible';
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'none';
+        canButton.style.display = 'none';
         if (__sourceHolder) {
             __sourceHolder.removeListener(makeStabObserver);
         }
@@ -237,6 +239,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     };
 
     function makeHubStab(tracks) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'none';
+        canButton.style.display = 'none';
+
         customMode = false;
         removeChildren(stabHolder);
         
@@ -357,7 +363,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
             } else {
                 var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
                 var idx = 0;
             
                 for (var i = 0; i < group.children.length; ++i) {
@@ -440,7 +446,10 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     function switchToBinMode() {
         customMode = 'bin';
-        refreshButton.style.visibility = 'hidden';
+
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
 
         removeChildren(stabHolder);
 
@@ -473,6 +482,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function switchToHubConnectMode() {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         customMode = 'hub-connect';
         refreshButton.style.visibility = 'hidden';
 
@@ -497,8 +510,11 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, false);
 
     function switchToCustomMode() {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         customMode = 'das';
-        refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
 
@@ -582,7 +598,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 thisB.addTier(dataToFinalize);
-                thisB.removeAllPopups();
+                switchToCustomMode();
             } else if (customMode === 'hub-connect') {
                 var curi = custURL.value.trim();
                 if (!/^.+:\/\//.exec(curi)) {
@@ -789,6 +805,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function promptForBAI(nds) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         customMode = 'prompt-bai'
         stabHolder.appendChild(makeElement('h2', 'Select an index file'));
@@ -834,6 +854,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function binFormatErrorPage(message) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         message = message || 'Custom data format not recognized';
         stabHolder.appendChild(makeElement('h2', 'Error adding custom data'));
@@ -844,6 +868,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
                      
     var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('h2', 'Add custom data: step 2'));
         stabHolder.appendChild(document.createTextNode('Label: '));
