@@ -90,13 +90,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         zoomSlider.max = zoom.max;
         zoomSlider.value = zoom.current;
         if (b.storeStatus) {
-            b.storeStatus();
+            b.storeViewStatus();
         }
     });
 
     this.addTierListener(function() {
         if (b.storeStatus) {
-            b.storeStatus();
+            b.storeTierStatus();
         }
     });
 
