@@ -265,8 +265,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    //if (this.row)
-        this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
+    this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
  }
 
 DasTier.prototype.drawOverlay = function() {

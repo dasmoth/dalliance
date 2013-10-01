@@ -275,7 +275,7 @@ DasTier.prototype.paint = function() {
     lh += 6
     this.viewport.setAttribute('height', lh);
     this.viewport.style.left = '-1000px';
-    this.holder.style.height = '' + Math.max(lh, 35) + 'px';
+    this.holder.style.height = '' + Math.max(lh, this.browser.minTierHeight) + 'px';
     this.updateHeight();
     this.drawOverlay();
     this.norigin = this.browser.viewStart;

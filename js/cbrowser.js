@@ -84,7 +84,7 @@ function Browser(opts) {
 
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
-    this.minTierHeight = 25;
+    this.minTierHeight = 30;
 
     this.browserLinks = {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
