@@ -260,6 +260,24 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
+    var uiKeyHandler = function(ev) {
+        // console.log('bukh: ' + ev.keyCode);
+        if (ev.keyCode == 65 || ev.keyCode == 97) {  // a
+            ev.preventDefault(); ev.stopPropagation();
+            b.showTrackAdder();
+        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
+            ev.stopPropagation(); ev.preventDefault();
+            b.toggleHelpPopup(ev);
+        }
+    };
+
+    holder.addEventListener('focus', function(ev) {
+        holder.addEventListener('keydown', uiKeyHandler, false);
+    }, false);
+    holder.addEventListener('blur', function(ev) {
+        holder.removeEventListener('keydown', uiKeyHandler, false);
+    }, false);
+
   }
 
 Browser.prototype.toggleHelpPopup = function(ev) {

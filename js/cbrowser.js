@@ -204,6 +204,7 @@ Browser.prototype.realInit = function() {
     */
 
     var keyHandler = function(ev) {
+        // console.log('cbkh: ' + ev.keyCode);
         if (ev.keyCode == 13) { // enter
             var layoutsChanged = false;
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -383,9 +384,6 @@ Browser.prototype.realInit = function() {
         } else if (ev.keyCode == 189 || ev.keyCode == 173) { // -
             ev.stopPropagation(); ev.preventDefault();
             thisB.zoomStep(10);
-        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
-            ev.stopPropagation(); ev.preventDefault();
-            thisB.toggleHelpPopup(ev);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
             var t = thisB.tiers[thisB.selectedTier];

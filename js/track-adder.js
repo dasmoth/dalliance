@@ -45,9 +45,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     var thisB = this;
-    var mx =  ev.clientX, my = ev.clientY;
-    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-    my +=  document.documentElement.scrollTop || document.body.scrollTop;
 
     var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
 
