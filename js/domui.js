@@ -199,8 +199,8 @@ function makeTreeTableSection(title, content, visible) {
         update();
     }, false);
 
-    var heading = makeElement('h6', [ttButton, title]);
-    return makeElement('div', [heading, content]);
+    var heading = makeElement('h6', [ttButton, ' ', title], {}, {display: 'block', background: 'gray', color: 'white', width: '100%', padding: '5px 2px', margin: '0px'});
+    return makeElement('div', [heading, content], {});
 }
 
 function dlog(msg) {

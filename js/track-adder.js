@@ -46,7 +46,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var thisB = this;
 
-    var popup = makeElement('div', null, {className: 'dalliance'} , {display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
+    var popup = makeElement('div', null, {className: 'dalliance'} , {width: '100%', display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
 
     var addModeButtons = [];
     var makeStab, makeStabObserver;
@@ -133,7 +133,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var customMode = false;
     var dataToFinalize = null;
 
-    var asform = makeElement('form', null, {}, {display: 'inline-block'});
+    var asform = makeElement('form', null, {}, {display: 'inline-block', width: '100%'});
     asform.addEventListener('submit', function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             doAdd();
@@ -141,8 +141,8 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, true); 
     var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
-    stabHolder.style.overflow = 'auto';
-    stabHolder.style.height = '400px';
+    stabHolder.style.overflow = 'scroll';
+    stabHolder.style.height = '500px';
     asform.appendChild(stabHolder);
 
     var __mapping;
@@ -187,7 +187,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             var source = sources[i];
             var r = makeElement('tr');
 
-            var bd = makeElement('td');
+            var bd = makeElement('td', null, {}, {width: '30px'});
             bd.style.textAlign = 'center';
             if (!source.props || source.props.cors) {
                 var b = makeElement('input');
@@ -243,7 +243,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = false;
         removeChildren(stabHolder);
         
-        var ttab = makeElement('div');
+        var ttab = makeElement('div', null, {}, {width: '100%'});
         var sources = [];
         for (var i = 0; i < tracks.length; ++i) {
             sources.push(tracks[i]);
@@ -370,7 +370,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                         continue;
 
                     var r = makeElement('tr');
-                    var bd = makeElement('td');
+                    var bd = makeElement('td', null, {}, {width: '30px'});
                     bd.style.textAlign = 'center';
                     
                     var b = makeElement('input');
@@ -950,7 +950,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     makeStab(thisB.availableSources);
 
 
-    var insert = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '800px', display: 'inline-block', marginLeft: '-10px'}), popup], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px'});
+    var insert = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '100%', display: 'inline-block', marginLeft: '-10px'}), popup], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px', height: '600px'});
     this.browserHolder.appendChild(insert);
     this.svgHolder.style.width = '60%';
     this.resizeViewer();
