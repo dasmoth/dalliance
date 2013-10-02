@@ -102,6 +102,9 @@ var __cfs_id_seed = 0;
 function CachingFeatureSource(source) {
     this.source = source;
     this.cfsid = 'cfs' + (++__cfs_id_seed);
+    if (source.name) {
+        this.name = source.name;
+    }
 }
 
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {

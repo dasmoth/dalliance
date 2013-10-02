@@ -250,14 +250,19 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
         }
+
+	console.log(src);
         
         // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);	
 
-        if ((actualScale < (this.scale/2) && features.length > 200 && (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample))) ||
-            (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
-        {
-            features = downsample(features, this.scale);
-        }
+	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
+	    console.log('considering downsample...');
+            if ((actualScale < (this.scale/2) && features.length > 200)  ||
+		(mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
+            {
+		features = downsample(features, this.scale);
+            }
+	}
 
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {
