@@ -188,7 +188,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         return;
     }
 
-    if (!this.dasSource.uri) {
+    if (!this.dasSource.uri && !this.dasSource.features_uri) {
         // FIXME should this be making an error callback???
         return;
     }
