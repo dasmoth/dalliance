@@ -883,6 +883,7 @@ function makeBwg(data, callback, name) {
         bwg.asOffset = (la[9] << 32) | (la[10]);    // 36 (unaligned longlong)
         bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
         bwg.uncompressBufSize = la[13];  // 52
+        bwg.extHeaderOffset = (la[14] << 32) | (la[15])
         
         // console.log('bwgVersion: ' + bwg.version);
         // dlog('bigType: ' + bwg.type);
@@ -1000,4 +1001,55 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
     }
     
     fbThresholdSearchRecur();
+}
+
+BigWig.prototype.getExtraIndices = function(callback) {
+    thisB = this;
+    if (this.version < 4 || this.extHeaderOffset == 0) {
+        return callback(null);
+    } else {
+        this.data.slice(this.extHeaderOffset, 64).fetch(function(result) {
+            if (!result) {
+                return callback(null, "Couldn't fetch extension header");
+            }
+
+            var sa = new Int16Array(result);
+            var la = new Int32Array(result);
+            
+            var extHeaderSize = sa[0];
+            var extraIndexCount = sa[1];
+            var extraIndexListOffset = (la[1]<<32) | (la[2]);
+
+            console.log('extHeaderSize = ' + extHeaderSize);
+            console.log('extraIndexCount = ' + extraIndexCount);
+            console.log('extraIndexListOffset = ' + extraIndexListOffset);
+
+            // FIXME 20byte records only make sense for single-field indices.
+            // Right now, these seem to be the only things around, but the format
+            // is actually more general.
+            thisB.data.slice(extraIndexListOffset, extraIndexCount * 20).fetch(function(eil) {
+                if (!eil) {
+                    return callback(null, "Couldn't fetch index info");
+                }
+
+                var sa = new Int16Array(eil);
+                var la = new Int32Array(eil);
+
+                var indices = [];
+                for (var ii = 0; ii < extraIndexCount; ++ii) {
+                    var eiType = sa[ii*10];
+                    var eiFieldCount = sa[ii*10 + 1];
+                    var eiOffset = (la[ii*5 + 1]<<32) | (la[ii*5+2]);
+                    var eiField = sa[ii*10 + 8]
+                    var index = {
+                        type: eiType,
+                        fieldCount: eiFieldCount,
+                        offset: eiOffset,
+                        field: eiField};
+                    indices.push(index);
+                }
+                callback(indices);
+            });
+        });
+    }
 }
