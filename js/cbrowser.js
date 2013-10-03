@@ -934,8 +934,15 @@ Browser.prototype.realMakeTier = function(source) {
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
 
-        if (tiersWereReordered)
+        if (tiersWereReordered) {
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                if (thisB.tiers[ti] == tier) {
+                    thisB.setSelectedTier(ti);
+                    break;
+                }
+            }
             thisB.notifyTier();
+        }
     };
 
     tier.label.addEventListener('mousedown', function(ev) {
@@ -1283,6 +1290,18 @@ Browser.prototype.removeTier = function(conf) {
     this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
     this.sources.splice(target, 1);
+
+    var nst = [];
+    for (var sti = 0; sti < this.selectedTiers.length; ++sti) {
+        var st = this.selectedTiers[sti];
+        if (st < target) {
+            nst.push(st);
+        } else if (st > target) {
+            nst.push(st - 1);
+        }
+    }
+    this.selectedTiers = nst;
+    this.markSelectedTiers();
 
     this.arrangeTiers();
     this.notifyTier();
