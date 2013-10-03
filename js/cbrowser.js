@@ -444,6 +444,11 @@ Browser.prototype.realInit = function() {
                     t.updateLabel();
                 }
             }
+        } else if (ev.keyCode == 77 || ev.keyCode == 109) { // m
+            ev.stopPropagation(); ev.preventDefault();
+            if (thisB.selectedTiers.length > 1) {
+                thisB.mergeSelectedTiers();
+            }
         } else {
             // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
