@@ -70,6 +70,7 @@ function Browser(opts) {
     this.positionFeedback = false;
 
     this.selectedTier = 1;
+    this.selectedTiers = [1];
 
     this.placards = [];
 
@@ -251,7 +252,10 @@ Browser.prototype.realInit = function() {
                     fedge = 1;
                 }
                 var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-                thisB.tiers[thisB.selectedTier].findNextFeature(
+
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                thisB.tiers[st].findNextFeature(
                       thisB.chr,
                       pos,
                       -1,
@@ -289,7 +293,9 @@ Browser.prototype.realInit = function() {
                     fedge = 1;
                 }
                 var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-                thisB.tiers[thisB.selectedTier].findNextFeature(
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                thisB.tiers[st].findNextFeature(
                       thisB.chr,
                       pos,
                       1,
@@ -323,14 +329,18 @@ Browser.prototype.realInit = function() {
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
-                var tt = thisB.tiers[thisB.selectedTier];
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 if (ch >= 40) {
                     tt.forceHeight = ch - 10;
                     tt.draw();
                 }
             } else if (ev.ctrlKey) {
-                var tt = thisB.tiers[thisB.selectedTier];
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                var tt = thisB.tiers[st];
   
                 if (tt.quantLeapThreshold) {
                     var th = tt.subtiers[0].height;
@@ -343,8 +353,9 @@ Browser.prototype.realInit = function() {
                     tt.draw();
                 }                
             } else {
-                if (thisB.selectedTier > 0) {
-                    thisB.setSelectedTier(thisB.selectedTier - 1);
+                var st = thisB.getSelectedTier();
+                if (st > 0) {
+                    thisB.setSelectedTier(st - 1);
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
                 }
@@ -353,12 +364,16 @@ Browser.prototype.realInit = function() {
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
-                var tt = thisB.tiers[thisB.selectedTier];
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 tt.forceHeight = ch + 10;
                 tt.draw();
             } else if (ev.ctrlKey) {
-                var tt = thisB.tiers[thisB.selectedTier];
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                var tt = thisB.tiers[st];
 
                 if (tt.quantLeapThreshold) {
                     var th = tt.subtiers[0].height;
@@ -374,8 +389,9 @@ Browser.prototype.realInit = function() {
                     }
                 }
             } else {
-                if (thisB.selectedTier < thisB.tiers.length -1) {
-                    thisB.setSelectedTier(thisB.selectedTier + 1);
+                var st = thisB.getSelectedTier();
+                if (st < thisB.tiers.length -1) {
+                    thisB.setSelectedTier(st + 1);
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
@@ -386,7 +402,9 @@ Browser.prototype.realInit = function() {
             thisB.zoomStep(10);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
-            var t = thisB.tiers[thisB.selectedTier];
+            var st = thisB.getSelectedTier();
+            if (st < 0) return;
+            var t = thisB.tiers[st];
             if (!t.infoVisible) {
                 t.infoElement.style.display = 'block';
                 t.updateHeight();
@@ -413,7 +431,9 @@ Browser.prototype.realInit = function() {
                     }
                 }
             } else {
-                var t = thisB.tiers[thisB.selectedTier];
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                var t = thisB.tiers[st];
                 if (t.dasSource.collapseSuperGroups) {
                     if (bumpStatus === undefined) {
                         bumpStatus = !t.bumped;
@@ -769,24 +789,51 @@ Browser.prototype.realMakeTier = function(source) {
     }, false);
     tier.nameButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        for (var ti = 0; ti < thisB.tiers.length; ++ti) {
-            if (thisB.tiers[ti] === tier) {
-                thisB.browserHolder.focus();
-                if (ti != thisB.selectedTier) {
-                    thisB.setSelectedTier(ti);
-                    return;
+
+        if (ev.shiftKey) {
+            var hitTier = -1;
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                if (thisB.tiers[ti] === tier) {
+                    hitTier = ti;
+                    break;
                 }
             }
-        }
+            if (hitTier >= 0) {
+                var i = thisB.selectedTiers.indexOf(hitTier);
+                if (i >= 0) {
+                    thisB.selectedTiers.splice(i, 1);
+                } else {
+                    thisB.selectedTiers.push(hitTier);
+                    thisB.selectedTiers.sort();
+                }
+                thisB.markSelectedTiers();
 
-        if (!tier.infoVisible) {
-            tier.infoElement.style.display = 'block';
-            tier.updateHeight();
-            tier.infoVisible = true;
+                if (thisB.selectedTiers.length > 0) {
+                    thisB.browserHolder.focus();
+                } else {
+                    thisB.notifyTierSelectionWrap(-1);
+                }
+            }
         } else {
-            tier.infoElement.style.display = 'none';
-            tier.updateHeight();
-            tier.infoVisible = false;
+            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+                if (thisB.tiers[ti] === tier) {
+                    thisB.browserHolder.focus();
+                    if (ti != thisB.selectedTier) {
+                        thisB.setSelectedTier(ti);
+                        return;
+                    }
+                }
+            }
+
+            if (!tier.infoVisible) {
+                tier.infoElement.style.display = 'block';
+                tier.updateHeight();
+                tier.infoVisible = true;
+            } else {
+                tier.infoElement.style.display = 'none';
+                tier.updateHeight();
+                tier.infoVisible = false;
+            }
         }
     }, false);
     tier.bumpButton.addEventListener('click', function(ev) {
@@ -1437,19 +1484,31 @@ Browser.prototype.featuresInRegion = function(chr, min, max) {
     return features;
 }
 
+
+Browser.prototype.getSelectedTier = function() {
+    if (this.selectedTiers.length > 0) 
+        return this.selectedTiers[0];
+    else
+        return -1;
+}
+
 Browser.prototype.setSelectedTier = function(t) {
-    this.selectedTier = t;
+    this.selectedTiers = [t];
+    this.markSelectedTiers();
+}
+
+Browser.prototype.markSelectedTiers = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var button = this.tiers[ti].nameButton;
 
-        if (ti == this.selectedTier) {
+        if (this.selectedTiers.indexOf(ti) >= 0) {
             button.classList.add('active');
             // this.tiers[ti].label.focus();
         } else {
             button.classList.remove('active');
         }
     }
-    if (t != null) {
+    if (this.selectedTiers.length > 0) {
         this.browserHolder.focus();
     }
 }
