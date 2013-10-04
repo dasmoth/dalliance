@@ -51,34 +51,36 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         document.title = title + ' :: dalliance';
     }
     
-    if (!this.noTitle) {
-        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
-    }
-
     var locField = makeElement('input', '', {className: 'loc-field'});
     b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
-    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
+
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
     var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
-    toolbar.appendChild(makeElement('div', [zoomInBtn,
-                                            makeElement('span', zoomSlider, {className: 'btn'}),
-                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
     var optsButton = makeElement('div', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
-
     var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
-    
+
+
+    var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'}, {verticalAlign: 'top'});
+    toolbar.appendChild(modeButtons);
+    if (!this.noTitle) {
+        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+    }
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
+    toolbar.appendChild(makeElement('div', [zoomInBtn,
+                                            makeElement('span', zoomSlider, {className: 'btn'}),
+                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
     toolbar.appendChild(makeElement('div', [svgBtn,
                                             resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
-
-    toolbar.appendChild(makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'}, {verticalAlign: 'top'}));
+    
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -109,7 +111,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
             var g = locField.value;
             var m = REGION_PATTERN.exec(g);
-            // console.log(m);
 
             var setLocationCB = function(err) {
                     if (err) {
@@ -277,8 +278,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.addEventListener('blur', function(ev) {
         holder.removeEventListener('keydown', uiKeyHandler, false);
     }, false);
-
-  }
+}
 
 Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
@@ -324,5 +324,6 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         this.removeAllPopups();
         this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
     }
+
 }
 
