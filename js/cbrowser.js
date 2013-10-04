@@ -133,7 +133,7 @@ Browser.prototype.realInit = function() {
     this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
@@ -157,7 +157,7 @@ Browser.prototype.realInit = function() {
     }, false);
 
     this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
-    this.tierHolder.appendChild(this.ruler);
+    this.svgHolder.appendChild(this.ruler);
 
     // Dimension stuff
 
