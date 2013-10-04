@@ -348,8 +348,11 @@ Browser.prototype.realInit = function() {
                     if (!tq)
                         return;
 
-                    var qscale = (tq.max - tq.min) / th;
-                    tt.quantLeapThreshold = tq.min + ((((tt.quantLeapThreshold - tq.min)/qscale)|0)+1)*qscale;
+                    var qmin = 1.0 * tq.min;
+                    var qmax = 1.0 * tq.max;
+
+                    var qscale = (qmax - qmin) / th;
+                    tt.quantLeapThreshold = qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale;
                     tt.draw();
                 }                
             } else {
@@ -381,10 +384,13 @@ Browser.prototype.realInit = function() {
                     if (!tq)
                         return;
 
-                    var qscale = (tq.max - tq.min) / th;
-                    var it = ((tt.quantLeapThreshold - tq.min)/qscale)|0;
+                    var qmin = 1.0 * tq.min;
+                    var qmax = 1.0 * tq.max;
+                    var qscale = (qmax - qmin) / th;
+
+                    var it = Math.round((tt.quantLeapThreshold - qmin)/qscale)|0;
                     if (it > 1) {
-                        tt.quantLeapThreshold = tq.min + (it-1)*qscale;
+                        tt.quantLeapThreshold = qmin + (it-1)*qscale;
                         tt.draw();
                     }
                 }
@@ -1256,7 +1262,6 @@ function sourcesAreEqual(a, b) {
         if (!b.overlay && b.overlay.length != a.overlay.length)
             return false;
         for (var oi = 0; oi < a.overlay.length; ++oi) {
-            console.log('comparing...');
             if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
                 return false;
         }
