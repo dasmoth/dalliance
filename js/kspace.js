@@ -251,12 +251,9 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
             mayDownsample = true;
         }
 
-	console.log(src);
-        
         // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);	
 
 	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
-	    console.log('considering downsample...');
             if ((actualScale < (this.scale/2) && features.length > 200)  ||
 		(mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
             {

@@ -1252,11 +1252,12 @@ function sourcesAreEqual(a, b) {
         sourceStyleURI(a) != sourceStyleURI(b))
         return false;
 
-    if (a.overlays) {
-        if (!b.overlays && b.overlays.length != a.overlays.length)
+    if (a.overlay) {
+        if (!b.overlay && b.overlay.length != a.overlay.length)
             return false;
-        for (var oi = 0; oi < a.overlays.length; ++oi) {
-            if (!sourcesAreEquals(a.overlays[oi], b.overlays[oi]))
+        for (var oi = 0; oi < a.overlay.length; ++oi) {
+            console.log('comparing...');
+            if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
                 return false;
         }
     }
