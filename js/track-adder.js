@@ -36,11 +36,9 @@ function activateButton(addModeButtons, which) {
 }
 
 Browser.prototype.showTrackAdder = function(ev) {
-    if (this.activeTrackAdder) {
-        this.browserHolder.removeChild(this.activeTrackAdder);
-        this.svgHolder.style.width = '100%';
-        this.activeTrackAdder = null;
-        this.resizeViewer();
+    if (this.uiMode === 'add') {
+        this.hideToolPanel();
+        this.setUiMode('none');
         return;
     }
 
@@ -950,9 +948,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     makeStab(thisB.availableSources);
 
 
-    var insert = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '100%', display: 'inline-block', marginLeft: '-10px'}), popup], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px', height: '600px'});
-    this.browserHolder.appendChild(insert);
-    this.svgHolder.style.width = '60%';
-    this.resizeViewer();
-    this.activeTrackAdder = insert;
+    this.showToolPanel(popup);
+    this.setUiMode('add');q
 }

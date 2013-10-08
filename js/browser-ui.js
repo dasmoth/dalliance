@@ -69,6 +69,18 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 
     var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'}, {verticalAlign: 'top'});
+    this.setUiMode = function(m) {
+        this.uiMode = m;
+        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton};
+        for (var x in mb) {
+            if (x == m)
+                mb[x].classList.add('active');
+            else
+                mb[x].classList.remove('active');
+        }
+    }
+
+
     toolbar.appendChild(modeButtons);
     if (!this.noTitle) {
         toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
@@ -280,22 +292,43 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }, false);
 }
 
+Browser.prototype.showToolPanel = function(panel) {
+    if (this.activeToolPanel) {
+        this.browserHolder.removeChild(this.activeToolPanel);
+    }
+
+    this.activeToolPanel = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '100%', display: 'inline-block', marginLeft: '-10px'}), panel], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px', height: '600px'});
+    this.browserHolder.appendChild(this.activeToolPanel);
+    this.svgHolder.style.width = '60%';
+    this.resizeViewer();
+}
+
+Browser.prototype.hideToolPanel = function() {
+    this.browserHolder.removeChild(this.activeToolPanel);
+    this.svgHolder.style.width = '100%';
+    this.activeToolPanel = null;
+    this.resizeViewer();
+}
+
 Browser.prototype.toggleHelpPopup = function(ev) {
-    if (this.helpPopup && this.helpPopup.displayed) {
-        this.removeAllPopups();
+    if (this.uiMode === 'help') {
+        this.hideToolPanel();
+        this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-        this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
+        var helpFrame = makeElement('iframe', null, {seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless'}, {width: '100%', height: '500px', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
+        this.showToolPanel(helpFrame);
+        this.setUiMode('help');
     }
 }
 
 Browser.prototype.toggleOptsPopup = function(ev) {
     var b = this;
 
-    if (this.optsPopup && this.optsPopup.displayed) {
-        this.removeAllPopups();
+    if (this.uiMode === 'opts') {
+        this.hideToolPanel();
+        this.setUiMode('none');
     } else {
-        var optsForm = makeElement('form', null, {className: 'popover-content form-horizontal'});
+        var optsForm = makeElement('div', null, {className: 'form-horizontal'}, {boxSizing: 'border-box', MozBoxSizing: 'border-box', display: 'inline-block', verticalAlign: 'top'});
         var optsTable = makeElement('table');
         optsTable.cellPadding = 5;
         var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
@@ -321,8 +354,8 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
         
         optsForm.appendChild(optsTable);
-        this.removeAllPopups();
-        this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
+        this.showToolPanel(optsForm);
+        this.setUiMode('opts');
     }
 
 }
