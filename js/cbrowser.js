@@ -133,7 +133,7 @@ Browser.prototype.realInit = function() {
     this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative'});
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative', webkitUserSelect: 'none', MozUserSelect: 'none', userSelect: 'none'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
