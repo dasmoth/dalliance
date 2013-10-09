@@ -889,7 +889,10 @@ Browser.prototype.realMakeTier = function(source) {
 
             yAtLastReorder = ev.clientY;
         }
-        dragLabel.style.left = label.getBoundingClientRect().left + 'px'; dragLabel.style.top = ev.clientY - 10 + 'px';
+        
+        var holderBCR = thisB.svgHolder.getBoundingClientRect();
+        dragLabel.style.left = (label.getBoundingClientRect().left - holderBCR.left) + 'px'; 
+        dragLabel.style.top = (ev.clientY - holderBCR.top - 10) + 'px';
         
         var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
