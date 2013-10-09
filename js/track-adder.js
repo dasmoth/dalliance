@@ -140,7 +140,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'scroll';
-    stabHolder.style.height = '500px';
+    // stabHolder.style.height = '500px';
     asform.appendChild(stabHolder);
 
     var __mapping;
@@ -947,7 +947,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-
     this.showToolPanel(popup);
-    this.setUiMode('add');q
+    this.setUiMode('add');
 }

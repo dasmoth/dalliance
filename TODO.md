@@ -19,6 +19,7 @@ For 0.10
   - Better tier-matching [DONE]
   - Support for shared data sources. [DONE]
   - Clean up glyph insertion into subtiers (performance-critical).
+  - Reduce the amount of CSS mixed in with the code.
 
 For 0.11
 --------

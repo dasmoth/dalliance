@@ -133,18 +133,18 @@ Browser.prototype.realInit = function() {
     this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative', webkitUserSelect: 'none', MozUserSelect: 'none', userSelect: 'none'});
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'flex', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative', webkitUserSelect: 'none', MozUserSelect: 'none', userSelect: 'none'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, {}, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative', outline: 'none'});
+    this.tierHolder = makeElement('div', null, {}, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative', outline: 'none', flex: '1 1 100%'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
         this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
     }
-    this.svgHolder.appendChild(this.bhtmlRoot);
+    this.browserHolder.appendChild(this.bhtmlRoot);
 
     //
     // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
@@ -965,7 +965,8 @@ Browser.prototype.realMakeTier = function(source) {
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
     tier.init(); // fetches stylesheet
-    this.arrangeTiers();
+    tier.currentlyHeight = 50;
+    this.updateHeight();
     tier.updateLabel();
 
     if (tier.featureSource && tier.featureSource.addActivityListener) {
@@ -1617,6 +1618,14 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
 
     var width = this.viewEnd - this.viewStart;
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
+}
+
+Browser.prototype.updateHeight = function() {
+    var tierTotal = 0;
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        tierTotal += this.tiers[ti].currentHeight;
+    }
+    this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
 function glyphLookup(glyphs, rx, matches) {

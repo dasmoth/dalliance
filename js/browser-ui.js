@@ -294,17 +294,17 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 Browser.prototype.showToolPanel = function(panel) {
     if (this.activeToolPanel) {
-        this.browserHolder.removeChild(this.activeToolPanel);
+        this.svgHolder.removeChild(this.activeToolPanel);
     }
 
-    this.activeToolPanel = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '100%', display: 'inline-block', marginLeft: '-10px'}), panel], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px', height: '600px'});
-    this.browserHolder.appendChild(this.activeToolPanel);
-    this.svgHolder.style.width = '60%';
+    var content = makeElement('div', panel, {}, {overflowY: 'auto'});
+    this.activeToolPanel = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', minHeight: '100px', display: 'inline-block', flex: '0 0 8px'}), content], {}, {display: 'inline-flex', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', minHeight: '500px', flex: '0 0 500px', alignItems: 'stretch'});
+    this.svgHolder.appendChild(this.activeToolPanel);
     this.resizeViewer();
 }
 
 Browser.prototype.hideToolPanel = function() {
-    this.browserHolder.removeChild(this.activeToolPanel);
+    this.svgHolder.removeChild(this.activeToolPanel);
     this.svgHolder.style.width = '100%';
     this.activeToolPanel = null;
     this.resizeViewer();
@@ -315,7 +315,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless'}, {width: '100%', height: '500px', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
+        var helpFrame = makeElement('iframe', null, {seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless'}, {width: '100%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
         this.showToolPanel(helpFrame);
         this.setUiMode('help');
     }
