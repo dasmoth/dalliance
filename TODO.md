@@ -7,29 +7,31 @@ For 0.10
   - Progress/activity indicators [DONE]
     + ...when reloading.
     + ...when leaping.
-  - Animate when leaping.
-    + Also toggle-zooming?
-    + Inform user of progress [Now shows an activity spinner -- is this good enough?]
-  - Chromosome overviews
-  - Better search (using TRIX?)
-  - Per-track display customization ("Stylesheet editor")?
-  - Bulk addition of local files.
+    - Better search (using TRIX?)
   - More track-hub stuff:
-    + Assembly hub support.
     + Multiwig [DONE]
     + Grouping/compositeTrack [DONE]
     + Views (leave for now?)
     + Better support for visibility options. [DONE]
   - Matrix track selection. [DONE]
   - User interface for connecting to a track hub. [DONE]
-  - Replace feature popups with inspector?
-     + Maybe a more general popupocalypse? (track-adder, help, etc.?)
+  - Popupocalypse (track-adder, help, etc.) [mostly done, needs flexification and final cleanups]
   - Better tier-matching [DONE]
   - Support for shared data sources. [DONE]
-  - Retina display support
   - Clean up glyph insertion into subtiers (performance-critical).
 
 For 0.11
+--------
+
+  - Retina display support.
+  - Replace feature popups with inspector?
+  - Assembly hub support.
+  - Bulk addition of local files.
+  - Per-track display customization ("Stylesheet editor")?
+  - Chromosome overviews.
+  - Animate when leaping/toggling.
+
+For 0.12
 --------
 
   - Undo/redo.  
