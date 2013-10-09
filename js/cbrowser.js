@@ -1622,9 +1622,9 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
 
 Browser.prototype.updateHeight = function() {
     var tierTotal = 0;
-    for (var ti = 0; ti < this.tiers.length; ++ti) {
-        tierTotal += this.tiers[ti].currentHeight;
-    }
+    for (var ti = 0; ti < this.tiers.length; ++ti) 
+        tierTotal += (this.tiers[ti].currentHeight || 30);
+    console.log('uh: ' + tierTotal);
     this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
