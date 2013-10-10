@@ -18,7 +18,6 @@ For 0.10
   - Popupocalypse (track-adder, help, etc.) [DONE]
   - Better tier-matching [DONE]
   - Support for shared data sources. [DONE]
-  - Clean up glyph insertion into subtiers (performance-critical).
   - Reduce the amount of CSS mixed in with the code. [DONE core]
 
 For 0.11

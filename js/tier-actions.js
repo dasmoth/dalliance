@@ -10,7 +10,7 @@
 Browser.prototype.mergeSelectedTiers = function() {
     var sources = [];
     for (var sti = 0; sti < this.selectedTiers.length; ++sti) {
-	sources.push(shallowCopy(this.tiers[this.selectedTiers[sti]].dasSource));
+	   sources.push(shallowCopy(this.tiers[this.selectedTiers[sti]].dasSource));
     }
     
     this.addTier(

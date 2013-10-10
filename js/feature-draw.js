@@ -193,6 +193,8 @@ function drawFeatureTier(tier)
         }
     }
 
+
+
     // Bumping
 
     var unbumpedST = new SubTier();
@@ -235,6 +237,15 @@ function drawFeatureTier(tier)
 	if (st.quant) {
 	    st.glyphs.unshift(new GridGlyph(st.height));
 	}
+    }
+
+    for (var sti = 0; sti < bumpedSTs.length; ++sti) {
+        var st = bumpedSTs[sti];
+        st.glyphs.sort(function (g1, g2) {
+            var z1 = g1.zindex || 0;
+            var z2 = g2.zindex || 0;
+            return z1 - z2;
+        });
     }
 
     tier.subtiers = bumpedSTs;
@@ -680,8 +691,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg.quant = quant;
     }
 
-    return gg;
+    if (style.ZINDEX) {
+        gg.zindex = style.ZINDEX | 0;
+    }
 
+    return gg;
 }
 
 
