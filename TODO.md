@@ -15,11 +15,11 @@ For 0.10
     + Better support for visibility options. [DONE]
   - Matrix track selection. [DONE]
   - User interface for connecting to a track hub. [DONE]
-  - Popupocalypse (track-adder, help, etc.) [mostly done, needs flexification and final cleanups]
+  - Popupocalypse (track-adder, help, etc.) [DONE]
   - Better tier-matching [DONE]
   - Support for shared data sources. [DONE]
   - Clean up glyph insertion into subtiers (performance-critical).
-  - Reduce the amount of CSS mixed in with the code.
+  - Reduce the amount of CSS mixed in with the code. [DONE core]
 
 For 0.11
 --------

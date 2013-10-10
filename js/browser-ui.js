@@ -44,7 +44,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     holder.classList.add('dalliance');
-    var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
+    var toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
 
     var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
     if (this.setDocumentTitle) {
@@ -57,7 +57,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});  // NB min and max get overwritten.
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
 
     var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
@@ -68,7 +68,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
 
 
-    var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'}, {verticalAlign: 'top'});
+    var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
         this.uiMode = m;
         var mb = {help: helpButton, add: addTrackBtn, opts: optsButton};
@@ -83,15 +83,15 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     toolbar.appendChild(modeButtons);
     if (!this.noTitle) {
-        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
+        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group title'}));
     }
-    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group loc-group'}));
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
-                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+                                            zoomOutBtn], {className: 'btn-group'}));
 
     toolbar.appendChild(makeElement('div', [svgBtn,
-                                            resetBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
+                                            resetBtn], {className: 'btn-group'}));
     
 
     holder.appendChild(toolbar);

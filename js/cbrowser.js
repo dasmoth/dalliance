@@ -589,42 +589,20 @@ Browser.prototype.realMakeTier = function(source) {
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
     var viewport = makeElement('canvas', null, 
-                               {width: '' + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
-                               {position: 'absolute', 
-                                padding: '0px', 
-                                margin: '0px',
-                                border: '0px', 
-                                left: '-1000px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ 
-                                borderBottomStyle: 'solid', 
-                                borderBottomColor: 'rgb(180,180,180)', 
-                                borderRightStyle: 'solid', 
-                                borderRightColor: 'rgb(180,180,180)'});
+                               {width: '' + ((this.featurePanelWidth|0) + 2000), 
+                                height: "50",
+                                className: 'viewport'});
+                               
 
     var viewportOverlay = makeElement('canvas', null,
-         {width: + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
-         {position: 'relative', 
-          padding: '0px', 
-          margin: '0px',
-          border: '0px', 
-          left: '-1000px',
-          zIndex: '1000',
-          pointerEvents: 'none'});
+         {width: + ((this.featurePanelWidth|0) + 2000), 
+          height: "50",
+          className: 'viewport-overlay'});
 
     var placardContent = makeElement('span', 'blah');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {}, {
-        display: 'none',
-        position: 'relative',
-//        width: '100%',
-        borderCollapse: 'collapse',
-        marginTop: '-1px',
-        height: '50px',
-        textAlign: 'center',
-        lineHeight: '50px',
-        borderStyle: 'solid',
-        borderColor: 'red',
-        borderWidth: '1px'});
+    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
     
-    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
     // vph.className = 'tier-viewport-background';
     vph.style.background = background;
 
@@ -639,14 +617,8 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.quantOverlay = makeElement(
         'canvas', null, 
-        {width: '50', height: "56"}, 
-        {position: 'absolute', 
-         padding: '0px', 
-         margin: '0px',
-         border: '0px', 
-         left: '' + ((this.featurePanelWidth/2)|0) + 'px',
-         top: '0px',
-         display: 'none'});
+        {width: '50', height: "56",
+         className: 'quant-overlay'});
     tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
