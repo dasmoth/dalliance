@@ -69,3 +69,85 @@
   font-size: 8pt;
   color: #f00;
 }
+
+/* Rules relating to the flexbox tool panel are currently done manually */
+
+*.dalliance .main-holder {
+  overflow: hidden;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: flex;
+  width: 100%;
+  font-size: 10pt;
+  outline: none;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+*.dalliance .tier-holder {
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  margin: 0px;
+  position: relative;
+  outline: none;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 100%;
+  flex: 1 1 100%;
+}
+
+*.dalliance .tool-divider {
+  background-color: gray;
+  width: 8px;
+  min-height: 100px;
+  display: inline-block;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 0 8px;
+  flex: 0 0 8px;
+}
+
+*.dalliance .tool-holder {
+  display: -webkit-inline-box;
+  display: -moz-inline-box;
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  vertical-align: top;      /* Should be done by flex mechanism? */
+  min-height: 500px;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 0 500px;
+  flex: 0 0 500px;
+  -webkit-box-align: stretch;
+  -moz-box-align: stretch;
+  align-items: stretch;
+}
+
+*.dalliance .guideline {
+  width: 1px;
+  height: 2000px;     /* Can this be handled better...? */
+  background-color: blue;
+  position: absolute;
+  z-index: 900;
+  top: 0px;
+  /* left set by code... */
+}
+
+*.dalliance .powered-by {
+  font-size: 10pt;
+}
+
+*.dalliance .help-panel {
+  width: 100%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  vertical-align: top;
+}

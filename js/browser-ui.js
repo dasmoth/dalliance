@@ -303,7 +303,7 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
     else
         content = makeElement('div', panel, {}, {overflowY: 'auto', width: '100%'});
 
-    this.activeToolPanel = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', minHeight: '100px', display: 'inline-block', flex: '0 0 8px'}), content], {}, {display: 'inline-flex', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', minHeight: '500px', flex: '0 0 500px', alignItems: 'stretch'});
+    this.activeToolPanel = makeElement('div', [makeElement('div', null, {className: 'tool-divider'}), content], {className: 'tool-holder'});
     this.svgHolder.appendChild(this.activeToolPanel);
     this.resizeViewer();
 }
@@ -320,7 +320,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless'}, {width: '100%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
+        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless', className: 'help-panel'});
         this.showToolPanel(helpFrame, true);
         this.setUiMode('help');
     }

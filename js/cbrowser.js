@@ -133,30 +133,24 @@ Browser.prototype.realInit = function() {
     this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'flex', width: '100%', fontSize: '10pt', outline: 'none', position: 'relative', webkitUserSelect: 'none', MozUserSelect: 'none', userSelect: 'none'});
+    this.svgHolder = makeElement('div', null, {className: 'main-holder'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, {}, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative', outline: 'none', flex: '1 1 100%'});
+    this.tierHolder = makeElement('div', null, {className: 'tier-holder'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
-        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
+        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION], {className: 'powered-by'}));
     }
     this.browserHolder.appendChild(this.bhtmlRoot);
-
-    //
-    // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
-    //
-
-    // this.resizeViewer(true);
     
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
+    this.ruler = makeElement('div', null, {className: 'guideline'});
     this.svgHolder.appendChild(this.ruler);
 
     setTimeout(function() {thisB.realInit2()}, 1);
