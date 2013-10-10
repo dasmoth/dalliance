@@ -1,3 +1,26 @@
+MOLGENIS Fork specific README (Find Dalliance orginal readme below)
+===================================================================
+1.	Fork Dalliance on github and clone on your machine
+		https://github.com/dasmoth/dalliance 
+		git clone https://github.com/yourname/dalliance.git
+2.	Pull regularly from Dalliance master and from the MOLGENIS fork
+		git remote add blessed https://github.com/dasmoth/dalliance.git
+		git remote add molgenisBlessed https://github.com/molgenis/dalliance.git
+3.	Git submodule init
+	Git submodule update 
+		(switch to WiFi if it fails, UMCG network blocks a port which is causing an error)
+4.	Create javascript project with dalliance git directory as project directory
+5.	Download compiler.jar and place it in your dalliance folder
+		https://developers.google.com/closure/compiler/docs/gettingstarted_app
+6.	Compile dalliance (run build.sh in the dalliance directory)
+7.	Use compiled js file in the genome-browser module (manual copy action)
+8.	Pull regularly from both molgenisBlessed and blessed!
+
+NOTES:
+•	Create any pull request from your fork to the MOLGENIS fork, NOT to the MASTER!
+•	Do not check in dalliance-compiled.js and dalliance-all.js
+
+Original Dalliance README:
 Dalliance Genome Explorer
 =========================
 

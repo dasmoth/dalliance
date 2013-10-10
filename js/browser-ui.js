@@ -7,6 +7,11 @@
 // browser-us.js: standard UI wiring
 //
 
+var molgenisUrl = location.hostname;
+        if(location.port != ""){
+        	molgenisUrl = molgenisUrl+":"+location.port;
+        }
+
 function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
@@ -40,6 +45,29 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     if (!b.disableDefaultFeaturePopup) {
         this.addFeatureListener(function(ev, feature, hit, tier) {
             b.featurePopup(ev, feature, hit, tier);
+            
+            //BEGIN custom MOLGENIS code
+            console.log('BEGIN custom MOLGENIS code'+hit[0].id);
+                  if(hit[0].typeId == "mutation"){ // could also use hit.type?
+                    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/'+ hit[0].id
+                    console.log(url);
+                    $.ajax({
+                      url: url,
+                      type: "GET",
+                      dataType: "json",
+                      success: function(data) {
+                        console.log("Data returned : " + data);
+                        
+                        if (typeof data == 'object') {
+                        	patientMutationTable(data);
+                        }
+                      },
+                      error: function(jqXHR, textStatus, errorThrown) {
+                        console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+                      }
+                    });
+                  }
+            //END custom MOLGENIS code
         });
     }
 
@@ -239,6 +267,27 @@ Browser.prototype.initUI = function(holder, genomePanel) {
        }
 
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
+       
+            //BEGIN custom MOLGENIS code
+            var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
+            console.log(url);
+            $.ajax({
+              url: url,
+              type: "GET",
+              dataType: "json",
+              success: function(data) {
+                console.log("Data returned : " + data);
+                
+                if (typeof data == 'object') {
+                	patientMutationTable(data);
+                }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                  console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+                }
+             });
+            //END custom MOLGENIS code
+        
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 
@@ -262,15 +311,35 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             locField.focus();
         }
     });
-
+    //BEGIN custom MOLGENIS code
+    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
+    console.log(url);
+    $.ajax({
+      url: url,
+      type: "GET",
+      dataType: "json",
+      success: function(data) {
+        console.log("Data returned : " + data);
+        
+        if (typeof data == 'object') {
+        	patientMutationTable(data);
+        }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+        }
+     });
+    //END custom MOLGENIS code
   }
 
 Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
         this.removeAllPopups();
     } else {
-        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-        this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
+    	// BEGIN custom MOLGENIS code
+    	var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'css/index.html'}, {width: '490px', height: '500px'});
+    	// END custom MOLGENIS code
+    	this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
 }
 

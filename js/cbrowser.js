@@ -22,8 +22,9 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = 'http://www.biodalliance.org/release-0.9/';
-
+    // custom code
+    this.uiPrefix = 'http://localhost:8080/';
+    // custom code
     this.sources = [];
     this.tiers = [];
 

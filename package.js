@@ -30,7 +30,7 @@ Package.on_use(function (api, where) {
 	api.add_files("js/bam.js","client");
 	api.add_files("js/twoBit.js","client");
 	api.add_files("jszlib/js/inflate.js","client");
-=======
+
   summary: "UX/UI framework from Twitter"
 });
 
