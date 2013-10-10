@@ -151,7 +151,7 @@ Browser.prototype.realInit = function() {
     //
 
     // this.resizeViewer(true);
-    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
+    
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
@@ -159,8 +159,12 @@ Browser.prototype.realInit = function() {
     this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
     this.svgHolder.appendChild(this.ruler);
 
-    // Dimension stuff
+    setTimeout(function() {thisB.realInit2()}, 1);
+}
 
+Browser.prototype.realInit2 = function() {
+    var thisB = this;
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
     if (!this.zoomMax) {
@@ -1624,7 +1628,6 @@ Browser.prototype.updateHeight = function() {
     var tierTotal = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) 
         tierTotal += (this.tiers[ti].currentHeight || 30);
-    console.log('uh: ' + tierTotal);
     this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
