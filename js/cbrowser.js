@@ -1233,7 +1233,7 @@ function sourcesAreEqual(a, b) {
         return false;
 
     if (a.overlay) {
-        if (!b.overlay && b.overlay.length != a.overlay.length)
+        if (!b.overlay || b.overlay.length != a.overlay.length)
             return false;
         for (var oi = 0; oi < a.overlay.length; ++oi) {
             if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
