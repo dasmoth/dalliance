@@ -1239,6 +1239,9 @@ function sourcesAreEqual(a, b) {
             if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
                 return false;
         }
+    } else {
+        if (b.overlay)
+            return false;
     }
 
     return true;
