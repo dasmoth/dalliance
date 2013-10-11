@@ -165,6 +165,7 @@ DasTier.prototype.updateStatus = function(status) {
         this.placard.style.display = 'none';
         this.holder.style.display = 'block';
     }
+    this.updateHeight();
 }
 
 DasTier.prototype.draw = function() {
@@ -266,6 +267,9 @@ DasTier.prototype.updateLabel = function() {
 
 DasTier.prototype.updateHeight = function() {
     this.currentHeight = Math.max(this.holder.clientHeight, this.label.clientHeight + 4);
+    if (this.placard.style.display !== 'none') {
+        this.currentHeight = Math.max(this.currentHeight, this.placard.clientHeight);
+    }
     this.row.style.height = '' + this.currentHeight + 'px';
     this.browser.updateHeight();
  }
