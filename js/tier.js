@@ -268,7 +268,7 @@ DasTier.prototype.updateLabel = function() {
 DasTier.prototype.updateHeight = function() {
     this.currentHeight = Math.max(this.holder.clientHeight, this.label.clientHeight + 4);
     if (this.placard.style.display !== 'none') {
-        this.currentHeight = Math.max(this.currentHeight, this.placard.clientHeight);
+        this.currentHeight = Math.max(this.currentHeight, this.placard.clientHeight + 2);
     }
     this.row.style.height = '' + this.currentHeight + 'px';
     this.browser.updateHeight();

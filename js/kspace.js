@@ -237,8 +237,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
     if (status) {
-        console.log('ks-updatestatus');
-        tier.updateStatus(status);
+         tier.updateStatus(status);
     } else {
         var mayDownsample = false;
         var src = tier.getSource();
