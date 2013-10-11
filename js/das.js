@@ -387,6 +387,9 @@ DASSource.prototype.features = function(segment, options, callback) {
         }
                 
         callback(features, undefined, segmentMap);
+    },
+    function (err) {
+        callback([], err);
     });
 }
 
@@ -728,10 +731,19 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
     }
 }
 
-DASSource.prototype.doCrossDomainRequest = function(url, handler) {
+DASSource.prototype.doCrossDomainRequest = function(url, handler, errHandler) {
     var custAuth;
     if (this.xUser) {
         custAuth = 'Basic ' + btoa(this.xUser + ':' + this.xPass);
     }
-    return doCrossDomainRequest(url, handler, this.credentials, custAuth);
+
+    try {
+        return doCrossDomainRequest(url, handler, this.credentials, custAuth);
+    } catch (err) {
+        if (errHandler) {
+            errHandler(err);
+        } else {
+            throw err;
+        }
+    }
 }

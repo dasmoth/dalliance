@@ -128,8 +128,9 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 needSeq = true;
             }
         } catch (ex) {
+            tiers[t].updateStatus(ex);
             console.log('Error fetching tier source');
-            console.log(ex.stack);
+            console.log(ex);
         }
     }
 
@@ -236,6 +237,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
     if (status) {
+        console.log('ks-updatestatus');
         tier.updateStatus(status);
     } else {
         var mayDownsample = false;

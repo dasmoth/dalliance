@@ -143,7 +143,8 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
         var awaitedFeatures = new Awaited();
         pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
         this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
-            awaitedFeatures.provide({status: status, features: features, scale: scale});
+            if (!awaitedFeatures.res)
+                awaitedFeatures.provide({status: status, features: features, scale: scale});
         });
     } 
 
