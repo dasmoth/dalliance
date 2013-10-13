@@ -2,6 +2,7 @@
 
 function FetchPool() {
     this.reqs = [];
+    this.awaitedFeatures = {};
 }
 
 FetchPool.prototype.addRequest = function(xhr) {
@@ -34,8 +35,10 @@ function KnownSpace(tierMap, chr, min, max, scale, seqSource) {
     this.max = max;
     this.scale = scale;
     this.seqSource = seqSource || new DummySequenceSource();
+    this.viewCount = 0;
 
     this.featureCache = {};
+    this.latestViews = {};
 }
 
 KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
@@ -70,6 +73,7 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     this.pool = new FetchPool();
     this.awaitedSeq = new Awaited();
     this.seqWasFetched = false;
+    this.viewCount++;
     
     this.startFetchesForTiers(this.tierMap);
 }
@@ -124,8 +128,9 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 needSeq = true;
             }
         } catch (ex) {
+            tiers[t].updateStatus(ex);
             console.log('Error fetching tier source');
-            console.log(ex.stack);
+            console.log(ex);
         }
     }
 
@@ -167,6 +172,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
 KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     var thisB = this;
 
+    var viewID = this.viewCount;
     var source = tier.getSource() || new DummyFeatureSource();
     var needsSeq = tier.needsSequence(this.scale);
     var baton = thisB.featureCache[tier];
@@ -203,6 +209,15 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     }
 
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
+	if (source.instrument)
+	    console.log('Finishing fetch ' + viewID);
+
+	var latestViewID = thisB.latestViews[tier] || -1;
+	if (latestViewID > viewID) {
+	    // console.log('Ignoring out of date view');
+	    return;
+	}
+
         if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
             thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features, status);
         }
@@ -212,6 +227,9 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         //}
         // dlog('Provisioning ' + tier.toString() + ' with fresh features');
         //tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
+
+
+	thisB.latestViews[tier] = viewID;
         thisB.provision(tier, thisB.chr, thisB.min, thisB.max, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
     return needsSeq;
@@ -219,24 +237,30 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
     if (status) {
-        tier.updateStatus(status);
+         tier.updateStatus(status);
     } else {
         var mayDownsample = false;
         var src = tier.getSource();
-        while (MappedFeatureSource.prototype.isPrototypeOf(src)) {
-            src = src.source;
+        while (MappedFeatureSource.prototype.isPrototypeOf(src) || CachingFeatureSource.prototype.isPrototypeOf(src) || OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+	    if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+		src = src.sources[0];
+	    } else {
+		src = src.source;
+	    }
         }
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
         }
-        
+
         // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);	
 
-        if ((actualScale < (this.scale/2) && features.length > 200 && (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample))) ||
-            (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
-        {
-            features = downsample(features, this.scale);
-        }
+	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
+            if ((actualScale < (this.scale/2) && features.length > 200)  ||
+		(mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
+            {
+		features = downsample(features, this.scale);
+            }
+	}
 
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {

@@ -12,12 +12,30 @@ function EnsemblFeatureSource(source) {
     this.base = source.uri || 'http://beta.rest.ensembl.org';
     this.species = source.species || 'human';
 
+    this.activityListeners = [];
+    this.busy = 0;
+
     if (typeof source.type === 'string') {
         this.type = [source.type];
     } else {
         this.type = source.type || ['regulatory'];
     }
 }
+
+EnsemblFeatureSource.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+EnsemblFeatureSource.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
 
 EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();
@@ -58,6 +76,7 @@ EnsemblFeatureSource.prototype.getScales = function() {
 }
 
 EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
     url = this.base + '/feature/region/' + this.species + '/' + chr + ':' + min + '-' + max;
 
     var filters = [];
@@ -66,11 +85,12 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     }
     filters.push('content-type=application/json');
     url = url + '?' + filters.join(';');
-    
-    console.log(url);
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
+        thisB.busy--;
+        thisB.notifyActivity();
+
 	if (req.readyState == 4) {
 	    if (req.status >= 300) {
 		callback('Error code ' + req.status, null);
@@ -108,6 +128,9 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 	
     };
     
+    thisB.busy++;
+    thisB.notifyActivity();
+
     req.open('GET', url, true);
     req.responseType = 'text';
     req.send('');

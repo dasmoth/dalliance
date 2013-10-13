@@ -193,6 +193,8 @@ function drawFeatureTier(tier)
         }
     }
 
+
+
     // Bumping
 
     var unbumpedST = new SubTier();
@@ -237,6 +239,15 @@ function drawFeatureTier(tier)
 	}
     }
 
+    for (var sti = 0; sti < bumpedSTs.length; ++sti) {
+        var st = bumpedSTs[sti];
+        st.glyphs.sort(function (g1, g2) {
+            var z1 = g1.zindex || 0;
+            var z2 = g2.zindex || 0;
+            return z1 - z2;
+        });
+    }
+
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
 }
@@ -275,7 +286,7 @@ DasTier.prototype.paint = function() {
     lh += 6
     this.viewport.setAttribute('height', lh);
     this.viewport.style.left = '-1000px';
-    this.holder.style.height = '' + Math.max(lh, 35) + 'px';
+    this.holder.style.height = '' + Math.max(lh, this.browser.minTierHeight) + 'px';
     this.updateHeight();
     this.drawOverlay();
     this.norigin = this.browser.viewStart;
@@ -327,7 +338,7 @@ DasTier.prototype.paintQuant = function() {
 	quant = this.subtiers[0].quant;
 
     if (quant && this.quantOverlay) {
-	var h = this.viewport.height;
+	var h = this.subtiers[0].height;
 	var w = this.quantOverlay.width;
 	this.quantOverlay.height = this.viewport.height;
 	var ctx = this.quantOverlay.getContext('2d');
@@ -337,10 +348,10 @@ DasTier.prototype.paintQuant = function() {
 
 	if (this.browser.rulerLocation == 'right') {
 	    ctx.fillRect(w-30, 0, 30, 20);
-            ctx.fillRect(w-30, h-20, 30, 20);
+            ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
 	} else {
             ctx.fillRect(0, 0, 30, 20);
-            ctx.fillRect(0, h-20, 30, 20);
+            ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
 	}
         ctx.globalAlpha = 1.0;
 
@@ -349,15 +360,15 @@ DasTier.prototype.paintQuant = function() {
         ctx.beginPath();
 
 	if (this.browser.rulerLocation == 'right') {
-	    ctx.moveTo(w - 8, 3);
-            ctx.lineTo(w, 3);
-            ctx.lineTo(w, h-3);
-            ctx.lineTo(w - 8, h - 3);
+	    ctx.moveTo(w - 8, MIN_PADDING);
+            ctx.lineTo(w, MIN_PADDING);
+            ctx.lineTo(w, h + MIN_PADDING);
+            ctx.lineTo(w - 8, h + MIN_PADDING);
 	} else {
-            ctx.moveTo(8, 3);
-            ctx.lineTo(0,3);
-            ctx.lineTo(0,h-3);
-            ctx.lineTo(8,h-3);
+            ctx.moveTo(8, MIN_PADDING);
+            ctx.lineTo(0, MIN_PADDING);
+            ctx.lineTo(0, h+MIN_PADDING);
+            ctx.lineTo(8, h+MIN_PADDING);
 	}
         ctx.stroke();
 
@@ -366,11 +377,11 @@ DasTier.prototype.paintQuant = function() {
 	if (this.browser.rulerLocation == 'right') {
 	    ctx.textAlign = 'right';
 	    ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), w-8, h-5);
+            ctx.fillText(formatQuantLabel(quant.min), w-8, h + MIN_PADDING - 2);
 	} else {
 	    ctx.textAlign = 'left';
             ctx.fillText(formatQuantLabel(quant.max), 8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), 8, h-5);
+            ctx.fillText(formatQuantLabel(quant.min), 8, h + MIN_PADDING - 2);
 	}
     }
 }
@@ -680,8 +691,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 	gg.quant = quant;
     }
 
-    return gg;
+    if (style.ZINDEX) {
+        gg.zindex = style.ZINDEX | 0;
+    }
 
+    return gg;
 }
 
 

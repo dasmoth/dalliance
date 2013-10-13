@@ -7,7 +7,7 @@
 <style>
 </style>
 
-<title>Human NCBI36 :: Dalliance</title> 
+<title>Human GRCh37 :: Dalliance</title> 
 <script language="javascript" src="js/bam.js"></script>
 <script language="javascript" src="js/bigwig.js"></script>
 <script language="javascript" src="js/das.js"></script>
@@ -43,39 +43,43 @@
 <script language="javascript" src="polyfills/html5slider.js"></script>
 <script language="javascript" src="js/ensembljson.js"></script>
 <script language="javascript" src="js/overlay.js"></script>
-<script language="javascript" src="js/tier-actions.js"></script>
-
-<script type="application/dart" src="dart_backends/web/dalliance_dart_stub.dart"></script>
-<script language="javascript" src="dart_backends/web/packages/browser/dart.js"></script>
-<script language="javascript" src="dart_backends/web/packages/browser/interop.js"></script>
 
 <script language="javascript">
   var b = new Browser({
     chr:          '22',
     viewStart:    30000000,
     viewEnd:      30030000,
-    cookieKey:    'human3',
+    cookieKey:    'human-grc_h37',
+
+    coordSystem: {
+      speciesName: 'Human',
+      taxon: 9606,
+      auth: 'GRCh',
+      version: '37',
+      ucscName: 'hg19',
+    },
 
     chains: {
-      hg19ToHg18: new Chainset('http://www.derkholm.net:8080/das/hg19ToHg18/', 'GRCh37', 'NCBI36',
+      hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',
                                {
                                   speciesName: 'Human',
                                   taxon: 9606,
                                   auth: 'GRCh',
-                                  version: 37
+                                  version: 36
                                })
     },
 
-    sources:     [{name:                 'Genome',      
-                   twoBitURI:            'http://www.biodalliance.org/datasets/hg18.2bit',
-                   // uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
-                   tier_type:            'sequence'},
+    sources:     [{name:                 'Genome',
+                   // twoBitURI:            'http://www.biodalliance.org/datasets/hg18.2bit',
+                   uri:                  'http://www.derkholm.net:8080/das/hg19comp/',      
+                   tier_type:            'sequence',
+                   provides_entrypoints: true,
+                  },
                   {name:                 'e! transcripts',
                    uri:                  'http://beta.rest.ensembl.org',
                    tier_type:            'ensembl',
                    species:              'human',
                    type:                 ['transcript', 'exon', 'cds'],
-                   mapping: 'hg19ToHg18',
                   },
                   {name:                 'Genes',     
                    desc:                 'Gene structures from Ensembl 54',
@@ -85,65 +89,67 @@
                    provides_search:      true,
                    provides_entrypoints: true,
                    maxbins:              false,
+                   mapping:              'hg18ToHg19',
                    featureInfoPlugin: function(f, info) {
                       info.add('Testing', 'This is another test!');
                    }
-                  }, 
-                  {name:                 'Repeats',     
-                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
-                   stylesheet_uri:       'http://www.biodalliance.org/stylesheets/repeats-L1.xml'}, 
-                  {name:                 'CpG Density', 
-                   uri:                  'http://www.derkholm.net:8080/das/hg18comp/',        
-                   // stylesheet_uri:       'http://www.biodalliance.org/stylesheets/cpg-hist.xml',
+                  },
+                  {name:                 'Repeats',
+                   desc:                 'Repeat annotation from Ensembl 59',
+                   uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',      
+                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'
+                  },
+                  {name: 'CpG',
+                   desc: 'CpG observed/expected ratio',
+                   uri: 'http://www.derkholm.net:8080/das/hg19comp/',
+                   // stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'
                    quantLeapThreshold: 0.8,
                    forceReduction: -1,
                    style:                [{type: 'cpgoe',
                                            style: {glyph: 'LINEPLOT',
-                                                   FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]},
-                    {name: 'MeDIP-raw',
-                     desc: 'MeDIP-seq reads from Nature Biotech. 26:779-785',
-                     uri: 'http://www.derkholm.net:8080/das/medipseq_reads/'},
+                                                   FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]
+                  },
+                  {name:                 'MeDIP-raw',
+                   desc:                 'MeDIP-seq reads from Nature Biotech. 26:779-785',
+                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads/',
+                   mapping:              'hg18ToHg19',
+                  },
                   {name:                 'BWG test',
                    bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
                    stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet',
-                   quantLeapThreshold: 80}
-               /*   ,{name:                 'BBD test',
-                   bwgURI:               'http://www.biodalliance.org/datasets/ensGene.bb',
-                   link:                 'http://ncbi36.ensembl.org/Homo_sapiens/Gene/Summary?t=$$',
-                   collapseSuperGroups:  true,
-                   disable: true} */
-               /*   ,{name:                 'Style test',
-                   uri:                  './glyph-test/',
-                   features_uri:         './glyph-test/features.xml',
-                   stylesheet_uri:       './glyph-test/stylesheet.xml'} */
-                  ,{name:                 'TabixTest',
-                   tabixURI:             'http://www.biodalliance.org/datasets/batman-SP.sort.gff.gz',
-                   tabixPayload:         'gff',
-                   stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet'}
-                  ,{name:                 'GTF Test',
-                   tabixURI:             'http://www.biodalliance.org/datasets/example.gtf.gz',
-                   tabixPayload:         'gff2'}
-                  ,{name:                'VCF Test',
-                   tabixURI:             'http://www.biodalliance.org/datasets/Son_s_VCF_file.vcf.gz',
-                   tabixPayload:         'vcf'} 
+                   mapping:              'hg18ToHg19',
+                   quantLeapThreshold: 80
+                  },
+                  {name:                 'BWG hist',
+                   bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
+                   style:     [{type: 'default',
+                                style:  {glyph: 'HISTOGRAM', HEIGHT: 50, MIN: 0, MAX: 100}}],
+                   mapping:              'hg18ToHg19',
+                   quantLeapThreshold: 80
+                  }
                 ],
 
     setDocumentTitle: true,
     uiPrefix: '',
 
-    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/'),
+    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+    karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+
     browserLinks: {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}',
-        Sequence: 'http://www.derkholm.net:8080/das/hg18comp/sequence?segment=${chr}:${start},${end}'
+        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
+        Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
     }
   });
   
-  b.hubs = ['http://www.biodalliance.org/datasets/testhub/hub.txt'];
+  b.hubs = [
+            'http://www.biodalliance.org/datasets/testhub/hub.txt',
+            'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt'
+           ];
   
   b.addFeatureInfoPlugin(function(f, info) {
       info.add('Testing', 'This is a test!');
-    });
+  });
 </script>
 </head>
 

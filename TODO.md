@@ -4,33 +4,34 @@ For 0.10
   - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
   - Extra small-glyph types [DONE SQUARE, STAR]
   - UI for leaping (button to complement ctrl-arrow).
-  - Progress/activity indicators
+  - Progress/activity indicators [DONE]
     + ...when reloading.
     + ...when leaping.
-  - Animate when leaping.
-    + Also toggle-zooming?
-    + Inform user of progress
-  - Chromosome overviews
-  - Better search (using TRIX?)
-  - Per-track display customization ("Stylesheet editor")?
-  - Bulk addition of local files.
+    - Better search (using TRIX?)
   - More track-hub stuff:
-    + Assembly hub support.
     + Multiwig [DONE]
     + Grouping/compositeTrack [DONE]
     + Views (leave for now?)
-    + Better support for visibility options.
-  - Matrix track selection.
+    + Better support for visibility options. [DONE]
+  - Matrix track selection. [DONE]
   - User interface for connecting to a track hub. [DONE]
-  - Replace feature popups with inspector?
-     + Maybe a more general popupocalypse? (track-adder, help, etc.?)
-  - Rethink tier-matching
-     + Should track-hub-derived sources have a URI associated with their
-       hub?
-  - Retina display support
-  - Clean up glyph insertion into subtiers (performance-critical).
+  - Popupocalypse (track-adder, help, etc.) [DONE]
+  - Better tier-matching [DONE]
+  - Support for shared data sources. [DONE]
+  - Reduce the amount of CSS mixed in with the code. [DONE core]
 
 For 0.11
+--------
+
+  - Retina display support.
+  - Replace feature popups with inspector?
+  - Assembly hub support.
+  - Bulk addition of local files.
+  - Per-track display customization ("Stylesheet editor")?
+  - Chromosome overviews.
+  - Animate when leaping/toggling.
+
+For 0.12
 --------
 
   - Undo/redo.  

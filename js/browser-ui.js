@@ -44,44 +44,55 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     holder.classList.add('dalliance');
-    var toolbar = makeElement('div', null, {className: 'btn-toolbar'});
+    var toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
 
     var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
     if (this.setDocumentTitle) {
         document.title = title + ' :: dalliance';
     }
     
-    if (!this.noTitle) {
-        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group'}, {verticalAlign: 'top'}));
-    }
-
     var locField = makeElement('input', '', {className: 'loc-field'});
     b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
-    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group'}, {verticalAlign: 'top', marginLeft: '10px', marginRight: '5px'}));
+
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {width: '200px'});  // NB min and max get overwritten.
+    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
-    toolbar.appendChild(makeElement('div', [zoomInBtn,
-                                            makeElement('span', zoomSlider, {className: 'btn'}),
-                                            zoomOutBtn], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
     var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
     var optsButton = makeElement('div', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
-
     var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
-    
-    toolbar.appendChild(makeElement('div', [addTrackBtn,
-                                            // favBtn,
-                                            svgBtn,
-                                            resetBtn,
-                                            optsButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
 
-    toolbar.appendChild(makeElement('div', [helpButton], {className: 'btn-group'}, {verticalAlign: 'top'}));
+
+    var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
+    this.setUiMode = function(m) {
+        this.uiMode = m;
+        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton};
+        for (var x in mb) {
+            if (x == m)
+                mb[x].classList.add('active');
+            else
+                mb[x].classList.remove('active');
+        }
+    }
+
+
+    toolbar.appendChild(modeButtons);
+    if (!this.noTitle) {
+        toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group title'}));
+    }
+    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group loc-group'}));
+    toolbar.appendChild(makeElement('div', [zoomInBtn,
+                                            makeElement('span', zoomSlider, {className: 'btn'}),
+                                            zoomOutBtn], {className: 'btn-group'}));
+
+    toolbar.appendChild(makeElement('div', [svgBtn,
+                                            resetBtn], {className: 'btn-group'}));
+    
 
     holder.appendChild(toolbar);
     holder.appendChild(genomePanel);
@@ -93,13 +104,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         zoomSlider.max = zoom.max;
         zoomSlider.value = zoom.current;
         if (b.storeStatus) {
-            b.storeStatus();
+            b.storeViewStatus();
         }
     });
 
     this.addTierListener(function() {
         if (b.storeStatus) {
-            b.storeStatus();
+            b.storeTierStatus();
         }
     });
 
@@ -112,7 +123,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
             var g = locField.value;
             var m = REGION_PATTERN.exec(g);
-            // console.log(m);
 
             var setLocationCB = function(err) {
                     if (err) {
@@ -263,24 +273,67 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
-  }
+    var uiKeyHandler = function(ev) {
+        // console.log('bukh: ' + ev.keyCode);
+        if (ev.keyCode == 65 || ev.keyCode == 97) {  // a
+            ev.preventDefault(); ev.stopPropagation();
+            b.showTrackAdder();
+        } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
+            ev.stopPropagation(); ev.preventDefault();
+            b.toggleHelpPopup(ev);
+        }
+    };
+
+    holder.addEventListener('focus', function(ev) {
+        holder.addEventListener('keydown', uiKeyHandler, false);
+    }, false);
+    holder.addEventListener('blur', function(ev) {
+        holder.removeEventListener('keydown', uiKeyHandler, false);
+    }, false);
+}
+
+Browser.prototype.showToolPanel = function(panel, nowrap) {
+    if (this.activeToolPanel) {
+        this.svgHolder.removeChild(this.activeToolPanel);
+    }
+
+    var content;
+    if (nowrap)
+        content = panel;
+    else
+        content = makeElement('div', panel, {}, {overflowY: 'auto', width: '100%'});
+
+    this.activeToolPanel = makeElement('div', [makeElement('div', null, {className: 'tool-divider'}), content], {className: 'tool-holder'});
+    this.svgHolder.appendChild(this.activeToolPanel);
+    this.resizeViewer();
+}
+
+Browser.prototype.hideToolPanel = function() {
+    this.svgHolder.removeChild(this.activeToolPanel);
+    this.svgHolder.style.width = '100%';
+    this.activeToolPanel = null;
+    this.resizeViewer();
+}
 
 Browser.prototype.toggleHelpPopup = function(ev) {
-    if (this.helpPopup && this.helpPopup.displayed) {
-        this.removeAllPopups();
+    if (this.uiMode === 'help') {
+        this.hideToolPanel();
+        this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'help/index.html'}, {width: '490px', height: '500px'});
-        this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
+        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless', className: 'help-panel'});
+        this.showToolPanel(helpFrame, true);
+        this.setUiMode('help');
     }
 }
 
 Browser.prototype.toggleOptsPopup = function(ev) {
     var b = this;
 
-    if (this.optsPopup && this.optsPopup.displayed) {
-        this.removeAllPopups();
+    if (this.uiMode === 'opts') {
+        this.hideToolPanel();
+        this.setUiMode('none');
     } else {
-        var optsForm = makeElement('form', null, {className: 'popover-content form-horizontal'});
+        var optsForm = makeElement('div', null, {className: 'form-horizontal'}, {boxSizing: 'border-box', MozBoxSizing: 'border-box', display: 'inline-block', verticalAlign: 'top'});
         var optsTable = makeElement('table');
         optsTable.cellPadding = 5;
         var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
@@ -306,8 +359,9 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
         
         optsForm.appendChild(optsTable);
-        this.removeAllPopups();
-        this.optsPopup = this.popit(ev, 'Options', optsForm, {width: 500});
+        this.showToolPanel(optsForm);
+        this.setUiMode('opts');
     }
+
 }
 
