@@ -109,10 +109,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             return hubButton;
         }
     }
-    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
-        var hub = this.hubObjects[hi];
-        makeHubButton(hub);
-    }
+ 
 
     var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
     addModeButtons.push(defButton);
@@ -120,6 +117,13 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
     addModeButtons.push(binButton);
+
+
+    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
+        var hub = this.hubObjects[hi];
+        makeHubButton(hub);
+    }
+
     var addHubButton = this.makeButton('+', 'Connect to a new track-hub');
     addModeButtons.push(addHubButton);
 
@@ -429,22 +433,21 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, false);
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, binButton);
         switchToBinMode();
     }, false);
     addHubButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, addHubButton);
         switchToHubConnectMode();
     }, false);
 
 
     function switchToBinMode() {
+        activateButton(addModeButtons, binButton);
         customMode = 'bin';
 
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         removeChildren(stabHolder);
 
@@ -477,9 +480,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function switchToHubConnectMode() {
+        activateButton(addModeButtons, addHubButton);
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         customMode = 'hub-connect';
         refreshButton.style.visibility = 'hidden';
@@ -500,14 +504,14 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     custButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, custButton);
         switchToCustomMode();
     }, false);
 
     function switchToCustomMode() {
+        activateButton(addModeButtons, custButton);
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         customMode = 'das';
 
@@ -930,7 +934,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var canButton = makeElement('button', 'Cancel', {className: 'btn'});
     canButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        thisB.removeAllPopups();
+        switchToBinMode();
     }, false);
 
     var refreshButton = makeElement('button', 'Refresh', {className: 'btn'});

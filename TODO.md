@@ -3,11 +3,9 @@ For 0.10
    
   - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
   - Extra small-glyph types [DONE SQUARE, STAR]
-  - UI for leaping (button to complement ctrl-arrow).
   - Progress/activity indicators [DONE]
     + ...when reloading.
     + ...when leaping.
-    - Better search (using TRIX?)
   - More track-hub stuff:
     + Multiwig [DONE]
     + Grouping/compositeTrack [DONE]
@@ -23,6 +21,8 @@ For 0.10
 For 0.11
 --------
 
+  - UI for leaping (button to complement ctrl-arrow).
+  - Search of bigbed files.
   - Retina display support.
   - Replace feature popups with inspector?
   - Assembly hub support.
