@@ -1,23 +1,3 @@
-For 0.10
---------
-   
-  - Allow arbitrary glyphs to be used in scatter-plots. [DONE with <SCATTER>yes</SCATTER> stylesheet extension]
-  - Extra small-glyph types [DONE SQUARE, STAR]
-  - Progress/activity indicators [DONE]
-    + ...when reloading.
-    + ...when leaping.
-  - More track-hub stuff:
-    + Multiwig [DONE]
-    + Grouping/compositeTrack [DONE]
-    + Views (leave for now?)
-    + Better support for visibility options. [DONE]
-  - Matrix track selection. [DONE]
-  - User interface for connecting to a track hub. [DONE]
-  - Popupocalypse (track-adder, help, etc.) [DONE]
-  - Better tier-matching [DONE]
-  - Support for shared data sources. [DONE]
-  - Reduce the amount of CSS mixed in with the code. [DONE core]
-
 For 0.11
 --------
 
