@@ -47,26 +47,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             b.featurePopup(ev, feature, hit, tier);
             
             //BEGIN custom MOLGENIS code
-            console.log('BEGIN custom MOLGENIS code'+hit[0].id);
-                  if(hit[0].typeId == "mutation"){ // could also use hit.type?
-                    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/'+ hit[0].id
-                    console.log(url);
-                    $.ajax({
-                      url: url,
-                      type: "GET",
-                      dataType: "json",
-                      success: function(data) {
-                        console.log("Data returned : " + data);
-                        
-                        if (typeof data == 'object') {
-                        	patientMutationTable(data);
-                        }
-                      },
-                      error: function(jqXHR, textStatus, errorThrown) {
-                        console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
-                      }
-                    });
-                  }
+            updateMolgenisTable(molgenisUrl, hit[0]);
             //END custom MOLGENIS code
         });
     }
@@ -269,23 +250,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
        
             //BEGIN custom MOLGENIS code
-            var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
-            console.log(url);
-            $.ajax({
-              url: url,
-              type: "GET",
-              dataType: "json",
-              success: function(data) {
-                console.log("Data returned : " + data);
-                
-                if (typeof data == 'object') {
-                	patientMutationTable(data);
-                }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                  console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
-                }
-             });
+        updateMolgenisTable(molgenisUrl, null);
             //END custom MOLGENIS code
         
     }, false);
@@ -312,23 +277,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
     //BEGIN custom MOLGENIS code
-    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
-    console.log(url);
-    $.ajax({
-      url: url,
-      type: "GET",
-      dataType: "json",
-      success: function(data) {
-        console.log("Data returned : " + data);
-        
-        if (typeof data == 'object') {
-        	patientMutationTable(data);
-        }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
-        }
-     });
+    updateMolgenisTable(molgenisUrl, null);
     //END custom MOLGENIS code
   }
 
