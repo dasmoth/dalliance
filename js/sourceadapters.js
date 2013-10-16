@@ -29,6 +29,13 @@ DasTier.prototype.initSources = function() {
 
     this.featureSource = fs;
     this.sequenceSource = ss;
+
+    if (this.featureSource && this.featureSource.addChangeListener) {
+        this.featureSource.addChangeListener(function() {
+            thisTier.browser.refreshTier(thisTier);
+        });
+    }
+
 }
 
 Browser.prototype.createFeatureSource = function(config) {
@@ -107,10 +114,17 @@ SourceCache.prototype.put = function(conf, source) {
 var __cfs_id_seed = 0;
 
 function CachingFeatureSource(source) {
+    var thisB = this;
+
     this.source = source;
     this.cfsid = 'cfs' + (++__cfs_id_seed);
     if (source.name) {
         this.name = source.name;
+    }
+    if (source.addChangeListener) {
+        source.addChangeListener(function() {
+            thisB.cfsid = 'cfs' + (++__cfs_id_seed);
+        });
     }
 }
 
@@ -126,6 +140,11 @@ CachingFeatureSource.prototype.addActivityListener = function(l) {
     if (this.source.addActivityListener) {
         this.source.addActivityListener(l);
     }
+}
+
+CachingFeatureSource.prototype.addChangeListener = function(l) {
+    if (this.source.addChangeListener)
+        this.source.addChangeListener(l);
 }
 
 CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
