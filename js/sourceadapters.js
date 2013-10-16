@@ -7,6 +7,12 @@
 // sourceadapters.js
 //
 
+var __dalliance_sourceAdapterFactories = {}
+
+function dalliance_registerSourceAdapterFactory(type, factory) {
+    __dalliance_sourceAdapterFactories[type] = factory;
+}
+
 DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
@@ -31,7 +37,10 @@ Browser.prototype.createFeatureSource = function(config) {
         return fs;
     }
 
-    if (config.bwgURI || config.bwgBlob) {
+    if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
+        var saf = __dalliance_sourceAdapterFactories[config.tier_type];
+        fs = saf(config).features;
+    } else if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         fs = new BAMFeatureSource(config);
@@ -39,8 +48,6 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
-    } else if (config.tier_type == 'ensembl') {
-        fs = new EnsemblFeatureSource(config);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
