@@ -1392,7 +1392,8 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
 Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
-          this.featureListeners[fli](ev, feature, hit, tier);
+          if (this.featureListeners[fli](ev, feature, hit, tier))
+            return;
       } catch (ex) {
           console.log(ex.stack);
       }
