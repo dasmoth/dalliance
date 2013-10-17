@@ -50,6 +50,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
         for (var s = 0; s < stanzas.length; ++s) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
+            track._db = thisB;
             for (var l = 0; l < toks.length - 2; l += 3) {
                 var k = toks[l+1], v = toks[l+2];
                 if (k.match(THUB_SUBGROUP_REGEXP)) {
@@ -197,11 +198,11 @@ TrackHubTrack.prototype.toDallianceSource = function() {
     } else {
         typeToks = this.type.split(/\s+/);
         if (typeToks[0] == 'bigBed') {
-            source.bwgURI = this.bigDataUrl;
+            source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigbedStyles();
             return source;
         } else if (typeToks[0] == 'bigWig') {
-            source.bwgURI = this.bigDataUrl;
+            source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigwigStyles();
             source.noDownsample = true;     // FIXME seems like a blunt instrument...
             
@@ -211,7 +212,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 
             return source;
         } else if (typeToks[0] == 'bam') {
-            source.bamURI = this.bigDataUrl;
+            source.bamURI = relativeURL(this._db.absURL, this.bigDataUrl);
             return source;
         } else {
             console.log('Unsupported ' + this.type);
