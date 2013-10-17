@@ -11,6 +11,7 @@ function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
     this.activityListeners = [];
+    this.changeListeners = [];
     this.business = [];
 
     for (var i = 0; i < this.sources.length; ++i) {
@@ -35,6 +36,11 @@ OverlayFeatureSource.prototype.initN = function(n) {
             thisB.notifyActivity();
         });
     }
+    if (s.addChangeListener) {
+        s.addChangeListener(function() {
+            thisB.notifyChange();
+        });
+    }
 }
 
 OverlayFeatureSource.prototype.addActivityListener = function(l) {
@@ -50,6 +56,20 @@ OverlayFeatureSource.prototype.notifyActivity = function() {
     for (var li = 0; li < this.activityListeners.length; ++li) {
         try {
             this.activityListeners[li](busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
+OverlayFeatureSource.prototype.addChangeListener = function(listener) {
+    this.changeListeners.push(listener);
+}
+
+OverlayFeatureSource.prototype.notifyChange = function() {
+    for (var li = 0; li < this.changeListeners.length; ++li) {
+        try {
+            this.changeListeners[li](this.busy);
         } catch (e) {
             console.log(e);
         }
@@ -159,9 +179,14 @@ function OverlayFeatureSource_merge_byKey(featureSets) {
 	of = om[this.keyForFeature(f)]
 	if (of) {
 	    if (of.id)
-		f.id = of.id;
+		  f.id = of.id;
 	    if (of.label) 
-		f.label = of.label;
+		  f.label = of.label;
+
+        if (of.score2)
+            f.score2 = of.score2;
+        else if (of.score)
+            f.score2 = of.score;
 	}
 	mf.push(f);
     }
