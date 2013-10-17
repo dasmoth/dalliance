@@ -483,6 +483,25 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
         var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
+
+        if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
+            var grad = style._gradient;
+            if (!grad) {
+                grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+                style._gradient = grad;
+            }
+
+            var sc2 = feature.score2 || 0;
+            var smin2 = style.MIN2 ? (1.0 * style.MIN2) : 0.0;
+            var smax2 = style.MAX2 ? (1.0 * style.MAX2) : 1.0;
+            var relScore2 = ((1.0 * sc2) - smin2) / (smax2-smin2);
+
+            var step = (relScore2*grad.length)|0;
+            if (step < 0) step = 0;
+            if (step >= grad.length) step = grad.length - 1;
+            stroke = grad[step];
+        }
+
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
         var size = style.SIZE || height;
 
