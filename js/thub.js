@@ -83,6 +83,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
         }
         
         var toplevels = [];
+        var composites = [];
         for (var ti = 0; ti < tracks.length; ++ti) {
             var track = tracks[ti];
             var top = true;
@@ -96,18 +97,30 @@ TrackHubDB.prototype.getTracks = function(callback) {
                         parent.children = [];
                     parent.children.push(track);
 
-                    if (parent && (!parent.compositeTrack || parent.view))
-                        top = false;
-                    if (parent.container == 'multiWig')
+                    if (parent)
                         top = false;
                 }
                
             }
-            if (track.compositeTrack && !track.view)
-                    top = false;  // FIXME How to handle composites properly?
-
-            if (top)
+            if (track.compositeTrack) {
+                composites.push(track);
+            } else if (top) {
                 toplevels.push(track);
+            }
+        }
+
+        for (var ci = 0; ci < composites.length; ++ci) {
+            var comp = composites[ci];
+            var parentOfViews = false;
+            for (var ki = 0; ki < comp.children.length; ++ki) {
+                var k = comp.children[ki];
+                if (k.view) {
+                    toplevels.push(k);
+                    parentOfViews = true;
+                }
+            }
+            if (!parentOfViews)
+                toplevels.push(comp);
         }
             
         thisB._tracks = toplevels;
