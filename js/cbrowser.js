@@ -419,9 +419,9 @@ Browser.prototype.realInit2 = function() {
                 t.infoVisible = false;
             }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
-            ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
+                ev.stopPropagation(); ev.preventDefault();
                 for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                     var t = thisB.tiers[ti];
                     if (t.dasSource.collapseSuperGroups) {
@@ -434,7 +434,8 @@ Browser.prototype.realInit2 = function() {
                         t.updateLabel();
                     }
                 }
-            } else {
+            } else if (!ev.ctrlKey && !ev.metaKey) {
+                ev.stopPropagation(); ev.preventDefault();
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;
                 var t = thisB.tiers[st];
