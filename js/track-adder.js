@@ -7,31 +7,11 @@
 // track-adder.js
 //
 
-function sourceURI(source) {
-    // FIXME
-    return source.uri || source.bwgURI || source.bamURI;
-}
 
 Browser.prototype.currentlyActive = function(source) {
-    var suri = sourceURI(source);
-    for (var i = 0; i < this.tiers.length; ++i) {
-        var ts = this.tiers[i].dasSource;
-        var tsuri = sourceURI(ts);
-        if (tsuri == suri || tsuri == suri + '/') {
-            // Special cases where we might meaningfully want two tiers of the same URI.
-            if (ts.tier_type) {
-                if (!source.tier_type || source.tier_type != ts.tier_type) {
-                    continue;
-                }
-            }
-            if (ts.stylesheet_uri) {
-                if (!source.stylesheet_uri || source.stylesheet_uri != ts.stylesheet_uri) {
-                    continue;
-                }
-            }
-
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (sourcesAreEqual(this.tiers[ti].dasSource, source))
             return true;
-        }
     }
     return false;
 }
@@ -56,13 +36,15 @@ function activateButton(addModeButtons, which) {
 }
 
 Browser.prototype.showTrackAdder = function(ev) {
-    var thisB = this;
-    var mx =  ev.clientX, my = ev.clientY;
-    mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
-    my +=  document.documentElement.scrollTop || document.body.scrollTop;
+    if (this.uiMode === 'add') {
+        this.hideToolPanel();
+        this.setUiMode('none');
+        return;
+    }
 
-    var popup = makeElement('div');
-    popup.appendChild(makeElement('div', null));
+    var thisB = this;
+
+    var popup = makeElement('div', null, {className: 'dalliance'} , {width: '100%', display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
 
     var addModeButtons = [];
     var makeStab, makeStabObserver;
@@ -127,10 +109,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             return hubButton;
         }
     }
-    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
-        var hub = this.hubObjects[hi];
-        makeHubButton(hub);
-    }
+ 
 
     var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
     addModeButtons.push(defButton);
@@ -138,6 +117,13 @@ Browser.prototype.showTrackAdder = function(ev) {
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
     addModeButtons.push(binButton);
+
+
+    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
+        var hub = this.hubObjects[hi];
+        makeHubButton(hub);
+    }
+
     var addHubButton = this.makeButton('+', 'Connect to a new track-hub');
     addModeButtons.push(addHubButton);
 
@@ -145,14 +131,11 @@ Browser.prototype.showTrackAdder = function(ev) {
     var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
     
-    // popup.appendChild(makeElement('div', null, {}, {clear: 'both', height: '10px'})); // HACK only way I've found of adding appropriate spacing in Gecko.
-    
-    var addButtons = [];
     var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
     var customMode = false;
     var dataToFinalize = null;
 
-    var asform = makeElement('form', null, {}, {clear: 'both'});
+    var asform = makeElement('form', null, {}, {display: 'inline-block', width: '100%'});
     asform.addEventListener('submit', function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             doAdd();
@@ -160,8 +143,8 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, true); 
     var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
-    stabHolder.style.overflow = 'auto';
-    stabHolder.style.height = '400px';
+    stabHolder.style.overflow = 'scroll';
+    // stabHolder.style.height = '500px';
     asform.appendChild(stabHolder);
 
     var __mapping;
@@ -169,7 +152,9 @@ Browser.prototype.showTrackAdder = function(ev) {
 
 
     makeStab = function(msources, mapping) {
-        refreshButton.style.visibility = 'visible';
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'none';
+        canButton.style.display = 'none';
         if (__sourceHolder) {
             __sourceHolder.removeListener(makeStabObserver);
         }
@@ -180,15 +165,15 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     makeStabObserver = function(msources) {
         customMode = false;
-        addButtons = [];
+        var buttons = [];
         removeChildren(stabHolder);
         if (!msources) {
             stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
             return;
         }
         
-        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+        var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'}, {width: '100%'});
+        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
         var idx = 0;
 
         var sources = [];
@@ -204,7 +189,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             var source = sources[i];
             var r = makeElement('tr');
 
-            var bd = makeElement('td');
+            var bd = makeElement('td', null, {}, {width: '30px'});
             bd.style.textAlign = 'center';
             if (!source.props || source.props.cors) {
                 var b = makeElement('input');
@@ -213,9 +198,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (__mapping) {
                     b.dalliance_mapping = __mapping;
                 }
-                b.checked = thisB.currentlyActive(source);
+                // b.checked = thisB.currentlyActive(source);
                 bd.appendChild(b);
-                addButtons.push(b);
+                buttons.push(b);
                 b.addEventListener('change', function(ev) {
                     if (ev.target.checked) {
                         thisB.addTier(ev.target.dalliance_source);
@@ -237,15 +222,30 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabBody.appendChild(r);
             ++idx;
         }
+
+        function setChecks() {
+            for (var bi = 0; bi < buttons.length; ++bi) {
+                var b = buttons[bi];
+                b.checked = thisB.currentlyActive(b.dalliance_source);
+            }
+        }
+        setChecks();
+        thisB.addTierListener(function(l) {
+            setChecks();
+        });
+
         stabHolder.appendChild(stab);
     };
 
     function makeHubStab(tracks) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'none';
+        canButton.style.display = 'none';
+
         customMode = false;
-        addButtons = [];
         removeChildren(stabHolder);
         
-        var ttab = makeElement('div');
+        var ttab = makeElement('div', null, {}, {width: '100%'});
         var sources = [];
         for (var i = 0; i < tracks.length; ++i) {
             sources.push(tracks[i]);
@@ -272,6 +272,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 children: tops});
         }
         
+        var buttons = [];
         for (var gi = 0; gi < groups.length; ++gi) {
             var group = groups[gi];
             var dg = group;
@@ -299,14 +300,19 @@ Browser.prototype.showTrackAdder = function(ev) {
                         trks[vX] = {};
                     trks[vX][vY] = child;
                 }
-                __test_trks = trks;
 
-                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'});
+                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'}, {tableLayout: 'fixed'});
                 {
                     var header = makeElement('tr');
-                    header.appendChild(makeElement('td'));   // blank corner element
+                    header.appendChild(makeElement('th', null, {}, {width: '150px', height: '100px'}));   // blank corner element
                     for (var si = 0; si < sgX.titles.length; ++si) {
-                        var h = makeElement('th', sgX.titles[si], {}, {transform: 'rotate(-45deg)', transformOrigin: '0px 0px', webkitTransform: 'rotate(-45deg)', webkitTransformOrigin: '0px 0px'});
+                        var h = makeElement('th', makeElement('div', sgX.titles[si], {}, {transform: 'rotate(-60deg)', 
+                                                                       transformOrigin: '0% 100%', 
+                                                                       webkitTransform: 'rotate(-60deg) translate(20px,10px)', 
+                                                                       webkitTransformOrigin: '0% 100%',
+                                                                       textAlign: 'left'}), {}, {width: '35px',
+                                                                                                 height: '100px',
+                                                                                                 verticalAlign: 'bottom'})
                         header.appendChild(h);
                     }
                     matrix.appendChild(header);
@@ -316,7 +322,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 for (var yi = 0; yi < sgY.titles.length; ++yi) {
                     var vY = sgY.tags[yi];
                     var row = makeElement('tr');
-                    row.appendChild(makeElement('th', sgY.titles[yi]));
+                    row.appendChild(makeElement('th', sgY.titles[yi]), {});
                     
                     for (var xi = 0; xi < sgX.titles.length; ++xi) {
                         var vX = sgX.tags[xi];
@@ -333,17 +339,17 @@ Browser.prototype.showTrackAdder = function(ev) {
                             
                             var b = makeElement('input');
                             b.type = 'checkbox';
-                            b.dalliance_track = track;
+                            b.dalliance_source = ds;
                             if (__mapping) {
                                 b.dalliance_mapping = __mapping;
                             }
-                            b.checked = thisB.currentlyActive(ds); // FIXME!
+                            buttons.push(b);
                             cell.appendChild(b);
                             b.addEventListener('change', function(ev) {
                                 if (ev.target.checked) {
-                                    thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                                    thisB.addTier(ev.target.dalliance_source);
                                 } else {
-                                    thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                                    thisB.removeTier(ev.target.dalliance_source);
                                 }
                             });
 
@@ -356,7 +362,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
             } else {
                 var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
                 var idx = 0;
             
                 for (var i = 0; i < group.children.length; ++i) {
@@ -366,23 +372,22 @@ Browser.prototype.showTrackAdder = function(ev) {
                         continue;
 
                     var r = makeElement('tr');
-                    var bd = makeElement('td');
+                    var bd = makeElement('td', null, {}, {width: '30px'});
                     bd.style.textAlign = 'center';
                     
                     var b = makeElement('input');
                     b.type = 'checkbox';
-                    b.dalliance_track = track;
+                    b.dalliance_source = ds;
                     if (__mapping) {
                         b.dalliance_mapping = __mapping;
                     }
-                    b.checked = thisB.currentlyActive(ds); // FIXME!
+                    buttons.push(b);
                     bd.appendChild(b);
-                    addButtons.push(b);
                     b.addEventListener('change', function(ev) {
                         if (ev.target.checked) {
-                            thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                            thisB.addTier(ev.target.dalliance_source);
                         } else {
-                            thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                            thisB.removeTier(ev.target.dalliance_source);
                         }
                     });
 
@@ -400,6 +405,17 @@ Browser.prototype.showTrackAdder = function(ev) {
                 
             }
         }
+
+        function setChecks() {
+            for (var bi = 0; bi < buttons.length; ++bi) {
+                var b = buttons[bi];
+                b.checked = thisB.currentlyActive(b.dalliance_source);
+            }
+        }
+        setChecks();
+        thisB.addTierListener(function(l) {
+            setChecks();
+        });
         
         stabHolder.appendChild(ttab);
     };
@@ -417,19 +433,21 @@ Browser.prototype.showTrackAdder = function(ev) {
     }, false);
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, binButton);
         switchToBinMode();
     }, false);
     addHubButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, addHubButton);
         switchToHubConnectMode();
     }, false);
 
 
     function switchToBinMode() {
+        activateButton(addModeButtons, binButton);
         customMode = 'bin';
-        refreshButton.style.visibility = 'hidden';
+
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         removeChildren(stabHolder);
 
@@ -462,6 +480,11 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function switchToHubConnectMode() {
+        activateButton(addModeButtons, addHubButton);
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'none';
+
         customMode = 'hub-connect';
         refreshButton.style.visibility = 'hidden';
 
@@ -481,13 +504,16 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     custButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, custButton);
         switchToCustomMode();
     }, false);
 
     function switchToCustomMode() {
+        activateButton(addModeButtons, custButton);
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'none';
+
         customMode = 'das';
-        refreshButton.style.visibility = 'hidden';
 
         removeChildren(stabHolder);
 
@@ -571,7 +597,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 thisB.addTier(dataToFinalize);
-                thisB.removeAllPopups();
+                switchToCustomMode();
             } else if (customMode === 'hub-connect') {
                 var curi = custURL.value.trim();
                 if (!/^.+:\/\//.exec(curi)) {
@@ -612,17 +638,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 });
             }
         } else {
-            // No longer needed because of instant addition....
-
-            /*
-            for (var bi = 0; bi < addButtons.length; ++bi) {
-                var b = addButtons[bi];
-                if (b.checked) {
-                    var nds = b.dalliance_source;
-                    thisB.addTier(nds);
-                }
-            }
-            */
             thisB.removeAllPopups();
         }
     };
@@ -635,9 +650,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
         var tsm = Math.max(knownSpace.min, (knownSpace.min + knownSpace.max - 100) / 2)|0;
         var testSegment = new DASSegment(knownSpace.chr, tsm, Math.min(tsm + 99, knownSpace.max));
-//        dlog('test segment: ' + testSegment);
         nds.features(testSegment, {}, function(features, status) {
-            // dlog('status=' + status);
             if (status) {
                 if (!retry) {
                     dlog('retrying with credentials');
@@ -671,7 +684,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 uri = match[1] + '/sources';
             }
         }
-//        dlog('sourceQuery: ' + uri);
         function sqfail() {
             if (!retry) {
                 return tryAddDASxSources(nds, true);
@@ -684,7 +696,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (!sources || sources.length == 0) {
                     return sqfail();
                 } 
-//                dlog('got ' + sources.length + ' sources');
 
                 var fs = null;
                 if (sources.length == 1) {
@@ -692,7 +703,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     for (var i = 0; i < sources.length; ++i) {
                         if (sources[i].uri === nds.uri) {
-//                            dlog('got match!');
                             fs = sources[i];
                             break;
                         }
@@ -794,6 +804,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function promptForBAI(nds) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         customMode = 'prompt-bai'
         stabHolder.appendChild(makeElement('h2', 'Select an index file'));
@@ -839,6 +853,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
 
     function binFormatErrorPage(message) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         message = message || 'Custom data format not recognized';
         stabHolder.appendChild(makeElement('h2', 'Error adding custom data'));
@@ -849,6 +867,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
                      
     var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
         removeChildren(stabHolder);
         stabHolder.appendChild(makeElement('h2', 'Add custom data: step 2'));
         stabHolder.appendChild(document.createTextNode('Label: '));
@@ -912,7 +934,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var canButton = makeElement('button', 'Cancel', {className: 'btn'});
     canButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        thisB.removeAllPopups();
+        switchToBinMode();
     }, false);
 
     var refreshButton = makeElement('button', 'Refresh', {className: 'btn'});
@@ -929,5 +951,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-    return this.popit(ev, 'Add data sources...', popup, {width: 500});
+    this.showToolPanel(popup);
+    this.setUiMode('add');
 }

@@ -7,6 +7,12 @@
 // sourceadapters.js
 //
 
+var __dalliance_sourceAdapterFactories = {}
+
+function dalliance_registerSourceAdapterFactory(type, factory) {
+    __dalliance_sourceAdapterFactories[type] = factory;
+}
+
 DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
@@ -23,12 +29,25 @@ DasTier.prototype.initSources = function() {
 
     this.featureSource = fs;
     this.sequenceSource = ss;
+
+    if (this.featureSource && this.featureSource.addChangeListener) {
+        this.featureSource.addChangeListener(function() {
+            thisTier.browser.refreshTier(thisTier);
+        });
+    }
+
 }
 
 Browser.prototype.createFeatureSource = function(config) {
-    var fs;
+    var fs = this.sourceCache.get(config);
+    if (fs) {
+        return fs;
+    }
 
-    if (config.bwgURI || config.bwgBlob) {
+    if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
+        var saf = __dalliance_sourceAdapterFactories[config.tier_type];
+        fs = saf(config).features;
+    } else if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         fs = new BAMFeatureSource(config);
@@ -36,8 +55,6 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
-    } else if (config.tier_type == 'ensembl') {
-        fs = new EnsemblFeatureSource(config);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
@@ -61,12 +78,127 @@ Browser.prototype.createFeatureSource = function(config) {
         fs.name = config.name;
     }
 
+    if (fs != null) {
+        fs = new CachingFeatureSource(fs);
+        this.sourceCache.put(config, fs);
+    }
     return fs;
 }
+
+function SourceCache() {
+    this.sourcesByURI = {}
+}
+
+SourceCache.prototype.get = function(conf) {
+    var scb = this.sourcesByURI[sourceDataURI(conf)];
+    if (scb) {
+        for (var si = 0; si < scb.configs.length; ++si) {
+            if (sourcesAreEqual(scb.configs[si], conf)) {
+                return scb.sources[si];
+            }
+        }
+    }
+}
+
+SourceCache.prototype.put = function(conf, source) {
+    var uri = sourceDataURI(conf);
+    var scb = this.sourcesByURI[uri];
+    if (!scb) {
+        scb = {configs: [], sources: []};
+        this.sourcesByURI[uri] = scb;
+    }
+    scb.configs.push(conf);
+    scb.sources.push(source);
+}
+
+var __cfs_id_seed = 0;
+
+function CachingFeatureSource(source) {
+    var thisB = this;
+
+    this.source = source;
+    this.cfsid = 'cfs' + (++__cfs_id_seed);
+    if (source.name) {
+        this.name = source.name;
+    }
+    if (source.addChangeListener) {
+        source.addChangeListener(function() {
+            thisB.cfsid = 'cfs' + (++__cfs_id_seed);
+        });
+    }
+}
+
+CachingFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.source.getStyleSheet(callback);
+}
+
+CachingFeatureSource.prototype.getScales = function() {
+    return this.source.getScales();
+}
+
+CachingFeatureSource.prototype.addActivityListener = function(l) {
+    if (this.source.addActivityListener) {
+        this.source.addActivityListener(l);
+    }
+}
+
+CachingFeatureSource.prototype.addChangeListener = function(l) {
+    if (this.source.addChangeListener)
+        this.source.addChangeListener(l);
+}
+
+CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    this.source.findNextFeature(chr, pos, dir, callback);
+}
+
+CachingFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    this.source.quantFindNextFeature(chr, pos, dir, threshold, callback);
+}
+
+CachingFeatureSource.prototype.capabilities = function() {
+    if (this.source.capabilities) {
+        return this.source.capabilities();
+    } else {
+        return {};
+    }
+}
+
+CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
+    if (!awaitedFeatures) {
+        var awaitedFeatures = new Awaited();
+        pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
+        this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
+            if (!awaitedFeatures.res)
+                awaitedFeatures.provide({status: status, features: features, scale: scale});
+        });
+    } 
+
+    awaitedFeatures.await(function(af) {
+        callback(af.status, af.features, af.scale);
+    });
+}
+    
 
 
 function DASFeatureSource(dasSource) {
     this.dasSource = dasSource;
+    this.busy = 0;
+    this.activityListeners = [];
+}
+
+DASFeatureSource.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+DASFeatureSource.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
 
 DASFeatureSource.prototype.getStyleSheet = function(callback) {
@@ -83,7 +215,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         return;
     }
 
-    if (!this.dasSource.uri) {
+    if (!this.dasSource.uri && !this.dasSource.features_uri) {
         // FIXME should this be making an error callback???
         return;
     }
@@ -101,10 +233,17 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     }
     
     var thisB = this;
+    thisB.busy++;
+    thisB.notifyActivity();
+
     this.dasSource.features(
         new DASSegment(chr, min, max),
         fops,
         function(features, status) {
+            
+            thisB.busy--;
+            thisB.notifyActivity();
+
             var retScale = scale;
             if (!tryMaxBins) {
                 retScale = 0.1;
@@ -230,6 +369,9 @@ function BWGFeatureSource(bwgSource) {
     this.bwgSource = this.opts = bwgSource;    
     thisB.bwgHolder = new Awaited();
 
+    this.busy = 0;
+    this.activityListeners = [];
+
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
         if (!pfs) {
@@ -259,6 +401,20 @@ function BWGFeatureSource(bwgSource) {
         });
     } else {
         thisB.init();
+    }
+}
+
+BWGFeatureSource.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+BWGFeatureSource.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 
@@ -323,7 +479,13 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         } else {
             data = bwg.getUnzoomedView();
         }
+        
+        thisB.busy++;
+        thisB.notifyActivity();
         data.readWigData(chr, min, max, function(features) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
             var fs = 1000000000;
             if (bwg.type === 'bigwig') {
                 var is = (max - min) / features.length / 2;
@@ -345,16 +507,26 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
 }
 
 BWGFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
-    var beforeQFNF = Date.now()|0;
+    // var beforeQFNF = Date.now()|0;
+    var thisB = this;
+    thisB.busy++;
+    thisB.notifyActivity();
     this.bwgHolder.res.thresholdSearch(chr, pos, dir, threshold, function(a, b) {
-        var afterQFNF = Date.now()|0;
-        console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
+        thisB.busy--;
+        thisB.notifyActivity();
+        // var afterQFNF = Date.now()|0;
+        // console.log('QFNF took ' + (afterQFNF - beforeQFNF) + 'ms');
         return callback(a, b);
     });
 }
 
 BWGFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    var thisB = this;
+    thisB.busy++;
+    thisB.notifyActivity();
     this.bwgHolder.res.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(res) {
+        thisB.busy--;
+        thisB.notifyActivity();
         if (res.length > 0 && res[0] != null) {
             callback(res[0]);
         }
@@ -491,6 +663,8 @@ function BAMFeatureSource(bamSource) {
     this.bamSource = bamSource;
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
     this.bamHolder = new Awaited();
+    this.busy = 0;
+    this.activityListeners = [];
     
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
@@ -525,6 +699,20 @@ function BAMFeatureSource(bamSource) {
     }
 }
 
+BAMFeatureSource.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+BAMFeatureSource.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
 BAMFeatureSource.prototype.init = function() {
     var thisB = this;
     var bamF, baiF;
@@ -542,8 +730,15 @@ BAMFeatureSource.prototype.init = function() {
 
 BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
+    
+    thisB.busy++;
+    thisB.notifyActivity();
+    
     this.bamHolder.await(function(bam) {
         bam.fetch(chr, min, max, function(bamRecords, error) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
             if (error) {
                 callback(error, null, null);
             } else {
@@ -600,7 +795,25 @@ BAMFeatureSource.prototype.getStyleSheet = function(callback) {
 function MappedFeatureSource(source, mapping) {
     this.source = source;
     this.mapping = mapping;
+    
+    this.activityListeners = [];
+    this.busy = 0;
 }
+
+MappedFeatureSource.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+MappedFeatureSource.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
 
 MappedFeatureSource.prototype.getStyleSheet = function(callback) {
     return this.source.getStyleSheet(callback);
@@ -613,12 +826,21 @@ MappedFeatureSource.prototype.getScales = function() {
 MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
 
+    thisB.busy++;
+    thisB.notifyActivity();
+
     this.mapping.sourceBlocksForRange(chr, min, max, function(mseg) {
         if (mseg.length == 0) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
             callback("No mapping available for this regions", [], scale);
         } else {
             var seg = mseg[0];
             thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
+                thisB.busy--;
+                thisB.notifyActivity();
+
                 var mappedFeatures = [];
                 if (features) {
                     for (var fi = 0; fi < features.length; ++fi) {

@@ -25,7 +25,7 @@
 .tier-tab {
   display: inline-block;
   *display: inline;
-  padding: 4px 12px;
+  padding: 2px 6px;
   margin-bottom: 0;
   *margin-left: .3em;
   font-size: 14px;

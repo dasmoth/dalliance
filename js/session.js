@@ -19,6 +19,11 @@ Browser.prototype.nukeStatus = function() {
 }
 
 Browser.prototype.storeStatus = function() {
+    this.storeViewStatus();
+    this.storeTierStatus();
+}
+
+Browser.prototype.storeViewStatus = function() {
     if (!this.cookieKey || this.noPersist) {
         return;
     }
@@ -28,6 +33,13 @@ Browser.prototype.storeStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.view-end'] = this.viewEnd|0
     if (this.currentSeqMax) {
 	localStorage['dalliance.' + this.cookieKey + '.current-seq-length'] = this.currentSeqMax;
+    }
+}
+
+
+Browser.prototype.storeTierStatus = function() {
+    if (!this.cookieKey || this.noPersist) {
+        return;
     }
 
     var currentSourceList = [];
@@ -60,7 +72,7 @@ Browser.prototype.restoreStatus = function() {
     }
 
     var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
-    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
+    var pageConfigHash = hex_sha1(miniJSONify({sources: this.sources, hubs: this.hubs}));
     if (pageConfigHash != storedConfigHash) {
         localStorage['dalliance.' + this.cookieKey + '.configHash'] = pageConfigHash;
         return;

@@ -23,7 +23,7 @@ SubTier.prototype.add = function(glyph) {
     this.glyphs.push(glyph);
     this.height = Math.max(this.height, glyph.height());
     if (glyph.quant && this.quant == null) {
-	this.quant = glyph.quant;
+        this.quant = glyph.quant;
     }
 }
 
@@ -62,7 +62,7 @@ function drawFeatureTier(tier)
                     continue;
                 }
                 var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
-		if (g)
+                if (g)
                     glyphs.push(g);
             }
         }
@@ -162,7 +162,7 @@ function drawFeatureTier(tier)
         var g = glyphsForGroup(tier.groupedFeatures[gid], 0, tier.groups[gid], tier,
                                (tier.dasSource.collapseSuperGroups && !tier.bumped) ? 'collapsed_gene' : 'tent');
         if (g) {
-	    g.group = tier.groups[gid];
+            g.group = tier.groups[gid];
             groupGlyphs[gid] = g;
         }
     }
@@ -192,6 +192,8 @@ function drawFeatureTier(tier)
             glyphs.push(gg);
         }
     }
+
+
 
     // Bumping
 
@@ -231,10 +233,19 @@ function drawFeatureTier(tier)
     }
 
     for (var sti = 0; sti < bumpedSTs.length; ++sti) {
-	var st = bumpedSTs[sti];
-	if (st.quant) {
-	    st.glyphs.unshift(new GridGlyph(st.height));
-	}
+        var st = bumpedSTs[sti];
+        if (st.quant) {
+            st.glyphs.unshift(new GridGlyph(st.height));
+        }
+    }
+
+    for (var sti = 0; sti < bumpedSTs.length; ++sti) {
+        var st = bumpedSTs[sti];
+        st.glyphs.sort(function (g1, g2) {
+            var z1 = g1.zindex || 0;
+            var z2 = g2.zindex || 0;
+            return z1 - z2;
+        });
     }
 
     tier.subtiers = bumpedSTs;
@@ -263,19 +274,19 @@ function formatQuantLabel(v) {
 DasTier.prototype.paint = function() {
     var subtiers = this.subtiers;
     if (!subtiers) {
-	return;
+        return;
     }
 
     var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
 
     var lh = MIN_PADDING;
     for (var s = 0; s < subtiers.length; ++s) {
-	lh = lh + subtiers[s].height + MIN_PADDING;
+        lh = lh + subtiers[s].height + MIN_PADDING;
     }
     lh += 6
     this.viewport.setAttribute('height', lh);
     this.viewport.style.left = '-1000px';
-    this.holder.style.height = '' + Math.max(lh, 35) + 'px';
+    this.holder.style.height = '' + Math.max(lh, this.browser.minTierHeight) + 'px';
     this.updateHeight();
     this.drawOverlay();
     this.norigin = this.browser.viewStart;
@@ -290,32 +301,32 @@ DasTier.prototype.paint = function() {
     gc.translate(offset, MIN_PADDING);
    
     for (var s = 0; s < subtiers.length; ++s) {
-	var quant = null;
-	var glyphs = subtiers[s].glyphs;
-	for (var i = 0; i < glyphs.length; ++i) {
-	    var glyph = glyphs[i];
-	    if (glyph.min() < fpw-offset && glyph.max() > -offset) { 
-		var glyph = glyphs[i];
-		glyph.draw(gc);
-		if (glyph.quant) {
-		    quant = glyph.quant;
-		}
-	    }
-	}
-	gc.translate(0, subtiers[s].height + MIN_PADDING);
+        var quant = null;
+        var glyphs = subtiers[s].glyphs;
+        for (var i = 0; i < glyphs.length; ++i) {
+            var glyph = glyphs[i];
+            if (glyph.min() < fpw-offset && glyph.max() > -offset) { 
+                var glyph = glyphs[i];
+                glyph.draw(gc);
+                if (glyph.quant) {
+                    quant = glyph.quant;
+                }
+            }
+        }
+        gc.translate(0, subtiers[s].height + MIN_PADDING);
     }
     gc.restore();
 
     if (quant && this.quantLeapThreshold && this.featureSource && sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
-	var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+        var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
-	gc.save();
-	gc.strokeStyle = 'red';
-	gc.lineWidth = 0.3;
-	gc.moveTo(0, ry);
-	gc.lineTo(5000, ry);
-	gc.stroke();
-	gc.restore();
+        gc.save();
+        gc.strokeStyle = 'red';
+        gc.lineWidth = 0.3;
+        gc.moveTo(0, ry);
+        gc.lineTo(5000, ry);
+        gc.stroke();
+        gc.restore();
     }
 
     this.paintQuant();
@@ -324,54 +335,54 @@ DasTier.prototype.paint = function() {
 DasTier.prototype.paintQuant = function() {
     var quant;
     if (this.subtiers && this.subtiers.length > 0)
-	quant = this.subtiers[0].quant;
+        quant = this.subtiers[0].quant;
 
     if (quant && this.quantOverlay) {
-	var h = this.viewport.height;
-	var w = this.quantOverlay.width;
-	this.quantOverlay.height = this.viewport.height;
-	var ctx = this.quantOverlay.getContext('2d');
+        var h = this.subtiers[0].height;
+        var w = this.quantOverlay.width;
+        this.quantOverlay.height = this.viewport.height;
+        var ctx = this.quantOverlay.getContext('2d');
 
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;
 
-	if (this.browser.rulerLocation == 'right') {
-	    ctx.fillRect(w-30, 0, 30, 20);
-            ctx.fillRect(w-30, h-20, 30, 20);
-	} else {
+        if (this.browser.rulerLocation == 'right') {
+            ctx.fillRect(w-30, 0, 30, 20);
+            ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
+        } else {
             ctx.fillRect(0, 0, 30, 20);
-            ctx.fillRect(0, h-20, 30, 20);
-	}
+            ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
+        }
         ctx.globalAlpha = 1.0;
 
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.beginPath();
 
-	if (this.browser.rulerLocation == 'right') {
-	    ctx.moveTo(w - 8, 3);
-            ctx.lineTo(w, 3);
-            ctx.lineTo(w, h-3);
-            ctx.lineTo(w - 8, h - 3);
-	} else {
-            ctx.moveTo(8, 3);
-            ctx.lineTo(0,3);
-            ctx.lineTo(0,h-3);
-            ctx.lineTo(8,h-3);
-	}
+        if (this.browser.rulerLocation == 'right') {
+            ctx.moveTo(w - 8, MIN_PADDING);
+            ctx.lineTo(w, MIN_PADDING);
+            ctx.lineTo(w, h + MIN_PADDING);
+            ctx.lineTo(w - 8, h + MIN_PADDING);
+        } else {
+            ctx.moveTo(8, MIN_PADDING);
+            ctx.lineTo(0, MIN_PADDING);
+            ctx.lineTo(0, h+MIN_PADDING);
+            ctx.lineTo(8, h+MIN_PADDING);
+        }
         ctx.stroke();
 
         ctx.fillStyle = 'black';
 
-	if (this.browser.rulerLocation == 'right') {
-	    ctx.textAlign = 'right';
-	    ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), w-8, h-5);
-	} else {
-	    ctx.textAlign = 'left';
+        if (this.browser.rulerLocation == 'right') {
+            ctx.textAlign = 'right';
+            ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
+            ctx.fillText(formatQuantLabel(quant.min), w-8, h + MIN_PADDING - 2);
+        } else {
+            ctx.textAlign = 'left';
             ctx.fillText(formatQuantLabel(quant.max), 8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), 8, h-5);
-	}
+            ctx.fillText(formatQuantLabel(quant.min), 8, h + MIN_PADDING - 2);
+        }
     }
 }
 
@@ -382,15 +393,15 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var glyphs = [];
     var strand = null;
     for (var i = 0; i < features.length; ++i) {
-	var f = features[i];
-	if (f.orientation && strand==null) {
+        var f = features[i];
+        if (f.orientation && strand==null) {
             strand = f.orientation;
         }
-	 if (!label && f.label) {
+         if (!label && f.label) {
             label = f.label;
         }
 
-	var style = tier.styleForFeature(f);
+        var style = tier.styleForFeature(f);
         if (!style) {
             continue;
         }
@@ -398,28 +409,28 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
             continue;
         }
 
-	var g = glyphForFeature(f, 0, style, tier, null, true);
-	if (g) {
-	    glyphs.push(g);
-	}
+        var g = glyphForFeature(f, 0, style, tier, null, true);
+        if (g) {
+            glyphs.push(g);
+        }
     }
 
     if (glyphs.length == 0)
-	return null;
+        return null;
     
     var connector = 'flat';
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
-	if (strand === '+') {
-	    connector = 'collapsed+';
-	} else if (strand === '-') {
-	    connector = 'collapsed-';
-	}
+        if (strand === '+') {
+            connector = 'collapsed+';
+        } else if (strand === '-') {
+            connector = 'collapsed-';
+        }
     } else {
-	if (strand === '+') {
-	    connector = 'hat+';
-	} else if (strand === '-') {
-	    connector = 'hat-';
-	}
+        if (strand === '+') {
+            connector = 'hat+';
+        } else if (strand === '-') {
+            connector = 'hat-';
+        }
     }
 
     var labelText = null;
@@ -435,12 +446,12 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 
     var gg = new GroupGlyph(glyphs, connector);
     if (labelText) {
-	if (strand === '+') {
-	    labelText = '>' + labelText;
-	} else if (strand === '-') {
-	    labelText = '<' + labelText;
-	}
-	gg = new LabelledGlyph(gg, labelText);
+        if (strand === '+') {
+            labelText = '>' + labelText;
+        } else if (strand === '-') {
+            labelText = '<' + labelText;
+        }
+        gg = new LabelledGlyph(gg, labelText);
     }
     gg.bump = true;
     return gg;
@@ -470,13 +481,32 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var gg, quant;
 
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
-	var stroke = style.FGCOLOR || 'black';
+        var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
+
+        if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
+            var grad = style._gradient;
+            if (!grad) {
+                grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+                style._gradient = grad;
+            }
+
+            var sc2 = feature.score2 || 0;
+            var smin2 = style.MIN2 ? (1.0 * style.MIN2) : 0.0;
+            var smax2 = style.MAX2 ? (1.0 * style.MAX2) : 1.0;
+            var relScore2 = ((1.0 * sc2) - smin2) / (smax2-smin2);
+
+            var step = (relScore2*grad.length)|0;
+            if (step < 0) step = 0;
+            if (step >= grad.length) step = grad.length - 1;
+            stroke = grad[step];
+        }
+
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
-	var size = style.SIZE || height;
+        var size = style.SIZE || height;
 
         requiredHeight = height = 1.0 * height;
-	size = 1.0 * size;
+        size = 1.0 * size;
 
         var mid = (minPos + maxPos)/2;
         var hh = size/2;
@@ -484,62 +514,62 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var mark;
         var bMinPos = minPos, bMaxPos = maxPos;
 
-	if (gtype === 'EX') {
-	    gg = new ExGlyph(mid, size, stroke);
-	} else if (gtype === 'TRIANGLE') {
-	    var dir = style.DIRECTION || 'N';
-	    var width = style.LINEWIDTH || size;
-	    gg = new TriangleGlyph(mid, size, dir, width, stroke);
-	} else if (gtype === 'DOT') {
-	    gg = new DotGlyph(mid, size, stroke);
-	} else if (gtype === 'SQUARE') {
-	    gg = new BoxGlyph(mid - hh, 0, size, size, stroke, null);
-	} else if (gtype === 'STAR') {
-	    var points = 5;
-	    if (style.POINTS) 
-		points = style.POINTS | 0;
-	    gg = new StarGlyph(mid, hh, points, stroke, null);
-	} else {
-	    gg = new CrossGlyph(mid, size, stroke);
-	}
+        if (gtype === 'EX') {
+            gg = new ExGlyph(mid, size, stroke);
+        } else if (gtype === 'TRIANGLE') {
+            var dir = style.DIRECTION || 'N';
+            var width = style.LINEWIDTH || size;
+            gg = new TriangleGlyph(mid, size, dir, width, stroke);
+        } else if (gtype === 'DOT') {
+            gg = new DotGlyph(mid, size, stroke);
+        } else if (gtype === 'SQUARE') {
+            gg = new BoxGlyph(mid - hh, 0, size, size, stroke, null);
+        } else if (gtype === 'STAR') {
+            var points = 5;
+            if (style.POINTS) 
+                points = style.POINTS | 0;
+            gg = new StarGlyph(mid, hh, points, stroke, null);
+        } else {
+            gg = new CrossGlyph(mid, size, stroke);
+        }
 
-	if (isDasBooleanTrue(style.SCATTER)) {
-	    var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+        if (isDasBooleanTrue(style.SCATTER)) {
+            var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
             var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
             if (!smax) {
-		if (smin < 0) {
+                if (smin < 0) {
                     smax = 0;
-		} else {
+                } else {
                     smax = 10;
-		}
+                }
             }
             if (!smin) {
-		smin = 0;
+                smin = 0;
             }
 
             if ((1.0 * score) < (1.0 *smin)) {
-		score = smin;
+                score = smin;
             }
             if ((1.0 * score) > (1.0 * smax)) {
-		score = smax;
+                score = smax;
             }
             var relScore = ((1.0 * score) - smin) / (smax-smin);
-	    var relOrigin = (-1.0 * smin) / (smax - smin);
+            var relOrigin = (-1.0 * smin) / (smax - smin);
 
-	    if (relScore >= relOrigin) {
-		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-		y = y + ((1.0 - relOrigin) * requiredHeight) - height;
-	    } else {
-		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-		y = y + ((1.0 - relOrigin) * requiredHeight);
-	    }
-	    
-	    quant = {min: smin, max: smax};
-	    gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
-	}
+            if (relScore >= relOrigin) {
+                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+            } else {
+                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                y = y + ((1.0 - relOrigin) * requiredHeight);
+            }
+            
+            quant = {min: smin, max: smax};
+            gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
+        }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
-	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+        var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
         var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
         if (!smax) {
@@ -560,138 +590,141 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             score = smax;
         }
         var relScore = ((1.0 * score) - smin) / (smax-smin);
-	var relOrigin = (-1.0 * smin) / (smax - smin);
+        var relOrigin = (-1.0 * smin) / (smax - smin);
 
-	if (gtype === 'HISTOGRAM') {
-	    if (relScore >= relOrigin) {
-		height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-		y = y + ((1.0 - relOrigin) * requiredHeight) - height;
-	    } else {
-		height = Math.max(1, (relOrigin - relScore) * requiredHeight);
-		y = y + ((1.0 - relOrigin) * requiredHeight);
-	    }
-	    quant = {min: smin, max: smax};
-	}
-
-	var stroke = style.FGCOLOR || null;
-	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
-	var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
-
-	if (style.COLOR2) {
-	    var grad = style._gradient;
-	    if (!grad) {
-		grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
-		style._gradient = grad;
-	    }
-
-	    var step = (relScore*grad.length)|0;
-	    if (step < 0) step = 0;
-	    if (step >= grad.length) step = grad.length - 1;
-	    fill = grad[step];
+        if (gtype === 'HISTOGRAM') {
+            if (relScore >= relOrigin) {
+                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+            } else {
+                height = Math.max(1, (relOrigin - relScore) * requiredHeight);
+                y = y + ((1.0 - relOrigin) * requiredHeight);
+            }
+            quant = {min: smin, max: smax};
         }
 
-	gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
+        var stroke = style.FGCOLOR || null;
+        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
+
+        if (style.COLOR2) {
+            var grad = style._gradient;
+            if (!grad) {
+                grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+                style._gradient = grad;
+            }
+
+            var step = (relScore*grad.length)|0;
+            if (step < 0) step = 0;
+            if (step >= grad.length) step = grad.length - 1;
+            fill = grad[step];
+        }
+
+        gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
     } else if (gtype === 'HIDDEN') {
-	gg = new PaddedGlyph(null, minPos, maxPos);
-	noLabel = true;
+        gg = new PaddedGlyph(null, minPos, maxPos);
+        noLabel = true;
     } else if (gtype === 'ARROW') {
-	var color = style.FGCOLOR || 'purple';
-	var parallel = isDasBooleanTrue(style.PARALLEL);
-	var sw = isDasBooleanTrue(style.SOUTHWEST);
-	var ne = isDasBooleanTrue(style.NORTHEAST);
-	gg = new ArrowGlyph(minPos, maxPos, height, color, parallel, sw, ne);
+        var color = style.FGCOLOR || 'purple';
+        var parallel = isDasBooleanTrue(style.PARALLEL);
+        var sw = isDasBooleanTrue(style.SOUTHWEST);
+        var ne = isDasBooleanTrue(style.NORTHEAST);
+        gg = new ArrowGlyph(minPos, maxPos, height, color, parallel, sw, ne);
     } else if (gtype === 'ANCHORED_ARROW') {
-	var stroke = style.FGCOLOR || 'none';
+        var stroke = style.FGCOLOR || 'none';
         var fill = style.BGCOLOR || 'green';
-	gg = new AArrowGlyph(minPos, maxPos, height, fill, stroke, strand);
-	gg.bump = true;
+        gg = new AArrowGlyph(minPos, maxPos, height, fill, stroke, strand);
+        gg.bump = true;
     } else if (gtype === 'SPAN') {
-	var stroke = style.FGCOLOR || 'black';
-	gg = new SpanGlyph(minPos, maxPos, height, stroke);
+        var stroke = style.FGCOLOR || 'black';
+        gg = new SpanGlyph(minPos, maxPos, height, stroke);
     } else if (gtype === 'LINE') {
-	var stroke = style.FGCOLOR || 'black';
-	var lineStyle = style.STYLE || 'solid';
-	gg = new LineGlyph(minPos, maxPos, height, lineStyle, strand, stroke);
+        var stroke = style.FGCOLOR || 'black';
+        var lineStyle = style.STYLE || 'solid';
+        gg = new LineGlyph(minPos, maxPos, height, lineStyle, strand, stroke);
     } else if (gtype === 'PRIMERS') {
-	var stroke = style.FGCOLOR || 'black';
-	var fill = style.BGCOLOR || 'red';
-	gg = new PrimersGlyph(minPos, maxPos, height, fill, stroke);
+        var stroke = style.FGCOLOR || 'black';
+        var fill = style.BGCOLOR || 'red';
+        gg = new PrimersGlyph(minPos, maxPos, height, fill, stroke);
     } else if (gtype === 'TEXT') {
-	var string = style.STRING || 'text';
-	var fill = style.FGCOLOR || 'black';
-	gg = new TextGlyph(minPos, maxPos, height, fill, string);
+        var string = style.STRING || 'text';
+        var fill = style.FGCOLOR || 'black';
+        gg = new TextGlyph(minPos, maxPos, height, fill, string);
     } else if (gtype === 'TOOMANY') {
-	var stroke = style.FGCOLOR || 'gray';
-	var fill = style.BGCOLOR || 'orange';
-	gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
+        var stroke = style.FGCOLOR || 'gray';
+        var fill = style.BGCOLOR || 'orange';
+        gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
     } else if (gtype === 'POINT') {
-	var height = tier.forceHeight || style.HEIGHT || 30;
-	var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
-	var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
-	var yscale = ((1.0 * height) / (smax - smin));
-	var relScore = ((1.0 * score) - smin) / (smax-smin);
-	var sc = ((score - (1.0*smin)) * yscale)|0;
-	quant = {min: smin, max: smax};
+        var height = tier.forceHeight || style.HEIGHT || 30;
+        var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
+        var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+        var yscale = ((1.0 * height) / (smax - smin));
+        var relScore = ((1.0 * score) - smin) / (smax-smin);
+        var sc = ((score - (1.0*smin)) * yscale)|0;
+        quant = {min: smin, max: smax};
 
-	var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
-	if (style.COLOR2) {
-	    var grad = style._gradient;
-	    if (!grad) {
-		grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
-		style._gradient = grad;
-	    }
+        var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
+        if (style.COLOR2) {
+            var grad = style._gradient;
+            if (!grad) {
+                grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
+                style._gradient = grad;
+            }
 
-	    var step = (relScore*grad.length)|0;
-	    if (step < 0) step = 0;
-	    if (step >= grad.length) step = grad.length - 1;
-	    fill = grad[step];
+            var step = (relScore*grad.length)|0;
+            if (step < 0) step = 0;
+            if (step >= grad.length) step = grad.length - 1;
+            fill = grad[step];
         } 
 
-	gg = new PointGlyph((minPos + maxPos)/2, height-sc, height, fill);
+        gg = new PointGlyph((minPos + maxPos)/2, height-sc, height, fill);
     } else if (gtype === '__SEQUENCE') {
-	var refSeq = null;
-	if (tier.currentSequence) {
-	    var csStart = tier.currentSequence.start|0;
-	    var csEnd = tier.currentSequence.end|0;
-	    if (csStart < min && csEnd > max) {
-		refSeq = tier.currentSequence.seq.substr(min - csStart, max - min + 1);
-	    }
-	}
-	gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq);
+        var refSeq = null;
+        if (tier.currentSequence) {
+            var csStart = tier.currentSequence.start|0;
+            var csEnd = tier.currentSequence.end|0;
+            if (csStart < min && csEnd > max) {
+                refSeq = tier.currentSequence.seq.substr(min - csStart, max - min + 1);
+            }
+        }
+        gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq);
     } else if (gtype === '__NONE') {
-	return null;
+        return null;
     } else /* default to BOX */ {
-	var stroke = style.FGCOLOR || null;
-	var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
-	gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
-	// gg.bump = true;
+        var stroke = style.FGCOLOR || null;
+        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
+        // gg.bump = true;
     }
 
     if (isDasBooleanTrue(style.LABEL) && label && !noLabel) {
-	gg = new LabelledGlyph(gg, label);
+        gg = new LabelledGlyph(gg, label);
     }
 
     if (bump) {
-	gg.bump = true;
+        gg.bump = true;
     }
 
     gg.feature = feature;
     if (quant) {
-	gg.quant = quant;
+        gg.quant = quant;
+    }
+
+    if (style.ZINDEX) {
+        gg.zindex = style.ZINDEX | 0;
     }
 
     return gg;
-
 }
 
 
-	
+        
     
 
 DasTier.prototype.styleForFeature = function(f) {
     var cs = f._cachedStyle;
     if (cs) {
-	return cs;
+        return cs;
     }
 
     var ssScale = zoomForScale(this.browser.scale);
@@ -708,19 +741,19 @@ DasTier.prototype.styleForFeature = function(f) {
             continue;
         }
 
-	var labelRE = sh._labelRE;
-	if (!labelRE || !labelRE.test) {
-	    labelRE = new RegExp('^' + sh.label + '$');
-	    sh._labelRE = labelRE;
-	}
+        var labelRE = sh._labelRE;
+        if (!labelRE || !labelRE.test) {
+            labelRE = new RegExp('^' + sh.label + '$');
+            sh._labelRE = labelRE;
+        }
         if (sh.label && !(labelRE.test(f.label))) {
             continue;
         }
-	var methodRE = sh._methodRE;
-	if (!methodRE || !methodRE.test) {
-	    methodRE = new RegExp('^' + sh.method + '$');
-	    sh._methodRE = methodRE;
-	}
+        var methodRE = sh._methodRE;
+        if (!methodRE || !methodRE.test) {
+            methodRE = new RegExp('^' + sh.method + '$');
+            sh._methodRE = methodRE;
+        }
         if (sh.method && !(methodRE.test(f.method))) {
             continue;
         }
@@ -735,7 +768,7 @@ DasTier.prototype.styleForFeature = function(f) {
             }
         }
         // perfect match.
-	f._cachedStyle = sh.style;
+        f._cachedStyle = sh.style;
         return sh.style;
     }
     f._cachedStyle = maybe;
@@ -759,7 +792,7 @@ function makeLineGlyph(features, style, tier) {
         var sc = ((f.score - (1.0*min)) * yscale)|0;
         var py = (height - sc);  // FIXME y???
         points.push(px);
-	points.push(py);
+        points.push(py);
     }
     var lgg = new LineGraphGlyph(points, color, height);
     lgg.quant = {min: min, max: max};
