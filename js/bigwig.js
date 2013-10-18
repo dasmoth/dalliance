@@ -349,7 +349,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                     }
                                 }
 
-                                if (bedColumns.length < 9) {
+                                if (bedColumns.length < 9 || thisB.bwg.definedFieldCount < 12) {
                                     if (chromId == chr) {
                                         maybeCreateFeature(chromId, start + 1, end, featureOpts);
                                     }
