@@ -1,0 +1,116 @@
+<!DOCTYPE html> 
+
+<html>
+
+<head>
+
+<style>
+</style>
+
+<title>Dalliance :: Connect to Assembly Hub</title> 
+<script language="javascript" src="js/spans.js"></script>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="js/cbrowser.js"></script>
+<script language="javascript" src="js/feature-popup.js"></script>
+<script language="javascript" src="js/tier.js"></script>
+<script language="javascript" src="js/features.js"></script>
+<script language="javascript" src="js/color.js"></script>
+<script language="javascript" src="js/feature-draw.js"></script>
+<script language="javascript" src="js/sequence-draw.js"></script>
+<script language="javascript" src="js/domui.js"></script>
+<script language="javascript" src="js/karyoscape.js"></script>
+<script language="javascript" src="js/quant-config.js"></script>
+<script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
+<script language="javascript" src="js/version.js"></script>
+<script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="json/json2.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript" src="js/thub.js"></script>
+<script language="javascript" src="js/svg-export.js"></script>
+<script language="javascript" src="jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/browser-ui.js"></script>
+<script language="javascript" src="js/glyphs.js"></script>
+<script language="javascript" src="js/session.js"></script>
+<script language="javascript" src="js/jbjson.js"></script>
+<script language="javascript" src="js/sourceadapters.js"></script>
+<script language="javascript" src="js/ensembljson.js"></script>
+<script language="javascript" src="js/overlay.js"></script>
+<script language="javascript" src="polyfills/html5slider.js"></script>
+
+<script langugage="javascript">
+function init() {
+var container = document.getElementById('svgHolder');  // Has the nice property that 
+                                                       // it gets nuked when Dalliance starts up....
+
+document.getElementById('submit_button').addEventListener('click', function(ev) {
+    connectTrackHub(document.getElementById('huburl').value, function(hub, err) {
+        if (hub) {
+            container.appendChild(makeElement('p', 'Where do you want to go today?'));
+            var ge = [];
+            for (var g in hub.genomes) {
+                var gg = hub.genomes[g];
+                var gl = makeElement('li', makeLabelForGenome(gg));
+                ge.push(gl);
+            }
+            container.appendChild(makeElement('ul', ge));
+        } else {
+            console.log(err);
+        }
+    });
+}, false);
+}
+
+var AHUB_REGION_REGEXP = /([^:]+):(\d+)-(\d+)/;
+
+function makeLabelForGenome(genome) {
+    var a = makeElement('a', genome.description);
+    a.addEventListener('click', function(ev) {
+
+        var reg = AHUB_REGION_REGEXP.exec(genome.defaultPos);
+
+        var b = new Browser({
+           chr:          reg[1],
+           viewStart:    reg[2]|0,
+           viewEnd:      reg[3]|0,
+
+            noPersist: true,
+
+            coordSystem: {speciesName: genome.organism,
+                          taxon: genome.orderKey|0,
+                          auth: '', version: '',
+                          ucscName: genome.genome},
+
+            sources:     [{name:                 'Genome',      
+                           twoBitURI: relativeURL(genome.absURL, genome.twoBitPath),
+                           tier_type:            'sequence'}],
+
+    
+            hubs: [document.getElementById('huburl').value],
+
+            uiPrefix: ''
+        });
+        b.realInit();
+    }, false);
+
+    return a;
+}
+</script>
+
+
+</head>
+
+<body onload="init();">
+<div id='svgHolder'>
+<h1>Assembly hub test</h1>
+Hub URL:<input id='huburl' type='text' value='http://genome-test.cse.ucsc.edu/~hiram/hubs/Plants/hub.txt'>
+<input type='submit' id='submit_button'>
+</div>
+</body>
+</html>
