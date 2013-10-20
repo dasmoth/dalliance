@@ -269,8 +269,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (tops.length > 0) {
             groups.push({
                 shortLabel: 'Others',
+                priority: -100000000,
                 children: tops});
         }
+
+        groups.sort(THUB_COMPARE);
         
         var buttons = [];
         for (var gi = 0; gi < groups.length; ++gi) {
@@ -365,6 +368,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
                 var idx = 0;
             
+                group.children.sort(THUB_COMPARE);
                 for (var i = 0; i < group.children.length; ++i) {
                     var track = group.children[i];
                     var ds = track.toDallianceSource();

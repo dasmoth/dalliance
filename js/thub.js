@@ -350,3 +350,15 @@ TrackHubTrack.prototype.bigbedStyles = function() {
 
     return stylesheet.styles;
 }
+
+function THUB_COMPARE(g, h) {
+    if (g.priority && h.priority) {
+        return (1.0 * g.priority) - (1.0 * h.priority)
+    } else if (g.priority) {
+        return 1;
+    } else if (h.priority) {
+        return -1;
+    } else {
+        return g.shortLabel.localeCompare(h.shortLabel);
+    }
+}
