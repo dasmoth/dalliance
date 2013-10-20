@@ -741,6 +741,12 @@ DasTier.prototype.styleForFeature = function(f) {
             continue;
         }
 
+        if (sh.orientation) {
+            if (sh.orientation != f.orientation) {
+                continue;
+            }
+        }
+
         var labelRE = sh._labelRE;
         if (!labelRE || !labelRE.test) {
             labelRE = new RegExp('^' + sh.label + '$');

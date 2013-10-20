@@ -304,7 +304,22 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     wigStyle.BUMP = (visibility == 'full' || visibility == 'pack');
     wigStyle.LABEL = (visibility == 'full' || visibility == 'pack');
     wigStyle.ZINDEX = 20;
-    stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+
+    var cbs = this.get('colorByStrand');
+    if (cbs) {
+        var cbsToks = cbs.split(/\s+/);
+        console.log(cbsToks);
+        
+        var plus = shallowCopy(wigStyle);
+        plus.BGCOLOR = 'rgb(' + cbsToks[0]; + ')';
+        stylesheet.pushStyle({type: 'bigwig', orientation: '+'}, null, plus);
+
+        var minus = shallowCopy(wigStyle);
+        minus.BGCOLOR = 'rgb(' + cbsToks[1]; + ')';
+        stylesheet.pushStyle({type: 'bigwig', orientation: '-'}, null, minus);
+    } else {
+        stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+    }   
     
     var tlStyle = new DASStyle();
     tlStyle.glyph = 'BOX';
