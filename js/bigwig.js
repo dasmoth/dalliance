@@ -1003,6 +1003,24 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
     fbThresholdSearchRecur();
 }
 
+BigWig.prototype.getAutoSQL = function(callback) {
+    thisB = this;
+    if (!this.asOffset)
+        return callback(null);
+
+    this.data.slice(this.asOffset, 2048).fetch(function(result) {
+        var ba = new Int8Array(result);
+        var s = '';
+        console.log(ba.length);
+        for (var i = 0; i < ba.length; ++i) {
+            if (ba[i] == 0)
+                break;
+            s += String.fromCharCode(ba[i]);
+        }
+        return callback(s);
+    });
+}
+
 BigWig.prototype.getExtraIndices = function(callback) {
     thisB = this;
     if (this.version < 4 || this.extHeaderOffset == 0) {
