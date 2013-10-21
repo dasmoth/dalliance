@@ -904,7 +904,10 @@ function makeBwg(data, callback, name) {
         }
 
         bwg.readChromTree(function() {
-            return callback(bwg);
+            bwg.getAutoSQL(function(as) {
+                bwg.schema = as;
+                return callback(bwg);
+            });
         });
     });
 }
@@ -935,8 +938,6 @@ BigWig.prototype._tsFetch = function(zoom, chr, min, max, callback) {
 }
 
 BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
-    // console.log('ref=' + referencePoint + '; dir=' + dir);
-
     dir = (dir<0) ? -1 : 1;
     var bwg = this;
     var initialChr = this.chromsToIDs[chrName];
@@ -965,8 +966,6 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
-        // console.log('trying ' + miniJSONify(candidate));
-
         bwg._tsFetch(candidate.zoom, candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = dir > 0 ? 0 : 300000000;
             if (candidate.fromRef)
@@ -1008,16 +1007,43 @@ BigWig.prototype.getAutoSQL = function(callback) {
     if (!this.asOffset)
         return callback(null);
 
+
     this.data.slice(this.asOffset, 2048).fetch(function(result) {
         var ba = new Int8Array(result);
         var s = '';
-        console.log(ba.length);
         for (var i = 0; i < ba.length; ++i) {
             if (ba[i] == 0)
                 break;
             s += String.fromCharCode(ba[i]);
         }
-        return callback(s);
+        
+        /* 
+         * Quick'n'dirty attempt to parse autoSql format.
+         * See: http://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/059/5949/5949l2.html
+         */
+
+        var header_re = /(\w+)\s+(\w+)\s+("([^"]+)")?\s+\(\s*/;
+        var field_re = /([\w\[\]]+)\s+(\w+)\s*;\s*("([^"]+)")?\s*/g;
+
+        var headerMatch = header_re.exec(s);
+        if (headerMatch) {
+            var as = {
+                declType: headerMatch[1],
+                name: headerMatch[2],
+                comment: headerMatch[4],
+
+                fields: []
+            };
+
+            s = s.substring(headerMatch[0]);
+            for (var m = field_re.exec(s); m != null; m = field_re.exec(s)) {
+                as.fields.push({type: m[1],
+                             name: m[2],
+                             comment: m[4]});
+            }
+
+            return callback(as);
+        }
     });
 }
 

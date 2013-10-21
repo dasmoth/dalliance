@@ -12,6 +12,7 @@ For 0.11
   - Chromosome overviews.
   - Animate when leaping/toggling.
   - Export track configuration for current browser state.
+  - Support for arbitrary columns in bigbeds.
 
 For 0.12
 --------
