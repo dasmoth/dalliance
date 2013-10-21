@@ -215,8 +215,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
         } else {
             var features = [];
             var createFeature = function(chr, fmin, fmax, opts) {
-                // dlog('createFeature(' + fmin +', ' + fmax + ')');
-
                 if (!opts) {
                     opts = {};
                 }
@@ -315,6 +313,9 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                             }
                         } else if (thisB.bwg.type == 'bigbed') {
                             var offset = 0;
+                            var dfc = thisB.bwg.definedFieldCount;
+                            var schema = thisB.bwg.schema;
+
                             while (offset < ba.length) {
                                 var chromId = (ba[offset+3]<<24) | (ba[offset+2]<<16) | (ba[offset+1]<<8) | (ba[offset+0]);
                                 var start = (ba[offset+7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
@@ -333,23 +334,29 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                                 var featureOpts = {};
                                 
                                 var bedColumns = rest.split('\t');
-                                if (bedColumns.length > 0) {
+                                if (bedColumns.length > 0 && dfc > 3) {
                                     featureOpts.label = bedColumns[0];
                                 }
-                                if (bedColumns.length > 1) {
+                                if (bedColumns.length > 1 && dfc > 4) {
                                     featureOpts.score = stringToInt(bedColumns[1]);
                                 }
-                                if (bedColumns.length > 2) {
+                                if (bedColumns.length > 2 && dfc > 5) {
                                     featureOpts.orientation = bedColumns[2];
                                 }
-                                if (bedColumns.length > 5) {
+                                if (bedColumns.length > 5 && dfc > 8) {
                                     var color = bedColumns[5];
                                     if (BED_COLOR_REGEXP.test(color)) {
                                         featureOpts.override_color = 'rgb(' + color + ')';
                                     }
                                 }
 
-                                if (bedColumns.length < 9 || thisB.bwg.definedFieldCount < 12) {
+                                if (bedColumns.length > dfc-3 && schema) {
+                                    for (var col = dfc - 3; col < bedColumns.length; ++col) {
+                                        featureOpts[schema.fields[col+3].name] = bedColumns[col];
+                                    }
+                                }
+
+                                if (dfc < 12) {
                                     if (chromId == chr) {
                                         maybeCreateFeature(chromId, start + 1, end, featureOpts);
                                     }
@@ -628,8 +635,6 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             var bestChr = -1;
             var bestPos = -1;
             var createFeature = function(chrx, fmin, fmax, opts) {
-//                dlog('createFeature(' + fmin +', ' + fmax + ')');
-
                 if (!opts) {
                     opts = {};
                 }
@@ -651,11 +656,8 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 }
             };
             var maybeCreateFeature = function(chrx, fmin, fmax, opts) {
-//                dlog('maybeCreateFeature(' + thisB.bwg.idsToChroms[chrx] + ',' + fmin + ',' + fmax + ')');
                 if ((dir < 0 && (chrx < chr || fmax < pos)) || (dir > 0 && (chrx > chr || fmin > pos))) {
-                //                if (fmin <= max && fmax >= min) {
                     createFeature(chrx, fmin, fmax, opts);
-                    //}
                 }
             };
             var tramp = function() {
