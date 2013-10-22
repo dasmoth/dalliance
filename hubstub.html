@@ -72,7 +72,6 @@ var AHUB_REGION_REGEXP = /([^:]+):(\d+)-(\d+)/;
 function makeLabelForGenome(genome) {
     var a = makeElement('a', genome.description);
     a.addEventListener('click', function(ev) {
-
         var reg = AHUB_REGION_REGEXP.exec(genome.defaultPos);
 
         var b = new Browser({

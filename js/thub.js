@@ -155,6 +155,11 @@ function connectTrackHub(hubURL, callback) {
                     for (var l = 0; l < toks.length - 2; l += 3) {
                         gprops[toks[l+1]] = toks[l+2];
                     }
+
+                    if (gprops.twoBitPath) {
+                        gprops.twoBitPath = relativeURL(genURL, gprops.twoBitPath);
+                    }
+
                     if (gprops.genome && gprops.trackDb) {
                         gprops.absURL = relativeURL(genURL, gprops.trackDb);
                         hub.genomes[gprops.genome] = gprops;
@@ -308,7 +313,6 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     var cbs = this.get('colorByStrand');
     if (cbs) {
         var cbsToks = cbs.split(/\s+/);
-        console.log(cbsToks);
         
         var plus = shallowCopy(wigStyle);
         plus.BGCOLOR = 'rgb(' + cbsToks[0]; + ')';

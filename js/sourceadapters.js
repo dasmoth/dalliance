@@ -434,8 +434,12 @@ BWGFeatureSource.prototype.init = function() {
         arg = this.bwgSource.bwgBlob;
     }
 
-    make(arg, function(bwg) {
-        thisB.bwgHolder.provide(bwg);
+    make(arg, function(bwg, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            thisB.bwgHolder.provide(bwg);
+        }
     }, this.opts.credentials);
 }
 
