@@ -36,6 +36,14 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     }
 
     this.initSources();
+
+    var thisB = this;
+    if (this.featureSource && this.featureSource.getDefaultFIPs) {
+        this.featureSource.getDefaultFIPs(function(fip) {
+            if (fip)
+                thisB.addFeatureInfoPlugin(fip);
+        });
+    }
 }
 
 DasTier.prototype.toString = function() {

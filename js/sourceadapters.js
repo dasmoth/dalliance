@@ -128,6 +128,11 @@ function CachingFeatureSource(source) {
     }
 }
 
+CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.source.getDefaultFIPs)
+        return this.source.getDefaultFIPs(callback); 
+}
+
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {
     this.source.getStyleSheet(callback);
 }
@@ -544,6 +549,23 @@ BWGFeatureSource.prototype.getScales = function() {
     } else {
         return null;
     }
+}
+
+BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    this.bwgHolder.await(function(bwg) {
+        if (bwg.schema && bwg.definedFieldCount+3 < bwg.schema.fields.length) {
+            var fip = function(feature, featureInfo) {
+                for (var fi = bwg.definedFieldCount+3; fi < bwg.schema.fields.length; ++fi) {
+                    var f = bwg.schema.fields[fi];
+                    featureInfo.add(f.comment, feature[f.name]);
+                }
+            };
+
+            callback(fip);
+        } else {
+            // No need to do anything.
+        }
+    });
 }
 
 BWGFeatureSource.prototype.getStyleSheet = function(callback) {
