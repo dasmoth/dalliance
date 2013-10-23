@@ -68,8 +68,7 @@ function Browser(opts) {
     this.guidelineSpacing = 75;
     this.fgGuide = null;
     this.positionFeedback = false;
-
-    this.selectedTier = 1;
+    
     this.selectedTiers = [1];
 
     this.placards = [];
@@ -855,7 +854,10 @@ Browser.prototype.realMakeTier = function(source) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    var st = thisB.tiers[thisB.selectedTier];
+                    var st = [];
+                    for (var xi = 0; xi < thisB.selectedTiers.length; ++xi) {
+                        st.push(thisB.tiers[thisB.selectedTiers[xi]]);
+                    }
 
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
@@ -863,11 +865,10 @@ Browser.prototype.realMakeTier = function(source) {
                     thisB.sources.splice(tierOrdinal, 1);
                     thisB.sources.splice(ti, 0, ts);
 
-                    // FIXME probably shouldn't be recorded selected tier by index (!)
+                    thisB.selectedTiers = [];
                     for (var sti = 0; sti < thisB.tiers.length; ++sti) {
-                        if (thisB.tiers[sti] === st) {
-                            thisB.selectedTier = sti; break;
-                        }
+                        if (st.indexOf(thisB.tiers[sti]) >= 0)
+                            thisB.selectedTiers.push(sti);
                     }
 
                     tierOrdinal = ti;
