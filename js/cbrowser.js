@@ -68,8 +68,7 @@ function Browser(opts) {
     this.guidelineSpacing = 75;
     this.fgGuide = null;
     this.positionFeedback = false;
-
-    this.selectedTier = 1;
+    
     this.selectedTiers = [1];
 
     this.placards = [];
@@ -193,15 +192,6 @@ Browser.prototype.realInit2 = function() {
         }
     }, false);
 
-
-    /*
-    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
-
-    */
-
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
         if (ev.keyCode == 13) { // enter
@@ -219,28 +209,20 @@ Browser.prototype.realInit2 = function() {
                 thisB.arrangeTiers();
             }
         } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
-            // if (!thisB.snapZoomLockout) {
-                if (!thisB.isSnapZooming) {
-                    thisB.isSnapZooming = true;
-                    var newZoom = thisB.savedZoom || 1.0;
-                    thisB.savedZoom = thisB.zoomSliderValue;
-                    thisB.zoomSliderValue = newZoom;
-                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    // thisB.invalidateLayouts();
-                    // thisB.zoomSlider.setColor('red');
-                    // thisB.refresh();
-                } else {
-                    thisB.isSnapZooming = false;
-                    var newZoom = thisB.savedZoom || 10.0;
-                    thisB.savedZoom = thisB.zoomSliderValue;
-                    thisB.zoomSliderValue = newZoom;
-                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    // thisB.invalidateLayouts();
-                    // thisB.zoomSlider.setColor('blue');
-                    // thisB.refresh();
-                }
-                thisB.snapZoomLockout = true;
-            // }
+            if (!thisB.isSnapZooming) {
+                thisB.isSnapZooming = true;
+                var newZoom = thisB.savedZoom || 1.0;
+                thisB.savedZoom = thisB.zoomSliderValue;
+                thisB.zoomSliderValue = newZoom;
+                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+            } else {
+                thisB.isSnapZooming = false;
+                var newZoom = thisB.savedZoom || 10.0;
+                thisB.savedZoom = thisB.zoomSliderValue;
+                thisB.zoomSliderValue = newZoom;
+                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+            }
+            thisB.snapZoomLockout = true;
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
@@ -800,7 +782,7 @@ Browser.prototype.realMakeTier = function(source) {
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 if (thisB.tiers[ti] === tier) {
                     thisB.browserHolder.focus();
-                    if (ti != thisB.selectedTier) {
+                    if (thisB.selectedTiers.length != 1 || thisB.selectedTiers[0] != ti) {
                         thisB.setSelectedTier(ti);
                         return;
                     }
@@ -872,7 +854,10 @@ Browser.prototype.realMakeTier = function(source) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    var st = thisB.tiers[thisB.selectedTier];
+                    var st = [];
+                    for (var xi = 0; xi < thisB.selectedTiers.length; ++xi) {
+                        st.push(thisB.tiers[thisB.selectedTiers[xi]]);
+                    }
 
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
@@ -880,11 +865,10 @@ Browser.prototype.realMakeTier = function(source) {
                     thisB.sources.splice(tierOrdinal, 1);
                     thisB.sources.splice(ti, 0, ts);
 
-                    // FIXME probably shouldn't be recorded selected tier by index (!)
+                    thisB.selectedTiers = [];
                     for (var sti = 0; sti < thisB.tiers.length; ++sti) {
-                        if (thisB.tiers[sti] === st) {
-                            thisB.selectedTier = sti; break;
-                        }
+                        if (st.indexOf(thisB.tiers[sti]) >= 0)
+                            thisB.selectedTiers.push(sti);
                     }
 
                     tierOrdinal = ti;
@@ -1159,8 +1143,6 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     } 
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
-    // var minExtraW = (width * this.minExtra) | 0;
-    // var maxExtraW = (width * this.maxExtra) | 0;
     var minExtraW = (100.0/this.scale)|0;
     var maxExtraW = (1000.0/this.scale)|0;
 
@@ -1168,9 +1150,6 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
         this.refresh();
     }
 }
-
-
-
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = this.tierHolder.getBoundingClientRect().width | 0;
@@ -1181,11 +1160,6 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
-
-
-        // var delta = nve - this.viewEnd;
-        // this.viewStart = this.viewStart - (delta/2);
-        // this.viewEnd = this.viewEnd + (delta/2);
 
         this.viewEnd = nve;
 
