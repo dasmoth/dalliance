@@ -208,6 +208,8 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         }
     }
 
+    if (source.instrument)
+        console.log('Starting  fetch ' + viewID + ' (' + this.min + ', ' + this.max + ')');
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
 	if (source.instrument)
 	    console.log('Finishing fetch ' + viewID);

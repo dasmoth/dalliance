@@ -274,10 +274,13 @@ function formatQuantLabel(v) {
 DasTier.prototype.paint = function() {
     var subtiers = this.subtiers;
     if (!subtiers) {
-	return;
+	   return;
     }
 
     var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
+    if (fpw < this.browser.featurePanelWidth + 1950) {
+        this.viewport.width = fpw = (this.browser.featurePanelWidth|0) + 2000;
+    }
 
     var lh = MIN_PADDING;
     for (var s = 0; s < subtiers.length; ++s) {

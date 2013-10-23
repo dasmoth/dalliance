@@ -582,7 +582,7 @@ Browser.prototype.realMakeTier = function(source) {
           height: "50",
           className: 'viewport-overlay'});
 
-    var placardContent = makeElement('span', 'blah');
+    var placardContent = makeElement('span', '');
     var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
     
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
