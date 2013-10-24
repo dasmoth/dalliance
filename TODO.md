@@ -5,7 +5,7 @@ For 0.11
   - Search of bigbed files.
   - Retina display support.
   - Replace feature popups with inspector?
-  - Assembly hub support.
+  - Assembly hub support. [DONE]
   - Bulk addition of local files.
   - Rename tracks.
   - Per-track display customization ("Stylesheet editor")?

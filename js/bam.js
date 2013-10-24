@@ -368,6 +368,10 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
     // Exits via top of loop.
 }
 
+function readInt64(ba, offset) {
+    return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
+}
+
 function readInt(ba, offset) {
     return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
 }
