@@ -1051,10 +1051,6 @@ BigWig.prototype.getExtraIndices = function(callback) {
             var extraIndexCount = sa[1];
             var extraIndexListOffset = (la[1]<<32) | (la[2]);
 
-            console.log('extHeaderSize = ' + extHeaderSize);
-            console.log('extraIndexCount = ' + extraIndexCount);
-            console.log('extraIndexListOffset = ' + extraIndexListOffset);
-
             // FIXME 20byte records only make sense for single-field indices.
             // Right now, these seem to be the only things around, but the format
             // is actually more general.
