@@ -115,6 +115,10 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
     var beforeBWG = Date.now();
 
+    var filter = function(chromId, fmin, fmax, toks) {
+        return ((chr < 0 || chromId == chr) && fmin <= max && fmax >= min);
+    }
+
     var cirFobRecur = function(offset, level) {
         outstanding += offset.length;
 
@@ -140,7 +144,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
                     --outstanding;
                     if (outstanding == 0) {
-                        thisB.fetchFeatures(chr, min, max, blocksToFetch, callback);
+                        thisB.fetchFeatures(filter, blocksToFetch, callback);
                     }
                 }
             }
@@ -198,7 +202,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 }
 
 
-BigWigView.prototype.fetchFeatures = function(chr, min, max, blocksToFetch, callback) {
+BigWigView.prototype.fetchFeatures = function(filter, blocksToFetch, callback) {
     var thisB = this;
 
     blocksToFetch.sort(function(b0, b1) {
@@ -229,9 +233,7 @@ BigWigView.prototype.fetchFeatures = function(chr, min, max, blocksToFetch, call
         };
 
 
-        var filter = function(chromId, fmin, fmax, toks) {
-            return ((chr < 0 || chromId == chr) && fmin <= max && fmax >= min);
-        }
+
 
         var tramp = function() {
             if (blocksToFetch.length == 0) {
@@ -396,7 +398,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                 }
             }
 
-            if (filter(chromId, start + 1, end)) {
+            if (filter(chromId, start + 1, end, bedColumns)) {
                 if (dfc < 12) {
                     createFeature(chromId, start + 1, end, featureOpts);
                 } else {
@@ -1101,8 +1103,6 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
         
-        // console.log('magic=' + bptMagic + ';blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
-
         function bptReadNode(nodeOffset) {
             thisB.bbi.data.slice(nodeOffset, 4 + (blockSize * (keySize + valSize))).fetch(function(node) {
                 var ba = new Uint8Array(node);
@@ -1111,8 +1111,6 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
 
                 var nodeType = ba[0];
                 var cnt = sa[1];
-
-                console.log('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
 
                 var offset = 4;
                 if (nodeType == 0) {
@@ -1150,7 +1148,13 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                             var start = readInt(ba, offset);
                             var length = readInt(ba, offset + 8);
 
-                            thisB.bbi.getUnzoomedView().fetchFeatures(null, 1, 1000000000, [{offset: start, size: length}], callback);
+                            thisB.bbi.getUnzoomedView().fetchFeatures(
+                                function(chr, min, max, toks) {
+                                    if (toks && toks.length > thisB.field - 3)
+                                        return toks[thisB.field - 3] == name;
+                                }, 
+                                [{offset: start, size: length}], 
+                                callback);
                         }
                         offset += valSize;
                     }
