@@ -128,6 +128,11 @@ function CachingFeatureSource(source) {
     }
 }
 
+CachingFeatureSource.prototype.search = function(query, callback) {
+    if (this.source.search)
+        return this.source.search(query, callback);
+}
+
 CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
     if (this.source.getDefaultFIPs)
         return this.source.getDefaultFIPs(callback); 
@@ -439,6 +444,11 @@ BWGFeatureSource.prototype.init = function() {
             console.log(err);
         } else {
             thisB.bwgHolder.provide(bwg);
+            if (bwg.type == 'bigbed') {
+                bwg.getExtraIndices(function(ei) {
+                    thisB.extraIndices = ei;
+                });
+            }
         }
     }, this.opts.credentials);
 }
@@ -447,6 +457,12 @@ BWGFeatureSource.prototype.capabilities = function() {
     var caps = {leap: true};
     if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
         caps.quantLeap = true;
+    if (this.extraIndices && this.extraIndices.length > 0) {
+        caps.search = [];
+        for (var eii = 0; eii < this.extraIndices.length; ++eii) {
+            caps.search.push(this.extraIndices[eii].field);
+        }
+    }
     return caps;
 }
 
@@ -553,6 +569,16 @@ BWGFeatureSource.prototype.getScales = function() {
     } else {
         return null;
     }
+}
+
+BWGFeatureSource.prototype.search = function(query, callback) {
+    console.log(query);
+    if (!this.extraIndices || this.extraIndices.length == 0) {
+        return callback(null, 'No indices available');
+    }
+
+    var index = this.extraIndices[0];
+    return index.lookup(query, callback);
 }
 
 BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
