@@ -2,7 +2,7 @@ For 0.11
 --------
 
   - UI for leaping (button to complement ctrl-arrow).
-  - Search of bigbed files.
+  - Search of bigbed files. [DONE]
   - Retina display support.
   - Replace feature popups with inspector?
   - Assembly hub support. [DONE]
@@ -32,6 +32,7 @@ For 0.12
   - Try to preserve layout when expanding/collapsing variants.
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
+  - Trix indexes.
 
 Future
 -------------

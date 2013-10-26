@@ -304,3 +304,21 @@ Browser.prototype.toggleOptsPopup = function(ev) {
 
 }
 
+Browser.prototype.openTierPanel = function(tier) {
+    var b = this;
+
+    if (this.uiMode === 'tier' && this.manipulatingTier === tier) {
+        this.hideToolPanel();
+        this.setUiMode('none');
+    } else {
+        this.manipulatingTier = tier;
+
+        var tierForm = makeElement('div');
+        tierForm.innerHTML = 'Hello world';
+
+
+        this.showToolPanel(tierForm);
+        this.setUiMode('tier');
+    }
+}
+
