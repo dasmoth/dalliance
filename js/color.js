@@ -15,6 +15,15 @@ DColour.prototype.toSvgString = function() {
     return this.name;
 }
 
+function hex2(x) {
+    y = '00' + x.toString(16);
+    return y.substring(y.length - 2);
+}
+
+DColour.prototype.toHexString = function() {
+    return '#' + hex2(this.red) + hex2(this.green) + hex2(this.blue);
+}
+
 var palette = {
     red: new DColour(255, 0, 0, 'red'),
     green: new DColour(0, 255, 0, 'green'),

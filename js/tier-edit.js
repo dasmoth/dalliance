@@ -21,6 +21,13 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierNameField = makeElement('input', null, {type: 'text', value: tier.dasSource.name});
         var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
 
+        if (tier.stylesheet.styles.length > 0) {
+            var s = tier.stylesheet.styles[0].style;
+            if (s.BGCOLOR) {
+                tierColorField.value = dasColourForName(s.BGCOLOR);
+            }
+        }
+
         var tierTable = makeElement('table',
             [makeElement('tr',
                 [makeElement('th', 'Tier name:'),
@@ -36,7 +43,9 @@ Browser.prototype.openTierPanel = function(tier) {
 
         tierColorField.addEventListener('change', function(ev) {
             console.log(tierColorField.value);
-            tier.stylesheet.styles[0].style.BGCOLOR = tierColorField.value;
+            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
+                tier.stylesheet.styles[i].style.BGCOLOR = tierColorField.value;
+            }
             tier.draw();
         }, false);
 
