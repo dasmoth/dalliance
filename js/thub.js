@@ -41,7 +41,8 @@ TrackHubDB.prototype.getTracks = function(callback) {
         if (err) {
             return callback(null, err);
         }
-
+        
+        trackFile = trackFile.replace(/\#.*/g, '');
         trackFile = trackFile.replace('\\\n', ' ');
 
         var tracks = [];
