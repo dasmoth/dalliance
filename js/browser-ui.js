@@ -220,6 +220,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
             ev.stopPropagation(); ev.preventDefault();
             b.toggleHelpPopup(ev);
+        } else if (ev.keyCode == 69 || ev.keyCode == 101) { //e
+            ev.stopPropagation(); ev.preventDefault();
+            if (b.selectedTiers.length == 1) {
+                b.openTierPanel(b.tiers[b.selectedTiers[0]]);
+            }
         }
     };
 
@@ -314,8 +319,28 @@ Browser.prototype.openTierPanel = function(tier) {
         this.manipulatingTier = tier;
 
         var tierForm = makeElement('div');
-        tierForm.innerHTML = 'Hello world';
 
+        var tierNameField = makeElement('input', null, {type: 'text', value: tier.dasSource.name});
+        var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
+
+        var tierTable = makeElement('table',
+            [makeElement('tr',
+                [makeElement('th', 'Tier name:'),
+                 tierNameField]),
+             makeElement('tr',
+                [makeElement('th', 'Colour (experimental)'),
+                 tierColorField])]);
+        tierForm.appendChild(tierTable);
+
+        tierNameField.addEventListener('input', function(ev) {
+            tier.nameElement.innerText = tierNameField.value;
+        }, false);
+
+        tierColorField.addEventListener('change', function(ev) {
+            console.log(tierColorField.value);
+            tier.stylesheet.styles[0].style.BGCOLOR = tierColorField.value;
+            tier.draw();
+        }, false);
 
         this.showToolPanel(tierForm);
         this.setUiMode('tier');

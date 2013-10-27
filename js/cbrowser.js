@@ -735,7 +735,8 @@ Browser.prototype.realMakeTier = function(source) {
     if (source.pennant) {
         tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
     }
-    tier.nameButton.appendChild(makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    tier.nameElement = makeElement('span', source.name);
+    tier.nameButton.appendChild(makeElement('span', [tier.nameElement, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
     tier.nameButton.appendChild(tier.bumpButton);
     tier.nameButton.appendChild(tier.loaderButton);
     
