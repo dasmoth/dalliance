@@ -24,7 +24,7 @@ Browser.prototype.openTierPanel = function(tier) {
         if (tier.stylesheet.styles.length > 0) {
             var s = tier.stylesheet.styles[0].style;
             if (s.BGCOLOR) {
-                tierColorField.value = dasColourForName(s.BGCOLOR);
+                tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
             }
         }
 
