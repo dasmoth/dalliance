@@ -70,12 +70,12 @@ function sortFeatures(tier)
                 if (g.type == 'gene') {
                     // Like a super-grouper...
                     fSuperGroup = gid; 
-                    groups[gid] = shallowCopy(g);
+                    groups[gid] = g;
                 } else if (g.type == 'translation') {
                     // have to ignore this to get sensible results from bj-e :-(.
                 } else {
                     pusho(groupedFeatures, gid, f);
-                    groups[gid] = shallowCopy(g);
+                    groups[gid] = g;
                     fGroups.push(gid);
                 }
             }

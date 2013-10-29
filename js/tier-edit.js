@@ -24,6 +24,8 @@ Browser.prototype.openTierPanel = function(tier) {
         if (tier.stylesheet.styles.length > 0) {
             var s = tier.stylesheet.styles[0].style;
             if (s.BGCOLOR) {
+                var oldCol = dasColourForName(s.BGCOLOR).toHexString();
+                console.log('old=' + oldCol);
                 tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
             }
         }
@@ -41,12 +43,19 @@ Browser.prototype.openTierPanel = function(tier) {
             tier.nameElement.innerText = tierNameField.value;
         }, false);
 
+        var redrawTimeout = null;
         tierColorField.addEventListener('change', function(ev) {
             console.log(tierColorField.value);
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
                 tier.stylesheet.styles[i].style.BGCOLOR = tierColorField.value;
             }
-            tier.draw();
+            
+            if (!redrawTimeout) {
+                redrawTimeout = setTimeout(function() {
+                    tier.draw();
+                    redrawTimeout = null;
+                }, 10);
+            }
         }, false);
 
         this.showToolPanel(tierForm);
