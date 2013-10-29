@@ -322,20 +322,24 @@ Awaited.prototype.await = function(f) {
     }
 }
 
-function textXHR(url, callback) {
+function textXHR(url, callback, opts) {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-	if (req.readyState == 4) {
-	    if (req.status >= 300) {
-		callback(null, 'Error code ' + req.status);
-	    } else {
-		callback(req.responseText);
-	    }
-	}
+    	if (req.readyState == 4) {
+    	    if (req.status >= 300) {
+    		    callback(null, 'Error code ' + req.status);
+    	    } else {
+    		    callback(req.responseText);
+    	    }
+    	}
     };
     
     req.open('GET', url, true);
     req.responseType = 'text';
+
+    if (opts && opts.credentials) {
+        req.withCredentials = true;
+    }
     req.send('');
 }
 

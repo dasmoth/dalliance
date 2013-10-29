@@ -126,10 +126,12 @@ TrackHubDB.prototype.getTracks = function(callback) {
             
         thisB._tracks = toplevels;
         return callback(thisB._tracks, null);
-    });
+    }, {credentials: this.credentials});
 }
 
-function connectTrackHub(hubURL, callback) {
+function connectTrackHub(hubURL, callback, opts) {
+    opts = opts || {};
+
     textXHR(hubURL, function(hubFile, err) {
         if (err) {
             return callback(null, err);
@@ -137,6 +139,9 @@ function connectTrackHub(hubURL, callback) {
 
         var toks = hubFile.split(THUB_PARSE_REGEXP);
         var hub = new TrackHub(hubURL);
+        if (opts.credentials) {
+            hub.credentials = opts.credentials;
+        }
         for (var l = 0; l < toks.length - 2; l += 3) {
             hub[toks[l+1]] = toks[l+2];
         }
@@ -153,6 +158,10 @@ function connectTrackHub(hubURL, callback) {
                 for (var s = 0; s < stanzas.length; ++s) {
                     var toks = stanzas[s].split(THUB_PARSE_REGEXP);
                     var gprops = new TrackHubDB();
+                    if (opts.credentials) {
+                        gprops.credentials = opts.credentials;
+                    }
+
                     for (var l = 0; l < toks.length - 2; l += 3) {
                         gprops[toks[l+1]] = toks[l+2];
                     }
@@ -169,11 +178,11 @@ function connectTrackHub(hubURL, callback) {
 
                 callback(hub);
                         
-            });
+            }, opts);
         } else {
             callback(null, 'No genomesFile');
         }
-    })
+    }, opts);
 }
 
 
@@ -219,6 +228,9 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         if (typeToks[0] == 'bigBed') {
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigbedStyles();
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
             return source;
         } else if (typeToks[0] == 'bigWig') {
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
@@ -229,9 +241,16 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 source.quantLeapThreshold = this.yLineMark !== undefined ? (1.0 * this.yLineMark) : 0.0;
             }
 
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
+
             return source;
         } else if (typeToks[0] == 'bam') {
             source.bamURI = relativeURL(this._db.absURL, this.bigDataUrl);
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
             return source;
         } else {
             console.log('Unsupported ' + this.type);

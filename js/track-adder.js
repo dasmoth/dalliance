@@ -607,44 +607,54 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (!/^.+:\/\//.exec(curi)) {
                     curi = 'http://' + curi;
                 }
-                console.log('hub: ' + curi);
-                connectTrackHub(curi, function(hub, err) {
-                    if (err) {
-                        removeChildren(stabHolder);
-                        stabHolder.appendChild(makeElement('h2', 'Error connecting to track hub'))
-                        stabHolder.appendChild(makeElement('p', err));
-                        customMode = 'reset-hub';
-                        return;
-                    } else {
-                        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-                            thisB.hubs.push(curi);
-                            thisB.hubObjects.push(hub);
-                            
-                            var hubButton = makeHubButton(hub);
-                            modeButtonHolder.appendChild(hubButton);
-                            activateButton(addModeButtons, hubButton);
-                            
-                        
-                            // FIXME redundant with hub-tab click handler.
-                        
-                            hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                                makeHubStab(tracks);
-                            });
-                        } else {
-                            removeChildren(stabHolder);
-                            stabHolder.appendChild(makeElement('h2', 'No data for this genome'))
-                            stabHolder.appendChild(makeElement('p', 'This URL appears to be a valid track-hub, but it doesn\'t contain any data for the coordinate system of this browser'));
-                            stabHolder.appendChild(makeElement('p', 'coordSystem.ucscName = ' + thisB.coordSystem.ucscName));
-                            customMode = 'reset-hub';
-                            return;
-                        }
-                    }
-                });
+                
+                tryAddHub(curi);
+                
             }
         } else {
             thisB.removeAllPopups();
         }
     };
+
+    function tryAddHub(curi, opts, retry) {
+        opts = opts || {};
+        
+        connectTrackHub(curi, function(hub, err) {
+            if (err) {
+                if (!retry) {
+                    return tryAddHub(curi, {credentials: true}, true);
+                }
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('h2', 'Error connecting to track hub'))
+                stabHolder.appendChild(makeElement('p', err));
+                customMode = 'reset-hub';
+                return;
+            } else {
+                if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
+                    thisB.hubs.push(curi);
+                    thisB.hubObjects.push(hub);
+                    
+                    var hubButton = makeHubButton(hub);
+                    modeButtonHolder.appendChild(hubButton);
+                    activateButton(addModeButtons, hubButton);
+                    
+                
+                    // FIXME redundant with hub-tab click handler.
+                
+                    hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
+                        makeHubStab(tracks);
+                    });
+                } else {
+                    removeChildren(stabHolder);
+                    stabHolder.appendChild(makeElement('h2', 'No data for this genome'))
+                    stabHolder.appendChild(makeElement('p', 'This URL appears to be a valid track-hub, but it doesn\'t contain any data for the coordinate system of this browser'));
+                    stabHolder.appendChild(makeElement('p', 'coordSystem.ucscName = ' + thisB.coordSystem.ucscName));
+                    customMode = 'reset-hub';
+                    return;
+                }
+            }
+        }, opts);
+    }
 
     var tryAddDAS = function(nds, retry) {
         var knownSpace = thisB.knownSpace;
