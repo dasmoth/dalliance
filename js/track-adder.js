@@ -750,16 +750,21 @@ Browser.prototype.showTrackAdder = function(ev) {
         );
     }
 
-    var tryAddBin = function(nds) {
+    var tryAddBin = function(nds, retry) {
         var fetchable;
         if (nds.bwgURI) {
-            fetchable = new URLFetchable(nds.bwgURI);
+            fetchable = new URLFetchable(nds.bwgURI, null, null, {credentials: nds.credentials});
         } else {
             fetchable = new BlobFetchable(nds.bwgBlob);
         }
 
         fetchable.slice(0, 1<<16).fetch(function(result, error) {
             if (!result) {
+                if (!retry) {
+                    nds.credentials = true;
+                    tryAddBin(nds, true);
+                }
+
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
                 if (nds.bwgURI) {
