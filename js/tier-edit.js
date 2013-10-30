@@ -19,24 +19,35 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierForm = makeElement('div');
 
         var tierNameField = makeElement('input', null, {type: 'text', value: tier.dasSource.name});
+        var glyphField = makeElement('select');
+        glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));
+        glyphField.appendChild(makeElement('option', 'Line Plot', {value: 'LINEPLOT'}));
+        glyphField.appendChild(makeElement('option', 'Ribbon', {value: 'GRADIENT'}));
+
+
         var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
 
         if (tier.stylesheet.styles.length > 0) {
             var s = tier.stylesheet.styles[0].style;
             if (s.BGCOLOR) {
                 var oldCol = dasColourForName(s.BGCOLOR).toHexString();
-                console.log('old=' + oldCol);
                 tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
             }
+            glyphField.value = s.glyph;
         }
 
         var tierTable = makeElement('table',
             [makeElement('tr',
                 [makeElement('th', 'Tier name:'),
                  tierNameField]),
+
              makeElement('tr',
                 [makeElement('th', 'Colour (experimental)'),
-                 tierColorField])]);
+                 tierColorField]),
+
+             makeElement('tr',
+                [makeElement('th', 'Glyph'),
+                 makeElement('td', glyphField)])]);
         tierForm.appendChild(tierTable);
 
         tierNameField.addEventListener('input', function(ev) {
@@ -44,18 +55,28 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
 
         var redrawTimeout = null;
-        tierColorField.addEventListener('change', function(ev) {
-            console.log(tierColorField.value);
-            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                tier.stylesheet.styles[i].style.BGCOLOR = tierColorField.value;
-            }
-            
+        function scheduleRedraw() {
             if (!redrawTimeout) {
                 redrawTimeout = setTimeout(function() {
                     tier.draw();
                     redrawTimeout = null;
                 }, 10);
             }
+        }
+
+        tierColorField.addEventListener('change', function(ev) {
+            console.log(tierColorField.value);
+            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
+                tier.stylesheet.styles[i].style.BGCOLOR = tierColorField.value;
+            }
+            scheduleRedraw();
+        }, false);
+
+        glyphField.addEventListener('change', function(ev) {
+            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
+                tier.stylesheet.styles[i].style.glyph = glyphField.value;
+            }
+            scheduleRedraw();
         }, false);
 
         this.showToolPanel(tierForm);
