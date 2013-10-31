@@ -1119,7 +1119,8 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                                 key += String.fromCharCode(charCode);
                             }
                         }
-                        var childOffset = (la[offset/4] << 32) | (la[offset/4 + 1]);
+
+                        var childOffset = readInt(ba, offset);
                         offset += 8;
                         
                         if (name.localeCompare(key) < 0 && lastChildOffset) {

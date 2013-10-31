@@ -13,6 +13,7 @@ For 0.11
   - Animate when leaping/toggling.
   - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
+  - Security cleanups + support for credentialed trackhubs [DONE]
 
 For 0.12
 --------
