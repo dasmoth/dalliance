@@ -40,59 +40,66 @@ Browser.prototype.search = function(g, statusCallback) {
             return false;
         }
 
+        var searchCount = 0;
+        var foundLatch = false;
+
+        function searchCallback(found, err) {
+            --searchCount;
+            if (err) {
+                return statusCallback(err);
+            }
+
+            if (!found) found = [];
+            var min = 500000000, max = -100000000;
+            var nchr = null;
+            for (var fi = 0; fi < found.length; ++fi) {
+                var f = found[fi];
+            
+                if (nchr == null) {
+                    nchr = f.segment;
+                }
+                min = Math.min(min, f.min);
+                max = Math.max(max, f.max);
+            }
+
+            if (!nchr) {
+                if (searchCount == 0 && !foundLatch)
+                    return statusCallback("no match for '" + g + "'");
+            } else {
+                foundLatch = true;
+                thisB.highlightRegion(nchr, min, max);
+            
+                var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
+                thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
+            }
+        }
+
         if (this.searchEndpoint) {
-            return this.doDasSearch(thisB.searchEndpoint, g, statusCallback);
+            searchCount = 1;
+            return this.doDasSearch(thisB.searchEndpoint, g, searchCallback);
         }
 
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
             if (sourceAdapterIsCapable(tier.featureSource, 'search')) {
-                return this.doAdapterSearch(tier.featureSource, g, statusCallback);
+                ++searchCount;
+                tier.featureSource.search(g, searchCallback);
             } else if (tier.dasSource.provides_search) {
-                return this.doDasSearch(tier.dasSource, g, statusCallback);
+                ++searchCount;
+                this.doDasSearch(tier.dasSource, g, searchCallback);
             }
         }
-        
     }
 }
 
-Browser.prototype.doAdapterSearch = function(fs, g, statusCallback) {
+Browser.prototype.doDasSearch = function(source, g, searchCallback) {
     var thisB = this;
-    fs.search(g, function(found, err) {
-        if (err) {
-            return statusCallback(err);
-        }
-
+    source.features(null, {group: g, type: 'transcript'}, function(found) {
         if (!found) found = [];
         var min = 500000000, max = -100000000;
         var nchr = null;
-        for (var fi = 0; fi < found.length; ++fi) {
-            var f = found[fi];
-        
-            if (nchr == null) {
-                nchr = f.segment;
-            }
-            min = Math.min(min, f.min);
-            max = Math.max(max, f.max);
-        }
 
-        if (!nchr) {
-            return statusCallback("no match for '" + g + "' (search should improve soon!)");
-        } else {
-            thisB.highlightRegion(nchr, min, max);
-        
-            var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-            thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
-        }
-    });
-}
-
-Browser.prototype.doDasSearch = function(source, g, statusCallback) {
-    var thisB = this;
-    source.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
-        if (!found) found = [];
-        var min = 500000000, max = -100000000;
-        var nchr = null;
+        var found2 = [];
         for (var fi = 0; fi < found.length; ++fi) {
             var f = found[fi];
             
@@ -100,21 +107,9 @@ Browser.prototype.doDasSearch = function(source, g, statusCallback) {
                 // ...because Dazzle can return spurious overlapping features.
                 continue;
             }
-
-            if (nchr == null) {
-                nchr = f.segment;
-            }
-            min = Math.min(min, f.min);
-            max = Math.max(max, f.max);
+            found2.push(f);
         }
 
-        if (!nchr) {
-            return statusCallback("no match for '" + g + "' (search should improve soon!)");
-        } else {
-            thisB.highlightRegion(nchr, min, max);
-        
-            var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-            thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
-        }
+        return searchCallback(found2);
     }, false);
 }

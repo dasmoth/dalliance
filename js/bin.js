@@ -92,6 +92,9 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     req.open('GET', url, true);
     req.overrideMimeType('text/plain; charset=x-user-defined');
     if (this.end) {
+        if (this.end - this.start > 100000000) {
+            throw 'Monster fetch!';
+        }
         // console.log('req bytes=' + this.start + '-' + this.end);
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
         length = this.end - this.start + 1;

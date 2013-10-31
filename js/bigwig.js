@@ -990,7 +990,7 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 }
 
 BigWig.prototype.getAutoSQL = function(callback) {
-    thisB = this;
+    var thisB = this;
     if (!this.asOffset)
         return callback(null);
 
@@ -1035,8 +1035,8 @@ BigWig.prototype.getAutoSQL = function(callback) {
 }
 
 BigWig.prototype.getExtraIndices = function(callback) {
-    thisB = this;
-    if (this.version < 4 || this.extHeaderOffset == 0) {
+    var thisB = this;
+    if (this.version < 4 || this.extHeaderOffset == 0 || this.type != 'bigbed') {
         return callback(null);
     } else {
         this.data.slice(this.extHeaderOffset, 64).fetch(function(result) {
@@ -1050,6 +1050,10 @@ BigWig.prototype.getExtraIndices = function(callback) {
             var extHeaderSize = sa[0];
             var extraIndexCount = sa[1];
             var extraIndexListOffset = (la[1]<<32) | (la[2]);
+
+            if (extraIndexCount == 0) {
+                return callback(null);
+            }
 
             // FIXME 20byte records only make sense for single-field indices.
             // Right now, these seem to be the only things around, but the format
@@ -1099,6 +1103,10 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
         
+        // console.log('blockSize: ' + blockSize);
+        // console.log('keySize: ' + keySize);
+        // console.log('valSize: ' + valSize);
+
         function bptReadNode(nodeOffset) {
             thisB.bbi.data.slice(nodeOffset, 4 + (blockSize * (keySize + valSize))).fetch(function(node) {
                 var ba = new Uint8Array(node);
@@ -1145,7 +1153,7 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                             var start = readInt(ba, offset);
                             var length = readInt(ba, offset + 8);
 
-                            thisB.bbi.getUnzoomedView().fetchFeatures(
+                            return thisB.bbi.getUnzoomedView().fetchFeatures(
                                 function(chr, min, max, toks) {
                                     if (toks && toks.length > thisB.field - 3)
                                         return toks[thisB.field - 3] == name;
@@ -1155,6 +1163,7 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                         }
                         offset += valSize;
                     }
+                    return callback([]);
                 }
             });
         }

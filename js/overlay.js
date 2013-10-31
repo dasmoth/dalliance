@@ -85,10 +85,30 @@ OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
 }
 
 OverlayFeatureSource.prototype.capabilities = function() {
+    var caps = {};
     var s0 = this.sources[0];
     if (s0.capabilities) 
-        return s0.capabilities();
-    return {};
+        caps = shallowCopy(s0.capabilities());
+
+    for (var i = 1; i < this.sources.length; ++i) {
+        var si = this.sources[i];
+        if (si.capabilities) {
+            var co = si.capabilities();
+            if (co.search) {
+                caps.search = co.search;
+            }
+        }
+    }
+
+    return caps;
+}
+
+OverlayFeatureSource.prototype.search = function(query, callback) {
+    for (var i = 0; i < this.sources.length; ++i) {
+        if (sourceAdapterIsCapable(this.sources[i], 'search')) {
+            return this.sources[i].search(query, callback);
+        }
+    }
 }
 
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
