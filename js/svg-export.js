@@ -42,8 +42,7 @@ Browser.prototype.saveSVG = function() {
     saveRoot.appendChild(clip);
 
     var pos = 70;
-    var tierHolder = makeElementNS(NS_SVG, 'g', null, {/* clipPath: 'url(#featureClip)', clipRule: 'nonzero' */});
-
+    var tierHolder = makeElementNS(NS_SVG, 'g', null, {});
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
@@ -103,8 +102,20 @@ Browser.prototype.saveSVG = function() {
     	tierBackground.setAttribute('height', pos - tierTopPos);
     	tierHolder.appendChild(makeElementNS(NS_SVG, 'g', [tierSVG, tierLabels]));
     }
-    saveRoot.appendChild(tierHolder);
 
+    var highlights = this.highlights || [];
+    for (var hi = 0; hi < highlights.length; ++hi) {
+        var h = highlights[hi];
+        if (h.chr == this.chr && h.min < this.viewEnd && h.max > this.viewStart) {
+            var tmin = (Math.max(h.min, this.viewStart) - this.viewStart) * this.scale;
+            var tmax = (Math.min(h.max, this.viewEnd) - this.viewStart) * this.scale;
+
+            tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: margin + tmin, y: 70, width: (tmax-tmin), height: pos-70,
+                                                                  stroke: 'none', fill: 'red', fillOpacity: 0.3}));
+        }
+    }
+
+    saveRoot.appendChild(tierHolder);
     saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
     saveDoc.documentElement.setAttribute('height', pos + 50);
 
