@@ -310,3 +310,18 @@ DasTier.prototype.drawOverlay = function() {
     t.oorigin = b.viewStart;
     t.overlay.style.left = '-1000px'
 }
+
+DasTier.prototype.notify = function(message) {
+    this.notifier.innerText = message;
+    this.notifier.style.opacity = 0.8;
+    if (this.notifierFadeTimeout) {
+        clearTimeout(this.notifierFadeTimeout);
+    }
+
+    var thisB = this;
+    this.notifierFadeTimeout = setTimeout(function() {
+        thisB.notifier.style.opacity = 0;
+        thisB.notifierFadeTimeout = null;
+    }, 2000);
+
+}

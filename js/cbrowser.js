@@ -335,6 +335,8 @@ Browser.prototype.realInit2 = function() {
 
                     var qscale = (qmax - qmin) / th;
                     tt.quantLeapThreshold = qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale;
+
+                    tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                     tt.draw();
                 }                
             } else {
@@ -373,6 +375,7 @@ Browser.prototype.realInit2 = function() {
                     var it = Math.round((tt.quantLeapThreshold - qmin)/qscale)|0;
                     if (it > 1) {
                         tt.quantLeapThreshold = qmin + (it-1)*qscale;
+                        tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                         tt.draw();
                     }
                 }
@@ -587,6 +590,19 @@ Browser.prototype.realMakeTier = function(source) {
     var placardContent = makeElement('span', '');
     var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
     
+    var notifier = makeElement('div', 'Exciting message', {},
+        {backgroundColor: 'black',
+         color: 'white', 
+         zIndex: 5000,
+         position: 'relative',
+         top: '-25px',
+         opacity: 0.0,
+         padding: '6px',
+         borderRadius: '4px',
+         display: 'inline-block',
+         transition: 'opacity 0.6s ease-in-out'
+         });
+
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
     // vph.className = 'tier-viewport-background';
     vph.style.background = background;
@@ -599,6 +615,7 @@ Browser.prototype.realMakeTier = function(source) {
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
     tier.oorigin = this.viewStart;
     tier.background = background;
+    tier.notifier = notifier;
 
     tier.quantOverlay = makeElement(
         'canvas', null, 
@@ -746,7 +763,7 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, placard , tier.label ], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
