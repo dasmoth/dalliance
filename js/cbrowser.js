@@ -472,7 +472,9 @@ Browser.prototype.realInit2 = function() {
             }
             continue;
         }
-        this.makeTier(source);
+
+        if (!source.disabled)
+            this.makeTier(source);
     }
     thisB.arrangeTiers();
     thisB.refresh();
