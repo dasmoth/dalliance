@@ -1190,7 +1190,15 @@ Browser.prototype.addTier = function(conf) {
 }
 
 function sourceDataURI(conf) {
-    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
+    if (conf.uri) {
+        return conf.uri;
+    } else if (conf.bwgBlob) {
+        return 'file:' + conf.bwgBlob.name;
+    } else if (conf.bamBlob) {
+        return 'file:' + conf.bamBlob.name;
+    }
+
+    return conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
 }
 
 function sourceStyleURI(conf) {
