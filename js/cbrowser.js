@@ -149,8 +149,10 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, {className: 'guideline'});
+    this.ruler = makeElement('div', null, {className: 'guideline'})
+    this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
     this.svgHolder.appendChild(this.ruler);
+    this.svgHolder.appendChild(this.ruler2);
 
     setTimeout(function() {thisB.realInit2()}, 1);
 }
@@ -879,6 +881,7 @@ Browser.prototype.realMakeTier = function(source) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
                     }
                     thisB.tierHolder.appendChild(thisB.ruler);
+                    thisB.tierHolder.appendChild(thisB.ruler2);
                     tiersWereReordered = true;
                     thisB.arrangeTiers();
                 }
@@ -1533,6 +1536,9 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.display = display;
     this.ruler.style.left = left;
     this.ruler.style.right = right;
+
+    this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var q = this.tiers[ti].quantOverlay;
