@@ -174,6 +174,10 @@ CachingFeatureSource.prototype.capabilities = function() {
 }
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (pool == null) {
+        throw 'pool is null...';
+    }
+
     var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();

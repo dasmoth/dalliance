@@ -112,6 +112,10 @@ function filterFeatures(features, min, max) {
 }
 
 KnownSpace.prototype.invalidate = function(tier) {
+    if (!this.pool) {
+        return;
+    }
+
     this.featureCache[tier] = null;
     this.startFetchesForTiers([tier]);
 }
