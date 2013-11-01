@@ -51,7 +51,7 @@ Browser.prototype.openTierPanel = function(tier) {
         tierForm.appendChild(tierTable);
 
         tierNameField.addEventListener('input', function(ev) {
-            tier.nameElement.innerText = tierNameField.value;
+            tier.nameElement.innerText = tier.dasSource.name = tierNameField.value;
         }, false);
 
         var redrawTimeout = null;

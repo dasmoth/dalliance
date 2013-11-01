@@ -463,6 +463,7 @@ Browser.prototype.realInit2 = function() {
     this.hPopupHolder.classList.add('dalliance');
     document.body.appendChild(this.hPopupHolder);
 
+    var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
         if (source.bwgURI && !this.supportsBinary) {
@@ -473,9 +474,13 @@ Browser.prototype.realInit2 = function() {
             continue;
         }
 
-        if (!source.disabled)
+        if (!source.disabled) {
+            actualSources.push(source);
             this.makeTier(source);
+        }
     }
+    this.sources = actualSources;
+
     thisB.arrangeTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
