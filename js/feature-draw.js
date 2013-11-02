@@ -386,7 +386,7 @@ DasTier.prototype.paintQuant = function() {
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.moveTo(w, ty);
-                ctx.lineTo(w - 8, ty);
+                ctx.lineTo(w - 5, ty);
             }
         } else {
             ctx.moveTo(8, MIN_PADDING);
@@ -396,7 +396,7 @@ DasTier.prototype.paintQuant = function() {
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.moveTo(0, ty);
-                ctx.lineTo(8, ty);
+                ctx.lineTo(5, ty);
             }
         }
         ctx.stroke();

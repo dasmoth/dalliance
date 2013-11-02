@@ -96,7 +96,7 @@ Browser.prototype.saveSVG = function() {
                     for (var t = 1; t < numTics-1; ++t) {
                         var ty = t*ticSpacing;
                         path.moveTo(margin, pos + ty);
-                        path.lineTo(margin+5, pos + ty);
+                        path.lineTo(margin+3, pos + ty);
                     }
 
         		    tierLabels.appendChild(makeElementNS(NS_SVG, 'path', null, {d: path.toPathData(), fill: 'none', stroke: 'black', strokeWidth: '2px'}));
