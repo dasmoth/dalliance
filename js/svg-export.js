@@ -64,6 +64,7 @@ Browser.prototype.saveSVG = function() {
             }
     	
     	    var offset = ((tier.glyphCacheOrigin - b.viewStart) * b.scale);
+            var hasQuant = false;
             for (var sti = 0; sti < tier.subtiers.length; ++sti) {
         		var subtier = tier.subtiers[sti];
                     
@@ -76,15 +77,36 @@ Browser.prototype.saveSVG = function() {
     		    tierSVG.appendChild(makeElementNS(NS_SVG, 'g', glyphElements, {transform: 'translate(' + (margin+offset) + ', ' + pos + ')'}));
 
         		if (subtier.quant) {
+                    hasQuant = true;
         		    var q = subtier.quant;
+                    var h = subtier.height;
+
+                    var numTics = 2;
+                    if (h > 40) {
+                        numTics = 1 + ((h/20) | 0);
+                    }
+                    var ticSpacing = h / (numTics - 1);
+                    var ticInterval = (q.max - q.min) / (numTics - 1);
+
         		    var path = new SVGPath();
         		    path.moveTo(margin + 5, pos);
         		    path.lineTo(margin, pos);
         		    path.lineTo(margin, pos + subtier.height);
         		    path.lineTo(margin + 5, pos + subtier.height);
+                    for (var t = 1; t < numTics-1; ++t) {
+                        var ty = t*ticSpacing;
+                        path.moveTo(margin, pos + ty);
+                        path.lineTo(margin+5, pos + ty);
+                    }
+
         		    tierLabels.appendChild(makeElementNS(NS_SVG, 'path', null, {d: path.toPathData(), fill: 'none', stroke: 'black', strokeWidth: '2px'}));
-        		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.max), {x: margin - 3, y: pos + 8, textAnchor: 'end'}));
-        		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.min), {x: margin - 3, y: pos +  subtier.height - 3, textAnchor: 'end'}));
+        		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.max), {x: margin - 3, y: pos + 7, textAnchor: 'end'}));
+        		    tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel(q.min), {x: margin - 3, y: pos +  subtier.height, textAnchor: 'end'}));
+                    for (var t = 1; t < numTics-1; ++t) {
+                        var ty = t*ticSpacing;
+                        tierLabels.appendChild(makeElementNS(NS_SVG, 'text', formatQuantLabel((1.0*q.max) - (t*ticInterval)), 
+                            {x: margin - 3, y: pos +  ty + 3, textAnchor: 'end'}));
+                    }
         		}
 
     		    pos += subtier.height + 3;
@@ -96,7 +118,7 @@ Browser.prototype.saveSVG = function() {
     	    makeElementNS(
     		NS_SVG, 'text',
     		tier.dasSource.name,
-    		{x: margin - 12, y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
+    		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
 
     	
     	tierBackground.setAttribute('height', pos - tierTopPos);

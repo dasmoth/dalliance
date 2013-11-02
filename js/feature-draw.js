@@ -352,12 +352,25 @@ DasTier.prototype.paintQuant = function() {
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;
 
+        var numTics = 2;
+        if (h > 40) {
+            numTics = 1 + ((h/20) | 0);
+        }
+        var ticSpacing = (h+MIN_PADDING*2) / (numTics - 1);
+        var ticInterval = (quant.max - quant.min) / (numTics - 1);
+
         if (this.browser.rulerLocation == 'right') {
             ctx.fillRect(w-30, 0, 30, 20);
             ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
+            for (var t = 1; t < numTics-1; ++t) {
+                ctx.fillRect(w-30, t*ticSpacing, 30, 20);
+            }
         } else {
             ctx.fillRect(0, 0, 30, 20);
             ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
+            for (var t = 1; t < numTics-1; ++t) {
+                ctx.fillRect(0, t*ticSpacing, 30, 20);
+            }
         }
         ctx.globalAlpha = 1.0;
 
@@ -370,11 +383,21 @@ DasTier.prototype.paintQuant = function() {
             ctx.lineTo(w, MIN_PADDING);
             ctx.lineTo(w, h + MIN_PADDING);
             ctx.lineTo(w - 8, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.moveTo(w, ty);
+                ctx.lineTo(w - 8, ty);
+            }
         } else {
             ctx.moveTo(8, MIN_PADDING);
             ctx.lineTo(0, MIN_PADDING);
             ctx.lineTo(0, h+MIN_PADDING);
             ctx.lineTo(8, h+MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.moveTo(0, ty);
+                ctx.lineTo(8, ty);
+            }
         }
         ctx.stroke();
 
@@ -382,12 +405,20 @@ DasTier.prototype.paintQuant = function() {
 
         if (this.browser.rulerLocation == 'right') {
             ctx.textAlign = 'right';
-            ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), w-8, h + MIN_PADDING - 2);
+            ctx.fillText(formatQuantLabel(quant.max), w-9, 8);
+            ctx.fillText(formatQuantLabel(quant.min), w-9, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), w - 9, ty + 3);
+            }
         } else {
             ctx.textAlign = 'left';
-            ctx.fillText(formatQuantLabel(quant.max), 8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), 8, h + MIN_PADDING - 2);
+            ctx.fillText(formatQuantLabel(quant.max), 9, 8);
+            ctx.fillText(formatQuantLabel(quant.min), 9, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), 9, ty + 3);
+            }
         }
     }
 }
@@ -725,11 +756,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     return gg;
-}
-
-
-        
-    
+}    
 
 DasTier.prototype.styleForFeature = function(f) {
     var cs = f._cachedStyle;
