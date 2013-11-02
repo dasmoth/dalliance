@@ -509,9 +509,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
-        var size = style.SIZE || height;
-
         requiredHeight = height = 1.0 * height;
+
+        var size = style.SIZE || height;
+        if (style.RSIZE) {
+            size = (1.0 * style.RSIZE) * height;
+        }
+        
         size = 1.0 * size;
 
         var mid = (minPos + maxPos)/2;

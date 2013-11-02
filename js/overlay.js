@@ -189,26 +189,26 @@ function OverlayFeatureSource_merge_byKey(featureSets) {
     var om = {};
     var of = featureSets[1];
     for (var fi = 0; fi < of.length; ++fi) {
-	om[this.keyForFeature(of[fi])] = of[fi];
+	   om[this.keyForFeature(of[fi])] = of[fi];
     }
 
     var mf = [];
     var fl = featureSets[0];
     for (var fi = 0; fi < fl.length; ++fi) {
-	var f = fl[fi];
-	of = om[this.keyForFeature(f)]
-	if (of) {
-	    if (of.id)
-		  f.id = of.id;
-	    if (of.label) 
-		  f.label = of.label;
+    	var f = fl[fi];
+    	of = om[this.keyForFeature(f)]
+    	if (of) {
+    	    if (of.id)
+    		  f.id = of.id;
+    	    if (of.label) 
+    		  f.label = of.label;
 
-        if (of.score2)
-            f.score2 = of.score2;
-        else if (of.score)
-            f.score2 = of.score;
-	}
-	mf.push(f);
+            if (of.score2)
+                f.score2 = of.score2;
+            else if (of.score)
+                f.score2 = of.score;
+    	}
+    	mf.push(f);
     }
     return mf;
 }
