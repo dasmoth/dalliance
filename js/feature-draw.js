@@ -645,7 +645,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         var stroke = style.FGCOLOR || null;
-        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
         var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
 
         if (style.COLOR2) {
@@ -704,7 +706,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var sc = ((score - (1.0*smin)) * yscale)|0;
         quant = {min: smin, max: smax};
 
-        var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
+        var fill = style.FGCOLOR || style.COLOR1 || 'black';
         if (style.COLOR2) {
             var grad = style._gradient;
             if (!grad) {
@@ -733,7 +735,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         return null;
     } else /* default to BOX */ {
         var stroke = style.FGCOLOR || null;
-        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
         gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
         // gg.bump = true;
     }

@@ -313,6 +313,7 @@ TrackHubTrack.prototype.bigwigStyles = function() {
 }
 
 TrackHubTrack.prototype.bigbedStyles = function() {
+    var itemRgb = (''+this.get('itemRgb')).toLowerCase() == 'on';
     var visibility = this.get('visibility') || 'full';
     var color = this.get('color');
     if (color)
@@ -329,6 +330,8 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     wigStyle.BUMP = (visibility == 'full' || visibility == 'pack');
     wigStyle.LABEL = (visibility == 'full' || visibility == 'pack');
     wigStyle.ZINDEX = 20;
+    if (itemRgb)
+        wigStyle.BGITEM = true;
 
     var cbs = this.get('colorByStrand');
     if (cbs) {
@@ -348,6 +351,8 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     var tlStyle = new DASStyle();
     tlStyle.glyph = 'BOX';
     tlStyle.FGCOLOR = 'black';
+    if (itemRgb)
+        tlStyle.BGITEM = true;
     tlStyle.BGCOLOR = 'red'
     tlStyle.HEIGHT = 10;
     tlStyle.BUMP = true;

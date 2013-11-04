@@ -388,7 +388,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
             if (bedColumns.length > 5 && dfc > 8) {
                 var color = bedColumns[5];
                 if (BED_COLOR_REGEXP.test(color)) {
-                    featureOpts.override_color = 'rgb(' + color + ')';
+                    featureOpts.itemRgb = 'rgb(' + color + ')';
                 }
             }
 
@@ -415,9 +415,12 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     grp.notes = [];
                     featureOpts.groups = [grp];
 
-                    if (bedColumns.length > 10) {
+                    if (bedColumns.length > 9) {
                         var geneId = bedColumns[9];
-                        var geneName = bedColumns[10];
+                        var geneName = geneId;
+                        if (bedColumns.length > 10) {
+                            geneName = bedColumns[10];
+                        }
                         var gg = new DASGroup();
                         gg.id = geneId;
                         gg.label = geneName;
