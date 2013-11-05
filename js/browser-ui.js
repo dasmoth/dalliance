@@ -16,17 +16,6 @@ function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-function parseLocCardinal(n, m) {
-    var i = n.replace(/,/g, '');
-    if (m === 'k' || m === 'K') {
-        return i * 1000;
-    } else if (m == 'm' || m === 'M') {
-        return i * 1000000;
-    } else {
-        return i;
-    }
-}
-
 /*
  * Quite a bit of this ought to be done using a templating system, but
  * since web-components isn't quite ready for prime time yet we'll stick
@@ -39,8 +28,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
 
     var b = this;
-    var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;
-    // var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([\-,\,.]+([0-9,]+))?/;
 
     if (!b.disableDefaultFeaturePopup) {
         this.addFeatureListener(function(ev, feature, hit, tier) {
@@ -108,7 +95,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = '';
-        locField.placeholder = ('chr' + chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
+        locField.placeholder = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.min = zoom.min;
         zoomSlider.max = zoom.max;
         zoomSlider.value = zoom.current;
@@ -130,63 +117,15 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         } if (ev.keyCode == 10 || ev.keyCode == 13) {
             ev.preventDefault();
 
+
             var g = locField.value;
-            var m = REGION_PATTERN.exec(g);
-
-            var setLocationCB = function(err) {
-                    if (err) {
-                        locStatusField.innerText = '' + err;
-                    } else {
-                        locStatusField.innerText = '';
-                    }
-                };
-
-            if (m) {
-                var chr = m[1], start, end;
-                if (m[5]) {
-                    start = parseLocCardinal(m[2],  m[3]);
-                    end = parseLocCardinal(m[5], m[6]);
+            b.search(g, function(err) {
+                if (err) {
+                    locStatusField.innerText = '' + err;
                 } else {
-                    var width = b.viewEnd - b.viewStart + 1;
-                    start = (parseLocCardinal(m[2], m[3]) - (width/2))|0;
-                    end = start + width - 1;
+                    locStatusField.innerText = '';
                 }
-                b.setLocation(chr, start, end, setLocationCB);
-            } else {
-                if (!g || g.length == 0) {
-                    return false;
-                }
-
-                b.searchEndpoint.features(null, {group: g, type: 'transcript'}, function(found) {        // HAXX
-                    if (!found) found = [];
-                    var min = 500000000, max = -100000000;
-                    var nchr = null;
-                    for (var fi = 0; fi < found.length; ++fi) {
-                        var f = found[fi];
-                        
-                        if (f.label.toLowerCase() != g.toLowerCase()) {
-                            // ...because Dazzle can return spurious overlapping features.
-                            continue;
-                        }
-
-                        if (nchr == null) {
-                            nchr = f.segment;
-                        }
-                        min = Math.min(min, f.min);
-                        max = Math.max(max, f.max);
-                    }
-
-                    if (!nchr) {
-                        locStatusField.innerText = "no match for '" + g + "' (search should improve soon!)";
-                    } else {
-                        b.highlightRegion(nchr, min, max);
-                    
-                        var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-                        b.setLocation(nchr, min - padding, max + padding, setLocationCB);
-                    }
-                }, false);
-            }
-
+            });
         }
     }, false); 
 
@@ -298,6 +237,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         } else if (ev.keyCode == 72 || ev.keyCode == 104) { // h
             ev.stopPropagation(); ev.preventDefault();
             b.toggleHelpPopup(ev);
+        } else if (ev.keyCode == 69 || ev.keyCode == 101) { //e
+            ev.stopPropagation(); ev.preventDefault();
+            if (b.selectedTiers.length == 1) {
+                b.openTierPanel(b.tiers[b.selectedTiers[0]]);
+            }
         }
     };
 
@@ -382,4 +326,6 @@ Browser.prototype.toggleOptsPopup = function(ev) {
     }
 
 }
+
+
 

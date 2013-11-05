@@ -128,6 +128,16 @@ function CachingFeatureSource(source) {
     }
 }
 
+CachingFeatureSource.prototype.search = function(query, callback) {
+    if (this.source.search)
+        return this.source.search(query, callback);
+}
+
+CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.source.getDefaultFIPs)
+        return this.source.getDefaultFIPs(callback); 
+}
+
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {
     this.source.getStyleSheet(callback);
 }
@@ -164,6 +174,10 @@ CachingFeatureSource.prototype.capabilities = function() {
 }
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (pool == null) {
+        throw 'pool is null...';
+    }
+
     var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();
@@ -429,8 +443,17 @@ BWGFeatureSource.prototype.init = function() {
         arg = this.bwgSource.bwgBlob;
     }
 
-    make(arg, function(bwg) {
-        thisB.bwgHolder.provide(bwg);
+    make(arg, function(bwg, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            thisB.bwgHolder.provide(bwg);
+            if (bwg.type == 'bigbed') {
+                bwg.getExtraIndices(function(ei) {
+                    thisB.extraIndices = ei;
+                });
+            }
+        }
     }, this.opts.credentials);
 }
 
@@ -438,6 +461,12 @@ BWGFeatureSource.prototype.capabilities = function() {
     var caps = {leap: true};
     if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
         caps.quantLeap = true;
+    if (this.extraIndices && this.extraIndices.length > 0) {
+        caps.search = [];
+        for (var eii = 0; eii < this.extraIndices.length; ++eii) {
+            caps.search.push(this.extraIndices[eii].field);
+        }
+    }
     return caps;
 }
 
@@ -544,6 +573,33 @@ BWGFeatureSource.prototype.getScales = function() {
     } else {
         return null;
     }
+}
+
+BWGFeatureSource.prototype.search = function(query, callback) {
+    console.log(query);
+    if (!this.extraIndices || this.extraIndices.length == 0) {
+        return callback(null, 'No indices available');
+    }
+
+    var index = this.extraIndices[0];
+    return index.lookup(query, callback);
+}
+
+BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    this.bwgHolder.await(function(bwg) {
+        if (bwg.schema && bwg.definedFieldCount+3 < bwg.schema.fields.length) {
+            var fip = function(feature, featureInfo) {
+                for (var fi = bwg.definedFieldCount+3; fi < bwg.schema.fields.length; ++fi) {
+                    var f = bwg.schema.fields[fi];
+                    featureInfo.add(f.comment, feature[f.name]);
+                }
+            };
+
+            callback(fip);
+        } else {
+            // No need to do anything.
+        }
+    });
 }
 
 BWGFeatureSource.prototype.getStyleSheet = function(callback) {

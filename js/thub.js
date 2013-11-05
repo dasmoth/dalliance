@@ -41,7 +41,8 @@ TrackHubDB.prototype.getTracks = function(callback) {
         if (err) {
             return callback(null, err);
         }
-
+        
+        trackFile = trackFile.replace(/\#.*/g, '');
         trackFile = trackFile.replace('\\\n', ' ');
 
         var tracks = [];
@@ -83,6 +84,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
         }
         
         var toplevels = [];
+        var composites = [];
         for (var ti = 0; ti < tracks.length; ++ti) {
             var track = tracks[ti];
             var top = true;
@@ -96,26 +98,40 @@ TrackHubDB.prototype.getTracks = function(callback) {
                         parent.children = [];
                     parent.children.push(track);
 
-                    if (parent && (!parent.compositeTrack || parent.view))
-                        top = false;
-                    if (parent.container == 'multiWig')
+                    if (parent)
                         top = false;
                 }
                
             }
-            if (track.compositeTrack && !track.view)
-                    top = false;  // FIXME How to handle composites properly?
-
-            if (top)
+            if (track.compositeTrack) {
+                composites.push(track);
+            } else if (top) {
                 toplevels.push(track);
+            }
+        }
+
+        for (var ci = 0; ci < composites.length; ++ci) {
+            var comp = composites[ci];
+            var parentOfViews = false;
+            for (var ki = 0; ki < comp.children.length; ++ki) {
+                var k = comp.children[ki];
+                if (k.view) {
+                    toplevels.push(k);
+                    parentOfViews = true;
+                }
+            }
+            if (!parentOfViews)
+                toplevels.push(comp);
         }
             
         thisB._tracks = toplevels;
         return callback(thisB._tracks, null);
-    });
+    }, {credentials: this.credentials});
 }
 
-function connectTrackHub(hubURL, callback) {
+function connectTrackHub(hubURL, callback, opts) {
+    opts = opts || {};
+
     textXHR(hubURL, function(hubFile, err) {
         if (err) {
             return callback(null, err);
@@ -123,6 +139,9 @@ function connectTrackHub(hubURL, callback) {
 
         var toks = hubFile.split(THUB_PARSE_REGEXP);
         var hub = new TrackHub(hubURL);
+        if (opts.credentials) {
+            hub.credentials = opts.credentials;
+        }
         for (var l = 0; l < toks.length - 2; l += 3) {
             hub[toks[l+1]] = toks[l+2];
         }
@@ -139,9 +158,18 @@ function connectTrackHub(hubURL, callback) {
                 for (var s = 0; s < stanzas.length; ++s) {
                     var toks = stanzas[s].split(THUB_PARSE_REGEXP);
                     var gprops = new TrackHubDB();
+                    if (opts.credentials) {
+                        gprops.credentials = opts.credentials;
+                    }
+
                     for (var l = 0; l < toks.length - 2; l += 3) {
                         gprops[toks[l+1]] = toks[l+2];
                     }
+
+                    if (gprops.twoBitPath) {
+                        gprops.twoBitPath = relativeURL(genURL, gprops.twoBitPath);
+                    }
+
                     if (gprops.genome && gprops.trackDb) {
                         gprops.absURL = relativeURL(genURL, gprops.trackDb);
                         hub.genomes[gprops.genome] = gprops;
@@ -150,11 +178,11 @@ function connectTrackHub(hubURL, callback) {
 
                 callback(hub);
                         
-            });
+            }, opts);
         } else {
             callback(null, 'No genomesFile');
         }
-    })
+    }, opts);
 }
 
 
@@ -200,6 +228,9 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         if (typeToks[0] == 'bigBed') {
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigbedStyles();
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
             return source;
         } else if (typeToks[0] == 'bigWig') {
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
@@ -210,9 +241,16 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 source.quantLeapThreshold = this.yLineMark !== undefined ? (1.0 * this.yLineMark) : 0.0;
             }
 
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
+
             return source;
         } else if (typeToks[0] == 'bam') {
             source.bamURI = relativeURL(this._db.absURL, this.bigDataUrl);
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
             return source;
         } else {
             console.log('Unsupported ' + this.type);
@@ -275,6 +313,7 @@ TrackHubTrack.prototype.bigwigStyles = function() {
 }
 
 TrackHubTrack.prototype.bigbedStyles = function() {
+    var itemRgb = (''+this.get('itemRgb')).toLowerCase() == 'on';
     var visibility = this.get('visibility') || 'full';
     var color = this.get('color');
     if (color)
@@ -291,11 +330,29 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     wigStyle.BUMP = (visibility == 'full' || visibility == 'pack');
     wigStyle.LABEL = (visibility == 'full' || visibility == 'pack');
     wigStyle.ZINDEX = 20;
-    stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+    if (itemRgb)
+        wigStyle.BGITEM = true;
+
+    var cbs = this.get('colorByStrand');
+    if (cbs) {
+        var cbsToks = cbs.split(/\s+/);
+        
+        var plus = shallowCopy(wigStyle);
+        plus.BGCOLOR = 'rgb(' + cbsToks[0]; + ')';
+        stylesheet.pushStyle({type: 'bigwig', orientation: '+'}, null, plus);
+
+        var minus = shallowCopy(wigStyle);
+        minus.BGCOLOR = 'rgb(' + cbsToks[1]; + ')';
+        stylesheet.pushStyle({type: 'bigwig', orientation: '-'}, null, minus);
+    } else {
+        stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+    }   
     
     var tlStyle = new DASStyle();
     tlStyle.glyph = 'BOX';
     tlStyle.FGCOLOR = 'black';
+    if (itemRgb)
+        tlStyle.BGITEM = true;
     tlStyle.BGCOLOR = 'red'
     tlStyle.HEIGHT = 10;
     tlStyle.BUMP = true;
@@ -321,4 +378,16 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     stylesheet.pushStyle({type: 'density'}, null, densStyle); */
 
     return stylesheet.styles;
+}
+
+function THUB_COMPARE(g, h) {
+    if (g.priority && h.priority) {
+        return (1.0 * g.priority) - (1.0 * h.priority)
+    } else if (g.priority) {
+        return 1;
+    } else if (h.priority) {
+        return -1;
+    } else {
+        return g.shortLabel.localeCompare(h.shortLabel);
+    }
 }

@@ -70,8 +70,7 @@ function Browser(opts) {
     this.guidelineSpacing = 75;
     this.fgGuide = null;
     this.positionFeedback = false;
-
-    this.selectedTier = 1;
+    
     this.selectedTiers = [1];
 
     this.placards = [];
@@ -152,8 +151,10 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, {className: 'guideline'});
+    this.ruler = makeElement('div', null, {className: 'guideline'})
+    this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
     this.svgHolder.appendChild(this.ruler);
+    this.svgHolder.appendChild(this.ruler2);
 
     setTimeout(function() {thisB.realInit2()}, 1);
 }
@@ -195,15 +196,6 @@ Browser.prototype.realInit2 = function() {
         }
     }, false);
 
-
-    /*
-    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
-
-    */
-
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
         if (ev.keyCode == 13) { // enter
@@ -221,28 +213,20 @@ Browser.prototype.realInit2 = function() {
                 thisB.arrangeTiers();
             }
         } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
-            // if (!thisB.snapZoomLockout) {
-                if (!thisB.isSnapZooming) {
-                    thisB.isSnapZooming = true;
-                    var newZoom = thisB.savedZoom || 1.0;
-                    thisB.savedZoom = thisB.zoomSliderValue;
-                    thisB.zoomSliderValue = newZoom;
-                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    // thisB.invalidateLayouts();
-                    // thisB.zoomSlider.setColor('red');
-                    // thisB.refresh();
-                } else {
-                    thisB.isSnapZooming = false;
-                    var newZoom = thisB.savedZoom || 10.0;
-                    thisB.savedZoom = thisB.zoomSliderValue;
-                    thisB.zoomSliderValue = newZoom;
-                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-                    // thisB.invalidateLayouts();
-                    // thisB.zoomSlider.setColor('blue');
-                    // thisB.refresh();
-                }
-                thisB.snapZoomLockout = true;
-            // }
+            if (!thisB.isSnapZooming) {
+                thisB.isSnapZooming = true;
+                var newZoom = thisB.savedZoom || 1.0;
+                thisB.savedZoom = thisB.zoomSliderValue;
+                thisB.zoomSliderValue = newZoom;
+                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+            } else {
+                thisB.isSnapZooming = false;
+                var newZoom = thisB.savedZoom || 10.0;
+                thisB.savedZoom = thisB.zoomSliderValue;
+                thisB.zoomSliderValue = newZoom;
+                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+            }
+            thisB.snapZoomLockout = true;
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
@@ -353,6 +337,8 @@ Browser.prototype.realInit2 = function() {
 
                     var qscale = (qmax - qmin) / th;
                     tt.quantLeapThreshold = qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale;
+
+                    tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                     tt.draw();
                 }                
             } else {
@@ -391,6 +377,7 @@ Browser.prototype.realInit2 = function() {
                     var it = Math.round((tt.quantLeapThreshold - qmin)/qscale)|0;
                     if (it > 1) {
                         tt.quantLeapThreshold = qmin + (it-1)*qscale;
+                        tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                         tt.draw();
                     }
                 }
@@ -421,9 +408,9 @@ Browser.prototype.realInit2 = function() {
                 t.infoVisible = false;
             }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
-            ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
+                ev.stopPropagation(); ev.preventDefault();
                 for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                     var t = thisB.tiers[ti];
                     if (t.dasSource.collapseSuperGroups) {
@@ -436,7 +423,8 @@ Browser.prototype.realInit2 = function() {
                         t.updateLabel();
                     }
                 }
-            } else {
+            } else if (!ev.ctrlKey && !ev.metaKey) {
+                ev.stopPropagation(); ev.preventDefault();
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;
                 var t = thisB.tiers[st];
@@ -477,6 +465,7 @@ Browser.prototype.realInit2 = function() {
     this.hPopupHolder.classList.add('dalliance');
     document.body.appendChild(this.hPopupHolder);
 
+    var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
         if (source.bwgURI && !this.supportsBinary) {
@@ -486,8 +475,14 @@ Browser.prototype.realInit2 = function() {
             }
             continue;
         }
-        this.makeTier(source);
+
+        if (!source.disabled) {
+            actualSources.push(source);
+            this.makeTier(source);
+        }
     }
+    this.sources = actualSources;
+
     thisB.arrangeTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
@@ -601,9 +596,22 @@ Browser.prototype.realMakeTier = function(source) {
           height: "50",
           className: 'viewport-overlay'});
 
-    var placardContent = makeElement('span', 'blah');
+    var placardContent = makeElement('span', '');
     var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
     
+    var notifier = makeElement('div', 'Exciting message', {},
+        {backgroundColor: 'black',
+         color: 'white', 
+         zIndex: 5000,
+         position: 'relative',
+         top: '-25px',
+         opacity: 0.0,
+         padding: '6px',
+         borderRadius: '4px',
+         display: 'inline-block',
+         transition: 'opacity 0.6s ease-in-out'
+         });
+
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
     // vph.className = 'tier-viewport-background';
     vph.style.background = background;
@@ -616,6 +624,7 @@ Browser.prototype.realMakeTier = function(source) {
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
     tier.oorigin = this.viewStart;
     tier.background = background;
+    tier.notifier = notifier;
 
     tier.quantOverlay = makeElement(
         'canvas', null, 
@@ -754,7 +763,8 @@ Browser.prototype.realMakeTier = function(source) {
     if (source.pennant) {
         tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
     }
-    tier.nameButton.appendChild(makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    tier.nameElement = makeElement('span', source.name);
+    tier.nameButton.appendChild(makeElement('span', [tier.nameElement, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
     tier.nameButton.appendChild(tier.bumpButton);
     tier.nameButton.appendChild(tier.loaderButton);
     
@@ -762,7 +772,7 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, placard , tier.label ], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
@@ -801,7 +811,7 @@ Browser.prototype.realMakeTier = function(source) {
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 if (thisB.tiers[ti] === tier) {
                     thisB.browserHolder.focus();
-                    if (ti != thisB.selectedTier) {
+                    if (thisB.selectedTiers.length != 1 || thisB.selectedTiers[0] != ti) {
                         thisB.setSelectedTier(ti);
                         return;
                     }
@@ -873,7 +883,10 @@ Browser.prototype.realMakeTier = function(source) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    var st = thisB.tiers[thisB.selectedTier];
+                    var st = [];
+                    for (var xi = 0; xi < thisB.selectedTiers.length; ++xi) {
+                        st.push(thisB.tiers[thisB.selectedTiers[xi]]);
+                    }
 
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
@@ -881,11 +894,10 @@ Browser.prototype.realMakeTier = function(source) {
                     thisB.sources.splice(tierOrdinal, 1);
                     thisB.sources.splice(ti, 0, ts);
 
-                    // FIXME probably shouldn't be recorded selected tier by index (!)
+                    thisB.selectedTiers = [];
                     for (var sti = 0; sti < thisB.tiers.length; ++sti) {
-                        if (thisB.tiers[sti] === st) {
-                            thisB.selectedTier = sti; break;
-                        }
+                        if (st.indexOf(thisB.tiers[sti]) >= 0)
+                            thisB.selectedTiers.push(sti);
                     }
 
                     tierOrdinal = ti;
@@ -895,6 +907,7 @@ Browser.prototype.realMakeTier = function(source) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
                     }
                     thisB.tierHolder.appendChild(thisB.ruler);
+                    thisB.tierHolder.appendChild(thisB.ruler2);
                     tiersWereReordered = true;
                     thisB.arrangeTiers();
                 }
@@ -1160,8 +1173,6 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     } 
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
-    // var minExtraW = (width * this.minExtra) | 0;
-    // var maxExtraW = (width * this.maxExtra) | 0;
     var minExtraW = (100.0/this.scale)|0;
     var maxExtraW = (1000.0/this.scale)|0;
 
@@ -1169,9 +1180,6 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
         this.refresh();
     }
 }
-
-
-
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = this.tierHolder.getBoundingClientRect().width | 0;
@@ -1182,11 +1190,6 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
-
-
-        // var delta = nve - this.viewEnd;
-        // this.viewStart = this.viewStart - (delta/2);
-        // this.viewEnd = this.viewEnd + (delta/2);
 
         this.viewEnd = nve;
 
@@ -1212,12 +1215,21 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
+    this.markSelectedTiers();
     this.positionRuler();
     this.notifyTier();
 }
 
 function sourceDataURI(conf) {
-    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
+    if (conf.uri) {
+        return conf.uri;
+    } else if (conf.bwgBlob) {
+        return 'file:' + conf.bwgBlob.name;
+    } else if (conf.bamBlob) {
+        return 'file:' + conf.bamBlob.name;
+    }
+
+    return conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
 }
 
 function sourceStyleURI(conf) {
@@ -1558,6 +1570,9 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.display = display;
     this.ruler.style.left = left;
     this.ruler.style.right = right;
+
+    this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var q = this.tiers[ti].quantOverlay;

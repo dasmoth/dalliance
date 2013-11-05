@@ -274,17 +274,23 @@ function formatQuantLabel(v) {
 DasTier.prototype.paint = function() {
     var subtiers = this.subtiers;
     if (!subtiers) {
-        return;
+	   return;
     }
 
     var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
+    if (fpw < this.browser.featurePanelWidth + 1950) {
+        this.viewport.width = fpw = (this.browser.featurePanelWidth|0) + 2000;
+    }
 
     var lh = MIN_PADDING;
     for (var s = 0; s < subtiers.length; ++s) {
         lh = lh + subtiers[s].height + MIN_PADDING;
     }
     lh += 6
-    this.viewport.setAttribute('height', lh);
+    if (lh != this.viewport.height) {
+        this.viewport.height = lh;
+    }
+    // this.viewport.setAttribute('height', lh);
     this.viewport.style.left = '-1000px';
     this.holder.style.height = '' + Math.max(lh, this.browser.minTierHeight) + 'px';
     this.updateHeight();
@@ -346,12 +352,25 @@ DasTier.prototype.paintQuant = function() {
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;
 
+        var numTics = 2;
+        if (h > 40) {
+            numTics = 1 + ((h/20) | 0);
+        }
+        var ticSpacing = (h+MIN_PADDING*2) / (numTics - 1);
+        var ticInterval = (quant.max - quant.min) / (numTics - 1);
+
         if (this.browser.rulerLocation == 'right') {
             ctx.fillRect(w-30, 0, 30, 20);
             ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
+            for (var t = 1; t < numTics-1; ++t) {
+                ctx.fillRect(w-30, t*ticSpacing, 30, 20);
+            }
         } else {
             ctx.fillRect(0, 0, 30, 20);
             ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
+            for (var t = 1; t < numTics-1; ++t) {
+                ctx.fillRect(0, t*ticSpacing, 30, 20);
+            }
         }
         ctx.globalAlpha = 1.0;
 
@@ -364,11 +383,21 @@ DasTier.prototype.paintQuant = function() {
             ctx.lineTo(w, MIN_PADDING);
             ctx.lineTo(w, h + MIN_PADDING);
             ctx.lineTo(w - 8, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.moveTo(w, ty);
+                ctx.lineTo(w - 5, ty);
+            }
         } else {
             ctx.moveTo(8, MIN_PADDING);
             ctx.lineTo(0, MIN_PADDING);
             ctx.lineTo(0, h+MIN_PADDING);
             ctx.lineTo(8, h+MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.moveTo(0, ty);
+                ctx.lineTo(5, ty);
+            }
         }
         ctx.stroke();
 
@@ -376,12 +405,20 @@ DasTier.prototype.paintQuant = function() {
 
         if (this.browser.rulerLocation == 'right') {
             ctx.textAlign = 'right';
-            ctx.fillText(formatQuantLabel(quant.max), w-8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), w-8, h + MIN_PADDING - 2);
+            ctx.fillText(formatQuantLabel(quant.max), w-9, 8);
+            ctx.fillText(formatQuantLabel(quant.min), w-9, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), w - 9, ty + 3);
+            }
         } else {
             ctx.textAlign = 'left';
-            ctx.fillText(formatQuantLabel(quant.max), 8, 10);
-            ctx.fillText(formatQuantLabel(quant.min), 8, h + MIN_PADDING - 2);
+            ctx.fillText(formatQuantLabel(quant.max), 9, 8);
+            ctx.fillText(formatQuantLabel(quant.min), 9, h + MIN_PADDING);
+            for (var t = 1; t < numTics-1; ++t) {
+                var ty = t*ticSpacing;
+                ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), 9, ty + 3);
+            }
         }
     }
 }
@@ -503,9 +540,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
-        var size = style.SIZE || height;
-
         requiredHeight = height = 1.0 * height;
+
+        var size = style.SIZE || height;
+        if (style.RSIZE) {
+            size = (1.0 * style.RSIZE) * height;
+        }
+        
         size = 1.0 * size;
 
         var mid = (minPos + maxPos)/2;
@@ -604,7 +645,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         var stroke = style.FGCOLOR || null;
-        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
         var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
 
         if (style.COLOR2) {
@@ -663,7 +706,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var sc = ((score - (1.0*smin)) * yscale)|0;
         quant = {min: smin, max: smax};
 
-        var fill = feature.override_color || style.FGCOLOR || style.COLOR1 || 'black';
+        var fill = style.FGCOLOR || style.COLOR1 || 'black';
         if (style.COLOR2) {
             var grad = style._gradient;
             if (!grad) {
@@ -692,7 +735,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         return null;
     } else /* default to BOX */ {
         var stroke = style.FGCOLOR || null;
-        var fill = feature.override_color || style.BGCOLOR || style.COLOR1 || 'green';
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
         gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
         // gg.bump = true;
     }
@@ -715,11 +760,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     return gg;
-}
-
-
-        
-    
+}    
 
 DasTier.prototype.styleForFeature = function(f) {
     var cs = f._cachedStyle;
@@ -739,6 +780,12 @@ DasTier.prototype.styleForFeature = function(f) {
         var sh = ss[si];
         if (sh.zoom && sh.zoom != ssScale) {
             continue;
+        }
+
+        if (sh.orientation) {
+            if (sh.orientation != f.orientation) {
+                continue;
+            }
         }
 
         var labelRE = sh._labelRE;

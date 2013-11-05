@@ -2,16 +2,18 @@ For 0.11
 --------
 
   - UI for leaping (button to complement ctrl-arrow).
-  - Search of bigbed files.
+  - Search of bigbed files. [DONE]
   - Retina display support.
   - Replace feature popups with inspector?
-  - Assembly hub support.
+  - Assembly hub support. [DONE]
   - Bulk addition of local files.
   - Rename tracks.
   - Per-track display customization ("Stylesheet editor")?
   - Chromosome overviews.
   - Animate when leaping/toggling.
   - Export track configuration for current browser state.
+  - Support for arbitrary columns in bigbeds. [DONE]
+  - Security cleanups + support for credentialed trackhubs [DONE]
 
 For 0.12
 --------
@@ -31,6 +33,7 @@ For 0.12
   - Try to preserve layout when expanding/collapsing variants.
   - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
+  - Trix indexes.
 
 Future
 -------------

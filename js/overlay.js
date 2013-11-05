@@ -85,10 +85,30 @@ OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
 }
 
 OverlayFeatureSource.prototype.capabilities = function() {
+    var caps = {};
     var s0 = this.sources[0];
     if (s0.capabilities) 
-        return s0.capabilities();
-    return {};
+        caps = shallowCopy(s0.capabilities());
+
+    for (var i = 1; i < this.sources.length; ++i) {
+        var si = this.sources[i];
+        if (si.capabilities) {
+            var co = si.capabilities();
+            if (co.search) {
+                caps.search = co.search;
+            }
+        }
+    }
+
+    return caps;
+}
+
+OverlayFeatureSource.prototype.search = function(query, callback) {
+    for (var i = 0; i < this.sources.length; ++i) {
+        if (sourceAdapterIsCapable(this.sources[i], 'search')) {
+            return this.sources[i].search(query, callback);
+        }
+    }
 }
 
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -169,26 +189,26 @@ function OverlayFeatureSource_merge_byKey(featureSets) {
     var om = {};
     var of = featureSets[1];
     for (var fi = 0; fi < of.length; ++fi) {
-	om[this.keyForFeature(of[fi])] = of[fi];
+	   om[this.keyForFeature(of[fi])] = of[fi];
     }
 
     var mf = [];
     var fl = featureSets[0];
     for (var fi = 0; fi < fl.length; ++fi) {
-	var f = fl[fi];
-	of = om[this.keyForFeature(f)]
-	if (of) {
-	    if (of.id)
-		  f.id = of.id;
-	    if (of.label) 
-		  f.label = of.label;
+    	var f = fl[fi];
+    	of = om[this.keyForFeature(f)]
+    	if (of) {
+    	    if (of.id)
+    		  f.id = of.id;
+    	    if (of.label) 
+    		  f.label = of.label;
 
-        if (of.score2)
-            f.score2 = of.score2;
-        else if (of.score)
-            f.score2 = of.score;
-	}
-	mf.push(f);
+            if (of.score2)
+                f.score2 = of.score2;
+            else if (of.score)
+                f.score2 = of.score;
+    	}
+    	mf.push(f);
     }
     return mf;
 }
