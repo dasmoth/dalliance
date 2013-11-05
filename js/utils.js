@@ -310,7 +310,6 @@ Awaited.prototype.provide = function(x) {
     for (var i = 0; i < this.queue.length; ++i) {
         this.queue[i](x);
     }
-    this.queue = null;   // avoid leaking closures.
 }
 
 Awaited.prototype.await = function(f) {
@@ -322,33 +321,25 @@ Awaited.prototype.await = function(f) {
     }
 }
 
-function textXHR(url, callback, opts) {
+function textXHR(url, callback) {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-    	if (req.readyState == 4) {
-    	    if (req.status >= 300) {
-    		    callback(null, 'Error code ' + req.status);
-    	    } else {
-    		    callback(req.responseText);
-    	    }
-    	}
+	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+		callback(null, 'Error code ' + req.status);
+	    } else {
+		callback(req.responseText);
+	    }
+	}
     };
     
     req.open('GET', url, true);
     req.responseType = 'text';
-
-    if (opts && opts.credentials) {
-        req.withCredentials = true;
-    }
     req.send('');
 }
 
 function relativeURL(base, rel) {
     // FIXME quite naive -- good enough for trackhubs?
-
-    if (rel.indexOf('http:') == 0 || rel.indexOf('https:') == 0) {
-        return rel;
-    }
 
     var li = base.lastIndexOf('/');
     if (li >= 0) {

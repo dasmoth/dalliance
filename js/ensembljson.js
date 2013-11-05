@@ -135,7 +135,3 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     req.responseType = 'text';
     req.send('');
 }
-
-dalliance_registerSourceAdapterFactory('ensembl', function(source) {
-    return {features: new EnsemblFeatureSource(source)};
-});

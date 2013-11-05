@@ -22,7 +22,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    // custom code
+	// custom code
     this.uiPrefix = 'http://localhost:8080/';
     // custom code
 
@@ -70,8 +70,8 @@ function Browser(opts) {
     this.guidelineSpacing = 75;
     this.fgGuide = null;
     this.positionFeedback = false;
-    
-    this.selectedTiers = [1];
+
+    this.selectedTier = 1;
 
     this.placards = [];
 
@@ -134,34 +134,34 @@ Browser.prototype.realInit = function() {
     this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
-    this.svgHolder = makeElement('div', null, {className: 'main-holder'});
+    this.svgHolder = makeElement('div', null, {}, {overflow: 'hidden', display: 'inline-block', width: '100%', fontSize: '10pt', outline: 'none'});
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, {className: 'tier-holder'});
+    this.tierHolder = makeElement('div', null, {}, {width: '100%', padding: '0px', margin: '0px', border: '0px', position: 'relative', outline: 'none'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
-        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION], {className: 'powered-by'}));
+        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION]));
     }
-    this.browserHolder.appendChild(this.bhtmlRoot);
-    
+    this.svgHolder.appendChild(this.bhtmlRoot);
+
+    //
+    // Window resize support (should happen before first fetch so we know the actual size of the viewed area).
+    //
+
+    // this.resizeViewer(true);
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
 
-    this.ruler = makeElement('div', null, {className: 'guideline'})
-    this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
-    this.svgHolder.appendChild(this.ruler);
-    this.svgHolder.appendChild(this.ruler2);
+    this.ruler = makeElement('div', null, null, {width: '1px', height: '2000px', backgroundColor: 'blue', position: 'absolute', zIndex: '900', top: '0px'});
+    this.tierHolder.appendChild(this.ruler);
 
-    setTimeout(function() {thisB.realInit2()}, 1);
-}
+    // Dimension stuff
 
-Browser.prototype.realInit2 = function() {
-    var thisB = this;
-    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
     if (!this.zoomMax) {
@@ -196,6 +196,15 @@ Browser.prototype.realInit2 = function() {
         }
     }, false);
 
+
+    /*
+    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
+
+    */
+
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
         if (ev.keyCode == 13) { // enter
@@ -213,20 +222,28 @@ Browser.prototype.realInit2 = function() {
                 thisB.arrangeTiers();
             }
         } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
-            if (!thisB.isSnapZooming) {
-                thisB.isSnapZooming = true;
-                var newZoom = thisB.savedZoom || 1.0;
-                thisB.savedZoom = thisB.zoomSliderValue;
-                thisB.zoomSliderValue = newZoom;
-                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-            } else {
-                thisB.isSnapZooming = false;
-                var newZoom = thisB.savedZoom || 10.0;
-                thisB.savedZoom = thisB.zoomSliderValue;
-                thisB.zoomSliderValue = newZoom;
-                thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
-            }
-            thisB.snapZoomLockout = true;
+            // if (!thisB.snapZoomLockout) {
+                if (!thisB.isSnapZooming) {
+                    thisB.isSnapZooming = true;
+                    var newZoom = thisB.savedZoom || 1.0;
+                    thisB.savedZoom = thisB.zoomSliderValue;
+                    thisB.zoomSliderValue = newZoom;
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    // thisB.invalidateLayouts();
+                    // thisB.zoomSlider.setColor('red');
+                    // thisB.refresh();
+                } else {
+                    thisB.isSnapZooming = false;
+                    var newZoom = thisB.savedZoom || 10.0;
+                    thisB.savedZoom = thisB.zoomSliderValue;
+                    thisB.zoomSliderValue = newZoom;
+                    thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
+                    // thisB.invalidateLayouts();
+                    // thisB.zoomSlider.setColor('blue');
+                    // thisB.refresh();
+                }
+                thisB.snapZoomLockout = true;
+            // }
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
@@ -236,10 +253,7 @@ Browser.prototype.realInit2 = function() {
                     fedge = 1;
                 }
                 var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                thisB.tiers[st].findNextFeature(
+                thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
                       pos,
                       -1,
@@ -277,9 +291,7 @@ Browser.prototype.realInit2 = function() {
                     fedge = 1;
                 }
                 var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                thisB.tiers[st].findNextFeature(
+                thisB.tiers[thisB.selectedTier].findNextFeature(
                       thisB.chr,
                       pos,
                       1,
@@ -313,18 +325,14 @@ Browser.prototype.realInit2 = function() {
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                var tt = thisB.tiers[st];
+                var tt = thisB.tiers[thisB.selectedTier];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 if (ch >= 40) {
                     tt.forceHeight = ch - 10;
                     tt.draw();
                 }
             } else if (ev.ctrlKey) {
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                var tt = thisB.tiers[st];
+                var tt = thisB.tiers[thisB.selectedTier];
   
                 if (tt.quantLeapThreshold) {
                     var th = tt.subtiers[0].height;
@@ -332,19 +340,13 @@ Browser.prototype.realInit2 = function() {
                     if (!tq)
                         return;
 
-                    var qmin = 1.0 * tq.min;
-                    var qmax = 1.0 * tq.max;
-
-                    var qscale = (qmax - qmin) / th;
-                    tt.quantLeapThreshold = qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale;
-
-                    tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
+                    var qscale = (tq.max - tq.min) / th;
+                    tt.quantLeapThreshold = tq.min + ((((tt.quantLeapThreshold - tq.min)/qscale)|0)+1)*qscale;
                     tt.draw();
                 }                
             } else {
-                var st = thisB.getSelectedTier();
-                if (st > 0) {
-                    thisB.setSelectedTier(st - 1);
+                if (thisB.selectedTier > 0) {
+                    thisB.setSelectedTier(thisB.selectedTier - 1);
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
                 }
@@ -353,16 +355,12 @@ Browser.prototype.realInit2 = function() {
             ev.stopPropagation(); ev.preventDefault();
 
             if (ev.shiftKey) {
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                var tt = thisB.tiers[st];
+                var tt = thisB.tiers[thisB.selectedTier];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 tt.forceHeight = ch + 10;
                 tt.draw();
             } else if (ev.ctrlKey) {
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                var tt = thisB.tiers[st];
+                var tt = thisB.tiers[thisB.selectedTier];
 
                 if (tt.quantLeapThreshold) {
                     var th = tt.subtiers[0].height;
@@ -370,21 +368,16 @@ Browser.prototype.realInit2 = function() {
                     if (!tq)
                         return;
 
-                    var qmin = 1.0 * tq.min;
-                    var qmax = 1.0 * tq.max;
-                    var qscale = (qmax - qmin) / th;
-
-                    var it = Math.round((tt.quantLeapThreshold - qmin)/qscale)|0;
+                    var qscale = (tq.max - tq.min) / th;
+                    var it = ((tt.quantLeapThreshold - tq.min)/qscale)|0;
                     if (it > 1) {
-                        tt.quantLeapThreshold = qmin + (it-1)*qscale;
-                        tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
+                        tt.quantLeapThreshold = tq.min + (it-1)*qscale;
                         tt.draw();
                     }
                 }
             } else {
-                var st = thisB.getSelectedTier();
-                if (st < thisB.tiers.length -1) {
-                    thisB.setSelectedTier(st + 1);
+                if (thisB.selectedTier < thisB.tiers.length -1) {
+                    thisB.setSelectedTier(thisB.selectedTier + 1);
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
@@ -395,9 +388,7 @@ Browser.prototype.realInit2 = function() {
             thisB.zoomStep(10);
         } else if (ev.keyCode == 73 || ev.keyCode == 105) { // i
             ev.stopPropagation(); ev.preventDefault();
-            var st = thisB.getSelectedTier();
-            if (st < 0) return;
-            var t = thisB.tiers[st];
+            var t = thisB.tiers[thisB.selectedTier];
             if (!t.infoVisible) {
                 t.infoElement.style.display = 'block';
                 t.updateHeight();
@@ -408,9 +399,9 @@ Browser.prototype.realInit2 = function() {
                 t.infoVisible = false;
             }
         } else if (ev.keyCode == 84 || ev.keyCode == 116) { // t
+            ev.stopPropagation(); ev.preventDefault();
             var bumpStatus;
             if( ev.shiftKey ){
-                ev.stopPropagation(); ev.preventDefault();
                 for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                     var t = thisB.tiers[ti];
                     if (t.dasSource.collapseSuperGroups) {
@@ -423,11 +414,8 @@ Browser.prototype.realInit2 = function() {
                         t.updateLabel();
                     }
                 }
-            } else if (!ev.ctrlKey && !ev.metaKey) {
-                ev.stopPropagation(); ev.preventDefault();
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                var t = thisB.tiers[st];
+            } else {
+                var t = thisB.tiers[thisB.selectedTier];
                 if (t.dasSource.collapseSuperGroups) {
                     if (bumpStatus === undefined) {
                         bumpStatus = !t.bumped;
@@ -437,11 +425,6 @@ Browser.prototype.realInit2 = function() {
                     t.draw();
                     t.updateLabel();
                 }
-            }
-        } else if (ev.keyCode == 77 || ev.keyCode == 109) { // m
-            ev.stopPropagation(); ev.preventDefault();
-            if (thisB.selectedTiers.length > 1) {
-                thisB.mergeSelectedTiers();
             }
         } else {
             // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
@@ -465,7 +448,6 @@ Browser.prototype.realInit2 = function() {
     this.hPopupHolder.classList.add('dalliance');
     document.body.appendChild(this.hPopupHolder);
 
-    var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
         if (source.bwgURI && !this.supportsBinary) {
@@ -475,14 +457,8 @@ Browser.prototype.realInit2 = function() {
             }
             continue;
         }
-
-        if (!source.disabled) {
-            actualSources.push(source);
-            this.makeTier(source);
-        }
+        this.makeTier(source);
     }
-    this.sources = actualSources;
-
     thisB.arrangeTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
@@ -586,33 +562,42 @@ Browser.prototype.realMakeTier = function(source) {
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
     var viewport = makeElement('canvas', null, 
-                               {width: '' + ((this.featurePanelWidth|0) + 2000), 
-                                height: "50",
-                                className: 'viewport'});
-                               
+                               {width: '' + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
+                               {position: 'absolute', 
+                                padding: '0px', 
+                                margin: '0px',
+                                border: '0px', 
+                                left: '-1000px', /* borderTopStyle: 'solid', borderTopColor: 'black', */ 
+                                borderBottomStyle: 'solid', 
+                                borderBottomColor: 'rgb(180,180,180)', 
+                                borderRightStyle: 'solid', 
+                                borderRightColor: 'rgb(180,180,180)'});
 
     var viewportOverlay = makeElement('canvas', null,
-         {width: + ((this.featurePanelWidth|0) + 2000), 
-          height: "50",
-          className: 'viewport-overlay'});
+         {width: + ((this.featurePanelWidth|0) + 2000), height: "50"}, 
+         {position: 'relative', 
+          padding: '0px', 
+          margin: '0px',
+          border: '0px', 
+          left: '-1000px',
+          zIndex: '1000',
+          pointerEvents: 'none'});
 
-    var placardContent = makeElement('span', '');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
+    var placardContent = makeElement('span', 'blah');
+    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {}, {
+        display: 'none',
+        position: 'relative',
+//        width: '100%',
+        borderCollapse: 'collapse',
+        marginTop: '-1px',
+        height: '50px',
+        textAlign: 'center',
+        lineHeight: '50px',
+        borderStyle: 'solid',
+        borderColor: 'red',
+        borderWidth: '1px'});
     
-    var notifier = makeElement('div', 'Exciting message', {},
-        {backgroundColor: 'black',
-         color: 'white', 
-         zIndex: 5000,
-         position: 'relative',
-         top: '-25px',
-         opacity: 0.0,
-         padding: '6px',
-         borderRadius: '4px',
-         display: 'inline-block',
-         transition: 'opacity 0.6s ease-in-out'
-         });
-
-    var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
+    var vph = makeElement('div', [viewport, viewportOverlay], {}, {display: 'inline-block', position: 'relative', width: '100%' , overflowX: 'hidden', overflowY: 'hidden'});
     // vph.className = 'tier-viewport-background';
     vph.style.background = background;
 
@@ -624,12 +609,17 @@ Browser.prototype.realMakeTier = function(source) {
     var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
     tier.oorigin = this.viewStart;
     tier.background = background;
-    tier.notifier = notifier;
 
     tier.quantOverlay = makeElement(
         'canvas', null, 
-        {width: '50', height: "56",
-         className: 'quant-overlay'});
+        {width: '50', height: "56"}, 
+        {position: 'absolute', 
+         padding: '0px', 
+         margin: '0px',
+         border: '0px', 
+         left: '' + ((this.featurePanelWidth/2)|0) + 'px',
+         top: '0px',
+         display: 'none'});
     tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
@@ -763,8 +753,7 @@ Browser.prototype.realMakeTier = function(source) {
     if (source.pennant) {
         tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
     }
-    tier.nameElement = makeElement('span', source.name);
-    tier.nameButton.appendChild(makeElement('span', [tier.nameElement, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    tier.nameButton.appendChild(makeElement('span', [source.name, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
     tier.nameButton.appendChild(tier.bumpButton);
     tier.nameButton.appendChild(tier.loaderButton);
     
@@ -772,7 +761,7 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-    var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [vph, placard , tier.label ], {}, {position: 'relative', display: 'block' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
@@ -782,51 +771,24 @@ Browser.prototype.realMakeTier = function(source) {
     }, false);
     tier.nameButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-
-        if (ev.shiftKey) {
-            var hitTier = -1;
-            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
-                if (thisB.tiers[ti] === tier) {
-                    hitTier = ti;
-                    break;
+        for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+            if (thisB.tiers[ti] === tier) {
+                thisB.browserHolder.focus();
+                if (ti != thisB.selectedTier) {
+                    thisB.setSelectedTier(ti);
+                    return;
                 }
             }
-            if (hitTier >= 0) {
-                var i = thisB.selectedTiers.indexOf(hitTier);
-                if (i >= 0) {
-                    thisB.selectedTiers.splice(i, 1);
-                } else {
-                    thisB.selectedTiers.push(hitTier);
-                    thisB.selectedTiers.sort();
-                }
-                thisB.markSelectedTiers();
+        }
 
-                if (thisB.selectedTiers.length > 0) {
-                    thisB.browserHolder.focus();
-                } else {
-                    thisB.notifyTierSelectionWrap(-1);
-                }
-            }
+        if (!tier.infoVisible) {
+            tier.infoElement.style.display = 'block';
+            tier.updateHeight();
+            tier.infoVisible = true;
         } else {
-            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
-                if (thisB.tiers[ti] === tier) {
-                    thisB.browserHolder.focus();
-                    if (thisB.selectedTiers.length != 1 || thisB.selectedTiers[0] != ti) {
-                        thisB.setSelectedTier(ti);
-                        return;
-                    }
-                }
-            }
-
-            if (!tier.infoVisible) {
-                tier.infoElement.style.display = 'block';
-                tier.updateHeight();
-                tier.infoVisible = true;
-            } else {
-                tier.infoElement.style.display = 'none';
-                tier.updateHeight();
-                tier.infoVisible = false;
-            }
+            tier.infoElement.style.display = 'none';
+            tier.updateHeight();
+            tier.infoVisible = false;
         }
     }, false);
     tier.bumpButton.addEventListener('click', function(ev) {
@@ -871,10 +833,7 @@ Browser.prototype.realMakeTier = function(source) {
 
             yAtLastReorder = ev.clientY;
         }
-        
-        var holderBCR = thisB.svgHolder.getBoundingClientRect();
-        dragLabel.style.left = (label.getBoundingClientRect().left - holderBCR.left) + 'px'; 
-        dragLabel.style.top = (ev.clientY - holderBCR.top - 10) + 'px';
+        dragLabel.style.left = label.getBoundingClientRect().left + 'px'; dragLabel.style.top = ev.clientY - 10 + 'px';
         
         var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -883,10 +842,7 @@ Browser.prototype.realMakeTier = function(source) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    var st = [];
-                    for (var xi = 0; xi < thisB.selectedTiers.length; ++xi) {
-                        st.push(thisB.tiers[thisB.selectedTiers[xi]]);
-                    }
+                    var st = thisB.tiers[thisB.selectedTier];
 
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
@@ -894,10 +850,11 @@ Browser.prototype.realMakeTier = function(source) {
                     thisB.sources.splice(tierOrdinal, 1);
                     thisB.sources.splice(ti, 0, ts);
 
-                    thisB.selectedTiers = [];
+                    // FIXME probably shouldn't be recorded selected tier by index (!)
                     for (var sti = 0; sti < thisB.tiers.length; ++sti) {
-                        if (st.indexOf(thisB.tiers[sti]) >= 0)
-                            thisB.selectedTiers.push(sti);
+                        if (thisB.tiers[sti] === st) {
+                            thisB.selectedTier = sti; break;
+                        }
                     }
 
                     tierOrdinal = ti;
@@ -907,7 +864,6 @@ Browser.prototype.realMakeTier = function(source) {
                         thisB.tierHolder.appendChild(thisB.tiers[i].row);
                     }
                     thisB.tierHolder.appendChild(thisB.ruler);
-                    thisB.tierHolder.appendChild(thisB.ruler2);
                     tiersWereReordered = true;
                     thisB.arrangeTiers();
                 }
@@ -928,15 +884,8 @@ Browser.prototype.realMakeTier = function(source) {
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
 
-        if (tiersWereReordered) {
-            for (var ti = 0; ti < thisB.tiers.length; ++ti) {
-                if (thisB.tiers[ti] == tier) {
-                    thisB.setSelectedTier(ti);
-                    break;
-                }
-            }
+        if (tiersWereReordered)
             thisB.notifyTier();
-        }
     };
 
     tier.label.addEventListener('mousedown', function(ev) {
@@ -950,8 +899,7 @@ Browser.prototype.realMakeTier = function(source) {
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
     tier.init(); // fetches stylesheet
-    tier.currentlyHeight = 50;
-    this.updateHeight();
+    this.arrangeTiers();
     tier.updateLabel();
 
     if (tier.featureSource && tier.featureSource.addActivityListener) {
@@ -1173,6 +1121,8 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     } 
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
+    // var minExtraW = (width * this.minExtra) | 0;
+    // var maxExtraW = (width * this.maxExtra) | 0;
     var minExtraW = (100.0/this.scale)|0;
     var maxExtraW = (1000.0/this.scale)|0;
 
@@ -1180,6 +1130,9 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
         this.refresh();
     }
 }
+
+
+
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = this.tierHolder.getBoundingClientRect().width | 0;
@@ -1190,6 +1143,11 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     if (oldFPW != this.featurePanelWidth) {
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
+
+
+        // var delta = nve - this.viewEnd;
+        // this.viewStart = this.viewStart - (delta/2);
+        // this.viewEnd = this.viewEnd + (delta/2);
 
         this.viewEnd = nve;
 
@@ -1215,21 +1173,12 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 Browser.prototype.addTier = function(conf) {
     this.sources.push(conf);
     this.makeTier(conf);
-    this.markSelectedTiers();
     this.positionRuler();
     this.notifyTier();
 }
 
 function sourceDataURI(conf) {
-    if (conf.uri) {
-        return conf.uri;
-    } else if (conf.bwgBlob) {
-        return 'file:' + conf.bwgBlob.name;
-    } else if (conf.bamBlob) {
-        return 'file:' + conf.bamBlob.name;
-    }
-
-    return conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
+    return conf.uri || conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
 }
 
 function sourceStyleURI(conf) {
@@ -1246,16 +1195,13 @@ function sourcesAreEqual(a, b) {
         sourceStyleURI(a) != sourceStyleURI(b))
         return false;
 
-    if (a.overlay) {
-        if (!b.overlay || b.overlay.length != a.overlay.length)
+    if (a.overlays) {
+        if (!b.overlays && b.overlays.length != a.overlays.length)
             return false;
-        for (var oi = 0; oi < a.overlay.length; ++oi) {
-            if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
+        for (var oi = 0; oi < a.overlays.length; ++oi) {
+            if (!sourcesAreEquals(a.overlays[oi], b.overlays[oi]))
                 return false;
         }
-    } else {
-        if (b.overlay)
-            return false;
     }
 
     return true;
@@ -1287,18 +1233,6 @@ Browser.prototype.removeTier = function(conf) {
     this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
     this.sources.splice(target, 1);
-
-    var nst = [];
-    for (var sti = 0; sti < this.selectedTiers.length; ++sti) {
-        var st = this.selectedTiers[sti];
-        if (st < target) {
-            nst.push(st);
-        } else if (st > target) {
-            nst.push(st - 1);
-        }
-    }
-    this.selectedTiers = nst;
-    this.markSelectedTiers();
 
     this.arrangeTiers();
     this.notifyTier();
@@ -1406,8 +1340,7 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
 Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
-          if (this.featureListeners[fli](ev, feature, hit, tier))
-            return;
+          this.featureListeners[fli](ev, feature, hit, tier);
       } catch (ex) {
           console.log(ex.stack);
       }
@@ -1506,31 +1439,19 @@ Browser.prototype.featuresInRegion = function(chr, min, max) {
     return features;
 }
 
-
-Browser.prototype.getSelectedTier = function() {
-    if (this.selectedTiers.length > 0) 
-        return this.selectedTiers[0];
-    else
-        return -1;
-}
-
 Browser.prototype.setSelectedTier = function(t) {
-    this.selectedTiers = [t];
-    this.markSelectedTiers();
-}
-
-Browser.prototype.markSelectedTiers = function() {
+    this.selectedTier = t;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var button = this.tiers[ti].nameButton;
 
-        if (this.selectedTiers.indexOf(ti) >= 0) {
+        if (ti == this.selectedTier) {
             button.classList.add('active');
             // this.tiers[ti].label.focus();
         } else {
             button.classList.remove('active');
         }
     }
-    if (this.selectedTiers.length > 0) {
+    if (t != null) {
         this.browserHolder.focus();
     }
 }
@@ -1571,9 +1492,6 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.left = left;
     this.ruler.style.right = right;
 
-    this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
-    this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var q = this.tiers[ti].quantOverlay;
         if (q) {
@@ -1609,13 +1527,6 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
 
     var width = this.viewEnd - this.viewStart;
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
-}
-
-Browser.prototype.updateHeight = function() {
-    var tierTotal = 0;
-    for (var ti = 0; ti < this.tiers.length; ++ti) 
-        tierTotal += (this.tiers[ti].currentHeight || 30);
-    this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
 function glyphLookup(glyphs, rx, matches) {

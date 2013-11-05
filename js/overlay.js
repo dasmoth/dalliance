@@ -11,7 +11,6 @@ function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
     this.activityListeners = [];
-    this.changeListeners = [];
     this.business = [];
 
     for (var i = 0; i < this.sources.length; ++i) {
@@ -36,11 +35,6 @@ OverlayFeatureSource.prototype.initN = function(n) {
             thisB.notifyActivity();
         });
     }
-    if (s.addChangeListener) {
-        s.addChangeListener(function() {
-            thisB.notifyChange();
-        });
-    }
 }
 
 OverlayFeatureSource.prototype.addActivityListener = function(l) {
@@ -62,20 +56,6 @@ OverlayFeatureSource.prototype.notifyActivity = function() {
     }
 }
 
-OverlayFeatureSource.prototype.addChangeListener = function(listener) {
-    this.changeListeners.push(listener);
-}
-
-OverlayFeatureSource.prototype.notifyChange = function() {
-    for (var li = 0; li < this.changeListeners.length; ++li) {
-        try {
-            this.changeListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
-
 OverlayFeatureSource.prototype.getScales = function() {
     return this.sources[0].getScales();
 }
@@ -85,30 +65,10 @@ OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
 }
 
 OverlayFeatureSource.prototype.capabilities = function() {
-    var caps = {};
     var s0 = this.sources[0];
     if (s0.capabilities) 
-        caps = shallowCopy(s0.capabilities());
-
-    for (var i = 1; i < this.sources.length; ++i) {
-        var si = this.sources[i];
-        if (si.capabilities) {
-            var co = si.capabilities();
-            if (co.search) {
-                caps.search = co.search;
-            }
-        }
-    }
-
-    return caps;
-}
-
-OverlayFeatureSource.prototype.search = function(query, callback) {
-    for (var i = 0; i < this.sources.length; ++i) {
-        if (sourceAdapterIsCapable(this.sources[i], 'search')) {
-            return this.sources[i].search(query, callback);
-        }
-    }
+        return s0.capabilities();
+    return {};
 }
 
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -189,26 +149,21 @@ function OverlayFeatureSource_merge_byKey(featureSets) {
     var om = {};
     var of = featureSets[1];
     for (var fi = 0; fi < of.length; ++fi) {
-	   om[this.keyForFeature(of[fi])] = of[fi];
+	om[this.keyForFeature(of[fi])] = of[fi];
     }
 
     var mf = [];
     var fl = featureSets[0];
     for (var fi = 0; fi < fl.length; ++fi) {
-    	var f = fl[fi];
-    	of = om[this.keyForFeature(f)]
-    	if (of) {
-    	    if (of.id)
-    		  f.id = of.id;
-    	    if (of.label) 
-    		  f.label = of.label;
-
-            if (of.score2)
-                f.score2 = of.score2;
-            else if (of.score)
-                f.score2 = of.score;
-    	}
-    	mf.push(f);
+	var f = fl[fi];
+	of = om[this.keyForFeature(f)]
+	if (of) {
+	    if (of.id)
+		f.id = of.id;
+	    if (of.label) 
+		f.label = of.label;
+	}
+	mf.push(f);
     }
     return mf;
 }

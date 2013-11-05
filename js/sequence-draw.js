@@ -31,10 +31,7 @@ function drawSeqTier(tier, seq)
 {
     var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
 
-    var fpw = tier.viewport.width|0;
-    if (fpw < tier.browser.featurePanelWidth + 1950) {
-        tier.viewport.width = fpw = (tier.browser.featurePanelWidth|0) + 2000;
-    }
+    var fpw = tier.viewport.width|0; 
 
     var height = 50;
     if (seq && seq.seq) {

@@ -36,14 +36,6 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     }
 
     this.initSources();
-
-    var thisB = this;
-    if (this.featureSource && this.featureSource.getDefaultFIPs) {
-        this.featureSource.getDefaultFIPs(function(fip) {
-            if (fip)
-                thisB.addFeatureInfoPlugin(fip);
-        });
-    }
 }
 
 DasTier.prototype.toString = function() {
@@ -173,7 +165,6 @@ DasTier.prototype.updateStatus = function(status) {
         this.placard.style.display = 'none';
         this.holder.style.display = 'block';
     }
-    this.updateHeight();
 }
 
 DasTier.prototype.draw = function() {
@@ -274,12 +265,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.currentHeight = Math.max(this.holder.clientHeight, this.label.clientHeight + 4);
-    if (this.placard.style.display !== 'none') {
-        this.currentHeight = Math.max(this.currentHeight, this.placard.clientHeight + 2);
-    }
-    this.row.style.height = '' + this.currentHeight + 'px';
-    this.browser.updateHeight();
+    this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
  }
 
 DasTier.prototype.drawOverlay = function() {
@@ -309,19 +295,4 @@ DasTier.prototype.drawOverlay = function() {
 
     t.oorigin = b.viewStart;
     t.overlay.style.left = '-1000px'
-}
-
-DasTier.prototype.notify = function(message) {
-    this.notifier.innerText = message;
-    this.notifier.style.opacity = 0.8;
-    if (this.notifierFadeTimeout) {
-        clearTimeout(this.notifierFadeTimeout);
-    }
-
-    var thisB = this;
-    this.notifierFadeTimeout = setTimeout(function() {
-        thisB.notifier.style.opacity = 0;
-        thisB.notifierFadeTimeout = null;
-    }, 2000);
-
 }

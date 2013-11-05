@@ -10,8 +10,8 @@
 var VERSION = {
     CONFIG: 3,
     MAJOR:  0,
-    MINOR:  10,
-    MICRO:  5,
+    MINOR:  9,
+    MICRO:  2,
     PATCH:  '',
     BRANCH: 'dev'
 }

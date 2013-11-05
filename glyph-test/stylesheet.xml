@@ -184,20 +184,8 @@
             <HEIGHT>10</HEIGHT>
             <FGCOLOR>red</FGCOLOR>
             <LABEL>no</LABEL>
-            <BUMP>no</BUMP>
+            <BUMP>yes</BUMP>
           </TOOMANY>
-        </GLYPH>
-      </TYPE>
-
-      <TYPE id='test8a'>
-        <GLYPH>
-          <STAR>
-            <HEIGHT>10</HEIGHT>
-            <FGCOLOR>purple</FGCOLOR>
-            <LABEL>no</LABEL>
-            <BUMP>no</BUMP>
-            <ZINDEX>100</ZINDEX>
-          </STAR>
         </GLYPH>
       </TYPE>
 

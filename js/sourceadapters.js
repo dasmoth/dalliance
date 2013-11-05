@@ -7,12 +7,6 @@
 // sourceadapters.js
 //
 
-var __dalliance_sourceAdapterFactories = {}
-
-function dalliance_registerSourceAdapterFactory(type, factory) {
-    __dalliance_sourceAdapterFactories[type] = factory;
-}
-
 DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
@@ -29,13 +23,6 @@ DasTier.prototype.initSources = function() {
 
     this.featureSource = fs;
     this.sequenceSource = ss;
-
-    if (this.featureSource && this.featureSource.addChangeListener) {
-        this.featureSource.addChangeListener(function() {
-            thisTier.browser.refreshTier(thisTier);
-        });
-    }
-
 }
 
 Browser.prototype.createFeatureSource = function(config) {
@@ -44,10 +31,7 @@ Browser.prototype.createFeatureSource = function(config) {
         return fs;
     }
 
-    if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
-        var saf = __dalliance_sourceAdapterFactories[config.tier_type];
-        fs = saf(config).features;
-    } else if (config.bwgURI || config.bwgBlob) {
+    if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         fs = new BAMFeatureSource(config);
@@ -55,6 +39,8 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
+    } else if (config.tier_type == 'ensembl') {
+        fs = new EnsemblFeatureSource(config);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
@@ -114,28 +100,11 @@ SourceCache.prototype.put = function(conf, source) {
 var __cfs_id_seed = 0;
 
 function CachingFeatureSource(source) {
-    var thisB = this;
-
     this.source = source;
     this.cfsid = 'cfs' + (++__cfs_id_seed);
     if (source.name) {
         this.name = source.name;
     }
-    if (source.addChangeListener) {
-        source.addChangeListener(function() {
-            thisB.cfsid = 'cfs' + (++__cfs_id_seed);
-        });
-    }
-}
-
-CachingFeatureSource.prototype.search = function(query, callback) {
-    if (this.source.search)
-        return this.source.search(query, callback);
-}
-
-CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
-    if (this.source.getDefaultFIPs)
-        return this.source.getDefaultFIPs(callback); 
 }
 
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {
@@ -150,11 +119,6 @@ CachingFeatureSource.prototype.addActivityListener = function(l) {
     if (this.source.addActivityListener) {
         this.source.addActivityListener(l);
     }
-}
-
-CachingFeatureSource.prototype.addChangeListener = function(l) {
-    if (this.source.addChangeListener)
-        this.source.addChangeListener(l);
 }
 
 CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
@@ -174,17 +138,12 @@ CachingFeatureSource.prototype.capabilities = function() {
 }
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    if (pool == null) {
-        throw 'pool is null...';
-    }
-
     var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();
         pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
         this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
-            if (!awaitedFeatures.res)
-                awaitedFeatures.provide({status: status, features: features, scale: scale});
+            awaitedFeatures.provide({status: status, features: features, scale: scale});
         });
     } 
 
@@ -443,17 +402,8 @@ BWGFeatureSource.prototype.init = function() {
         arg = this.bwgSource.bwgBlob;
     }
 
-    make(arg, function(bwg, err) {
-        if (err) {
-            console.log(err);
-        } else {
-            thisB.bwgHolder.provide(bwg);
-            if (bwg.type == 'bigbed') {
-                bwg.getExtraIndices(function(ei) {
-                    thisB.extraIndices = ei;
-                });
-            }
-        }
+    make(arg, function(bwg) {
+        thisB.bwgHolder.provide(bwg);
     }, this.opts.credentials);
 }
 
@@ -461,12 +411,6 @@ BWGFeatureSource.prototype.capabilities = function() {
     var caps = {leap: true};
     if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
         caps.quantLeap = true;
-    if (this.extraIndices && this.extraIndices.length > 0) {
-        caps.search = [];
-        for (var eii = 0; eii < this.extraIndices.length; ++eii) {
-            caps.search.push(this.extraIndices[eii].field);
-        }
-    }
     return caps;
 }
 
@@ -573,33 +517,6 @@ BWGFeatureSource.prototype.getScales = function() {
     } else {
         return null;
     }
-}
-
-BWGFeatureSource.prototype.search = function(query, callback) {
-    console.log(query);
-    if (!this.extraIndices || this.extraIndices.length == 0) {
-        return callback(null, 'No indices available');
-    }
-
-    var index = this.extraIndices[0];
-    return index.lookup(query, callback);
-}
-
-BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
-    this.bwgHolder.await(function(bwg) {
-        if (bwg.schema && bwg.definedFieldCount+3 < bwg.schema.fields.length) {
-            var fip = function(feature, featureInfo) {
-                for (var fi = bwg.definedFieldCount+3; fi < bwg.schema.fields.length; ++fi) {
-                    var f = bwg.schema.fields[fi];
-                    featureInfo.add(f.comment, feature[f.name]);
-                }
-            };
-
-            callback(fip);
-        } else {
-            // No need to do anything.
-        }
-    });
 }
 
 BWGFeatureSource.prototype.getStyleSheet = function(callback) {

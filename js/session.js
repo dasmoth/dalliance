@@ -72,7 +72,7 @@ Browser.prototype.restoreStatus = function() {
     }
 
     var storedConfigHash = localStorage['dalliance.' + this.cookieKey + '.configHash'] || '';
-    var pageConfigHash = hex_sha1(miniJSONify({sources: this.sources, hubs: this.hubs}));
+    var pageConfigHash = hex_sha1(miniJSONify(this.sources));
     if (pageConfigHash != storedConfigHash) {
         localStorage['dalliance.' + this.cookieKey + '.configHash'] = pageConfigHash;
         return;

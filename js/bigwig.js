@@ -37,10 +37,13 @@ BigWig.prototype.readChromTree = function(callback) {
         var valSize = la[3];
         var itemCount = (la[4] << 32) | (la[5]);
         var rootNodeOffset = 32;
+        
+        // console.log('blockSize=' + blockSize + '    keySize=' + keySize + '   valSize=' + valSize + '    itemCount=' + itemCount);
 
         var bptReadNode = function(offset) {
             var nodeType = ba[offset];
             var cnt = sa[(offset/2) + 1];
+            // console.log('ReadNode: ' + offset + '     type=' + nodeType + '   count=' + cnt);
             offset += 4;
             for (var n = 0; n < cnt; ++n) {
                 if (nodeType == 0) {
@@ -61,6 +64,7 @@ BigWig.prototype.readChromTree = function(callback) {
                     var chromSize = (ba[offset + 7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
                     offset += 8;
 
+                    // console.log(key + ':' + chromId + ',' + chromSize);
                     thisB.chromsToIDs[key] = chromId;
                     if (key.indexOf('chr') == 0) {
                         thisB.chromsToIDs[key.substr(3)] = chromId;
@@ -101,6 +105,7 @@ BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
 BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     var thisB = this;
     if (!this.cirHeader) {
+        // dlog('No CIR yet, fetching');
         this.bwg.data.slice(this.cirTreeOffset, 48).fetch(function(result) {
             thisB.cirHeader = result;
             var la = new Int32Array(thisB.cirHeader);
@@ -115,10 +120,6 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
     var beforeBWG = Date.now();
 
-    var filter = function(chromId, fmin, fmax, toks) {
-        return ((chr < 0 || chromId == chr) && fmin <= max && fmax >= min);
-    }
-
     var cirFobRecur = function(offset, level) {
         outstanding += offset.length;
 
@@ -130,6 +131,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
         }
         
         var fetchRanges = spans.ranges();
+        // console.log('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
             var fr = fetchRanges[r];
             cirFobStartFetch(offset, fr, level);
@@ -138,13 +140,14 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
     var cirFobStartFetch = function(offset, fr, level, attempts) {
         var length = fr.max() - fr.min();
+        // console.log('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
         thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(resultBuffer) {
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
                     --outstanding;
                     if (outstanding == 0) {
-                        thisB.fetchFeatures(filter, blocksToFetch, callback);
+                        cirCompleted();
                     }
                 }
             }
@@ -158,6 +161,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
         var isLeaf = ba[offset];
         var cnt = sa[offset/2 + 1];
+        // dlog('cir level=' + level + '; cnt=' + cnt);
         offset += 4;
 
         if (isLeaf != 0) {
@@ -172,6 +176,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 if (((chr < 0 || startChrom < chr) || (startChrom == chr && startBase <= max)) &&
                     ((chr < 0 || endChrom   > chr) || (endChrom == chr && endBase >= min)))
                 {
+                    // console.log('Got an interesting block: startChrom=' + startChrom + '; startBase=' + startBase + '; endChrom=' + endChrom + ' ;endBase=' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                     blocksToFetch.push({offset: blockOffset, size: blockSize});
                 }
                 offset += 32;
@@ -189,6 +194,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                     (chr < 0 || endChrom   > chr || (endChrom == chr && endBase >= min)))
                 {
                     recurOffsets.push(blockOffset);
+                    // console.log('interesting inner: startChrom=' + startChrom + '; endChrom=' + endChrom);
                 }
                 offset += 24;
             }
@@ -197,272 +203,260 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             }
         }
     };
+    
 
-    cirFobRecur([thisB.cirTreeOffset + 48], 1);
-}
+    var cirCompleted = function() {
+        blocksToFetch.sort(function(b0, b1) {
+            return (b0.offset|0) - (b1.offset|0);
+        });
 
+        if (blocksToFetch.length == 0) {
+            callback([]);
+        } else {
+            var features = [];
+            var createFeature = function(chr, fmin, fmax, opts) {
+                // dlog('createFeature(' + fmin +', ' + fmax + ')');
 
-BigWigView.prototype.fetchFeatures = function(filter, blocksToFetch, callback) {
-    var thisB = this;
-
-    blocksToFetch.sort(function(b0, b1) {
-        return (b0.offset|0) - (b1.offset|0);
-    });
-
-    if (blocksToFetch.length == 0) {
-        callback([]);
-    } else {
-        var features = [];
-        var createFeature = function(chr, fmin, fmax, opts) {
-            if (!opts) {
-                opts = {};
-            }
-        
-            var f = new DASFeature();
-            f._chromId = chr;
-            f.segment = thisB.bwg.idsToChroms[chr];
-            f.min = fmin;
-            f.max = fmax;
-            f.type = 'bigwig';
+                if (!opts) {
+                    opts = {};
+                }
             
-            for (k in opts) {
-                f[k] = opts[k];
-            }
-            
-            features.push(f);
-        };
-
-
-
-
-        var tramp = function() {
-            if (blocksToFetch.length == 0) {
-                var afterBWG = Date.now();
-                // dlog('BWG fetch took ' + (afterBWG - beforeBWG) + 'ms');
-                callback(features);
-                return;  // just in case...
-            } else {
-                var block = blocksToFetch[0];
-                if (block.data) {
-                    thisB.parseFeatures(block.data, createFeature, filter);
-                    blocksToFetch.splice(0, 1);
-                    tramp();
+                var f = new DASFeature();
+                f._chromId = chr;
+                f.segment = thisB.bwg.idsToChroms[chr];
+                f.min = fmin;
+                f.max = fmax;
+                f.type = 'bigwig';
+                
+                for (k in opts) {
+                    f[k] = opts[k];
+                }
+                
+                features.push(f);
+            };
+            var maybeCreateFeature = function(chromId, fmin, fmax, opts) {
+                if ((chr < 0 || chromId == chr) && fmin <= max && fmax >= min) {
+                    createFeature(chromId, fmin, fmax, opts);
+                }
+            };
+            var tramp = function() {
+                if (blocksToFetch.length == 0) {
+                    var afterBWG = Date.now();
+                    // dlog('BWG fetch took ' + (afterBWG - beforeBWG) + 'ms');
+                    callback(features);
+                    return;  // just in case...
                 } else {
-                    var fetchStart = block.offset;
-                    var fetchSize = block.size;
-                    var bi = 1;
-                    while (bi < blocksToFetch.length && blocksToFetch[bi].offset == (fetchStart + fetchSize)) {
-                        fetchSize += blocksToFetch[bi].size;
-                        ++bi;
-                    }
+                    var block = blocksToFetch[0];
+                    if (block.data) {
+                        var ba = new Uint8Array(block.data);
 
-                    thisB.bwg.data.slice(fetchStart, fetchSize).fetch(function(result) {
-                        var offset = 0;
-                        var bi = 0;
-                        while (offset < fetchSize) {
-                            var fb = blocksToFetch[bi];
-                        
-                            var data;
-                            if (thisB.bwg.uncompressBufSize > 0) {
-                                data = jszlib_inflate_buffer(result, offset + 2, fb.size - 2);
-                            } else {
-                                var tmp = new Uint8Array(fb.size);    // FIXME is this really the best we can do?
-                                arrayCopy(new Uint8Array(result, offset, fb.size), 0, tmp, 0, fb.size);
-                                data = tmp.buffer;
+                        if (thisB.isSummary) {
+                            var sa = new Int16Array(block.data);
+                            var la = new Int32Array(block.data);
+                            var fa = new Float32Array(block.data);
+
+                            var itemCount = block.data.byteLength/32;
+                            for (var i = 0; i < itemCount; ++i) {
+                                var chromId =   la[(i*8)];
+                                var start =     la[(i*8)+1];
+                                var end =       la[(i*8)+2];
+                                var validCnt =  la[(i*8)+3];
+                                var minVal    = fa[(i*8)+4];
+                                var maxVal    = fa[(i*8)+5];
+                                var sumData   = fa[(i*8)+6];
+                                var sumSqData = fa[(i*8)+7];
+                                
+                                if (chr < 0 || chromId == chr) {
+                                    var summaryOpts = {type: 'bigwig', score: sumData/validCnt, maxScore: maxVal};
+                                    if (thisB.bwg.type == 'bigbed') {
+                                        summaryOpts.type = 'density';
+                                    }
+                                    maybeCreateFeature(chromId, start + 1, end, summaryOpts);
+                                }
                             }
-                            fb.data = data;
+                        } else if (thisB.bwg.type == 'bigwig') {
+                            var sa = new Int16Array(block.data);
+                            var la = new Int32Array(block.data);
+                            var fa = new Float32Array(block.data);
+
+                            var chromId = la[0];
+                            var blockStart = la[1];
+                            var blockEnd = la[2];
+                            var itemStep = la[3];
+                            var itemSpan = la[4];
+                            var blockType = ba[20];
+                            var itemCount = sa[11];
+
+                            // dlog('processing bigwig block, type=' + blockType + '; count=' + itemCount);
                             
-                            offset += fb.size;
+                            if (blockType == BIG_WIG_TYPE_FSTEP) {
+                                for (var i = 0; i < itemCount; ++i) {
+                                    var score = fa[i + 6];
+                                    maybeCreateFeature(chromId, blockStart + (i*itemStep) + 1, blockStart + (i*itemStep) + itemSpan, {score: score});
+                                }
+                            } else if (blockType == BIG_WIG_TYPE_VSTEP) {
+                                for (var i = 0; i < itemCount; ++i) {
+                                    var start = la[(i*2) + 6];
+                                    var score = fa[(i*2) + 7];
+                                    maybeCreateFeature(chromId, start + 1, start + itemSpan, {score: score});
+                                }
+                            } else if (blockType == BIG_WIG_TYPE_GRAPH) {
+                                for (var i = 0; i < itemCount; ++i) {
+                                    var start = la[(i*3) + 6];
+                                    var end   = la[(i*3) + 7];
+                                    var score = fa[(i*3) + 8];
+                                    if (start > end) {
+                                        start = end;
+                                    }
+                                    maybeCreateFeature(chromId, start + 1, end, {score: score});
+                                }
+                            } else {
+                                dlog('Currently not handling bwgType=' + blockType);
+                            }
+                        } else if (thisB.bwg.type == 'bigbed') {
+                            var offset = 0;
+                            while (offset < ba.length) {
+                                var chromId = (ba[offset+3]<<24) | (ba[offset+2]<<16) | (ba[offset+1]<<8) | (ba[offset+0]);
+                                var start = (ba[offset+7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
+                                var end = (ba[offset+11]<<24) | (ba[offset+10]<<16) | (ba[offset+9]<<8) | (ba[offset+8]);
+                                offset += 12;
+                                var rest = '';
+                                while (true) {
+                                    var ch = ba[offset++];
+                                    if (ch != 0) {
+                                        rest += String.fromCharCode(ch);
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                var featureOpts = {};
+                                
+                                var bedColumns = rest.split('\t');
+                                if (bedColumns.length > 0) {
+                                    featureOpts.label = bedColumns[0];
+                                }
+                                if (bedColumns.length > 1) {
+                                    featureOpts.score = stringToInt(bedColumns[1]);
+                                }
+                                if (bedColumns.length > 2) {
+                                    featureOpts.orientation = bedColumns[2];
+                                }
+                                if (bedColumns.length > 5) {
+                                    var color = bedColumns[5];
+                                    if (BED_COLOR_REGEXP.test(color)) {
+                                        featureOpts.override_color = 'rgb(' + color + ')';
+                                    }
+                                }
+
+                                if (bedColumns.length < 9) {
+                                    if (chromId == chr) {
+                                        maybeCreateFeature(chromId, start + 1, end, featureOpts);
+                                    }
+                                } else if (chromId == chr && start <= max && end >= min) {
+                                    // Complex-BED?
+                                    // FIXME this is currently a bit of a hack to do Clever Things with ensGene.bb
+
+                                    var thickStart = bedColumns[3]|0;
+                                    var thickEnd   = bedColumns[4]|0;
+                                    var blockCount = bedColumns[6]|0;
+                                    var blockSizes = bedColumns[7].split(',');
+                                    var blockStarts = bedColumns[8].split(',');
+                                    
+                                    featureOpts.type = 'bb-transcript'
+                                    var grp = new DASGroup();
+                                    grp.id = bedColumns[0];
+                                    grp.type = 'bb-transcript'
+                                    grp.notes = [];
+                                    featureOpts.groups = [grp];
+
+                                    if (bedColumns.length > 10) {
+                                        var geneId = bedColumns[9];
+                                        var geneName = bedColumns[10];
+                                        var gg = new DASGroup();
+                                        gg.id = geneId;
+                                        gg.label = geneName;
+                                        gg.type = 'gene';
+                                        featureOpts.groups.push(gg);
+                                    }
+
+                                    var spans = null;
+                                    for (var b = 0; b < blockCount; ++b) {
+                                        var bmin = (blockStarts[b]|0) + start;
+                                        var bmax = bmin + (blockSizes[b]|0);
+                                        var span = new Range(bmin, bmax);
+                                        if (spans) {
+                                            spans = union(spans, span);
+                                        } else {
+                                            spans = span;
+                                        }
+                                    }
+                                    
+                                    var tsList = spans.ranges();
+                                    for (var s = 0; s < tsList.length; ++s) {
+                                        var ts = tsList[s];
+                                        createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
+                                    }
+
+                                    if (thickEnd > thickStart) {
+                                        var tl = intersection(spans, new Range(thickStart, thickEnd));
+                                        if (tl) {
+                                            featureOpts.type = 'bb-translation';
+                                            var tlList = tl.ranges();
+                                            for (var s = 0; s < tlList.length; ++s) {
+                                                var ts = tlList[s];
+                                                createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            dlog("Don't know what to do with " + thisB.bwg.type);
+                        }
+                        blocksToFetch.splice(0, 1);
+                        tramp();
+                    } else {
+                        var fetchStart = block.offset;
+                        var fetchSize = block.size;
+                        var bi = 1;
+                        while (bi < blocksToFetch.length && blocksToFetch[bi].offset == (fetchStart + fetchSize)) {
+                            fetchSize += blocksToFetch[bi].size;
                             ++bi;
                         }
-                        tramp();
-                    });
-                }
-            }
-        }
-        tramp();
-    }
-}
 
-BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
-    var ba = new Uint8Array(data);
-
-    if (this.isSummary) {
-        var sa = new Int16Array(data);
-        var la = new Int32Array(data);
-        var fa = new Float32Array(data);
-
-        var itemCount = data.byteLength/32;
-        for (var i = 0; i < itemCount; ++i) {
-            var chromId =   la[(i*8)];
-            var start =     la[(i*8)+1];
-            var end =       la[(i*8)+2];
-            var validCnt =  la[(i*8)+3];
-            var minVal    = fa[(i*8)+4];
-            var maxVal    = fa[(i*8)+5];
-            var sumData   = fa[(i*8)+6];
-            var sumSqData = fa[(i*8)+7];
-            
-            if (filter(chromId, start + 1, end)) {
-                var summaryOpts = {type: 'bigwig', score: sumData/validCnt, maxScore: maxVal};
-                if (this.bwg.type == 'bigbed') {
-                    summaryOpts.type = 'density';
-                }
-                createFeature(chromId, start + 1, end, summaryOpts);
-            }
-        }
-    } else if (this.bwg.type == 'bigwig') {
-        var sa = new Int16Array(data);
-        var la = new Int32Array(data);
-        var fa = new Float32Array(data);
-
-        var chromId = la[0];
-        var blockStart = la[1];
-        var blockEnd = la[2];
-        var itemStep = la[3];
-        var itemSpan = la[4];
-        var blockType = ba[20];
-        var itemCount = sa[11];
-        
-        if (blockType == BIG_WIG_TYPE_FSTEP) {
-            for (var i = 0; i < itemCount; ++i) {
-                var score = fa[i + 6];
-                var fmin = blockStart + (i*itemStep) + 1, fmax = blockStart + (i*itemStep) + itemSpan;
-                if (filter(chromId, fmin, fmax))
-                    createFeature(chromId, fmin, fmax, {score: score});
-            }
-        } else if (blockType == BIG_WIG_TYPE_VSTEP) {
-            for (var i = 0; i < itemCount; ++i) {
-                var start = la[(i*2) + 6] + 1;
-                var end = start + itemSpan - 1;
-                var score = fa[(i*2) + 7];
-                if (filter(chromId, start, end))
-                    createFeature(chromId, start, end, {score: score});
-            }
-        } else if (blockType == BIG_WIG_TYPE_GRAPH) {
-            for (var i = 0; i < itemCount; ++i) {
-                var start = la[(i*3) + 6] + 1;
-                var end   = la[(i*3) + 7];
-                var score = fa[(i*3) + 8];
-                if (start > end) {
-                    start = end;
-                }
-                if (filter(chromId, start, end))
-                    createFeature(chromId, start, end, {score: score});
-            }
-        } else {
-            console.log('Currently not handling bwgType=' + blockType);
-        }
-    } else if (this.bwg.type == 'bigbed') {
-        var offset = 0;
-        var dfc = this.bwg.definedFieldCount;
-        var schema = this.bwg.schema;
-
-        while (offset < ba.length) {
-            var chromId = (ba[offset+3]<<24) | (ba[offset+2]<<16) | (ba[offset+1]<<8) | (ba[offset+0]);
-            var start = (ba[offset+7]<<24) | (ba[offset+6]<<16) | (ba[offset+5]<<8) | (ba[offset+4]);
-            var end = (ba[offset+11]<<24) | (ba[offset+10]<<16) | (ba[offset+9]<<8) | (ba[offset+8]);
-            offset += 12;
-            var rest = '';
-            while (true) {
-                var ch = ba[offset++];
-                if (ch != 0) {
-                    rest += String.fromCharCode(ch);
-                } else {
-                    break;
-                }
-            }
-
-            var featureOpts = {};
-            
-            var bedColumns = rest.split('\t');
-            if (bedColumns.length > 0 && dfc > 3) {
-                featureOpts.label = bedColumns[0];
-            }
-            if (bedColumns.length > 1 && dfc > 4) {
-                featureOpts.score = stringToInt(bedColumns[1]);
-            }
-            if (bedColumns.length > 2 && dfc > 5) {
-                featureOpts.orientation = bedColumns[2];
-            }
-            if (bedColumns.length > 5 && dfc > 8) {
-                var color = bedColumns[5];
-                if (BED_COLOR_REGEXP.test(color)) {
-                    featureOpts.itemRgb = 'rgb(' + color + ')';
-                }
-            }
-
-            if (bedColumns.length > dfc-3 && schema) {
-                for (var col = dfc - 3; col < bedColumns.length; ++col) {
-                    featureOpts[schema.fields[col+3].name] = bedColumns[col];
-                }
-            }
-
-            if (filter(chromId, start + 1, end, bedColumns)) {
-                if (dfc < 12) {
-                    createFeature(chromId, start + 1, end, featureOpts);
-                } else {
-                    var thickStart = bedColumns[3]|0;
-                    var thickEnd   = bedColumns[4]|0;
-                    var blockCount = bedColumns[6]|0;
-                    var blockSizes = bedColumns[7].split(',');
-                    var blockStarts = bedColumns[8].split(',');
-                    
-                    featureOpts.type = 'bb-transcript'
-                    var grp = new DASGroup();
-                    grp.id = bedColumns[0];
-                    grp.type = 'bb-transcript'
-                    grp.notes = [];
-                    featureOpts.groups = [grp];
-
-                    if (bedColumns.length > 9) {
-                        var geneId = bedColumns[9];
-                        var geneName = geneId;
-                        if (bedColumns.length > 10) {
-                            geneName = bedColumns[10];
-                        }
-                        var gg = new DASGroup();
-                        gg.id = geneId;
-                        gg.label = geneName;
-                        gg.type = 'gene';
-                        featureOpts.groups.push(gg);
-                    }
-
-                    var spans = null;
-                    for (var b = 0; b < blockCount; ++b) {
-                        var bmin = (blockStarts[b]|0) + start;
-                        var bmax = bmin + (blockSizes[b]|0);
-                        var span = new Range(bmin, bmax);
-                        if (spans) {
-                            spans = union(spans, span);
-                        } else {
-                            spans = span;
-                        }
-                    }
-                    
-                    var tsList = spans.ranges();
-                    for (var s = 0; s < tsList.length; ++s) {
-                        var ts = tsList[s];
-                        createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
-                    }
-
-                    if (thickEnd > thickStart) {
-                        var tl = intersection(spans, new Range(thickStart, thickEnd));
-                        if (tl) {
-                            featureOpts.type = 'bb-translation';
-                            var tlList = tl.ranges();
-                            for (var s = 0; s < tlList.length; ++s) {
-                                var ts = tlList[s];
-                                createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
+                        thisB.bwg.data.slice(fetchStart, fetchSize).fetch(function(result) {
+                            var offset = 0;
+                            var bi = 0;
+                            while (offset < fetchSize) {
+                                var fb = blocksToFetch[bi];
+                            
+                                var data;
+                                if (thisB.bwg.uncompressBufSize > 0) {
+                                    // var beforeInf = Date.now();
+                                    data = jszlib_inflate_buffer(result, offset + 2, fb.size - 2);
+                                    // var afterInf = Date.now();
+                                    // dlog('inflate: ' + (afterInf - beforeInf) + 'ms');
+                                } else {
+                                    var tmp = new Uint8Array(fb.size);    // FIXME is this really the best we can do?
+                                    arrayCopy(new Uint8Array(result, offset, fb.size), 0, tmp, 0, fb.size);
+                                    data = tmp.buffer;
+                                }
+                                fb.data = data;
+                                
+                                offset += fb.size;
+                                ++bi;
                             }
-                        }
+                            tramp();
+                        });
                     }
                 }
             }
+            tramp();
         }
-    } else {
-        dlog("Don't know what to do with " + this.bwg.type);
     }
+
+    cirFobRecur([thisB.cirTreeOffset + 48], 1);
 }
 
 //
@@ -526,6 +520,14 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
         // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
         thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
             var resultBuffer = result;
+
+// This is now handled in URLFetchable instead.
+//
+//            if (resultBuffer.byteLength != length) {           
+//                dlog("Didn't get expected size: " + resultBuffer.byteLength + " != " + length);
+//                return cirFobStartFetch(offset, fr, level, attempts + 1);
+//            }
+
 
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
@@ -626,6 +628,8 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             var bestChr = -1;
             var bestPos = -1;
             var createFeature = function(chrx, fmin, fmax, opts) {
+//                dlog('createFeature(' + fmin +', ' + fmax + ')');
+
                 if (!opts) {
                     opts = {};
                 }
@@ -647,8 +651,11 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 }
             };
             var maybeCreateFeature = function(chrx, fmin, fmax, opts) {
+//                dlog('maybeCreateFeature(' + thisB.bwg.idsToChroms[chrx] + ',' + fmin + ',' + fmax + ')');
                 if ((dir < 0 && (chrx < chr || fmax < pos)) || (dir > 0 && (chrx > chr || fmin > pos))) {
+                //                if (fmin <= max && fmax >= min) {
                     createFeature(chrx, fmin, fmax, opts);
+                    //}
                 }
             };
             var tramp = function() {
@@ -809,6 +816,9 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 
 
 
+
+
+
 BigWig.prototype.readWigData = function(chrName, min, max, callback) {
     this.getUnzoomedView().readWigData(chrName, min, max, callback);
 }
@@ -873,7 +883,6 @@ function makeBwg(data, callback, name) {
         bwg.asOffset = (la[9] << 32) | (la[10]);    // 36 (unaligned longlong)
         bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
         bwg.uncompressBufSize = la[13];  // 52
-        bwg.extHeaderOffset = (la[14] << 32) | (la[15])
         
         // console.log('bwgVersion: ' + bwg.version);
         // dlog('bigType: ' + bwg.type);
@@ -894,10 +903,7 @@ function makeBwg(data, callback, name) {
         }
 
         bwg.readChromTree(function() {
-            bwg.getAutoSQL(function(as) {
-                bwg.schema = as;
-                return callback(bwg);
-            });
+            return callback(bwg);
         });
     });
 }
@@ -928,6 +934,8 @@ BigWig.prototype._tsFetch = function(zoom, chr, min, max, callback) {
 }
 
 BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, threshold, callback) {
+    // console.log('ref=' + referencePoint + '; dir=' + dir);
+
     dir = (dir<0) ? -1 : 1;
     var bwg = this;
     var initialChr = this.chromsToIDs[chrName];
@@ -956,6 +964,8 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
 	});
 
 	var candidate = candidates.splice(0, 1)[0];
+        // console.log('trying ' + miniJSONify(candidate));
+
         bwg._tsFetch(candidate.zoom, candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = dir > 0 ? 0 : 300000000;
             if (candidate.fromRef)
@@ -990,188 +1000,4 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
     }
     
     fbThresholdSearchRecur();
-}
-
-BigWig.prototype.getAutoSQL = function(callback) {
-    var thisB = this;
-    if (!this.asOffset)
-        return callback(null);
-
-
-    this.data.slice(this.asOffset, 2048).fetch(function(result) {
-        var ba = new Int8Array(result);
-        var s = '';
-        for (var i = 0; i < ba.length; ++i) {
-            if (ba[i] == 0)
-                break;
-            s += String.fromCharCode(ba[i]);
-        }
-        
-        /* 
-         * Quick'n'dirty attempt to parse autoSql format.
-         * See: http://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/059/5949/5949l2.html
-         */
-
-        var header_re = /(\w+)\s+(\w+)\s+("([^"]+)")?\s+\(\s*/;
-        var field_re = /([\w\[\]]+)\s+(\w+)\s*;\s*("([^"]+)")?\s*/g;
-
-        var headerMatch = header_re.exec(s);
-        if (headerMatch) {
-            var as = {
-                declType: headerMatch[1],
-                name: headerMatch[2],
-                comment: headerMatch[4],
-
-                fields: []
-            };
-
-            s = s.substring(headerMatch[0]);
-            for (var m = field_re.exec(s); m != null; m = field_re.exec(s)) {
-                as.fields.push({type: m[1],
-                             name: m[2],
-                             comment: m[4]});
-            }
-
-            return callback(as);
-        }
-    });
-}
-
-BigWig.prototype.getExtraIndices = function(callback) {
-    var thisB = this;
-    if (this.version < 4 || this.extHeaderOffset == 0 || this.type != 'bigbed') {
-        return callback(null);
-    } else {
-        this.data.slice(this.extHeaderOffset, 64).fetch(function(result) {
-            if (!result) {
-                return callback(null, "Couldn't fetch extension header");
-            }
-
-            var sa = new Int16Array(result);
-            var la = new Int32Array(result);
-            
-            var extHeaderSize = sa[0];
-            var extraIndexCount = sa[1];
-            var extraIndexListOffset = (la[1]<<32) | (la[2]);
-
-            if (extraIndexCount == 0) {
-                return callback(null);
-            }
-
-            // FIXME 20byte records only make sense for single-field indices.
-            // Right now, these seem to be the only things around, but the format
-            // is actually more general.
-            thisB.data.slice(extraIndexListOffset, extraIndexCount * 20).fetch(function(eil) {
-                if (!eil) {
-                    return callback(null, "Couldn't fetch index info");
-                }
-
-                var sa = new Int16Array(eil);
-                var la = new Int32Array(eil);
-
-                var indices = [];
-                for (var ii = 0; ii < extraIndexCount; ++ii) {
-                    var eiType = sa[ii*10];
-                    var eiFieldCount = sa[ii*10 + 1];
-                    var eiOffset = (la[ii*5 + 1]<<32) | (la[ii*5+2]);
-                    var eiField = sa[ii*10 + 8]
-                    var index = new BBIExtraIndex(thisB, eiType, eiFieldCount, eiOffset, eiField);
-                    indices.push(index);
-                }
-                callback(indices);
-            });
-        });
-    }
-}
-
-function BBIExtraIndex(bbi, type, fieldCount, offset, field) {
-    this.bbi = bbi;
-    this.type = type;
-    this.fieldCount = fieldCount;
-    this.offset = offset;
-    this.field = field;
-}
-
-BBIExtraIndex.prototype.lookup = function(name, callback) {
-    var thisB = this;
-
-    this.bbi.data.slice(this.offset, 32).fetch(function(bpt) {
-        var ba = new Uint8Array(bpt);
-        var sa = new Int16Array(bpt);
-        var la = new Int32Array(bpt);
-        var bptMagic = la[0];
-        var blockSize = la[1];
-        var keySize = la[2];
-        var valSize = la[3];
-        var itemCount = (la[4] << 32) | (la[5]);
-        var rootNodeOffset = 32;
-        
-        // console.log('blockSize: ' + blockSize);
-        // console.log('keySize: ' + keySize);
-        // console.log('valSize: ' + valSize);
-
-        function bptReadNode(nodeOffset) {
-            thisB.bbi.data.slice(nodeOffset, 4 + (blockSize * (keySize + valSize))).fetch(function(node) {
-                var ba = new Uint8Array(node);
-                var sa = new Uint16Array(node);
-                var la = new Uint32Array(node);
-
-                var nodeType = ba[0];
-                var cnt = sa[1];
-
-                var offset = 4;
-                if (nodeType == 0) {
-                    var lastChildOffset = null;
-                    for (var n = 0; n < cnt; ++n) {
-                        var key = '';
-                        for (var ki = 0; ki < keySize; ++ki) {
-                            var charCode = ba[offset++];
-                            if (charCode != 0) {
-                                key += String.fromCharCode(charCode);
-                            }
-                        }
-
-                        var childOffset = readInt(ba, offset);
-                        offset += 8;
-                        
-                        if (name.localeCompare(key) < 0 && lastChildOffset) {
-                            bptReadNode(lastChildOffset);
-                            return;
-                        }
-                        lastChildOffset = childOffset;
-                    }
-                    bptReadNode(lastChildOffset);
-                } else {
-                    for (var n = 0; n < cnt; ++n) {
-                        var key = '';
-                        for (var ki = 0; ki < keySize; ++ki) {
-                            var charCode = ba[offset++];
-                            if (charCode != 0) {
-                                key += String.fromCharCode(charCode);
-                            }
-                        }
-                        
-                        // Specific for EI case.
-                        if (key == name) {
-                            var start = readInt(ba, offset);
-                            var length = readInt(ba, offset + 8);
-
-                            return thisB.bbi.getUnzoomedView().fetchFeatures(
-                                function(chr, min, max, toks) {
-                                    if (toks && toks.length > thisB.field - 3)
-                                        return toks[thisB.field - 3] == name;
-                                }, 
-                                [{offset: start, size: length}], 
-                                callback);
-                        }
-                        offset += valSize;
-                    }
-                    return callback([]);
-                }
-            });
-        }
-
-        bptReadNode(thisB.offset + rootNodeOffset);
-    }); 
-
 }

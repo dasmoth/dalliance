@@ -153,16 +153,6 @@
       <PHASE>-</PHASE>
     </FEATURE>
 
-    <FEATURE id="test8a" label="test8a">
-      <TYPE id="test8a">test8a</TYPE>
-      <METHOD id="comp">comp</METHOD>
-      <START>30021000</START>
-      <END>30021001</END>
-      <SCORE>0.504</SCORE>
-      <ORIENTATION>0</ORIENTATION>
-      <PHASE>-</PHASE>
-    </FEATURE>
-
     <FEATURE id="test8" label="test8">
       <TYPE id="test8">test8</TYPE>
       <METHOD id="comp">comp</METHOD>

@@ -112,10 +112,6 @@ function filterFeatures(features, min, max) {
 }
 
 KnownSpace.prototype.invalidate = function(tier) {
-    if (!this.pool) {
-        return;
-    }
-
     this.featureCache[tier] = null;
     this.startFetchesForTiers([tier]);
 }
@@ -132,9 +128,8 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 needSeq = true;
             }
         } catch (ex) {
-            tiers[t].updateStatus(ex);
             console.log('Error fetching tier source');
-            console.log(ex);
+            console.log(ex.stack);
         }
     }
 
@@ -212,8 +207,6 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         }
     }
 
-    if (source.instrument)
-        console.log('Starting  fetch ' + viewID + ' (' + this.min + ', ' + this.max + ')');
     source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
 	if (source.instrument)
 	    console.log('Finishing fetch ' + viewID);
@@ -243,7 +236,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
     if (status) {
-         tier.updateStatus(status);
+        tier.updateStatus(status);
     } else {
         var mayDownsample = false;
         var src = tier.getSource();
@@ -258,9 +251,12 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
             mayDownsample = true;
         }
 
+	console.log(src);
+        
         // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);	
 
 	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
+	    console.log('considering downsample...');
             if ((actualScale < (this.scale/2) && features.length > 200)  ||
 		(mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
             {
