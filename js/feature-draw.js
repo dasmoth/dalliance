@@ -575,8 +575,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         if (isDasBooleanTrue(style.SCATTER)) {
-            var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
-            var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+            var smin = tier.quantMin(style); // tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
+            var smax = tier.quantMax(style); // tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
 
             if (!smax) {
                 if (smin < 0) {
@@ -610,8 +610,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
         }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
-        var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
-        var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+        var smin = tier.quantMin(style);
+        var smax = tier.quantMax(style);
 
         if (!smax) {
             if (smin < 0) {
@@ -699,8 +699,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         gg = new TooManyGlyph(minPos, maxPos, height, fill, stroke);
     } else if (gtype === 'POINT') {
         var height = tier.forceHeight || style.HEIGHT || 30;
-        var smin = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
-        var smax = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+        var smin = tier.quantMin(style);
+        var smax = tier.quantMax(style);
         var yscale = ((1.0 * height) / (smax - smin));
         var relScore = ((1.0 * score) - smin) / (smax-smin);
         var sc = ((score - (1.0*smin)) * yscale)|0;
@@ -825,8 +825,8 @@ DasTier.prototype.styleForFeature = function(f) {
 function makeLineGlyph(features, style, tier) {
     var origin = tier.browser.viewStart, scale = tier.browser.scale;
     var height = tier.forceHeight || style.HEIGHT || 30;
-    var min = tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore || 0;
-    var max = tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore || 10;
+    var min = tier.quantMin(style);
+    var max = tier.quantMax(style);
     var yscale = ((1.0 * height) / (max - min));
     var width = style.LINEWIDTH || 1;
     var color = style.FGCOLOR || style.COLOR1 || 'black';
@@ -844,4 +844,20 @@ function makeLineGlyph(features, style, tier) {
     var lgg = new LineGraphGlyph(points, color, height);
     lgg.quant = {min: min, max: max};
     return lgg;
+}
+
+DasTier.prototype.quantMin = function(style) {
+    if (this.forceMinDynamic) {
+        return this.currentFeaturesMinScore || 0;
+    } else {
+        return this.dasSource.forceMin || style.MIN || this.currentFeaturesMinScore || 0;
+    }
+}
+
+DasTier.prototype.quantMax = function(style) {
+    if (this.forceMaxDynamic) {
+        return this.currentFeaturesMaxScore || 0;
+    } else {
+        return this.dasSource.forceMax || style.MAX || this.currentFeaturesMaxScore || 10;
+    }
 }

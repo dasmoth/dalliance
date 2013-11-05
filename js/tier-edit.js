@@ -29,6 +29,8 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var tierMinField = makeElement('input', null, {type: 'text', value: '0.0'});
         var tierMaxField = makeElement('input', null, {type: 'text', value: '10.0'});
+        var tierMinToggle = makeElement('input', null, {type: 'checkbox'});
+        var tierMaxToggle = makeElement('input', null, {type: 'checkbox'});
 
         var quantLeapToggle = makeElement('input', null, {type: 'checkbox', checked: tier.quantLeapThreshold !== undefined});
         var quantLeapThreshField = makeElement('input', null, {type: 'text', value: tier.quantLeapThreshold, disabled: !quantLeapToggle.checked});
@@ -44,8 +46,19 @@ Browser.prototype.openTierPanel = function(tier) {
             if (s.MIN !== undefined) {
                 tierMinField.value = s.MIN;
             }
+            if (!tier.forceMinDynamic && s.MIN !== undefined) {
+                tierMinToggle.checked = true;
+            } else {
+                tierMinField.disabled = true;
+            }
+
             if (s.MAX !== undefined) {
                 tierMaxField.value = s.MAX;
+            }
+            if (!tier.forceMaxDynamic && s.MAX !== undefined) {
+                tierMaxToggle.checked = true;
+            } else {
+                tierMaxField.disabled = true;
             }
         }
 
@@ -71,11 +84,11 @@ Browser.prototype.openTierPanel = function(tier) {
 
              makeElement('tr',
                 [makeElement('th', 'Min value:'),
-                 makeElement('td', tierMinField)]),
+                 makeElement('td', [tierMinToggle, tierMinField])]),
 
              makeElement('tr',
                 [makeElement('th', 'Max value:'),
-                 makeElement('td', tierMaxField)]),
+                 makeElement('td', [tierMaxToggle, tierMaxField])]),
 
              makeElement('tr',
                 [makeElement('th', 'Threshold-leap'),
@@ -117,11 +130,21 @@ Browser.prototype.openTierPanel = function(tier) {
             scheduleRedraw();
         }, false);
 
+        tierMinToggle.addEventListener('change', function(ev) {
+            tier.forceMinDynamic = !tierMinToggle.checked;
+            tierMinField.disabled = !tierMinToggle.checked;
+            scheduleRedraw();
+        });
         tierMinField.addEventListener('input', function(ev) {
             tier.dasSource.forceMin = parseFloat(tierMinField.value);
             scheduleRedraw();
         }, false);
 
+        tierMaxToggle.addEventListener('change', function(ev) {
+            tier.forceMaxDynamic = !tierMaxToggle.checked;
+            tierMaxField.disabled = !tierMaxToggle.checked;
+            scheduleRedraw();
+        });
         tierMaxField.addEventListener('input', function(ev) {
             tier.dasSource.forceMax = parseFloat(tierMaxField.value);
             scheduleRedraw();
