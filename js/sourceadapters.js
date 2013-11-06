@@ -603,20 +603,14 @@ BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
 }
 
 BWGFeatureSource.prototype.getStyleSheet = function(callback) {
+    var thisB = this;
+
     this.bwgHolder.await(function(bwg) {
         if (!bwg) {
             return callback(null, 'bbi error');
         }
 
-	/* What to do about this...?
-        if (thisTier.dasSource.collapseSuperGroups === undefined) {
-            if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
-                thisTier.dasSource.collapseSuperGroups = true;
-                thisTier.bumped = false;
-            }
-        }*/
-
-	var stylesheet = new DASStylesheet();
+    	var stylesheet = new DASStylesheet();
         if (bwg.type == 'bigbed') {
             var wigStyle = new DASStyle();
             wigStyle.glyph = 'BOX';
@@ -661,7 +655,11 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
             stylesheet.pushStyle({type: 'default'}, null, wigStyle);
         }
 
-	return callback(stylesheet);
+        if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+            stylesheet.geneHint = true;
+        }
+
+    	return callback(stylesheet);
     });
 }
 
