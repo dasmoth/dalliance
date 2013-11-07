@@ -58,7 +58,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
         this.uiMode = m;
-        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, export: svgBtn};
+        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, 'export': svgBtn};
         for (var x in mb) {
             if (x == m)
                 mb[x].classList.add('active');

@@ -338,11 +338,11 @@ TrackHubTrack.prototype.bigbedStyles = function() {
         var cbsToks = cbs.split(/\s+/);
         
         var plus = shallowCopy(wigStyle);
-        plus.BGCOLOR = 'rgb(' + cbsToks[0]; + ')';
+        plus.BGCOLOR = 'rgb(' + cbsToks[0] + ')';
         stylesheet.pushStyle({type: 'bigwig', orientation: '+'}, null, plus);
 
         var minus = shallowCopy(wigStyle);
-        minus.BGCOLOR = 'rgb(' + cbsToks[1]; + ')';
+        minus.BGCOLOR = 'rgb(' + cbsToks[1] + ')';
         stylesheet.pushStyle({type: 'bigwig', orientation: '-'}, null, minus);
     } else {
         stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);

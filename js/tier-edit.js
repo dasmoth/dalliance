@@ -96,7 +96,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
              makeElement('tr',
                 [makeElement('th', 'Threshold:'),
-                 makeElement('td', quantLeapThreshField)]),
+                 makeElement('td', quantLeapThreshField)])
              ]);
 
 
