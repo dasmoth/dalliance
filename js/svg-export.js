@@ -5,7 +5,46 @@
 // svg-export.js
 //
 
-Browser.prototype.saveSVG = function() {
+Browser.prototype.openExportPanel = function(tier) {
+    var b = this;
+    if (this.uiMode === 'export') {
+        this.hideToolPanel();
+        this.setUiMode('none');
+    } else {
+        var exportForm = makeElement('div');
+
+        var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
+
+        var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
+        exportButton.addEventListener('click', function(ev) {
+            removeChildren(exportContent);
+            exportContent.appendChild(makeElement('a', 'Click to download', {
+                href: URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked})),
+                download: 'dalliance-view.svg',
+                type: 'image/svg+xml'
+            }));
+        }, false);
+
+        var exportContent = makeElement('p', '');
+
+        var exportOptsTable = makeElement('table',
+            [makeElement('tr',
+                [makeElement('th', 'Include highlights'),
+                 exportHighlightsToggle])
+            ]);
+
+        exportForm.appendChild(exportOptsTable);
+        exportForm.appendChild(exportButton);
+        exportForm.appendChild(exportContent);
+
+        this.showToolPanel(exportForm);
+        this.setUiMode('export');
+    }
+}
+
+Browser.prototype.makeSVG = function(opts) {
+    opts = opts || {};
+
     var b = this;
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
 
@@ -125,26 +164,31 @@ Browser.prototype.saveSVG = function() {
     	tierHolder.appendChild(makeElementNS(NS_SVG, 'g', [tierSVG, tierLabels]));
     }
 
-    var highlights = this.highlights || [];
-    for (var hi = 0; hi < highlights.length; ++hi) {
-        var h = highlights[hi];
-        if (h.chr == this.chr && h.min < this.viewEnd && h.max > this.viewStart) {
-            var tmin = (Math.max(h.min, this.viewStart) - this.viewStart) * this.scale;
-            var tmax = (Math.min(h.max, this.viewEnd) - this.viewStart) * this.scale;
+    if (opts.highlights) {
+        var highlights = this.highlights || [];
+        for (var hi = 0; hi < highlights.length; ++hi) {
+            var h = highlights[hi];
+            if (h.chr == this.chr && h.min < this.viewEnd && h.max > this.viewStart) {
+                var tmin = (Math.max(h.min, this.viewStart) - this.viewStart) * this.scale;
+                var tmax = (Math.min(h.max, this.viewEnd) - this.viewStart) * this.scale;
 
-            tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: margin + tmin, y: 70, width: (tmax-tmin), height: pos-70,
-                                                                  stroke: 'none', fill: 'red', fillOpacity: 0.3}));
+                tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: margin + tmin, y: 70, width: (tmax-tmin), height: pos-70,
+                                                                      stroke: 'none', fill: 'red', fillOpacity: 0.3}));
+            }
         }
-    }
+    }   
 
     saveRoot.appendChild(tierHolder);
     saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
     saveDoc.documentElement.setAttribute('height', pos + 50);
 
-    var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)]);
+    var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)], {type: 'image/svg+xml'});
+    return svgBlob;
+
+    /*
     var fr = new FileReader();
     fr.onload = function(fre) {
         window.open('data:image/svg+xml;' + fre.target.result.substring(6), 'Dalliance graphics', 'width=' + ( b.featurePanelWidth + 20 + margin + 'px'));
     };
-    fr.readAsDataURL(svgBlob);
+    fr.readAsDataURL(svgBlob); */
 }

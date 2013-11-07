@@ -58,7 +58,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
         this.uiMode = m;
-        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton};
+        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, export: svgBtn};
         for (var x in mb) {
             if (x == m)
                 mb[x].classList.add('active');
@@ -143,21 +143,21 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             trackAddPopup = b.showTrackAdder(ev);
         }
     }, false);
-    b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file.');
+    b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file. (A)');
 
     zoomInBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
       b.zoomStep(-10);
     }, false);
-    b.makeTooltip(zoomInBtn, 'Zoom in');
+    b.makeTooltip(zoomInBtn, 'Zoom in (+)');
 
     zoomOutBtn.addEventListener('click', function(ev) {
       ev.stopPropagation(); ev.preventDefault();
 
       b.zoomStep(10);
     }, false);
-    b.makeTooltip(zoomOutBtn, 'Zoom out');
+    b.makeTooltip(zoomOutBtn, 'Zoom out (-)');
 
     zoomSlider.addEventListener('change', function(ev) {
 	b.zoomSliderValue = (1.0 * zoomSlider.value);
@@ -173,7 +173,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     svgBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
-        b.saveSVG();
+        b.openExportPanel();
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
 
@@ -203,7 +203,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         ev.stopPropagation(); ev.preventDefault();
         b.toggleHelpPopup(ev);
     });
-    b.makeTooltip(helpButton, 'Help; Keyboard shortcuts.');
+    b.makeTooltip(helpButton, 'Help; Keyboard shortcuts. (H)');
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {
@@ -253,7 +253,9 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
 }
 
 Browser.prototype.hideToolPanel = function() {
-    this.svgHolder.removeChild(this.activeToolPanel);
+    if (this.activeToolPanel) {
+        this.svgHolder.removeChild(this.activeToolPanel);
+    }
     this.svgHolder.style.width = '100%';
     this.activeToolPanel = null;
     this.resizeViewer();
