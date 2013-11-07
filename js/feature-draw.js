@@ -272,14 +272,21 @@ function formatQuantLabel(v) {
 }
 
 DasTier.prototype.paint = function() {
+    var retina = this.browser.retina;
+
+
     var subtiers = this.subtiers;
     if (!subtiers) {
 	   return;
     }
 
+    var desiredWidth = this.browser.featurePanelWidth + 2000;
+    if (retina) {
+        desiredWidth *= 2;
+    }
     var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
-    if (fpw < this.browser.featurePanelWidth + 1950) {
-        this.viewport.width = fpw = (this.browser.featurePanelWidth|0) + 2000;
+    if (fpw < desiredWidth - 50) {
+        this.viewport.width = fpw = desiredWidth;
     }
 
     var lh = MIN_PADDING;
@@ -287,11 +294,20 @@ DasTier.prototype.paint = function() {
         lh = lh + subtiers[s].height + MIN_PADDING;
     }
     lh += 6
-    if (lh != this.viewport.height) {
-        this.viewport.height = lh;
+
+    var canvasHeight = lh;
+    if (retina) {
+        canvasHeight *= 2;
     }
-    // this.viewport.setAttribute('height', lh);
+
+    if (canvasHeight != this.viewport.height) {
+        this.viewport.height = canvasHeight;
+    }
+    
+    var tierHeight = Math.max(lh, this.browser.minTierHeight);
     this.viewport.style.left = '-1000px';
+    this.viewport.style.width = retina ? ('' + (fpw/2) + 'px') : ('' + fpw + 'px');
+    this.viewport.style.height = '' + lh + 'px';
     this.holder.style.height = '' + Math.max(lh, this.browser.minTierHeight) + 'px';
     this.updateHeight();
     this.drawOverlay();
@@ -299,10 +315,13 @@ DasTier.prototype.paint = function() {
 
     var gc = this.viewport.getContext('2d');
     gc.fillStyle = this.background;
-    gc.clearRect(0, 0, fpw, Math.max(lh, 200));
+    gc.clearRect(0, 0, fpw, canvasHeight);
     gc.restore();
 
     gc.save();
+    if (retina) {
+        gc.scale(2, 2);
+    }
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
     gc.translate(offset, MIN_PADDING);
    

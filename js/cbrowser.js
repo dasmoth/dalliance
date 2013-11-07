@@ -101,6 +101,8 @@ function Browser(opts) {
     this.hubObjects = [];
 
     this.sourceCache = new SourceCache();
+    
+    this.retina = false;
 
 
     for (var k in opts) {

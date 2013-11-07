@@ -7,13 +7,14 @@ For 0.11
   - Replace feature popups with inspector?
   - Assembly hub support. [DONE]
   - Bulk addition of local files.
-  - Rename tracks.
+  - Rename tracks. [DONE]
   - Per-track display customization ("Stylesheet editor")?
   - Chromosome overviews.
   - Animate when leaping/toggling.
   - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
   - Security cleanups + support for credentialed trackhubs [DONE]
+  - Feature centering after quantLeap
 
 For 0.12
 --------
