@@ -102,7 +102,7 @@ function Browser(opts) {
 
     this.sourceCache = new SourceCache();
     
-    this.retina = false;
+    this.retina = true;
 
 
     for (var k in opts) {

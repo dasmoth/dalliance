@@ -272,8 +272,7 @@ function formatQuantLabel(v) {
 }
 
 DasTier.prototype.paint = function() {
-    var retina = this.browser.retina;
-
+    var retina = this.browser.retina && window.devicePixelRatio > 1;
 
     var subtiers = this.subtiers;
     if (!subtiers) {
@@ -358,15 +357,22 @@ DasTier.prototype.paint = function() {
 }
 
 DasTier.prototype.paintQuant = function() {
+    var retina = this.browser.retina && window.devicePixelRatio > 1;
+
     var quant;
     if (this.subtiers && this.subtiers.length > 0)
         quant = this.subtiers[0].quant;
 
     if (quant && this.quantOverlay) {
         var h = this.subtiers[0].height;
-        var w = this.quantOverlay.width;
+        var w = 50;
         this.quantOverlay.height = this.viewport.height;
+        this.quantOverlay.width = retina ? w*2 : w;
+        this.quantOverlay.style.height = '' + (retina ? this.quantOverlay.height/2 : this.quantOverlay.height) + 'px';
+        this.quantOverlay.style.width = '' + w + 'px';
         var ctx = this.quantOverlay.getContext('2d');
+        if (retina)
+            ctx.scale(2, 2);
 
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;

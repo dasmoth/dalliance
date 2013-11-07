@@ -3,7 +3,7 @@ For 0.11
 
   - UI for leaping (button to complement ctrl-arrow).
   - Search of bigbed files. [DONE]
-  - Retina display support.
+  - Retina display support. [DONE]
   - Replace feature popups with inspector?
   - Assembly hub support. [DONE]
   - Bulk addition of local files.
