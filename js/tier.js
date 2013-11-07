@@ -83,6 +83,11 @@ DasTier.prototype.init = function() {
                 tier.browser.refreshTier(tier);
             } else {
                 tier.stylesheet = ss;
+                if (ss.geneHint) {
+                    tier.dasSource.collapseSuperGroups = true;
+                    tier.bumped = false;
+                    tier.updateLabel();
+                }
                 tier.browser.refreshTier(tier);
             }
         });
