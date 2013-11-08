@@ -390,13 +390,13 @@ DasTier.prototype.paintQuant = function() {
             ctx.fillRect(w-30, 0, 30, 20);
             ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
             for (var t = 1; t < numTics-1; ++t) {
-                ctx.fillRect(w-30, t*ticSpacing, 30, 20);
+                ctx.fillRect(w-30, t*ticSpacing - 10, 30, 20);
             }
         } else {
             ctx.fillRect(0, 0, 30, 20);
             ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
             for (var t = 1; t < numTics-1; ++t) {
-                ctx.fillRect(0, t*ticSpacing, 30, 20);
+                ctx.fillRect(0, t*ticSpacing - 10, 30, 20);
             }
         }
         ctx.globalAlpha = 1.0;
