@@ -74,6 +74,38 @@ URLFetchable.prototype.slice = function(s, l) {
 var seed=0;
 var isIOS = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
 
+URLFetchable.prototype.fetchAsText = function(callback) {
+    var req = new XMLHttpRequest();
+    var length;
+    var url = this.url;
+    if (isIOS) {
+        url = url + '?salt=' + (++seed);
+    }
+    req.open('GET', url, true);
+
+    if (this.end) {
+        if (this.end - this.start > 100000000) {
+            throw 'Monster fetch!';
+        }
+        req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
+        length = this.end - this.start + 1;
+    }
+
+    req.onreadystatechange = function() {
+        if (req.readyState == 4) {
+            if (req.status == 200 || req.status == 206) {
+                return callback(req.responseText);
+            } else {
+                return callback(null);
+            }
+        }
+    };
+    if (this.opts.credentials) {
+        req.withCredentials = true;
+    }
+    req.send('');
+}
+
 URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var thisB = this;
 
