@@ -345,6 +345,8 @@ DasTier.prototype.paint = function() {
         var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
         gc.save();
+        if (retina)
+            gc.scale(2, 2);
         gc.strokeStyle = 'red';
         gc.lineWidth = 0.3;
         gc.moveTo(0, ry);
