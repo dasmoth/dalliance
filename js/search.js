@@ -74,6 +74,17 @@ Browser.prototype.search = function(g, statusCallback) {
             }
         }
 
+        function doTrixSearch(tier, trix) {
+            trix.lookup(g, function(result, status) {
+                if (result == null || result.length < 2) {
+                    return tier.featureSource.search(g, searchCallback);
+                } else {
+                    var hit = result[1].split(',')[0];
+                    return tier.featureSource.search(hit, searchCallback);
+                }
+            });
+        }
+
         if (this.searchEndpoint) {
             searchCount = 1;
             return this.doDasSearch(thisB.searchEndpoint, g, searchCallback);
@@ -82,8 +93,20 @@ Browser.prototype.search = function(g, statusCallback) {
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             var tier = this.tiers[ti];
             if (sourceAdapterIsCapable(tier.featureSource, 'search')) {
-                ++searchCount;
-                tier.featureSource.search(g, searchCallback);
+                if (tier.dasSource.trixURI) {
+                    ++searchCount;
+                    if (tier.trix) {
+                        return doTrixSearch(tier, tier.trix);
+                    } else {
+                        return connectTrix(new URLFetchable(tier.dasSource.trixURI), new URLFetchable(tier.dasSource.trixURI + 'x'), function(trix) {
+                            tier.trix = trix;
+                            doTrixSearch(tier, trix);
+                        });
+                    }
+                } else {
+                    ++searchCount;
+                    tier.featureSource.search(g, searchCallback);
+                }
             } else if (tier.dasSource.provides_search) {
                 ++searchCount;
                 this.doDasSearch(tier.dasSource, g, searchCallback);

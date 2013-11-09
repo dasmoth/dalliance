@@ -52,5 +52,6 @@ TrixIndex.prototype.lookup = function(query, callback) {
                 return callback(lines[li].split(' '));
             }
         }
+        return callback(null);
     });
 }

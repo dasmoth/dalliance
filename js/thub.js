@@ -198,6 +198,11 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         source.pennant = THUB_PENNANT_PREFIX + ptoks[0];
     }
 
+    var searchTrix = this.get('searchTrix');
+    if (searchTrix) {
+        source.trixURI = relativeURL(this._db.absURL, searchTrix);
+    }
+
     if (this.container == 'multiWig') {
         source.merge = 'concat';
         source.overlay = [];
