@@ -212,6 +212,21 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
+    b.addTierSelectionListener(function(sel) {
+        if (b.uiMode === 'tier') {
+            if (sel.length == 0) {
+                b.hideToolPanel();
+                b.manipulatingTier = null;
+                b.uiMode = 'none';
+            } else {
+                var ft = b.tiers[sel[0]];
+                if (ft != b.manipulatingTier) {
+                    b.openTierPanel(ft);
+                }
+            }
+        }
+    });
+
     var uiKeyHandler = function(ev) {
         // console.log('bukh: ' + ev.keyCode);
         if (ev.keyCode == 65 || ev.keyCode == 97) {  // a

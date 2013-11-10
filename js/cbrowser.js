@@ -32,6 +32,7 @@ function Browser(opts) {
     this.viewListeners = [];
     this.regionSelectListeners = [];
     this.tierListeners = [];
+    this.tierSelectionListeners = [];
     this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
@@ -800,6 +801,7 @@ Browser.prototype.realMakeTier = function(source) {
                     thisB.selectedTiers.sort();
                 }
                 thisB.markSelectedTiers();
+                thisB.notifyTierSelection();
 
                 if (thisB.selectedTiers.length > 0) {
                     thisB.browserHolder.focus();
@@ -1515,8 +1517,13 @@ Browser.prototype.getSelectedTier = function() {
 }
 
 Browser.prototype.setSelectedTier = function(t) {
-    this.selectedTiers = [t];
+    if (t == null) {
+        this.selectedTiers = [];
+    } else {
+        this.selectedTiers = [t];
+    }
     this.markSelectedTiers();
+    this.notifyTierSelection();
 }
 
 Browser.prototype.markSelectedTiers = function() {
@@ -1532,6 +1539,20 @@ Browser.prototype.markSelectedTiers = function() {
     }
     if (this.selectedTiers.length > 0) {
         this.browserHolder.focus();
+    }
+}
+
+Browser.prototype.addTierSelectionListener = function(f) {
+    this.tierSelectionListeners.push(f);
+}
+
+Browser.prototype.notifyTierSelection = function() {
+    for (var fli = 0; fli < this.tierSelectionListeners.length; ++fli) {
+        try {
+            this.tierSelectionListeners[fli](this.selectedTiers);
+        } catch (ex) {
+            console.log(ex.stack);
+        }
     }
 }
 
