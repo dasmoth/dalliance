@@ -757,7 +757,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 refSeq = tier.currentSequence.seq.substr(min - csStart, max - min + 1);
             }
         }
-        gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq);
+        gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq, style.__SEQCOLOR);
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {

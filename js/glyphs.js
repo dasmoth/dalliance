@@ -994,12 +994,13 @@ TextGlyph.prototype.toSVG = function() {
 
 
 
-function SequenceGlyph(min, max, height, seq, ref) {
+function SequenceGlyph(min, max, height, seq, ref, scheme) {
     this._min = min;
     this._max = max;
     this._height = height;
     this._seq = seq;
     this._ref = ref;
+    this._scheme = scheme;
 }
 
 SequenceGlyph.prototype.min = function() {return this._min};
@@ -1012,29 +1013,29 @@ SequenceGlyph.prototype.draw = function(gc) {
     var scale = (this._max - this._min + 1) / this._seq.length;
 
     for (var p = 0; p < seq.length; ++p) {
-	var base = seq.substr(p, 1).toUpperCase();
-	var color = baseColors[base];
-	if (!color) {
-	    color = 'gray';
-	}
+    	var base = seq.substr(p, 1).toUpperCase();
+    	var color = baseColors[base];
+    	if (!color) {
+    	    color = 'gray';
+    	}
 
-	/*
-	if (this._ref) {
-	    var refbase = seq.substr(p, 1).toUpperCase();
-	    if (refbase === base) {
-		color = 'gray';
-	    } else {
-		color = 'red';
+    	
+    	if (this._scheme === 'mismatch' && this._ref) {
+    	    var refbase = this._ref.substr(p, 1).toUpperCase();
+    	    if (refbase === base) {
+    		  color = 'gray';
+    	    } else {
+    		  color = 'red';
             }
-        }*/
+        }
 
-	gc.fillStyle = color;
+    	gc.fillStyle = color;
 
-	if (scale >= 8) {
-	    gc.fillText(base, this._min + p*scale, 8);
-	} else {
-	    gc.fillRect(this._min + p*scale, 0, scale, this._height);
-	}
+    	if (scale >= 8) {
+    	    gc.fillText(base, this._min + p*scale, 8);
+    	} else {
+    	    gc.fillRect(this._min + p*scale, 0, scale, this._height);
+    	}
     }
 }
 
@@ -1044,28 +1045,37 @@ SequenceGlyph.prototype.toSVG = function() {
     var  g = makeElementNS(NS_SVG, 'g'); 
 
     for (var p = 0; p < seq.length; ++p) {
-	var base = seq.substr(p, 1).toUpperCase();
-	var color = baseColors[base];
-	if (!color) {
-	    color = 'gray';
-	}
+    	var base = seq.substr(p, 1).toUpperCase();
+    	var color = baseColors[base];
+    	if (!color) {
+    	    color = 'gray';
+    	}
 
-	if (scale >= 8) {
-	    g.appendChild(
-		    makeElementNS(NS_SVG, 'text', base, {
-			x: this._min + p*scale,
-			y: 8,
-			fill: color}));
-	} else {
-	    g.appendChild(
-		    makeElementNS(NS_SVG, 'rect', null, {
-			x:this._min + p*scale,
-			y: 0,
-			width: scale,
-			height: this._height,
-	                fill: color}));
+        if (this._scheme === 'mismatch' && this._ref) {
+            var refbase = this._ref.substr(p, 1).toUpperCase();
+            if (refbase === base) {
+              color = 'gray';
+            } else {
+              color = 'red';
+            }
+        }
 
-	}
+    	if (scale >= 8) {
+    	    g.appendChild(
+    		    makeElementNS(NS_SVG, 'text', base, {
+    			x: this._min + p*scale,
+    			y: 8,
+    			fill: color}));
+    	} else {
+    	    g.appendChild(
+    		    makeElementNS(NS_SVG, 'rect', null, {
+    			x:this._min + p*scale,
+    			y: 0,
+    			width: scale,
+    			height: this._height,
+    	                fill: color}));
+
+    	}
     }
 
     return g;

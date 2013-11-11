@@ -35,6 +35,7 @@ Browser.prototype.openTierPanel = function(tier) {
         var quantLeapToggle = makeElement('input', null, {type: 'checkbox', checked: tier.quantLeapThreshold !== undefined});
         var quantLeapThreshField = makeElement('input', null, {type: 'text', value: tier.quantLeapThreshold, disabled: !quantLeapToggle.checked});
 
+        var seqStyle = null;
         if (tier.stylesheet.styles.length > 0) {
             var s = tier.stylesheet.styles[0].style;
             if (s.BGCOLOR) {
@@ -59,6 +60,13 @@ Browser.prototype.openTierPanel = function(tier) {
                 tierMaxToggle.checked = true;
             } else {
                 tierMaxField.disabled = true;
+            }
+
+            for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
+                var ss = tier.stylesheet.styles[si].style;
+                if (ss.glyph === '__SEQUENCE') {
+                    seqStyle = ss; break;
+                }
             }
         }
 
@@ -98,6 +106,17 @@ Browser.prototype.openTierPanel = function(tier) {
                 [makeElement('th', 'Threshold:'),
                  makeElement('td', quantLeapThreshField)])
              ]);
+
+        if (seqStyle) {
+            var seqMismatchToggle = makeElement('input', null, {type: 'checkbox', checked: seqStyle.__SEQCOLOR === 'mismatch'});
+            tierTable.appendChild(makeElement('tr',
+                [makeElement('th', 'Color mismatches'),
+                 makeElement('td', seqMismatchToggle)]));
+            seqMismatchToggle.addEventListener('change', function(ev) {
+                seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
+                scheduleRedraw();
+            });
+        }
 
 
         tierForm.appendChild(tierTable);
