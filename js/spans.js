@@ -9,8 +9,10 @@
 
 function Range(min, max)
 {
-    this._min = min|0;
-    this._max = max|0;
+    if (typeof(min) != 'number' || typeof(max) != 'number')
+        throw 'Bad range ' + min + ',' + max;
+    this._min = min;
+    this._max = max;
 }
 
 Range.prototype.min = function() {

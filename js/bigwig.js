@@ -13,7 +13,17 @@ var BIG_BED_MAGIC = -2021002517;
 var BIG_WIG_TYPE_GRAPH = 1;
 var BIG_WIG_TYPE_VSTEP = 2;
 var BIG_WIG_TYPE_FSTEP = 3;
-    
+  
+var M1 = 256;
+var M2 = 256*256;
+var M3 = 256*256*256;
+var M4 = 256*256*256*256;
+
+function bwg_readOffset(ba, o) {
+    var offset = ba[o] + ba[o+1]*M1 + ba[o+2]*M2 + ba[o+3]*M3 + ba[o+4]*M4;
+    return offset;
+}
+
 function BigWig() {
 }
 
@@ -35,7 +45,7 @@ BigWig.prototype.readChromTree = function(callback) {
         var blockSize = la[1];
         var keySize = la[2];
         var valSize = la[3];
-        var itemCount = (la[4] << 32) | (la[5]);
+        var itemCount = bwg_readOffset(ba, 16);
         var rootNodeOffset = 32;
 
         var bptReadNode = function(offset) {
@@ -45,7 +55,7 @@ BigWig.prototype.readChromTree = function(callback) {
             for (var n = 0; n < cnt; ++n) {
                 if (nodeType == 0) {
                     offset += keySize;
-                    var childOffset = (la[offset/4] << 32) | (la[offset/4 + 1]);
+                    var childOffset = bwg_readOffset(ba, offset);
                     offset += 8;
                     childOffset -= thisB.chromTreeOffset;
                     bptReadNode(childOffset);
@@ -152,7 +162,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     }
 
     var cirFobRecur2 = function(cirBlockData, offset, level) {
-        var ba = new Int8Array(cirBlockData);
+        var ba = new Uint8Array(cirBlockData);
         var sa = new Int16Array(cirBlockData);
         var la = new Int32Array(cirBlockData);
 
@@ -167,8 +177,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 var startBase = la[lo + 1];
                 var endChrom = la[lo + 2];
                 var endBase = la[lo + 3];
-                var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
-                var blockSize = (la[lo + 6]<<32) | (la[lo + 7]);
+                var blockOffset = bwg_readOffset(ba, offset+16);
+                var blockSize = bwg_readOffset(ba, offset+24);
                 if (((chr < 0 || startChrom < chr) || (startChrom == chr && startBase <= max)) &&
                     ((chr < 0 || endChrom   > chr) || (endChrom == chr && endBase >= min)))
                 {
@@ -184,7 +194,7 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
                 var startBase = la[lo + 1];
                 var endChrom = la[lo + 2];
                 var endBase = la[lo + 3];
-                var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
+                var blockOffset = bwg_readOffset(ba, offset+16);
                 if ((chr < 0 || startChrom < chr || (startChrom == chr && startBase <= max)) &&
                     (chr < 0 || endChrom   > chr || (endChrom == chr && endBase >= min)))
                 {
@@ -514,7 +524,6 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
         }
         
         var fetchRanges = spans.ranges();
-        // dlog('fetchRanges: ' + fetchRanges);
         for (var r = 0; r < fetchRanges.length; ++r) {
             var fr = fetchRanges[r];
             cirFobStartFetch(offset, fr, level);
@@ -540,7 +549,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
     }
 
     var cirFobRecur2 = function(cirBlockData, offset, level) {
-        var ba = new Int8Array(cirBlockData);
+        var ba = new Uint8Array(cirBlockData);
         var sa = new Int16Array(cirBlockData);
         var la = new Int32Array(cirBlockData);
 
@@ -852,6 +861,7 @@ function makeBwg(data, callback, name) {
         }
 
         var header = result;
+        var ba = new Uint8Array(header);
         var sa = new Int16Array(header);
         var la = new Int32Array(header);
         if (la[0] == BIG_WIG_MAGIC) {
@@ -865,15 +875,15 @@ function makeBwg(data, callback, name) {
 
         bwg.version = sa[2];             // 4
         bwg.numZoomLevels = sa[3];       // 6
-        bwg.chromTreeOffset = (la[2] << 32) | (la[3]);     // 8
-        bwg.unzoomedDataOffset = (la[4] << 32) | (la[5]);  // 16
-        bwg.unzoomedIndexOffset = (la[6] << 32) | (la[7]); // 24
+        bwg.chromTreeOffset = bwg_readOffset(ba, 8);
+        bwg.unzoomedDataOffset = bwg_readOffset(ba, 16);
+        bwg.unzoomedIndexOffset = bwg_readOffset(ba, 24);
         bwg.fieldCount = sa[16];         // 32
         bwg.definedFieldCount = sa[17];  // 34
-        bwg.asOffset = (la[9] << 32) | (la[10]);    // 36 (unaligned longlong)
-        bwg.totalSummaryOffset = (la[11] << 32) | (la[12]);    // 44 (unaligned longlong)
+        bwg.asOffset = bwg_readOffset(ba, 36);
+        bwg.totalSummaryOffset = bwg_readOffset(ba, 44);
         bwg.uncompressBufSize = la[13];  // 52
-        bwg.extHeaderOffset = (la[14] << 32) | (la[15])
+        bwg.extHeaderOffset = bwg_readOffset(ba, 56);
         
         // console.log('bwgVersion: ' + bwg.version);
         // dlog('bigType: ' + bwg.type);
@@ -887,9 +897,8 @@ function makeBwg(data, callback, name) {
         bwg.zoomLevels = [];
         for (var zl = 0; zl < bwg.numZoomLevels; ++zl) {
             var zlReduction = la[zl*6 + 16]
-            var zlData = (la[zl*6 + 18]<<32)|(la[zl*6 + 19]);
-            var zlIndex = (la[zl*6 + 20]<<32)|(la[zl*6 + 21]);
-//          dlog('zoom(' + zl + '): reduction=' + zlReduction + '; data=' + zlData + '; index=' + zlIndex);
+            var zlData = bwg_readOffset(ba, zl*24 + 72);
+            var zlIndex = bwg_readOffset(ba, zl*24 + 80);
             bwg.zoomLevels.push({reduction: zlReduction, dataOffset: zlData, indexOffset: zlIndex});
         }
 
@@ -905,7 +914,6 @@ function makeBwg(data, callback, name) {
 
 BigWig.prototype._tsFetch = function(zoom, chr, min, max, callback) {
     var bwg = this;
-    // console.log('tsFetch: ' + zoom + ', ' + chr + ', ' + min + ', ' + max);
     if (zoom >= this.zoomLevels.length - 1) {
         if (!this.topLevelReductionCache) {
             this.getZoomedView(this.zoomLevels.length - 1).readWigDataById(-1, 0, 300000000, function(feats) {
@@ -999,7 +1007,7 @@ BigWig.prototype.getAutoSQL = function(callback) {
 
 
     this.data.slice(this.asOffset, 2048).fetch(function(result) {
-        var ba = new Int8Array(result);
+        var ba = new Uint8Array(result);
         var s = '';
         for (var i = 0; i < ba.length; ++i) {
             if (ba[i] == 0)
@@ -1047,12 +1055,13 @@ BigWig.prototype.getExtraIndices = function(callback) {
                 return callback(null, "Couldn't fetch extension header");
             }
 
+            var ba = new Uint8Array(result);
             var sa = new Int16Array(result);
             var la = new Int32Array(result);
             
             var extHeaderSize = sa[0];
             var extraIndexCount = sa[1];
-            var extraIndexListOffset = (la[1]<<32) | (la[2]);
+            var extraIndexListOffset = bwg_readOffset(ba, 4);
 
             if (extraIndexCount == 0) {
                 return callback(null);
@@ -1066,6 +1075,7 @@ BigWig.prototype.getExtraIndices = function(callback) {
                     return callback(null, "Couldn't fetch index info");
                 }
 
+                var ba = new Uint8Array(eil);
                 var sa = new Int16Array(eil);
                 var la = new Int32Array(eil);
 
@@ -1073,7 +1083,7 @@ BigWig.prototype.getExtraIndices = function(callback) {
                 for (var ii = 0; ii < extraIndexCount; ++ii) {
                     var eiType = sa[ii*10];
                     var eiFieldCount = sa[ii*10 + 1];
-                    var eiOffset = (la[ii*5 + 1]<<32) | (la[ii*5+2]);
+                    var eiOffset = bwg_readOffset(ba, ii*20 + 4);
                     var eiField = sa[ii*10 + 8]
                     var index = new BBIExtraIndex(thisB, eiType, eiFieldCount, eiOffset, eiField);
                     indices.push(index);
@@ -1103,12 +1113,8 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
         var blockSize = la[1];
         var keySize = la[2];
         var valSize = la[3];
-        var itemCount = (la[4] << 32) | (la[5]);
+        var itemCount = bwg_readOffset(ba, 16);
         var rootNodeOffset = 32;
-        
-        // console.log('blockSize: ' + blockSize);
-        // console.log('keySize: ' + keySize);
-        // console.log('valSize: ' + valSize);
 
         function bptReadNode(nodeOffset) {
             thisB.bbi.data.slice(nodeOffset, 4 + (blockSize * (keySize + valSize))).fetch(function(node) {

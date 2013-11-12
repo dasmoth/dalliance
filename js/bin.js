@@ -57,6 +57,10 @@ function URLFetchable(url, start, end, opts) {
 }
 
 URLFetchable.prototype.slice = function(s, l) {
+    if (s < 0) {
+        throw 'Bad slice ' + s;
+    }
+
     var ns = this.start, ne = this.end;
     if (ns && s) {
         ns = ns + s;

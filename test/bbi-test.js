@@ -68,4 +68,37 @@ describe('BBI objects', function() {
             expect(features.length > 0).toBeTruthy();
         });
     });
+
+    it('can retrieve features via extra indices', function() {
+        var index, features, err, flag, flag2;
+
+        runs(function() {
+            bb.getExtraIndices(function(ei) {
+                index = ei[0];
+                flag = true;
+            })
+        });
+
+        waitsFor(function() {
+            return flag;
+        }, 'Expects callback after extra-index request');
+
+        runs(function() {
+            index.lookup('AT5G57360.2', function(_f, _e) {
+                features = _f;
+                err = _e;
+                flag2 = true;
+            });
+        });
+
+        waitsFor(function() {
+            return flag2;
+        }, 'Expects callback after extra-index lookup');
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            expect(features.length > 0).toBeTruthy();
+        });
+    });
 });
