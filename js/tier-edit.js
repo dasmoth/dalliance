@@ -16,7 +16,7 @@ Browser.prototype.openTierPanel = function(tier) {
     } else {
         this.manipulatingTier = tier;
 
-        var tierForm = makeElement('div');
+        var tierForm = makeElement('div', null, {className: 'tier-edit'});
 
         var tierNameField = makeElement('input', null, {type: 'text', value: tier.dasSource.name});
         var glyphField = makeElement('select');
@@ -26,6 +26,28 @@ Browser.prototype.openTierPanel = function(tier) {
 
 
         var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
+        var tierColorField2 = makeElement('input', null, {type: 'color', value: '#dd00dd'});
+        var tierColorField3 = makeElement('input', null, {type: 'color', value: '#dd00dd'});
+        var tierColorFields = [tierColorField, tierColorField2, tierColorField3];
+        var colorListPlus = makeElement('i', null, {className: 'fa fa-plus-circle'});
+        var colorListMinus = makeElement('i', null, {className: 'fa fa-minus-circle'});
+        var numColors = 1;
+        var colorListElement = makeElement('td');
+        function setNumColors(n) {
+            numColors = n;
+            removeChildren(colorListElement);
+            for (var i = 0; i < n; ++i)
+                colorListElement.appendChild(tierColorFields[i]);
+        }
+        setNumColors(numColors);
+        colorListPlus.addEventListener('click', function(ev) {
+            if (numColors < 3)
+                setNumColors(numColors + 1);
+        }, false);
+        colorListMinus.addEventListener('click', function(ev) {
+            if (numColors > 1)
+                setNumColors(numColors - 1);
+        }, false);
 
         var tierMinField = makeElement('input', null, {type: 'text', value: '0.0'});
         var tierMaxField = makeElement('input', null, {type: 'text', value: '10.0'});
@@ -79,32 +101,28 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var tierTable = makeElement('table',
             [makeElement('tr',
-                [makeElement('th', 'Tier name:'),
+                [makeElement('th', 'Tier name:', {}, {width: '150px', textAlign: 'right'}),
                  tierNameField]),
 
-             makeElement('tr',
-                [makeElement('th', 'Colour'),
-                 tierColorField]),
-
-             makeElement('tr',
-                [makeElement('th', 'Glyph'),
+            makeElement('tr',
+                [makeElement('th', 'Style'),
                  makeElement('td', glyphField)]),
 
              makeElement('tr',
+                [makeElement('th', ['Colour(s)', colorListPlus, colorListMinus]),
+                 colorListElement]),
+
+             makeElement('tr',
                 [makeElement('th', 'Min value:'),
-                 makeElement('td', [tierMinToggle, tierMinField])]),
+                 makeElement('td', [tierMinToggle, ' ', tierMinField])]),
 
              makeElement('tr',
                 [makeElement('th', 'Max value:'),
-                 makeElement('td', [tierMaxToggle, tierMaxField])]),
+                 makeElement('td', [tierMaxToggle, ' ', tierMaxField])]),
 
              makeElement('tr',
-                [makeElement('th', 'Threshold-leap'),
-                 makeElement('td', quantLeapToggle)]),
-
-             makeElement('tr',
-                [makeElement('th', 'Threshold:'),
-                 makeElement('td', quantLeapThreshField)])
+                [makeElement('th', 'Threshold leap:'),
+                 makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])])
              ]);
 
         if (seqStyle) {
