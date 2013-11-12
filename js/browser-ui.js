@@ -249,6 +249,19 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.addEventListener('blur', function(ev) {
         holder.removeEventListener('keydown', uiKeyHandler, false);
     }, false);
+
+    holder.addEventListener('keydown', function(ev) {
+        if (ev.keyCode === 27) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            b.uiMode = 'none';
+            b.hideToolPanel();
+
+            if (b.selectedTiers && b.selectedTiers.length > 0) {
+                b.browserHolder.focus();
+            }
+        }
+    }, false);
 }
 
 Browser.prototype.showToolPanel = function(panel, nowrap) {
@@ -265,6 +278,9 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
     this.activeToolPanel = makeElement('div', [makeElement('div', null, {className: 'tool-divider'}), content], {className: 'tool-holder'});
     this.svgHolder.appendChild(this.activeToolPanel);
     this.resizeViewer();
+
+    var thisB = this;
+
 }
 
 Browser.prototype.hideToolPanel = function() {
