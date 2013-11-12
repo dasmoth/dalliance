@@ -21,6 +21,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     // FIXME shouldn't be hard-coded...
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css'}));
 
     var b = this;
 
@@ -43,16 +44,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
 
 
-    var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-in'})], {className: 'btn'});
+    var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
     var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'});  // NB min and max get overwritten.
-    var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'icon-zoom-out'})], {className: 'btn'});
+    var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
 
-    var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'icon-plus'})], {className: 'btn'});
-    var favBtn = makeElement('a', [makeElement('i', null, {className: 'icon-bookmark'})], {className: 'btn'});
-    var svgBtn = makeElement('a', [makeElement('i', null, {className: 'icon-print'})], {className: 'btn'});
-    var resetBtn = makeElement('a', [makeElement('i', null, {className: 'icon-refresh'})], {className: 'btn'});
-    var optsButton = makeElement('div', [makeElement('i', null, {className: 'icon-cog'})], {className: 'btn'});
-    var helpButton = makeElement('div', [makeElement('i', null, {className: 'icon-info-sign'})], {className: 'btn'});
+    var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-plus'})], {className: 'btn'});
+    var favBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-bookmark'})], {className: 'btn'});
+    var svgBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-print'})], {className: 'btn'});
+    var resetBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-refresh'})], {className: 'btn'});
+    var optsButton = makeElement('div', [makeElement('i', null, {className: 'fa fa-cogs'})], {className: 'btn'});
+    var helpButton = makeElement('div', [makeElement('i', null, {className: 'fa fa-info'})], {className: 'btn'});
 
 
     var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
