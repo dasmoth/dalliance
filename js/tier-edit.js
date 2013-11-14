@@ -14,6 +14,41 @@ Browser.prototype.openTierPanel = function(tier) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
+        var redrawTimeout = null;
+        function scheduleRedraw() {
+            if (!redrawTimeout) {
+                redrawTimeout = setTimeout(function() {
+                    tier.draw();
+                    redrawTimeout = null;
+                }, 10);
+            }
+        }
+
+        function changeColor(ev) {
+            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
+                var style = tier.stylesheet.styles[i].style;
+                if (numColors == 1) {
+                    if (style.glyph == 'LINEPLOT') {
+                        style.FGCOLOR = tierColorField.value;
+                    } else {
+                        style.BGCOLOR = tierColorField.value;
+                    }
+                    style.COLOR1 = style.COLOR2 = style.COLOR3 = null;
+                } else {
+                    style.COLOR1 = tierColorField.value;
+                    style.COLOR2 = tierColorField2.value;
+                    if (numColors > 2) {
+                        style.COLOR3 = tierColorField3.value;
+                    } else {
+                        style.COLOR3 = null;
+                    }
+                }
+                style._gradient = null;
+            }
+            scheduleRedraw();
+        }
+
+        
         this.manipulatingTier = tier;
 
         var tierForm = makeElement('div', null, {className: 'tier-edit'});
@@ -177,39 +212,7 @@ Browser.prototype.openTierPanel = function(tier) {
             tier.nameElement.innerText = tier.dasSource.name = tierNameField.value;
         }, false);
 
-        var redrawTimeout = null;
-        function scheduleRedraw() {
-            if (!redrawTimeout) {
-                redrawTimeout = setTimeout(function() {
-                    tier.draw();
-                    redrawTimeout = null;
-                }, 10);
-            }
-        }
 
-        function changeColor(ev) {
-            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                var style = tier.stylesheet.styles[i].style;
-                if (numColors == 1) {
-                    if (style.glyph == 'LINEPLOT') {
-                        style.FGCOLOR = tierColorField.value;
-                    } else {
-                        style.BGCOLOR = tierColorField.value;
-                    }
-                    style.COLOR1 = style.COLOR2 = style.COLOR3 = null;
-                } else {
-                    style.COLOR1 = tierColorField.value;
-                    style.COLOR2 = tierColorField2.value;
-                    if (numColors > 2) {
-                        style.COLOR3 = tierColorField3.value;
-                    } else {
-                        style.COLOR3 = null;
-                    }
-                }
-                style._gradient = null;
-            }
-            scheduleRedraw();
-        }
 
         for (var ci = 0; ci < tierColorFields.length; ++ci) {
             tierColorFields[ci].addEventListener('change', changeColor, false);
