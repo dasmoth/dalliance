@@ -243,7 +243,7 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
 
         tierHeightField.addEventListener('input', function(ev) {
-            tier.forceHeight = parseFloat(tierHeightField.value)|0;
+            tier.forceHeight = Math.min(500, parseFloat(tierHeightField.value)|0);
             scheduleRedraw();
         }, false)
 
