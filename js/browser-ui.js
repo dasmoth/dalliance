@@ -21,7 +21,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     // FIXME shouldn't be hard-coded...
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: 'http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/font-awesome.min.css'}));
 
     var b = this;
 
