@@ -38,8 +38,8 @@ Browser.prototype.openTierPanel = function(tier) {
             removeChildren(colorListElement);
             for (var i = 0; i < n; ++i)
                 colorListElement.appendChild(tierColorFields[i]);
+            changeColor(null);
         }
-        setNumColors(numColors);
         colorListPlus.addEventListener('click', function(ev) {
             if (numColors < 3)
                 setNumColors(numColors + 1);
@@ -60,10 +60,26 @@ Browser.prototype.openTierPanel = function(tier) {
         var seqStyle = null;
         if (tier.stylesheet.styles.length > 0) {
             var s = tier.stylesheet.styles[0].style;
-            if (s.BGCOLOR) {
-                var oldCol = dasColourForName(s.BGCOLOR).toHexString();
-                tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
+
+            if (s.COLOR1) {
+                tierColorField.value = dasColourForName(s.COLOR1).toHexString();
+                if (s.COLOR2) {
+                    tierColorField2.value = dasColourForName(s.COLOR2).toHexString();
+                    if (s.COLOR3) {
+                        tierColorField3.value = dasColourForName(s.COLOR3).toHexString();
+                        numColors = 3;
+                    } else {
+                        numColors = 2;
+                    }
+                }
+            } else {
+                if (s.glyph == 'LINEPLOT' && s.FGCOLOR) {
+                    tierColorField.value = dasColourForName(s.FGCOLOR).toHexString();
+                } else if (s.BGCOLOR) {
+                    tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
+                }
             }
+
             glyphField.value = s.glyph;
 
             if (s.MIN !== undefined) {
@@ -91,6 +107,8 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
         }
+
+        setNumColors(numColors);
 
         if (tier.dasSource.forceMin) {
             tierMinField.value = tier.dasSource.forceMin;
@@ -153,18 +171,39 @@ Browser.prototype.openTierPanel = function(tier) {
             }
         }
 
-        tierColorField.addEventListener('change', function(ev) {
+        function changeColor(ev) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                tier.stylesheet.styles[i].style.BGCOLOR = tierColorField.value;
+                var style = tier.stylesheet.styles[i].style;
+                if (numColors == 1) {
+                    if (style.glyph == 'LINEPLOT') {
+                        style.FGCOLOR = tierColorField.value;
+                    } else {
+                        style.BGCOLOR = tierColorField.value;
+                    }
+                    style.COLOR1 = style.COLOR2 = style.COLOR3 = null;
+                } else {
+                    style.COLOR1 = tierColorField.value;
+                    style.COLOR2 = tierColorField2.value;
+                    if (numColors > 2) {
+                        style.COLOR3 = tierColorField3.value;
+                    } else {
+                        style.COLOR3 = null;
+                    }
+                }
+                style._gradient = null;
             }
             scheduleRedraw();
-        }, false);
+        }
+
+        for (var ci = 0; ci < tierColorFields.length; ++ci) {
+            tierColorFields[ci].addEventListener('change', changeColor, false);
+        }
 
         glyphField.addEventListener('change', function(ev) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
                 tier.stylesheet.styles[i].style.glyph = glyphField.value;
             }
-            scheduleRedraw();
+            changeColor(); // Also calls scheduleRedraw.
         }, false);
 
         tierMinToggle.addEventListener('change', function(ev) {
