@@ -320,6 +320,7 @@ Browser.prototype.realInit2 = function() {
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 if (ch >= 40) {
                     tt.forceHeight = ch - 10;
+                    tt.notifyTierListeners('height');
                     tt.draw();
                 }
             } else if (ev.ctrlKey) {
@@ -359,6 +360,7 @@ Browser.prototype.realInit2 = function() {
                 var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 tt.forceHeight = ch + 10;
+                tt.notifyTierListeners('height');
                 tt.draw();
             } else if (ev.ctrlKey) {
                 var st = thisB.getSelectedTier();

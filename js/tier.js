@@ -44,6 +44,8 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
                 thisB.addFeatureInfoPlugin(fip);
         });
     }
+
+    this.listeners = [];
 }
 
 DasTier.prototype.toString = function() {
@@ -329,4 +331,18 @@ DasTier.prototype.notify = function(message) {
         thisB.notifierFadeTimeout = null;
     }, 2000);
 
+}
+
+DasTier.prototype.addTierListener = function(l) {
+    this.listeners.push(l);
+}
+
+DasTier.prototype.notifyTierListeners = function(change) {
+    for (var li = 0; li < this.listeners.length; ++li) {
+        try {
+            this.listeners[li](change);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }

@@ -52,14 +52,15 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-bookmark'})], {className: 'btn'});
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-refresh'})], {className: 'btn'});
-    var optsButton = makeElement('div', [makeElement('i', null, {className: 'fa fa-cogs'})], {className: 'btn'});
-    var helpButton = makeElement('div', [makeElement('i', null, {className: 'fa fa-info'})], {className: 'btn'});
+    var optsButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-cogs'})], {className: 'btn'});
+    var helpButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-info'})], {className: 'btn'});
+    var tierEditButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-road'})], {className: 'btn'});
+    b.makeTooltip(tierEditButton, 'Configure currently selected track(s) (E)')
 
-
-    var modeButtons = makeElement('div', [addTrackBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
+    var modeButtons = makeElement('div', [addTrackBtn, tierEditButton, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
         this.uiMode = m;
-        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, 'export': svgBtn};
+        var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, 'export': svgBtn, tier: tierEditButton};
         for (var x in mb) {
             if (x == m)
                 mb[x].classList.add('active');
@@ -205,6 +206,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.toggleHelpPopup(ev);
     });
     b.makeTooltip(helpButton, 'Help; Keyboard shortcuts. (H)');
+
+    tierEditButton.addEventListener('click', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        if (b.selectedTiers.length == 1) {
+            b.openTierPanel(b.tiers[b.selectedTiers[0]]);
+        }
+    }, false);
 
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {

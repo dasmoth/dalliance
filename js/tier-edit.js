@@ -57,9 +57,12 @@ Browser.prototype.openTierPanel = function(tier) {
         var quantLeapToggle = makeElement('input', null, {type: 'checkbox', checked: tier.quantLeapThreshold !== undefined});
         var quantLeapThreshField = makeElement('input', null, {type: 'text', value: tier.quantLeapThreshold, disabled: !quantLeapToggle.checked});
 
+        var tierHeightField = makeElement('input', null, {type: 'text', value: '50'});
+
         var seqStyle = null;
+        var mainStyle = null;
         if (tier.stylesheet.styles.length > 0) {
-            var s = tier.stylesheet.styles[0].style;
+            var s = mainStyle = tier.stylesheet.styles[0].style;
 
             if (s.COLOR1) {
                 tierColorField.value = dasColourForName(s.COLOR1).toHexString();
@@ -117,6 +120,15 @@ Browser.prototype.openTierPanel = function(tier) {
             tierMaxField.value = tier.dasSource.forceMax;
         }
 
+        function refresh() {
+            if (tier.forceHeight) {
+                tierHeightField.value = '' + tier.forceHeight;
+            } else if (mainStyle && mainStyle.HEIGHT) {
+                tierHeightField.value = '' + mainStyle.HEIGHT;
+            }
+        }
+        refresh();
+
         var tierTable = makeElement('table',
             [makeElement('tr',
                 [makeElement('th', 'Tier name:', {}, {width: '150px', textAlign: 'right'}),
@@ -137,6 +149,10 @@ Browser.prototype.openTierPanel = function(tier) {
              makeElement('tr',
                 [makeElement('th', 'Max value:'),
                  makeElement('td', [tierMaxToggle, ' ', tierMaxField])]),
+
+             makeElement('tr',
+                [makeElement('th', 'Height'),
+                 makeElement('td', tierHeightField)]),
 
              makeElement('tr',
                 [makeElement('th', 'Threshold leap:'),
@@ -226,6 +242,11 @@ Browser.prototype.openTierPanel = function(tier) {
             scheduleRedraw();
         }, false);
 
+        tierHeightField.addEventListener('input', function(ev) {
+            tier.forceHeight = parseFloat(tierHeightField.value)|0;
+            scheduleRedraw();
+        }, false)
+
         function updateQuant() {
             quantLeapThreshField.disabled = !quantLeapToggle.checked;
             if (quantLeapToggle.checked) {
@@ -245,5 +266,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
         this.showToolPanel(tierForm);
         this.setUiMode('tier');
+
+        tier.addTierListener(refresh);
     }
 }
