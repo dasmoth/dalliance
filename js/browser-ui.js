@@ -53,9 +53,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var svgBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-print'})], {className: 'btn'});
     var resetBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-refresh'})], {className: 'btn'});
     var optsButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-cogs'})], {className: 'btn'});
-    var helpButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-info'})], {className: 'btn'});
+    var helpButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-question'})], {className: 'btn'});
+
     var tierEditButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-road'})], {className: 'btn'});
     b.makeTooltip(tierEditButton, 'Configure currently selected track(s) (E)')
+
+    var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-left'})], {className: 'btn'});
+    var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-right'})], {className: 'btn pull-right'});
 
     var modeButtons = makeElement('div', [addTrackBtn, tierEditButton, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
@@ -70,7 +74,10 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
 
+    toolbar.appendChild(leapRightButton);
     toolbar.appendChild(modeButtons);
+    
+    toolbar.appendChild(leapLeftButton);
     if (!this.noTitle) {
         toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group title'}));
     }
@@ -212,6 +219,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (b.selectedTiers.length == 1) {
             b.openTierPanel(b.tiers[b.selectedTiers[0]]);
         }
+    }, false);
+
+    leapLeftButton.addEventListener('click', function(ev) {
+        b.leap(-1, false);
+    }, false);
+    leapRightButton.addEventListener('click', function(ev) {
+        b.leap(1, false);
     }, false);
 
     b.addTierSelectionWrapListener(function(dir) {

@@ -66,7 +66,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeHubButton = function(hub) {
         if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-            var hubRemove = makeElement('i', null, {className: 'icon-remove'});
+            var hubRemove = makeElement('i', null, {className: 'fa fa-times'});
             var hbContent = makeElement('span', [hub.shortLabel || 'Unknown', ' ', hubRemove]);
             var hubButton = thisB.makeButton(hbContent, hub.longLabel);
             addModeButtons.push(hubButton);

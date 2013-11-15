@@ -272,7 +272,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
 
 
 DasTier.prototype.updateLabel = function() {
-   this.bumpButton.className = this.bumped ? 'icon-minus-sign' : 'icon-plus-sign';
+   this.bumpButton.className = this.bumped ? 'fa fa-minus-circle' : 'fa fa-plus-circle';
    if (this.dasSource.collapseSuperGroups) {
         this.bumpButton.style.display = 'inline-block';
     } else {

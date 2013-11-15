@@ -232,10 +232,14 @@ Browser.prototype.realInit2 = function() {
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
-                var fedge = 0;
+                var fedge = false;
                 if(ev.shiftKey){
-                    fedge = 1;
+                    fedge = true;
                 }
+
+                thisB.leap(-1, fedge);
+
+                /*
                 var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
 
                 var st = thisB.getSelectedTier();
@@ -266,47 +270,19 @@ Browser.prototype.realInit2 = function() {
                           } else {
                               alert('no next feature');
                           }
-                      });
+                      }); */
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
         } else if (ev.keyCode == 37) { // left arrow
             ev.stopPropagation(); ev.preventDefault();
             if (ev.ctrlKey) {
-                var fedge = 0;
+                var fedge = false;
                 if(ev.shiftKey){
-                    fedge = 1;
+                    fedge = true;
                 }
-                var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                thisB.tiers[st].findNextFeature(
-                      thisB.chr,
-                      pos,
-                      1,
-                      fedge,
-                      function(nxt) {
-                          if (nxt) {
-                              var nmin = nxt.min;
-                              var nmax = nxt.max;
-                              if (fedge) { 
-                                  if (nmin>pos+1) {
-                                      nmax=nmin;
-                                  } else {
-                                      nmax++;
-                                      nmin=nmax
-                                  }
-                              }
-                              var wid = thisB.viewEnd - thisB.viewStart + 1;
-                              if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
-                              var newStart = (nmin + nmax - wid)/2 + 1;
-                              var newEnd = newStart + wid - 1;
-                              var pos2=pos;
-                              thisB.setLocation(nxt.segment, newStart, newEnd);
-                          } else {
-                              alert('no next feature'); // FIXME better reporting would be nice!
-                          }
-                      });
+                
+                thisB.leap(1, fedge);
             } else {
                 thisB.move(ev.shiftKey ? -100 : -25);
             }
@@ -600,7 +576,7 @@ Browser.prototype.realMakeTier = function(source) {
           className: 'viewport-overlay'});
 
     var placardContent = makeElement('span', '');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'icon-warning-sign'}), ' ', placardContent], {className: 'placard'});
+    var placard = makeElement('div', [makeElement('i', null, {className: 'fa fa-warning'}), ' ', placardContent], {className: 'placard'});
     
     var notifier = makeElement('div', 'Exciting message', {},
         {backgroundColor: 'black',
@@ -757,11 +733,11 @@ Browser.prototype.realMakeTier = function(source) {
 
 
 
-    tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
-    tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
+    tier.removeButton = makeElement('i', null, {className: 'fa fa-times'});
+    tier.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
     tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
-    tier.nameButton = makeElement('a', [], {className: 'tier-tab'});
+    tier.nameButton = makeElement('div', [], {className: 'tier-tab'});
     tier.nameButton.appendChild(tier.removeButton);
     if (source.pennant) {
         tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
@@ -775,6 +751,17 @@ Browser.prototype.realMakeTier = function(source) {
        [tier.nameButton],
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+
+
+    /*
+    tier.leapLeftButton = makeElement('div', makeElement('i', null, {className: 'fa fa-chevron-left'}),
+        {className: 'btn'},
+        {position: 'absolute', left: '2px', top: '2px'});
+
+    tier.leapRightButton = makeElement('div', makeElement('i', null, {className: 'fa fa-chevron-right'}),
+        {className: 'btn'},
+        {position: 'absolute', right: '2px', top: '2px'});*/
+
     var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
@@ -1639,6 +1626,50 @@ Browser.prototype.updateHeight = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) 
         tierTotal += (this.tiers[ti].currentHeight || 30);
     this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
+}
+
+Browser.prototype.leap = function(dir, fedge) {
+    var thisB = this;
+    var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
+
+    var st = thisB.getSelectedTier();
+    if (st < 0) return;
+    thisB.tiers[st].findNextFeature(
+          thisB.chr,
+          pos,
+          dir,
+          fedge,
+          function(nxt) {
+              if (nxt) {
+                  var nmin = nxt.min;
+                  var nmax = nxt.max;
+                  if (fedge) { 
+                    if (dir > 0) {
+                      if (nmin>pos+1) {
+                          nmax=nmin;
+                      } else {
+                          nmax++;
+                          nmin=nmax
+                      }
+                    } else {
+                        if (nmax<pos-1) {
+                            nmax++;
+                            nmin=nmax;
+                        } else {
+                            nmax=nmin;
+                        }
+                    } 
+                  }
+                  var wid = thisB.viewEnd - thisB.viewStart + 1;
+                  if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
+                  var newStart = (nmin + nmax - wid)/2 + 1;
+                  var newEnd = newStart + wid - 1;
+                  var pos2=pos;
+                  thisB.setLocation(nxt.segment, newStart, newEnd);
+              } else {
+                  alert('no next feature'); // FIXME better reporting would be nice!
+              }
+          });
 }
 
 function glyphLookup(glyphs, rx, matches) {
