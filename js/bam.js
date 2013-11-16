@@ -340,7 +340,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
                 p += 5;
             } else if (type == 'f') {
                 throw 'FIXME need floats';
-            } else if (type == 'Z') {
+            } else if (type == 'Z' || type == 'H') {
                 p += 3;
                 value = '';
                 for (;;) {
@@ -350,6 +350,33 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
                     } else {
                         value += String.fromCharCode(cc);
                     }
+                }
+            } else if (type == 'B') {
+                var atype = String.fromCharCode(ba[p + 3]);
+                var alen = readInt(ba, p + 4);
+                var elen;
+                var reader;
+                if (atype == 'i' || atype == 'I' || atype == 'f') {
+                    elen = 4;
+                    if (atype == 'f')
+                        reader = readFloat;
+                    else
+                        reader = readInt;
+                } else if (atype == 's' || atype == 'S') {
+                    elen = 2;
+                    reader = readShort;
+                } else if (atype == 'c' || atype == 'C') {
+                    elen = 1;
+                    reader = readByte;
+                } else {
+                    throw 'Unknown array type ' + atype;
+                }
+
+                p += 8;
+                value = [];
+                for (var i = 0; i < alen; ++i) {
+                    value.push(reader(ba, p));
+                    p += elen;
                 }
             } else {
                 throw 'Unknown type '+ type;
@@ -366,7 +393,22 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
     }
 
     // Exits via top of loop.
-}
+};
+
+(function() {
+    var convertBuffer = new ArrayBuffer(8);
+    var ba = new Uint8Array(convertBuffer);
+    var fa = new Float32Array(convertBuffer);
+
+
+    window.readFloat = function(buf, offset) {
+        ba[0] = buf[offset];
+        ba[1] = buf[offset+1];
+        ba[2] = buf[offset+2];
+        ba[3] = buf[offset+3];
+        return fa[0];
+    };
+ })();
 
 function readInt64(ba, offset) {
     return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
@@ -378,6 +420,10 @@ function readInt(ba, offset) {
 
 function readShort(ba, offset) {
     return (ba[offset + 1] << 8) | (ba[offset]);
+}
+
+function readByte(ba, offset) {
+    return ba[offset];
 }
 
 function readVob(ba, offset) {
