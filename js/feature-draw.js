@@ -359,19 +359,23 @@ DasTier.prototype.paint = function() {
 }
 
 DasTier.prototype.paintQuant = function() {
+    if (!this.quantOverlay)
+        return;
+
     var retina = this.browser.retina && window.devicePixelRatio > 1;
 
     var quant;
     if (this.subtiers && this.subtiers.length > 0)
         quant = this.subtiers[0].quant;
 
-    if (quant && this.quantOverlay) {
+    if (quant) {
         var h = this.subtiers[0].height;
         var w = 50;
         this.quantOverlay.height = this.viewport.height;
         this.quantOverlay.width = retina ? w*2 : w;
         this.quantOverlay.style.height = '' + (retina ? this.quantOverlay.height/2 : this.quantOverlay.height) + 'px';
         this.quantOverlay.style.width = '' + w + 'px';
+        this.quantOverlay.style.display = 'block';
         var ctx = this.quantOverlay.getContext('2d');
         if (retina)
             ctx.scale(2, 2);
@@ -447,6 +451,8 @@ DasTier.prototype.paintQuant = function() {
                 ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), 9, ty + 3);
             }
         }
+    } else {
+        this.quantOverlay.style.display = 'none';
     }
 }
 
