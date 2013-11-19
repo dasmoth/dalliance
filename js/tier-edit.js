@@ -28,7 +28,7 @@ Browser.prototype.openTierPanel = function(tier) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
                 var style = tier.stylesheet.styles[i].style;
                 if (numColors == 1) {
-                    if (style.glyph == 'LINEPLOT') {
+                    if (style.glyph == 'LINEPLOT' || style.glyph == 'DOT') {
                         style.FGCOLOR = tierColorField.value;
                     } else {
                         style.BGCOLOR = tierColorField.value;
@@ -58,6 +58,7 @@ Browser.prototype.openTierPanel = function(tier) {
         glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));
         glyphField.appendChild(makeElement('option', 'Line Plot', {value: 'LINEPLOT'}));
         glyphField.appendChild(makeElement('option', 'Ribbon', {value: 'GRADIENT'}));
+        glyphField.appendChild(makeElement('option', 'Scatter', {value: 'SCATTER'}));
 
 
         var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
@@ -111,14 +112,18 @@ Browser.prototype.openTierPanel = function(tier) {
                     }
                 }
             } else {
-                if (s.glyph == 'LINEPLOT' && s.FGCOLOR) {
+                if (s.glyph == 'LINEPLOT' || s.glyph == 'DOT' && s.FGCOLOR) {
                     tierColorField.value = dasColourForName(s.FGCOLOR).toHexString();
                 } else if (s.BGCOLOR) {
                     tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
                 }
             }
 
-            glyphField.value = s.glyph;
+            if (isDasBooleanTrue(s.SCATTER)) {
+                glyphField.value = 'SCATTER';
+            } else {
+                glyphField.value = s.glyph;
+            }
 
             if (s.MIN !== undefined) {
                 tierMinField.value = s.MIN;
@@ -220,7 +225,15 @@ Browser.prototype.openTierPanel = function(tier) {
 
         glyphField.addEventListener('change', function(ev) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                tier.stylesheet.styles[i].style.glyph = glyphField.value;
+                var ts = tier.stylesheet.styles[i].style;
+
+                if (glyphField.value === 'SCATTER') {
+                    ts.SCATTER = true;
+                    ts.glyph = 'DOT';
+                    ts.SIZE = '3';
+                } else {
+                    ts.glyph = glyphField.value;
+                }
             }
             changeColor(); // Also calls scheduleRedraw.
         }, false);
@@ -228,6 +241,8 @@ Browser.prototype.openTierPanel = function(tier) {
         tierMinToggle.addEventListener('change', function(ev) {
             tier.forceMinDynamic = !tierMinToggle.checked;
             tierMinField.disabled = !tierMinToggle.checked;
+            if (tierMinToggle.checked)
+                tier.dasSource.forceMin = parseFloat(tierMinField.value);
             scheduleRedraw();
         });
         tierMinField.addEventListener('input', function(ev) {
@@ -238,6 +253,8 @@ Browser.prototype.openTierPanel = function(tier) {
         tierMaxToggle.addEventListener('change', function(ev) {
             tier.forceMaxDynamic = !tierMaxToggle.checked;
             tierMaxField.disabled = !tierMaxToggle.checked;
+            if (tierMaxToggle.checked)
+                tier.dasSource.forceMax = parseFloat(tierMaxField.value);
             scheduleRedraw();
         });
         tierMaxField.addEventListener('input', function(ev) {
