@@ -1,6 +1,6 @@
 function updateMolgenisTable(molgenisUrl, chr, mutation) {
 	if (mutation == null || mutation.typeId == "mutation") {
-		var url = 'http://' + molgenisUrl + '/plugin/genomebrowser/data?segment='+chr;
+		var url = '/plugin/genomebrowser/data?segment='+chr;
 		if (mutation != null) {
 			url = url +'&mutation='+ mutation.id;
 		}
