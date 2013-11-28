@@ -5,18 +5,25 @@ For 0.11
   - Search of bigbed files. [DONE]
   - Search via Trix indices. [DONE]
   - Retina display support. [DONE]
-  - Replace feature popups with inspector?
   - Assembly hub support. [DONE]
-  - Bulk addition of local files.
   - Rename tracks. [DONE]
   - Per-track display customization ("Stylesheet editor")?
-  - Animate when leaping/toggling.
   - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
   - Security cleanups + support for credentialed trackhubs [DONE]
   - Feature centering after quantLeap
 
 For 0.12
+--------
+
+  - Replace feature popups with inspector?
+  - Feature selection
+  - Small BED/WIG support
+  - Animate when leaping/toggling.
+  - Apply track-edit operations to multiple tracks at once.
+  - Bulk addition of local files.
+
+For 0.13
 --------
 
   - Undo/redo.  
@@ -27,27 +34,19 @@ For 0.12
       stylesheet language.
   - Stylesheet language revamp???  
   - Incremental data fetching
-  - New track-adder UI.
   - Better zoom control
     + Show all toggle levels.
     + Some kind of feedback for toggling.
   - Try to preserve layout when expanding/collapsing variants.
-  - Small BED/WIG support
   - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
   - Chromosome overviews.
 
 Future
 -------------
 
- - Work out the kinks in security/preflighting.
  - Construct as a web-component
    + (web component polyfills aren't quite ready yet).
  - Better tiling in renderer.
- - Better control of vertical resize.
- - Better configuration of quantitative tracks.
-     + Global y-zoom? [Matias wants this.  Wouldn't per-trackgroup be better?  Needs an explicit idea of track-groups.]
-     + Switch between bars/colourways? [Leave this for now]
-     + Increase/decrease viewed height of quant tracks?
  - Non-positional annotation.
  - Alignment improvements.
 
