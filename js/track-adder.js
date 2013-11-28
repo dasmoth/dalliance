@@ -84,13 +84,19 @@ Browser.prototype.showTrackAdder = function(ev) {
             
             hubButton.addEventListener('click', function(ev) {
                 ev.preventDefault(); ev.stopPropagation();
+                activateButton(addModeButtons, hubButton);
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('div', makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'}, {marginLeft: 'auto', marginRight: 'auto', marginTop: '100px'}), null, {textAlign: 'center'}));
+
+                refreshButton.style.display = 'none';
+                addButton.style.display = 'none';
+                canButton.style.display = 'none';
 
                 hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
                     if (err) {
                         console.log(err);
                     }
-
-                    activateButton(addModeButtons, hubButton);
+                    
                     makeHubStab(tracks);
                 });
             }, false);
