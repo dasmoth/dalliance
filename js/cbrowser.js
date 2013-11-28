@@ -1204,6 +1204,9 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 }
 
 Browser.prototype.addTier = function(conf) {
+    conf = new DASSource(conf);
+    conf.disabled = false;
+    
     this.sources.push(conf);
     this.makeTier(conf);
     this.markSelectedTiers();
