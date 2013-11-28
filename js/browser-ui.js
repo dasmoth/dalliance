@@ -189,14 +189,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     resetBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
 
-       for (var i = b.tiers.length - 1; i >= 0; --i) {
-           b.removeTier({index: i});
-       }
-       for (var i = 0; i < b.defaultSources.length; ++i) {
-           b.addTier(b.defaultSources[i]);
-       }
-
-        b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
+       b.reset();
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 

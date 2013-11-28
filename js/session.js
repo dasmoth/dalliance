@@ -125,3 +125,16 @@ Browser.prototype.restoreStatus = function() {
         this.hubs = JSON.parse(hubStr);
     }
 }
+
+Browser.prototype.reset = function() {
+    for (var i = this.tiers.length - 1; i >= 0; --i) {
+       this.removeTier({index: i});
+    }
+    for (var i = 0; i < this.defaultSources.length; ++i) {
+        var s = this.defaultSources[i];
+        if (!s.disabled) 
+            this.addTier(this.defaultSources[i]);
+    }
+
+    this.setLocation(this.defaultChr, this.defaultStart, this.defaultEnd);
+}
