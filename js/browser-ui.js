@@ -61,7 +61,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-left'})], {className: 'btn'});
     var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-right'})], {className: 'btn pull-right'});
 
-    var modeButtons = makeElement('div', [addTrackBtn, tierEditButton, optsButton, helpButton], {className: 'btn-group pull-right'});
+    var modeButtons = makeElement('div', [addTrackBtn, tierEditButton, svgBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
     this.setUiMode = function(m) {
         this.uiMode = m;
         var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, 'export': svgBtn, tier: tierEditButton};
@@ -85,9 +85,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
                                             zoomOutBtn], {className: 'btn-group'}));
-
-    toolbar.appendChild(makeElement('div', [svgBtn,
-                                            resetBtn], {className: 'btn-group'}));
     
 
     holder.appendChild(toolbar);
@@ -185,13 +182,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         b.openExportPanel();
     }, false);
     b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
-
-    resetBtn.addEventListener('click', function(ev) {
-       ev.stopPropagation(); ev.preventDefault();
-
-       b.reset();
-    }, false);
-    b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 
     var optsPopup;
     optsButton.addEventListener('click', function(ev) {
@@ -296,7 +286,6 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
     this.resizeViewer();
 
     var thisB = this;
-
 }
 
 Browser.prototype.hideToolPanel = function() {
@@ -350,8 +339,15 @@ Browser.prototype.toggleOptsPopup = function(ev) {
             }
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
-        
+
         optsForm.appendChild(optsTable);
+
+        var resetButton = makeElement('button', 'Reset browser', {className: 'btn'}, {marginLeft: 'auto', marginRight: 'auto', display: 'block'});
+        resetButton.addEventListener('click', function(ev) {
+            b.reset();
+        }, false);
+        optsForm.appendChild(resetButton);
+
         this.showToolPanel(optsForm);
         this.setUiMode('opts');
     }
