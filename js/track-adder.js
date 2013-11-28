@@ -62,6 +62,17 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
         }; mf(m);
     }
+
+    var groupedDefaults = {};
+    for (var si = 0; si < this.defaultSources.length; ++si) {
+        var s = this.defaultSources[si];
+        var g = s.group || 'Defaults';
+        if (groupedDefaults[g]) {
+            groupedDefaults[g].push(s);
+        } else {
+            groupedDefaults[g] = [s];
+        }
+    }
     
 
     var makeHubButton = function(hub) {
@@ -110,9 +121,17 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
     }
  
-
-    var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
-    addModeButtons.push(defButton);
+    for (var g in groupedDefaults) {
+        (function(g, ds) {
+            var defButton = thisB.makeButton(g, 'Browse the default set of data for this browser');
+            defButton.addEventListener('click', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                activateButton(addModeButtons, defButton);
+                makeStab(new Observed(ds));
+            }, false);
+            addModeButtons.push(defButton);
+        })(g, groupedDefaults[g]);
+    }   
     var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
@@ -430,11 +449,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         activateButton(addModeButtons, regButton);
         makeStab(thisB.availableSources);
     }, false);
-    defButton.addEventListener('click', function(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, defButton);
-        makeStab(new Observed(thisB.defaultSources));
-    }, false);
+ 
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         switchToBinMode();
