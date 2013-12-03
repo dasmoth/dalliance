@@ -588,7 +588,8 @@ Browser.prototype.realMakeTier = function(source) {
          padding: '6px',
          borderRadius: '4px',
          display: 'inline-block',
-         transition: 'opacity 0.6s ease-in-out'
+         transition: 'opacity 0.6s ease-in-out',
+         pointerEvents: 'none'
          });
 
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
