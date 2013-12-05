@@ -1278,7 +1278,13 @@ Browser.prototype.removeTier = function(conf) {
         throw "Couldn't find requested tier";
     }
 
+
+
     var victim = this.tiers[target];
+    if (victim.sequenceSource) {
+        throw "Can't remove sequence source tier";
+    }
+
     this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
     this.sources.splice(target, 1);
