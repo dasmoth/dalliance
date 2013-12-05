@@ -12,6 +12,7 @@ Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.view-start'];
     delete localStorage['dalliance.' + this.cookieKey + '.view-end'];
     delete localStorage['dalliance.' + this.cookieKey + '.sources'];
+    delete localStorage['dalliance.' + this.cookieKey + '.hubs'];
     delete localStorage['dalliance.' + this.cookieKey + '.version'];
 
     delete localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
@@ -113,7 +114,6 @@ Browser.prototype.restoreStatus = function() {
             var oldSource = defaultSourcesByConfigHash[hash];
             if (oldSource) {
                 if (oldSource.featureInfoPlugin) {
-                    // console.log('revivifying ' + hash);
                     source.featureInfoPlugin = oldSource.featureInfoPlugin;
                 }
             }
@@ -128,7 +128,7 @@ Browser.prototype.restoreStatus = function() {
 
 Browser.prototype.reset = function() {
     for (var i = this.tiers.length - 1; i >= 0; --i) {
-       this.removeTier({index: i});
+       this.removeTier({index: i}, true);
     }
     for (var i = 0; i < this.defaultSources.length; ++i) {
         var s = this.defaultSources[i];

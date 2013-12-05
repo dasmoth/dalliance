@@ -1256,7 +1256,7 @@ function sourcesAreEqual(a, b) {
     return true;
 }
 
-Browser.prototype.removeTier = function(conf) {
+Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
 
     // FIXME can this be done in a way that doesn't need changing every time we add
@@ -1281,7 +1281,7 @@ Browser.prototype.removeTier = function(conf) {
 
 
     var victim = this.tiers[target];
-    if (victim.sequenceSource) {
+    if (victim.sequenceSource && !force) {
         throw "Can't remove sequence source tier";
     }
 
