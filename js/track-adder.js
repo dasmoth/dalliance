@@ -252,9 +252,11 @@ Browser.prototype.showTrackAdder = function(ev) {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
                 var t = thisB.currentlyActive(b.dalliance_source);
-                b.checked = t != null;
                 if (t) {
+                    b.checked = true;
                     b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
                 }
             }
         }
@@ -443,9 +445,11 @@ Browser.prototype.showTrackAdder = function(ev) {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
                 var t = thisB.currentlyActive(b.dalliance_source);
-                b.checked = t != null;
                 if (t) {
+                    b.checked = true;
                     b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
                 }
             }
         }
