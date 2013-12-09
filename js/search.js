@@ -30,7 +30,7 @@ Browser.prototype.search = function(g, statusCallback) {
             start = parseLocCardinal(m[2],  m[3]);
             end = parseLocCardinal(m[5], m[6]);
         } else {
-            var width = b.viewEnd - b.viewStart + 1;
+            var width = this.viewEnd - this.viewStart + 1;
             start = (parseLocCardinal(m[2], m[3]) - (width/2))|0;
             end = start + width - 1;
         }
