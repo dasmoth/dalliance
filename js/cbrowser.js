@@ -588,7 +588,8 @@ Browser.prototype.realMakeTier = function(source) {
          padding: '6px',
          borderRadius: '4px',
          display: 'inline-block',
-         transition: 'opacity 0.6s ease-in-out'
+         transition: 'opacity 0.6s ease-in-out',
+         pointerEvents: 'none'
          });
 
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
@@ -1255,7 +1256,7 @@ function sourcesAreEqual(a, b) {
     return true;
 }
 
-Browser.prototype.removeTier = function(conf) {
+Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
 
     // FIXME can this be done in a way that doesn't need changing every time we add
@@ -1277,7 +1278,13 @@ Browser.prototype.removeTier = function(conf) {
         throw "Couldn't find requested tier";
     }
 
+
+
     var victim = this.tiers[target];
+    if (victim.sequenceSource && !force) {
+        throw "Can't remove sequence source tier";
+    }
+
     this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
     this.sources.splice(target, 1);

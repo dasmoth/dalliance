@@ -11,7 +11,7 @@
 Browser.prototype.currentlyActive = function(source) {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (sourcesAreEqual(this.tiers[ti].dasSource, source))
-            return true;
+            return this.tiers[ti];
     }
     return false;
 }
@@ -248,10 +248,16 @@ Browser.prototype.showTrackAdder = function(ev) {
             ++idx;
         }
 
-        function setChecks() {
+        var setChecks = function() {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
-                b.checked = thisB.currentlyActive(b.dalliance_source);
+                var t = thisB.currentlyActive(b.dalliance_source);
+                if (t) {
+                    b.checked = true;
+                    b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
+                }
             }
         }
         setChecks();
@@ -435,10 +441,16 @@ Browser.prototype.showTrackAdder = function(ev) {
             }
         }
 
-        function setChecks() {
+        var setChecks = function() {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
-                b.checked = thisB.currentlyActive(b.dalliance_source);
+                var t = thisB.currentlyActive(b.dalliance_source);
+                if (t) {
+                    b.checked = true;
+                    b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
+                }
             }
         }
         setChecks();

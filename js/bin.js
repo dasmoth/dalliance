@@ -76,14 +76,14 @@ URLFetchable.prototype.slice = function(s, l) {
 }
 
 var seed=0;
-var isIOS = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
+var isSafari = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
 
 URLFetchable.prototype.fetchAsText = function(callback) {
     var req = new XMLHttpRequest();
     var length;
     var url = this.url;
-    if (isIOS) {
-        url = url + '?salt=' + (++seed);
+    if (isSafari) {
+        url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
     }
     req.open('GET', url, true);
 
@@ -121,9 +121,8 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var req = new XMLHttpRequest();
     var length;
     var url = this.url;
-    if (isIOS) {
-        // console.log('Safari hack');
-        url = url + '?salt=' + (++seed);
+    if (isSafari) {
+        url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
     }
     req.open('GET', url, true);
     req.overrideMimeType('text/plain; charset=x-user-defined');
