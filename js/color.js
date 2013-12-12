@@ -44,56 +44,57 @@ function dasColourForName(name) {
             c = new DColour(('0x' + match[1])|0, ('0x' + match[2])|0, ('0x' + match[3])|0, name);
             palette[name] = c;
         } else {
-	    match = CSS_COLOR_RE.exec(name);
-	    if (match) {
-		c = new DColour(match[1]|0, match[2]|0, match[3]|0, name);
-		palette[name] = c;
-	    } else {
-		console.log("couldn't handle color: " + name);
-		c = palette.black;
-		palette[name] = c;
-	    }
+    	    match = CSS_COLOR_RE.exec(name);
+    	    if (match) {
+        		c = new DColour(match[1]|0, match[2]|0, match[3]|0, name);
+        		palette[name] = c;
+	       } else {
+		      console.log("couldn't handle color: " + name);
+		      c = palette.black;
+		      palette[name] = c;
+	       }
         }
     }
     return c;
 }
 
-function makeGradient(steps, color1, color2, color3) {
-    var cols = [];
-    var c1 = dasColourForName(color1);
-    var c2 = dasColourForName(color2);
-
-    if (color3) {
-	var c3 = dasColourForName(color3);
-	for (var s = 0; s < steps; ++s) {
-	    var relScore = (1.0 * s)/(steps-1);
-	    var ca, cb, frac;
-	    if (relScore < 0.5) {
-                ca = c1;
-                cb = c2;
-                frac = relScore * 2;
-            } else {
-		ca = c2;
-		cb = c3;
-                frac = (relScore * 2.0) - 1.0;
-            }
-	    var fill = new DColour(
-		((ca.red * (1.0 - frac)) + (cb.red * frac))|0,
-		((ca.green * (1.0 - frac)) + (cb.green * frac))|0,
-		((ca.blue * (1.0 - frac)) + (cb.blue * frac))|0
-            ).toSvgString();
-	    cols.push(fill);
-	}
-    } else {
-	for (var s = 0; s < steps; ++s) {
-	    var frac = (1.0 * s)/(steps-1);
-	    var fill = new DColour(
-		((c1.red * (1.0 - frac)) + (c2.red * frac))|0,
-		((c1.green * (1.0 - frac)) + (c2.green * frac))|0,
-		((c1.blue * (1.0 - frac)) + (c2.blue * frac))|0
-            ).toSvgString();
-	    cols.push(fill);
-	}
+function makeColourSteps(steps, stops, colours) {
+    var dcolours = [];
+    for (var ci = 0; ci < colours.length; ++ci) {
+        dcolours.push(dasColourForName(colours[ci]));
     }
-    return cols;
+
+    var grad = [];
+  STEP_LOOP:
+    for (var si = 0; si < steps; ++si) {
+        var rs = (1.0 * si) / (steps-1);
+        var score = stops[0] + (stops[stops.length -1] - stops[0]) * rs;
+        for (var i = 0; i < stops.length - 1; ++i) {
+            if (score >= stops[i] && score <= stops[i+1]) {
+                var frac = (score - stops[i]) / (stops[i+1] - stops[i]);
+                var ca = dcolours[i];
+                var cb = dcolours[i+1];
+
+                var fill = new DColour(
+                    ((ca.red * (1.0 - frac)) + (cb.red * frac))|0,
+                    ((ca.green * (1.0 - frac)) + (cb.green * frac))|0,
+                    ((ca.blue * (1.0 - frac)) + (cb.blue * frac))|0
+                ).toSvgString();
+                grad.push(fill);
+
+                continue STEP_LOOP;
+            }
+        }
+        throw 'Bad step';
+    }
+
+    return grad;
+}
+
+function makeGradient(steps, color1, color2, color3) {
+    if (color3) {
+        return makeColourSteps(steps, [0, 0.5, 1], [color1, color2, color3]);
+    } else {
+        return makeColourSteps(steps, [0, 1], [color1, color2]);
+    }
 }
