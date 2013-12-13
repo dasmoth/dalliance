@@ -555,7 +555,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var fill = style.BGCOLOR || 'none';
 
         if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
-            var grad = style._gradient;
+            var grad = style.BGGRAD || style._gradient;
             if (!grad) {
                 grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
                 style._gradient = grad;
@@ -683,6 +683,13 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             fill = feature.itemRgb;
         var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
 
+        if (style.BGGRAD) {
+            var grad = style.BGGRAD;
+            var step = (relScore*grad.length)|0;
+            if (step < 0) step = 0;
+            if (step >= grad.length) step = grad.length - 1;
+            fill = grad[step];
+        }
         if (style.COLOR2) {
             var grad = style._gradient;
             if (!grad) {
