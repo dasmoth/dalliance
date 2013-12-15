@@ -385,7 +385,12 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
 
             var featureOpts = {};
             
-            var bedColumns = rest.split('\t');
+            var bedColumns;
+            if (rest.length > 0) {
+                bedColumns = rest.split('\t');
+            } else {
+                bedColumns = [];
+            }
             if (bedColumns.length > 0 && dfc > 3) {
                 featureOpts.label = bedColumns[0];
             }
