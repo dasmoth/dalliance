@@ -31,50 +31,6 @@ function makeBam(data, bai, callback) {
     bam.data = data;
     bam.bai = bai;
 
-    bam.data.slice(0, 65536).fetch(function(r) {
-        if (!r) {
-            return dlog("Couldn't access BAM");
-        }
-
-        var unc = unbgzf(r);
-        var uncba = new Uint8Array(unc);
-
-        var magic = readInt(uncba, 0);
-        var headLen = readInt(uncba, 4);
-        var header = '';
-        for (var i = 0; i < headLen; ++i) {
-            header += String.fromCharCode(uncba[i + 8]);
-        }
-
-        var nRef = readInt(uncba, headLen + 8);
-        var p = headLen + 12;
-
-        bam.chrToIndex = {};
-        bam.indexToChr = [];
-        for (var i = 0; i < nRef; ++i) {
-            var lName = readInt(uncba, p);
-            var name = '';
-            for (var j = 0; j < lName-1; ++j) {
-                name += String.fromCharCode(uncba[p + 4 + j]);
-            }
-            var lRef = readInt(uncba, p + lName + 4);
-            // dlog(name + ': ' + lRef);
-            bam.chrToIndex[name] = i;
-            if (name.indexOf('chr') == 0) {
-                bam.chrToIndex[name.substring(3)] = i;
-            } else {
-                bam.chrToIndex['chr' + name] = i;
-            }
-            bam.indexToChr.push(name);
-
-            p = p + 8 + lName;
-        }
-
-        if (bam.indices) {
-            return callback(bam);
-        }
-    });
-
     bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
         if (!header) {
             return dlog("Couldn't access BAI");
@@ -91,6 +47,7 @@ function makeBam(data, bai, callback) {
         bam.indices = [];
 
         var p = 8;
+        var minBlockIndex = 1000000000;
         for (var ref = 0; ref < nref; ++ref) {
             var blockStart = p;
             var nbin = readInt(uncba, p); p += 4;
@@ -100,14 +57,70 @@ function makeBam(data, bai, callback) {
                 p += 8 + (nchnk * 16);
             }
             var nintv = readInt(uncba, p); p += 4;
+            
+            var q = p;
+            for (var i = 0; i < nintv; ++i) {
+                var v = readVob(uncba, q); q += 8;
+                if (v) {
+                    var bi = v.block;
+                    if (v.offset > 0)
+                        bi += 65536;
+
+                    if (bi < minBlockIndex)
+                        minBlockIndex = bi;
+                    break;
+                }
+            }
             p += (nintv * 8);
+
+
             if (nbin > 0) {
                 bam.indices[ref] = new Uint8Array(header, blockStart, p - blockStart);
             }                     
         }
-        if (bam.chrToIndex) {
-            return callback(bam);
-        }
+
+        bam.data.slice(0, minBlockIndex).fetch(function(r) {
+            if (!r) {
+                return dlog("Couldn't access BAM");
+            }
+
+            var unc = unbgzf(r, r.byteLength);
+            var uncba = new Uint8Array(unc);
+
+            var magic = readInt(uncba, 0);
+            var headLen = readInt(uncba, 4);
+            var header = '';
+            for (var i = 0; i < headLen; ++i) {
+                header += String.fromCharCode(uncba[i + 8]);
+            }
+
+            var nRef = readInt(uncba, headLen + 8);
+            var p = headLen + 12;
+
+            bam.chrToIndex = {};
+            bam.indexToChr = [];
+            for (var i = 0; i < nRef; ++i) {
+                var lName = readInt(uncba, p);
+                var name = '';
+                for (var j = 0; j < lName-1; ++j) {
+                    name += String.fromCharCode(uncba[p + 4 + j]);
+                }
+                var lRef = readInt(uncba, p + lName + 4);
+                bam.chrToIndex[name] = i;
+                if (name.indexOf('chr') == 0) {
+                    bam.chrToIndex[name.substring(3)] = i;
+                } else {
+                    bam.chrToIndex['chr' + name] = i;
+                }
+                bam.indexToChr.push(name);
+
+                p = p + 8 + lName;
+            }
+
+            if (bam.indices) {
+                return callback(bam);
+            }
+        });
     });
 }
 
@@ -203,7 +216,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
-//    dlog('mergedChunks = ' + miniJSONify(mergedChunks));
+    // dlog('mergedChunks = ' + miniJSONify(mergedChunks));
 
     return mergedChunks;
 }
