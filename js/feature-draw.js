@@ -770,14 +770,14 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             cursor = 0;
             for (var ci = 0; ci < ops.length; ++ci) {
                 var co = ops[ci];
-                if (co.op == 'M' || co.op == 'S') {
+                if (co.op == 'M') {
                     seq += rawseq.substr(cursor, co.cnt);
                     cursor += co.cnt;
                 } else if (co.op == 'D') {
                     for (var oi = 0; oi < co.cnt; ++oi) {
                         seq += '-';
                     }
-                } else if (co.op == 'I') {
+                } else if (co.op == 'I' || co.op == 'S') {
                     cursor += co.cnt;
                 } else {
                     console.log('unknown cigop' + co.op);

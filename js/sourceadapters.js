@@ -806,7 +806,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                         var ops = parseCigar(r.cigar);
                         for (var ci = 0; ci < ops.length; ++ci) {
                             var co = ops[ci];
-                            if (co.op == 'M' || co.op == 'S' || co.op == 'D')
+                            if (co.op == 'M' || co.op == 'D')
                                 len += co.cnt;
                         }
                     }
