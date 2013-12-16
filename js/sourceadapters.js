@@ -799,13 +799,26 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 var features = [];
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
+
+                    var len = r.seq.length;
+                    if (r.cigar) {
+                        len = 0;
+                        var ops = parseCigar(r.cigar);
+                        for (var ci = 0; ci < ops.length; ++ci) {
+                            var co = ops[ci];
+                            if (co.op == 'M' || co.op == 'S' || co.op == 'D')
+                                len += co.cnt;
+                        }
+                    }
+
                     var f = new DASFeature();
                     f.min = r.pos + 1;
-                    f.max = r.pos + r.seq.length;
+                    f.max = r.pos + len;
                     f.segment = r.segment;
                     f.type = 'bam';
                     f.id = r.readName;
                     f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
+                    f.cigar = r.cigar;
                     f.seq = r.seq;
                     features.push(f);
                 }

@@ -20,7 +20,7 @@ function Chainset(uri, srcTag, destTag, coords) {
 function parseCigar(cigar)
 {
     var cigops = [];
-    var CIGAR_REGEXP = new RegExp('([0-9]*)([MID])', 'g');
+    var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
     var match;
     while ((match = CIGAR_REGEXP.exec(cigar)) != null) {
         var count = match[1];

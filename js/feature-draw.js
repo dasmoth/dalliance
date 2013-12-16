@@ -762,6 +762,32 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
         gg = new PointGlyph((minPos + maxPos)/2, height-sc, height, fill);
     } else if (gtype === '__SEQUENCE') {
+        var rawseq = feature.seq;
+        var seq = rawseq;
+        if (feature.cigar) {
+            var ops = parseCigar(feature.cigar);
+            seq = ''
+            cursor = 0;
+            for (var ci = 0; ci < ops.length; ++ci) {
+                var co = ops[ci];
+                if (co.op == 'M' || co.op == 'S') {
+                    seq += rawseq.substr(cursor, co.cnt);
+                    cursor += co.cnt;
+                } else if (co.op == 'D') {
+                    for (var oi = 0; oi < co.cnt; ++oi) {
+                        seq += '-';
+                    }
+                } else if (co.op == 'I') {
+                    cursor += co.cnt;
+                } else {
+                    console.log('unknown cigop' + co.op);
+                }
+            }
+            /* console.log('raw=' + rawseq);
+            console.log('seq=' + seq);
+            console.log('cig=' + feature.cigar); */
+        }
+
         var refSeq = null;
         if (tier.currentSequence) {
             var csStart = tier.currentSequence.start|0;
@@ -781,7 +807,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq, style.__SEQCOLOR);
+        gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR);
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {
