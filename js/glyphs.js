@@ -1019,13 +1019,14 @@ SequenceGlyph.prototype.draw = function(gc) {
             color = 'gray';
         }
 
-        
         if (this._scheme === 'mismatch' && this._ref) {
             var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === base) {
-                  color = 'gray';
+            if (refbase === 'N') {
+                color = 'gray';
+            } else if (refbase === base) {
+                color = 'black';
             } else {
-                  color = 'red';
+                color = 'red';
             }
         }
 
@@ -1053,10 +1054,12 @@ SequenceGlyph.prototype.toSVG = function() {
 
         if (this._scheme === 'mismatch' && this._ref) {
             var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === base) {
-              color = 'gray';
+            if (refbase === 'N') {
+                color = 'gray';
+            } else if (refbase === base) {
+                color = 'black';
             } else {
-              color = 'red';
+                color = 'red';
             }
         }
 

@@ -766,8 +766,19 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         if (tier.currentSequence) {
             var csStart = tier.currentSequence.start|0;
             var csEnd = tier.currentSequence.end|0;
-            if (csStart < min && csEnd > max) {
-                refSeq = tier.currentSequence.seq.substr(min - csStart, max - min + 1);
+            if (csStart <= max && csEnd >= min) {
+                var sfMin = Math.max(min, csStart);
+                var sfMax = Math.min(max, csEnd);
+
+                refSeq = tier.currentSequence.seq.substr(sfMin - csStart, sfMax - sfMin + 1);
+                while (min < sfMin) {
+                    refSeq = 'N' + refSeq;
+                    sfMin--;
+                }
+                while (max > sfMax) {
+                    refSeq = refSeq + 'N';
+                    sfMax++;
+                }
             }
         }
         gg = new SequenceGlyph(minPos, maxPos, height, feature.seq, refSeq, style.__SEQCOLOR);
