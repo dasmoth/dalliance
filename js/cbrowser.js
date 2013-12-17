@@ -1685,7 +1685,7 @@ Browser.prototype.leap = function(dir, fedge) {
 function glyphLookup(glyphs, rx, matches) {
     matches = matches || [];
 
-    for (var gi = 0; gi < glyphs.length; ++gi) {
+    for (var gi = glyphs.length - 1; gi >= 0; --gi) {
         var g = glyphs[gi];
         if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
             if (g.feature) {

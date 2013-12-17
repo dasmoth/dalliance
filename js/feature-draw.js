@@ -764,6 +764,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === '__SEQUENCE') {
         var rawseq = feature.seq;
         var seq = rawseq;
+
+
+        var indels = [];
         if (feature.cigar) {
             var ops = parseCigar(feature.cigar);
             seq = ''
@@ -777,15 +780,18 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     for (var oi = 0; oi < co.cnt; ++oi) {
                         seq += '-';
                     }
-                } else if (co.op == 'I' || co.op == 'S') {
+                } else if (co.op == 'I') {
+                    var ig = new TriangleGlyph(minPos + (seq.length*scale), 5, 'S', 5, 'red');
+                    ig.feature = {label: 'Insertion: ' + rawseq.substr(cursor, co.cnt), type: 'insertion', method: 'insertion'};
+                    indels.push(ig);
+
+                    cursor += co.cnt;
+                } else if (co.op == 'S') {
                     cursor += co.cnt;
                 } else {
                     console.log('unknown cigop' + co.op);
                 }
             }
-            /* console.log('raw=' + rawseq);
-            console.log('seq=' + seq);
-            console.log('cig=' + feature.cigar); */
         }
 
         var refSeq = null;
@@ -808,6 +814,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
         }
         gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR);
+        if (indels.length > 0) {
+            indels.splice(0, 0, gg);
+            gg = new GroupGlyph(indels);
+        }
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {
