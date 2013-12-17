@@ -6,7 +6,7 @@
 //
 
 var MIN_PADDING = 3;
-var DEFAULT_SUBTIER_MAX = 25;
+var DEFAULT_SUBTIER_MAX = 100;
 
 function isDasBooleanTrue(s) {
     s = ('' + s).toLowerCase();

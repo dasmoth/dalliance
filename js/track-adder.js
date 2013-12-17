@@ -615,7 +615,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     promptForBAI(dataToFinalize);
                 }
-            } else if (customMode === 'finalize') {
+            } else if (customMode === 'finalize' || customMode === 'finalize-bin') {
                 dataToFinalize.name = custName.value;
                 var m = custCS.value;
                 if (m != '__default__') {
@@ -634,7 +634,11 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 thisB.addTier(dataToFinalize);
-                switchToCustomMode();
+
+                if (customMode == 'finalize-bin')
+                    switchToBinMode();
+                else
+                    switchToCustomMode();
             } else if (customMode === 'hub-connect') {
                 var curi = custURL.value.trim();
                 if (!/^.+:\/\//.exec(curi)) {
@@ -978,7 +982,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
 
         custName.focus();
-        customMode = 'finalize';
+
+        if (customMode === 'bin' || customMode === 'prompt-bai')
+            customMode = 'finalize-bin';
+        else
+            customMode = 'finalize';
         dataToFinalize = nds;
     }
 
@@ -986,7 +994,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     var canButton = makeElement('button', 'Cancel', {className: 'btn'});
     canButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        switchToBinMode();
+        if (customMode === 'finalize-bin')
+            switchToBinMode();
+        else
+            switchToCustomMode();
     }, false);
 
     var refreshButton = makeElement('button', 'Refresh', {className: 'btn'});
