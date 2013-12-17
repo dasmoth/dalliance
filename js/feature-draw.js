@@ -553,6 +553,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
         var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
+        var outline = style.STROKECOLOR;
 
         if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
             var grad = style.BGGRAD || style._gradient;
@@ -579,6 +580,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         if (style.RSIZE) {
             size = (1.0 * style.RSIZE) * height;
         }
+
+        if (style.STROKETHRESHOLD) {
+            if (size < (1.0 * style.STROKETHRESHOLD))
+                outline = null;
+        }
         
         size = 1.0 * size;
 
@@ -593,16 +599,16 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         } else if (gtype === 'TRIANGLE') {
             var dir = style.DIRECTION || 'N';
             var width = style.LINEWIDTH || size;
-            gg = new TriangleGlyph(mid, size, dir, width, stroke);
+            gg = new TriangleGlyph(mid, size, dir, width, stroke, outline);
         } else if (gtype === 'DOT') {
-            gg = new DotGlyph(mid, size, stroke);
+            gg = new DotGlyph(mid, size, stroke, outline);
         } else if (gtype === 'SQUARE') {
-            gg = new BoxGlyph(mid - hh, 0, size, size, stroke, null);
+            gg = new BoxGlyph(mid - hh, 0, size, size, stroke, outline);
         } else if (gtype === 'STAR') {
             var points = 5;
             if (style.POINTS) 
                 points = style.POINTS | 0;
-            gg = new StarGlyph(mid, hh, points, stroke, null);
+            gg = new StarGlyph(mid, hh, points, stroke, outline);
         } else {
             gg = new CrossGlyph(mid, size, stroke);
         }

@@ -2,7 +2,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
-// feature-draw.js: new feature-tier renderer
+// glyphs.js: components which know how to draw themselves
 //
 
 function BoxGlyph(x, y, width, height, fill, stroke, alpha, radius) {
@@ -443,11 +443,12 @@ ExGlyph.prototype.height = function() {
     return this._height;
 }
 
-function TriangleGlyph(x, height, dir, width, stroke) {
+function TriangleGlyph(x, height, dir, width, fill, stroke) {
     this._x = x;
     this._height = height;
     this._dir = dir;
     this._width = width;
+    this._fill = fill;
     this._stroke = stroke;
 }
 
@@ -479,8 +480,15 @@ TriangleGlyph.prototype.drawPath = function(g) {
 TriangleGlyph.prototype.draw = function(g) {
     g.beginPath();
     this.drawPath(g);
-    g.fillStyle = this._stroke;
-    g.fill();
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
 }
 
 TriangleGlyph.prototype.toSVG = function() {
@@ -493,7 +501,8 @@ TriangleGlyph.prototype.toSVG = function() {
         NS_SVG, 'path',
         null,
         {d: g.toPathData(),
-         fill: this._stroke});
+         fill: this._fill || 'none',
+         stroke: this._stroke || 'none'});
 }
 
 TriangleGlyph.prototype.min = function() {
@@ -511,9 +520,10 @@ TriangleGlyph.prototype.height = function() {
 
 
 
-function DotGlyph(x, height, stroke) {
+function DotGlyph(x, height, fill, stroke) {
     this._x = x;
     this._height = height;
+    this._fill = fill;
     this._stroke = stroke;
 }
 
@@ -522,7 +532,16 @@ DotGlyph.prototype.draw = function(g) {
     g.fillStyle = this._stroke;
     g.beginPath();
     g.arc(this._x, hh, hh, 0, 6.29);
-    g.fill();
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
 }
 
 DotGlyph.prototype.toSVG = function() {
@@ -531,7 +550,8 @@ DotGlyph.prototype.toSVG = function() {
         NS_SVG, 'circle',
         null,
         {cx: this._x, cy: hh, r: hh,
-         fill: this._stroke,
+         fill: this._fill || 'none',
+         stroke: this._stroke || 'none',
          strokeWidth: '1px'});
 }
 
@@ -1246,8 +1266,15 @@ StarGlyph.prototype.drawPath = function(g) {
 StarGlyph.prototype.draw = function(g) {
     g.beginPath();
     this.drawPath(g);
-    g.fillStyle = this._fill;
-    g.fill();
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
 }
 
 StarGlyph.prototype.toSVG = function() {
@@ -1258,5 +1285,6 @@ StarGlyph.prototype.toSVG = function() {
         NS_SVG, 'path',
         null,
         {d: g.toPathData(),
-         fill: this._fill});
+         fill: this._fill || 'none',
+         stroke: this._stroke || 'none'});
 }
