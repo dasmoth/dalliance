@@ -647,6 +647,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
             
             quant = {min: smin, max: smax};
+
+            if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
+                gg = new LabelledGlyph(gg, label, true);
+                noLabel = true;
+            }
             gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
         }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {

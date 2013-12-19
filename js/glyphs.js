@@ -308,11 +308,12 @@ LineGraphGlyph.prototype.toSVG = function() {
          strokeWidth: '2px'});
 }
 
-function LabelledGlyph(glyph, text) {
+function LabelledGlyph(glyph, text, measured) {
     this.glyph = glyph;
     this.text = text;
     this.textLen = GLOBAL_GC.measureText(text).width + 10;
     this.bump = glyph.bump;
+    this.measured = measured;
 }
 
 LabelledGlyph.prototype.toSVG = function() {
@@ -326,11 +327,14 @@ LabelledGlyph.prototype.min = function() {
 }
 
 LabelledGlyph.prototype.max = function() {
-    return Math.max(this.glyph.max(), (1.0*this.glyph.min()) + this.textLen);
+    if (this.measured)
+        return Math.max(this.glyph.max(), (1.0*this.glyph.min()) + this.textLen);
+    else
+        return this.glyph.max();
 }
 
 LabelledGlyph.prototype.height = function() {
-    return this.glyph.height() + 20;
+    return this.glyph.height() + this.measured ? 20 : 0;
 }
 
 LabelledGlyph.prototype.draw = function(g) {
