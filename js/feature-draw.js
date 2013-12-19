@@ -538,7 +538,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var type = feature.type;
     var strand = feature.orientation;
     var score = feature.score;
-    var label = feature.label;
+    var label = feature.label || feature.id;
 
     var minPos = (min - origin) * scale;
     var rawMaxPos = ((max - origin + 1) * scale);
@@ -835,7 +835,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         // gg.bump = true;
     }
 
-    if (isDasBooleanTrue(style.LABEL) && label && !noLabel) {
+    if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
         gg = new LabelledGlyph(gg, label);
     }
 

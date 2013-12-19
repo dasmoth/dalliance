@@ -147,10 +147,10 @@ function OverlayBaton(source, callback, count) {
 
 OverlayBaton.prototype.completed = function(index, status, features, scale) {
     if (this.scale == null || index == 0) 
-	this.scale = scale;
+	   this.scale = scale;
 
     if (this.returns[index])
-	throw 'Multiple returns for source ' + index;
+	   throw 'Multiple returns for source ' + index;
 
     this.returns[index] = true;
     this.returnCount++;
@@ -158,26 +158,26 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
     this.features[index] = features;
 
     if (status) {
-	this.statuses[index] = status;
-	this.statusCount++;
+    	this.statuses[index] = status;
+    	this.statusCount++;
     }
 
 
     if (this.returnCount == this.count) {
-	if (this.statusCount > 0) {
-	    var message = '';
-	    for (var si = 0; si < this.count; ++si) {
-		var s = this.statuses[si];
-		if (s != 0) {
-		    if (message.length > 0) 
-			message += ', ';
-		    message += s;
-		}
-	    }
-	    return this.callback(message, null, this.scale);
-	} else {
-	    this.callback(null, this.source.merge(this.features), this.scale);
-	}
+    	if (this.statusCount > 0) {
+    	    var message = '';
+    	    for (var si = 0; si < this.count; ++si) {
+        		var s = this.statuses[si];
+        		if (s != 0) {
+        		    if (message.length > 0) 
+        			message += ', ';
+        		    message += s;
+        		}
+    	    }
+    	    return this.callback(message, null, this.scale);
+    	} else {
+    	    this.callback(null, this.source.merge(this.features), this.scale);
+    	}
     }
 }
 
@@ -186,28 +186,38 @@ OverlayFeatureSource.prototype.keyForFeature = function(feature) {
 }
 
 function OverlayFeatureSource_merge_byKey(featureSets) {
-    var om = {};
-    var of = featureSets[1];
-    for (var fi = 0; fi < of.length; ++fi) {
-	   om[this.keyForFeature(of[fi])] = of[fi];
+    var omaps = [];
+
+    for (var fsi = 1; fsi < featureSets.length; ++fsi) {
+        var om = {};
+        var of = featureSets[fsi];
+        for (var fi = 0; fi < of.length; ++fi) {
+    	   om[this.keyForFeature(of[fi])] = of[fi];
+        }
+        omaps.push(om);
     }
+
 
     var mf = [];
     var fl = featureSets[0];
     for (var fi = 0; fi < fl.length; ++fi) {
     	var f = fl[fi];
-    	of = om[this.keyForFeature(f)]
-    	if (of) {
-    	    if (of.id)
-    		  f.id = of.id;
-    	    if (of.label) 
-    		  f.label = of.label;
 
-            if (of.score2)
-                f.score2 = of.score2;
-            else if (of.score)
-                f.score2 = of.score;
-    	}
+        for (var oi = 0; oi < omaps.length; ++oi) {
+            var om = omaps[oi];
+        	of = om[this.keyForFeature(f)]
+        	if (of) {
+                for (var k in of) {
+                    if (k === 'score') {
+                        f.score2 = of.score;
+                    } else if (k === 'min' || k === 'max' || k === 'segment' || k === '_cachedStyle') {
+                        // do nothing
+                    } else {
+                        f[k] = of[k];
+                    }
+                }
+        	}
+        }
     	mf.push(f);
     }
     return mf;
