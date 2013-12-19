@@ -637,7 +637,7 @@ Browser.prototype.realMakeTier = function(source) {
         var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale;
         rx -= offset;
        
-        return glyphLookup(glyphs, rx);
+        return glyphLookup(glyphs, rx, ry);
     }
 
     var dragMoveHandler = function(ev) {
@@ -1682,12 +1682,17 @@ Browser.prototype.leap = function(dir, fedge) {
           });
 }
 
-function glyphLookup(glyphs, rx, matches) {
+function glyphLookup(glyphs, rx, ry, matches) {
     matches = matches || [];
 
     for (var gi = glyphs.length - 1; gi >= 0; --gi) {
         var g = glyphs[gi];
         if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
+            if (g.minY) {
+                if (ry < g.minY() || ry > g.maxY())
+                    continue;
+            }
+
             if (g.feature) {
                 matches.push(g.feature);
             } else if (g.group) {
@@ -1695,9 +1700,9 @@ function glyphLookup(glyphs, rx, matches) {
             }
     
             if (g.glyphs) {
-                return glyphLookup(g.glyphs, rx, matches);
+                return glyphLookup(g.glyphs, rx, ry, matches);
             } else if (g.glyph) {
-                return glyphLookup([g.glyph], rx, matches);
+                return glyphLookup([g.glyph], rx, ry, matches);
             } else {
                 return matches;
             }
