@@ -522,7 +522,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
         } else if (strand === '-') {
             labelText = '<' + labelText;
         }
-        gg = new LabelledGlyph(gg, labelText);
+        gg = new LabelledGlyph(gg, labelText, false);
     }
     gg.bump = true;
     return gg;
@@ -842,7 +842,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
-        gg = new LabelledGlyph(gg, label);
+        gg = new LabelledGlyph(gg, label, false);
     }
 
     if (bump) {

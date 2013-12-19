@@ -62,7 +62,7 @@ Browser.prototype.createFeatureSource = function(config) {
     if (config.overlay) {
         var sources = [];
         if (fs)
-            sources.push(fs);
+            sources.push(new CachingFeatureSource(fs));
 
         for (var oi = 0; oi < config.overlay.length; ++oi) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
