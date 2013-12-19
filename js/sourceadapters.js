@@ -587,9 +587,9 @@ BWGFeatureSource.prototype.search = function(query, callback) {
 
 BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
     this.bwgHolder.await(function(bwg) {
-        if (bwg.schema && bwg.definedFieldCount+3 < bwg.schema.fields.length) {
+        if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
             var fip = function(feature, featureInfo) {
-                for (var fi = bwg.definedFieldCount+3; fi < bwg.schema.fields.length; ++fi) {
+                for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
                     var f = bwg.schema.fields[fi];
                     featureInfo.add(f.comment, feature[f.name]);
                 }
