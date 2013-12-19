@@ -349,6 +349,7 @@ DasTier.prototype.paint = function() {
             gc.scale(2, 2);
         gc.strokeStyle = 'red';
         gc.lineWidth = 0.3;
+        gc.beginPath();
         gc.moveTo(0, ry);
         gc.lineTo(5000, ry);
         gc.stroke();
