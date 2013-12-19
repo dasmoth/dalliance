@@ -903,8 +903,14 @@ DasTier.prototype.styleForFeature = function(f) {
                     maybe = sh.style;
                 }
                 continue;
-            } else if (sh.type != f.type) {
-                continue;
+            } else {
+                var typeRE = sh._typeRE;
+                if (!typeRE || !typeRE.test) {
+                    typeRE = new RegExp('^' + sh.type + '$');
+                    sh._typeRE = typeRE;
+                }
+                if (!typeRE.test(f.type)) 
+                    continue;
             }
         }
         // perfect match.
