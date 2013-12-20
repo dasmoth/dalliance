@@ -333,6 +333,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         record.mq = mq;
         record.readName = readName;
         record.segment = this.indexToChr[refID];
+        record.flag = flag;
 
         while (p < blockEnd) {
             var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);

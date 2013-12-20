@@ -800,6 +800,9 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
 
+                    if (r.flag & 0x4)
+                        continue; 
+                    
                     var len = r.seq.length;
                     if (r.cigar) {
                         len = 0;
