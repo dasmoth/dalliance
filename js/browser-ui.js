@@ -91,8 +91,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.appendChild(genomePanel);
 
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
-        locField.value = '';
-        locField.placeholder = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
+        // locField.value = '';
+        locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.min = zoom.min;
         zoomSlider.max = zoom.max;
         zoomSlider.value = zoom.current;
