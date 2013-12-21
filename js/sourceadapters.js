@@ -62,7 +62,7 @@ Browser.prototype.createFeatureSource = function(config) {
     if (config.overlay) {
         var sources = [];
         if (fs)
-            sources.push(fs);
+            sources.push(new CachingFeatureSource(fs));
 
         for (var oi = 0; oi < config.overlay.length; ++oi) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
@@ -587,9 +587,9 @@ BWGFeatureSource.prototype.search = function(query, callback) {
 
 BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
     this.bwgHolder.await(function(bwg) {
-        if (bwg.schema && bwg.definedFieldCount+3 < bwg.schema.fields.length) {
+        if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
             var fip = function(feature, featureInfo) {
-                for (var fi = bwg.definedFieldCount+3; fi < bwg.schema.fields.length; ++fi) {
+                for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
                     var f = bwg.schema.fields[fi];
                     featureInfo.add(f.comment, feature[f.name]);
                 }
@@ -800,6 +800,9 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
 
+                    if (r.flag & 0x4)
+                        continue; 
+                    
                     var len = r.seq.length;
                     if (r.cigar) {
                         len = 0;

@@ -349,6 +349,7 @@ DasTier.prototype.paint = function() {
             gc.scale(2, 2);
         gc.strokeStyle = 'red';
         gc.lineWidth = 0.3;
+        gc.beginPath();
         gc.moveTo(0, ry);
         gc.lineTo(5000, ry);
         gc.stroke();
@@ -521,7 +522,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
         } else if (strand === '-') {
             labelText = '<' + labelText;
         }
-        gg = new LabelledGlyph(gg, labelText);
+        gg = new LabelledGlyph(gg, labelText, false);
     }
     gg.bump = true;
     return gg;
@@ -538,7 +539,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     var type = feature.type;
     var strand = feature.orientation;
     var score = feature.score;
-    var label = feature.label;
+    var label = feature.label || feature.id;
 
     var minPos = (min - origin) * scale;
     var rawMaxPos = ((max - origin + 1) * scale);
@@ -553,6 +554,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
         var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
+        var outline = style.STROKECOLOR;
 
         if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
             var grad = style.BGGRAD || style._gradient;
@@ -579,6 +581,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         if (style.RSIZE) {
             size = (1.0 * style.RSIZE) * height;
         }
+
+        if (style.STROKETHRESHOLD) {
+            if (size < (1.0 * style.STROKETHRESHOLD))
+                outline = null;
+        }
         
         size = 1.0 * size;
 
@@ -593,16 +600,16 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         } else if (gtype === 'TRIANGLE') {
             var dir = style.DIRECTION || 'N';
             var width = style.LINEWIDTH || size;
-            gg = new TriangleGlyph(mid, size, dir, width, stroke);
+            gg = new TriangleGlyph(mid, size, dir, width, stroke, outline);
         } else if (gtype === 'DOT') {
-            gg = new DotGlyph(mid, size, stroke);
+            gg = new DotGlyph(mid, size, stroke, outline);
         } else if (gtype === 'SQUARE') {
-            gg = new BoxGlyph(mid - hh, 0, size, size, stroke, null);
+            gg = new BoxGlyph(mid - hh, 0, size, size, stroke, outline);
         } else if (gtype === 'STAR') {
             var points = 5;
             if (style.POINTS) 
                 points = style.POINTS | 0;
-            gg = new StarGlyph(mid, hh, points, stroke, null);
+            gg = new StarGlyph(mid, hh, points, stroke, outline);
         } else {
             gg = new CrossGlyph(mid, size, stroke);
         }
@@ -640,6 +647,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
             
             quant = {min: smin, max: smax};
+
+            if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
+                gg = new LabelledGlyph(gg, label, true);
+                noLabel = true;
+            }
             gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
         }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
@@ -764,6 +776,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === '__SEQUENCE') {
         var rawseq = feature.seq;
         var seq = rawseq;
+
+
+        var indels = [];
         if (feature.cigar) {
             var ops = parseCigar(feature.cigar);
             seq = ''
@@ -777,15 +792,18 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     for (var oi = 0; oi < co.cnt; ++oi) {
                         seq += '-';
                     }
-                } else if (co.op == 'I' || co.op == 'S') {
+                } else if (co.op == 'I') {
+                    var ig = new TriangleGlyph(minPos + (seq.length*scale), 5, 'S', 5, 'red');
+                    ig.feature = {label: 'Insertion: ' + rawseq.substr(cursor, co.cnt), type: 'insertion', method: 'insertion'};
+                    indels.push(ig);
+
+                    cursor += co.cnt;
+                } else if (co.op == 'S') {
                     cursor += co.cnt;
                 } else {
                     console.log('unknown cigop' + co.op);
                 }
             }
-            /* console.log('raw=' + rawseq);
-            console.log('seq=' + seq);
-            console.log('cig=' + feature.cigar); */
         }
 
         var refSeq = null;
@@ -808,6 +826,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
         }
         gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR);
+        if (indels.length > 0) {
+            indels.splice(0, 0, gg);
+            gg = new GroupGlyph(indels);
+        }
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {
@@ -819,8 +841,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         // gg.bump = true;
     }
 
-    if (isDasBooleanTrue(style.LABEL) && label && !noLabel) {
-        gg = new LabelledGlyph(gg, label);
+    if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
+        gg = new LabelledGlyph(gg, label, false);
     }
 
     if (bump) {
@@ -887,8 +909,14 @@ DasTier.prototype.styleForFeature = function(f) {
                     maybe = sh.style;
                 }
                 continue;
-            } else if (sh.type != f.type) {
-                continue;
+            } else {
+                var typeRE = sh._typeRE;
+                if (!typeRE || !typeRE.test) {
+                    typeRE = new RegExp('^' + sh.type + '$');
+                    sh._typeRE = typeRE;
+                }
+                if (!typeRE.test(f.type)) 
+                    continue;
             }
         }
         // perfect match.
