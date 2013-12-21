@@ -153,10 +153,17 @@
   b.addFeatureInfoPlugin(function(f, info) {
       info.add('Testing', 'This is a test!');
   });
+
+  b.addViewListener(function(chr, min, max) {
+    var link = document.getElementById('enslink');
+    link.href = 'http://www.ensembl.org/Homo_sapiens/Location/View?r=' + chr + ':' + min + '-' + max;
+  });
+
 </script>
 </head>
 
 <body>
+<a href='http://www.ensembl.org/' id='enslink' target='_newtab'>Link to Ensembl</a>
 <div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
 </body>
 </html>
