@@ -101,6 +101,50 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.STROKECOLOR = 'black';
         stylesheet.pushStyle({type: 'variation'}, null, varStyle);
     }
+        {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'SQUARE';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'red';
+        stylesheet.pushStyle({type: 'indel', method: '.+_UTR_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'TRIANGLE';
+        varStyle.DIRECTION = 'S';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'red';
+        stylesheet.pushStyle({type: 'indel', method: 'missense_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'TRIANGLE';
+        varStyle.DIRECTION = 'N';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'red';
+        stylesheet.pushStyle({type: 'indel', method: 'splice_.+_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'STAR';
+        varStyle.POINTS = 6;
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'red';
+        stylesheet.pushStyle({type: 'indel', method: 'regulatory_region_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'PLIMSOLL';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'red';
+        varStyle.STROKECOLOR = 'black';
+        stylesheet.pushStyle({type: 'indel'}, null, varStyle);
+    }
 
     var wigStyle = new DASStyle();
     wigStyle.glyph = 'BOX';
@@ -181,6 +225,11 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 
                     if (j.alt_alleles) {
                         notes.push('Alleles=' + j.alt_alleles.join('/'));
+                        if (j.alt_alleles.length > 1) {
+                            if (j.alt_alleles[1].length != j.alt_alleles[0].length || j.alt_alleles[1] == '-') {
+                                f.type = 'indel';
+                            }
+                        }
                     }
         		    
                     if (notes.length > 0) {
