@@ -132,7 +132,7 @@
 
 *.dalliance .guideline {
   width: 1px;
-  height: 2000px;     /* Can this be handled better...? */
+  height: 100%;
   background-color: blue;
   position: absolute;
   z-index: 900;
