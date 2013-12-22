@@ -57,6 +57,58 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     cdsStyle.ZINDEX = 10;
     stylesheet.pushStyle({type: 'cds'}, null, cdsStyle);
 
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'SQUARE';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation', method: '.+_UTR_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'TRIANGLE';
+        varStyle.DIRECTION = 'S';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation', method: 'missense_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'TRIANGLE';
+        varStyle.DIRECTION = 'N';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation', method: 'splice_.+_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'STAR';
+        varStyle.POINTS = 6;
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation', method: 'regulatory_region_variant'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'DOT';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'DOT';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'blue';
+        stylesheet.pushStyle({type: 'variation'}, null, varStyle);
+    }
+
     var wigStyle = new DASStyle();
     wigStyle.glyph = 'BOX';
     wigStyle.FGCOLOR = 'black';
@@ -67,11 +119,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     wigStyle.ZINDEX = 20;
     stylesheet.pushStyle({type: 'default'}, null, wigStyle);
 
-    var varStyle = new DASStyle();
-    varStyle.glyph = 'DOT';
-    varStyle.BUMP = 'no';
-    varStyle.LABEL = 'no';
-    varStyle.FGCOLOR = 'blue';
+
 
     return callback(stylesheet);
 }
@@ -113,7 +161,8 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
         		var features = [];
         		for (fi = 0; fi < jf.length; ++fi) {
         		    var j = jf[fi];
-        		    
+
+        		    var notes = [];
         		    var f = new DASFeature();
         		    f.segment = chr;
         		    f.min = j['start'] | 0;
@@ -133,7 +182,17 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
                         else if (j.strand > 0) 
                             f.orientation = '+';
                     }
+
+                    if (j.consequence_type)
+                        f.method = j.consequence_type;
+
+                    if (j.alt_alleles) {
+                        notes.push('Alleles=' + j.alt_alleles.join('/'));
+                    }
         		    
+                    if (notes.length > 0) {
+                        f.notes = notes;
+                    }
         		    features.push(f);
         		}
         		callback(null, features);
