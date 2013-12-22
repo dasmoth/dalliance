@@ -79,24 +79,29 @@ Browser.prototype.restoreStatus = function() {
         return;
     }
 
-    var defaultSourcesByConfigHash = {};
+    var defaultSourcesByURI = {};
     for (var si = 0; si < this.sources.length; ++si) {
         var source = this.sources[si];
-        defaultSourcesByConfigHash[hex_sha1(miniJSONify(source))] = source;
+        var uri = sourceDataURI(source);
+        var ul = defaultSourcesByURI[uri];
+        if (!ul)
+            defaultSourcesByURI[uri] = ul = [];
+        ul.push(source);
+        
     }
 
     var qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     var qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
     var qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
     if (qChr && qMin && qMax) {
-	this.chr = qChr;
-	this.viewStart = qMin;
-	this.viewEnd = qMax;
-	
-	var csm = localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
-	if (csm) {
-	    this.currentSeqMax = csm|0;
-	}
+    	this.chr = qChr;
+    	this.viewStart = qMin;
+    	this.viewEnd = qMax;
+    	
+    	var csm = localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
+    	if (csm) {
+    	    this.currentSeqMax = csm|0;
+    	}
     }
     var rs = localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
     this.reverseScrolling = (rs && rs == 'true');
@@ -107,14 +112,17 @@ Browser.prototype.restoreStatus = function() {
 
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];
     if (sourceStr) {
-	this.sources = JSON.parse(sourceStr);
+	    this.sources = JSON.parse(sourceStr);
         for (var si = 0; si < this.sources.length; ++si) {
             var source = this.sources[si];
-            var hash = hex_sha1(miniJSONify(source, {props: true, coords: true}));
-            var oldSource = defaultSourcesByConfigHash[hash];
-            if (oldSource) {
-                if (oldSource.featureInfoPlugin) {
-                    source.featureInfoPlugin = oldSource.featureInfoPlugin;
+            var uri = sourceDataURI(source);
+            var ul = defaultSourcesByURI[uri] || [];
+            for (var osi = 0; osi < ul.length; ++osi) {    
+                var oldSource = ul[osi];
+                if (sourcesAreEqual(source, oldSource)) {
+                    if (oldSource.featureInfoPlugin) {
+                        source.featureInfoPlugin = oldSource.featureInfoPlugin;
+                    }
                 }
             }
         }
