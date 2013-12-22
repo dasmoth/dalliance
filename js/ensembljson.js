@@ -94,18 +94,11 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     }
     {
         var varStyle = new DASStyle();
-        varStyle.glyph = 'DOT';
+        varStyle.glyph = 'PLIMSOLL';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
-        varStyle.FGCOLOR = 'blue';
-        stylesheet.pushStyle({type: 'variation'}, null, varStyle);
-    }
-    {
-        var varStyle = new DASStyle();
-        varStyle.glyph = 'DOT';
-        varStyle.BUMP = 'yes';
-        varStyle.LABEL = 'no';
-        varStyle.FGCOLOR = 'blue';
+        varStyle.FGCOLOR = 'rgb(50,80,255)';
+        varStyle.STROKECOLOR = 'black';
         stylesheet.pushStyle({type: 'variation'}, null, varStyle);
     }
 

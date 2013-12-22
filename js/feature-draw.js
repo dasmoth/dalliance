@@ -551,7 +551,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
     var gg, quant;
 
-    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR') {
+    if (gtype === 'CROSS' || gtype === 'EX' || gtype === 'TRIANGLE' || gtype === 'DOT' || gtype === 'SQUARE' || gtype === 'STAR' || gtype === 'PLIMSOLL') {
         var stroke = style.FGCOLOR || 'black';
         var fill = style.BGCOLOR || 'none';
         var outline = style.STROKECOLOR;
@@ -603,6 +603,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             gg = new TriangleGlyph(mid, size, dir, width, stroke, outline);
         } else if (gtype === 'DOT') {
             gg = new DotGlyph(mid, size, stroke, outline);
+        } else if (gtype === 'PLIMSOLL') {
+            gg = new PlimsollGlyph(mid, size, 0.2 * size, stroke, outline);
         } else if (gtype === 'SQUARE') {
             gg = new BoxGlyph(mid - hh, 0, size, size, stroke, outline);
         } else if (gtype === 'STAR') {

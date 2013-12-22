@@ -1300,3 +1300,54 @@ StarGlyph.prototype.toSVG = function() {
          fill: this._fill || 'none',
          stroke: this._stroke || 'none'});
 }
+
+
+function PlimsollGlyph(x, height, overhang, fill, stroke) {
+    this._x = x;
+    this._height = height;
+    this._overhang = overhang;
+    this._fill = fill;
+    this._stroke = stroke;
+}
+
+PlimsollGlyph.prototype.draw = function(g) {
+    var hh = this._height/2;
+    g.fillStyle = this._stroke;
+    g.beginPath();
+    g.arc(this._x, hh, hh - this._overhang, 0, 6.29);
+    g.moveTo(this._x, 0);
+    g.lineTo(this._x, this._height);
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
+}
+
+PlimsollGlyph.prototype.toSVG = function() {
+    var hh = this._height/2;
+    return makeElementNS(NS_SVG, 'g', 
+        [makeElementNS(NS_SVG, 'circle', null, {cx: this._x, cy: hh, r: hh - this._overhang}),
+         makeElementNS(NS_SVG, 'line', null, {x1: this._x, y1: 0, x2: this._x, y2: this._height})],
+        {fill: this._fill || 'none',
+         stroke: this._stroke || 'none',
+         strokeWidth: '1px'});
+}
+
+PlimsollGlyph.prototype.min = function() {
+    return this._x - this._height/2;
+}
+
+PlimsollGlyph.prototype.max = function() {
+    return this._x + this._height/2;
+}
+
+PlimsollGlyph.prototype.height = function() {
+    return this._height;
+}
+
