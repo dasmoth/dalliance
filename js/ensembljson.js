@@ -67,6 +67,12 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     wigStyle.ZINDEX = 20;
     stylesheet.pushStyle({type: 'default'}, null, wigStyle);
 
+    var varStyle = new DASStyle();
+    varStyle.glyph = 'DOT';
+    varStyle.BUMP = 'no';
+    varStyle.LABEL = 'no';
+    varStyle.FGCOLOR = 'blue';
+
     return callback(stylesheet);
 }
 
@@ -91,21 +97,29 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
         thisB.busy--;
         thisB.notifyActivity();
 
-	if (req.readyState == 4) {
-	    if (req.status >= 300) {
-		callback('Error code ' + req.status, null);
-	    } else {
-		var jf = JSON.parse(req.response);
-		var features = [];
-		for (fi = 0; fi < jf.length; ++fi) {
-		    var j = jf[fi];
-		    
-		    var f = new DASFeature();
-		    f.segment = chr;
-		    f.min = j['start'] | 0;
-		    f.max = j['end'] | 0;
-		    f.type = j.feature_type || 'unknown';
-		    f.id = j.ID;
+    	if (req.readyState == 4) {
+    	    if (req.status >= 300) {
+                var err = 'Error code ' + req.status;
+                try {
+                    var jr = JSON.parse(req.response);
+                    if (jr.error) {
+                        err = jr.error;
+                    }
+                } catch (ex) {};
+
+    		    callback(err, null);
+    	    } else {
+        		var jf = JSON.parse(req.response);
+        		var features = [];
+        		for (fi = 0; fi < jf.length; ++fi) {
+        		    var j = jf[fi];
+        		    
+        		    var f = new DASFeature();
+        		    f.segment = chr;
+        		    f.min = j['start'] | 0;
+        		    f.max = j['end'] | 0;
+        		    f.type = j.feature_type || 'unknown';
+        		    f.id = j.ID;
 
                     if (j.Parent) {
                         var grp = new DASGroup();
@@ -119,12 +133,12 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
                         else if (j.strand > 0) 
                             f.orientation = '+';
                     }
-		    
-		    features.push(f);
-		}
-		callback(null, features);
-	    }
-	}
+        		    
+        		    features.push(f);
+        		}
+        		callback(null, features);
+    	    }
+    	}
 	
     };
     
