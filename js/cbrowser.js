@@ -882,9 +882,6 @@ Browser.prototype.realMakeTier = function(source) {
 
                     thisB.tiers.splice(tierOrdinal, 1);
                     thisB.tiers.splice(ti, 0, tier);
-                    var ts = thisB.sources[tierOrdinal];
-                    thisB.sources.splice(tierOrdinal, 1);
-                    thisB.sources.splice(ti, 0, ts);
 
                     thisB.selectedTiers = [];
                     for (var sti = 0; sti < thisB.tiers.length; ++sti) {
@@ -1208,7 +1205,6 @@ Browser.prototype.addTier = function(conf) {
     conf = new DASSource(conf);
     conf.disabled = false;
     
-    this.sources.push(conf);
     this.makeTier(conf);
     this.markSelectedTiers();
     this.positionRuler();
@@ -1287,7 +1283,6 @@ Browser.prototype.removeTier = function(conf, force) {
 
     this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
-    this.sources.splice(target, 1);
 
     var nst = [];
     for (var sti = 0; sti < this.selectedTiers.length; ++sti) {

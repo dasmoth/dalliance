@@ -33,7 +33,7 @@ Browser.prototype.storeViewStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.view-start'] = this.viewStart|0;
     localStorage['dalliance.' + this.cookieKey + '.view-end'] = this.viewEnd|0
     if (this.currentSeqMax) {
-	localStorage['dalliance.' + this.cookieKey + '.current-seq-length'] = this.currentSeqMax;
+	   localStorage['dalliance.' + this.cookieKey + '.current-seq-length'] = this.currentSeqMax;
     }
 }
 
