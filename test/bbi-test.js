@@ -7,13 +7,135 @@
 // bbi-test.js
 //
 
+describe('bigbed files', function() {
+    var bbURI = 'http://www.biodalliance.org/datasets/tests/test-leap.bb';
+    // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';
+
+    it('can be created by connecting to a URI', function() {
+        var cb, err;
+        runs(function() {
+             makeBwgFromURL(bbURI,
+                function(_bb, _err) {
+                    bb = _bb;
+                    err = _err;
+                    cb = true;
+                });
+       });
+
+        waitsFor(function() {
+            return cb;
+        }, "The callback should be invoked");
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(bb).not.toBeNull();
+        });
+    });
+
+    it('can retrieve features from a genomic interval', function() {
+        var features, err, flag;
+
+        runs(function() {
+            bb.readWigData('chr1', 1, 100000000, function(_f, _e) {
+                flag = true;
+                features = _f;
+                err = _e;
+            });
+        });
+
+        waitsFor(function() {
+            return flag;
+        }, 'Expects callback after feature fetch');
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            expect(features.length > 0).toBeTruthy();
+        });
+    });
+
+    it('can retrieve features by adjacency', function() {
+        var features, err, flag;
+
+        runs(function() {
+            bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, -1, function(_f, _e) {
+                flag = true;
+                features = _f;
+                err = _e;
+            });
+        });
+
+        waitsFor(function() {
+            return flag;
+        }, 'Expects callback after feature fetch');
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            // console.log(features);
+            expect(features.length > 0).toBeTruthy();
+        });
+    });
+
+    it('returns features from the next chromosome if there are no adjacent features on this chromosome', function() {
+        var features, err, flag;
+
+        runs(function() {
+            bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, 1, function(_f, _e) {
+                flag = true;
+                features = _f;
+                err = _e;
+            });
+        });
+
+        waitsFor(function() {
+            return flag;
+        }, 'Expects callback after feature fetch');
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            // console.log(features);
+            expect(features.length > 0).toBeTruthy();
+        });
+    });
+
+/*
+    it('loops after last chromosome', function() {
+        var features, err, flag;
+
+        runs(function() {
+            bb.getUnzoomedView().getFirstAdjacent('chr1', 1, -1, function(_f, _e) {
+                flag = true;
+                features = _f;
+                err = _e;
+            });
+        });
+
+        waitsFor(function() {
+            return flag;
+        }, 'Expects callback after feature fetch');
+
+        runs(function() {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            // console.log(features);
+            expect(features.length > 0).toBeTruthy();
+        });
+    }); */
+});
+
 describe('BBI objects', function() {
+
+    var ensGeneURI = 'http://www.biodalliance.org/datasets/tests/ensGene.araTha1.bb';
+    // var ensGeneURI = 'http://local.biodalliance.org/dalliance/plants/araTha/bbi/ensGene.araTha1.bb';
+
     var bb;
 
     it('can be created by connecting to a URI', function() {
         var cb, err;
         runs(function() {
-           makeBwgFromURL('http://www.biodalliance.org/datasets/tests/ensGene.araTha1.bb',
+           makeBwgFromURL(ensGeneURI,
                 function(_bb, _err) {
                     bb = _bb;
                     err = _err;

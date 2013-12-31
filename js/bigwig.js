@@ -975,29 +975,28 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
                 rp = referencePoint;
             
             for (var fi = 0; fi < feats.length; ++fi) {
-	        var f = feats[fi];
-                
+    	        var f = feats[fi];
 
                 if (dir > 0) {
-	            if (f.maxScore > threshold) {
-		        if (candidate.zoom == 0) {
-		            if (f.min > rp)
-			        return callback(f);
-		        } else if (f.max > rp) {
-		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
-		        }
-	            }
+    	            if (f.maxScore > threshold) {
+        		        if (candidate.zoom == 0) {
+        		            if (f.min > rp)
+                                return callback(f);
+        		        } else if (f.max > rp) {
+        		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
+        		        }
+                    }
                 } else {
                     if (f.maxScore > threshold) {
-		        if (candidate.zoom == 0) {
-		            if (f.max < rp)
-			        return callback(f);
-		        } else if (f.min < rp) {
-		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
-		        }
-	            }
+            		    if (candidate.zoom == 0) {
+                	        if (f.max < rp)
+                			    return callback(f);
+                        } else if (f.min < rp) {
+                            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
+                        }
+    	            }
                 }
-	    }
+    	    }
             fbThresholdSearchRecur();
         });
     }
