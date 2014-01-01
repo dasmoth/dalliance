@@ -500,7 +500,6 @@ BigWigView.prototype.getFirstAdjacent = function(chrName, pos, dir, callback) {
 BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
     var thisB = this;
     if (!this.cirHeader) {
-        // dlog('No CIR yet, fetching');
         this.bwg.data.slice(this.cirTreeOffset, 48).fetch(function(result) {
             thisB.cirHeader = result;
             var la = new Int32Array(thisB.cirHeader);
@@ -524,7 +523,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
         var maxCirBlockSpan = 4 +  (thisB.cirBlockSize * 32);   // Upper bound on size, based on a completely full leaf node.
         var spans;
         for (var i = 0; i < offset.length; ++i) {
-            var blockSpan = new Range(offset[i], Math.min(offset[i] + maxCirBlockSpan, thisB.cirTreeOffset + thisB.cirTreeLength));
+            var blockSpan = new Range(offset[i], offset[i] + maxCirBlockSpan);
             spans = spans ? union(spans, blockSpan) : blockSpan;
         }
         
@@ -537,16 +536,14 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 
     var cirFobStartFetch = function(offset, fr, level, attempts) {
         var length = fr.max() - fr.min();
-        // dlog('fetching ' + fr.min() + '-' + fr.max() + ' (' + (fr.max() - fr.min()) + ')');
-        thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(result) {
-            var resultBuffer = result;
-
+        thisB.bwg.data.slice(fr.min(), fr.max() - fr.min()).fetch(function(resultBuffer) {
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
                     --outstanding;
                     if (outstanding == 0) {
                         cirCompleted();
+                        // thisB.fetchFeatures(function() {return true;}, [blockToFetch], callback);
                     }
                 }
             }
@@ -560,7 +557,6 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
 
         var isLeaf = ba[offset];
         var cnt = sa[offset/2 + 1];
-        // dlog('cir level=' + level + '; cnt=' + cnt);
         offset += 4;
 
         if (isLeaf != 0) {
@@ -570,9 +566,8 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 var startBase = la[lo + 1];
                 var endChrom = la[lo + 2];
                 var endBase = la[lo + 3];
-                var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
-                var blockSize = (la[lo + 6]<<32) | (la[lo + 7]);
-                // dlog('startChrom=' + startChrom);
+                var blockOffset = bwg_readOffset(ba, offset+16);
+                var blockSize = bwg_readOffset(ba, offset+24);
                 if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)))) ||
                     (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)))))
                 {
@@ -601,13 +596,11 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 var endChrom = la[lo + 2];
                 var endBase = la[lo + 3];
                 var blockOffset = (la[lo + 4]<<32) | (la[lo + 5]);
-                // dlog('startChrom=' + startChrom);
                 if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)) &&
                                  (endChrom   >= chr))) ||
                      (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)) &&
                                   (startChrom <= chr))))
                 {
-                    // dlog('Got an interesting block: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                     if (bestRecur < 0 || endBase > bestPos) {
                         bestRecur = blockOffset;
                         bestPos = (dir < 0) ? endBase : startBase;

@@ -72,8 +72,8 @@ describe('bigbed files', function() {
         runs(function() {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
-            // console.log(features);
-            expect(features.length > 0).toBeTruthy();
+            console.log(features);
+            expect(features.length).toBe(1);
         });
     });
 
@@ -95,8 +95,8 @@ describe('bigbed files', function() {
         runs(function() {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
-            // console.log(features);
-            expect(features.length > 0).toBeTruthy();
+            console.log(features);
+            expect(features.length).toBe(1);
         });
     });
 
