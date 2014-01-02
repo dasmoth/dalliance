@@ -208,6 +208,15 @@ Browser.prototype.openTierPanel = function(tier) {
                 seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
                 scheduleRedraw();
             });
+
+            var seqInsertToggle = makeElement('input', null, {type: 'checkbox', checked: isDasBooleanTrue(seqStyle.__INSERTIONS)});
+            tierTable.appendChild(makeElement('tr',
+                [makeElement('th', 'Show insertions (experimental)'),
+                 makeElement('td', seqInsertToggle)]));
+            seqInsertToggle.addEventListener('change', function(ev) {
+                seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
+                scheduleRedraw();
+            });
         }
 
 

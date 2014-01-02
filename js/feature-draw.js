@@ -783,7 +783,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === '__SEQUENCE') {
         var rawseq = feature.seq;
         var seq = rawseq;
-
+        var insertionLabels = isDasBooleanTrue(style.__INSERTIONS);
 
         var indels = [];
         if (feature.cigar) {
@@ -800,8 +800,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                         seq += '-';
                     }
                 } else if (co.op == 'I') {
+                    var inseq =  rawseq.substr(cursor, co.cnt);
                     var ig = new TriangleGlyph(minPos + (seq.length*scale), 5, 'S', 5, 'red');
-                    ig.feature = {label: 'Insertion: ' + rawseq.substr(cursor, co.cnt), type: 'insertion', method: 'insertion'};
+                    if (insertionLabels)
+                        ig = new LabelledGlyph(ig, inseq, false, 'center', 'above', '7px sans-serif');
+                    ig.feature = {label: 'Insertion: ' + inseq, type: 'insertion', method: 'insertion'};
                     indels.push(ig);
 
                     cursor += co.cnt;
@@ -833,6 +836,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
         }
         gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR);
+        if (insertionLabels)
+            gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {
             indels.splice(0, 0, gg);
             gg = new GroupGlyph(indels);

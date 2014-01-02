@@ -308,10 +308,24 @@ LineGraphGlyph.prototype.toSVG = function() {
          strokeWidth: '2px'});
 }
 
-function LabelledGlyph(glyph, text, unmeasured) {
+function LabelledGlyph(glyph, text, unmeasured, anchor, align, font) {
     this.glyph = glyph;
     this.text = text;
-    this.textLen = GLOBAL_GC.measureText(text).width + 10;
+    this.anchor = anchor || 'left';
+    this.align = align || 'below';
+    if (font) {
+        this.font = font;
+    }
+    if (this.font) {
+        GLOBAL_GC.save();
+        GLOBAL_GC.font = this.font;
+    }
+    var metrics = GLOBAL_GC.measureText(text);
+    if (this.font) {
+        GLOBAL_GC.restore();
+    }
+    this.textLen = metrics.width;
+    this.textHeight = 5;
     this.bump = glyph.bump;
     this.measured = !unmeasured;
 }
@@ -328,19 +342,48 @@ LabelledGlyph.prototype.min = function() {
 
 LabelledGlyph.prototype.max = function() {
     if (this.measured)
-        return Math.max(this.glyph.max(), (1.0*this.glyph.min()) + this.textLen);
+        return Math.max(this.glyph.max(), (1.0*this.glyph.min()) + this.textLen + 10);
     else
         return this.glyph.max();
 }
 
 LabelledGlyph.prototype.height = function() {
-    return this.glyph.height() + (this.measured ? 20 : 0);
+    var h = this.glyph.height();
+    if (this.measured) {
+        if (this.align == 'above') {
+            h += this.textHeight + 2;
+        } else {
+            h += 20;
+        }
+    }
+    return h;
 }
 
 LabelledGlyph.prototype.draw = function(g) {
+    if (this.align == 'above') {
+        g.save();
+        g.translate(0, this.textHeight + 2);
+    }
     this.glyph.draw(g);
+    if (this.align == 'above') {
+        g.restore();
+    }
+
     g.fillStyle = 'black';
-    g.fillText(this.text, this.glyph.min(), this.glyph.height() + 15);
+    if (this.font) {
+        g.save();
+        g.font = this.font;
+    }
+    var p;
+    if ('center' == this.anchor) {
+        p = (this.glyph.min() + this.glyph.max() - this.textLen) / 2;
+    } else {
+        p = this.glyph.min();
+    }
+    g.fillText(this.text, p, this.align == 'above' ? this.textHeight : this.glyph.height() + 15);
+    if (this.font) {
+        g.restore();
+    }
 }
 
 
@@ -1117,7 +1160,11 @@ function TranslatedGlyph(glyph, x, y, height) {
 }
 
 TranslatedGlyph.prototype.height = function() {
-    return this._height;
+    if (this._height) {
+        return this._height;
+    } else {
+        return this.glyph.height() + this._y;
+    }
 }
 
 TranslatedGlyph.prototype.min = function() {
