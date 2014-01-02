@@ -14,12 +14,14 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportForm = makeElement('div');
 
         var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
+        var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: true});
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
             removeChildren(exportContent);
             exportContent.appendChild(makeElement('a', 'Click to download', {
-                href: URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked})),
+                href: URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
+                                                     ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'})),
                 download: 'dalliance-view.svg',
                 type: 'image/svg+xml'
             }));
@@ -30,7 +32,10 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportOptsTable = makeElement('table',
             [makeElement('tr',
                 [makeElement('th', 'Include highlights'),
-                 exportHighlightsToggle])
+                 exportHighlightsToggle]),
+             makeElement('tr',
+                [makeElement('th', 'Include vertical guideline'),
+                 exportRulerToggle])
             ]);
 
         exportForm.appendChild(exportOptsTable);
@@ -176,7 +181,20 @@ Browser.prototype.makeSVG = function(opts) {
                                                                       stroke: 'none', fill: 'red', fillOpacity: 0.3}));
             }
         }
-    }   
+    }
+
+    var rulerPos = -1; 
+    if (opts.ruler == 'center') {
+        rulerPos = margin + ((this.viewEnd - this.viewStart + 1)*this.scale) / 2;
+    } else if (opts.ruler == 'left') {
+        rulerPos = margin;
+    } else if (opts.ruler == 'right') {
+        rulerPos = margin + ((this.viewEnd - this.viewStart + 1)*this.scale);
+    }
+    if (rulerPos >= 0) {
+        tierHolder.appendChild(makeElementNS(NS_SVG, 'line', null, {x1: rulerPos, y1: 70, x2: rulerPos, y2: pos,
+                                                              stroke: 'blue'}));
+    }
 
     saveRoot.appendChild(tierHolder);
     saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
