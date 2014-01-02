@@ -616,6 +616,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             gg = new CrossGlyph(mid, size, stroke);
         }
 
+        if (fill && fill != 'none' && (maxPos - minPos) > 5) {
+            var bgg = new BoxGlyph(minPos, 0, (maxPos - minPos), size, fill);
+            gg = new GroupGlyph([bgg, gg]);
+        }
+
         if (isDasBooleanTrue(style.SCATTER)) {
             var smin = tier.quantMin(style); // tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
             var smax = tier.quantMax(style); // tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;

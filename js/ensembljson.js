@@ -62,6 +62,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.glyph = 'SQUARE';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        // varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'blue';
         stylesheet.pushStyle({type: 'variation', method: '.+_UTR_variant'}, null, varStyle);
     }
@@ -71,6 +72,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.DIRECTION = 'S';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        // varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'blue';
         stylesheet.pushStyle({type: 'variation', method: 'missense_variant'}, null, varStyle);
     }
@@ -80,6 +82,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.DIRECTION = 'N';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        // varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'blue';
         stylesheet.pushStyle({type: 'variation', method: 'splice_.+_variant'}, null, varStyle);
     }
@@ -89,6 +92,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.POINTS = 6;
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        // varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'blue';
         stylesheet.pushStyle({type: 'variation', method: 'regulatory_region_variant'}, null, varStyle);
     }
@@ -97,6 +101,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.glyph = 'PLIMSOLL';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        // varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'rgb(50,80,255)';
         varStyle.STROKECOLOR = 'black';
         stylesheet.pushStyle({type: 'variation'}, null, varStyle);
@@ -106,6 +111,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.glyph = 'SQUARE';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'red';
         stylesheet.pushStyle({type: 'indel', method: '.+_UTR_variant'}, null, varStyle);
     }
@@ -115,6 +121,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.DIRECTION = 'S';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'red';
         stylesheet.pushStyle({type: 'indel', method: 'missense_variant'}, null, varStyle);
     }
@@ -124,6 +131,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.DIRECTION = 'N';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'red';
         stylesheet.pushStyle({type: 'indel', method: 'splice_.+_variant'}, null, varStyle);
     }
@@ -133,6 +141,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.POINTS = 6;
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'red';
         stylesheet.pushStyle({type: 'indel', method: 'regulatory_region_variant'}, null, varStyle);
     }
@@ -141,6 +150,7 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.glyph = 'PLIMSOLL';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
+        varStyle.BGCOLOR = '#888888';
         varStyle.FGCOLOR = 'red';
         varStyle.STROKECOLOR = 'black';
         stylesheet.pushStyle({type: 'indel'}, null, varStyle);
