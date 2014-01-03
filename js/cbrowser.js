@@ -290,7 +290,7 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
                     thisB.setSelectedTier(st - 1);
-                    thisB.tiers[thisB.getSelectedTier()].label.scrollIntoView();
+                    thisB.tiers[thisB.getSelectedTier()].viewport.scrollIntoView();
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
                 }
@@ -332,7 +332,7 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
                     thisB.setSelectedTier(st + 1);
-                    thisB.tiers[thisB.getSelectedTier()].label.scrollIntoView();
+                    thisB.tiers[thisB.getSelectedTier()].viewport.scrollIntoView();
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
