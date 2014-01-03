@@ -290,7 +290,11 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
                     thisB.setSelectedTier(st - 1);
-                    thisB.tiers[thisB.getSelectedTier()].viewport.scrollIntoView();
+                    var nst = thisB.tiers[thisB.getSelectedTier()];
+                    var rect = nst.holder.getBoundingClientRect();
+                    if (rect.bottom - rect.height < 0 || rect.botton > window.innerHeight) {
+                        nst.holder.scrollIntoView(true);
+                    }
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
                 }
@@ -332,7 +336,11 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
                     thisB.setSelectedTier(st + 1);
-                    thisB.tiers[thisB.getSelectedTier()].viewport.scrollIntoView();
+                    var nst = thisB.tiers[thisB.getSelectedTier()];
+                    var rect = nst.holder.getBoundingClientRect();
+                    if (rect.bottom - rect.height < 0 || rect.bottom > window.innerHeight) {
+                        nst.holder.scrollIntoView(rect.height > window.innerHeight);
+                    }
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
