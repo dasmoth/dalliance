@@ -189,10 +189,10 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-        thisB.busy--;
-        thisB.notifyActivity();
-
     	if (req.readyState == 4) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
     	    if (req.status >= 300) {
                 var err = 'Error code ' + req.status;
                 try {
