@@ -842,7 +842,7 @@ Browser.prototype.realMakeTier = function(source) {
         var holderBCR = thisB.svgHolder.getBoundingClientRect();
         dragLabel.style.left = (label.getBoundingClientRect().left - holderBCR.left) + 'px'; 
         dragLabel.style.top = (ev.clientY - holderBCR.top - 10) + 'px';
-        
+
         var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             var tt = thisB.tiers[ti];
@@ -877,6 +877,13 @@ Browser.prototype.realMakeTier = function(source) {
                 }
                 break;
             }
+        }
+
+        var labelBCR = dragLabel.getBoundingClientRect();
+        if (labelBCR.bottom - labelBCR.height < 0) {
+            dragLabel.scrollIntoView(true);
+        } else if (labelBCR.bottom > window.innerHeight) {
+            dragLabel.scrollIntoView(false);
         }
     };
 
