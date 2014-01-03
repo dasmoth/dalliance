@@ -1572,9 +1572,15 @@ Browser.prototype.positionRuler = function() {
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var q = this.tiers[ti].quantOverlay;
+        var tier = this.tiers[ti];
+        var q = tier.quantOverlay;
+
+        var quant;
+        if (tier.subtiers && tier.subtiers.length > 0)
+            quant = tier.subtiers[0].quant;
+
         if (q) {
-            q.style.display = display;
+            q.style.display = quant ? display : 'none';
             q.style.left = left;
             q.style.right = right;
         }
