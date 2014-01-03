@@ -238,39 +238,6 @@ Browser.prototype.realInit2 = function() {
                 }
 
                 thisB.leap(-1, fedge);
-
-                /*
-                var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
-
-                var st = thisB.getSelectedTier();
-                if (st < 0) return;
-                thisB.tiers[st].findNextFeature(
-                      thisB.chr,
-                      pos,
-                      -1,
-                      fedge,
-                      function(nxt) {
-                          if (nxt) {
-                              var nmin = nxt.min;
-                              var nmax = nxt.max;
-                              if (fedge) {
-                                  if (nmax<pos-1) {
-                                      nmax++;
-                                      nmin=nmax;
-                                  } else {
-                                      nmax=nmin;
-                                  }
-                              }
-                              var wid = thisB.viewEnd - thisB.viewStart + 1;
-                              if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
-                              var newStart = (nmin + nmax - wid)/2 + 1;
-                              var newEnd = newStart + wid - 1;
-                              var pos2=pos;
-                              thisB.setLocation(nxt.segment, newStart, newEnd);
-                          } else {
-                              alert('no next feature');
-                          }
-                      }); */
             } else {
                 thisB.move(ev.shiftKey ? 100 : 25);
             }
@@ -323,6 +290,7 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
                     thisB.setSelectedTier(st - 1);
+                    thisB.tiers[thisB.getSelectedTier()].label.scrollIntoView();
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
                 }
@@ -364,6 +332,7 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
                     thisB.setSelectedTier(st + 1);
+                    thisB.tiers[thisB.getSelectedTier()].label.scrollIntoView();
                 }
             }
         } else if (ev.keyCode == 187 || ev.keyCode == 61) { // +
@@ -731,8 +700,6 @@ Browser.prototype.realMakeTier = function(source) {
     vph.addEventListener('mouseout', function(ev) {
         isDragging = false;
     });
-
-
 
     tier.removeButton = makeElement('i', null, {className: 'fa fa-times'});
     tier.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
