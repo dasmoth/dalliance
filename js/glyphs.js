@@ -331,9 +331,29 @@ function LabelledGlyph(glyph, text, unmeasured, anchor, align, font) {
 }
 
 LabelledGlyph.prototype.toSVG = function() {
+    var child = this.glyph.toSVG();
+    var opts = {};
+    
+    if (this.align == 'above') {
+        child = makeElementNS(NS_SVG, 'g', child, {transform: "translate(0, " + (this.textHeight|0 + 2) + ")"});
+        opts.y = this.textHeight;
+    } else {
+        opts.y = this.glyph.height() + 15;
+    }
+
+    if (this.font) {
+        opts.fontSize  = 7;
+    }
+
+    if ('center' == this.anchor) {
+        opts.x = (this.glyph.min() + this.glyph.max() - this.textLen) / 2;
+    } else {
+        opts.x = this.glyph.min();
+    }
+
     return makeElementNS(NS_SVG, 'g',
-        [this.glyph.toSVG(),
-         makeElementNS(NS_SVG, 'text', this.text, {x: this.glyph.min(), y: this.glyph.height() + 15})]);
+        [child,
+         makeElementNS(NS_SVG, 'text', this.text, opts)]);
 }
 
 LabelledGlyph.prototype.min = function() {
