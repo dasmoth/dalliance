@@ -286,6 +286,16 @@ Browser.prototype.realInit2 = function() {
                     tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                     tt.draw();
                 }                
+            } else if (ev.altKey) {
+                var st = thisB.getSelectedTier();
+                var tier = thisB.tiers[st];
+                if (st > 0) {
+                    thisB.tiers.splice(st, 1);
+                    thisB.tiers.splice(st - 1, 0, tier);
+                    thisB.setSelectedTier(st - 1);
+                    thisB.reorderTiers();
+                    thisB.notifyTier();
+                }
             } else {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
@@ -331,6 +341,16 @@ Browser.prototype.realInit2 = function() {
                         tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
                         tt.draw();
                     }
+                }
+            } else if (ev.altKey) {
+                var st = thisB.getSelectedTier();
+                var tier = thisB.tiers[st];
+                if (st < thisB.tiers.length - 1) {
+                    thisB.tiers.splice(st, 1);
+                    thisB.tiers.splice(st + 1, 0, tier);
+                    thisB.setSelectedTier(st + 1);
+                    thisB.reorderTiers();
+                    thisB.notifyTier();
                 }
             } else {
                 var st = thisB.getSelectedTier();
@@ -728,16 +748,6 @@ Browser.prototype.realMakeTier = function(source) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-
-    /*
-    tier.leapLeftButton = makeElement('div', makeElement('i', null, {className: 'fa fa-chevron-left'}),
-        {className: 'btn'},
-        {position: 'absolute', left: '2px', top: '2px'});
-
-    tier.leapRightButton = makeElement('div', makeElement('i', null, {className: 'fa fa-chevron-right'}),
-        {className: 'btn'},
-        {position: 'absolute', right: '2px', top: '2px'});*/
-
     var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
@@ -866,14 +876,8 @@ Browser.prototype.realMakeTier = function(source) {
 
                     tierOrdinal = ti;
                     yAtLastReorder = ev.clientY;
-                    removeChildren(thisB.tierHolder);
-                    for (var i = 0; i < thisB.tiers.length; ++i) {
-                        thisB.tierHolder.appendChild(thisB.tiers[i].row);
-                    }
-                    thisB.tierHolder.appendChild(thisB.ruler);
-                    thisB.tierHolder.appendChild(thisB.ruler2);
+                    thisB.reorderTiers();
                     tiersWereReordered = true;
-                    thisB.arrangeTiers();
                 }
                 break;
             }
@@ -936,6 +940,16 @@ Browser.prototype.realMakeTier = function(source) {
     }
 }
 
+Browser.prototype.reorderTiers = function() {
+    removeChildren(this.tierHolder);
+    for (var i = 0; i < this.tiers.length; ++i) {
+        this.tierHolder.appendChild(this.tiers[i].row);
+    }
+    this.tierHolder.appendChild(this.ruler);
+    this.tierHolder.appendChild(this.ruler2);
+    this.arrangeTiers();
+}
+
 Browser.prototype.refreshTier = function(tier) {
     if (this.knownSpace) {
         this.knownSpace.invalidate(tier);
@@ -955,8 +969,6 @@ Browser.prototype.arrangeTiers = function() {
 Browser.prototype.refresh = function() {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
-    /* var minExtraW = (width * this.minExtra) | 0;
-    var maxExtraW = (width * this.maxExtra) | 0;*/
     var minExtraW = (100.0/this.scale)|0;
     var maxExtraW = (1000.0/this.scale)|0;
 
@@ -1033,10 +1045,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
                 setSources(msh, JSON.parse(localStorage['dalliance.registry.' + cacheHash + '.sources']), maybeMapping);
                 var cacheAge = (Date.now()|0) - (cacheTime|0);
                 if (cacheAge < (12 * 60 * 60 * 1000)) {
-                    // alert('Using cached registry data');
                     return;
-                } else {
-                    // alert('Registry data is stale, refetching');
                 }
             } catch (rex) {
                 console.log('Bad registry cache: ' + rex);
@@ -1508,7 +1517,6 @@ Browser.prototype.markSelectedTiers = function() {
 
         if (this.selectedTiers.indexOf(ti) >= 0) {
             button.classList.add('active');
-            // this.tiers[ti].label.focus();
         } else {
             button.classList.remove('active');
         }
