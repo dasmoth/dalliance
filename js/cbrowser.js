@@ -287,15 +287,37 @@ Browser.prototype.realInit2 = function() {
                     tt.draw();
                 }                
             } else if (ev.altKey) {
-                var st = thisB.getSelectedTier();
-                var tier = thisB.tiers[st];
-                if (st > 0) {
-                    thisB.tiers.splice(st, 1);
-                    thisB.tiers.splice(st - 1, 0, tier);
-                    thisB.setSelectedTier(st - 1);
-                    thisB.reorderTiers();
-                    thisB.notifyTier();
+                var cnt = thisB.selectedTiers.length;
+                if (cnt == 0)
+                    return;
+
+                var st = thisB.selectedTiers[0];
+                var contiguous = true;
+                var mt = [];
+                for (var si = 0; si < thisB.selectedTiers.length; ++si) {
+                    mt.push(thisB.tiers[thisB.selectedTiers[si]]);
+                    if (si > 0 && thisB.selectedTiers[si] - thisB.selectedTiers[si - 1] != 1)
+                        contiguous = false;
                 }
+
+                if (contiguous && st <= 0)
+                    return;
+
+                for (var si = thisB.selectedTiers.length - 1; si >= 0; --si)
+                    thisB.tiers.splice(thisB.selectedTiers[si], 1);
+
+                thisB.selectedTiers.splice(0, cnt);
+
+                var ip = contiguous ? st - 1 : st;
+                for (var si = 0; si < mt.length; ++si) {
+                    thisB.tiers.splice(ip+si, 0, mt[si]);
+                    thisB.selectedTiers.push(ip + si);
+                }
+
+                thisB.markSelectedTiers();
+                thisB.notifyTierSelection();
+                thisB.reorderTiers();
+                thisB.notifyTier();
             } else {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
@@ -343,15 +365,38 @@ Browser.prototype.realInit2 = function() {
                     }
                 }
             } else if (ev.altKey) {
-                var st = thisB.getSelectedTier();
-                var tier = thisB.tiers[st];
-                if (st < thisB.tiers.length - 1) {
-                    thisB.tiers.splice(st, 1);
-                    thisB.tiers.splice(st + 1, 0, tier);
-                    thisB.setSelectedTier(st + 1);
-                    thisB.reorderTiers();
-                    thisB.notifyTier();
+                var cnt = thisB.selectedTiers.length;
+                if (cnt == 0)
+                    return;
+
+                var st = thisB.selectedTiers[0];
+                var discontig = 0;
+                var mt = [];
+                for (var si = 0; si < thisB.selectedTiers.length; ++si) {
+                    mt.push(thisB.tiers[thisB.selectedTiers[si]]);
+                    if (si > 0)
+                        discontig += (thisB.selectedTiers[si] - thisB.selectedTiers[si - 1] - 1);
                 }
+                contiguous = discontig == 0;
+
+                if (contiguous && st + cnt >= thisB.tiers.length)
+                    return;
+
+                for (var si = thisB.selectedTiers.length - 1; si >= 0; --si)
+                    thisB.tiers.splice(thisB.selectedTiers[si], 1);
+
+                thisB.selectedTiers.splice(0, cnt);
+
+                var ip = contiguous ? st + 1 : st + discontig;
+                for (var si = 0; si < mt.length; ++si) {
+                    thisB.tiers.splice(ip+si, 0, mt[si]);
+                    thisB.selectedTiers.push(ip + si);
+                }
+
+                thisB.markSelectedTiers();
+                thisB.notifyTierSelection();
+                thisB.reorderTiers();
+                thisB.notifyTier();
             } else {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
