@@ -783,21 +783,26 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === '__SEQUENCE') {
         var rawseq = feature.seq;
         var seq = rawseq;
+        var rawquals = feature.quals;
+        var quals = rawquals;
         var insertionLabels = isDasBooleanTrue(style.__INSERTIONS);
 
         var indels = [];
         if (feature.cigar) {
             var ops = parseCigar(feature.cigar);
             seq = ''
+            quals = '';
             cursor = 0;
             for (var ci = 0; ci < ops.length; ++ci) {
                 var co = ops[ci];
                 if (co.op == 'M') {
                     seq += rawseq.substr(cursor, co.cnt);
+                    quals += rawquals.substr(cursor, co.cnt);
                     cursor += co.cnt;
                 } else if (co.op == 'D') {
                     for (var oi = 0; oi < co.cnt; ++oi) {
                         seq += '-';
+                        quals += 'Z';
                     }
                 } else if (co.op == 'I') {
                     var inseq =  rawseq.substr(cursor, co.cnt);
@@ -835,7 +840,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR);
+        gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {

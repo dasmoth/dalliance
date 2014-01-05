@@ -1081,19 +1081,24 @@ TextGlyph.prototype.toSVG = function() {
 
 
 
-function SequenceGlyph(min, max, height, seq, ref, scheme) {
+function SequenceGlyph(min, max, height, seq, ref, scheme, quals) {
     this._min = min;
     this._max = max;
     this._height = height;
     this._seq = seq;
     this._ref = ref;
     this._scheme = scheme;
+    this._quals = quals;
 }
 
 SequenceGlyph.prototype.min = function() {return this._min};
 SequenceGlyph.prototype.max = function() {return this._max};
 SequenceGlyph.prototype.height = function() {return this._height};
 
+
+SequenceGlyph.prototype.alphaForQual = function(qual) {
+    return 0.1 + 0.9*Math.max(0.0, Math.min((1.0 * qual) / 30.0, 1.0));
+}
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
@@ -1119,10 +1124,20 @@ SequenceGlyph.prototype.draw = function(gc) {
 
         gc.fillStyle = color;
 
+        if (this._quals) {
+            var qc = this._quals.charCodeAt(p) - 33;
+            gc.save();
+            gc.globalAlpha = this.alphaForQual(qc);
+        }
+
         if (scale >= 8) {
             gc.fillText(base, this._min + p*scale, 8);
         } else {
             gc.fillRect(this._min + p*scale, 0, scale, this._height);
+        }
+
+        if (this._quals) {
+            gc.restore();
         }
     }
 }
@@ -1150,12 +1165,19 @@ SequenceGlyph.prototype.toSVG = function() {
             }
         }
 
+        var alpha = 1.0;
+        if (this._quals) {
+            var qc = this._quals.charCodeAt(p) - 33;
+            alpha = this.alphaForQual(qc);
+        }
+
         if (scale >= 8) {
             g.appendChild(
                     makeElementNS(NS_SVG, 'text', base, {
                         x: this._min + p*scale,
                         y: 8,
-                        fill: color}));
+                        fill: color,
+                        fillOpacity: alpha}));
         } else {
             g.appendChild(
                     makeElementNS(NS_SVG, 'rect', null, {
@@ -1163,7 +1185,8 @@ SequenceGlyph.prototype.toSVG = function() {
                         y: 0,
                         width: scale,
                         height: this._height,
-                        fill: color}));
+                        fill: color,
+                        fillOpacity: alpha}));
 
         }
     }

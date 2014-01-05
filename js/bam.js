@@ -324,7 +324,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
 
         var qseq = '';
         for (var j = 0; j < lseq; ++j) {
-            qseq += String.fromCharCode(ba[p + j]);
+            qseq += String.fromCharCode(ba[p + j] + 33);
         }
         p += lseq;
         record.quals = qseq;

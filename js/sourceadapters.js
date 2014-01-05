@@ -823,6 +823,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
                     f.cigar = r.cigar;
                     f.seq = r.seq;
+                    f.quals = r.quals;
                     features.push(f);
                 }
                 callback(null, features, 1000000000);
