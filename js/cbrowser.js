@@ -588,17 +588,17 @@ Browser.prototype.realMakeTier = function(source) {
 
     var viewport = makeElement('canvas', null, 
                                {width: '' + ((this.featurePanelWidth|0) + 2000), 
-                                height: "50",
+                                height: "30",
                                 className: 'viewport'});
                                
 
     var viewportOverlay = makeElement('canvas', null,
          {width: + ((this.featurePanelWidth|0) + 2000), 
-          height: "50",
+          height: "30",
           className: 'viewport-overlay'});
 
     var placardContent = makeElement('span', '');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'fa fa-warning'}), ' ', placardContent], {className: 'placard'});
+    var placard = makeElement('div', [makeElement('i', null, {className: 'fa fa-warning'}), ' ', placardContent], {className: 'placard'}, {display: 'none'});
     
     var notifier = makeElement('div', 'Exciting message', {},
         {backgroundColor: 'black',

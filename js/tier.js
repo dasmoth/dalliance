@@ -288,7 +288,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.currentHeight = Math.max(this.holder.clientHeight, this.label.clientHeight + 4);
+    this.currentHeight = Math.max(this.layoutHeight, Math.max(this.holder.clientHeight, this.label.clientHeight + 4));
     if (this.placard.style.display !== 'none') {
         // Hard-coded because we don't know exactly when the CSS will have loaded.
         this.currentHeight = Math.max(this.currentHeight, /* this.placard.clientHeight + 2 */ 52);
@@ -343,7 +343,7 @@ DasTier.prototype.notify = function(message, timeout) {
             this.notifierFadeTimeout = setTimeout(function() {
                 thisB.notifier.style.opacity = 0;
                 thisB.notifierFadeTimeout = null;
-            }, 2000);
+            }, timeout);
         }
     } else {
         this.notifier.style.opacity = 0;

@@ -54,6 +54,7 @@ function drawSeqTier(tier, seq)
     tier.viewport.style.height = '' + height + 'px';
     tier.viewport.style.width = retina ? ('' + (fpw/2) + 'px') : ('' + fpw + 'px');
     tier.holder.style.height = '' + height + 'px'
+    tier.layoutHeight = height;
     tier.updateHeight();
 
     var gc = tier.viewport.getContext('2d');
