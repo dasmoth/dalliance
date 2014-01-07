@@ -476,7 +476,10 @@ BWGFeatureSource.prototype.init = function() {
 
     make(arg, function(bwg, err) {
         if (err) {
-            console.log(err);
+            thisB.error = err;
+            thisB.readiness = null;
+            thisB.notifyReadiness();
+            thisB.bwgHolder.provide(null);
         } else {
             thisB.bwgHolder.provide(bwg);
             thisB.readiness = null;
@@ -507,7 +510,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     var thisB = this;
     this.bwgHolder.await(function(bwg) {
         if (bwg == null) {
-            return callback("Can't access binary file", null, null);
+            return callback(thisB.error || "Can't access binary file", null, null);
         }
 
         // dlog('bwg: ' + bwg.name + '; want scale: ' + scale);
@@ -620,6 +623,8 @@ BWGFeatureSource.prototype.search = function(query, callback) {
 
 BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
     this.bwgHolder.await(function(bwg) {
+        if (!bwg) return;
+
         if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
             var fip = function(feature, featureInfo) {
                 for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
