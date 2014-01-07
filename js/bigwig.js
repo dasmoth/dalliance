@@ -672,7 +672,7 @@ function makeBwg(data, callback, name) {
     var bwg = new BigWig();
     bwg.data = data;
     bwg.name = name;
-    bwg.data.slice(0, 512).fetch(function(result) {
+    bwg.data.slice(0, 512).salted().fetch(function(result) {
         if (!result) {
             return callback(null, "Couldn't fetch file");
         }

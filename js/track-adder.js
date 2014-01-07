@@ -798,7 +798,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             fetchable = new BlobFetchable(nds.bwgBlob);
         }
 
-        fetchable.slice(0, 1<<16).fetch(function(result, error) {
+        fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
             if (!result) {
                 if (!retry) {
                     nds.credentials = true;

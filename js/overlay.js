@@ -201,7 +201,7 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
     	    var message = '';
     	    for (var si = 0; si < this.count; ++si) {
         		var s = this.statuses[si];
-        		if (s != 0) {
+        		if (s) {
         		    if (message.length > 0) 
         			message += ', ';
         		    message += s;

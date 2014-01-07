@@ -110,6 +110,12 @@ URLFetchable.prototype.fetchAsText = function(callback) {
     req.send('');
 }
 
+URLFetchable.prototype.salted = function() {
+    var o = shallowCopy(this.opts);
+    o.salt = true;
+    return new URLFetchable(this.url, this.start, this.end, o);
+}
+
 URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var thisB = this;
 
@@ -121,7 +127,7 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
     var req = new XMLHttpRequest();
     var length;
     var url = this.url;
-    if (isSafari) {
+    if (isSafari || this.opts.salt) {
         url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
     }
     req.open('GET', url, true);
