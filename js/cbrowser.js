@@ -63,12 +63,6 @@ function Browser(opts) {
     this.currentSeqMax = -1; // init once EPs are fetched.
 
     this.highlights = [];
-
-    this.autoSizeTiers = false;
-    this.guidelineStyle = 'foreground';
-    this.guidelineSpacing = 75;
-    this.fgGuide = null;
-    this.positionFeedback = false;
     
     this.selectedTiers = [1];
 
@@ -86,11 +80,6 @@ function Browser(opts) {
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 30;
-
-    this.browserLinks = {
-        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr${chr}:${start}-${end}'
-    }
 
     // Registry
 
@@ -115,8 +104,6 @@ function Browser(opts) {
 }
 
 Browser.prototype.realInit = function() {
-    this.supportsBinary = true; /* (typeof Int8Array === 'function');*/ 
-    
     this.defaultChr = this.chr;
     this.defaultStart = this.viewStart;
     this.defaultEnd = this.viewEnd;
@@ -489,13 +476,6 @@ Browser.prototype.realInit2 = function() {
     var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
-        if (source.bwgURI && !this.supportsBinary) {
-            if (!this.binaryWarningGiven) {
-                this.popit({clientX: 300, clientY: 100}, 'Warning', makeElement('p', 'your browser does not support binary data formats, some track(s) not loaded.  We currently recommend Google Chrome 9 or later, or Firefox 4 or later.'));
-                this.binaryWarningGiven = true;
-            }
-            continue;
-        }
 
         if (!source.disabled) {
             actualSources.push(source);
@@ -1291,9 +1271,6 @@ function sourcesAreEqual(a, b) {
 Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
 
-    // FIXME can this be done in a way that doesn't need changing every time we add
-    // new datasource types.
-
     if (typeof conf.index !== 'undefined' && conf.index >=0 && conf.index < this.tiers.length) {
         target = conf.index;
     } else {
@@ -1309,8 +1286,6 @@ Browser.prototype.removeTier = function(conf, force) {
     if (target < 0) {
         throw "Couldn't find requested tier";
     }
-
-
 
     var victim = this.tiers[target];
     if (victim.sequenceSource && !force) {

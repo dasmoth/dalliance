@@ -487,33 +487,26 @@ Browser.prototype.showTrackAdder = function(ev) {
         canButton.style.display = 'none';
 
         removeChildren(stabHolder);
+        var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
+        pageHolder.appendChild(makeElement('h3', 'Add custom URL-based data'));
+        pageHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
 
-        if (thisB.supportsBinary) {
-            var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
-            pageHolder.appendChild(makeElement('h3', 'Add custom URL-based data'));
-            pageHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
-
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(document.createTextNode('URL: '));
-            custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
-            pageHolder.appendChild(custURL);
-            
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(makeElement('b', '- or -'));
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(document.createTextNode('File: '));
-            custFile = makeElement('input', null, {type: 'file'});
-            pageHolder.appendChild(custFile);
-            
-            pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
-
-            stabHolder.appendChild(pageHolder);
-            custURL.focus();
-        } else {
-            stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
-            stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
-        }
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(document.createTextNode('URL: '));
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
+        pageHolder.appendChild(custURL);
         
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(makeElement('b', '- or -'));
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(document.createTextNode('File: '));
+        custFile = makeElement('input', null, {type: 'file'});
+        pageHolder.appendChild(custFile);
+        
+        pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
+
+        stabHolder.appendChild(pageHolder);
+        custURL.focus();
     }
 
     function switchToHubConnectMode() {
