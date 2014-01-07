@@ -623,10 +623,9 @@ Browser.prototype.realMakeTier = function(source) {
     vph.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
     vph.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
 
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent);
+    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent, notifier);
     tier.oorigin = this.viewStart;
     tier.background = background;
-    tier.notifier = notifier;
 
     tier.quantOverlay = makeElement(
         'canvas', null, 

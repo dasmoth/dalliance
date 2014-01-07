@@ -9,7 +9,7 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, holder, overlay, placard, placardContent)
+function DasTier(browser, source, viewport, holder, overlay, placard, placardContent, notifier)
 {
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
@@ -21,7 +21,8 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     this.placardContent = placardContent;
     this.req = null;
     this.layoutHeight = 25;
-    this.bumped = true; 
+    this.bumped = true;
+    this.notifier = notifier;
     if (source.quantLeapThreshold) {
         this.quantLeapThreshold = source.quantLeapThreshold;
     }
@@ -42,6 +43,12 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
         this.featureSource.getDefaultFIPs(function(fip) {
             if (fip)
                 thisB.addFeatureInfoPlugin(fip);
+        });
+    }
+
+    if (this.featureSource && this.featureSource.addReadinessListener) {
+        this.featureSource.addReadinessListener(function(ready) {
+            thisB.notify(ready, -1);
         });
     }
 
@@ -319,18 +326,28 @@ DasTier.prototype.drawOverlay = function() {
     t.overlay.style.left = '-1000px'
 }
 
-DasTier.prototype.notify = function(message) {
-    this.notifier.innerText = message;
-    this.notifier.style.opacity = 0.8;
+DasTier.prototype.notify = function(message, timeout) {
+    timeout = timeout || 2000;
+
     if (this.notifierFadeTimeout) {
         clearTimeout(this.notifierFadeTimeout);
+        this.notifierFadeTimeout = null;
     }
 
-    var thisB = this;
-    this.notifierFadeTimeout = setTimeout(function() {
-        thisB.notifier.style.opacity = 0;
-        thisB.notifierFadeTimeout = null;
-    }, 2000);
+    if (message) {
+        this.notifier.innerText = message;
+        this.notifier.style.opacity = 0.8;
+    
+        if (timeout > 0) {
+            var thisB = this;
+            this.notifierFadeTimeout = setTimeout(function() {
+                thisB.notifier.style.opacity = 0;
+                thisB.notifierFadeTimeout = null;
+            }, 2000);
+        }
+    } else {
+        this.notifier.style.opacity = 0;
+    }
 
 }
 

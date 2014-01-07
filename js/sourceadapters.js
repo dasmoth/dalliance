@@ -128,6 +128,13 @@ function CachingFeatureSource(source) {
     }
 }
 
+CachingFeatureSource.prototype.addReadinessListener = function(listener) {
+    if (this.source.addReadinessListener)
+        return this.source.addReadinessListener(listener);
+    else
+        listener(null);
+}
+
 CachingFeatureSource.prototype.search = function(query, callback) {
     if (this.source.search)
         return this.source.search(query, callback);
@@ -193,6 +200,42 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     });
 }
     
+function FeatureSourceBase() {
+    this.busy = 0;
+    this.activityListeners = [];
+    this.readinessListeners = [];
+    this.readiness = null;
+}
+
+FeatureSourceBase.prototype.addReadinessListener = function(listener) {
+    this.readinessListeners.push(listener);
+    listener(this.readiness);
+}
+
+FeatureSourceBase.prototype.notifyReadiness = function() {
+    for (var li = 0; li < this.readinessListeners.length; ++li) {
+        try {
+            this.readinessListeners[li](this.readiness);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
+FeatureSourceBase.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+FeatureSourceBase.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
 
 
 function DASFeatureSource(dasSource) {
@@ -379,12 +422,12 @@ DASFeatureSource.prototype.getScales = function() {
 var bwg_preflights = {};
 
 function BWGFeatureSource(bwgSource) {
+    FeatureSourceBase.call(this);
+
     var thisB = this;
+    this.readiness = 'Connecting';
     this.bwgSource = this.opts = bwgSource;    
     thisB.bwgHolder = new Awaited();
-
-    this.busy = 0;
-    this.activityListeners = [];
 
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
@@ -418,19 +461,7 @@ function BWGFeatureSource(bwgSource) {
     }
 }
 
-BWGFeatureSource.prototype.addActivityListener = function(listener) {
-    this.activityListeners.push(listener);
-}
-
-BWGFeatureSource.prototype.notifyActivity = function() {
-    for (var li = 0; li < this.activityListeners.length; ++li) {
-        try {
-            this.activityListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
+BWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
@@ -448,6 +479,8 @@ BWGFeatureSource.prototype.init = function() {
             console.log(err);
         } else {
             thisB.bwgHolder.provide(bwg);
+            thisB.readiness = null;
+            thisB.notifyReadiness();
             if (bwg.type == 'bigbed') {
                 bwg.getExtraIndices(function(ei) {
                     thisB.extraIndices = ei;
@@ -713,12 +746,12 @@ BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 }
 
 function BAMFeatureSource(bamSource) {
+    FeatureSourceBase.call(this);
+
     var thisB = this;
     this.bamSource = bamSource;
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
     this.bamHolder = new Awaited();
-    this.busy = 0;
-    this.activityListeners = [];
     
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
@@ -753,19 +786,7 @@ function BAMFeatureSource(bamSource) {
     }
 }
 
-BAMFeatureSource.prototype.addActivityListener = function(listener) {
-    this.activityListeners.push(listener);
-}
-
-BAMFeatureSource.prototype.notifyActivity = function() {
-    for (var li = 0; li < this.activityListeners.length; ++li) {
-        try {
-            this.activityListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
+BAMFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BAMFeatureSource.prototype.init = function() {
     var thisB = this;
@@ -778,6 +799,8 @@ BAMFeatureSource.prototype.init = function() {
         baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
     }
     makeBam(bamF, baiF, function(bam) {
+        thisB.readiness = null;
+        thisB.notifyReadiness();
         thisB.bamHolder.provide(bam);
     });
 }

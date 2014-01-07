@@ -11,8 +11,10 @@ function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
     this.activityListeners = [];
+    this.readinessListeners = [];
     this.changeListeners = [];
     this.business = [];
+    this.readiness = [];
 
     for (var i = 0; i < this.sources.length; ++i) {
         this.initN(i);
@@ -40,6 +42,37 @@ OverlayFeatureSource.prototype.initN = function(n) {
         s.addChangeListener(function() {
             thisB.notifyChange();
         });
+    }
+    if (s.addReadinessListener) {
+        s.addReadinessListener(function(r) {
+            thisB.readiness[n] = r;
+            thisB.notifyReadiness();
+        });
+    }
+}
+
+OverlayFeatureSource.prototype.addReadinessListener = function(l) {
+    this.readinessListeners.push(l);
+    this.notifyReadinessListener(l);
+}
+
+OverlayFeatureSource.prototype.notifyReadiness = function() {
+    for (var i = 0; i < this.readinessListeners.length; ++i) {
+        this.notifyReadinessListener(this.readinessListeners[i]);
+    }
+}
+
+OverlayFeatureSource.prototype.notifyReadinessListener = function(l) {
+    var r = null;
+    for (var i = 0; i < this.readiness.length; ++i) {
+        if (this.readiness[i] != null) {
+            r = this.readiness[i]; break;
+        }
+    }
+    try {
+        l(r);
+    } catch (e) {
+        console.log(e);
     }
 }
 

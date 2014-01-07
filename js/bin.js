@@ -130,7 +130,6 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         if (this.end - this.start > 100000000) {
             throw 'Monster fetch!';
         }
-        // console.log('req bytes=' + this.start + '-' + this.end);
         req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
         length = this.end - this.start + 1;
     }
@@ -140,7 +139,6 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
             if (req.status == 200 || req.status == 206) {
                 if (req.response) {
                     var bl = req.response.byteLength;
-                    // console.log('Got ' + bl + ' expected ' + length);
                     if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
                         return thisB.fetch(callback, attempt + 1, bl);
                     } else {
@@ -172,13 +170,10 @@ function bstringToBuffer(result) {
         return null;
     }
 
-//    var before = Date.now();
     var ba = new Uint8Array(result.length);
     for (var i = 0; i < ba.length; ++i) {
         ba[i] = result.charCodeAt(i);
     }
-//    var after  = Date.now();
-//    dlog('bb took ' + (after - before) + 'ms');
     return ba.buffer;
 }
 
