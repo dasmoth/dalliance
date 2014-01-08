@@ -218,28 +218,10 @@ Browser.prototype.realInit2 = function() {
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
-            if (ev.ctrlKey) {
-                var fedge = false;
-                if(ev.shiftKey){
-                    fedge = true;
-                }
-
-                thisB.leap(-1, fedge);
-            } else {
-                thisB.move(ev.shiftKey ? 100 : 25);
-            }
+            thisB.scrollArrowKey(ev, -1);
         } else if (ev.keyCode == 37) { // left arrow
             ev.stopPropagation(); ev.preventDefault();
-            if (ev.ctrlKey) {
-                var fedge = false;
-                if(ev.shiftKey){
-                    fedge = true;
-                }
-                
-                thisB.leap(1, fedge);
-            } else {
-                thisB.move(ev.shiftKey ? -100 : -25);
-            }
+            thisB.scrollArrowKey(ev, 1);
         } else if (ev.keyCode == 38 || ev.keyCode == 87) { // up arrow | w
             ev.stopPropagation(); ev.preventDefault();
 
@@ -1646,6 +1628,22 @@ Browser.prototype.updateHeight = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) 
         tierTotal += (this.tiers[ti].currentHeight || 30);
     this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
+}
+
+Browser.prototype.scrollArrowKey = function(ev, dir) {
+    if (this.reverseKeyScrolling)
+        dir = -dir;
+    
+    if (ev.ctrlKey) {
+        var fedge = false;
+        if(ev.shiftKey){
+            fedge = true;
+        }
+
+        this.leap(-1*dir, fedge);
+    } else {
+        this.move(ev.shiftKey ? 100*dir : 25*dir);
+    }
 }
 
 Browser.prototype.leap = function(dir, fedge) {

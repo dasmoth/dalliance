@@ -205,10 +205,10 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }, false);
 
     leapLeftButton.addEventListener('click', function(ev) {
-        b.leap(-1, false);
+        b.leap(b.reverseKeyScrolling ? 1 : -1, false);
     }, false);
     leapRightButton.addEventListener('click', function(ev) {
-        b.leap(1, false);
+        b.leap(b.reverseKeyScrolling ? -1 : 1, false);
     }, false);
 
     b.addTierSelectionWrapListener(function(dir) {
@@ -318,11 +318,20 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         var optsForm = makeElement('div', null, {className: 'form-horizontal'}, {boxSizing: 'border-box', MozBoxSizing: 'border-box', display: 'inline-block', verticalAlign: 'top'});
         var optsTable = makeElement('table');
         optsTable.cellPadding = 5;
+
         var scrollModeButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseScrolling});
         scrollModeButton.addEventListener('change', function(ev) {
             b.reverseScrolling = scrollModeButton.checked;
+            b.storeStatus();
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Reverse trackpad scrolling', {align: 'right'}), makeElement('td', scrollModeButton)]));
+
+        var scrollKeyButton = makeElement('input', '', {type: 'checkbox', checked: b.reverseKeyScrolling});
+        scrollKeyButton.addEventListener('change', function(ev) {
+            b.reverseKeyScrolling = scrollKeyButton.checked;
+            b.storeStatus();
+        }, false);
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Reverse scrolling buttons and keys', {align: 'right'}), makeElement('td', scrollKeyButton)]));
 
 
         var rulerSelect = makeElement('select');
@@ -337,6 +346,7 @@ Browser.prototype.toggleOptsPopup = function(ev) {
             for (var ti = 0; ti < b.tiers.length; ++ti) {
                 b.tiers[ti].paintQuant();
             }
+            b.storeStatus();
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
 

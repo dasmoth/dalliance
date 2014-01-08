@@ -16,6 +16,7 @@ Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.version'];
 
     delete localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
+    delete localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'];
     delete localStorage['dalliance.' + this.cookieKey + '.ruler-location'];
 }
 
@@ -53,6 +54,7 @@ Browser.prototype.storeTierStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
     localStorage['dalliance.' + this.cookieKey + '.hubs'] = JSON.stringify(this.hubs);
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
+    localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'] = this.reverseKeyScrolling;
     localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;
     
     localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;
@@ -103,8 +105,11 @@ Browser.prototype.restoreStatus = function() {
     	    this.currentSeqMax = csm|0;
     	}
     }
+
     var rs = localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];
     this.reverseScrolling = (rs && rs == 'true');
+    var rks = localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'];
+    this.reverseKeyScrolling = (rks && rks == 'true');
 
     var rl = localStorage['dalliance.' + this.cookieKey + '.ruler-location'];
     if (rl)
