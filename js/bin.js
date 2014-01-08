@@ -30,6 +30,8 @@ BlobFetchable.prototype.slice = function(start, length) {
     return new BlobFetchable(b);
 }
 
+BlobFetchable.prototype.salted = function() {return this;}
+
 BlobFetchable.prototype.fetch = function(callback) {
     var reader = new FileReader();
     reader.onloadend = function(ev) {
