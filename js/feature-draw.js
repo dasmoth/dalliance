@@ -283,7 +283,7 @@ DasTier.prototype.paint = function() {
     if (retina) {
         desiredWidth *= 2;
     }
-    var fpw = this.viewport.width|0; // this.browser.featurePanelWidth;
+    var fpw = this.viewport.width|0;
     if (fpw < desiredWidth - 50) {
         this.viewport.width = fpw = desiredWidth;
     }
@@ -565,15 +565,19 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 style._gradient = grad;
             }
 
-            var sc2 = feature.score2 || 0;
-            var smin2 = style.MIN2 ? (1.0 * style.MIN2) : 0.0;
-            var smax2 = style.MAX2 ? (1.0 * style.MAX2) : 1.0;
-            var relScore2 = ((1.0 * sc2) - smin2) / (smax2-smin2);
+            var sc2 = feature.score2;
+            if (sc2 != undefined || !stroke) {
+                sc2 = sc2 || 0;
 
-            var step = (relScore2*grad.length)|0;
-            if (step < 0) step = 0;
-            if (step >= grad.length) step = grad.length - 1;
-            stroke = grad[step];
+                var smin2 = style.MIN2 ? (1.0 * style.MIN2) : 0.0;
+                var smax2 = style.MAX2 ? (1.0 * style.MAX2) : 1.0;
+                var relScore2 = ((1.0 * sc2) - smin2) / (smax2-smin2);
+
+                var step = (relScore2*grad.length)|0;
+                if (step < 0) step = 0;
+                if (step >= grad.length) step = grad.length - 1;
+                stroke = grad[step];
+            }
         }
 
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
@@ -624,8 +628,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         if (isDasBooleanTrue(style.SCATTER)) {
-            var smin = tier.quantMin(style); // tier.dasSource.forceMin || style.MIN || tier.currentFeaturesMinScore;
-            var smax = tier.quantMax(style); // tier.dasSource.forceMax || style.MAX || tier.currentFeaturesMaxScore;
+            var smin = tier.quantMin(style);
+            var smax = tier.quantMax(style);
 
             if (!smax) {
                 if (smin < 0) {
