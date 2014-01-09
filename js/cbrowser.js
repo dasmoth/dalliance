@@ -454,10 +454,14 @@ Browser.prototype.realInit2 = function() {
     var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
+        var config = {};
+        if (this.restoredConfigs) {
+            config = this.restoredConfigs[t];
+        }
 
         if (!source.disabled) {
             actualSources.push(source);
-            this.makeTier(source);
+            this.makeTier(source, config);
         }
     }
     this.sources = actualSources;
@@ -552,15 +556,15 @@ Browser.prototype.touchCancelHandler = function(ev) {
 }
 
 
-Browser.prototype.makeTier = function(source) {
+Browser.prototype.makeTier = function(source, config) {
     try {
-        this.realMakeTier(source);
+        this.realMakeTier(source, config);
     } catch (e) {
         console.log(e.stack);
     }
 }
 
-Browser.prototype.realMakeTier = function(source) {
+Browser.prototype.realMakeTier = function(source, config) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
@@ -601,7 +605,7 @@ Browser.prototype.realMakeTier = function(source) {
     vph.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
     vph.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
 
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent, notifier);
+    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent, notifier, config);
     tier.oorigin = this.viewStart;
     tier.background = background;
 
@@ -940,6 +944,8 @@ Browser.prototype.realMakeTier = function(source) {
             }
         });
     }
+
+    tier._updateFromConfig();
 }
 
 Browser.prototype.reorderTiers = function() {

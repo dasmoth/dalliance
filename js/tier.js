@@ -364,30 +364,33 @@ DasTier.prototype._updateFromConfig = function() {
         this.forceMinDynamic = this.config.forceMinDynamic;
         needsRefresh = true;
     }
-    {
-        var forceMin = this.config.forceMin != undefined ? this.config.forceMin || this.dasSource.forceMin;
+
+        var forceMin = this.config.forceMin != undefined ? this.config.forceMin : this.dasSource.forceMin;
         if (forceMin != undefined && this.forceMin != forceMin) {
             this.forceMin = forceMin;
             needsRefresh = true;
         }
-    }
+
     if (this.config.forceMaxDynamic != undefined && this.forceMaxDynamic != this.config.forceMaxDynamic) {
         this.forceMaxDynamic = this.config.forceMaxDynamic;
         needsRefresh = true;
     }
-    {
-        var forceMax = this.config.forceMax != undefined ? this.config.forceMax || this.dasSource.forceMax;
+    
+        var forceMax = this.config.forceMax != undefined ? this.config.forceMax : this.dasSource.forceMax;
         if (forceMax != undefined && this.forceMax != forceMax) {
             this.forceMax = forceMax;
             needsRefresh = true;
         }
-    }
+    
 
     if (needsRefresh)
         this.scheduleRedraw();
 }
 
 DasTier.prototype.scheduleRedraw = function() {
+    if (!this.currentFeatures)
+        return;
+    
     var tier = this;
 
     if (!this.redrawTimeout) {

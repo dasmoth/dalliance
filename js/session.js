@@ -46,9 +46,10 @@ Browser.prototype.storeTierStatus = function() {
 
     var currentSourceList = [];
     for (var t = 0; t < this.tiers.length; ++t) {
-        var ts = this.tiers[t].dasSource;
+        var tt = this.tiers[t];
+        var ts = tt.dasSource;
         if (!ts.noPersist) {
-            currentSourceList.push(this.tiers[t].dasSource);
+            currentSourceList.push({source: tt.dasSource, config: tt.config || {}});
         }
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
@@ -117,9 +118,12 @@ Browser.prototype.restoreStatus = function() {
 
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];
     if (sourceStr) {
-	    this.sources = JSON.parse(sourceStr);
-        for (var si = 0; si < this.sources.length; ++si) {
-            var source = this.sources[si];
+	    var storedSources = JSON.parse(sourceStr);
+        this.sources = [];
+        this.restoredConfigs = [];
+        for (var si = 0; si < storedSources.length; ++si) {
+            var source = this.sources[si] = storedSources[si].source;
+            this.restoredConfigs[si] = storedSources[si].config;
             var uri = sourceDataURI(source);
             var ul = defaultSourcesByURI[uri] || [];
             for (var osi = 0; osi < ul.length; ++osi) {    

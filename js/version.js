@@ -8,7 +8,7 @@
 //
 
 var VERSION = {
-    CONFIG: 3,
+    CONFIG: 4,
     MAJOR:  0,
     MINOR:  10,
     MICRO:  5,
