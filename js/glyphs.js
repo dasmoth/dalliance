@@ -176,6 +176,7 @@ SVGPath.prototype.toPathData = function() {
     return this.ops.join(' ');
 }
 
+
 GroupGlyph.prototype.toSVG = function() {
     var g = makeElementNS(NS_SVG, 'g');
     for (var i = 0; i < this.glyphs.length; ++i) {
@@ -510,14 +511,51 @@ ExGlyph.prototype.height = function() {
     return this._height;
 }
 
+function PathGlyphBase(stroke, fill) {
+    this._stroke = stroke;
+    this._fill = fill;
+}
+
+PathGlyphBase.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
+}
+
+PathGlyphBase.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+        NS_SVG, 'path',
+        null,
+        {d: g.toPathData(),
+         fill: this._fill || 'none',
+         stroke: this._stroke || 'none'});
+}
+
+PathGlyphBase.prototype.drawPath = function(g) {
+    throw 'drawPath method on PathGlyphBase must be overridden';
+}
+
 function TriangleGlyph(x, height, dir, width, fill, stroke) {
+    PathGlyphBase.call(this, stroke, fill);
+
     this._x = x;
     this._height = height;
     this._dir = dir;
     this._width = width;
-    this._fill = fill;
-    this._stroke = stroke;
 }
+
+TriangleGlyph.prototype = Object.create(PathGlyphBase.prototype);
 
 TriangleGlyph.prototype.drawPath = function(g) {
     var hh = this._height/2;
@@ -542,34 +580,6 @@ TriangleGlyph.prototype.drawPath = function(g) {
     }
 
     g.closePath();
-}
-
-TriangleGlyph.prototype.draw = function(g) {
-    g.beginPath();
-    this.drawPath(g);
-
-    if (this._fill) {
-        g.fillStyle = this._fill;
-        g.fill();
-    }
-    if (this._stroke) {
-        g.strokeStyle = this._stroke;
-        g.stroke();
-    }
-}
-
-TriangleGlyph.prototype.toSVG = function() {
-
-
-    var g = new SVGPath();
-    this.drawPath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         fill: this._fill || 'none',
-         stroke: this._stroke || 'none'});
 }
 
 TriangleGlyph.prototype.min = function() {
@@ -675,13 +685,14 @@ PaddedGlyph.prototype.height = function() {
 
 
 function AArrowGlyph(min, max, height, fill, stroke, ori) {
+    PathGlyphBase.call(this, stroke, fill);
     this._min = min;
     this._max = max;
     this._height = height;
-    this._fill = fill;
-    this._stroke = stroke;
     this._ori = ori;
 }
+
+AArrowGlyph.prototype = Object.create(PathGlyphBase.prototype);
 
 AArrowGlyph.prototype.min = function() {
     return this._min;
@@ -695,7 +706,7 @@ AArrowGlyph.prototype.height = function() {
     return this._height;
 }
 
-AArrowGlyph.prototype.makePath = function(g) {
+AArrowGlyph.prototype.drawPath = function(g) {
     var maxPos = this._max;
     var minPos = this._min;
     var height = this._height;
@@ -731,43 +742,18 @@ AArrowGlyph.prototype.makePath = function(g) {
     g.lineTo(minPos + lInset, y+instep);
 }
 
-AArrowGlyph.prototype.draw = function(g) {
-    g.beginPath();
-    this.makePath(g);
-
-    if (this._fill) {
-        g.fillStyle = this._fill;
-        g.fill();
-    } 
-    if (this._stroke) {
-        g.strokeStyle = this._stroke;
-        g.stroke();
-    }
-}
-
-AArrowGlyph.prototype.toSVG = function() {
-    var g = new SVGPath();
-    this.makePath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         fill: this._fill || 'none',
-         stroke: this._stroke || 'none'});
-}
-
 function SpanGlyph(min, max, height, stroke) {
+    PathGlyphBase.call(this, stroke, null);
     this._min = min;
     this._max = max;
     this._height = height;
-    this._stroke = stroke;
 }
+
+SpanGlyph.prototype = Object.create(PathGlyphBase.prototype);
 
 SpanGlyph.prototype.min = function() {return this._min};
 SpanGlyph.prototype.max = function() {return this._max};
 SpanGlyph.prototype.height = function() {return this._height};
-
 
 SpanGlyph.prototype.drawPath = function(g) {
     var minPos = this._min, maxPos = this._max;
@@ -779,28 +765,6 @@ SpanGlyph.prototype.drawPath = function(g) {
     g.moveTo(maxPos, 0);
     g.lineTo(maxPos, height);
 }
-
-
-SpanGlyph.prototype.draw = function(g) {
-    g.beginPath();
-    this.drawPath(g);
-    g.strokeStyle = this._stroke;
-    g.stroke();
-}
-
-SpanGlyph.prototype.toSVG = function() {
-    var g = new SVGPath();
-    this.drawPath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         stroke: this._stroke || 'none'});
-}
-
-
-
 
 function LineGlyph(min, max, height, style, strand, stroke) {
     this._min = min;
@@ -930,6 +894,7 @@ PrimersGlyph.prototype.toSVG = function() {
 }
 
 function ArrowGlyph(min, max, height, color, parallel, sw, ne) {
+    PathGlyphBase.call(this, null, color);
     this._min = min;
     this._max = max;
     this._height = height;
@@ -938,6 +903,8 @@ function ArrowGlyph(min, max, height, color, parallel, sw, ne) {
     this._sw = sw;
     this._ne = ne;
 }
+
+ArrowGlyph.prototype = Object.create(PathGlyphBase.prototype);
 
 ArrowGlyph.prototype.min = function() {return this._min};
 ArrowGlyph.prototype.max = function() {return this._max};
@@ -997,24 +964,6 @@ ArrowGlyph.prototype.drawPath = function(g) {
         }
         g.closePath();
     }
-}
-
-ArrowGlyph.prototype.draw = function(g) {
-    g.beginPath();
-    this.drawPath(g);
-    g.fillStyle = this._color;
-    g.fill();
-}
-
-ArrowGlyph.prototype.toSVG = function() {
-    var g = new SVGPath();
-    this.drawPath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         fill: this._color});
 }
 
 
@@ -1327,12 +1276,13 @@ GridGlyph.prototype.toSVG = function() {
 }
 
 function StarGlyph(x, r, points, fill, stroke) {
+    PathGlyphBase.call(this, stroke, fill);
     this._x = x;
     this._r = r;
     this._points = points;
-    this._fill = fill;
-    this._stroke = stroke;
 }
+
+StarGlyph.prototype = Object.create(PathGlyphBase.prototype);
 
 StarGlyph.prototype.min = function() {
     return this._x - this._r;
@@ -1364,33 +1314,6 @@ StarGlyph.prototype.drawPath = function(g) {
     }
     g.closePath();
 }
-
-StarGlyph.prototype.draw = function(g) {
-    g.beginPath();
-    this.drawPath(g);
-
-    if (this._fill) {
-        g.fillStyle = this._fill;
-        g.fill();
-    }
-    if (this._stroke) {
-        g.strokeStyle = this._stroke;
-        g.stroke();
-    }
-}
-
-StarGlyph.prototype.toSVG = function() {
-    var g = new SVGPath();
-    this.drawPath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         fill: this._fill || 'none',
-         stroke: this._stroke || 'none'});
-}
-
 
 function PlimsollGlyph(x, height, overhang, fill, stroke) {
     this._x = x;
