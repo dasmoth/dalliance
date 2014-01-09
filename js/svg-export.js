@@ -11,7 +11,8 @@ Browser.prototype.openExportPanel = function(tier) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var exportForm = makeElement('div');
+        var exportForm = makeElement('div', null, {className: 'tier-edit'}, {textAlign: 'center'});
+        exportForm.appendChild(makeElement('p', 'Export current view as SVG'));
 
         var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
         var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: true});
@@ -19,7 +20,7 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
             removeChildren(exportContent);
-            exportContent.appendChild(makeElement('a', 'Click to download', {
+            exportContent.appendChild(makeElement('a', 'SVG created, click here to download', {
                 href: URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
                                                      ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'})),
                 download: 'dalliance-view.svg',
@@ -31,11 +32,11 @@ Browser.prototype.openExportPanel = function(tier) {
 
         var exportOptsTable = makeElement('table',
             [makeElement('tr',
-                [makeElement('th', 'Include highlights'),
-                 exportHighlightsToggle]),
+                [makeElement('th', 'Include highlights', {}, {width: '200px', textAlign: 'right'}),
+                 makeElement('td', exportHighlightsToggle)]),
              makeElement('tr',
                 [makeElement('th', 'Include vertical guideline'),
-                 exportRulerToggle])
+                 makeElement('td', exportRulerToggle)])
             ]);
 
         exportForm.appendChild(exportOptsTable);
