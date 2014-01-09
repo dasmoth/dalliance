@@ -14,16 +14,6 @@ Browser.prototype.openTierPanel = function(tier) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var redrawTimeout = null;
-        function scheduleRedraw() {
-            if (!redrawTimeout) {
-                redrawTimeout = setTimeout(function() {
-                    tier.draw();
-                    redrawTimeout = null;
-                }, 10);
-            }
-        }
-
         function changeColor(ev) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
                 var style = tier.stylesheet.styles[i].style;
@@ -45,15 +35,14 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
                 style._gradient = null;
             }
-            scheduleRedraw();
+            tier.scheduleRedraw();
         }
-
         
         this.manipulatingTier = tier;
 
         var tierForm = makeElement('div', null, {className: 'tier-edit'});
 
-        var tierNameField = makeElement('input', null, {type: 'text', value: tier.dasSource.name});
+        var tierNameField = makeElement('input', null, {type: 'text', value: tier.config.name || tier.dasSource.name});
         var glyphField = makeElement('select');
         glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));
         glyphField.appendChild(makeElement('option', 'Line Plot', {value: 'LINEPLOT'}));
@@ -153,11 +142,11 @@ Browser.prototype.openTierPanel = function(tier) {
 
         setNumColors(numColors);
 
-        if (tier.dasSource.forceMin) {
-            tierMinField.value = tier.dasSource.forceMin;
+        if (tier.forceMin != undefined) {
+            tierMinField.value = tier.forceMin;
         }
-        if (tier.dasSource.forceMax) {
-            tierMaxField.value = tier.dasSource.forceMax;
+        if (tier.forceMax != undefined) {
+            tierMaxField.value = tier.forceMax;
         }
 
         function refresh() {
@@ -206,7 +195,7 @@ Browser.prototype.openTierPanel = function(tier) {
                  makeElement('td', seqMismatchToggle)]));
             seqMismatchToggle.addEventListener('change', function(ev) {
                 seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
-                scheduleRedraw();
+                tier.scheduleRedraw();
             });
 
             var seqInsertToggle = makeElement('input', null, {type: 'checkbox', checked: isDasBooleanTrue(seqStyle.__INSERTIONS)});
@@ -215,7 +204,7 @@ Browser.prototype.openTierPanel = function(tier) {
                  makeElement('td', seqInsertToggle)]));
             seqInsertToggle.addEventListener('change', function(ev) {
                 seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
-                scheduleRedraw();
+                tier.scheduleRedraw();
             });
         }
 
@@ -223,7 +212,7 @@ Browser.prototype.openTierPanel = function(tier) {
         tierForm.appendChild(tierTable);
 
         tierNameField.addEventListener('input', function(ev) {
-            tier.nameElement.innerText = tier.dasSource.name = tierNameField.value;
+            tier.mergeConfig({name: tierNameField.value});
         }, false);
 
 
@@ -248,32 +237,35 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
 
         tierMinToggle.addEventListener('change', function(ev) {
-            tier.forceMinDynamic = !tierMinToggle.checked;
+            var conf = {forceMinDynamic: !tierMinToggle.checked};
             tierMinField.disabled = !tierMinToggle.checked;
-            if (tierMinToggle.checked)
-                tier.dasSource.forceMin = parseFloat(tierMinField.value);
-            scheduleRedraw();
+            if (tierMinToggle.checked && !Number.isNaN(parseFloat(tierMinField.value)))
+                conf.forceMin = parseFloat(tierMinField.value);
+            tier.mergeConfig(conf);
         });
         tierMinField.addEventListener('input', function(ev) {
-            tier.dasSource.forceMin = parseFloat(tierMinField.value);
-            scheduleRedraw();
+            var x = parseFloat(tierMinField.value);
+            if (!Number.isNaN(x))
+                tier.mergeConfig({forceMin: x});
         }, false);
 
         tierMaxToggle.addEventListener('change', function(ev) {
-            tier.forceMaxDynamic = !tierMaxToggle.checked;
+            var conf = {forceMaxDynamic: !tierMaxToggle.checked};
             tierMaxField.disabled = !tierMaxToggle.checked;
-            if (tierMaxToggle.checked)
-                tier.dasSource.forceMax = parseFloat(tierMaxField.value);
-            scheduleRedraw();
+            if (tierMaxToggle.checked && !Number.isNaN(parseFloat(tierMaxField.value)))
+                conf.forceMax = parseFloat(tierMaxField.value);
+            tier.mergeConfig(conf);
         });
         tierMaxField.addEventListener('input', function(ev) {
-            tier.dasSource.forceMax = parseFloat(tierMaxField.value);
-            scheduleRedraw();
+            var x = parseFloat(tierMaxField.value);
+            if (!Number.isNaN(x))
+                tier.mergeConfig({forceMax: x});
         }, false);
 
         tierHeightField.addEventListener('input', function(ev) {
-            tier.forceHeight = Math.min(500, parseFloat(tierHeightField.value)|0);
-            scheduleRedraw();
+            var x = parseFloat(tierHeightField.value);
+            if (!Number.isNaN(x))
+                tier.mergeConfig({height: Math.min(500, x|0)});
         }, false)
 
         function updateQuant() {
@@ -283,7 +275,7 @@ Browser.prototype.openTierPanel = function(tier) {
             } else {
                 tier.quantLeapThreshold = null;
             }
-            scheduleRedraw();
+            tier.scheduleRedraw();
         }
         quantLeapToggle.addEventListener('change', function(ev) {
             updateQuant();

@@ -231,9 +231,7 @@ Browser.prototype.realInit2 = function() {
                 var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 if (ch >= 40) {
-                    tt.forceHeight = ch - 10;
-                    tt.notifyTierListeners('height');
-                    tt.draw();
+                    tt.mergeConfig({height: ch-10});
                 }
             } else if (ev.ctrlKey) {
                 var st = thisB.getSelectedTier();
@@ -308,9 +306,7 @@ Browser.prototype.realInit2 = function() {
                 if (st < 0) return;
                 var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
-                tt.forceHeight = ch + 10;
-                tt.notifyTierListeners('height');
-                tt.draw();
+                tt.mergeConfig({height: ch+10});
             } else if (ev.ctrlKey) {
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;

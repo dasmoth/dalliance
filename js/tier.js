@@ -9,8 +9,9 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, holder, overlay, placard, placardContent, notifier)
+function DasTier(browser, source, viewport, holder, overlay, placard, placardContent, notifier, config)
 {
+    this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
     this.dasSource = new DASSource(source);
@@ -103,19 +104,6 @@ DasTier.prototype.init = function() {
     }
 }
 
-DasTier.prototype.styles = function(scale) {
-    // alert('Old SS code called');
-    if (this.stylesheet == null) {
-        return null;
-    } else if (this.browser.scale > 0.2) {
-        return this.stylesheet.highZoomStyles;
-    } else if (this.browser.scale > 0.01) {
-        return this.stylesheet.mediumZoomStyles;
-    } else {
-        return this.stylesheet.lowZoomStyles;
-    }
-}
-
 DasTier.prototype.getSource = function() {
     return this.featureSource;
 }
@@ -158,10 +146,6 @@ DasTier.prototype.needsSequence = function(scale ) {
         return true
     }
     return false;
-}
-
-DasTier.prototype.setStatus = function(status) {
-    dlog(status);
 }
 
 DasTier.prototype.viewFeatures = function(chr, min, max, scale, features, sequence) {
@@ -350,6 +334,70 @@ DasTier.prototype.notify = function(message, timeout) {
     }
 
 }
+
+DasTier.prototype.setConfig = function(config) {
+    this.config = config || {};
+    this._updateFromConfig();
+    this.notifyTierListeners();
+}
+
+DasTier.prototype.mergeConfig = function(newConfig) {
+    for (var k in newConfig) {
+        this.config[k] = newConfig[k];
+    }
+    this._updateFromConfig();
+    this.notifyTierListeners();
+}
+
+DasTier.prototype._updateFromConfig = function() {
+    var needsRefresh = false;
+
+    this.nameElement.innerText = this.config.name || this.dasSource.name;
+
+    if (this.config.height) {
+        if (this.config.height != this.forceHeight) {
+            this.forceHeight = this.config.height;
+            needsRefresh = true;
+        }
+    }
+    if (this.config.forceMinDynamic != undefined && this.forceMinDynamic != this.config.forceMinDynamic) {
+        this.forceMinDynamic = this.config.forceMinDynamic;
+        needsRefresh = true;
+    }
+    {
+        var forceMin = this.config.forceMin != undefined ? this.config.forceMin || this.dasSource.forceMin;
+        if (forceMin != undefined && this.forceMin != forceMin) {
+            this.forceMin = forceMin;
+            needsRefresh = true;
+        }
+    }
+    if (this.config.forceMaxDynamic != undefined && this.forceMaxDynamic != this.config.forceMaxDynamic) {
+        this.forceMaxDynamic = this.config.forceMaxDynamic;
+        needsRefresh = true;
+    }
+    {
+        var forceMax = this.config.forceMax != undefined ? this.config.forceMax || this.dasSource.forceMax;
+        if (forceMax != undefined && this.forceMax != forceMax) {
+            this.forceMax = forceMax;
+            needsRefresh = true;
+        }
+    }
+
+    if (needsRefresh)
+        this.scheduleRedraw();
+}
+
+DasTier.prototype.scheduleRedraw = function() {
+    var tier = this;
+
+    if (!this.redrawTimeout) {
+        this.redrawTimeout = setTimeout(function() {
+            tier.draw();
+            tier.redrawTimeout = null;
+        }, 10);
+    }
+}
+
 
 DasTier.prototype.addTierListener = function(l) {
     this.listeners.push(l);

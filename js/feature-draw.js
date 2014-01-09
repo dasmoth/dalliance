@@ -977,8 +977,8 @@ function makeLineGlyph(features, style, tier) {
 DasTier.prototype.quantMin = function(style) {
     if (this.forceMinDynamic) {
         return this.currentFeaturesMinScore || 0;
-    } else if (typeof(this.dasSource.forceMin) === 'number') {
-        return this.dasSource.forceMin;
+    } else if (typeof(this.forceMin) === 'number') {
+        return this.forceMin;
     } else {
         return style.MIN || this.currentFeaturesMinScore || 0;
     }
@@ -987,8 +987,8 @@ DasTier.prototype.quantMin = function(style) {
 DasTier.prototype.quantMax = function(style) {
     if (this.forceMaxDynamic) {
         return this.currentFeaturesMaxScore || 0;
-    } else if (typeof(this.dasSource.forceMax) === 'number') {
-        return this.dasSource.forceMax;
+    } else if (typeof(this.forceMax) === 'number') {
+        return this.forceMax;
     } else {
         return style.MAX || this.currentFeaturesMaxScore || 0;
     }
