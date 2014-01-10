@@ -243,8 +243,6 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 source.collapseSuperGroups = true;
             return source;
         } else if (typeToks[0] == 'bigWig') {
-            v
-
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigwigStyles();
             source.noDownsample = true;     // FIXME seems like a blunt instrument...
