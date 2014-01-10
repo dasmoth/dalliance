@@ -1,13 +1,13 @@
 For 0.11
 --------
 
-  - UI for leaping (button to complement ctrl-arrow).
+  - UI for leaping (button to complement ctrl-arrow). [DONE]
   - Search of bigbed files. [DONE]
   - Search via Trix indices. [DONE]
   - Retina display support. [DONE]
   - Assembly hub support. [DONE]
   - Rename tracks. [DONE]
-  - Per-track display customization ("Stylesheet editor")?
+  - Per-track display customization ("Stylesheet editor")? [WIP]
   - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
   - Security cleanups + support for credentialed trackhubs [DONE]
