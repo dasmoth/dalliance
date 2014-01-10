@@ -83,7 +83,7 @@ function makeBam(data, bai, callback) {
             if (!r) {
                 return dlog("Couldn't access BAM");
             }
-
+            
             var unc = unbgzf(r, r.byteLength);
             var uncba = new Uint8Array(unc);
 
