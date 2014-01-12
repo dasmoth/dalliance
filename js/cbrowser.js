@@ -493,13 +493,18 @@ Browser.prototype.realInit2 = function() {
 
     if (this.hubs) {
         for (var hi = 0; hi < this.hubs.length; ++hi) {
-            connectTrackHub(this.hubs[hi], function(hub, err) {
+            var hc = this.hubs[hi];
+            if (typeof hc == 'string') {
+                hc = {url: hc};
+            }
+
+            connectTrackHub(hc.url, function(hub, err) {
                 if (err) {
                     console.log(err);
                 } else {
                     thisB.hubObjects.push(hub);
                 }
-            });
+            }, hc);
         }
     }
 }

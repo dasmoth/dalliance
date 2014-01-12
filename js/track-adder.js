@@ -661,16 +661,16 @@ Browser.prototype.showTrackAdder = function(ev) {
                 return;
             } else {
                 if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-                    thisB.hubs.push(curi);
+                    hc = {url: curi};
+                    if (opts.credentials)
+                        hc.credentials = true;
+                    thisB.hubs.push(hc);
                     thisB.hubObjects.push(hub);
                     
                     var hubButton = makeHubButton(hub);
                     modeButtonHolder.appendChild(hubButton);
                     activateButton(addModeButtons, hubButton);
                     
-                
-                    // FIXME redundant with hub-tab click handler.
-                
                     hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
                         makeHubStab(tracks);
                     });
