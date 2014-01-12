@@ -1241,6 +1241,9 @@ function sourcesAreEqual(a, b) {
         sourceStyleURI(a) != sourceStyleURI(b))
         return false;
 
+    if (a.mapping != b.mapping)
+        return false;
+
     if (a.overlay) {
         if (!b.overlay || b.overlay.length != a.overlay.length)
             return false;
