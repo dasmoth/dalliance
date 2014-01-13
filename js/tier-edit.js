@@ -155,6 +155,15 @@ Browser.prototype.openTierPanel = function(tier) {
             } else if (mainStyle && mainStyle.HEIGHT) {
                 tierHeightField.value = '' + mainStyle.HEIGHT;
             }
+
+            if (typeof tier.quantLeapThreshold == 'number') {
+                quantLeapToggle.checked = true;
+                quantLeapThreshField.disabled = false;
+                quantLeapThreshField.value = tier.quantLeapThreshold;
+            } else {
+                quantLeapToggle.checked = false;
+                quantLeapThreshField.disabled = true;
+            }
         }
         refresh();
 
@@ -271,9 +280,12 @@ Browser.prototype.openTierPanel = function(tier) {
         function updateQuant() {
             quantLeapThreshField.disabled = !quantLeapToggle.checked;
             if (quantLeapToggle.checked) {
-                tier.quantLeapThreshold = parseFloat(quantLeapThreshField.value);
+                var x = parseFloat(quantLeapThreshField.value);
+                if (!Number.isNaN(x)) {
+                    tier.mergeConfig({quantLeapThreshold: parseFloat(quantLeapThreshField.value)});
+                }
             } else {
-                tier.quantLeapThreshold = null;
+                tier.mergeConfig({quantLeapThreshold: null});
             }
             tier.scheduleRedraw();
         }

@@ -365,22 +365,32 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
 
-        var forceMin = this.config.forceMin != undefined ? this.config.forceMin : this.dasSource.forceMin;
-        if (forceMin != undefined && this.forceMin != forceMin) {
-            this.forceMin = forceMin;
-            needsRefresh = true;
-        }
+    var forceMin = this.config.forceMin != undefined ? this.config.forceMin : this.dasSource.forceMin;
+    if (forceMin != undefined && this.forceMin != forceMin) {
+        this.forceMin = forceMin;
+        needsRefresh = true;
+    }
 
     if (this.config.forceMaxDynamic != undefined && this.forceMaxDynamic != this.config.forceMaxDynamic) {
         this.forceMaxDynamic = this.config.forceMaxDynamic;
         needsRefresh = true;
     }
     
-        var forceMax = this.config.forceMax != undefined ? this.config.forceMax : this.dasSource.forceMax;
-        if (forceMax != undefined && this.forceMax != forceMax) {
-            this.forceMax = forceMax;
-            needsRefresh = true;
-        }
+    var forceMax = this.config.forceMax != undefined ? this.config.forceMax : this.dasSource.forceMax;
+    if (forceMax != undefined && this.forceMax != forceMax) {
+        this.forceMax = forceMax;
+        needsRefresh = true;
+    }
+
+    var quantLeapThreshold = null;
+    if (this.config.quantLeapThreshold != undefined)
+        quantLeapThreshold = this.config.quantLeapThreshold;
+    else if (this.dasSource.quantLeapThreshold != undefined)
+        quantLeapThreshold = this.dasSource.quantLeapThreshold;
+    if (quantLeapThreshold != this.quantLeapThreshold) {
+        this.quantLeapThreshold = quantLeapThreshold;
+        needsRefresh = true;
+    }
     
 
     if (needsRefresh)

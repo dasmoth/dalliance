@@ -248,10 +248,9 @@ Browser.prototype.realInit2 = function() {
                     var qmax = 1.0 * tq.max;
 
                     var qscale = (qmax - qmin) / th;
-                    tt.quantLeapThreshold = qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale;
+                    tt.mergeConfig({quantLeapThreshold: qmin + ((Math.round((tt.quantLeapThreshold - qmin)/qscale)|0)+1)*qscale});
 
                     tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
-                    tt.draw();
                 }                
             } else if (ev.altKey) {
                 var cnt = thisB.selectedTiers.length;
@@ -324,9 +323,8 @@ Browser.prototype.realInit2 = function() {
 
                     var it = Math.round((tt.quantLeapThreshold - qmin)/qscale)|0;
                     if (it > 1) {
-                        tt.quantLeapThreshold = qmin + (it-1)*qscale;
+                        tt.mergeConfig({quantLeapThreshold: qmin + (it-1)*qscale});
                         tt.notify('Threshold: ' + formatQuantLabel(tt.quantLeapThreshold));
-                        tt.draw();
                     }
                 }
             } else if (ev.altKey) {
