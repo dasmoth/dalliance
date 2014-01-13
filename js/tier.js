@@ -424,4 +424,5 @@ DasTier.prototype.notifyTierListeners = function(change) {
             console.log(e);
         }
     }
+    this.browser.notifyTier();
 }

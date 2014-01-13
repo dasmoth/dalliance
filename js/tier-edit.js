@@ -287,7 +287,6 @@ Browser.prototype.openTierPanel = function(tier) {
             } else {
                 tier.mergeConfig({quantLeapThreshold: null});
             }
-            tier.scheduleRedraw();
         }
         quantLeapToggle.addEventListener('change', function(ev) {
             updateQuant();
