@@ -24,6 +24,7 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     this.layoutHeight = 25;
     this.bumped = true;
     this.notifier = notifier;
+    this.styleIdSeed = 0;
     if (source.quantLeapThreshold) {
         this.quantLeapThreshold = source.quantLeapThreshold;
     }
@@ -70,7 +71,7 @@ DasTier.prototype.init = function() {
     var tier = this;
 
     if (tier.dasSource.style) {
-        this.stylesheet = {styles: tier.dasSource.style};
+        this.setStylesheet({styles: tier.dasSource.style});
         this.browser.refreshTier(this);
     } else {
         var ssSource;
@@ -84,15 +85,16 @@ DasTier.prototype.init = function() {
         ssSource.getStyleSheet(function(ss, err) {
             if (err) {
                 tier.error = 'No stylesheet';
-                tier.stylesheet = new DASStylesheet();
+                var ss = new DASStylesheet();
                 var defStyle = new DASStyle();
                 defStyle.glyph = 'BOX';
                 defStyle.BGCOLOR = 'blue';
                 defStyle.FGCOLOR = 'black';
-                tier.stylesheet.pushStyle({type: 'default'}, null, defStyle);
+                ss.pushStyle({type: 'default'}, null, defStyle);
+                tier.setStylesheet(ss);
                 tier.browser.refreshTier(tier);
             } else {
-                tier.stylesheet = ss;
+                tier.setStylesheet(ss);
                 if (ss.geneHint) {
                     tier.dasSource.collapseSuperGroups = true;
                     tier.bumped = false;
@@ -101,6 +103,16 @@ DasTier.prototype.init = function() {
                 tier.browser.refreshTier(tier);
             }
         });
+    }
+}
+
+DasTier.prototype.setStylesheet = function(ss) {
+    this.stylesheet = shallowCopy(ss);
+    for (var si = 0; si < this.stylesheet.styles.length; ++si) {
+        var sh = this.stylesheet.styles[si] = shallowCopy(this.stylesheet.styles[si]);
+        sh._methodRE = sh._labelRE = sh._typeRE = null;
+        sh.style = shallowCopy(sh.style);
+        sh.style.id = 'style' + (++this.styleIdSeed);
     }
 }
 

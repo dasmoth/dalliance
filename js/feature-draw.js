@@ -47,24 +47,40 @@ function drawFeatureTier(tier)
     var glyphs = [];
     var specials = false;
 
+    // group by style
+    var gbsFeatures = {};
+    var gbsStyles = {};
+
     for (var uft in tier.ungroupedFeatures) {
         var ufl = tier.ungroupedFeatures[uft];
-        // var style = styles[uft] || styles['default'];
-        var style = tier.styleForFeature(ufl[0]);   // FIXME this isn't quite right...
-        if (!style) continue;
-        if (style.glyph == 'LINEPLOT') {
-            glyphs.push(makeLineGlyph(ufl, style, tier));
-            specials = true;
-        } else {
-            for (var pgid = 0; pgid < ufl.length; ++pgid) {
-                var f = ufl[pgid];
-                if (f.parts) {  // FIXME shouldn't really be needed
-                    continue;
-                }
+        
+        for (var pgid = 0; pgid < ufl.length; ++pgid) {
+            var f = ufl[pgid];
+            if (f.parts) {  // FIXME shouldn't really be needed
+                continue;
+            }
+
+            var style = tier.styleForFeature(f);
+            if (!style)
+                continue;
+
+            if (style.glyph == 'LINEPLOT') {
+                pusho(gbsFeatures, style.id, f);
+                gbsStyles[style.id] = style;
+            } else {
                 var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
                 if (g)
                     glyphs.push(g);
             }
+        }
+    }
+
+    for (var gbs in gbsFeatures) {
+        var gf = gbsFeatures[gbs];
+        var style = gbsStyles[gbs];
+        if (style.glyph == 'LINEPLOT') {
+            glyphs.push(makeLineGlyph(gf, style, tier));
+            specials = true;
         }
     }
 
@@ -882,7 +898,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     return gg;
-}    
+}
 
 DasTier.prototype.styleForFeature = function(f) {
     var ssScale = zoomForScale(this.browser.scale);
@@ -963,6 +979,10 @@ function makeLineGlyph(features, style, tier) {
     }
     var lgg = new LineGraphGlyph(points, color, height);
     lgg.quant = {min: min, max: max};
+
+    if (style.ZINDEX) 
+        lgg.zindex = style.ZINDEX|0;
+
     return lgg;
 }
 
