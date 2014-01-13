@@ -885,11 +885,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 }    
 
 DasTier.prototype.styleForFeature = function(f) {
-    var cs = f._cachedStyle;
-    if (cs) {
-        return cs;
-    }
-
     var ssScale = zoomForScale(this.browser.scale);
 
     if (!this.stylesheet) {
@@ -942,11 +937,8 @@ DasTier.prototype.styleForFeature = function(f) {
                     continue;
             }
         }
-        // perfect match.
-        f._cachedStyle = sh.style;
         return sh.style;
     }
-    f._cachedStyle = maybe;
     return maybe;
 }
 
