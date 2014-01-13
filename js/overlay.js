@@ -214,6 +214,14 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
     }
 }
 
+OverlayFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    for (var si = 0; si < this.sources.length; ++si) {
+        var s = this.sources[si];
+        if (s.getDefaultFIPs)
+            s.getDefaultFIPs(callback);
+    }
+}
+
 OverlayFeatureSource.prototype.keyForFeature = function(feature) {
     return '' + feature.min + '..' + feature.max;
 }
