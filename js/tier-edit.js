@@ -17,6 +17,9 @@ Browser.prototype.openTierPanel = function(tier) {
         function changeColor(ev) {
             for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
                 var style = tier.stylesheet.styles[i].style;
+                if (style.BGGRAD)
+                    return;
+
                 if (numColors == 1) {
                     if (style.glyph == 'LINEPLOT' || style.glyph == 'DOT') {
                         style.FGCOLOR = tierColorField.value;
