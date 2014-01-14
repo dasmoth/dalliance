@@ -84,7 +84,8 @@ URLFetchable.prototype.fetchAsText = function(callback) {
     var req = new XMLHttpRequest();
     var length;
     var url = this.url;
-    if (isSafari) {
+    if (isSafari || this.opts.salt) {
+        url = saltURL(url);
         url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
     }
     req.open('GET', url, true);

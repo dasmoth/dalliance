@@ -53,7 +53,19 @@ Browser.prototype.storeTierStatus = function() {
         }
     }
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
-    localStorage['dalliance.' + this.cookieKey + '.hubs'] = JSON.stringify(this.hubs);
+
+
+    var currentHubList = [];
+    for (var hi = 0; hi < this.hubObjects.length; ++hi) {
+        var tdb = this.hubObjects[hi];
+        var hc = {url: tdb.hub.url, genome: tdb.genome};
+        if (tdb.credentials)
+            hc.credentials = tdb.credentials;
+        if (tdb.mapping)
+            hc.mapping = tdb.mapping;
+        currentHubList.push(hc);
+    }
+    localStorage['dalliance.' + this.cookieKey + '.hubs'] = JSON.stringify(currentHubList);
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
     localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'] = this.reverseKeyScrolling;
     localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;

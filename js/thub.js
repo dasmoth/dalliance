@@ -28,7 +28,8 @@ TrackHubTrack.prototype.get = function(k) {
         return this._parent.get(k);
 }
 
-function TrackHubDB() {
+function TrackHubDB(hub) {
+    this.hub = hub;
 }
 
 TrackHubDB.prototype.getTracks = function(callback) {
@@ -131,6 +132,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
 
 function connectTrackHub(hubURL, callback, opts) {
     opts = opts || {};
+    opts.salt = true;
 
     textXHR(hubURL, function(hubFile, err) {
         if (err) {
@@ -157,7 +159,7 @@ function connectTrackHub(hubURL, callback, opts) {
                 stanzas = genFile.split(THUB_STANZA_REGEXP);
                 for (var s = 0; s < stanzas.length; ++s) {
                     var toks = stanzas[s].split(THUB_PARSE_REGEXP);
-                    var gprops = new TrackHubDB();
+                    var gprops = new TrackHubDB(hub);
                     if (opts.credentials) {
                         gprops.credentials = opts.credentials;
                     }
@@ -191,6 +193,9 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         name: this.shortLabel,
         desc: this.longLabel
     };
+    if (this._db.mapping) {
+        source.mapping = this._db.mapping;
+    }
 
     var pennantIcon = this.get('pennantIcon');
     if (pennantIcon) {

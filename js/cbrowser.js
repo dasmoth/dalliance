@@ -494,15 +494,27 @@ Browser.prototype.realInit2 = function() {
             var hc = this.hubs[hi];
             if (typeof hc == 'string') {
                 hc = {url: hc};
-            }
+            };
 
-            connectTrackHub(hc.url, function(hub, err) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    thisB.hubObjects.push(hub);
-                }
-            }, hc);
+            (function(hc) {
+                connectTrackHub(hc.url, function(hub, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        var tdb;
+                        if (hc.genome)
+                            tdb = hub.genomes[hc.genome];
+                        else 
+                            tdb = hub.genomes[thisB.coordSystem.ucscName];
+
+                        if (tdb) {
+                            if (hc.mapping) 
+                                tdb.mapping = hc.mapping;
+                            thisB.hubObjects.push(tdb);
+                        }
+                    }
+                }, hc);
+            })(hc);
         }
     }
 }

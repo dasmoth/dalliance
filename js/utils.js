@@ -322,7 +322,16 @@ Awaited.prototype.await = function(f) {
     }
 }
 
+__dalliance_saltSeed = 0;
+
+function saltURL(url) {
+    return url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++__dalliance_saltSeed));
+}
+
 function textXHR(url, callback, opts) {
+    if (opts.salt) 
+        url = saltURL(url);
+
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
     	if (req.readyState == 4) {

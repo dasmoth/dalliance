@@ -75,56 +75,52 @@ Browser.prototype.showTrackAdder = function(ev) {
     }
     
 
-    var makeHubButton = function(hub) {
-        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-            var hubRemove = makeElement('i', null, {className: 'fa fa-times'});
-            var hbContent = makeElement('span', [hub.shortLabel || 'Unknown', ' ', hubRemove]);
-            var hubButton = thisB.makeButton(hbContent, hub.longLabel);
-            addModeButtons.push(hubButton);
-            
-            hubButton.addEventListener('click', function(ev) {
-                ev.preventDefault(); ev.stopPropagation();
-                activateButton(addModeButtons, hubButton);
-                removeChildren(stabHolder);
-                stabHolder.appendChild(makeElement('div', makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'}, {marginLeft: 'auto', marginRight: 'auto', marginTop: '100px'}), null, {textAlign: 'center'}));
+    var makeHubButton = function(tdb) {
+        var hub = tdb.hub;
+        var hubRemove = makeElement('i', null, {className: 'fa fa-times'});
+        var label = hub.shortLabel || 'Unknown';
+        if (tdb.mapping)
+            label = label + ' (' + tdb.genome + ')';
+        var hbContent = makeElement('span', [label, ' ', hubRemove]);
+        var hubButton = thisB.makeButton(hbContent, hub.longLabel);
+        addModeButtons.push(hubButton);
+        
+        hubButton.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            activateButton(addModeButtons, hubButton);
+            removeChildren(stabHolder);
+            stabHolder.appendChild(makeElement('div', makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'}, {marginLeft: 'auto', marginRight: 'auto', marginTop: '100px'}), null, {textAlign: 'center'}));
 
-                refreshButton.style.display = 'none';
-                addButton.style.display = 'none';
-                canButton.style.display = 'none';
+            refreshButton.style.display = 'none';
+            addButton.style.display = 'none';
+            canButton.style.display = 'none';
 
-                hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                    if (err) {
-                        console.log(err);
-                    }
-                    
-                    makeHubStab(tracks);
-                });
-            }, false);
-
-            hubRemove.addEventListener('click', function(ev) {
-                ev.preventDefault(); ev.stopPropagation();
+            tdb.getTracks(function(tracks, err) {
+                if (err) {
+                    console.log(err);
+                }
                 
-                for (var hi = 0; hi < thisB.hubs.length; ++hi) {
-                    if (thisB.hubs[hi] == hub.url) {
-                        console.log('index ' + hi);
-                        thisB.hubs.splice(hi, 1);
-                        break;
-                    }
-                }
-                for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
-                    if (thisB.hubObjects[hi].url == hub.url) {
-                        thisB.hubObjects.splice(hi, 1);
-                        break;
-                    }
-                }
+                makeHubStab(tracks);
+            });
+        }, false);
 
-                modeButtonHolder.removeChild(hubButton);
-                activateButton(addModeButtons, addHubButton);
-                switchToHubConnectMode();
-            }, false);
+        hubRemove.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            
+            for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
+                if (thisB.hubObjects[hi].absURL = tdb.absURL) {
+                    thisB.hubObjects.splice(hi, 1);
+                    break;
+                }
+            }
+            thisB.notifyTier();
 
-            return hubButton;
-        }
+            modeButtonHolder.removeChild(hubButton);
+            activateButton(addModeButtons, addHubButton);
+            switchToHubConnectMode();
+        }, false);
+
+        return hubButton;
     }
  
     for (var g in groupedDefaults) {
@@ -647,6 +643,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     };
 
     function tryAddHub(curi, opts, retry) {
+        console.log('ntah');
         opts = opts || {};
         
         connectTrackHub(curi, function(hub, err) {
@@ -660,18 +657,49 @@ Browser.prototype.showTrackAdder = function(ev) {
                 customMode = 'reset-hub';
                 return;
             } else {
-                if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-                    hc = {url: curi};
-                    if (opts.credentials)
-                        hc.credentials = true;
-                    thisB.hubs.push(hc);
-                    thisB.hubObjects.push(hub);
-                    
-                    var hubButton = makeHubButton(hub);
-                    modeButtonHolder.appendChild(hubButton);
-                    activateButton(addModeButtons, hubButton);
-                    
-                    hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
+                var bestHub = null;
+                var bestHubButton = null;
+                for (var genome in hub.genomes) {
+                    var mapping = null;
+                    var okay = false;
+
+                    if (genome == thisB.coordSystem.ucscName) {
+                        okay = true;
+                    } else {
+                         for (var mid in thisB.chains) {
+                            var m = thisB.chains[mid];
+                            if (genome == m.coords.ucscName) {
+                                mapping = mid;
+                                okay = true;
+                            }
+                         }
+                    }
+
+                    if (okay) {
+                        hc = {url: curi, genome: genome};
+                        if (opts.credentials)
+                            hc.credentials = true;
+                        if (mapping) {
+                            hc.mapping = mapping;
+                            hub.genomes[genome].mapping = mapping;
+                        }
+                        thisB.hubs.push(hc);
+                        thisB.hubObjects.push(hub.genomes[genome]);
+                        
+                        var hubButton = makeHubButton(hub.genomes[genome]);
+                        modeButtonHolder.appendChild(hubButton);
+
+                        if (!mapping || !bestHub) {
+                            bestHub = hub.genomes[genome];
+                            bestHubButton = hubButton;
+                        }
+                    }
+                }
+
+                if (bestHub) {
+                    thisB.notifyTier();
+                    activateButton(addModeButtons, bestHubButton);
+                    bestHub.getTracks(function(tracks, err) {
                         makeHubStab(tracks);
                     });
                 } else {
