@@ -11,7 +11,7 @@ For 0.11
   - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
   - Security cleanups + support for credentialed trackhubs [DONE]
-  - Feature centering after quantLeap
+  - Feature centering after quantLeap [DONE]
   - Sequence-read/BAM support improvements [DONE]
 
 For 0.12

@@ -748,7 +748,13 @@ BigWig.prototype._tsFetch = function(zoom, chr, min, max, callback) {
             return callback(f);
         }
     } else {
-        return this.getZoomedView(zoom).readWigDataById(chr, min, max, callback);
+        var view;
+        if (zoom < 0) {
+            view = this.getUnzoomedView();
+        } else {
+            view = this.getZoomedView(zoom);
+        }
+        return view.readWigDataById(chr, min, max, callback);
     }
 }
 
@@ -765,22 +771,22 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
     }
        
     function fbThresholdSearchRecur() {
-	if (candidates.length == 0) {
-	    return callback(null);
-	}
-	candidates.sort(function(c1, c2) {
-	    var d = c1.zoom - c2.zoom;
-	    if (d != 0)
-		return d;
+    	if (candidates.length == 0) {
+    	    return callback(null);
+    	}
+    	candidates.sort(function(c1, c2) {
+    	    var d = c1.zoom - c2.zoom;
+    	    if (d != 0)
+    		    return d;
 
             d = c1.chrOrd - c2.chrOrd;
             if (d != 0)
                 return d;
-	    else
-		return c1.min - c2.min * dir;
-	});
+    	    else
+    		    return c1.min - c2.min * dir;
+    	});
 
-	var candidate = candidates.splice(0, 1)[0];
+	    var candidate = candidates.splice(0, 1)[0];
         bwg._tsFetch(candidate.zoom, candidate.chr, candidate.min, candidate.max, function(feats) {
             var rp = dir > 0 ? 0 : 300000000;
             if (candidate.fromRef)
@@ -788,23 +794,28 @@ BigWig.prototype.thresholdSearch = function(chrName, referencePoint, dir, thresh
             
             for (var fi = 0; fi < feats.length; ++fi) {
     	        var f = feats[fi];
+                var score;
+                if (f.maxScore != undefined)
+                    score = f.maxScore;
+                else
+                    score = f.score;
 
                 if (dir > 0) {
-    	            if (f.maxScore > threshold) {
-        		        if (candidate.zoom == 0) {
+    	            if (score > threshold) {
+        		        if (candidate.zoom < 0) {
         		            if (f.min > rp)
                                 return callback(f);
         		        } else if (f.max > rp) {
-        		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
+        		            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 2, min: f.min, max: f.max, fromRef: candidate.fromRef});
         		        }
                     }
                 } else {
-                    if (f.maxScore > threshold) {
-            		    if (candidate.zoom == 0) {
+                    if (score > threshold) {
+            		    if (candidate.zoom < 0) {
                 	        if (f.max < rp)
                 			    return callback(f);
                         } else if (f.min < rp) {
-                            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: Math.max(0, candidate.zoom - 2), min: f.min, max: f.max, fromRef: candidate.fromRef});
+                            candidates.push({chr: candidate.chr, chrOrd: candidate.chrOrd, zoom: candidate.zoom - 2, min: f.min, max: f.max, fromRef: candidate.fromRef});
                         }
     	            }
                 }
@@ -994,6 +1005,5 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
         }
 
         bptReadNode(thisB.offset + rootNodeOffset);
-    }); 
-
+    });
 }
