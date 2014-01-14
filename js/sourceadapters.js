@@ -612,7 +612,6 @@ BWGFeatureSource.prototype.getScales = function() {
 }
 
 BWGFeatureSource.prototype.search = function(query, callback) {
-    console.log(query);
     if (!this.extraIndices || this.extraIndices.length == 0) {
         return callback(null, 'No indices available');
     }
@@ -622,6 +621,9 @@ BWGFeatureSource.prototype.search = function(query, callback) {
 }
 
 BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.opts.noExtraFeatureInfo)
+        return true;
+
     this.bwgHolder.await(function(bwg) {
         if (!bwg) return;
 
