@@ -22,10 +22,6 @@ function Browser(opts) {
         opts = {};
     }
 
-	// custom code
-    this.uiPrefix = 'http://localhost:8080/';
-    // custom code
-
     this.sources = [];
     this.tiers = [];
 
@@ -746,7 +742,7 @@ Browser.prototype.realMakeTier = function(source) {
 
     tier.removeButton = makeElement('i', null, {className: 'icon-remove'});
     tier.bumpButton = makeElement('i', null, {className: 'icon-plus-sign'});
-    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
+    tier.loaderButton = makeElement('img', null, {src: '/img/loader.gif'}, {display: 'none'});
     tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
     tier.nameButton = makeElement('a', [], {className: 'tier-tab'});
     tier.nameButton.appendChild(tier.removeButton);

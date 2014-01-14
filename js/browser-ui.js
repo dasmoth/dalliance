@@ -34,9 +34,8 @@ function parseLocCardinal(n, m) {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
-    // FIXME shouldn't be hard-coded...
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: '/css/bootstrap-scoped.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: '/css/dalliance-scoped.css'}));
 
     var b = this;
     var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;
@@ -300,7 +299,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.removeAllPopups();
     } else {
     	// BEGIN custom MOLGENIS code
-    	var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'css/index.html'}, {width: '490px', height: '500px'});
+    	var helpFrame = makeElement('iframe', null, {src: '/css/index.html'}, {width: '490px', height: '500px'});
     	// END custom MOLGENIS code
     	this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
