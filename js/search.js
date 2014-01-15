@@ -74,7 +74,7 @@ Browser.prototype.search = function(g, statusCallback) {
             }
         }
 
-        function doTrixSearch(tier, trix) {
+        var doTrixSearch = function(tier, trix) {
             trix.lookup(g, function(result, status) {
                 if (result == null || result.length < 2) {
                     return tier.featureSource.search(g, searchCallback);
@@ -91,26 +91,27 @@ Browser.prototype.search = function(g, statusCallback) {
         }
 
         for (var ti = 0; ti < this.tiers.length; ++ti) {
-            var tier = this.tiers[ti];
-            if (sourceAdapterIsCapable(tier.featureSource, 'search')) {
-                if (tier.dasSource.trixURI) {
-                    ++searchCount;
-                    if (tier.trix) {
-                        return doTrixSearch(tier, tier.trix);
+            (function(tier) {
+                if (sourceAdapterIsCapable(tier.featureSource, 'search')) {
+                    if (tier.dasSource.trixURI) {
+                        ++searchCount;
+                        if (tier.trix) {
+                            doTrixSearch(tier, tier.trix);
+                        } else {
+                            connectTrix(new URLFetchable(tier.dasSource.trixURI), new URLFetchable(tier.dasSource.trixURI + 'x'), function(trix) {
+                                tier.trix = trix;
+                                doTrixSearch(tier, trix);
+                            });
+                        }
                     } else {
-                        return connectTrix(new URLFetchable(tier.dasSource.trixURI), new URLFetchable(tier.dasSource.trixURI + 'x'), function(trix) {
-                            tier.trix = trix;
-                            doTrixSearch(tier, trix);
-                        });
+                        ++searchCount;
+                        tier.featureSource.search(g, searchCallback);
                     }
-                } else {
+                } else if (tier.dasSource.provides_search) {
                     ++searchCount;
-                    tier.featureSource.search(g, searchCallback);
+                    this.doDasSearch(tier.dasSource, g, searchCallback);
                 }
-            } else if (tier.dasSource.provides_search) {
-                ++searchCount;
-                this.doDasSearch(tier.dasSource, g, searchCallback);
-            }
+            })(this.tiers[ti]);
         }
     }
 }
