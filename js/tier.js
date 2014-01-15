@@ -331,7 +331,7 @@ DasTier.prototype.notify = function(message, timeout) {
     }
 
     if (message) {
-        this.notifier.innerText = message;
+        this.notifier.textContent = message;
         this.notifier.style.opacity = 0.8;
     
         if (timeout > 0) {
