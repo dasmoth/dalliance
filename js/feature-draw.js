@@ -84,22 +84,26 @@ function drawFeatureTier(tier)
         }
     }
 
-    // Merge supergroups
-    
+    // Merge supergroups    
+
     if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
         for (var sg in tier.superGroups) {
             var sgg = tier.superGroups[sg];
+            tier.groups[sg] = shallowCopy(tier.groups[sg]);
             tier.groups[sg].type = tier.groups[sgg[0]].type;   // HACK to make styling easier in DAS1.6
             var featsByType = {};
             for (var g = 0; g < sgg.length; ++g) {
                 var gf = tier.groupedFeatures[sgg[g]];
+                if (!gf)
+                    continue;
+
                 for (var fi = 0; fi < gf.length; ++fi) {
                     var f = gf[fi];
                     pusho(featsByType, f.type, f);
                 }
 
                 if (tier.groups[sg] && !tier.groups[sg].links || tier.groups[sg].links.length == 0) {
-                    tier.groups[sg].links = tier.groups[sgg[0]].links;
+                   tier.groups[sg].links = tier.groups[sgg[0]].links;
                 }
 
                 delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
@@ -208,8 +212,6 @@ function drawFeatureTier(tier)
             glyphs.push(gg);
         }
     }
-
-
 
     // Bumping
 

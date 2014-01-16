@@ -126,6 +126,8 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
     var awaitedSeq = this.awaitedSeq;
     var needSeq = false;
 
+    var gex;
+
     for (var t = 0; t < tiers.length; ++t) {
         try {
             if (this.startFetchesFor(tiers[t], awaitedSeq)) {
@@ -135,6 +137,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
             tiers[t].updateStatus(ex);
             console.log('Error fetching tier source');
             console.log(ex);
+            gex = ex;
         }
     }
 
@@ -171,6 +174,9 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
             }
         });
     } 
+
+    if (gex)
+        throw gex;
 }
 
 KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {

@@ -1,7 +1,10 @@
 function sortFeatures(tier)
 {
+    var dmin = tier.browser.drawnStart, dmax = tier.browser.drawnEnd;
     var ungroupedFeatures = {};
     var groupedFeatures = {};
+    var drawnGroupedFeatures = {};
+    var groupMins = {}, groupMaxes = {};
     var groups = {};
     var superGroups = {};
     var groupsToSupers = {};
@@ -38,13 +41,13 @@ function sortFeatures(tier)
         return spids;
     }
 
-
     for (var fi = 0; fi < tier.currentFeatures.length; ++fi) {
-        // var f = eval('[' + miniJSONify(tier.currentFeatures[fi]) + ']')[0]; 
         var f = tier.currentFeatures[fi];
         if (f.parts) {
             continue;
         }
+
+        var drawn = f.min <= dmax && f.max >= dmin;
 
         if (!f.min || !f.max) {
             nonPositional.push(f);
@@ -77,6 +80,14 @@ function sortFeatures(tier)
                     pusho(groupedFeatures, gid, f);
                     groups[gid] = g;
                     fGroups.push(gid);
+
+                    var ogm = groupMins[gid];
+                    if (!ogm || f.min < ogm)
+                        groupMins[gid] = f.min;
+
+                    ogm = groupMaxes[gid];
+                    if (!ogm || f.max > ogm)
+                        groupMaxes[gid] = f.max;
                 }
             }
         }
@@ -124,7 +135,8 @@ function sortFeatures(tier)
         }
 
         if (fGroups.length == 0) {
-            pusho(ungroupedFeatures, f.type, f);
+            if (drawn)
+                pusho(ungroupedFeatures, f.type, f);
         } else if (fSuperGroup) {
             for (var g = 0; g < fGroups.length; ++g) {
                 var gid = fGroups[g];
@@ -134,8 +146,13 @@ function sortFeatures(tier)
         }       
     }
 
+    for (var gid in groupedFeatures) {
+        if (groupMaxes[gid] >= dmin && groupMins[gid] <= dmax)
+            drawnGroupedFeatures[gid] = groupedFeatures[gid];
+    }
+
     tier.ungroupedFeatures = ungroupedFeatures;
-    tier.groupedFeatures = groupedFeatures;
+    tier.groupedFeatures = drawnGroupedFeatures;
     tier.groups = groups;
     tier.superGroups = superGroups;
     tier.groupsToSupers = groupsToSupers;

@@ -23,6 +23,7 @@ For 0.12
   - Animate when leaping/toggling.
   - Apply track-edit operations to multiple tracks at once.
   - Bulk addition of local files.
+  - Search-by-name (or description) in track-adder.
 
 For 0.13
 --------
