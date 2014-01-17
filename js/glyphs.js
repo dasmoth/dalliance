@@ -5,6 +5,61 @@
 // glyphs.js: components which know how to draw themselves
 //
 
+function SVGPath() {
+    this.ops = [];
+}
+
+SVGPath.prototype.moveTo = function(x, y) {
+    this.ops.push('M ' + x + ' ' + y);
+}
+
+SVGPath.prototype.lineTo = function(x, y) {
+    this.ops.push('L ' + x + ' ' + y);
+}
+
+SVGPath.prototype.closePath = function() {
+    this.ops.push('Z');
+}
+
+SVGPath.prototype.toPathData = function() {
+    return this.ops.join(' ');
+}
+
+function PathGlyphBase(stroke, fill) {
+    this._stroke = stroke;
+    this._fill = fill;
+}
+
+PathGlyphBase.prototype.draw = function(g) {
+    g.beginPath();
+    this.drawPath(g);
+
+    if (this._fill) {
+        g.fillStyle = this._fill;
+        g.fill();
+    }
+    if (this._stroke) {
+        g.strokeStyle = this._stroke;
+        g.stroke();
+    }
+}
+
+PathGlyphBase.prototype.toSVG = function() {
+    var g = new SVGPath();
+    this.drawPath(g);
+    
+    return makeElementNS(
+        NS_SVG, 'path',
+        null,
+        {d: g.toPathData(),
+         fill: this._fill || 'none',
+         stroke: this._stroke || 'none'});
+}
+
+PathGlyphBase.prototype.drawPath = function(g) {
+    throw 'drawPath method on PathGlyphBase must be overridden';
+}
+
 function BoxGlyph(x, y, width, height, fill, stroke, alpha, radius) {
     this.x = x;
     this.y = y;
@@ -106,12 +161,7 @@ function GroupGlyph(glyphs, connector) {
     this.coverage = cov;
 }
 
-GroupGlyph.prototype.draw = function(g) {
-    for (var i = 0; i < this.glyphs.length; ++i) {
-        var gl = this.glyphs[i];
-        gl.draw(g);
-    }
-
+GroupGlyph.prototype.drawConnectors = function(g) {
     var ranges = this.coverage.ranges();
     for (var r = 1; r < ranges.length; ++r) {
         var gl = ranges[r];
@@ -121,7 +171,6 @@ GroupGlyph.prototype.draw = function(g) {
             var end = gl.min();
             var mid = (start+end)/2
             
-            g.beginPath();
             if (this.connector === 'hat+') {
                 g.moveTo(start, this.h/2);
                 g.lineTo(mid, 0);
@@ -134,48 +183,38 @@ GroupGlyph.prototype.draw = function(g) {
                 g.moveTo(start, this.h/2);
                 g.lineTo(end, this.h/2);
                 if (end - start > 4) {
-                    g.moveTo(mid - 2, (this.h/2) - 5);
+                    g.moveTo(mid - 2, (this.h/2) - 3);
                     g.lineTo(mid + 2, this.h/2);
-                    g.lineTo(mid - 2, (this.h/2) + 5);
+                    g.lineTo(mid - 2, (this.h/2) + 3);
                 }
             } else if (this.connector === 'collapsed-') {
                 g.moveTo(start, this.h/2);
                 g.lineTo(end, this.h/2);
                 if (end - start > 4) {
-                    g.moveTo(mid + 2, (this.h/2) - 5);
+                    g.moveTo(mid + 2, (this.h/2) - 3);
                     g.lineTo(mid - 2, this.h/2);
-                    g.lineTo(mid + 2, (this.h/2) + 5);
+                    g.lineTo(mid + 2, (this.h/2) + 3);
                 }
             } else {
                 g.moveTo(start, this.h/2);
                 g.lineTo(end, this.h/2);
             }
-            g.stroke();
         }
         last = gl;
     }
 }
 
-function SVGPath() {
-    this.ops = [];
-}
+GroupGlyph.prototype.draw = function(g) {
+    for (var i = 0; i < this.glyphs.length; ++i) {
+        var gl = this.glyphs[i];
+        gl.draw(g);
+    }
 
-SVGPath.prototype.moveTo = function(x, y) {
-    this.ops.push('M ' + x + ' ' + y);
+    g.strokeStyle = 'black';
+    g.beginPath();
+    this.drawConnectors(g);
+    g.stroke();
 }
-
-SVGPath.prototype.lineTo = function(x, y) {
-    this.ops.push('L ' + x + ' ' + y);
-}
-
-SVGPath.prototype.closePath = function() {
-    this.ops.push('Z');
-}
-
-SVGPath.prototype.toPathData = function() {
-    return this.ops.join(' ');
-}
-
 
 GroupGlyph.prototype.toSVG = function() {
     var g = makeElementNS(NS_SVG, 'g');
@@ -183,60 +222,19 @@ GroupGlyph.prototype.toSVG = function() {
         g.appendChild(this.glyphs[i].toSVG());
     }
 
-    var ranges = this.coverage.ranges();
-    for (var r = 1; r < ranges.length; ++r) {
-        var gl = ranges[r];
-        var last = ranges[r - 1];
-        if (last && gl.min() > last.max()) {
-            var start = last.max();
-            var end = gl.min();
-            var mid = (start+end)/2
+    var p = new SVGPath();
+    this.drawConnectors(p);
 
-            var p = new SVGPath();
-
-            if (this.connector === 'hat+') {
-                p.moveTo(start, this.h/2);
-                p.lineTo(mid, 0);
-                p.lineTo(end, this.h/2);
-            } else if (this.connector === 'hat-') {
-                p.moveTo(start, this.h/2);
-                p.lineTo(mid, this.h);
-                p.lineTo(end, this.h/2);
-            } else if (this.connector === 'collapsed+') {
-                p.moveTo(start, this.h/2);
-                p.lineTo(end, this.h/2);
-                if (end - start > 4) {
-                    p.moveTo(mid - 2, (this.h/2) - 5);
-                    p.lineTo(mid + 2, this.h/2);
-                    p.lineTo(mid - 2, (this.h/2) + 5);
-                }
-            } else if (this.connector === 'collapsed-') {
-                p.moveTo(start, this.h/2);
-                p.lineTo(end, this.h/2);
-                if (end - start > 4) {
-                    p.moveTo(mid + 2, (this.h/2) - 5);
-                    p.lineTo(mid - 2, this.h/2);
-                    p.lineTo(mid + 2, (this.h/2) + 5);
-                }
-            } else {
-                p.moveTo(start, this.h/2);
-                p.lineTo(end, this.h/2);
-            }
-
-            var path = makeElementNS(
-                NS_SVG, 'path',
-                null,
-                {d: p.toPathData(),
-                 fill: 'none',
-                 stroke: 'black',
-                 strokeWidth: 0.5});
-            g.appendChild(path);
-        }
-    }
+    var path = makeElementNS(
+        NS_SVG, 'path',
+        null,
+        {d: p.toPathData(),
+         fill: 'none',
+         stroke: 'black',
+         strokeWidth: 0.5});
+    g.appendChild(path);
 
     return g;
-
-    
 }
 
 GroupGlyph.prototype.min = function() {
@@ -511,40 +509,7 @@ ExGlyph.prototype.height = function() {
     return this._height;
 }
 
-function PathGlyphBase(stroke, fill) {
-    this._stroke = stroke;
-    this._fill = fill;
-}
 
-PathGlyphBase.prototype.draw = function(g) {
-    g.beginPath();
-    this.drawPath(g);
-
-    if (this._fill) {
-        g.fillStyle = this._fill;
-        g.fill();
-    }
-    if (this._stroke) {
-        g.strokeStyle = this._stroke;
-        g.stroke();
-    }
-}
-
-PathGlyphBase.prototype.toSVG = function() {
-    var g = new SVGPath();
-    this.drawPath(g);
-    
-    return makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: g.toPathData(),
-         fill: this._fill || 'none',
-         stroke: this._stroke || 'none'});
-}
-
-PathGlyphBase.prototype.drawPath = function(g) {
-    throw 'drawPath method on PathGlyphBase must be overridden';
-}
 
 function TriangleGlyph(x, height, dir, width, fill, stroke) {
     PathGlyphBase.call(this, stroke, fill);
