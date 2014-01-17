@@ -8,7 +8,6 @@ For 0.11
   - Assembly hub support. [DONE]
   - Rename tracks. [DONE]
   - Per-track display customization ("Stylesheet editor")? [WIP]
-  - Export track configuration for current browser state.
   - Support for arbitrary columns in bigbeds. [DONE]
   - Security cleanups + support for credentialed trackhubs [DONE]
   - Feature centering after quantLeap [DONE]
@@ -24,6 +23,7 @@ For 0.12
   - Apply track-edit operations to multiple tracks at once.
   - Bulk addition of local files.
   - Search-by-name (or description) in track-adder.
+  - Export track configuration for current browser state.
 
 For 0.13
 --------

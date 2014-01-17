@@ -35,7 +35,7 @@ DSBin.prototype.score = function() {
 }
 
 DSBin.prototype.feature = function(f) {
-    if (f.score) {
+    if (f.score != undefined) {
         this.tot += f.score;
         this.hasScore = true
     }
@@ -55,7 +55,7 @@ DSBin.prototype.feature = function(f) {
 }
 
 function downsample(features, targetRez) {
-    var beforeDS = Date.now();
+    // var beforeDS = Date.now();
 
     var sn = 0;
     while (ds_scale(sn + 1) < targetRez) {
@@ -102,7 +102,7 @@ function downsample(features, targetRez) {
         }
     }
 
-    var afterDS = Date.now();
+    // var afterDS = Date.now();
     // dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms');
     return sampledFeatures;
 }
