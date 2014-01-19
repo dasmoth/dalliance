@@ -575,7 +575,7 @@ Browser.prototype.makeTier = function(source, config) {
     try {
         this.realMakeTier(source, config);
     } catch (e) {
-        console.log(e.stack);
+        console.log(e.stack || e);
     }
 }
 

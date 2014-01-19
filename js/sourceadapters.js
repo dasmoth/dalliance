@@ -236,6 +236,24 @@ FeatureSourceBase.prototype.notifyActivity = function() {
     }
 }
 
+FeatureSourceBase.prototype.getScales = function() {
+    return null;
+}
+
+FeatureSourceBase.prototype.fetch = function(chr, min, max, scale, types, pool, cnt) {
+    return cnt(null, [], 1000000000);
+}
+
+FeatureSourceBase.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+    var defStyle = new DASStyle();
+    defStyle.glyph = 'BOX';
+    defStyle.BGCOLOR = 'blue';
+    defStyle.FGCOLOR = 'black';
+    stylesheet.pushStyle({type: 'default'}, null, defStyle);
+    return callback(stylesheet);
+}
+
 
 
 function DASFeatureSource(dasSource) {
