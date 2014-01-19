@@ -451,13 +451,13 @@ function readVob(ba, offset) {
 }
 
 function unbgzf(data, lim) {
-    lim = Math.min(lim || 1, data.byteLength - 100);
+    lim = Math.min(lim || 1, data.byteLength - 50);
     var oBlockList = [];
     var ptr = [0];
     var totalSize = 0;
 
     while (ptr[0] < lim) {
-        var ba = new Uint8Array(data, ptr[0], 100); // FIXME is this enough for all credible BGZF block headers?
+        var ba = new Uint8Array(data, ptr[0], 12); // FIXME is this enough for all credible BGZF block headers?
         var xlen = (ba[11] << 8) | (ba[10]);
         // dlog('xlen[' + (ptr[0]) +']=' + xlen);
         var unc = jszlib_inflate_buffer(data, 12 + xlen + ptr[0], Math.min(65536, data.byteLength - 12 - xlen - ptr[0]), ptr);

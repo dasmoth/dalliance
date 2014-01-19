@@ -12,6 +12,7 @@ For 0.11
   - Security cleanups + support for credentialed trackhubs [DONE]
   - Feature centering after quantLeap [DONE]
   - Sequence-read/BAM support improvements [DONE]
+  - Basic support for Tabix+VCF [DONE]
 
 For 0.12
 --------
@@ -40,7 +41,7 @@ For 0.13
     + Show all toggle levels.
     + Some kind of feedback for toggling.
   - Try to preserve layout when expanding/collapsing variants.
-  - Tabix support (VCF/GFF/GTF)  [DONE on dart_backends branch]
+  - More Tabix payloads (GFF/GTF)
   - Chromosome overviews.
 
 Future

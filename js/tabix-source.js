@@ -62,6 +62,26 @@ TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool,
     });
 }
 
+
+TabixFeatureSource.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'PLIMSOLL';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'rgb(50,80,255)';
+        varStyle.STROKECOLOR = 'black';
+        stylesheet.pushStyle({type: 'default'}, null, varStyle);
+    }
+
+
+
+
+    return callback(stylesheet);
+}
+
 function VCFParser() {}
 
 VCFParser.prototype.parse = function(line) {

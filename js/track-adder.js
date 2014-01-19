@@ -604,6 +604,14 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     promptForBAI(dataToFinalize);
                 }
+            } else if (customMode === 'prompt-tbi') {
+                var fileList = custFile.files;
+                if (fileList && fileList.length > 0 && fileList[0]) {
+                    dataToFinalize.indexBlob = fileList[0];
+                    completeTabixVCF(dataToFinalize);
+                } else {
+                    promptForTabix(dataToFinalize);
+                }
             } else if (customMode === 'finalize' || customMode === 'finalize-bin') {
                 dataToFinalize.name = custName.value;
                 var m = custCS.value;
@@ -643,7 +651,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     };
 
     function tryAddHub(curi, opts, retry) {
-        console.log('ntah');
         opts = opts || {};
         
         connectTrackHub(curi, function(hub, err) {
@@ -872,7 +879,15 @@ Browser.prototype.showTrackAdder = function(ev) {
                     } else {
                         return completeBAM(nds);
                     }
+                } else if (magic == 0x69662323) {
+                    // FIXME should check whole of first line
+                    if (nds.bwgBlob) {
+                        return promptForTabix(nds);
+                    } else {
+                        return completeTabixVCF(nds);
+                    }
                 } else {
+                    console.log('magic = ' + magic.toString(16));
                     // maybe Tabix?
                    return binFormatErrorPage();
                 }
@@ -889,6 +904,22 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = 'prompt-bai'
         stabHolder.appendChild(makeElement('h2', 'Select an index file'));
         stabHolder.appendChild(makeElement('p', 'Dalliance requires a BAM index (.bai) file when displaying BAM data.  These normally accompany BAM files.  For security reasons, web applications like Dalliance can only access local files which you have explicity selected.  Please use the file chooser below to select the appropriate BAI file'));
+
+        stabHolder.appendChild(document.createTextNode('Index file: '));
+        custFile = makeElement('input', null, {type: 'file'});
+        stabHolder.appendChild(custFile);
+        dataToFinalize = nds;
+    }
+
+    function promptForTabix(nds) {
+        refreshButton.style.display = 'none';
+        addButton.style.display = 'inline';
+        canButton.style.display = 'inline';
+
+        removeChildren(stabHolder);
+        customMode = 'prompt-tbi'
+        stabHolder.appendChild(makeElement('h2', 'Select an index file'));
+        stabHolder.appendChild(makeElement('p', 'Dalliance requires a Tabix index (.tbi) file when displaying VCF data.  For security reasons, web applications like Dalliance can only access local files which you have explicity selected.  Please use the file chooser below to select the appropriate BAI file'));
 
         stabHolder.appendChild(document.createTextNode('Index file: '));
         custFile = makeElement('input', null, {type: 'file'});
@@ -928,6 +959,46 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
         });
     }
+
+    function completeTabixVCF(nds) {
+        var indexF;
+        if (nds.indexBlob) {
+            indexF = new BlobFetchable(nds.indexBlob);
+        } else {
+            indexF = new URLFetchable(nds.bwgURI + '.tbi');
+        }
+        indexF.slice(0, 1<<16).fetch(function(r) {
+            var hasTabix = false;
+            if (r) {
+                var ba = new Uint8Array(r);
+                if (ba[0] == 31 || ba[1] == 139) {
+                    var unc = unbgzf(r);
+                    ba = new Uint8Array(unc);
+                    var m2 = readInt(ba, 0);
+                    hasTabix = (m2 == TABIX_MAGIC);
+                }
+            }
+            if (hasTabix) {
+                var nameExtractPattern = new RegExp('/?([^/]+?)(.vcf)?(.gz)?$');
+                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
+                if (match) {
+                    nds.name = match[1];
+                }
+
+                nds.uri = nds.bwgURI;
+                nds.blob = nds.bwgBlob;
+                nds.bwgURI = undefined;
+                nds.bwgBlob = undefined;
+                nds.tier_type = 'tabix';
+                nds.payload = 'vcf';
+                        
+                return addDasCompletionPage(nds, false, false, true);
+            } else {
+                return binFormatErrorPage('You have selected a valid VCF file, but a corresponding index (.tbi) file was not found.  Please index your VCF ("tabix -p vcf -f myfile.vcf.gz") and place the .tbi file in the same directory');
+            }
+        });
+    }
+
 
     function binFormatErrorPage(message) {
         refreshButton.style.display = 'none';
@@ -1004,7 +1075,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         custName.focus();
 
-        if (customMode === 'bin' || customMode === 'prompt-bai')
+        if (customMode === 'bin' || customMode === 'prompt-bai' || customMode === 'prompt-tbi')
             customMode = 'finalize-bin';
         else
             customMode = 'finalize';

@@ -133,8 +133,8 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
             p +=  (nchnk * 16);
         }
     }
-//    dlog('leafChunks = ' + miniJSONify(leafChunks));
-//    dlog('otherChunks = ' + miniJSONify(otherChunks));
+    // console.log('leafChunks = ' + miniJSONify(leafChunks));
+    // console.log('otherChunks = ' + miniJSONify(otherChunks));
 
     var nintv = readInt(index, p);
     var lowest = null;
@@ -148,7 +148,7 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
             lowest = lb;
         }
     }
-    // dlog('Lowest LB = ' + lowest);
+   //  console.log('Lowest LB = ' + lowest);
     
     var prunedOtherChunks = [];
     if (lowest != null) {
@@ -158,8 +158,8 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
                 prunedOtherChunks.push(chnk);
             }
         }
-    }
-    // dlog('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
+    } 
+    // console.log('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
     otherChunks = prunedOtherChunks;
 
     var intChunks = [];
@@ -192,7 +192,7 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
-    // dlog('mergedChunks = ' + miniJSONify(mergedChunks));
+    // console.log('mergedChunks = ' + miniJSONify(mergedChunks));
 
     return mergedChunks;
 }
