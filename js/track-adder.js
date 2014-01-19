@@ -48,19 +48,23 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var addModeButtons = [];
     var makeStab, makeStabObserver;
-    var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
-    addModeButtons.push(regButton);
-    
-    for (var m in this.mappableSources) {
-        var mf  = function(mm) {
-            var mapButton = thisB.makeButton(thisB.chains[mm].srcTag, 'Browse datasources mapped from ' + thisB.chains[mm].srcTag);
-            addModeButtons.push(mapButton);
-            mapButton.addEventListener('click', function(ev) {
-                ev.preventDefault(); ev.stopPropagation();
-                activateButton(addModeButtons, mapButton);
-                makeStab(thisB.mappableSources[mm], mm);
-            }, false);
-        }; mf(m);
+
+
+    if (!this.noRegistryTabs) {
+        var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
+        addModeButtons.push(regButton);
+        
+        for (var m in this.mappableSources) {
+            var mf  = function(mm) {
+                var mapButton = thisB.makeButton(thisB.chains[mm].srcTag, 'Browse datasources mapped from ' + thisB.chains[mm].srcTag);
+                addModeButtons.push(mapButton);
+                mapButton.addEventListener('click', function(ev) {
+                    ev.preventDefault(); ev.stopPropagation();
+                    activateButton(addModeButtons, mapButton);
+                    makeStab(thisB.mappableSources[mm], mm);
+                }, false);
+            }; mf(m);
+        }
     }
 
     var groupedDefaults = {};
@@ -122,7 +126,10 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         return hubButton;
     }
- 
+
+
+    var firstDefButton = null;
+    var firstDefSources = null;
     for (var g in groupedDefaults) {
         (function(g, ds) {
             var defButton = thisB.makeButton(g, 'Browse the default set of data for this browser');
@@ -132,9 +139,14 @@ Browser.prototype.showTrackAdder = function(ev) {
                 makeStab(new Observed(ds));
             }, false);
             addModeButtons.push(defButton);
+
+            if (!firstDefButton) {
+                firstDefButton = defButton;
+                firstDefSources = ds;
+            }
         })(g, groupedDefaults[g]);
     }   
-    var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
+    var custButton = this.makeButton('DAS', 'Add arbitrary DAS data');
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
     addModeButtons.push(binButton);
@@ -148,7 +160,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var addHubButton = this.makeButton('+', 'Connect to a new track-hub');
     addModeButtons.push(addHubButton);
 
-    activateButton(addModeButtons, regButton);
+
     var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
     
@@ -263,6 +275,9 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         stabHolder.appendChild(stab);
     };
+
+
+
 
     function makeHubStab(tracks) {
         refreshButton.style.display = 'none';
@@ -458,11 +473,13 @@ Browser.prototype.showTrackAdder = function(ev) {
     };
     
 
-    regButton.addEventListener('click', function(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, regButton);
-        makeStab(thisB.availableSources);
-    }, false);
+    if (regButton) {
+        regButton.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            activateButton(addModeButtons, regButton);
+            makeStab(thisB.availableSources);
+        }, false);
+    }
  
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
@@ -1108,4 +1125,9 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     this.showToolPanel(popup);
     this.setUiMode('add');
+
+    if (firstDefButton) {
+        activateButton(addModeButtons, firstDefButton);
+        makeStab(new Observed(firstDefSources));
+    }
 }
