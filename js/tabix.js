@@ -201,6 +201,11 @@ TabixFile.prototype.fetch = function(chr, min, max, callback) {
     var thisB = this;
 
     var chrId = this.chrToIndex[chr];
+    if (chrId == undefined)
+        return callback([]);
+
+    var canonicalChr = this.indexToChr[chrId];
+
     var chunks;
     if (chrId === undefined) {
         chunks = [];
@@ -228,7 +233,7 @@ TabixFile.prototype.fetch = function(chr, min, max, callback) {
             });
         } else {
             var ba = new Uint8Array(data);
-            thisB.readRecords(ba, chunks[index].minv.offset, records, min, max, chr);
+            thisB.readRecords(ba, chunks[index].minv.offset, records, min, max, canonicalChr);
             data = null;
             ++index;
             return tramp();
