@@ -62,6 +62,11 @@ TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool,
     });
 }
 
+TabixFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.parser && this.parser.getDefaultFIPs)
+        this.parser.getDefaultFIPs(callback);
+}
+
 
 TabixFeatureSource.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();
@@ -72,12 +77,10 @@ TabixFeatureSource.prototype.getStyleSheet = function(callback) {
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
         varStyle.FGCOLOR = 'rgb(50,80,255)';
+        varStyle.BGCOLOR = '#888888';
         varStyle.STROKECOLOR = 'black';
         stylesheet.pushStyle({type: 'default'}, null, varStyle);
     }
-
-
-
 
     return callback(stylesheet);
 }
@@ -87,11 +90,24 @@ function VCFParser() {}
 VCFParser.prototype.parse = function(line) {
     var toks = line.split('\t');
     var f = new DASFeature();
+    f.segment = toks[0];
+    f.id = toks[2]
+    f.refAllele = toks[3];
+    f.altAlleles = toks[4].split(',');
     f.min = parseInt(toks[1]);
-    f.max = parseInt(toks[1]);
+    f.max = parseInt(f.min + f.refAllele.length - 1);
     f.type = 'vcf';
     return f;
 }
+
+VCFParser.prototype.getDefaultFIPs = function(callback) {
+    var fip = function(feature, featureInfo) {
+        featureInfo.add("Ref. allele", feature.refAllele);
+        featureInfo.add("Alt. alleles", feature.altAlleles.join(','));
+    };
+    callback(fip);
+}
+
 
 dalliance_registerSourceAdapterFactory('tabix', function(source) {
     return {features: new TabixFeatureSource(source)};
