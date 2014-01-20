@@ -11,7 +11,7 @@
 Browser.prototype.currentlyActive = function(source) {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (sourcesAreEqual(this.tiers[ti].dasSource, source))
-            return true;
+            return this.tiers[ti];
     }
     return false;
 }
@@ -36,11 +36,9 @@ function activateButton(addModeButtons, which) {
 }
 
 Browser.prototype.showTrackAdder = function(ev) {
-    if (this.activeTrackAdder) {
-        this.browserHolder.removeChild(this.activeTrackAdder);
-        this.svgHolder.style.width = '100%';
-        this.activeTrackAdder = null;
-        this.resizeViewer();
+    if (this.uiMode === 'add') {
+        this.hideToolPanel();
+        this.setUiMode('none');
         return;
     }
 
@@ -64,64 +62,89 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
         }; mf(m);
     }
-    
 
-    var makeHubButton = function(hub) {
-        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-            var hubRemove = makeElement('i', null, {className: 'icon-remove'});
-            var hbContent = makeElement('span', [hub.shortLabel, ' ', hubRemove]);
-            var hubButton = thisB.makeButton(hbContent, hub.longLabel);
-            addModeButtons.push(hubButton);
-            
-            hubButton.addEventListener('click', function(ev) {
-                ev.preventDefault(); ev.stopPropagation();
-
-                hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                    if (err) {
-                        console.log(err);
-                    }
-
-                    activateButton(addModeButtons, hubButton);
-                    makeHubStab(tracks);
-                });
-            }, false);
-
-            hubRemove.addEventListener('click', function(ev) {
-                ev.preventDefault(); ev.stopPropagation();
-                
-                for (var hi = 0; hi < thisB.hubs.length; ++hi) {
-                    if (thisB.hubs[hi] == hub.url) {
-                        console.log('index ' + hi);
-                        thisB.hubs.splice(hi, 1);
-                        break;
-                    }
-                }
-                for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
-                    if (thisB.hubObjects[hi].url == hub.url) {
-                        thisB.hubObjects.splice(hi, 1);
-                        break;
-                    }
-                }
-
-                modeButtonHolder.removeChild(hubButton);
-                activateButton(addModeButtons, addHubButton);
-                switchToHubConnectMode();
-            }, false);
-
-            return hubButton;
+    var groupedDefaults = {};
+    for (var si = 0; si < this.defaultSources.length; ++si) {
+        var s = this.defaultSources[si];
+        var g = s.group || 'Defaults';
+        if (groupedDefaults[g]) {
+            groupedDefaults[g].push(s);
+        } else {
+            groupedDefaults[g] = [s];
         }
     }
+    
+
+    var makeHubButton = function(tdb) {
+        var hub = tdb.hub;
+        var hubRemove = makeElement('i', null, {className: 'fa fa-times'});
+        var label = hub.shortLabel || 'Unknown';
+        if (tdb.mapping)
+            label = label + ' (' + tdb.genome + ')';
+        var hbContent = makeElement('span', [label, ' ', hubRemove]);
+        var hubButton = thisB.makeButton(hbContent, hub.longLabel);
+        addModeButtons.push(hubButton);
+        
+        hubButton.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            activateButton(addModeButtons, hubButton);
+            removeChildren(stabHolder);
+            stabHolder.appendChild(makeElement('div', makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'}, {marginLeft: 'auto', marginRight: 'auto', marginTop: '100px'}), null, {textAlign: 'center'}));
+
+            refreshButton.style.display = 'none';
+            addButton.style.display = 'none';
+            canButton.style.display = 'none';
+
+            tdb.getTracks(function(tracks, err) {
+                if (err) {
+                    console.log(err);
+                }
+                
+                makeHubStab(tracks);
+            });
+        }, false);
+
+        hubRemove.addEventListener('click', function(ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            
+            for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
+                if (thisB.hubObjects[hi].absURL = tdb.absURL) {
+                    thisB.hubObjects.splice(hi, 1);
+                    break;
+                }
+            }
+            thisB.notifyTier();
+
+            modeButtonHolder.removeChild(hubButton);
+            activateButton(addModeButtons, addHubButton);
+            switchToHubConnectMode();
+        }, false);
+
+        return hubButton;
+    }
+ 
+    for (var g in groupedDefaults) {
+        (function(g, ds) {
+            var defButton = thisB.makeButton(g, 'Browse the default set of data for this browser');
+            defButton.addEventListener('click', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                activateButton(addModeButtons, defButton);
+                makeStab(new Observed(ds));
+            }, false);
+            addModeButtons.push(defButton);
+        })(g, groupedDefaults[g]);
+    }   
+    var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
+    addModeButtons.push(custButton);
+    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
+    addModeButtons.push(binButton);
+
+
     for (var hi = 0; hi < this.hubObjects.length; ++hi) {
         var hub = this.hubObjects[hi];
         makeHubButton(hub);
     }
 
-    var defButton = this.makeButton('Defaults', 'Browse the default set of data for this browser');
-    addModeButtons.push(defButton);
-    var custButton = this.makeButton('Custom', 'Add arbitrary DAS data');
-    addModeButtons.push(custButton);
-    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
-    addModeButtons.push(binButton);
     var addHubButton = this.makeButton('+', 'Connect to a new track-hub');
     addModeButtons.push(addHubButton);
 
@@ -142,7 +165,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'scroll';
-    stabHolder.style.height = '500px';
+    // stabHolder.style.height = '500px';
     asform.appendChild(stabHolder);
 
     var __mapping;
@@ -221,10 +244,16 @@ Browser.prototype.showTrackAdder = function(ev) {
             ++idx;
         }
 
-        function setChecks() {
+        var setChecks = function() {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
-                b.checked = thisB.currentlyActive(b.dalliance_source);
+                var t = thisB.currentlyActive(b.dalliance_source);
+                if (t) {
+                    b.checked = true;
+                    b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
+                }
             }
         }
         setChecks();
@@ -267,8 +296,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (tops.length > 0) {
             groups.push({
                 shortLabel: 'Others',
+                priority: -100000000,
                 children: tops});
         }
+
+        groups.sort(THUB_COMPARE);
         
         var buttons = [];
         for (var gi = 0; gi < groups.length; ++gi) {
@@ -363,6 +395,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
                 var idx = 0;
             
+                group.children.sort(THUB_COMPARE);
                 for (var i = 0; i < group.children.length; ++i) {
                     var track = group.children[i];
                     var ds = track.toDallianceSource();
@@ -404,10 +437,16 @@ Browser.prototype.showTrackAdder = function(ev) {
             }
         }
 
-        function setChecks() {
+        var setChecks = function() {
             for (var bi = 0; bi < buttons.length; ++bi) {
                 var b = buttons[bi];
-                b.checked = thisB.currentlyActive(b.dalliance_source);
+                var t = thisB.currentlyActive(b.dalliance_source);
+                if (t) {
+                    b.checked = true;
+                    b.disabled = t.sequenceSource != null;
+                } else {
+                    b.checked = false;
+                }
             }
         }
         setChecks();
@@ -424,64 +463,53 @@ Browser.prototype.showTrackAdder = function(ev) {
         activateButton(addModeButtons, regButton);
         makeStab(thisB.availableSources);
     }, false);
-    defButton.addEventListener('click', function(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, defButton);
-        makeStab(new Observed(thisB.defaultSources));
-    }, false);
+ 
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, binButton);
         switchToBinMode();
     }, false);
     addHubButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, addHubButton);
         switchToHubConnectMode();
     }, false);
 
 
     function switchToBinMode() {
+        activateButton(addModeButtons, binButton);
         customMode = 'bin';
 
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         removeChildren(stabHolder);
+        var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
+        pageHolder.appendChild(makeElement('h3', 'Add custom URL-based data'));
+        pageHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
 
-        if (thisB.supportsBinary) {
-            var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
-            pageHolder.appendChild(makeElement('h3', 'Add custom URL-based data'));
-            pageHolder.appendChild(makeElement('p', ['You can add indexed binary data hosted on an web server that supports CORS (', makeElement('a', 'full details', {href: 'http://www.biodalliance.org/bin.html'}), ').  Currently supported formats are bigwig, bigbed, and indexed BAM.']));
-
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(document.createTextNode('URL: '));
-            custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
-            pageHolder.appendChild(custURL);
-            
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(makeElement('b', '- or -'));
-            pageHolder.appendChild(makeElement('br'));
-            pageHolder.appendChild(document.createTextNode('File: '));
-            custFile = makeElement('input', null, {type: 'file'});
-            pageHolder.appendChild(custFile);
-            
-            pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
-
-            stabHolder.appendChild(pageHolder);
-            custURL.focus();
-        } else {
-            stabHolder.appendChild(makeElement('h2', 'Your browser does not support binary data'));
-            stabHolder.appendChild(makeElement('p', 'Browsers currently known to support this feature include Google Chrome 9 or later and Mozilla Firefox 4 or later.'));
-        }
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(document.createTextNode('URL: '));
+        custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
+        pageHolder.appendChild(custURL);
         
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(makeElement('b', '- or -'));
+        pageHolder.appendChild(makeElement('br'));
+        pageHolder.appendChild(document.createTextNode('File: '));
+        custFile = makeElement('input', null, {type: 'file'});
+        pageHolder.appendChild(custFile);
+        
+        pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
+
+        stabHolder.appendChild(pageHolder);
+        custURL.focus();
     }
 
     function switchToHubConnectMode() {
+        activateButton(addModeButtons, addHubButton);
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         customMode = 'hub-connect';
         refreshButton.style.visibility = 'hidden';
@@ -502,14 +530,14 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     custButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
-        activateButton(addModeButtons, custButton);
         switchToCustomMode();
     }, false);
 
     function switchToCustomMode() {
+        activateButton(addModeButtons, custButton);
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
-        canButton.style.display = 'inline';
+        canButton.style.display = 'none';
 
         customMode = 'das';
 
@@ -576,7 +604,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     promptForBAI(dataToFinalize);
                 }
-            } else if (customMode === 'finalize') {
+            } else if (customMode === 'finalize' || customMode === 'finalize-bin') {
                 dataToFinalize.name = custName.value;
                 var m = custCS.value;
                 if (m != '__default__') {
@@ -595,50 +623,96 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 thisB.addTier(dataToFinalize);
-                switchToCustomMode();
+
+                if (customMode == 'finalize-bin')
+                    switchToBinMode();
+                else
+                    switchToCustomMode();
             } else if (customMode === 'hub-connect') {
                 var curi = custURL.value.trim();
                 if (!/^.+:\/\//.exec(curi)) {
                     curi = 'http://' + curi;
                 }
-                console.log('hub: ' + curi);
-                connectTrackHub(curi, function(hub, err) {
-                    if (err) {
-                        removeChildren(stabHolder);
-                        stabHolder.appendChild(makeElement('h2', 'Error connecting to track hub'))
-                        stabHolder.appendChild(makeElement('p', err));
-                        customMode = 'reset-hub';
-                        return;
-                    } else {
-                        if (thisB.coordSystem.ucscName && hub.genomes[thisB.coordSystem.ucscName]) {
-                            thisB.hubs.push(curi);
-                            thisB.hubObjects.push(hub);
-                            
-                            var hubButton = makeHubButton(hub);
-                            modeButtonHolder.appendChild(hubButton);
-                            activateButton(addModeButtons, hubButton);
-                            
-                        
-                            // FIXME redundant with hub-tab click handler.
-                        
-                            hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                                makeHubStab(tracks);
-                            });
-                        } else {
-                            removeChildren(stabHolder);
-                            stabHolder.appendChild(makeElement('h2', 'No data for this genome'))
-                            stabHolder.appendChild(makeElement('p', 'This URL appears to be a valid track-hub, but it doesn\'t contain any data for the coordinate system of this browser'));
-                            stabHolder.appendChild(makeElement('p', 'coordSystem.ucscName = ' + thisB.coordSystem.ucscName));
-                            customMode = 'reset-hub';
-                            return;
-                        }
-                    }
-                });
+                
+                tryAddHub(curi);
+                
             }
         } else {
             thisB.removeAllPopups();
         }
     };
+
+    function tryAddHub(curi, opts, retry) {
+        console.log('ntah');
+        opts = opts || {};
+        
+        connectTrackHub(curi, function(hub, err) {
+            if (err) {
+                if (!retry) {
+                    return tryAddHub(curi, {credentials: true}, true);
+                }
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('h2', 'Error connecting to track hub'))
+                stabHolder.appendChild(makeElement('p', err));
+                customMode = 'reset-hub';
+                return;
+            } else {
+                var bestHub = null;
+                var bestHubButton = null;
+                for (var genome in hub.genomes) {
+                    var mapping = null;
+                    var okay = false;
+
+                    if (genome == thisB.coordSystem.ucscName) {
+                        okay = true;
+                    } else {
+                         for (var mid in thisB.chains) {
+                            var m = thisB.chains[mid];
+                            if (genome == m.coords.ucscName) {
+                                mapping = mid;
+                                okay = true;
+                            }
+                         }
+                    }
+
+                    if (okay) {
+                        hc = {url: curi, genome: genome};
+                        if (opts.credentials)
+                            hc.credentials = true;
+                        if (mapping) {
+                            hc.mapping = mapping;
+                            hub.genomes[genome].mapping = mapping;
+                        }
+                        thisB.hubs.push(hc);
+                        thisB.hubObjects.push(hub.genomes[genome]);
+                        
+                        var hubButton = makeHubButton(hub.genomes[genome]);
+                        modeButtonHolder.appendChild(hubButton);
+
+                        if (!mapping || !bestHub) {
+                            bestHub = hub.genomes[genome];
+                            bestHubButton = hubButton;
+                        }
+                    }
+                }
+
+                if (bestHub) {
+                    thisB.notifyTier();
+                    activateButton(addModeButtons, bestHubButton);
+                    bestHub.getTracks(function(tracks, err) {
+                        makeHubStab(tracks);
+                    });
+                } else {
+                    removeChildren(stabHolder);
+                    stabHolder.appendChild(makeElement('h2', 'No data for this genome'))
+                    stabHolder.appendChild(makeElement('p', 'This URL appears to be a valid track-hub, but it doesn\'t contain any data for the coordinate system of this browser'));
+                    stabHolder.appendChild(makeElement('p', 'coordSystem.ucscName = ' + thisB.coordSystem.ucscName));
+                    customMode = 'reset-hub';
+                    return;
+                }
+            }
+        }, opts);
+    }
 
     var tryAddDAS = function(nds, retry) {
         var knownSpace = thisB.knownSpace;
@@ -744,16 +818,21 @@ Browser.prototype.showTrackAdder = function(ev) {
         );
     }
 
-    var tryAddBin = function(nds) {
+    var tryAddBin = function(nds, retry) {
         var fetchable;
         if (nds.bwgURI) {
-            fetchable = new URLFetchable(nds.bwgURI);
+            fetchable = new URLFetchable(nds.bwgURI, null, null, {credentials: nds.credentials});
         } else {
             fetchable = new BlobFetchable(nds.bwgBlob);
         }
 
-        fetchable.slice(0, 1<<16).fetch(function(result, error) {
+        fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
             if (!result) {
+                if (!retry) {
+                    nds.credentials = true;
+                    tryAddBin(nds, true);
+                }
+
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
                 if (nds.bwgURI) {
@@ -924,7 +1003,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
 
         custName.focus();
-        customMode = 'finalize';
+
+        if (customMode === 'bin' || customMode === 'prompt-bai')
+            customMode = 'finalize-bin';
+        else
+            customMode = 'finalize';
         dataToFinalize = nds;
     }
 
@@ -932,7 +1015,10 @@ Browser.prototype.showTrackAdder = function(ev) {
     var canButton = makeElement('button', 'Cancel', {className: 'btn'});
     canButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        thisB.removeAllPopups();
+        if (customMode === 'finalize-bin')
+            switchToBinMode();
+        else
+            switchToCustomMode();
     }, false);
 
     var refreshButton = makeElement('button', 'Refresh', {className: 'btn'});
@@ -949,10 +1035,6 @@ Browser.prototype.showTrackAdder = function(ev) {
     popup.appendChild(asform);
     makeStab(thisB.availableSources);
 
-
-    var insert = makeElement('div', [makeElement('div', null, {}, {background: 'gray', width: '10px', height: '100%', display: 'inline-block', marginLeft: '-10px'}), popup], {}, {display: 'inline-block', width: '40%', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingLeft: '10px', height: '600px'});
-    this.browserHolder.appendChild(insert);
-    this.svgHolder.style.width = '60%';
-    this.resizeViewer();
-    this.activeTrackAdder = insert;
+    this.showToolPanel(popup);
+    this.setUiMode('add');
 }

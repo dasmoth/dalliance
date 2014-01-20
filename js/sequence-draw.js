@@ -29,21 +29,41 @@ function tileSizeForScale(scale, min)
 
 function drawSeqTier(tier, seq)
 {
+	var retina = tier.browser.retina && window.devicePixelRatio > 1;
     var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
 
-    var fpw = tier.viewport.width|0; 
+	var desiredWidth = tier.browser.featurePanelWidth + 2000;
+    if (retina) {
+        desiredWidth *= 2;
+    }
+    var fpw = tier.viewport.width|0; // this.browser.featurePanelWidth;
+    if (fpw < desiredWidth - 50) {
+        tier.viewport.width = fpw = desiredWidth;
+    }
 
     var height = 50;
     if (seq && seq.seq) {
-	height += 25;
+		height += 25;
     }
-    tier.viewport.height = height;
+
+    var canvasHeight = height;
+    if (retina) 
+    	canvasHeight *= 2;
+
+    tier.viewport.height = canvasHeight;
+    tier.viewport.style.height = '' + height + 'px';
+    tier.viewport.style.width = retina ? ('' + (fpw/2) + 'px') : ('' + fpw + 'px');
     tier.holder.style.height = '' + height + 'px'
+    tier.layoutHeight = height;
     tier.updateHeight();
 
     var gc = tier.viewport.getContext('2d');
     gc.clearRect(0, 0, fpw, tier.viewport.height);
+    if (retina) {
+        gc.scale(2, 2);
+    }
     gc.translate(1000,0);
+
 
     var seqTierMax = knownEnd;
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
@@ -55,42 +75,42 @@ function drawSeqTier(tier, seq)
     var origin = tier.browser.viewStart;
 
     while (pos <= seqTierMax) {
-	gc.fillStyle = ((pos / tile) % 2 == 0) ? 'white' : 'black';
-	gc.strokeStyle = 'black';
-	gc.fillRect((pos - origin) * scale,
-		    8,
-		    tile*scale,
-		    3);
-	gc.strokeRect((pos - origin) * scale,
-		      8,
-		      tile*scale,
-		      3);
+		gc.fillStyle = ((pos / tile) % 2 == 0) ? 'white' : 'black';
+		gc.strokeStyle = 'black';
+		gc.fillRect((pos - origin) * scale,
+			    8,
+			    tile*scale,
+			    3);
+		gc.strokeRect((pos - origin) * scale,
+			      8,
+			      tile*scale,
+			      3);
 
-	gc.fillStyle = 'black';
-	gc.fillText(formatLongInt(pos), ((pos - origin) * scale), 22);
-	
+		gc.fillStyle = 'black';
+		gc.fillText(formatLongInt(pos), ((pos - origin) * scale), 22);
+		
 
-	pos += tile;
+		pos += tile;
     }
 
     if (seq && seq.seq) {
-	for (var p = knownStart; p <= knownEnd; ++p) {
-	    if (p >= seq.start && p <= seq.end) {
-		var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
-		var color = baseColors[base];
-		if (!color) {
-                    color = 'gray';
-		}
+		for (var p = knownStart; p <= knownEnd; ++p) {
+		    if (p >= seq.start && p <= seq.end) {
+				var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
+				var color = baseColors[base];
+				if (!color) {
+		            color = 'gray';
+				}
 
-		gc.fillStyle = color;
+				gc.fillStyle = color;
 
-		if (scale >= 8) {
-		    gc.fillText(base, (p - origin) * scale, 52);
-		} else {
-		    gc.fillRect((p - origin) * scale, 42, scale, 12); 
+				if (scale >= 8) {
+				    gc.fillText(base, (p - origin) * scale, 52);
+				} else {
+				    gc.fillRect((p - origin) * scale, 42, scale, 12); 
+				}
+		    }
 		}
-	    }
-	}
     } 
 
     tier.norigin = tier.browser.viewStart;

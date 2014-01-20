@@ -43,6 +43,9 @@
 <script language="javascript" src="polyfills/html5slider.js"></script>
 <script language="javascript" src="js/ensembljson.js"></script>
 <script language="javascript" src="js/overlay.js"></script>
+<script language="javascript" src="js/tier-actions.js"></script>
+<script language="javascript" src="js/tier-edit.js"></script>
+<script language="javascript" src="js/search.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -99,6 +102,16 @@
                    uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',      
                    stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'
                   },
+                  {name: 'SNPs',
+                   tier_type: 'ensembl',
+                   species:'human',
+                   type: 'variation',
+                   featureInfoPlugin: function(f, info) {
+                    if (f.id) {
+                      info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
+                    }
+                   }
+                  },
                   {name: 'CpG',
                    desc: 'CpG observed/expected ratio',
                    uri: 'http://www.derkholm.net:8080/das/hg19comp/',
@@ -150,10 +163,17 @@
   b.addFeatureInfoPlugin(function(f, info) {
       info.add('Testing', 'This is a test!');
   });
+
+  b.addViewListener(function(chr, min, max) {
+    var link = document.getElementById('enslink');
+    link.href = 'http://www.ensembl.org/Homo_sapiens/Location/View?r=' + chr + ':' + min + '-' + max;
+  });
+
 </script>
 </head>
 
 <body>
+<a href='http://www.ensembl.org/' id='enslink' target='_newtab'>Link to Ensembl</a>
 <div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
 </body>
 </html>

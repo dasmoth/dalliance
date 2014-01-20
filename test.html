@@ -22,7 +22,6 @@
 <script language="javascript" src="js/sequence-draw.js"></script>
 <script language="javascript" src="js/domui.js"></script>
 <script language="javascript" src="js/karyoscape.js"></script>
-<script language="javascript" src="js/quant-config.js"></script>
 <script language="javascript" src="js/track-adder.js"></script>
 <script language="javascript" src="js/chainset.js"></script>
 <script language="javascript" src="js/version.js"></script>
@@ -100,7 +99,8 @@
                                                    FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]},
                     {name: 'MeDIP-raw',
                      desc: 'MeDIP-seq reads from Nature Biotech. 26:779-785',
-                     uri: 'http://www.derkholm.net:8080/das/medipseq_reads/'},
+                     uri: 'http://www.derkholm.net:8080/das/medipseq_reads/',
+                     group: 'Custom group'},
                   {name:                 'BWG test',
                    bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
                    stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet',
@@ -114,11 +114,12 @@
                    uri:                  './glyph-test/',
                    features_uri:         './glyph-test/features.xml',
                    stylesheet_uri:       './glyph-test/stylesheet.xml',
-                   dasStaticFeatures:    true} 
+                   dasStaticFeatures:    true,
+                   disabled: true} 
                  ,{name:                 'BWG hist',
                    bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
                    style:     [{type: 'default',
-                                style:  {glyph: 'HISTOGRAM', HEIGHT: 50, MIN: 0, MAX: 100}}],
+                                style:  {glyph: 'HISTOGRAM', HEIGHT: 50 /* , MIN: 0, MAX: 100 */}}],
                    quantLeapThreshold: 80}
                 ],
 
@@ -138,6 +139,7 @@
   b.addFeatureInfoPlugin(function(f, info) {
       info.add('Testing', 'This is a test!');
     });
+
 </script>
 </head>
 

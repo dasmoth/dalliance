@@ -184,10 +184,10 @@ function makeTreeTableSection(title, content, visible) {
     var ttButton = makeElement('i');
     function update() {
         if (visible) {
-            ttButton.className = 'icon-chevron-down';
+            ttButton.className = 'fa fa-caret-down';
             content.style.display = 'table';
         } else {
-            ttButton.className = 'icon-chevron-right';
+            ttButton.className = 'fa fa-caret-right';
             content.style.display = 'none';
         }
     }

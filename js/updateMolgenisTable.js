@@ -10,7 +10,7 @@ function updateMolgenisTable(molgenisUrl, chr, mutation) {
 			dataType : "json",
 			success : function(data) {
 				if (typeof data == 'object') {
-					patientMutationTable(data);
+					//patientMutationTable(data);
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
@@ -19,15 +19,4 @@ function updateMolgenisTable(molgenisUrl, chr, mutation) {
 			}
 		});
 	}
-}
-
-Browser.prototype.reset = function(){
-	for (var i = this.tiers.length - 1; i >= 0; --i) {
-		this.removeTier({index: i});
-	}
-	for (var i = 0; i < this.defaultSources.length; ++i) {
-		this.addTier(this.defaultSources[i]);
-	}
-	
-	this.setLocation(this.defaultChr, this.defaultStart, this.defaultEnd);
 }

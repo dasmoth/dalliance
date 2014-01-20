@@ -387,6 +387,9 @@ DASSource.prototype.features = function(segment, options, callback) {
         }
                 
         callback(features, undefined, segmentMap);
+    },
+    function (err) {
+        callback([], err);
     });
 }
 
@@ -492,6 +495,27 @@ DASStylesheet.prototype.pushStyle = function(filters, zoom, style) {
 function DASStyle() {
 }
 
+function parseGradient(grad) {
+    var steps = grad.getAttribute('steps');
+    if (steps) {
+        steps = steps|0;
+    } else {
+        steps = 50;
+    }
+
+
+    var stops = [];
+    var colors = [];
+    var se = grad.getElementsByTagName('STOP');
+    for (var si = 0; si < se.length; ++si) {
+        var stop = se[si];
+        stops.push(1.0 * stop.getAttribute('score'));
+        colors.push(stop.firstChild.nodeValue);
+    }
+
+    return makeColourSteps(steps, stops, colors);
+}
+
 DASSource.prototype.stylesheet = function(successCB, failureCB) {
     var dasURI, creds = this.credentials;
     if (this.stylesheet_uri) {
@@ -529,7 +553,11 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
                 while (child) {
                     if (child.nodeType == Node.ELEMENT_NODE) {
                         // alert(child.localName);
-                        style[child.localName] = child.firstChild.nodeValue;
+                        if (child.localName == 'BGGRAD') {
+                            style[child.localName] = parseGradient(child);
+                        } else {      
+                            style[child.localName] = child.firstChild.nodeValue;
+                        }
                     }
                     child = child.nextSibling;
                 }
@@ -728,10 +756,19 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
     }
 }
 
-DASSource.prototype.doCrossDomainRequest = function(url, handler) {
+DASSource.prototype.doCrossDomainRequest = function(url, handler, errHandler) {
     var custAuth;
     if (this.xUser) {
         custAuth = 'Basic ' + btoa(this.xUser + ':' + this.xPass);
     }
-    return doCrossDomainRequest(url, handler, this.credentials, custAuth);
+
+    try {
+        return doCrossDomainRequest(url, handler, this.credentials, custAuth);
+    } catch (err) {
+        if (errHandler) {
+            errHandler(err);
+        } else {
+            throw err;
+        }
+    }
 }

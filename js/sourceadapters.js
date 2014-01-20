@@ -7,6 +7,12 @@
 // sourceadapters.js
 //
 
+var __dalliance_sourceAdapterFactories = {}
+
+function dalliance_registerSourceAdapterFactory(type, factory) {
+    __dalliance_sourceAdapterFactories[type] = factory;
+}
+
 DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
@@ -23,6 +29,13 @@ DasTier.prototype.initSources = function() {
 
     this.featureSource = fs;
     this.sequenceSource = ss;
+
+    if (this.featureSource && this.featureSource.addChangeListener) {
+        this.featureSource.addChangeListener(function() {
+            thisTier.browser.refreshTier(thisTier);
+        });
+    }
+
 }
 
 Browser.prototype.createFeatureSource = function(config) {
@@ -31,7 +44,10 @@ Browser.prototype.createFeatureSource = function(config) {
         return fs;
     }
 
-    if (config.bwgURI || config.bwgBlob) {
+    if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
+        var saf = __dalliance_sourceAdapterFactories[config.tier_type];
+        fs = saf(config).features;
+    } else if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         fs = new BAMFeatureSource(config);
@@ -39,8 +55,6 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
-    } else if (config.tier_type == 'ensembl') {
-        fs = new EnsemblFeatureSource(config);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
@@ -48,7 +62,7 @@ Browser.prototype.createFeatureSource = function(config) {
     if (config.overlay) {
         var sources = [];
         if (fs)
-            sources.push(fs);
+            sources.push(new CachingFeatureSource(fs));
 
         for (var oi = 0; oi < config.overlay.length; ++oi) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
@@ -100,11 +114,35 @@ SourceCache.prototype.put = function(conf, source) {
 var __cfs_id_seed = 0;
 
 function CachingFeatureSource(source) {
+    var thisB = this;
+
     this.source = source;
     this.cfsid = 'cfs' + (++__cfs_id_seed);
     if (source.name) {
         this.name = source.name;
     }
+    if (source.addChangeListener) {
+        source.addChangeListener(function() {
+            thisB.cfsid = 'cfs' + (++__cfs_id_seed);
+        });
+    }
+}
+
+CachingFeatureSource.prototype.addReadinessListener = function(listener) {
+    if (this.source.addReadinessListener)
+        return this.source.addReadinessListener(listener);
+    else
+        listener(null);
+}
+
+CachingFeatureSource.prototype.search = function(query, callback) {
+    if (this.source.search)
+        return this.source.search(query, callback);
+}
+
+CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.source.getDefaultFIPs)
+        return this.source.getDefaultFIPs(callback); 
 }
 
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {
@@ -119,6 +157,11 @@ CachingFeatureSource.prototype.addActivityListener = function(l) {
     if (this.source.addActivityListener) {
         this.source.addActivityListener(l);
     }
+}
+
+CachingFeatureSource.prototype.addChangeListener = function(l) {
+    if (this.source.addChangeListener)
+        this.source.addChangeListener(l);
 }
 
 CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
@@ -138,12 +181,17 @@ CachingFeatureSource.prototype.capabilities = function() {
 }
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    if (pool == null) {
+        throw 'pool is null...';
+    }
+
     var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();
         pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
         this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
-            awaitedFeatures.provide({status: status, features: features, scale: scale});
+            if (!awaitedFeatures.res)
+                awaitedFeatures.provide({status: status, features: features, scale: scale});
         });
     } 
 
@@ -152,6 +200,42 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     });
 }
     
+function FeatureSourceBase() {
+    this.busy = 0;
+    this.activityListeners = [];
+    this.readinessListeners = [];
+    this.readiness = null;
+}
+
+FeatureSourceBase.prototype.addReadinessListener = function(listener) {
+    this.readinessListeners.push(listener);
+    listener(this.readiness);
+}
+
+FeatureSourceBase.prototype.notifyReadiness = function() {
+    for (var li = 0; li < this.readinessListeners.length; ++li) {
+        try {
+            this.readinessListeners[li](this.readiness);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
+FeatureSourceBase.prototype.addActivityListener = function(listener) {
+    this.activityListeners.push(listener);
+}
+
+FeatureSourceBase.prototype.notifyActivity = function() {
+    for (var li = 0; li < this.activityListeners.length; ++li) {
+        try {
+            this.activityListeners[li](this.busy);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
 
 
 function DASFeatureSource(dasSource) {
@@ -338,12 +422,12 @@ DASFeatureSource.prototype.getScales = function() {
 var bwg_preflights = {};
 
 function BWGFeatureSource(bwgSource) {
+    FeatureSourceBase.call(this);
+
     var thisB = this;
+    this.readiness = 'Connecting';
     this.bwgSource = this.opts = bwgSource;    
     thisB.bwgHolder = new Awaited();
-
-    this.busy = 0;
-    this.activityListeners = [];
 
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
@@ -377,19 +461,7 @@ function BWGFeatureSource(bwgSource) {
     }
 }
 
-BWGFeatureSource.prototype.addActivityListener = function(listener) {
-    this.activityListeners.push(listener);
-}
-
-BWGFeatureSource.prototype.notifyActivity = function() {
-    for (var li = 0; li < this.activityListeners.length; ++li) {
-        try {
-            this.activityListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
+BWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
@@ -402,8 +474,22 @@ BWGFeatureSource.prototype.init = function() {
         arg = this.bwgSource.bwgBlob;
     }
 
-    make(arg, function(bwg) {
-        thisB.bwgHolder.provide(bwg);
+    make(arg, function(bwg, err) {
+        if (err) {
+            thisB.error = err;
+            thisB.readiness = null;
+            thisB.notifyReadiness();
+            thisB.bwgHolder.provide(null);
+        } else {
+            thisB.bwgHolder.provide(bwg);
+            thisB.readiness = null;
+            thisB.notifyReadiness();
+            if (bwg.type == 'bigbed') {
+                bwg.getExtraIndices(function(ei) {
+                    thisB.extraIndices = ei;
+                });
+            }
+        }
     }, this.opts.credentials);
 }
 
@@ -411,6 +497,12 @@ BWGFeatureSource.prototype.capabilities = function() {
     var caps = {leap: true};
     if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
         caps.quantLeap = true;
+    if (this.extraIndices && this.extraIndices.length > 0) {
+        caps.search = [];
+        for (var eii = 0; eii < this.extraIndices.length; ++eii) {
+            caps.search.push(this.extraIndices[eii].field);
+        }
+    }
     return caps;
 }
 
@@ -418,7 +510,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     var thisB = this;
     this.bwgHolder.await(function(bwg) {
         if (bwg == null) {
-            return callback("Can't access binary file", null, null);
+            return callback(thisB.error || "Can't access binary file", null, null);
         }
 
         // dlog('bwg: ' + bwg.name + '; want scale: ' + scale);
@@ -519,21 +611,46 @@ BWGFeatureSource.prototype.getScales = function() {
     }
 }
 
+BWGFeatureSource.prototype.search = function(query, callback) {
+    if (!this.extraIndices || this.extraIndices.length == 0) {
+        return callback(null, 'No indices available');
+    }
+
+    var index = this.extraIndices[0];
+    return index.lookup(query, callback);
+}
+
+BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.opts.noExtraFeatureInfo)
+        return true;
+
+    this.bwgHolder.await(function(bwg) {
+        if (!bwg) return;
+
+        if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
+            var fip = function(feature, featureInfo) {
+                for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
+                    var f = bwg.schema.fields[fi];
+                    featureInfo.add(f.comment, feature[f.name]);
+                }
+            };
+
+            callback(fip);
+        } else {
+            // No need to do anything.
+        }
+    });
+}
+
 BWGFeatureSource.prototype.getStyleSheet = function(callback) {
+    var thisB = this;
+
     this.bwgHolder.await(function(bwg) {
         if (!bwg) {
             return callback(null, 'bbi error');
         }
 
-	/* What to do about this...?
-        if (thisTier.dasSource.collapseSuperGroups === undefined) {
-            if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
-                thisTier.dasSource.collapseSuperGroups = true;
-                thisTier.bumped = false;
-            }
-        }*/
-
-	var stylesheet = new DASStylesheet();
+    	var stylesheet = new DASStylesheet();
         if (bwg.type == 'bigbed') {
             var wigStyle = new DASStyle();
             wigStyle.glyph = 'BOX';
@@ -578,7 +695,11 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
             stylesheet.pushStyle({type: 'default'}, null, wigStyle);
         }
 
-	return callback(stylesheet);
+        if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+            stylesheet.geneHint = true;
+        }
+
+    	return callback(stylesheet);
     });
 }
 
@@ -632,12 +753,12 @@ BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 }
 
 function BAMFeatureSource(bamSource) {
+    FeatureSourceBase.call(this);
+
     var thisB = this;
     this.bamSource = bamSource;
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
     this.bamHolder = new Awaited();
-    this.busy = 0;
-    this.activityListeners = [];
     
     if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
@@ -672,19 +793,7 @@ function BAMFeatureSource(bamSource) {
     }
 }
 
-BAMFeatureSource.prototype.addActivityListener = function(listener) {
-    this.activityListeners.push(listener);
-}
-
-BAMFeatureSource.prototype.notifyActivity = function() {
-    for (var li = 0; li < this.activityListeners.length; ++li) {
-        try {
-            this.activityListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
+BAMFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BAMFeatureSource.prototype.init = function() {
     var thisB = this;
@@ -697,6 +806,8 @@ BAMFeatureSource.prototype.init = function() {
         baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
     }
     makeBam(bamF, baiF, function(bam) {
+        thisB.readiness = null;
+        thisB.notifyReadiness();
         thisB.bamHolder.provide(bam);
     });
 }
@@ -718,14 +829,31 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 var features = [];
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
+
+                    if (r.flag & 0x4)
+                        continue; 
+                    
+                    var len = r.seq.length;
+                    if (r.cigar) {
+                        len = 0;
+                        var ops = parseCigar(r.cigar);
+                        for (var ci = 0; ci < ops.length; ++ci) {
+                            var co = ops[ci];
+                            if (co.op == 'M' || co.op == 'D')
+                                len += co.cnt;
+                        }
+                    }
+
                     var f = new DASFeature();
                     f.min = r.pos + 1;
-                    f.max = r.pos + r.seq.length;
+                    f.max = r.pos + len;
                     f.segment = r.segment;
                     f.type = 'bam';
                     f.id = r.readName;
                     f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
+                    f.cigar = r.cigar;
                     f.seq = r.seq;
+                    f.quals = r.quals;
                     features.push(f);
                 }
                 callback(null, features, 1000000000);

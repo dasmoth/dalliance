@@ -9,8 +9,9 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, holder, overlay, placard, placardContent)
+function DasTier(browser, source, viewport, holder, overlay, placard, placardContent, notifier, config)
 {
+    this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
     this.dasSource = new DASSource(source);
@@ -21,7 +22,9 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     this.placardContent = placardContent;
     this.req = null;
     this.layoutHeight = 25;
-    this.bumped = true; 
+    this.bumped = true;
+    this.notifier = notifier;
+    this.styleIdSeed = 0;
     if (source.quantLeapThreshold) {
         this.quantLeapThreshold = source.quantLeapThreshold;
     }
@@ -36,6 +39,22 @@ function DasTier(browser, source, viewport, holder, overlay, placard, placardCon
     }
 
     this.initSources();
+
+    var thisB = this;
+    if (this.featureSource && this.featureSource.getDefaultFIPs) {
+        this.featureSource.getDefaultFIPs(function(fip) {
+            if (fip)
+                thisB.addFeatureInfoPlugin(fip);
+        });
+    }
+
+    if (this.featureSource && this.featureSource.addReadinessListener) {
+        this.featureSource.addReadinessListener(function(ready) {
+            thisB.notify(ready, -1);
+        });
+    }
+
+    this.listeners = [];
 }
 
 DasTier.prototype.toString = function() {
@@ -52,7 +71,7 @@ DasTier.prototype.init = function() {
     var tier = this;
 
     if (tier.dasSource.style) {
-        this.stylesheet = {styles: tier.dasSource.style};
+        this.setStylesheet({styles: tier.dasSource.style});
         this.browser.refreshTier(this);
     } else {
         var ssSource;
@@ -66,31 +85,34 @@ DasTier.prototype.init = function() {
         ssSource.getStyleSheet(function(ss, err) {
             if (err) {
                 tier.error = 'No stylesheet';
-                tier.stylesheet = new DASStylesheet();
+                var ss = new DASStylesheet();
                 var defStyle = new DASStyle();
                 defStyle.glyph = 'BOX';
                 defStyle.BGCOLOR = 'blue';
                 defStyle.FGCOLOR = 'black';
-                tier.stylesheet.pushStyle({type: 'default'}, null, defStyle);
+                ss.pushStyle({type: 'default'}, null, defStyle);
+                tier.setStylesheet(ss);
                 tier.browser.refreshTier(tier);
             } else {
-                tier.stylesheet = ss;
+                tier.setStylesheet(ss);
+                if (ss.geneHint) {
+                    tier.dasSource.collapseSuperGroups = true;
+                    tier.bumped = false;
+                    tier.updateLabel();
+                }
                 tier.browser.refreshTier(tier);
             }
         });
     }
 }
 
-DasTier.prototype.styles = function(scale) {
-    // alert('Old SS code called');
-    if (this.stylesheet == null) {
-        return null;
-    } else if (this.browser.scale > 0.2) {
-        return this.stylesheet.highZoomStyles;
-    } else if (this.browser.scale > 0.01) {
-        return this.stylesheet.mediumZoomStyles;
-    } else {
-        return this.stylesheet.lowZoomStyles;
+DasTier.prototype.setStylesheet = function(ss) {
+    this.stylesheet = shallowCopy(ss);
+    for (var si = 0; si < this.stylesheet.styles.length; ++si) {
+        var sh = this.stylesheet.styles[si] = shallowCopy(this.stylesheet.styles[si]);
+        sh._methodRE = sh._labelRE = sh._typeRE = null;
+        sh.style = shallowCopy(sh.style);
+        sh.style.id = 'style' + (++this.styleIdSeed);
     }
 }
 
@@ -138,10 +160,6 @@ DasTier.prototype.needsSequence = function(scale ) {
     return false;
 }
 
-DasTier.prototype.setStatus = function(status) {
-    dlog(status);
-}
-
 DasTier.prototype.viewFeatures = function(chr, min, max, scale, features, sequence) {
     this.currentFeatures = features;
     this.currentSequence = sequence;
@@ -165,6 +183,7 @@ DasTier.prototype.updateStatus = function(status) {
         this.placard.style.display = 'none';
         this.holder.style.display = 'block';
     }
+    this.updateHeight();
 }
 
 DasTier.prototype.draw = function() {
@@ -256,7 +275,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
 
 
 DasTier.prototype.updateLabel = function() {
-   this.bumpButton.className = this.bumped ? 'icon-minus-sign' : 'icon-plus-sign';
+   this.bumpButton.className = this.bumped ? 'fa fa-minus-circle' : 'fa fa-plus-circle';
    if (this.dasSource.collapseSuperGroups) {
         this.bumpButton.style.display = 'inline-block';
     } else {
@@ -265,7 +284,13 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.row.style.height = '' + Math.max(this.holder.clientHeight, this.label.clientHeight + 4) + 'px';
+    this.currentHeight = Math.max(this.layoutHeight, Math.max(this.holder.clientHeight, this.label.clientHeight + 4));
+    if (this.placard.style.display !== 'none') {
+        // Hard-coded because we don't know exactly when the CSS will have loaded.
+        this.currentHeight = Math.max(this.currentHeight, /* this.placard.clientHeight + 2 */ 52);
+    }
+    this.row.style.height = '' + this.currentHeight + 'px';
+    this.browser.updateHeight();
  }
 
 DasTier.prototype.drawOverlay = function() {
@@ -295,4 +320,121 @@ DasTier.prototype.drawOverlay = function() {
 
     t.oorigin = b.viewStart;
     t.overlay.style.left = '-1000px'
+}
+
+DasTier.prototype.notify = function(message, timeout) {
+    timeout = timeout || 2000;
+
+    if (this.notifierFadeTimeout) {
+        clearTimeout(this.notifierFadeTimeout);
+        this.notifierFadeTimeout = null;
+    }
+
+    if (message) {
+        this.notifier.textContent = message;
+        this.notifier.style.opacity = 0.8;
+    
+        if (timeout > 0) {
+            var thisB = this;
+            this.notifierFadeTimeout = setTimeout(function() {
+                thisB.notifier.style.opacity = 0;
+                thisB.notifierFadeTimeout = null;
+            }, timeout);
+        }
+    } else {
+        this.notifier.style.opacity = 0;
+    }
+
+}
+
+DasTier.prototype.setConfig = function(config) {
+    this.config = config || {};
+    this._updateFromConfig();
+    this.notifyTierListeners();
+}
+
+DasTier.prototype.mergeConfig = function(newConfig) {
+    for (var k in newConfig) {
+        this.config[k] = newConfig[k];
+    }
+    this._updateFromConfig();
+    this.notifyTierListeners();
+}
+
+DasTier.prototype._updateFromConfig = function() {
+    var needsRefresh = false;
+
+    this.nameElement.innerText = this.config.name || this.dasSource.name;
+
+    if (this.config.height) {
+        if (this.config.height != this.forceHeight) {
+            this.forceHeight = this.config.height;
+            needsRefresh = true;
+        }
+    }
+    if (this.config.forceMinDynamic != undefined && this.forceMinDynamic != this.config.forceMinDynamic) {
+        this.forceMinDynamic = this.config.forceMinDynamic;
+        needsRefresh = true;
+    }
+
+    var forceMin = this.config.forceMin != undefined ? this.config.forceMin : this.dasSource.forceMin;
+    if (forceMin != undefined && this.forceMin != forceMin) {
+        this.forceMin = forceMin;
+        needsRefresh = true;
+    }
+
+    if (this.config.forceMaxDynamic != undefined && this.forceMaxDynamic != this.config.forceMaxDynamic) {
+        this.forceMaxDynamic = this.config.forceMaxDynamic;
+        needsRefresh = true;
+    }
+    
+    var forceMax = this.config.forceMax != undefined ? this.config.forceMax : this.dasSource.forceMax;
+    if (forceMax != undefined && this.forceMax != forceMax) {
+        this.forceMax = forceMax;
+        needsRefresh = true;
+    }
+
+    var quantLeapThreshold = null;
+    if (this.config.quantLeapThreshold != undefined)
+        quantLeapThreshold = this.config.quantLeapThreshold;
+    else if (this.dasSource.quantLeapThreshold != undefined)
+        quantLeapThreshold = this.dasSource.quantLeapThreshold;
+    if (quantLeapThreshold != this.quantLeapThreshold) {
+        this.quantLeapThreshold = quantLeapThreshold;
+        needsRefresh = true;
+    }
+    
+
+    if (needsRefresh)
+        this.scheduleRedraw();
+}
+
+DasTier.prototype.scheduleRedraw = function() {
+    if (!this.currentFeatures)
+        return;
+    
+    var tier = this;
+
+    if (!this.redrawTimeout) {
+        this.redrawTimeout = setTimeout(function() {
+            tier.draw();
+            tier.redrawTimeout = null;
+        }, 10);
+    }
+}
+
+
+DasTier.prototype.addTierListener = function(l) {
+    this.listeners.push(l);
+}
+
+DasTier.prototype.notifyTierListeners = function(change) {
+    for (var li = 0; li < this.listeners.length; ++li) {
+        try {
+            this.listeners[li](change);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    this.browser.notifyTier();
 }
