@@ -95,7 +95,7 @@ VCFParser.prototype.parse = function(line) {
     f.refAllele = toks[3];
     f.altAlleles = toks[4].split(',');
     f.min = parseInt(toks[1]);
-    f.max = parseInt(f.min + f.refAllele.length - 1);
+    f.max = f.min + f.refAllele.length - 1;
     f.type = 'vcf';
     return f;
 }
