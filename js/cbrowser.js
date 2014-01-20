@@ -1228,6 +1228,8 @@ Browser.prototype.addTier = function(conf) {
 function sourceDataURI(conf) {
     if (conf.uri) {
         return conf.uri;
+    } else if (conf.blob) {
+        return 'file:' + conf.blob.name;
     } else if (conf.bwgBlob) {
         return 'file:' + conf.bwgBlob.name;
     } else if (conf.bamBlob) {
@@ -1252,6 +1254,9 @@ function sourcesAreEqual(a, b) {
         return false;
 
     if (a.mapping != b.mapping)
+        return false;
+
+    if (a.tier_type != b.tier_type)
         return false;
 
     if (a.overlay) {
