@@ -660,30 +660,31 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 smin = 0;
             }
 
-            if ((1.0 * score) < (1.0 *smin)) {
-                score = smin;
-            }
-            if ((1.0 * score) > (1.0 * smax)) {
-                score = smax;
-            }
             var relScore = ((1.0 * score) - smin) / (smax-smin);
             var relOrigin = (-1.0 * smin) / (smax - smin);
 
-            if (relScore >= relOrigin) {
-                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-                y = y + ((1.0 - relOrigin) * requiredHeight) - height;
-            } else {
-                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-                y = y + ((1.0 - relOrigin) * requiredHeight);
-            }
-            
-            quant = {min: smin, max: smax};
+            if (relScore < 0.0 || relScore > 1.0) {
+                // Glyph is out of bounds.
+                // Should we allow for "partially showing" glyphs?
 
-            if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
-                gg = new LabelledGlyph(gg, label, true);
-                noLabel = true;
+                return null;
+            } else {
+                if (relScore >= relOrigin) {
+                    height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                    y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+                } else {
+                    height = Math.max(1, (relScore - relOrigin) * requiredHeight);
+                    y = y + ((1.0 - relOrigin) * requiredHeight);
+                }
+                
+                quant = {min: smin, max: smax};
+
+                if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
+                    gg = new LabelledGlyph(gg, label, true);
+                    noLabel = true;
+                }
+                gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
             }
-            gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
         }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {
         var smin = tier.quantMin(style);
