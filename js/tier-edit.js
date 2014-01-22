@@ -223,6 +223,12 @@ Browser.prototype.openTierPanel = function(tier) {
 
         tierForm.appendChild(tierTable);
 
+        var resetButton = makeElement('button', 'Reset track', {className: 'btn'}, {marginLeft: 'auto', marginRight: 'auto', display: 'block'});
+        resetButton.addEventListener('click', function(ev) {
+            tier.setConfig({});
+        }, false);
+        tierForm.appendChild(resetButton);
+
         tierNameField.addEventListener('input', function(ev) {
             tier.mergeConfig({name: tierNameField.value});
         }, false);

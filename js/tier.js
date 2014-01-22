@@ -366,38 +366,38 @@ DasTier.prototype._updateFromConfig = function() {
 
     this.nameElement.innerText = this.config.name || this.dasSource.name;
 
-    if (this.config.height) {
-        if (this.config.height != this.forceHeight) {
-            this.forceHeight = this.config.height;
-            needsRefresh = true;
-        }
+    var wantedHeight = this.config.height || this.dasSource.forceHeight;
+    if (wantedHeight != this.forceHeight) {
+        this.forceHeight = wantedHeight;
+        needsRefresh = true;
     }
-    if (this.config.forceMinDynamic != undefined && this.forceMinDynamic != this.config.forceMinDynamic) {
+
+    if (this.forceMinDynamic != this.config.forceMinDynamic) {
         this.forceMinDynamic = this.config.forceMinDynamic;
         needsRefresh = true;
     }
 
     var forceMin = this.config.forceMin != undefined ? this.config.forceMin : this.dasSource.forceMin;
-    if (forceMin != undefined && this.forceMin != forceMin) {
+    if (this.forceMin != forceMin) {
         this.forceMin = forceMin;
         needsRefresh = true;
     }
 
-    if (this.config.forceMaxDynamic != undefined && this.forceMaxDynamic != this.config.forceMaxDynamic) {
+    if (this.forceMaxDynamic != this.config.forceMaxDynamic) {
         this.forceMaxDynamic = this.config.forceMaxDynamic;
         needsRefresh = true;
     }
     
     var forceMax = this.config.forceMax != undefined ? this.config.forceMax : this.dasSource.forceMax;
-    if (forceMax != undefined && this.forceMax != forceMax) {
+    if (this.forceMax != forceMax) {
         this.forceMax = forceMax;
         needsRefresh = true;
     }
 
     var quantLeapThreshold = null;
-    if (this.config.quantLeapThreshold != undefined)
+    if (this.config.quantLeapThreshold !== undefined)
         quantLeapThreshold = this.config.quantLeapThreshold;
-    else if (this.dasSource.quantLeapThreshold != undefined)
+    else if (this.dasSource.quantLeapThreshold !== undefined)
         quantLeapThreshold = this.dasSource.quantLeapThreshold;
     if (quantLeapThreshold != this.quantLeapThreshold) {
         this.quantLeapThreshold = quantLeapThreshold;
