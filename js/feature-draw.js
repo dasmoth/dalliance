@@ -871,6 +871,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             indels.splice(0, 0, gg);
             gg = new GroupGlyph(indels);
         }
+    } else if (gtype === '__INSERTION') {
+        var ig = new TriangleGlyph(minPos, 5, 'S', 5, 'red');
+        gg = new LabelledGlyph(ig, feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {

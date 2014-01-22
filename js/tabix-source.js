@@ -73,6 +73,26 @@ TabixFeatureSource.prototype.getStyleSheet = function(callback) {
 
     {
         var varStyle = new DASStyle();
+        varStyle.glyph = '__INSERTION';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'rgb(50,80,255)';
+        varStyle.BGCOLOR = '#888888';
+        varStyle.STROKECOLOR = 'black';
+        stylesheet.pushStyle({type: 'insertion'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
+        varStyle.glyph = 'PLIMSOLL';
+        varStyle.BUMP = 'yes';
+        varStyle.LABEL = 'no';
+        varStyle.FGCOLOR = 'rgb(255, 60, 60)';
+        varStyle.BGCOLOR = '#888888';
+        varStyle.STROKECOLOR = 'black';
+        stylesheet.pushStyle({type: 'deletion'}, null, varStyle);
+    }
+    {
+        var varStyle = new DASStyle();
         varStyle.glyph = 'PLIMSOLL';
         varStyle.BUMP = 'yes';
         varStyle.LABEL = 'no';
@@ -96,7 +116,16 @@ VCFParser.prototype.parse = function(line) {
     f.altAlleles = toks[4].split(',');
     f.min = parseInt(toks[1]);
     f.max = f.min + f.refAllele.length - 1;
-    f.type = 'vcf';
+
+    var alt = f.altAlleles[0];
+    var ref = f.refAllele;
+    if (alt.length > ref.length) {
+        f.type = "insertion";
+    } else if (alt.length < ref.length) {
+        f.type = "deletion";
+    } else {
+        f.type = 'substitution';
+    }
     return f;
 }
 
