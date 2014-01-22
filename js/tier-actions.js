@@ -18,7 +18,7 @@ Browser.prototype.mergeSelectedTiers = function() {
         for (var si = 0; si < ss.length; ++si) {
             var sh = ss[si];
             var nsh = shallowCopy(sh);
-            nsh.method = tier.dasSource.name;
+            nsh.method = tier.dasSource.name.replace(/[()+*?]/g, '\\$&');
             nsh._methodRE = null;
             nsh.style = shallowCopy(sh.style);
 
