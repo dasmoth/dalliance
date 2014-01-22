@@ -21,6 +21,8 @@ Browser.prototype.mergeSelectedTiers = function() {
             nsh.method = tier.dasSource.name.replace(/[()+*?]/g, '\\$&');
             nsh._methodRE = null;
             nsh.style = shallowCopy(sh.style);
+            if (nsh.style.ZINDEX === undefined)
+                nsh.style.ZINDEX = sti;
 
             styles.push(nsh);
         }
