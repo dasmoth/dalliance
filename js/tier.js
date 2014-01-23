@@ -364,7 +364,10 @@ DasTier.prototype.mergeConfig = function(newConfig) {
 DasTier.prototype._updateFromConfig = function() {
     var needsRefresh = false;
 
-    this.nameElement.innerText = this.config.name || this.dasSource.name;
+    if (typeof this.config.name === 'string')
+        this.nameElement.innerText = this.config.name;
+    else
+        this.nameElement.innerText = this.dasSource.name;
 
     var wantedHeight = this.config.height || this.dasSource.forceHeight;
     if (wantedHeight != this.forceHeight) {

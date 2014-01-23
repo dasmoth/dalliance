@@ -45,7 +45,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var tierForm = makeElement('div', null, {className: 'tier-edit'});
 
-        var tierNameField = makeElement('input', null, {type: 'text', value: tier.config.name || tier.dasSource.name});
+        var tierNameField = makeElement('input', null, {type: 'text'});
         var glyphField = makeElement('select');
         glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));
         glyphField.appendChild(makeElement('option', 'Line Plot', {value: 'LINEPLOT'}));
@@ -117,24 +117,6 @@ Browser.prototype.openTierPanel = function(tier) {
                 glyphField.value = s.glyph;
             }
 
-            if (s.MIN !== undefined) {
-                tierMinField.value = s.MIN;
-            }
-            if (!tier.forceMinDynamic && s.MIN !== undefined) {
-                tierMinToggle.checked = true;
-            } else {
-                tierMinField.disabled = true;
-            }
-
-            if (s.MAX !== undefined) {
-                tierMaxField.value = s.MAX;
-            }
-            if (!tier.forceMaxDynamic && s.MAX !== undefined) {
-                tierMaxToggle.checked = true;
-            } else {
-                tierMaxField.disabled = true;
-            }
-
             for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
                 var ss = tier.stylesheet.styles[si].style;
                 if (ss.glyph === '__SEQUENCE') {
@@ -145,14 +127,12 @@ Browser.prototype.openTierPanel = function(tier) {
 
         setNumColors(numColors);
 
-        if (tier.forceMin != undefined) {
-            tierMinField.value = tier.forceMin;
-        }
-        if (tier.forceMax != undefined) {
-            tierMaxField.value = tier.forceMax;
-        }
-
         function refresh() {
+            if (typeof tier.config.name === 'string')
+                tierNameField.value = tier.config.name;
+            else 
+                tierNameField.value = tier.dasSource.name;
+
             if (tier.forceHeight) {
                 tierHeightField.value = '' + tier.forceHeight;
             } else if (mainStyle && mainStyle.HEIGHT) {
@@ -166,6 +146,69 @@ Browser.prototype.openTierPanel = function(tier) {
             } else {
                 quantLeapToggle.checked = false;
                 quantLeapThreshField.disabled = true;
+            }
+
+            if (tier.stylesheet.styles.length > 0) {
+                var s = mainStyle = tier.stylesheet.styles[0].style;
+
+                /*
+                if (s.COLOR1) {
+                    tierColorField.value = dasColourForName(s.COLOR1).toHexString();
+                    if (s.COLOR2) {
+                        tierColorField2.value = dasColourForName(s.COLOR2).toHexString();
+                        if (s.COLOR3) {
+                            tierColorField3.value = dasColourForName(s.COLOR3).toHexString();
+                            numColors = 3;
+                        } else {
+                            numColors = 2;
+                        }
+                    }
+                } else {
+                    if (s.glyph == 'LINEPLOT' || s.glyph == 'DOT' && s.FGCOLOR) {
+                        tierColorField.value = dasColourForName(s.FGCOLOR).toHexString();
+                    } else if (s.BGCOLOR) {
+                        tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
+                    }
+                }
+
+                if (isDasBooleanTrue(s.SCATTER)) {
+                    glyphField.value = 'SCATTER';
+                } else {
+                    glyphField.value = s.glyph;
+                } */
+
+                if (s.MIN !== undefined) {
+                    tierMinField.value = s.MIN;
+                }
+                if (!tier.forceMinDynamic && s.MIN !== undefined) {
+                    tierMinToggle.checked = true;
+                } else {
+                    tierMinField.disabled = true;
+                }
+
+                if (s.MAX !== undefined) {
+                    tierMaxField.value = s.MAX;
+                }
+                if (!tier.forceMaxDynamic && s.MAX !== undefined) {
+                    tierMaxToggle.checked = true;
+                } else {
+                    tierMaxField.disabled = true;
+                }
+
+                if (tier.forceMin != undefined) {
+                    tierMinField.value = tier.forceMin;
+                }
+                if (tier.forceMax != undefined) {
+                    tierMaxField.value = tier.forceMax;
+                }
+
+                /*
+                for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
+                    var ss = tier.stylesheet.styles[si].style;
+                    if (ss.glyph === '__SEQUENCE') {
+                        seqStyle = ss; break;
+                    }
+                } */
             }
         }
         refresh();
