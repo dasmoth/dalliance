@@ -109,7 +109,7 @@ Browser.prototype.search = function(g, statusCallback) {
                     }
                 } else if (tier.dasSource.provides_search) {
                     ++searchCount;
-                    this.doDasSearch(tier.dasSource, g, searchCallback);
+                    thisB.doDasSearch(tier.dasSource, g, searchCallback);
                 }
             })(this.tiers[ti]);
         }
