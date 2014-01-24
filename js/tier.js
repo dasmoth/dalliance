@@ -107,13 +107,14 @@ DasTier.prototype.init = function() {
 }
 
 DasTier.prototype.setStylesheet = function(ss) {
-    this.stylesheet = shallowCopy(ss);
-    for (var si = 0; si < this.stylesheet.styles.length; ++si) {
-        var sh = this.stylesheet.styles[si] = shallowCopy(this.stylesheet.styles[si]);
+    this.baseStylesheet = shallowCopy(ss);
+    for (var si = 0; si < this.baseStylesheet.styles.length; ++si) {
+        var sh = this.baseStylesheet.styles[si] = shallowCopy(this.baseStylesheet.styles[si]);
         sh._methodRE = sh._labelRE = sh._typeRE = null;
         sh.style = shallowCopy(sh.style);
         sh.style.id = 'style' + (++this.styleIdSeed);
     }
+    this._updateFromConfig();
 }
 
 DasTier.prototype.getSource = function() {
@@ -407,6 +408,12 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
     
+    // Possible FIXME -- are there cases where style IDs need to be reassigned?
+    var stylesheet = this.config.stylesheet || this.baseStylesheet;
+    if (this.stylesheet !== stylesheet) {
+        this.stylesheet = stylesheet;
+        needsRefresh = true;
+    }
 
     if (needsRefresh)
         this.scheduleRedraw();

@@ -14,31 +14,37 @@ Browser.prototype.openTierPanel = function(tier) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        function changeColor(ev) {
-            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                var style = tier.stylesheet.styles[i].style;
-                if (style.BGGRAD)
-                    return;
+        var setStyleColors = function(style) {
+            if (style.BGGRAD)
+                return;
 
-                if (numColors == 1) {
-                    if (style.glyph == 'LINEPLOT' || style.glyph == 'DOT') {
-                        style.FGCOLOR = tierColorField.value;
-                    } else {
-                        style.BGCOLOR = tierColorField.value;
-                    }
-                    style.COLOR1 = style.COLOR2 = style.COLOR3 = null;
+            if (numColors == 1) {
+                if (style.glyph == 'LINEPLOT' || style.glyph == 'DOT') {
+                    style.FGCOLOR = tierColorField.value;
                 } else {
-                    style.COLOR1 = tierColorField.value;
-                    style.COLOR2 = tierColorField2.value;
-                    if (numColors > 2) {
-                        style.COLOR3 = tierColorField3.value;
-                    } else {
-                        style.COLOR3 = null;
-                    }
+                    style.BGCOLOR = tierColorField.value;
                 }
-                style._gradient = null;
+                style.COLOR1 = style.COLOR2 = style.COLOR3 = null;
+            } else {
+                style.COLOR1 = tierColorField.value;
+                style.COLOR2 = tierColorField2.value;
+                if (numColors > 2) {
+                    style.COLOR3 = tierColorField3.value;
+                } else {
+                    style.COLOR3 = null;
+                }
             }
-            tier.scheduleRedraw();
+            style._gradient = null;
+        }
+
+        var changeColor = function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+
+            for (var i = 0; i < nss.styles.length; ++i) {
+                var style = nss.styles[i].style;
+                setStyleColors(style);
+            }
+            tier.mergeConfig({stylesheet: nss});
         }
         
         this.manipulatingTier = tier;
@@ -66,15 +72,18 @@ Browser.prototype.openTierPanel = function(tier) {
             removeChildren(colorListElement);
             for (var i = 0; i < n; ++i)
                 colorListElement.appendChild(tierColorFields[i]);
-            changeColor(null);
         }
         colorListPlus.addEventListener('click', function(ev) {
-            if (numColors < 3)
+            if (numColors < 3) {
                 setNumColors(numColors + 1);
+                changeColor(null);
+            }
         }, false);
         colorListMinus.addEventListener('click', function(ev) {
-            if (numColors > 1)
+            if (numColors > 1) {
                 setNumColors(numColors - 1);
+                changeColor(null);
+            }
         }, false);
 
         var tierMinField = makeElement('input', null, {type: 'text', value: '0.0'});
@@ -87,42 +96,9 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var tierHeightField = makeElement('input', null, {type: 'text', value: '50'});
 
-        var seqStyle = null;
         var mainStyle = null;
         if (tier.stylesheet.styles.length > 0) {
             var s = mainStyle = tier.stylesheet.styles[0].style;
-
-            if (s.COLOR1) {
-                tierColorField.value = dasColourForName(s.COLOR1).toHexString();
-                if (s.COLOR2) {
-                    tierColorField2.value = dasColourForName(s.COLOR2).toHexString();
-                    if (s.COLOR3) {
-                        tierColorField3.value = dasColourForName(s.COLOR3).toHexString();
-                        numColors = 3;
-                    } else {
-                        numColors = 2;
-                    }
-                }
-            } else {
-                if (s.glyph == 'LINEPLOT' || s.glyph == 'DOT' && s.FGCOLOR) {
-                    tierColorField.value = dasColourForName(s.FGCOLOR).toHexString();
-                } else if (s.BGCOLOR) {
-                    tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
-                }
-            }
-
-            if (isDasBooleanTrue(s.SCATTER)) {
-                glyphField.value = 'SCATTER';
-            } else {
-                glyphField.value = s.glyph;
-            }
-
-            for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
-                var ss = tier.stylesheet.styles[si].style;
-                if (ss.glyph === '__SEQUENCE') {
-                    seqStyle = ss; break;
-                }
-            }
         }
 
         setNumColors(numColors);
@@ -151,7 +127,6 @@ Browser.prototype.openTierPanel = function(tier) {
             if (tier.stylesheet.styles.length > 0) {
                 var s = mainStyle = tier.stylesheet.styles[0].style;
 
-                /*
                 if (s.COLOR1) {
                     tierColorField.value = dasColourForName(s.COLOR1).toHexString();
                     if (s.COLOR2) {
@@ -169,13 +144,13 @@ Browser.prototype.openTierPanel = function(tier) {
                     } else if (s.BGCOLOR) {
                         tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
                     }
-                }
+                } 
 
                 if (isDasBooleanTrue(s.SCATTER)) {
                     glyphField.value = 'SCATTER';
                 } else {
                     glyphField.value = s.glyph;
-                } */
+                } 
 
                 if (s.MIN !== undefined) {
                     tierMinField.value = s.MIN;
@@ -202,16 +177,40 @@ Browser.prototype.openTierPanel = function(tier) {
                     tierMaxField.value = tier.forceMax;
                 }
 
-                /*
-                for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
-                    var ss = tier.stylesheet.styles[si].style;
-                    if (ss.glyph === '__SEQUENCE') {
-                        seqStyle = ss; break;
-                    }
-                } */
+                var seqStyle = getSeqStyle(tier.stylesheet);
+                if (seqStyle) {
+                    seqMismatchRow.style.display = 'table-row';
+                    seqMismatchToggle.checked = (seqStyle.__SEQCOLOR === 'mismatch');
+                    seqInsertRow.style.display = 'table-row';
+                    seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
+                } else {
+                    seqMismatchRow.style.display = 'none';
+                    seqInsertRow.style.display = 'none';
+                }
             }
         }
-        refresh();
+
+        var seqMismatchToggle = makeElement('input', null, {type: 'checkbox'});
+        var seqMismatchRow = makeElement('tr',
+            [makeElement('th', 'Color mismatches'),
+             makeElement('td', seqMismatchToggle)]);
+        seqMismatchToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            var seqStyle = getSeqStyle(nss);
+            seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
+            tier.mergeConfig({stylesheet: nss});
+        });
+
+        var seqInsertToggle = makeElement('input', null, {type: 'checkbox'});
+        var seqInsertRow = makeElement('tr',
+            [makeElement('th', 'Show insertions'),
+             makeElement('td', seqInsertToggle)]);
+        seqInsertToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            var seqStyle = getSeqStyle(nss);
+            seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
+            tier.mergeConfig({stylesheet: nss});
+        });
 
         var tierTable = makeElement('table',
             [makeElement('tr',
@@ -240,29 +239,14 @@ Browser.prototype.openTierPanel = function(tier) {
 
              makeElement('tr',
                 [makeElement('th', 'Threshold leap:'),
-                 makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])])
+                 makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])]),
+
+             seqMismatchRow,
+             seqInsertRow
              ]);
 
-        if (seqStyle) {
-            var seqMismatchToggle = makeElement('input', null, {type: 'checkbox', checked: seqStyle.__SEQCOLOR === 'mismatch'});
-            tierTable.appendChild(makeElement('tr',
-                [makeElement('th', 'Color mismatches'),
-                 makeElement('td', seqMismatchToggle)]));
-            seqMismatchToggle.addEventListener('change', function(ev) {
-                seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
-                tier.scheduleRedraw();
-            });
 
-            var seqInsertToggle = makeElement('input', null, {type: 'checkbox', checked: isDasBooleanTrue(seqStyle.__INSERTIONS)});
-            tierTable.appendChild(makeElement('tr',
-                [makeElement('th', 'Show insertions (experimental)'),
-                 makeElement('td', seqInsertToggle)]));
-            seqInsertToggle.addEventListener('change', function(ev) {
-                seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
-                tier.scheduleRedraw();
-            });
-        }
-
+        refresh();
 
         tierForm.appendChild(tierTable);
 
@@ -277,14 +261,14 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
 
 
-
         for (var ci = 0; ci < tierColorFields.length; ++ci) {
             tierColorFields[ci].addEventListener('change', changeColor, false);
         }
 
         glyphField.addEventListener('change', function(ev) {
-            for (var i = 0; i < tier.stylesheet.styles.length; ++i) {
-                var ts = tier.stylesheet.styles[i].style;
+            var nss = copyStylesheet(tier.stylesheet);
+            for (var i = 0; i < nss.styles.length; ++i) {
+                var ts = nss.styles[i].style;
 
                 if (glyphField.value === 'SCATTER') {
                     ts.SCATTER = true;
@@ -293,8 +277,9 @@ Browser.prototype.openTierPanel = function(tier) {
                 } else {
                     ts.glyph = glyphField.value;
                 }
+                setStyleColors(ts);
             }
-            changeColor(); // Also calls scheduleRedraw.
+            tier.mergeConfig({stylesheet: nss});
         }, false);
 
         tierMinToggle.addEventListener('change', function(ev) {
@@ -353,4 +338,25 @@ Browser.prototype.openTierPanel = function(tier) {
 
         tier.addTierListener(refresh);
     }
+}
+
+function getSeqStyle(stylesheet) {
+    for (var si = 0; si < stylesheet.styles.length; ++si) {
+        var ss = stylesheet.styles[si].style;
+        if (ss.glyph === '__SEQUENCE') {
+            return ss;
+        }
+    }
+}
+
+function copyStylesheet(ss) {
+    var nss = shallowCopy(ss);
+    nss.styles = [];
+    for (var si = 0; si < ss.styles.length; ++si) {
+        var sh = nss.styles[si] = shallowCopy(ss.styles[si]);
+        sh._methodRE = sh._labelRE = sh._typeRE = null;
+        sh.style = shallowCopy(sh.style);
+        // sh.style.id = 'style' + (++this.styleIdSeed);
+    }
+    return nss;
 }
