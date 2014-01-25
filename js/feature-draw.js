@@ -19,8 +19,31 @@ function SubTier() {
     this.quant = null;
 }
 
+SubTier.prototype.indexFor = function(glyph) {
+    var gmin = glyph.min();
+    var lb = 0, ub = this.glyphs.length;
+    while (ub > lb) {
+        var mid = ((lb + ub)/2)|0;
+        if (mid >= this.glyphs.length)
+            return this.glyphs.length;
+        var mg = this.glyphs[mid];
+        if (gmin < mg.min()) {
+            ub = mid;
+        } else {
+            lb = mid + 1;
+        }
+    }
+    return ub;
+}
+
 SubTier.prototype.add = function(glyph) {
-    this.glyphs.push(glyph);
+    var ind = this.indexFor(glyph);
+    /* if (ind==0) {
+        console.log('len=' + this.glyphs.length + ';ind=' + ind);
+        console.log('min=' + glyph.min());
+        console.log('arr=' + this.glyphs.map(function(g) {return g.min()}).join(','));
+    }*/
+    this.glyphs.splice(ind, 0, glyph);
     this.height = Math.max(this.height, glyph.height());
     if (glyph.quant && this.quant == null) {
         this.quant = glyph.quant;
@@ -28,13 +51,23 @@ SubTier.prototype.add = function(glyph) {
 }
 
 SubTier.prototype.hasSpaceFor = function(glyph) {
+    var ind = this.indexFor(glyph);
+    if (ind > 0 && this.glyphs[ind-1].max() >= glyph.min())
+        return false;
+    if (ind < this.glyphs.length && this.glyphs[ind].min() <= glyph.max())
+        return false;
+
+    return true;
+
+    /*
+    var gmin = glyph.min(), gmax = glyph.max();
     for (var i = 0; i < this.glyphs.length; ++i) {
         var g = this.glyphs[i];
-        if (g.min() <= glyph.max() && g.max() >= glyph.min()) {
+        if (g.min() <= gmax && g.max() >= gmin) {
             return false;
         }
     }
-    return true;
+    return true; */
 }
 
 var GLOBAL_GC;
@@ -235,7 +268,7 @@ function drawFeatureTier(tier)
                 }
             }
             if (bumpedSTs.length >= subtierMax) {
-                tier.status = 'Too many overlapping features, truncating at ' + subtierMax;
+                // tier.status = 'Too many overlapping features, truncating at ' + subtierMax;
             } else {
                 var st = new SubTier();
                 st.add(g);

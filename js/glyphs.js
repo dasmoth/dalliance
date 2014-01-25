@@ -1286,6 +1286,7 @@ function PlimsollGlyph(x, height, overhang, fill, stroke) {
     this._overhang = overhang;
     this._fill = fill;
     this._stroke = stroke;
+    this._hh = height / 2;
 }
 
 PlimsollGlyph.prototype.draw = function(g) {
@@ -1308,7 +1309,7 @@ PlimsollGlyph.prototype.draw = function(g) {
 }
 
 PlimsollGlyph.prototype.toSVG = function() {
-    var hh = this._height/2;
+    var hh = this._hh;
     return makeElementNS(NS_SVG, 'g', 
         [makeElementNS(NS_SVG, 'circle', null, {cx: this._x, cy: hh, r: hh - this._overhang}),
          makeElementNS(NS_SVG, 'line', null, {x1: this._x, y1: 0, x2: this._x, y2: this._height})],
@@ -1318,11 +1319,11 @@ PlimsollGlyph.prototype.toSVG = function() {
 }
 
 PlimsollGlyph.prototype.min = function() {
-    return this._x - this._height/2;
+    return this._x - this._hh;
 }
 
 PlimsollGlyph.prototype.max = function() {
-    return this._x + this._height/2;
+    return this._x + this._hh;
 }
 
 PlimsollGlyph.prototype.height = function() {

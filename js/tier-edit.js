@@ -7,6 +7,8 @@
 // tier-edit.js
 //
 
+var __dalliance_smallGlyphs = {DOT: true, EX: true, STAR: true, SQUARE: true, CROSS: true, TRIANGLE: true, PLIMSOLL: true}
+
 Browser.prototype.openTierPanel = function(tier) {
     var b = this;
 
@@ -19,7 +21,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 return;
 
             if (numColors == 1) {
-                if (style.glyph == 'LINEPLOT' || style.glyph == 'DOT') {
+                if (style.glyph == 'LINEPLOT' || __dalliance_smallGlyphs[style.glyph]) {
                     style.FGCOLOR = tierColorField.value;
                 } else {
                     style.BGCOLOR = tierColorField.value;
@@ -312,7 +314,7 @@ Browser.prototype.openTierPanel = function(tier) {
             var x = parseFloat(tierHeightField.value);
             if (!Number.isNaN(x))
                 tier.mergeConfig({height: Math.min(500, x|0)});
-        }, false)
+        }, false);
 
         function updateQuant() {
             quantLeapThreshField.disabled = !quantLeapToggle.checked;
