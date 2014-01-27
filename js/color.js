@@ -30,7 +30,8 @@ var palette = {
     blue: new DColour(0, 0, 255, 'blue'),
     yellow: new DColour(255, 255, 0, 'yellow'),
     white: new DColour(255, 255, 255, 'white'),
-    black: new DColour(0, 0, 0, 'black')
+    black: new DColour(0, 0, 0, 'black'),
+    gray: new DColour(180, 180, 180, 'gray')
 };
 
 var COLOR_RE = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
