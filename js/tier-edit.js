@@ -128,6 +128,29 @@ Browser.prototype.openTierPanel = function(tier) {
 
             if (tier.stylesheet.styles.length > 0) {
                 var s = mainStyle = tier.stylesheet.styles[0].style;
+                var isSimpleQuantitative = false;
+
+                var isGradient = s.COLOR2 || s.BGGRAD;
+                if (tier.stylesheet.styles.length == 1 && (s.glyph == 'LINEPLOT' || s.glyph == 'HISTOGRAM' || s.glyph == 'GRADIENT' || isDasBooleanTrue(s.SCATTER))) {
+                    isSimpleQuantitative = true;
+                }
+
+                if (isSimpleQuantitative) {
+                    styleRow.style.display = 'table-row';
+                    colorRow.style.display = 'table-row';
+                    minRow.style.display = 'table-row';
+                    maxRow.style.display = 'table-row';
+                    if (sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
+                        quantLeapRow.style.display = 'table-row';
+                    else 
+                        quantLeapRow.style.display = 'none';
+                } else {
+                    styleRow.style.display = 'none';
+                    colorRow.style.display = 'none';
+                    minRow.style.display = 'none';
+                    maxRow.style.display = 'none';
+                    quantLeapRow.style.display = 'none';
+                }
 
                 if (s.COLOR1) {
                     tierColorField.value = dasColourForName(s.COLOR1).toHexString();
@@ -214,37 +237,40 @@ Browser.prototype.openTierPanel = function(tier) {
             tier.mergeConfig({stylesheet: nss});
         });
 
+        var styleRow = makeElement('tr',
+                [makeElement('th', 'Style'),
+                 makeElement('td', glyphField)]);
+        var colorRow = makeElement('tr',
+                [makeElement('th', ['Colour(s)', colorListPlus, colorListMinus]),
+                 colorListElement]);
+        var minRow = makeElement('tr',
+                [makeElement('th', 'Min value'),
+                 makeElement('td', [tierMinToggle, ' ', tierMinField])]);
+        var maxRow = makeElement('tr',
+                [makeElement('th', 'Max value'),
+                 makeElement('td', [tierMaxToggle, ' ', tierMaxField])]);
+        var quantLeapRow = 
+             makeElement('tr',
+                [makeElement('th', 'Threshold leap:'),
+                 makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])]);
+
         var tierTable = makeElement('table',
             [makeElement('tr',
-                [makeElement('th', 'Tier name:', {}, {width: '150px', textAlign: 'right'}),
+                [makeElement('th', 'Name', {}, {width: '150px', textAlign: 'right'}),
                  tierNameField]),
-
-            makeElement('tr',
-                [makeElement('th', 'Style'),
-                 makeElement('td', glyphField)]),
-
-             makeElement('tr',
-                [makeElement('th', ['Colour(s)', colorListPlus, colorListMinus]),
-                 colorListElement]),
-
-             makeElement('tr',
-                [makeElement('th', 'Min value:'),
-                 makeElement('td', [tierMinToggle, ' ', tierMinField])]),
-
-             makeElement('tr',
-                [makeElement('th', 'Max value:'),
-                 makeElement('td', [tierMaxToggle, ' ', tierMaxField])]),
 
              makeElement('tr',
                 [makeElement('th', 'Height'),
                  makeElement('td', tierHeightField)]),
 
-             makeElement('tr',
-                [makeElement('th', 'Threshold leap:'),
-                 makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])]),
+            styleRow,
+            colorRow,
+            minRow,
+            maxRow,
+            quantLeapRow,
 
-             seqMismatchRow,
-             seqInsertRow
+            seqMismatchRow,
+            seqInsertRow
              ]);
 
 
@@ -278,6 +304,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     ts.SIZE = '3';
                 } else {
                     ts.glyph = glyphField.value;
+                    ts.SCATTER = undefined;
                 }
                 setStyleColors(ts);
             }

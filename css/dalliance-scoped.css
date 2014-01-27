@@ -221,9 +221,13 @@
   overflow: hidden;
 }
 
+*.dalliance .tier-edit input {
+  margin-bottom: 0px;
+}
+
 *.dalliance .tier-edit th {
   width: 150px;
   text-align: right;
   padding-right: 10px;
-  vertical-align: top;
+  vertical-align: middle;
 }
