@@ -140,10 +140,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     colorRow.style.display = 'table-row';
                     minRow.style.display = 'table-row';
                     maxRow.style.display = 'table-row';
-                    if (sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
-                        quantLeapRow.style.display = 'table-row';
-                    else 
-                        quantLeapRow.style.display = 'none';
+                    
                 } else {
                     styleRow.style.display = 'none';
                     colorRow.style.display = 'none';
@@ -213,6 +210,11 @@ Browser.prototype.openTierPanel = function(tier) {
                     seqInsertRow.style.display = 'none';
                 }
             }
+
+            if (sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
+                quantLeapRow.style.display = 'table-row';
+            else 
+                quantLeapRow.style.display = 'none';
         }
 
         var seqMismatchToggle = makeElement('input', null, {type: 'checkbox'});
