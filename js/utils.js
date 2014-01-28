@@ -144,7 +144,12 @@ function makeElement(tag, children, attribs, styles)
     
     if (attribs) {
         for (var l in attribs) {
-            ele[l] = attribs[l];
+            try {
+                ele[l] = attribs[l];
+            } catch (e) {
+                console.log('error setting ' + l);
+                throw(e);
+            }
         }
     }
     if (styles) {

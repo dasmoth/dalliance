@@ -61,9 +61,15 @@ Browser.prototype.openTierPanel = function(tier) {
         glyphField.appendChild(makeElement('option', 'Scatter', {value: 'SCATTER'}));
 
 
-        var tierColorField = makeElement('input', null, {type: 'color', value: '#dd00dd'});
-        var tierColorField2 = makeElement('input', null, {type: 'color', value: '#dd00dd'});
-        var tierColorField3 = makeElement('input', null, {type: 'color', value: '#dd00dd'});
+        var tierColorField = makeElement('input', null, {type: 'text', value: '#dd00dd'});
+        var tierColorField2 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
+        var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
+        try {
+            tierColorField.type = tierColorField2.type = tierColorField3.type = 'color';
+        } catch (e) {
+            // IE throws if attempt to set type to 'color'.
+        }
+
         var tierColorFields = [tierColorField, tierColorField2, tierColorField3];
         var colorListPlus = makeElement('i', null, {className: 'fa fa-plus-circle'});
         var colorListMinus = makeElement('i', null, {className: 'fa fa-minus-circle'});
