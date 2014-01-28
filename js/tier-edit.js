@@ -120,7 +120,8 @@ Browser.prototype.openTierPanel = function(tier) {
             if (typeof tier.quantLeapThreshold == 'number') {
                 quantLeapToggle.checked = true;
                 quantLeapThreshField.disabled = false;
-                quantLeapThreshField.value = tier.quantLeapThreshold;
+                if (parseFloat(quantLeapThreshField.value) != tier.quantLeapThreshold)
+                    quantLeapThreshField.value = tier.quantLeapThreshold;
             } else {
                 quantLeapToggle.checked = false;
                 quantLeapThreshField.disabled = true;
@@ -146,7 +147,6 @@ Browser.prototype.openTierPanel = function(tier) {
                     colorRow.style.display = 'none';
                     minRow.style.display = 'none';
                     maxRow.style.display = 'none';
-                    quantLeapRow.style.display = 'none';
                 }
 
                 if (s.COLOR1) {
@@ -174,29 +174,40 @@ Browser.prototype.openTierPanel = function(tier) {
                     glyphField.value = s.glyph;
                 } 
 
+                var setMinValue, setMaxValue;
                 if (s.MIN !== undefined) {
-                    tierMinField.value = s.MIN;
+                    setMinValue = s.MIN;
                 }
-                if (!tier.forceMinDynamic && s.MIN !== undefined) {
+                if (!tier.forceMinDynamic && (s.MIN !== undefined || tier.forceMin !== undefined)) {
                     tierMinToggle.checked = true;
+                    tierMinField.disabled = false;
                 } else {
+                    tierMinToggle.checked = false;
                     tierMinField.disabled = true;
                 }
 
                 if (s.MAX !== undefined) {
-                    tierMaxField.value = s.MAX;
+                    setMaxValue = s.MAX;
                 }
-                if (!tier.forceMaxDynamic && s.MAX !== undefined) {
+                if (!tier.forceMaxDynamic && (s.MAX !== undefined || tier.forceMax !== undefined)) {
                     tierMaxToggle.checked = true;
+                    tierMaxField.disabled = false;
                 } else {
+                    tierMaxToggle.checked = false;
                     tierMaxField.disabled = true;
                 }
 
                 if (tier.forceMin != undefined) {
-                    tierMinField.value = tier.forceMin;
+                    setMinValue = tier.forceMin;
                 }
                 if (tier.forceMax != undefined) {
-                    tierMaxField.value = tier.forceMax;
+                    setMaxValue = tier.forceMax;
+                }
+                if (typeof(setMinValue) == 'number' && setMinValue != parseFloat(tierMinField.value)) {
+                    tierMinField.value = setMinValue;
+                }
+                if (typeof(setMaxValue) == 'number' && setMaxValue != parseFloat(tierMaxField.value)) {
+                    tierMaxField.value = setMaxValue;
                 }
 
                 var seqStyle = getSeqStyle(tier.stylesheet);
@@ -316,32 +327,34 @@ Browser.prototype.openTierPanel = function(tier) {
         tierMinToggle.addEventListener('change', function(ev) {
             var conf = {forceMinDynamic: !tierMinToggle.checked};
             tierMinField.disabled = !tierMinToggle.checked;
-            if (tierMinToggle.checked && !Number.isNaN(parseFloat(tierMinField.value)))
-                conf.forceMin = parseFloat(tierMinField.value);
+            var x = parseFloat(tierMinField.value);
+            if (tierMinToggle.checked && typeof(x) == 'number' && !isNaN(x))
+                conf.forceMin = parseFloat(x);
             tier.mergeConfig(conf);
         });
         tierMinField.addEventListener('input', function(ev) {
             var x = parseFloat(tierMinField.value);
-            if (!Number.isNaN(x))
+            if (typeof(x) == 'number' && !isNaN(x))
                 tier.mergeConfig({forceMin: x});
         }, false);
 
         tierMaxToggle.addEventListener('change', function(ev) {
             var conf = {forceMaxDynamic: !tierMaxToggle.checked};
             tierMaxField.disabled = !tierMaxToggle.checked;
-            if (tierMaxToggle.checked && !Number.isNaN(parseFloat(tierMaxField.value)))
-                conf.forceMax = parseFloat(tierMaxField.value);
+            var x = parseFloat(tierMaxField.value);
+            if (tierMaxToggle.checked && typeof(x) == 'number' && !isNaN(x))
+                conf.forceMax = parseFloat(x);
             tier.mergeConfig(conf);
         });
         tierMaxField.addEventListener('input', function(ev) {
             var x = parseFloat(tierMaxField.value);
-            if (!Number.isNaN(x))
+            if (typeof(x) == 'number' && !isNaN(x))
                 tier.mergeConfig({forceMax: x});
         }, false);
 
         tierHeightField.addEventListener('input', function(ev) {
             var x = parseFloat(tierHeightField.value);
-            if (!Number.isNaN(x))
+            if (typeof(x) == 'number' && !isNaN(x))
                 tier.mergeConfig({height: Math.min(500, x|0)});
         }, false);
 
@@ -349,7 +362,7 @@ Browser.prototype.openTierPanel = function(tier) {
             quantLeapThreshField.disabled = !quantLeapToggle.checked;
             if (quantLeapToggle.checked) {
                 var x = parseFloat(quantLeapThreshField.value);
-                if (!Number.isNaN(x)) {
+                if (typeof(x) == 'number' && !isNaN(x)) {
                     tier.mergeConfig({quantLeapThreshold: parseFloat(quantLeapThreshField.value)});
                 }
             } else {
