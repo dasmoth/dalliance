@@ -62,7 +62,7 @@
   border: 3px solid rgb(150, 150, 230);
 }
 *.dalliance .loc-field {
-  width: 300px;
+  width: 240px;
   margin-bottom: 0px;
 }
 *.dalliance .loc-status {
@@ -162,7 +162,7 @@
 }
 
 *.dalliance .zoom-slider {
-  width: 180px;
+  width: 150px;
 }
 
 *.dalliance .loc-group {
