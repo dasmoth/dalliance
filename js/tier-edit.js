@@ -129,24 +129,36 @@ Browser.prototype.openTierPanel = function(tier) {
 
             if (tier.stylesheet.styles.length > 0) {
                 var s = mainStyle = tier.stylesheet.styles[0].style;
-                var isSimpleQuantitative = false;
+                var isQuantitative=false, isSimpleQuantitative = false;
 
                 var isGradient = s.COLOR2 || s.BGGRAD;
-                if (tier.stylesheet.styles.length == 1 && (s.glyph == 'LINEPLOT' || s.glyph == 'HISTOGRAM' || s.glyph == 'GRADIENT' || isDasBooleanTrue(s.SCATTER))) {
-                    isSimpleQuantitative = true;
+
+                for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
+                    var ss = tier.stylesheet.styles[si].style;
+                    if (ss.glyph == 'LINEPLOT' || ss.glyph == 'HISTOGRAM' || ss.glyph == 'GRADIENT' || isDasBooleanTrue(ss.SCATTER)) {
+                        if (!isQuantitative)
+                            s = mainStyle = ss;
+                        isQuantitative = true;
+                    }
+                }
+
+                isSimpleQuantitative = isQuantitative && tier.stylesheet.styles.length == 1;
+
+                if (isQuantitative) {
+                    minRow.style.display = 'table-row';
+                    maxRow.style.display = 'table-row';
+                } else {
+                    minRow.style.display = 'none';
+                    maxRow.style.display = 'none';
                 }
 
                 if (isSimpleQuantitative) {
                     styleRow.style.display = 'table-row';
                     colorRow.style.display = 'table-row';
-                    minRow.style.display = 'table-row';
-                    maxRow.style.display = 'table-row';
-                    
                 } else {
                     styleRow.style.display = 'none';
                     colorRow.style.display = 'none';
-                    minRow.style.display = 'none';
-                    maxRow.style.display = 'none';
+
                 }
 
                 if (s.COLOR1) {
@@ -222,7 +234,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
 
-            if (sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
+            if (isQuantitative && sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
                 quantLeapRow.style.display = 'table-row';
             else 
                 quantLeapRow.style.display = 'none';
