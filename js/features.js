@@ -118,6 +118,14 @@ function sortFeatures(tier)
                 }
                 fGroups.push(pid);
 
+                var ogm = groupMins[pid];
+                if (!ogm || f.min < ogm)
+                    groupMins[pid] = f.min;
+
+                ogm = groupMaxes[pid];
+                if (!ogm || f.max > ogm)
+                    groupMaxes[pid] = f.max;
+
                 var sgs = superParentsOf(p);
                 if (sgs.length > 0) {
                     fSuperGroup = sgs[0];
