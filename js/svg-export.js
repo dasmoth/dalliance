@@ -20,12 +20,23 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
             removeChildren(exportContent);
-            exportContent.appendChild(makeElement('a', 'SVG created, click here to download', {
-                href: URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
-                                                     ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'})),
+
+            var blobURL = URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
+                                                     ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'}));
+
+            var downloadLink = makeElement('a', '[Download]', {
+                href: blobURL,
                 download: 'dalliance-view.svg',
                 type: 'image/svg+xml'
-            }));
+            });
+
+            var previewLink = makeElement('a', '[Preview in browser]', {
+                href: blobURL,
+                type: 'image/svg+xml',
+                target: '_new'
+            });
+
+            exportContent.appendChild(makeElement('p', ['SVG created: ', downloadLink, previewLink]));
         }, false);
 
         var exportContent = makeElement('p', '');
