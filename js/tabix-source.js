@@ -121,6 +121,13 @@ VCFParser.prototype.parse = function(line) {
     var ref = f.refAllele;
     if (alt.length > ref.length) {
         f.type = "insertion";
+        if (alt.indexOf(ref) == 0) {
+            f.insertion = alt.substr(ref.length);
+            f.min += ref.length;
+            f.max = f.min - 1; // Effectively "between" bases.
+        } else {
+            f.insertion = alt;
+        }
     } else if (alt.length < ref.length) {
         f.type = "deletion";
     } else {
