@@ -1390,17 +1390,22 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     var oldScale = this.scale;
     var scaleChanged = (Math.abs(newScale - oldScale)) > 0.0001;
     this.scale = newScale;
-    this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
+
+    var newZS, oldZS;
+    oldZS = this.zoomSliderValue;
+    this.zoomSliderValue = newZS = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
     
     if (scaleChanged) {
         this.refresh();
 
         if (this.savedZoom) {
-            var difToActive = Math.log(newScale) - Math.log(oldScale);
-            var difToSaved = Math.log(newScale) - Math.log(this.savedZoom);
+            var difToActive = newZS - oldZS;
+            var difToSaved = oldZS - this.savedZoom;
+            console.log('d2a: ' + difToActive);
+            console.log('d2s: ' + difToSaved);
             if (Math.abs(difToActive) > Math.abs(difToSaved)) {
                 this.isSnapZooming = !this.isSnapZooming;
-                this.savedZoom = oldScale;
+                this.savedZoom = oldZS;
             }
         } else {
             this.isSnapZooming = false;
