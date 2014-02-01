@@ -1317,6 +1317,13 @@ Browser.prototype.removeTier = function(conf, force) {
     this.notifyTier();
 }
 
+Browser.prototype.getSequenceSource = function() {
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (this.tiers[ti].sequenceSource) {
+            return this.tiers[ti].sequenceSource;
+        }
+    }
+}
 
 Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     if (!callback) {
@@ -1331,13 +1338,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     if (!newChr || newChr == this.chr) {
         return this._setLocation(null, newMin, newMax, null, callback);
     } else {
-        var ss;
-        for (var ti = 0; ti < this.tiers.length; ++ti) {
-            if (this.tiers[ti].sequenceSource) {
-                ss = this.tiers[ti].sequenceSource;
-                break;
-            }
-        }
+        var ss = this.getSequenceSource();
         if (!ss) {
             return callback('Need a sequence source');
         }
@@ -1503,6 +1504,39 @@ Browser.prototype.notifyRegionSelect = function(chr, min, max) {
 
 
 Browser.prototype.highlightRegion = function(chr, min, max) {
+    var thisB = this;
+    
+    if (chr == this.chr) {
+        return this._highlightRegion(chr, min, max);
+    }
+
+    var ss = this.getSequenceSource();
+    if (!ss) {
+        throw 'Need a sequence source';
+    }
+
+    ss.getSeqInfo(chr, function(si) {
+        if (!si) {
+            var altChr;
+            if (chr.indexOf('chr') == 0) {
+                altChr = chr.substr(3);
+            } else {
+                altChr = 'chr' + chr;
+            }
+            ss.getSeqInfo(altChr, function(si2) {
+                if (!si2) {
+                    // Fail silently.
+                } else {
+                    return thisB._highlightRegion(altChr, min, max);
+                }
+            });
+        } else {
+            return thisB._highlightRegion(chr, min, max);
+        }
+    });
+}
+
+Browser.prototype._highlightRegion = function(chr, min, max) {
     this.highlights.push(new Region(chr, min, max));
     var visStart = this.viewStart - (1000/this.scale);
     var visEnd = this.viewEnd + (1000/this.scale);
