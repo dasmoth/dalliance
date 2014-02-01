@@ -114,7 +114,7 @@ Browser.prototype.openTierPanel = function(tier) {
             var s = mainStyle = tier.stylesheet.styles[0].style;
         }
 
-        setNumColors(numColors);
+        
 
         function refresh() {
             if (typeof tier.config.name === 'string')
@@ -172,6 +172,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
                 }
 
+                var numColors = 1;
                 if (s.COLOR1) {
                     tierColorField.value = dasColourForName(s.COLOR1).toHexString();
                     if (s.COLOR2) {
@@ -190,6 +191,7 @@ Browser.prototype.openTierPanel = function(tier) {
                         tierColorField.value = dasColourForName(s.BGCOLOR).toHexString();
                     }
                 } 
+                setNumColors(numColors);
 
                 if (isDasBooleanTrue(s.SCATTER)) {
                     glyphField.value = 'SCATTER';
