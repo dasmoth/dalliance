@@ -1387,15 +1387,25 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     this.viewStart = newMin;
     this.viewEnd = newMax;
     var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
-    var scaleChanged = (Math.abs(newScale - this.scale)) > 0.0001;
+    var oldScale = this.scale;
+    var scaleChanged = (Math.abs(newScale - oldScale)) > 0.0001;
     this.scale = newScale;
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
-    this.isSnapZooming = false;
-    this.savedZoom = null;
-    this.notifyLocation();
-
+    
     if (scaleChanged) {
         this.refresh();
+
+        if (this.savedZoom) {
+            var difToActive = Math.log(newScale) - Math.log(oldScale);
+            var difToSaved = Math.log(newScale) - Math.log(this.savedZoom);
+            if (Math.abs(difToActive) > Math.abs(difToSaved)) {
+                this.isSnapZooming = !this.isSnapZooming;
+                this.savedZoom = oldScale;
+            }
+        } else {
+            this.isSnapZooming = false;
+            this.savedZoom = null;
+        }
     } else {
         var viewCenter = (this.viewStart + this.viewEnd)/2;
     
@@ -1406,6 +1416,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
             this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
         }
     }
+    this.notifyLocation();
 
     this.spaceCheck();
     return callback();
