@@ -52,6 +52,11 @@ Browser.prototype.openTierPanel = function(tier) {
         this.manipulatingTier = tier;
 
         var tierForm = makeElement('div', null, {className: 'tier-edit'});
+        if (tier.dasSource.mapping) {
+            var coords = this.chains[tier.dasSource.mapping].coords;
+            tierForm.appendChild(makeElement('div', 'Mapped from ' + coords.auth + coords.version , null, 
+                {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center'}));
+        }
 
         var tierNameField = makeElement('input', null, {type: 'text'});
         var glyphField = makeElement('select');
