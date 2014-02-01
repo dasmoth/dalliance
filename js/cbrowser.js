@@ -1715,7 +1715,7 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
             fedge = true;
         }
 
-        this.leap(-1*dir, fedge);
+        this.leap(dir, fedge);
     } else {
         this.move(ev.shiftKey ? 100*dir : 25*dir);
     }
@@ -1727,42 +1727,49 @@ Browser.prototype.leap = function(dir, fedge) {
 
     var st = thisB.getSelectedTier();
     if (st < 0) return;
-    thisB.tiers[st].findNextFeature(
-          thisB.chr,
-          pos,
-          dir,
-          fedge,
-          function(nxt) {
-              if (nxt) {
-                  var nmin = nxt.min;
-                  var nmax = nxt.max;
-                  if (fedge) { 
-                    if (dir > 0) {
-                      if (nmin>pos+1) {
-                          nmax=nmin;
-                      } else {
-                          nmax++;
-                          nmin=nmax
-                      }
-                    } else {
-                        if (nmax<pos-1) {
-                            nmax++;
-                            nmin=nmax;
+    var tier = thisB.tiers[st];
+
+    if (tier && ((tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
+                 || (tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')))) {
+        tier.findNextFeature(
+              thisB.chr,
+              pos,
+              -dir,
+              fedge,
+              function(nxt) {
+                  if (nxt) {
+                      var nmin = nxt.min;
+                      var nmax = nxt.max;
+                      if (fedge) { 
+                        if (dir > 0) {
+                          if (nmin>pos+1) {
+                              nmax=nmin;
+                          } else {
+                              nmax++;
+                              nmin=nmax
+                          }
                         } else {
-                            nmax=nmin;
-                        }
-                    } 
+                            if (nmax<pos-1) {
+                                nmax++;
+                                nmin=nmax;
+                            } else {
+                                nmax=nmin;
+                            }
+                        } 
+                      }
+                      var wid = thisB.viewEnd - thisB.viewStart + 1;
+                      if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
+                      var newStart = (nmin + nmax - wid)/2 + 1;
+                      var newEnd = newStart + wid - 1;
+                      var pos2=pos;
+                      thisB.setLocation(nxt.segment, newStart, newEnd);
+                  } else {
+                      alert('no next feature'); // FIXME better reporting would be nice!
                   }
-                  var wid = thisB.viewEnd - thisB.viewStart + 1;
-                  if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
-                  var newStart = (nmin + nmax - wid)/2 + 1;
-                  var newEnd = newStart + wid - 1;
-                  var pos2=pos;
-                  thisB.setLocation(nxt.segment, newStart, newEnd);
-              } else {
-                  alert('no next feature'); // FIXME better reporting would be nice!
-              }
-          });
+              });
+    } else {
+        this.move(100*dir);
+    }
 }
 
 function glyphLookup(glyphs, rx, ry, matches) {
