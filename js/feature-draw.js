@@ -907,7 +907,12 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
     } else if (gtype === '__INSERTION') {
         var ig = new TriangleGlyph(minPos, 5, 'S', 5, 'red');
-        gg = new LabelledGlyph(ig, feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
+        gg = new LabelledGlyph(ig, feature.insertion || feature.altAlleles[0], false, 'left', 'above', '7px sans-serif');
+        if ((maxPos - minPos) > 1) {
+            var fill = style.BGCOLOR || style.COLOR1 || 'green';
+            var bg = new BoxGlyph(minPos, 5, (maxPos - minPos), height, fill, stroke);
+            gg = new GroupGlyph([bg, gg]);
+        }
     } else if (gtype === '__NONE') {
         return null;
     } else /* default to BOX */ {

@@ -1317,6 +1317,13 @@ Browser.prototype.removeTier = function(conf, force) {
     this.notifyTier();
 }
 
+Browser.prototype.getSequenceSource = function() {
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (this.tiers[ti].sequenceSource) {
+            return this.tiers[ti].sequenceSource;
+        }
+    }
+}
 
 Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     if (!callback) {
@@ -1331,13 +1338,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     if (!newChr || newChr == this.chr) {
         return this._setLocation(null, newMin, newMax, null, callback);
     } else {
-        var ss;
-        for (var ti = 0; ti < this.tiers.length; ++ti) {
-            if (this.tiers[ti].sequenceSource) {
-                ss = this.tiers[ti].sequenceSource;
-                break;
-            }
-        }
+        var ss = this.getSequenceSource();
         if (!ss) {
             return callback('Need a sequence source');
         }
@@ -1387,15 +1388,30 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     this.viewStart = newMin;
     this.viewEnd = newMax;
     var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
-    var scaleChanged = (Math.abs(newScale - this.scale)) > 0.0001;
+    var oldScale = this.scale;
+    var scaleChanged = (Math.abs(newScale - oldScale)) > 0.0001;
     this.scale = newScale;
-    this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
-    this.isSnapZooming = false;
-    this.savedZoom = null;
-    this.notifyLocation();
 
+    var newZS, oldZS;
+    oldZS = this.zoomSliderValue;
+    this.zoomSliderValue = newZS = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
+    
     if (scaleChanged) {
         this.refresh();
+
+        if (this.savedZoom) {
+            var difToActive = newZS - oldZS;
+            var difToSaved = oldZS - this.savedZoom;
+            console.log('d2a: ' + difToActive);
+            console.log('d2s: ' + difToSaved);
+            if (Math.abs(difToActive) > Math.abs(difToSaved)) {
+                this.isSnapZooming = !this.isSnapZooming;
+                this.savedZoom = oldZS;
+            }
+        } else {
+            this.isSnapZooming = false;
+            this.savedZoom = null;
+        }
     } else {
         var viewCenter = (this.viewStart + this.viewEnd)/2;
     
@@ -1406,6 +1422,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
             this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
         }
     }
+    this.notifyLocation();
 
     this.spaceCheck();
     return callback();
@@ -1487,6 +1504,39 @@ Browser.prototype.notifyRegionSelect = function(chr, min, max) {
 
 
 Browser.prototype.highlightRegion = function(chr, min, max) {
+    var thisB = this;
+    
+    if (chr == this.chr) {
+        return this._highlightRegion(chr, min, max);
+    }
+
+    var ss = this.getSequenceSource();
+    if (!ss) {
+        throw 'Need a sequence source';
+    }
+
+    ss.getSeqInfo(chr, function(si) {
+        if (!si) {
+            var altChr;
+            if (chr.indexOf('chr') == 0) {
+                altChr = chr.substr(3);
+            } else {
+                altChr = 'chr' + chr;
+            }
+            ss.getSeqInfo(altChr, function(si2) {
+                if (!si2) {
+                    // Fail silently.
+                } else {
+                    return thisB._highlightRegion(altChr, min, max);
+                }
+            });
+        } else {
+            return thisB._highlightRegion(chr, min, max);
+        }
+    });
+}
+
+Browser.prototype._highlightRegion = function(chr, min, max) {
     this.highlights.push(new Region(chr, min, max));
     var visStart = this.viewStart - (1000/this.scale);
     var visEnd = this.viewEnd + (1000/this.scale);
@@ -1665,7 +1715,7 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
             fedge = true;
         }
 
-        this.leap(-1*dir, fedge);
+        this.leap(dir, fedge);
     } else {
         this.move(ev.shiftKey ? 100*dir : 25*dir);
     }
@@ -1677,42 +1727,49 @@ Browser.prototype.leap = function(dir, fedge) {
 
     var st = thisB.getSelectedTier();
     if (st < 0) return;
-    thisB.tiers[st].findNextFeature(
-          thisB.chr,
-          pos,
-          dir,
-          fedge,
-          function(nxt) {
-              if (nxt) {
-                  var nmin = nxt.min;
-                  var nmax = nxt.max;
-                  if (fedge) { 
-                    if (dir > 0) {
-                      if (nmin>pos+1) {
-                          nmax=nmin;
-                      } else {
-                          nmax++;
-                          nmin=nmax
-                      }
-                    } else {
-                        if (nmax<pos-1) {
-                            nmax++;
-                            nmin=nmax;
+    var tier = thisB.tiers[st];
+
+    if (tier && ((tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
+                 || (tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')))) {
+        tier.findNextFeature(
+              thisB.chr,
+              pos,
+              -dir,
+              fedge,
+              function(nxt) {
+                  if (nxt) {
+                      var nmin = nxt.min;
+                      var nmax = nxt.max;
+                      if (fedge) { 
+                        if (dir > 0) {
+                          if (nmin>pos+1) {
+                              nmax=nmin;
+                          } else {
+                              nmax++;
+                              nmin=nmax
+                          }
                         } else {
-                            nmax=nmin;
-                        }
-                    } 
+                            if (nmax<pos-1) {
+                                nmax++;
+                                nmin=nmax;
+                            } else {
+                                nmax=nmin;
+                            }
+                        } 
+                      }
+                      var wid = thisB.viewEnd - thisB.viewStart + 1;
+                      if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
+                      var newStart = (nmin + nmax - wid)/2 + 1;
+                      var newEnd = newStart + wid - 1;
+                      var pos2=pos;
+                      thisB.setLocation(nxt.segment, newStart, newEnd);
+                  } else {
+                      alert('no next feature'); // FIXME better reporting would be nice!
                   }
-                  var wid = thisB.viewEnd - thisB.viewStart + 1;
-                  if(parseFloat(wid/2) == parseInt(wid/2)){wid--;}
-                  var newStart = (nmin + nmax - wid)/2 + 1;
-                  var newEnd = newStart + wid - 1;
-                  var pos2=pos;
-                  thisB.setLocation(nxt.segment, newStart, newEnd);
-              } else {
-                  alert('no next feature'); // FIXME better reporting would be nice!
-              }
-          });
+              });
+    } else {
+        this.move(100*dir);
+    }
 }
 
 function glyphLookup(glyphs, rx, ry, matches) {

@@ -11,6 +11,10 @@ Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     delete localStorage['dalliance.' + this.cookieKey + '.view-start'];
     delete localStorage['dalliance.' + this.cookieKey + '.view-end'];
+    delete localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
+    delete localStorage['dalliance.' + this.cookieKey + '.showing-alt-zoom'];
+    delete localStorage['dalliance.' + this.cookieKey + '.saved-zoom'];
+
     delete localStorage['dalliance.' + this.cookieKey + '.sources'];
     delete localStorage['dalliance.' + this.cookieKey + '.hubs'];
     delete localStorage['dalliance.' + this.cookieKey + '.version'];
@@ -26,13 +30,15 @@ Browser.prototype.storeStatus = function() {
 }
 
 Browser.prototype.storeViewStatus = function() {
-    if (!this.cookieKey || this.noPersist) {
+    if (!this.cookieKey || this.noPersist || this.noPersistView) {
         return;
     }
 
     localStorage['dalliance.' + this.cookieKey + '.view-chr'] = this.chr;
     localStorage['dalliance.' + this.cookieKey + '.view-start'] = this.viewStart|0;
     localStorage['dalliance.' + this.cookieKey + '.view-end'] = this.viewEnd|0
+    localStorage['dalliance.' + this.cookieKey + '.showing-alt-zoom'] = '' + this.isSnapZooming;
+    localStorage['dalliance.' + this.cookieKey + '.saved-zoom'] = this.savedZoom;
     if (this.currentSeqMax) {
 	   localStorage['dalliance.' + this.cookieKey + '.current-seq-length'] = this.currentSeqMax;
     }
@@ -105,18 +111,27 @@ Browser.prototype.restoreStatus = function() {
         
     }
 
-    var qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
-    var qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
-    var qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
-    if (qChr && qMin && qMax) {
-    	this.chr = qChr;
-    	this.viewStart = qMin;
-    	this.viewEnd = qMax;
-    	
-    	var csm = localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
-    	if (csm) {
-    	    this.currentSeqMax = csm|0;
-    	}
+    if (!this.noPersistView) {
+        var qChr = localStorage['dalliance.' + this.cookieKey + '.view-chr'];
+        var qMin = localStorage['dalliance.' + this.cookieKey + '.view-start']|0;
+        var qMax = localStorage['dalliance.' + this.cookieKey + '.view-end']|0;
+        if (qChr && qMin && qMax) {
+        	this.chr = qChr;
+        	this.viewStart = qMin;
+        	this.viewEnd = qMax;
+        	
+        	var csm = localStorage['dalliance.' + this.cookieKey + '.current-seq-length'];
+        	if (csm) {
+        	    this.currentSeqMax = csm|0;
+        	}
+
+            this.isSnapZooming = (localStorage['dalliance.' + this.cookieKey + '.showing-alt-zoom']) == 'true';
+
+            var sz = parseFloat(localStorage['dalliance.' + this.cookieKey + '.saved-zoom']);
+            if (typeof sz === 'number' && !isNaN(sz)) {
+                this.savedZoom = sz;
+            }
+        }
     }
 
     var rs = localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'];

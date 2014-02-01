@@ -27,14 +27,20 @@ Browser.prototype.makeTooltip = function(ele, text)
         ele.removeEventListener('mouseout', outlistener, false);
     };
 
-    var setup;
-    setup = function(ev) {
+    var setup = function(ev) {
         var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
         if (!timer) {
             timer = setTimeout(function() {
+                var ttt;
+                if (typeof(text) === 'function') {
+                    ttt = text();
+                } else {
+                    ttt = text;
+                }
+
                 var popup = makeElement('div',
                     [makeElement('div', null, {className: 'tooltip-arrow'}),
-                     makeElement('div', text, {className: 'tooltip-inner'})], 
+                     makeElement('div', ttt, {className: 'tooltip-inner'})], 
                     {className: 'tooltip bottom in'}, {
                     display: 'block',
                     top: '' + (my + 20) + 'px',
