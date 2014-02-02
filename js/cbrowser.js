@@ -113,7 +113,7 @@ Browser.prototype.realInit = function() {
     }
 
     if (this.restoreStatus) {
-        this.restoreStatus();
+        this.statusRestored = this.restoreStatus();
     }
 
     var helpPopup;
@@ -516,6 +516,10 @@ Browser.prototype.realInit2 = function() {
                 }, hc);
             })(hc);
         }
+    }
+
+    if (!this.statusRestored && this.storeStatus) {
+        this.storeStatus();
     }
 }
 
@@ -1401,9 +1405,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
 
         if (this.savedZoom) {
             var difToActive = newZS - oldZS;
-            var difToSaved = oldZS - this.savedZoom;
-            console.log('d2a: ' + difToActive);
-            console.log('d2s: ' + difToSaved);
+            var difToSaved = newZS - this.savedZoom;
             if (Math.abs(difToActive) > Math.abs(difToSaved)) {
                 this.isSnapZooming = !this.isSnapZooming;
                 this.savedZoom = oldZS;

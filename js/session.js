@@ -61,6 +61,7 @@ Browser.prototype.storeTierStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.sources'] = JSON.stringify(currentSourceList);
 
 
+    var coveredHubURLs = {};
     var currentHubList = [];
     for (var hi = 0; hi < this.hubObjects.length; ++hi) {
         var tdb = this.hubObjects[hi];
@@ -69,9 +70,22 @@ Browser.prototype.storeTierStatus = function() {
             hc.credentials = tdb.credentials;
         if (tdb.mapping)
             hc.mapping = tdb.mapping;
+        coveredHubURLs[hc.url] = true;
         currentHubList.push(hc);
     }
+
+    // Needed to handle hubs that failed to connect, or hubs that haven't
+    // connected yet when we're called soon after startup.
+    for (var hi = 0; hi < this.hubs.length; ++hi) {
+        var hc = this.hubs[hi];
+        if (typeof hc === 'string')
+            hc = {url: hc};
+        if (!coveredHubURLs[hc.url])
+            currentHubList.push(hc);
+    }
+
     localStorage['dalliance.' + this.cookieKey + '.hubs'] = JSON.stringify(currentHubList);
+
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
     localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'] = this.reverseKeyScrolling;
     localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;
@@ -168,6 +182,8 @@ Browser.prototype.restoreStatus = function() {
     if (hubStr) {
         this.hubs = JSON.parse(hubStr);
     }
+
+    return true;
 }
 
 Browser.prototype.reset = function() {
