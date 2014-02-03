@@ -995,6 +995,7 @@ TextGlyph.prototype.toSVG = function() {
 
 (function(scope) {
 
+var isRetina = window.devicePixelRatio > 1;
 __dalliance_SequenceGlyphCache = {};
 
 function SequenceGlyph(min, max, height, seq, ref, scheme, quals) {
@@ -1049,15 +1050,25 @@ SequenceGlyph.prototype.draw = function(gc) {
             var img = __dalliance_SequenceGlyphCache[key];
             if (!img) {
                 img = document.createElement('canvas');
-                img.width = 8;
-                img.height = 10;
+                if (isRetina) {
+                    img.width = 16;
+                    img.height = 20;
+                } else {
+                    img.width = 8;
+                    img.height = 10;
+                }
                 var imgGc = img.getContext('2d');
+                if (isRetina) {
+                    imgGc.scale(2, 2);
+                }
                 imgGc.fillStyle = color;
                 imgGc.fillText(base, 0, 8);
                 __dalliance_SequenceGlyphCache[key] = img;
             }
-            gc.drawImage(img, this._min + p*scale, 0);
-            // gc.fillText(base, this._min + p*scale, 8);
+            if (isRetina)
+                gc.drawImage(img, this._min + p*scale, 0, 8, 10);
+            else
+                gc.drawImage(img, this._min + p*scale, 0);
         } else {
             gc.fillStyle = color;
             gc.fillRect(this._min + p*scale, 0, scale, this._height);
