@@ -15,12 +15,15 @@ function Chainset(uri, srcTag, destTag, coords) {
     this.chainsBySrc = {};
     this.chainsByDest = {};
     this.postFetchQueues = {};
-}
+};
+
+(function(scope) {
+
+var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
 
 function parseCigar(cigar)
 {
     var cigops = [];
-    var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
     var match;
     while ((match = CIGAR_REGEXP.exec(cigar)) != null) {
         var count = match[1];
@@ -31,6 +34,10 @@ function parseCigar(cigar)
     }
     return cigops;
 }
+
+scope.parseCigar = parseCigar;
+
+}(this));
 
 Chainset.prototype.fetchChainsTo = function(chr) {
     var thisCS = this;

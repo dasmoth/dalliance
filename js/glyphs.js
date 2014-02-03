@@ -991,9 +991,11 @@ TextGlyph.prototype.draw = function(g) {
 
 TextGlyph.prototype.toSVG = function() {
     return makeElementNS(NS_SVG, 'text', this._string, {x: this._min, y: this._height - 4});
-}
+};
 
+(function(scope) {
 
+__dalliance_SequenceGlyphCache = {};
 
 function SequenceGlyph(min, max, height, seq, ref, scheme, quals) {
     this._min = min;
@@ -1035,9 +1037,7 @@ SequenceGlyph.prototype.draw = function(gc) {
                 color = 'red';
             }
         }
-
-        gc.fillStyle = color;
-
+        
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
             gc.save();
@@ -1045,8 +1045,21 @@ SequenceGlyph.prototype.draw = function(gc) {
         }
 
         if (scale >= 8) {
-            gc.fillText(base, this._min + p*scale, 8);
+            var key = color + '_' + base
+            var img = __dalliance_SequenceGlyphCache[key];
+            if (!img) {
+                img = document.createElement('canvas');
+                img.width = 8;
+                img.height = 10;
+                var imgGc = img.getContext('2d');
+                imgGc.fillStyle = color;
+                imgGc.fillText(base, 0, 8);
+                __dalliance_SequenceGlyphCache[key] = img;
+            }
+            gc.drawImage(img, this._min + p*scale, 0);
+            // gc.fillText(base, this._min + p*scale, 8);
         } else {
+            gc.fillStyle = color;
             gc.fillRect(this._min + p*scale, 0, scale, this._height);
         }
 
@@ -1108,6 +1121,9 @@ SequenceGlyph.prototype.toSVG = function() {
     return g;
 }
 
+scope.SequenceGlyph = SequenceGlyph;
+
+}(this));
 
 function TranslatedGlyph(glyph, x, y, height) {
     this.glyph = glyph;

@@ -1,19 +1,3 @@
-For 0.11
---------
-
-  - UI for leaping (button to complement ctrl-arrow). [DONE]
-  - Search of bigbed files. [DONE]
-  - Search via Trix indices. [DONE]
-  - Retina display support. [DONE]
-  - Assembly hub support. [DONE]
-  - Rename tracks. [DONE]
-  - Per-track display customization ("Stylesheet editor")? [WIP]
-  - Support for arbitrary columns in bigbeds. [DONE]
-  - Security cleanups + support for credentialed trackhubs [DONE]
-  - Feature centering after quantLeap [DONE]
-  - Sequence-read/BAM support improvements [DONE]
-  - Basic support for Tabix+VCF [DONE]
-
 For 0.12
 --------
 
