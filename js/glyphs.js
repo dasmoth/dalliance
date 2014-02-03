@@ -1041,7 +1041,7 @@ SequenceGlyph.prototype.draw = function(gc) {
         
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
-            gc.save();
+            var oldAlpha = gc.globalAlpha;            // NB hoisted!
             gc.globalAlpha = this.alphaForQual(qc);
         }
 
@@ -1075,7 +1075,7 @@ SequenceGlyph.prototype.draw = function(gc) {
         }
 
         if (this._quals) {
-            gc.restore();
+            gc.globalAlpha = oldAlpha;
         }
     }
 }

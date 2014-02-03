@@ -38,11 +38,6 @@ SubTier.prototype.indexFor = function(glyph) {
 
 SubTier.prototype.add = function(glyph) {
     var ind = this.indexFor(glyph);
-    /* if (ind==0) {
-        console.log('len=' + this.glyphs.length + ';ind=' + ind);
-        console.log('min=' + glyph.min());
-        console.log('arr=' + this.glyphs.map(function(g) {return g.min()}).join(','));
-    }*/
     this.glyphs.splice(ind, 0, glyph);
     this.height = Math.max(this.height, glyph.height());
     if (glyph.quant && this.quant == null) {
@@ -58,16 +53,6 @@ SubTier.prototype.hasSpaceFor = function(glyph) {
         return false;
 
     return true;
-
-    /*
-    var gmin = glyph.min(), gmax = glyph.max();
-    for (var i = 0; i < this.glyphs.length; ++i) {
-        var g = this.glyphs[i];
-        if (g.min() <= gmax && g.max() >= gmin) {
-            return false;
-        }
-    }
-    return true; */
 }
 
 var GLOBAL_GC;
@@ -907,7 +892,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
     } else if (gtype === '__INSERTION') {
         var ig = new TriangleGlyph(minPos, 5, 'S', 5, 'red');
-        gg = new LabelledGlyph(ig, feature.insertion || feature.altAlleles[0], false, 'left', 'above', '7px sans-serif');
+        gg = new LabelledGlyph(ig, feature.insertion || feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
         if ((maxPos - minPos) > 1) {
             var fill = style.BGCOLOR || style.COLOR1 || 'green';
             var bg = new BoxGlyph(minPos, 5, (maxPos - minPos), height, fill, stroke);
