@@ -112,11 +112,23 @@ Browser.prototype.showTrackAdder = function(ev) {
             ev.preventDefault(); ev.stopPropagation();
             
             for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
-                if (thisB.hubObjects[hi].absURL = tdb.absURL) {
+                if (thisB.hubObjects[hi].absURL == tdb.absURL) {
                     thisB.hubObjects.splice(hi, 1);
                     break;
                 }
             }
+            for (var hi = 0; hi < thisB.hubs.length; ++hi) {
+                var hc = thisB.hubs[hi];
+                if (typeof hc === 'string')
+                    hc = {url: hc};
+                if (hc.url == tdb.hub.url && !hc.genome || hc.genome == tdb.genome) {
+                    thisB.hubs.splice(hi, 1);
+                    break;
+                }
+
+            }
+
+
             thisB.notifyTier();
 
             modeButtonHolder.removeChild(hubButton);
