@@ -7,17 +7,17 @@
 // bam-test.js
 //
 
-describe('BAM files', function() {
-    var bamURI = 'http://www.biodalliance.org/datasets/bodymap-skeletal_muscle-chr22.bam';
+describe('2bit files', function() {
+    var twoBitURI = 'http://www.biodalliance.org/datasets/hg19.2bit';
     // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';
-    var bam;
+    var twoBit;
 
     it('can be created by connecting to a URI', function() {
         var cb, err;
         runs(function() {
-             makeBam(new URLFetchable(bamURI), new URLFetchable(bamURI + '.bai'),
-                function(_bam, _err) {
-                    bam = _bam;
+             makeTwoBit(new URLFetchable(twoBitURI),
+                function(_tb, _err) {
+                    twoBit = _tb;
                     err = _err;
                     cb = true;
                 });
@@ -29,18 +29,18 @@ describe('BAM files', function() {
 
         runs(function() {
             expect(err).toBeFalsy();
-            expect(bam).not.toBeNull();
+            expect(twoBit).not.toBeNull();
         });
     });
 
-    it('can retrieve reads from a genomic interval', function() {
-        var features, err, flag;
+    it('can retrieve bases from a genomic interval', function() {
+        var seq, err, flag;
 
         runs(function() {
-            bam.fetch('22', 30000000, 30010000, function(_f, _e) {
+            twoBit.fetch('22', 30000000, 30001000, function(_s, _e) {
                 flag = true;
-                features = _f;
-                // console.log('got ' + features.length);
+                seq = _s;
+                // console.log('got ' + seq);
                 err = _e;
             });
         });
@@ -51,8 +51,8 @@ describe('BAM files', function() {
 
         runs(function() {
             expect(err).toBeFalsy();
-            expect(features).toBeTruthy();
-            expect(features.length > 0).toBeTruthy();
+            expect(seq).toBeTruthy();
+            expect(seq.length).toBe(1001);
         });
     });
 });
