@@ -79,12 +79,13 @@ Browser.prototype.openTierPanel = function(tier) {
         var colorListPlus = makeElement('i', null, {className: 'fa fa-plus-circle'});
         var colorListMinus = makeElement('i', null, {className: 'fa fa-minus-circle'});
         var numColors = 1;
-        var colorListElement = makeElement('td');
+        var colorListElement = makeElement('td', tierColorFields);
         function setNumColors(n) {
             numColors = n;
-            removeChildren(colorListElement);
-            for (var i = 0; i < n; ++i)
-                colorListElement.appendChild(tierColorFields[i]);
+            for (var i = 0; i < n; ++i) 
+                tierColorFields[i].style.display = 'block';
+            for (var i = n; i < tierColorFields.length; ++i)
+                tierColorFields[i].style.display = 'none';
         }
         colorListPlus.addEventListener('click', function(ev) {
             if (numColors < 3) {
