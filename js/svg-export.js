@@ -170,10 +170,15 @@ Browser.prototype.makeSVG = function(opts) {
     	    pos += 10;
     	}
 
+        var labelName;
+        if (typeof tier.config.name === 'string')
+            labelName = tier.config.name;
+        else
+            labelName = tier.dasSource.name;
     	tierLabels.appendChild(
     	    makeElementNS(
     		NS_SVG, 'text',
-    		tier.dasSource.name,
+    		labelName,
     		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
 
     	
@@ -185,12 +190,12 @@ Browser.prototype.makeSVG = function(opts) {
         var highlights = this.highlights || [];
         for (var hi = 0; hi < highlights.length; ++hi) {
             var h = highlights[hi];
-            if (h.chr == this.chr && h.min < this.viewEnd && h.max > this.viewStart) {
+            if ((h.chr == this.chr || h.chr == ('chr' + this.chr)) && h.min < this.viewEnd && h.max > this.viewStart) {
                 var tmin = (Math.max(h.min, this.viewStart) - this.viewStart) * this.scale;
                 var tmax = (Math.min(h.max, this.viewEnd) - this.viewStart) * this.scale;
 
                 tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: margin + tmin, y: 70, width: (tmax-tmin), height: pos-70,
-                                                                      stroke: 'none', fill: 'red', fillOpacity: 0.3}));
+                                                                      stroke: 'none', fill: this.defaultHighlightFill, fillOpacity: this.defaultHighlightAlpha}));
             }
         }
     }
