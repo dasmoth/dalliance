@@ -170,10 +170,15 @@ Browser.prototype.makeSVG = function(opts) {
     	    pos += 10;
     	}
 
+        var labelName;
+        if (typeof tier.config.name === 'string')
+            labelName = tier.config.name;
+        else
+            labelName = tier.dasSource.name;
     	tierLabels.appendChild(
     	    makeElementNS(
     		NS_SVG, 'text',
-    		tier.dasSource.name,
+    		labelName,
     		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
 
     	
