@@ -76,6 +76,8 @@ function Browser(opts) {
     this.rulerLocation = 'center';
     this.defaultHighlightFill = 'red';
     this.defaultHighlightAlpha = 0.3;
+    this.exportHighlights = true;
+    this.exportRuler = true;
 
     // Visual config.
 
