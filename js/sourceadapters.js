@@ -823,10 +823,16 @@ BAMFeatureSource.prototype.init = function() {
         bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials});
         baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
     }
-    makeBam(bamF, baiF, function(bam) {
+    makeBam(bamF, baiF, function(bam, err) {
         thisB.readiness = null;
         thisB.notifyReadiness();
-        thisB.bamHolder.provide(bam);
+
+        if (bam) {
+            thisB.bamHolder.provide(bam);
+        } else {
+            thisB.error = err;
+            thisB.bamHolder.provide(null);
+        }
     });
 }
 
@@ -837,6 +843,12 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     thisB.notifyActivity();
     
     this.bamHolder.await(function(bam) {
+        if (!bam) {
+            thisB.busy--;
+            thisB.notifyActivity();
+            return callback(thisB.error || "Couldn't fetch BAM");
+        }
+
         bam.fetch(chr, min, max, function(bamRecords, error) {
             thisB.busy--;
             thisB.notifyActivity();

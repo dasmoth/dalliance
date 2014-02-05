@@ -33,13 +33,13 @@ function makeBam(data, bai, callback) {
 
     bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
         if (!header) {
-            return dlog("Couldn't access BAI");
+            return callback(null, "Couldn't access BAI");
         }
 
         var uncba = new Uint8Array(header);
         var baiMagic = readInt(uncba, 0);
         if (baiMagic != BAI_MAGIC) {
-            return dlog('Not a BAI file');
+            return callback(null, 'Not a BAI file');
         }
 
         var nref = readInt(uncba, 4);
@@ -81,13 +81,16 @@ function makeBam(data, bai, callback) {
 
         bam.data.slice(0, minBlockIndex).fetch(function(r) {
             if (!r) {
-                return dlog("Couldn't access BAM");
+                return callback(null, "Couldn't access BAM");
             }
             
             var unc = unbgzf(r, r.byteLength);
             var uncba = new Uint8Array(unc);
 
             var magic = readInt(uncba, 0);
+            if (magic != BAM_MAGIC) {
+                return callback(null, "Not a BAM file, magic=0x" + magic.toString(16));
+            }
             var headLen = readInt(uncba, 4);
             var header = '';
             for (var i = 0; i < headLen; ++i) {
