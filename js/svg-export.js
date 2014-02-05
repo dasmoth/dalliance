@@ -14,8 +14,16 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportForm = makeElement('div', null, {className: 'tier-edit'}, {textAlign: 'center'});
         exportForm.appendChild(makeElement('p', 'Export current view as SVG'));
 
-        var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
-        var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: true});
+        var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportHighlights});
+        exportHighlightsToggle.addEventListener('change', function(ev) {
+            b.exportHighlights = exportHighlightsToggle.checked;
+            b.storeStatus();
+        }, false);
+        var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportRuler});
+        exportRulerToggle.addEventListener('change', function(ev) {
+            b.exportRuler = exportRulerToggle.checked;
+            b.storeStatus();
+        }, false);
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
@@ -38,6 +46,13 @@ Browser.prototype.openExportPanel = function(tier) {
 
             exportContent.appendChild(makeElement('p', ['SVG created: ', downloadLink, previewLink]));
         }, false);
+
+        b.addViewListener(function() {
+            removeChildren(exportContent);
+        });
+        b.addTierListener(function() {
+            removeChildren(exportContent);
+        });
 
         var exportContent = makeElement('p', '');
 

@@ -181,7 +181,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
        ev.stopPropagation(); ev.preventDefault();
         b.openExportPanel();
     }, false);
-    b.makeTooltip(svgBtn, 'Export publication-quality SVG.');
+    b.makeTooltip(svgBtn, 'Export publication-quality SVG. (P)');
 
     var optsPopup;
     optsButton.addEventListener('click', function(ev) {
@@ -275,6 +275,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             if (b.selectedTiers.length == 1) {
                 b.openTierPanel(b.tiers[b.selectedTiers[0]]);
             }
+        } else if (ev.keyCode == 80 || ev.keyCode == 112) { // p
+            ev.stopPropagation(); ev.preventDefault();
+            b.openExportPanel();
         }
     };
 

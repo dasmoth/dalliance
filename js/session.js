@@ -89,6 +89,9 @@ Browser.prototype.storeTierStatus = function() {
     localStorage['dalliance.' + this.cookieKey + '.reverse-scrolling'] = this.reverseScrolling;
     localStorage['dalliance.' + this.cookieKey + '.reverse-key-scrolling'] = this.reverseKeyScrolling;
     localStorage['dalliance.' + this.cookieKey + '.ruler-location'] = this.rulerLocation;
+
+    localStorage['dalliance.' + this.cookieKey + '.export-ruler'] = this.exportRuler;
+    localStorage['dalliance.' + this.cookieKey + '.export-highlights'] = this.exportHighlights;
     
     localStorage['dalliance.' + this.cookieKey + '.version'] = VERSION.CONFIG;
 }
@@ -157,6 +160,13 @@ Browser.prototype.restoreStatus = function() {
     if (rl)
         this.rulerLocation = rl;
 
+    var x = localStorage['dalliance.' + this.cookieKey + '.export-ruler'];
+    if (x)
+        this.exportRuler = (x === 'true');
+    var x = localStorage['dalliance.' + this.cookieKey + '.export-highlights'];
+    if (x)
+        this.exportHighlights = (x === 'true');
+
     var sourceStr = localStorage['dalliance.' + this.cookieKey + '.sources'];
     if (sourceStr) {
 	    var storedSources = JSON.parse(sourceStr);
@@ -195,6 +205,8 @@ Browser.prototype.reset = function() {
         if (!s.disabled) 
             this.addTier(this.defaultSources[i]);
     }
+
+    this.highlights.splice(0, this.highlights.length);
 
     this.setLocation(this.defaultChr, this.defaultStart, this.defaultEnd);
 }
