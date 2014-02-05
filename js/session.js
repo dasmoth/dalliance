@@ -206,5 +206,7 @@ Browser.prototype.reset = function() {
             this.addTier(this.defaultSources[i]);
     }
 
+    this.highlights.splice(0, this.highlights.length);
+
     this.setLocation(this.defaultChr, this.defaultStart, this.defaultEnd);
 }
