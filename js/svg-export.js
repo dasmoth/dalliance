@@ -47,6 +47,13 @@ Browser.prototype.openExportPanel = function(tier) {
             exportContent.appendChild(makeElement('p', ['SVG created: ', downloadLink, previewLink]));
         }, false);
 
+        b.addViewListener(function() {
+            removeChildren(exportContent);
+        });
+        b.addTierListener(function() {
+            removeChildren(exportContent);
+        });
+
         var exportContent = makeElement('p', '');
 
         var exportOptsTable = makeElement('table',
