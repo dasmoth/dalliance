@@ -55,6 +55,8 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
+    } else if (config.tier_type == 'worker-bam') {
+        fs = new RemoteBAMFeatureSource(config, this.fetchWorker);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
@@ -922,6 +924,129 @@ BAMFeatureSource.prototype.getStyleSheet = function(callback) {
 	return callback(stylesheet);
     });
 }
+
+
+
+
+function RemoteBAMFeatureSource(bamSource, worker) {
+    FeatureSourceBase.call(this);
+
+    var thisB = this;
+    this.bamSource = bamSource;
+    this.worker = worker;
+    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
+    this.keyHolder = new Awaited();
+    
+    this.init();
+}
+
+RemoteBAMFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
+
+RemoteBAMFeatureSource.prototype.init = function() {
+    var thisB = this;
+    var uri = this.bamSource.uri;
+    var indexUri = this.bamSource.indexUri || this.bamSouce.uri + '.bai';
+
+    this.worker.postCommand({command: 'connectBAM', uri: uri, indexUri: indexUri}, function(result, err) {
+        thisB.readiness = null;
+        thisB.notifyReadiness();
+
+        if (result) {
+            thisB.keyHolder.provide(result);
+        } else {
+            thisB.error = err;
+            thisB.keyHolder.provide(null);
+        }
+    }); 
+}
+
+RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
+    
+    thisB.busy++;
+    thisB.notifyActivity();
+    
+    this.keyHolder.await(function(key) {
+        if (!key) {
+            thisB.busy--;
+            thisB.notifyActivity();
+            return callback(thisB.error || "Couldn't fetch BAM");
+        }
+
+        thisB.worker.postCommand({command: 'fetch', connection: key, chr: chr, min: min, max: max}, function(bamRecords, error) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
+            if (error) {
+                callback(error, null, null);
+            } else {
+                var features = [];
+                for (var ri = 0; ri < bamRecords.length; ++ri) {
+                    var r = bamRecords[ri];
+
+                    if (r.flag & 0x4)
+                        continue; 
+                    
+                    var len = r.seq.length;
+                    if (r.cigar) {
+                        len = 0;
+                        var ops = parseCigar(r.cigar);
+                        for (var ci = 0; ci < ops.length; ++ci) {
+                            var co = ops[ci];
+                            if (co.op == 'M' || co.op == 'D')
+                                len += co.cnt;
+                        }
+                    }
+
+                    var f = new DASFeature();
+                    f.min = r.pos + 1;
+                    f.max = r.pos + len;
+                    f.segment = r.segment;
+                    f.type = 'bam';
+                    f.id = r.readName;
+                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
+                    f.cigar = r.cigar;
+                    f.seq = r.seq;
+                    f.quals = r.quals;
+                    features.push(f);
+                }
+                callback(null, features, 1000000000);
+            }
+        });
+    });
+}
+
+RemoteBAMFeatureSource.prototype.getScales = function() {
+    return 1000000000;
+}
+
+RemoteBAMFeatureSource.prototype.getStyleSheet = function(callback) {
+    this.keyHolder.await(function(bam) {
+        var stylesheet = new DASStylesheet();
+                
+        var densStyle = new DASStyle();
+        densStyle.glyph = 'HISTOGRAM';
+        densStyle.COLOR1 = 'black';
+        densStyle.COLOR2 = 'red';
+        densStyle.HEIGHT=30;
+        stylesheet.pushStyle({type: 'density'}, 'low', densStyle);
+        stylesheet.pushStyle({type: 'density'}, 'medium', densStyle);
+
+        var wigStyle = new DASStyle();
+        wigStyle.glyph = '__SEQUENCE';
+        wigStyle.FGCOLOR = 'black';
+        wigStyle.BGCOLOR = 'blue'
+        wigStyle.HEIGHT = 8;
+        wigStyle.BUMP = true;
+        wigStyle.LABEL = false;
+        wigStyle.ZINDEX = 20;
+        stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
+    //                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
+
+        return callback(stylesheet);
+    });
+}
+
 
 function MappedFeatureSource(source, mapping) {
     this.source = source;

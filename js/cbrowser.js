@@ -148,6 +148,8 @@ Browser.prototype.realInit = function() {
     this.svgHolder.appendChild(this.ruler);
     this.svgHolder.appendChild(this.ruler2);
 
+    this.fetchWorker = new FetchWorker();
+
     setTimeout(function() {thisB.realInit2()}, 1);
 }
 
@@ -1811,4 +1813,26 @@ function glyphLookup(glyphs, rx, ry, matches) {
         }
     }
     return matches;
+}
+
+function FetchWorker() {
+    var thisB = this;
+    this.worker = new Worker('js/fetchworker.js');
+    this.tagSeed = 0;
+    this.callbacks = {};
+
+    this.worker.onmessage = function(ev) {
+        var cb = thisB.callbacks[ev.data.tag];
+        if (cb) {
+            cb(ev.data.result, ev.data.error);
+            delete thisB.callbacks[ev.data.tag];
+        }
+    }
+}
+
+FetchWorker.prototype.postCommand = function(cmd, callback) {
+    var tag = 'x' + (++this.tagSeed);
+    cmd.tag = tag;
+    this.callbacks[tag] = callback;
+    this.worker.postMessage(cmd);
 }

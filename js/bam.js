@@ -412,20 +412,20 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
     // Exits via top of loop.
 };
 
-(function() {
+(function(global) {
     var convertBuffer = new ArrayBuffer(8);
     var ba = new Uint8Array(convertBuffer);
     var fa = new Float32Array(convertBuffer);
 
 
-    window.readFloat = function(buf, offset) {
+    global.readFloat = function(buf, offset) {
         ba[0] = buf[offset];
         ba[1] = buf[offset+1];
         ba[2] = buf[offset+2];
         ba[3] = buf[offset+3];
         return fa[0];
     };
- })();
+ }(this));
 
 function readInt64(ba, offset) {
     return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
