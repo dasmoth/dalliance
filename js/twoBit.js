@@ -15,8 +15,9 @@ function TwoBitFile() {
 function makeTwoBit(fetchable, cnt) {
     var tb = new TwoBitFile();
     tb.data = fetchable;
+    var headerBlockSize = 12500;
 
-    tb.data.slice(0, 1024).fetch(function(r) {
+    tb.data.slice(0, headerBlockSize).fetch(function(r) {
         if (!r) {
             return cnt(null, "Couldn't access data");
         }
@@ -30,21 +31,40 @@ function makeTwoBit(fetchable, cnt) {
         if (version != 0) {
             return cnt(null, 'Unsupported version ' + version);
         }
-        
+
         tb.seqCount = readInt(ba, 8);
         tb.seqDict = {};
-        var p = 16;
-        for (var i = 0; i < tb.seqCount; ++i) {
-            var ns = ba[p++];
-            var name = '';
-            for (var j = 1; j <= ns; ++j) {
-                name += String.fromCharCode(ba[p++]);
+
+        var p = 16, i=0;
+        var o = 0;  // Offset of the current block if we need to fetch multiple header blocks.
+
+        var parseSeqInfo = function() {
+            while (i < tb.seqCount) {
+                var ns = ba[p];
+                if (p + ns + 6 >= ba.length) {
+                    return tb.data.slice(o + p, headerBlockSize).fetch(function (r) {
+                        o += p;
+                        p = 0;
+                        ba = new Uint8Array(r);
+                        parseSeqInfo();
+                    });
+                } else {
+                    ++p;
+                    var name = '';
+                    for (var j = 1; j <= ns; ++j) {
+                        name += String.fromCharCode(ba[p++]);
+                    }
+                    var offset = readInt(ba, p);
+                    p += 4;
+                    tb.seqDict[name] = new TwoBitSeq(tb, offset);
+                    ++i;
+                }
             }
-            var offset = readInt(ba, p);
-            p += 4;
-            tb.seqDict[name] = new TwoBitSeq(tb, offset);
+            return cnt(tb);
         }
-        return cnt(tb);
+
+        parseSeqInfo();
+        
     });
 }
 
