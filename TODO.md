@@ -6,10 +6,14 @@ For 0.12
   - Small BED/WIG support
   - Animate when leaping/toggling.
   - Apply track-edit operations to multiple tracks at once.
-  - Bulk addition of local files.
-  - Typeahead for search-by-gene-ID
+  - Bulk addition of local files [WIP].
+  - Typeahead for search-by-gene-ID 
   - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
+  - Overlay function plugin API
+  - Documentation of plugin APIs
+  - Move standalone browser to embedded with control
+  - Full screen function
 
 For 0.13
 --------
