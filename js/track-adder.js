@@ -525,7 +525,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         pageHolder.appendChild(makeElement('b', '- or -'));
         pageHolder.appendChild(makeElement('br'));
         pageHolder.appendChild(document.createTextNode('File: '));
-        custFile = makeElement('input', null, {type: 'file'});
+        custFile = makeElement('input', null, {type: 'file', multiple: 'multiple'});
         pageHolder.appendChild(custFile);
         
         pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
@@ -547,7 +547,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
         pageHolder.appendChild(makeElement('h3', 'Connect to a track hub.'));
-        pageHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt" of a UCSC-style track hub']));
+        pageHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt") of a UCSC-style track hub']));
         
         custURL = makeElement('input', '', {size: 120, value: 'http://www.biodalliance.org/datasets/testhub/hub.txt'}, {width: '100%'});
         pageHolder.appendChild(custURL);
@@ -607,7 +607,10 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (customMode === 'bin') {
                 var opts = {name: 'temporary'};
                 var fileList = custFile.files;
-                if (fileList && fileList.length > 0 && fileList[0]) {
+
+                if (fileList && fileList.length > 1) {
+                    tryAddMultiple(fileList);
+                } else if (fileList && fileList.length > 0 && fileList[0]) {
                     opts.bwgBlob = fileList[0];
                     opts.noPersist = true;
                 } else {
@@ -672,7 +675,31 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
                 
                 tryAddHub(curi);
-                
+            } else if (customMode === 'multiple') {
+                for (var mi = 0; mi < multipleSet.length; ++mi) {
+                    var s = multipleSet[mi];
+
+                    var nds = {name: s.name, noPersist: true};
+                    if (s.mapping && s.mapping != '__default__')
+                        nds.mapping = s.mapping;
+
+                    if (s.tier_type == 'bwg') {
+                        nds.bwgBlob = s.blob;
+                        thisB.addTier(nds);
+                    } else if (s.tier_type == 'bam' && s.indexBlob) {
+                        nds.bamBlob = s.blob;
+                        nds.baiBlob = s.indexBlob;
+                        thisB.addTier(nds);
+                    } else if (s.tier_type == 'tabix') {
+                        nds.tier_type = 'tabix';
+                        nds.payload = s.payload;
+                        nds.blob = s.blob;
+                        nds.indexBlob = s.indexBlob;
+                        thisB.addTier(nds);
+                    }
+                }
+
+                switchToBinMode();
             }
         } else {
             thisB.removeAllPopups();
@@ -1111,6 +1138,168 @@ Browser.prototype.showTrackAdder = function(ev) {
         dataToFinalize = nds;
     }
 
+    var probeResource = function(source, listener, retry) {
+        var fetchable = new BlobFetchable(source.blob);
+
+        fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
+            if (!result) {
+                if (!retry) {
+                    source.credentials = true;
+                    probeResource(source, listener, true)
+                }
+
+                return listener(source, "Couldn't fetch data");
+            }
+
+            var ba = new Uint8Array(result);
+            var magic = readInt(ba, 0);
+            if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
+                source.tier_type = 'bwg';
+                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb|.bigWig|.bigBed)?$');
+                var match = nameExtractPattern.exec(source.uri || source.blob.name);
+                if (match) {
+                    source.name = match[1];
+                }
+
+                return listener(source, null);
+            } else if (magic == BAI_MAGIC) {
+                source.tier_type = 'bai';
+                return listener(source, null);
+            } else {
+                if (ba[0] != 31 || ba[1] != 139) {
+                    return listener(source, "Unsupported format");
+                }
+                var unc = unbgzf(result);
+                var uncba = new Uint8Array(unc);
+                magic = readInt(uncba, 0);
+                if (magic == BAM_MAGIC) {
+                    source.tier_type = 'bam';
+                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bam)?$');
+                    var match = nameExtractPattern.exec(source.uri || source.blob.name);
+                    if (match) {
+                        source.name = match[1];
+                    }
+
+                    return listener(source, null);
+                } else if (magic == TABIX_MAGIC) {
+                    source.tier_type = 'tabix-index';
+                    return listener(source, null);
+                } else if (magic == 0x69662323) {
+                    source.tier_type = 'tabix';
+                    source.payload = 'vcf';
+                    var nameExtractPattern = new RegExp('/?([^/]+?)(.vcf)?(.gz)?$');
+                    var match = nameExtractPattern.exec(source.uri || source.blob.name);
+                    if (match) {
+                        source.name = match[1];
+                    }
+
+                    return listener(source, null);
+                } else {
+                    console.log('magic = ' + magic.toString(16));
+                    // maybe Tabix?
+                   return listener(source, "Unsupported format");
+                }
+            }
+        });
+    }
+
+    var multipleSet = null;
+    var tryAddMultiple = function(fileList) {
+        var newSources = multipleSet = [];
+        customMode = 'multiple';
+        for (var fi = 0; fi < fileList.length; ++fi) {
+            var f = fileList[fi];
+            if (f) {
+                newSources.push({blob: f});
+            }
+        }
+
+        for (var fi = 0; fi < newSources.length; ++fi) {
+            probeResource(newSources[fi], function(source, err) {
+                if (err) {
+                    source.error = err;
+                }
+
+                var usedIndices = [];
+                var bams = {}, tabixes = {};
+                for (var si = 0; si < multipleSet.length; ++si) {
+                    var s = multipleSet[si];
+                    if (s.tier_type == 'bam' && !s.indexBlob) {
+                        bams[s.blob.name] = s;
+                    }
+                    if (s.tier_type == 'tabix' && !s.indexBlob) {
+                        tabixes[s.blob.name] = s;
+                    }
+                }
+
+                for (var si = 0; si < multipleSet.length; ++si) {
+                    var s = multipleSet[si];
+                    if (s.tier_type === 'bai') {
+                        var baiPattern = new RegExp('(.+)\\.bai$');
+                        var match = baiPattern.exec(s.blob.name);
+                        if (match && bams[match[1]]) {
+                            bams[match[1]].indexBlob = s.blob;
+                            usedIndices.push(si);
+                        }
+                    } else if (s.tier_type === 'tabix-index') {
+                        var tbiPattern = new RegExp('(.+)\\.tbi$');
+                        var match = tbiPattern.exec(s.blob.name);
+                        if (match && tabixes[match[1]]) {
+                            tabixes[match[1]].indexBlob = s.blob;
+                            usedIndices.push(si);
+                        }
+                    }
+                }
+
+                for (var bi = usedIndices.length - 1; bi >= 0; --bi) {
+                    multipleSet.splice(usedIndices[bi], 1);
+                }
+
+                updateMultipleStatus();
+            });
+        }
+        updateMultipleStatus();
+    }
+
+    var updateMultipleStatus = function() {
+        removeChildren(stabHolder);
+        var multTable = makeElement('table', multipleSet.map(function(s) {
+            var row = makeElement('tr');
+            row.appendChild(makeElement('td', s.name || s.blob.name));
+            var typeContent;
+            if (s.error) {
+                typeContent = makeElement('span', 'Error', null, {color: 'red'});
+            } else if (s.tier_type) {
+                typeContent = s.tier_type;
+            } else {
+                typeContent = makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'})
+            }
+
+            var ccs;
+            if (s.tier_type == 'bwg' || (s.tier_type == 'bam' && s.indexBlob) || (s.tier_type == 'tabix' && s.indexBlob)) {
+                ccs = makeElement('select', null, null, {width: '100px'});
+                ccs.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+                if (thisB.chains) {
+                    for (var csk in thisB.chains) {
+                        var cs = thisB.chains[csk].coords;
+                        ccs.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+                    }
+                }
+                ccs.value = s.mapping || '__default__';
+
+                ccs.addEventListener('change', function(ev) {
+                    s.mapping = ccs.value;
+                    console.log(s);
+                }, false);
+            }
+
+            return makeElement('tr', [makeElement('td', s.name || s.blob.name),
+                                      makeElement('td', typeContent),
+                                      makeElement('td', ccs)]);
+
+        }), {className: 'table table-striped table-condensed'});
+        stabHolder.appendChild(multTable);
+    }
 
     var canButton = makeElement('button', 'Cancel', {className: 'btn'});
     canButton.addEventListener('click', function(ev) {
