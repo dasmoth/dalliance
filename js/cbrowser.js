@@ -148,7 +148,11 @@ Browser.prototype.realInit = function() {
     this.svgHolder.appendChild(this.ruler);
     this.svgHolder.appendChild(this.ruler2);
 
-    this.fetchWorker = new FetchWorker();
+    try {
+        this.fetchWorker = new FetchWorker();
+    } catch (ex) {
+        console.log(ex);
+    }
 
     setTimeout(function() {thisB.realInit2()}, 1);
 }
