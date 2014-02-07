@@ -6,7 +6,7 @@ For 0.12
   - Small BED/WIG support
   - Animate when leaping/toggling.
   - Apply track-edit operations to multiple tracks at once.
-  - Bulk addition of local files.
+  - Bulk addition of local files. [DONE]
   - Typeahead for search-by-gene-ID
   - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
