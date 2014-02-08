@@ -309,9 +309,9 @@ DasTier.prototype.drawOverlay = function() {
 
     for (var hi = 0; hi < b.highlights.length; ++hi) {
         var h = b.highlights[hi];
-        if (h.chr == b.chr && h.min < visEnd && h.max > visStart) {
-            g.globalAlpha = 0.3;
-            g.fillStyle = 'red';
+        if (((h.chr === b.chr) || (h.chr === ('chr' + b.chr))) && h.min < visEnd && h.max > visStart) {
+            g.globalAlpha = b.defaultHighlightAlpha;
+            g.fillStyle = b.defaultHighlightFill;
             g.fillRect((h.min - origin) * b.scale,
                        0,
                        (h.max - h.min) * b.scale,

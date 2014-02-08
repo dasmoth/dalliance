@@ -74,6 +74,10 @@ function Browser(opts) {
     
     this.reverseScrolling = false;
     this.rulerLocation = 'center';
+    this.defaultHighlightFill = 'red';
+    this.defaultHighlightAlpha = 0.3;
+    this.exportHighlights = true;
+    this.exportRuler = true;
 
     // Visual config.
 
@@ -1539,10 +1543,16 @@ Browser.prototype.highlightRegion = function(chr, min, max) {
 }
 
 Browser.prototype._highlightRegion = function(chr, min, max) {
+    for (var hi = 0; hi < this.highlights.length; ++hi) {
+        var h = this.highlights[hi];
+        if (h.chr == chr && h.min == min && h.max == max)
+            return;
+    }
+
     this.highlights.push(new Region(chr, min, max));
     var visStart = this.viewStart - (1000/this.scale);
     var visEnd = this.viewEnd + (1000/this.scale);
-    if (chr == this.chr && min < visEnd && max > visStart) {
+    if ((chr == this.chr || chr == ('chr'+this.chr)) && min < visEnd && max > visStart) {
         this.drawOverlays();
     }
 }

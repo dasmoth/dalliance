@@ -14,8 +14,16 @@ Browser.prototype.openExportPanel = function(tier) {
         var exportForm = makeElement('div', null, {className: 'tier-edit'}, {display: 'flex', justifyContent: 'space-between', paddingTop: '3px', paddingBottom: '3px', borderTop: '1px solid black', borderBottom: '1px solid black'});
         exportForm.appendChild(makeElement('p', 'Export current view as SVG'));
 
-        var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
-        var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: true});
+        var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportHighlights});
+        exportHighlightsToggle.addEventListener('change', function(ev) {
+            b.exportHighlights = exportHighlightsToggle.checked;
+            b.storeStatus();
+        }, false);
+        var exportRulerToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportRuler});
+        exportRulerToggle.addEventListener('change', function(ev) {
+            b.exportRuler = exportRulerToggle.checked;
+            b.storeStatus();
+        }, false);
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
@@ -38,6 +46,13 @@ Browser.prototype.openExportPanel = function(tier) {
 
             exportContent.appendChild(makeElement('p', ['SVG created: ', downloadLink, previewLink]));
         }, false);
+
+        b.addViewListener(function() {
+            removeChildren(exportContent);
+        });
+        b.addTierListener(function() {
+            removeChildren(exportContent);
+        });
 
         var exportContent = makeElement('p', '');
 
@@ -174,10 +189,15 @@ Browser.prototype.makeSVG = function(opts) {
     	    pos += 10;
     	}
 
+        var labelName;
+        if (typeof tier.config.name === 'string')
+            labelName = tier.config.name;
+        else
+            labelName = tier.dasSource.name;
     	tierLabels.appendChild(
     	    makeElementNS(
     		NS_SVG, 'text',
-    		tier.dasSource.name,
+    		labelName,
     		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
 
     	
@@ -189,12 +209,12 @@ Browser.prototype.makeSVG = function(opts) {
         var highlights = this.highlights || [];
         for (var hi = 0; hi < highlights.length; ++hi) {
             var h = highlights[hi];
-            if (h.chr == this.chr && h.min < this.viewEnd && h.max > this.viewStart) {
+            if ((h.chr == this.chr || h.chr == ('chr' + this.chr)) && h.min < this.viewEnd && h.max > this.viewStart) {
                 var tmin = (Math.max(h.min, this.viewStart) - this.viewStart) * this.scale;
                 var tmax = (Math.min(h.max, this.viewEnd) - this.viewStart) * this.scale;
 
                 tierHolder.appendChild(makeElementNS(NS_SVG, 'rect', null, {x: margin + tmin, y: 70, width: (tmax-tmin), height: pos-70,
-                                                                      stroke: 'none', fill: 'red', fillOpacity: 0.3}));
+                                                                      stroke: 'none', fill: this.defaultHighlightFill, fillOpacity: this.defaultHighlightAlpha}));
             }
         }
     }
