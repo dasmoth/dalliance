@@ -32,7 +32,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     holder.classList.add('dalliance');
-    var toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
+    var toolbar = b.toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
 
     var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
     if (this.setDocumentTitle) {
@@ -301,7 +301,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 Browser.prototype.showToolPanel = function(panel, nowrap) {
     if (this.activeToolPanel) {
-        this.svgHolder.removeChild(this.activeToolPanel);
+        this.activeToolPanel.parentElement.removeChild(this.activeToolPanel);
     }
 
     var content;
@@ -319,7 +319,7 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
 
 Browser.prototype.hideToolPanel = function() {
     if (this.activeToolPanel) {
-        this.svgHolder.removeChild(this.activeToolPanel);
+        this.activeToolPanel.parentElement.removeChild(this.activeToolPanel);
     }
     this.svgHolder.style.width = '100%';
     this.activeToolPanel = null;

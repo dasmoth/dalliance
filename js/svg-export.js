@@ -11,7 +11,7 @@ Browser.prototype.openExportPanel = function(tier) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var exportForm = makeElement('div', null, {className: 'tier-edit'}, {textAlign: 'center'});
+        var exportForm = makeElement('div', null, {className: 'tier-edit'}, {display: 'flex', justifyContent: 'space-between', paddingTop: '3px', paddingBottom: '3px', borderTop: '1px solid black', borderBottom: '1px solid black'});
         exportForm.appendChild(makeElement('p', 'Export current view as SVG'));
 
         var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: true});
@@ -54,7 +54,11 @@ Browser.prototype.openExportPanel = function(tier) {
         exportForm.appendChild(exportButton);
         exportForm.appendChild(exportContent);
 
-        this.showToolPanel(exportForm);
+        if (this.uiMode !== 'none')
+            this.hideToolPanel();
+        this.browserHolder.insertBefore(exportForm, this.svgHolder);
+        this.activeToolPanel = exportForm;
+
         this.setUiMode('export');
     }
 }
