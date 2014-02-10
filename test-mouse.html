@@ -1,28 +1,25 @@
-<!DOCTYPE html PUBLIC
-	"-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-	"http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg-flat.dtd"> 
+<!DOCTYPE html> 
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-     xmlns:svg="http://www.w3.org/2000/svg"
-     >
+<html>
 
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=utf-8"/>
-<title>Mouse NCBIm37 :: Dalliance</title> 
+
 <style>
-body {font-family: 'helvetica'}
 </style>
+
+<title>Mouse NCBIm37 :: Dalliance</title> 
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/das.js"></script>
 <script language="javascript" src="js/spans.js"></script>
 <script language="javascript" src="js/utils.js"></script>
-<script language="javascript" src="js/das.js"></script>
 <script language="javascript" src="js/cbrowser.js"></script>
 <script language="javascript" src="js/feature-popup.js"></script>
 <script language="javascript" src="js/tier.js"></script>
-<script language="javascript" src="js/sequence-tier.js"></script>
 <script language="javascript" src="js/features.js"></script>
 <script language="javascript" src="js/color.js"></script>
 <script language="javascript" src="js/feature-draw.js"></script>
-<script language="javascript" src="js/slider.js"></script>
+<script language="javascript" src="js/sequence-draw.js"></script>
 <script language="javascript" src="js/domui.js"></script>
 <script language="javascript" src="js/karyoscape.js"></script>
 <script language="javascript" src="js/quant-config.js"></script>
@@ -34,12 +31,26 @@ body {font-family: 'helvetica'}
 <script language="javascript" src="js/kspace.js"></script>
 <script language="javascript" src="json/json2.js"></script>
 <script language="javascript" src="js/bin.js"></script>
-<script language="javascript" src="js/bigwig.js"></script>
-<script language="javascript" src="js/bam.js"></script>
 <script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript" src="js/thub.js"></script>
+<script language="javascript" src="js/svg-export.js"></script>
 <script language="javascript" src="jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/browser-ui.js"></script>
+<script language="javascript" src="js/glyphs.js"></script>
+<script language="javascript" src="js/session.js"></script>
+<script language="javascript" src="js/jbjson.js"></script>
+<script language="javascript" src="js/sourceadapters.js"></script>
+<script language="javascript" src="polyfills/html5slider.js"></script>
+<script language="javascript" src="js/ensembljson.js"></script>
+<script language="javascript" src="js/overlay.js"></script>
+<script language="javascript" src="js/tier-actions.js"></script>
+<script language="javascript" src="js/tier-edit.js"></script>
+<script language="javascript" src="js/search.js"></script>
+<script language="javascript" src="js/tabix.js"></script>
+<script language="javascript" src="js/tabix-source.js"></script>
+<script language="javascript" src="js/bigtab.js"></script>
 
-<script language="javascript"> 
+<script language="javascript">
   new Browser({
       chr:        '19',
       viewStart:  30000000,
@@ -82,11 +93,7 @@ body {font-family: 'helvetica'}
                     {name: 'CpG Density',
                      desc: 'CpG observed/expected ratio',
                      uri: 'http://www.derkholm.net:9080/das/mm9comp/',
-                     stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'},
-                    {name: 'Sperm meth',
-                     bwgURI: 'http://localhost/sperm_mC.bw'},
-                    {name: 'Sperm meth',
-                     bwgURI: 'http://localhost/sperm_hmC.bw'}],
+                     stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'}],
    
     searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),
     karyoEndpoint: new DASSource('http://www.derkholm.net:8080/das/mmu_58_37k/'),
@@ -96,21 +103,11 @@ body {font-family: 'helvetica'}
         UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position=chr${chr}:${start}-${end}'
     }
 });
-</script> 
-</head> 
- 
-<body> 
- 
-<h2>Mouse NCBIm37</h2> 
- 
-<div id='svgHolder'> 
-Dalliance requires a modern Javascript-enabled web browser.  If in doubt, please download the latest version
-of <a href="http://www.mozilla.com/firefox/">Firefox</a>, <a href="http://www.google.com/chrome">Google Chrome</a>, 
-or <a href="http://www.apple.com/safari/">Safari</a> for your platform.
-</div> 
- 
-<div id='log'></div>
+</script>
+</head>
 
-</body> 
+<body>
+<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
+</body>
 </html>
 
