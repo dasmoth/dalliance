@@ -8,8 +8,8 @@
 //
 
 function MemStore() {
-    var featuresByChr = {};
-    var maxLength = 1;
+    this.featuresByChr = {};
+    this.maxLength = 1;
 }
 
 MemStore.prototype.addFeatures = function(features) {
@@ -68,8 +68,8 @@ MemStore.prototype.fetch = function(chr, min, max) {
     if (!fa)
         return [];
 
-    var mini = this._indexFor(fa, min - this.maxLength - 1);
-    var maxi = this._indexFor(fa, max);
+    var mini = Math.max(0, this._indexFor(fa, min - this.maxLength - 1));
+    var maxi = Math.min(fa.length - 1, this._indexFor(fa, max));
 
     var res = [];
     for (var fi = mini; fi <= maxi; ++fi) {
@@ -80,3 +80,62 @@ MemStore.prototype.fetch = function(chr, min, max) {
     return res;
 }
 
+function MemStoreFeatureSource(source) {
+    this.source = source;
+    FeatureSourceBase.call(this);
+    this.storeHolder = new Awaited();
+    this.parser = new VCFParser();
+
+    var thisB = this;
+    textXHR(this.source.uri, function(resp, err) {
+        if (!resp) {
+            thisB.error = err || "No data"
+            thisB.storeHolder.provide(null);
+        } else {
+            var store = new MemStore();
+            var features = [];
+            var lines = resp.split('\n');
+            for (var li = 0; li < lines.length; ++li) {
+                var line = lines[li];
+                if (line.length > 0) {
+                    features.push(thisB.parser.parse(line));
+                }
+            }
+            store.addFeatures(features);
+
+            thisB.storeHolder.provide(store);
+        }
+    }, {});
+}
+
+MemStoreFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
+
+MemStoreFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, cnt) {
+    var thisB = this;
+    this.storeHolder.await(function(store) {
+        if (store) {
+            var f = store.fetch(chr, min, max);
+            return cnt(null, f, 100000000);
+        } else {
+            return cnt(thisB.error)
+        }
+    });
+}
+
+MemStoreFeatureSource.prototype.getStyleSheet = function(callback) {
+    if (this.parser && this.parser.getStyleSheet)
+        this.parser.getStyleSheet(callback)
+}
+
+MemStoreFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.parser && this.parser.getDefaultFIPs)
+        this.parser.getDefaultFIPs(callback);
+}
+
+MemStoreFeatureSource.prototype.getScales = function() {
+    return 100000000;
+}
+
+dalliance_registerSourceAdapterFactory('memstore', function(source) {
+    return {features: new MemStoreFeatureSource(source)};
+});
