@@ -1,12 +1,13 @@
-Dalliance Genome Explorer
+Biodalliance: fast, embeddable genome visualization
 =========================
 
 Dalliance is a genome viewing tool that aims to offer a high
 level of interactivity while working entirely within your web
-browser. It currently supports recent versions of Firefox, Google
-Chrome, and Safari.
+browser. It works with current versions of Chrome, Firefox, and
+Safari and (with minor visual glitches) Internet Explorer 11.  It
+is also usable with current mobile web browsers.
 
-To try it, visit [http://www.biodalliance.org/human/ncbi36/](http://www.biodalliance.org/human/ncbi36/).
+To try it, visit [http://www.biodalliance.org/human37.html](http://www.biodalliance.org/human37.html).
 
 Development
 -----------
@@ -47,3 +48,6 @@ Reporting bugs
 Dalliance is under active development and we welcome your suggestions.
 Right now, probably the best place for bug reports or feature requests
 is the [Github issue tracker](http://github.com/dasmoth/dalliance).
+
+There is also a [mailing list](https://groups.google.com/forum/#!forum/biodalliance-dev)
+where the project can be discussed.
