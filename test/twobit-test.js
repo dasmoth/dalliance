@@ -37,7 +37,7 @@ describe('2bit files', function() {
         var seq, err, flag;
 
         runs(function() {
-            twoBit.fetch('22', 30000000, 30001000, function(_s, _e) {
+            twoBit.fetch('22', 19178140, 19178170, function(_s, _e) {
                 flag = true;
                 seq = _s;
                 // console.log('got ' + seq);
@@ -52,7 +52,9 @@ describe('2bit files', function() {
         runs(function() {
             expect(err).toBeFalsy();
             expect(seq).toBeTruthy();
-            expect(seq.length).toBe(1001);
+            console.log(seq.length);
+            expect(seq.length).toBe(31);
+            expect(seq).toBe('NTCACAGATCACCATACCATNTNNNGNNCNA');
         });
     });
 });
