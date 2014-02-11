@@ -16,10 +16,12 @@ function TabixFeatureSource(source) {
     this.tabixHolder = new Awaited();
     var thisB = this;
 
-    if (source.payload == 'vcf') {
-        this.parser = new VCFParser();
-    } else {
+
+    var parser = dalliance_makeParser(source.payload);
+    if (!parser) {
         throw 'Unsuported tabix payload ' + source.payload;
+    } else {
+        this.parser = new VCFParser();
     }
 
     var data, index;

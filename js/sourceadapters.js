@@ -7,11 +7,28 @@
 // sourceadapters.js
 //
 
-var __dalliance_sourceAdapterFactories = {}
+var __dalliance_sourceAdapterFactories = {};
 
 function dalliance_registerSourceAdapterFactory(type, factory) {
     __dalliance_sourceAdapterFactories[type] = factory;
-}
+};
+
+
+(function(global) {
+    var __dalliance_parserFactories = {};
+
+    global.dalliance_registerParserFactory = function(type, factory) {
+        __dalliance_parserFactories[type] = factory;
+    };
+
+    global.dalliance_makeParser = function(type) {
+        if (__dalliance_parserFactories[type]) {
+            return __dalliance_parserFactories[type](type);
+        }
+    };
+}(this));
+
+
 
 DasTier.prototype.initSources = function() {
     var thisTier = this;

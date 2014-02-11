@@ -84,7 +84,10 @@ function MemStoreFeatureSource(source) {
     this.source = source;
     FeatureSourceBase.call(this);
     this.storeHolder = new Awaited();
-    this.parser = new VCFParser();
+    this.parser = dalliance_makeParser(source.payload);
+    if (!this.parser) {
+        throw "Unsupported memstore payload: " + source.payload;
+    }
 
     var thisB = this;
     textXHR(this.source.uri, function(resp, err) {
@@ -98,7 +101,9 @@ function MemStoreFeatureSource(source) {
             for (var li = 0; li < lines.length; ++li) {
                 var line = lines[li];
                 if (line.length > 0) {
-                    features.push(thisB.parser.parse(line));
+                    var f = thisB.parser.parse(line);
+                    if (f)
+                        features.push(f);
                 }
             }
             store.addFeatures(features);

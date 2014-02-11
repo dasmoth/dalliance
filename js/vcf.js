@@ -4,7 +4,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2014
 //
-// vcf .js
+// vcf.js
 //
 
 function VCFParser() {}
@@ -82,3 +82,5 @@ VCFParser.prototype.getDefaultFIPs = function(callback) {
     };
     callback(fip);
 }
+
+dalliance_registerParserFactory('vcf', function() {return new VCFParser()});
