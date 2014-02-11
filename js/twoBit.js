@@ -193,7 +193,7 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
                     ++ptr;
                 }
             }
-            if (ptr < max) {
+            if (ptr <= max) {
                 fillSeq(max);
             }
 
