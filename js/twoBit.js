@@ -188,7 +188,7 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
                 if (ptr < nb.min()) {
                     fillSeq(nb.min() - 1);
                 }
-                while (ptr < nb.max()) {
+                while (ptr <= nb.max()) {
                     seqstr += 'N';
                     ++ptr;
                 }
