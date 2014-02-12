@@ -1,3 +1,12 @@
+*.dalliance span {
+  text-align: left;
+  width: auto;
+}
+
+*.dalliance form {
+  padding: 0px;
+}
+
 *.dalliance * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
