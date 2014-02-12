@@ -103,6 +103,8 @@ function Browser(opts) {
         this[k] = opts[k];
     }
 
+    // this.uiPrefix = 'http://www.biodalliance.org/dev/'
+
     var thisB = this;
     window.addEventListener('load', function(ev) {thisB.realInit();}, false);
 }
@@ -130,7 +132,7 @@ Browser.prototype.realInit = function() {
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.tierHolder = makeElement('div', null, {className: 'tier-holder'});
+    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder'});
     this.svgHolder.appendChild(this.tierHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -154,11 +156,22 @@ Browser.prototype.realInit = function() {
         console.log(ex);
     }
 
-    setTimeout(function() {thisB.realInit2()}, 1);
+    if (window.getComputedStyle(this.browserHolderHolder).display != 'none') {
+        setTimeout(function() {thisB.realInit2()}, 1);
+    } else {
+        var pollInterval = setInterval(function() {
+            if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
+                clearInterval(pollInterval);
+                thisB.realInit2();
+            } 
+        }, 300);
+    }
 }
 
 Browser.prototype.realInit2 = function() {
     var thisB = this;
+
+    removeChildren(this.tierHolder);
     this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);

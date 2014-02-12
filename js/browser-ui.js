@@ -118,9 +118,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             var g = locField.value;
             b.search(g, function(err) {
                 if (err) {
-                    locStatusField.innerText = '' + err;
+                    locStatusField.textContent = '' + err;
                 } else {
-                    locStatusField.innerText = '';
+                    locStatusField.textContent = '';
                 }
             });
         }
