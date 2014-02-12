@@ -103,6 +103,8 @@ function Browser(opts) {
         this[k] = opts[k];
     }
 
+    // this.uiPrefix = 'http://www.biodalliance.org/dev/'
+
     var thisB = this;
     window.addEventListener('load', function(ev) {thisB.realInit();}, false);
 }

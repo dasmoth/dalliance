@@ -177,7 +177,7 @@ DasTier.prototype.updateStatus = function(status) {
         this.currentFeatures = [];
         this.currentSequence = null;
         this.error = status;
-        this.placardContent.innerText = status;
+        this.placardContent.textContent = status;
         this.placard.style.display = 'block';
         this.holder.style.display = 'none';
     } else {
@@ -366,9 +366,9 @@ DasTier.prototype._updateFromConfig = function() {
     var needsRefresh = false;
 
     if (typeof this.config.name === 'string')
-        this.nameElement.innerText = this.config.name;
+        this.nameElement.textContent = this.config.name;
     else
-        this.nameElement.innerText = this.dasSource.name;
+        this.nameElement.textContent = this.dasSource.name;
 
     var wantedHeight = this.config.height || this.dasSource.forceHeight;
     if (wantedHeight != this.forceHeight) {
