@@ -67,6 +67,7 @@ Chainset.prototype.fetchChainsTo = function(chr) {
                     }
 
                     var srcops = parseCigar(srcSeg.cigar), destops = parseCigar(destSeg.cigar);
+
                     var srcOffset = 0, destOffset = 0;
                     var srci = 0, desti = 0;
                     while (srci < srcops.length && desti < destops.length) {
@@ -160,6 +161,7 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
                 var bSrc = b[0];
                 var bDest = b[1];
                 var bSize = b[2];
+
                 if (cpos >= bDest && cpos <= (bDest + bSize)) {
                     var apos = cpos - bDest;
 
@@ -173,7 +175,7 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
                     return {seq: c.srcChr, pos: dpos, flipped: (c.srcOri != c.destOri)}
                 }
             }
-            return null;
+            // return null;
         }
     }
     return null;

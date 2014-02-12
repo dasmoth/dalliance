@@ -673,7 +673,17 @@ function elementValue(element, tag)
 {
     var children = element.getElementsByTagName(tag);
     if (children.length > 0 && children[0].firstChild) {
-        return children[0].firstChild.nodeValue;
+        var c = children[0];
+        if (c.childNodes.length == 1) {
+            return c.firstChild.nodeValue;
+        } else {
+            var s = '';
+            for (var ni = 0; ni < c.childNodes.length; ++ni) {
+                s += c.childNodes[ni].nodeValue;
+            }
+            return s;
+        }
+
     } else {
         return null;
     }
