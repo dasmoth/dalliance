@@ -608,20 +608,17 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var opts = {name: 'temporary'};
                 var fileList = custFile.files;
 
-                if (fileList && fileList.length > 1) {
+                if (fileList && fileList.length > 0) {
                     tryAddMultiple(fileList);
-                } else if (fileList && fileList.length > 0 && fileList[0]) {
-                    opts.bwgBlob = fileList[0];
-                    opts.noPersist = true;
                 } else {
                     var curi = custURL.value.trim();
                     if (!/^.+:\/\//.exec(curi)) {
                         curi = 'http://' + curi;
                     }
                     opts.bwgURI = curi;
+                    var nds = new DASSource(opts);
+                    tryAddBin(nds);
                 }
-                var nds = new DASSource(opts);
-                tryAddBin(nds);
             } else if (customMode === 'reset') {
                 switchToCustomMode();
             } else if (customMode === 'reset-bin') {
@@ -690,11 +687,16 @@ Browser.prototype.showTrackAdder = function(ev) {
                         nds.bamBlob = s.blob;
                         nds.baiBlob = s.indexBlob;
                         thisB.addTier(nds);
-                    } else if (s.tier_type == 'tabix') {
+                    } else if (s.tier_type == 'tabix' && s.indexBlob) {
                         nds.tier_type = 'tabix';
                         nds.payload = s.payload;
                         nds.blob = s.blob;
                         nds.indexBlob = s.indexBlob;
+                        thisB.addTier(nds);
+                    } else if (s.tier_type == 'memstore') {
+                        nds.tier_type = 'memstore';
+                        nds.payload = s.payload;
+                        nds.blob = s.blob;
                         thisB.addTier(nds);
                     }
                 }
@@ -1165,10 +1167,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (magic == BAI_MAGIC) {
                 source.tier_type = 'bai';
                 return listener(source, null);
-            } else {
-                if (ba[0] != 31 || ba[1] != 139) {
-                    return listener(source, "Unsupported format");
-                }
+            } else if (ba[0] == 31 || ba[1] == 139) {
                 var unc = unbgzf(result);
                 var uncba = new Uint8Array(unc);
                 magic = readInt(uncba, 0);
@@ -1199,6 +1198,24 @@ Browser.prototype.showTrackAdder = function(ev) {
                     // maybe Tabix?
                    return listener(source, "Unsupported format");
                 }
+            } else {
+                var text = String.fromCharCode.apply(null, ba);
+                var lines = text.split("\n");
+
+                var BED_REGEXP = new RegExp('^.+\t[0-9]+\t[0-9]+.*$');
+                if (BED_REGEXP.test(lines[0])) {
+                    source.tier_type = 'memstore';
+                    source.payload = 'bed';
+                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bed)?$');
+                    var match = nameExtractPattern.exec(source.uri || source.blob.name);
+                    if (match) {
+                        source.name = match[1];
+                    }
+
+                    return listener(source, null);
+                }
+
+                return listener(source, "Unsupported format");
             }
         });
     }
@@ -1270,13 +1287,13 @@ Browser.prototype.showTrackAdder = function(ev) {
             if (s.error) {
                 typeContent = makeElement('span', 'Error', null, {color: 'red'});
             } else if (s.tier_type) {
-                typeContent = s.tier_type;
+                typeContent = s.payload || s.tier_type;
             } else {
                 typeContent = makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'})
             }
 
             var ccs;
-            if (s.tier_type == 'bwg' || (s.tier_type == 'bam' && s.indexBlob) || (s.tier_type == 'tabix' && s.indexBlob)) {
+            if (s.tier_type == 'bwg' || (s.tier_type == 'bam' && s.indexBlob) || (s.tier_type == 'tabix' && s.indexBlob) || s.tier_type == 'memstore') {
                 ccs = makeElement('select', null, null, {width: '100px'});
                 ccs.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
                 if (thisB.chains) {

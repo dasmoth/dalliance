@@ -90,7 +90,7 @@ function MemStoreFeatureSource(source) {
     }
 
     var thisB = this;
-    textXHR(this.source.uri, function(resp, err) {
+    this._load(function(resp, err) {
         if (!resp) {
             thisB.error = err || "No data"
             thisB.storeHolder.provide(null);
@@ -110,10 +110,22 @@ function MemStoreFeatureSource(source) {
 
             thisB.storeHolder.provide(store);
         }
-    }, {});
+    });
 }
 
 MemStoreFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
+
+MemStoreFeatureSource.prototype._load = function(callback) {
+    if (this.source.blob) {
+        var r = new FileReader();
+        r.onloadend = function() {
+            return callback(r.result, r.error);
+        }
+        r.readAsText(this.source.blob);
+    } else {
+        textXHR(this.source.uri, callback, {});
+    }
+}
 
 MemStoreFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, cnt) {
     var thisB = this;
