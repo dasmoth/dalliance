@@ -1203,7 +1203,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var lines = text.split("\n");
 
                 var BED_REGEXP = new RegExp('^.+\t[0-9]+\t[0-9]+.*$');
-                if (BED_REGEXP.test(lines[0])) {
+                if (BED_REGEXP.test(lines[0].replace('\r', ''))) {
                     source.tier_type = 'memstore';
                     source.payload = 'bed';
                     var nameExtractPattern = new RegExp('/?([^/]+?)(.bed)?$');
