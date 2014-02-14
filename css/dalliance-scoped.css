@@ -7,6 +7,12 @@
   padding: 0px;
 }
 
+*.dalliance .nav-tabs > li {
+  float: left;
+  list-style: none;
+  margin: 0px;
+}
+
 *.dalliance * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
