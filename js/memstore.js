@@ -10,6 +10,7 @@
 function MemStore() {
     this.featuresByChr = {};
     this.maxLength = 1;
+    this.chrRing = null;
 }
 
 MemStore.prototype.addFeatures = function(features) {
@@ -39,6 +40,7 @@ MemStore.prototype.addFeatures = function(features) {
             return f1.max - f2.max;
         });
     }
+    this.chrRing = null;
 }
 
 MemStore.prototype._indexFor = function(fa, p) {
@@ -78,6 +80,52 @@ MemStore.prototype.fetch = function(chr, min, max) {
             res.push(f);
     }
     return res;
+}
+
+MemStore.prototype.findNextFeature = function(chr, pos, dir) {
+    if (this.chrRing == null) {
+        this.chrRing = [];
+        for (var chr in this.featuresByChr) {
+            this.chrRing.push(chr);
+        }
+        this.chrRing.sort();
+    }
+
+    var fa = this.featuresByChr[chr];
+    if (!fa) {
+        if (chr.indexOf('chr') == 0) {
+            chr = chr.substring(3);
+            fa = this.featuresByChr[chr];
+        } else {
+            chr = 'chr' + chr;
+            fa = this.featuresByChr[chr];
+        }
+    }
+    if (!fa)
+        return null;
+
+    var i = Math.max(0, Math.min(this._indexFor(fa, pos), fa.length - 1));
+    if (dir > 0) {
+        while (i < fa.length) {
+            var f = fa[i++];
+            if (f.min > pos)
+                return f;
+        }
+        var chrInd = this.chrRing.indexOf(chr) + 1;
+        if (chrInd >= this.chrRing.length)
+            chrInd = 0;
+        return this.findNextFeature(this.chrRing[chrInd], 0, dir);
+    } else {
+        while (i >= 0) {
+            var f = fa[i--];
+            if (f.max < pos)
+                return f;
+        }
+        var chrInd = this.chrRing.indexOf(chr) - 1;
+        if (chrInd < 0)
+            chrInd = this.chrRing.length - 1;
+        return this.findNextFeature(this.chrRing[chrInd], 10000000000, dir);
+    }
 }
 
 function MemStoreFeatureSource(source) {
@@ -151,6 +199,23 @@ MemStoreFeatureSource.prototype.getDefaultFIPs = function(callback) {
 
 MemStoreFeatureSource.prototype.getScales = function() {
     return 100000000;
+}
+
+MemStoreFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    var thisB = this;
+    this.storeHolder.await(function(store) {
+        if (store) {
+            return callback(store.findNextFeature(chr, pos, dir));
+        } else {
+            return callback(null, thisB.error);
+        }
+    });
+}
+
+
+MemStoreFeatureSource.prototype.capabilities = function() {
+    var caps = {leap: true};
+    return caps;
 }
 
 dalliance_registerSourceAdapterFactory('memstore', function(source) {
