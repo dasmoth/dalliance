@@ -248,31 +248,29 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 }
 
 KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
-    if (status) {
-         tier.updateStatus(status);
-    } else {
+    tier.updateStatus(status);
+   
+   if (!status) {
         var mayDownsample = false;
         var src = tier.getSource();
         while (MappedFeatureSource.prototype.isPrototypeOf(src) || CachingFeatureSource.prototype.isPrototypeOf(src) || OverlayFeatureSource.prototype.isPrototypeOf(src)) {
-	    if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
-		src = src.sources[0];
-	    } else {
-		src = src.source;
-	    }
+	       if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+		       src = src.sources[0];
+	       } else {
+		      src = src.source;
+	       }
         }
         if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
         }
 
-        // console.log('features=' + features.length + '; maybe=' + mayDownsample + '; actualScale=' + actualScale + '; thisScale=' + this.scale + '; wanted=' + wantedTypes);	
-
-	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
+    	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
             if ((actualScale < (this.scale/2) && features.length > 200)  ||
-		(mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
+		        (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
             {
-		features = downsample(features, this.scale);
+		        features = downsample(features, this.scale);
             }
-	}
+    	}
 
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {

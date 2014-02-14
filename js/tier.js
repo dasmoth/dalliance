@@ -180,11 +180,14 @@ DasTier.prototype.updateStatus = function(status) {
         this.placardContent.textContent = status;
         this.placard.style.display = 'block';
         this.holder.style.display = 'none';
-    } else {
+        this.draw();
+        this.updateHeight();
+    } else if (this.error) {
         this.placard.style.display = 'none';
         this.holder.style.display = 'block';
+        this.error = null;
+        this.updateHeight();
     }
-    this.updateHeight();
 }
 
 DasTier.prototype.draw = function() {
