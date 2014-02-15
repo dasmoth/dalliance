@@ -22,7 +22,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = 'http://www.biodalliance.org/release-0.11/';
+    this.uiPrefix = 'http://www.biodalliance.org/release-0.12/';
 
     this.sources = [];
     this.tiers = [];
@@ -640,7 +640,7 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
     // vph.className = 'tier-viewport-background';
-    vph.style.background = background;
+    // vph.style.background = background;
 
     vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
     vph.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
@@ -1010,7 +1010,7 @@ Browser.prototype.arrangeTiers = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
         t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
-        t.holder.style.background = t.background;
+        // t.holder.style.background = t.background;
     }
 }
 

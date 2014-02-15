@@ -351,14 +351,20 @@ DasTier.prototype.paint = function() {
     this.norigin = this.browser.viewStart;
 
     var gc = this.viewport.getContext('2d');
-    gc.fillStyle = this.background;
     gc.clearRect(0, 0, fpw, canvasHeight);
-    gc.restore();
 
     gc.save();
     if (retina) {
         gc.scale(2, 2);
     }
+
+    {
+        gc.fillStyle = this.background;
+        var knownMin = (this.knownStart - this.browser.viewStart) * this.browser.scale + 1000;
+        var knownMax = (this.knownEnd - this.browser.viewStart) * this.browser.scale + 1000;
+        gc.fillRect(knownMin, 0, knownMax - knownMin, lh);
+    }
+
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
     gc.translate(offset, MIN_PADDING);
    

@@ -187,6 +187,9 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     var needsSeq = tier.needsSequence(this.scale);
     var baton = thisB.featureCache[tier];
     var wantedTypes = tier.getDesiredTypes(this.scale);
+    var chr = this.chr, min = this.min, max = this.max;
+
+
     if (wantedTypes === undefined) {
 //         dlog('skipping because wantedTypes is undef');
         return false;
@@ -194,20 +197,20 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     if (baton) {
 //      dlog('considering cached features: ' + baton);
     }
-    if (baton && baton.chr === this.chr && baton.min <= this.min && baton.max >= this.max) {
+    if (baton && baton.chr === this.chr && baton.min <= min && baton.max >= max) {
         var cachedFeatures = baton.features;
-        if (baton.min < this.min || baton.max > this.max) {
-            cachedFeatures = filterFeatures(cachedFeatures, this.min, this.max);
+        if (baton.min < min || baton.max > max) {
+            cachedFeatures = filterFeatures(cachedFeatures, min, max);
         }
         
         // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
 //      if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
 //          cachedFeatures = downsample(cachedFeatures, thisB.scale);
 //      }
-        // dlog('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache');
+//      console.log('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache (' + baton.min + ', ' + baton.max + ')');
 //      tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
-        thisB.provision(tier, baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, baton.chr, Math.max(baton.min, min), Math.min(baton.max, max), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
 
         var availableScales = source.getScales();
         if (baton.scale <= this.scale || !availableScales) {
@@ -219,19 +222,19 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     }
 
     if (source.instrument)
-        console.log('Starting  fetch ' + viewID + ' (' + this.min + ', ' + this.max + ')');
-    source.fetch(this.chr, this.min, this.max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
-	if (source.instrument)
-	    console.log('Finishing fetch ' + viewID);
+        console.log('Starting  fetch ' + viewID + ' (' + min + ', ' + tmax + ')');
+    source.fetch(chr, min, max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
+    	if (source.instrument)
+    	    console.log('Finishing fetch ' + viewID);
 
-	var latestViewID = thisB.latestViews[tier] || -1;
-	if (latestViewID > viewID) {
-	    // console.log('Ignoring out of date view');
-	    return;
-	}
+    	var latestViewID = thisB.latestViews[tier] || -1;
+    	if (latestViewID > viewID) {
+    	    // console.log('Ignoring out of date view');
+    	    return;
+    	}
 
-        if (!baton || (thisB.min < baton.min) || (thisB.max > baton.max)) {         // FIXME should be merging in some cases?
-            thisB.featureCache[tier] = new KSCacheBaton(thisB.chr, thisB.min, thisB.max, scale, features, status);
+        if (!baton || (min < baton.min) || (max > baton.max)) {         // FIXME should be merging in some cases?
+            thisB.featureCache[tier] = new KSCacheBaton(chr, min, max, scale, features, status);
         }
 
         //if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
@@ -242,7 +245,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 
 	thisB.latestViews[tier] = viewID;
-        thisB.provision(tier, thisB.chr, thisB.min, thisB.max, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, chr, min, max, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
     return needsSeq;
 }

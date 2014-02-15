@@ -58,7 +58,8 @@ function drawSeqTier(tier, seq)
     tier.updateHeight();
 
     var gc = tier.viewport.getContext('2d');
-    gc.clearRect(0, 0, fpw, tier.viewport.height);
+    gc.fillStyle = tier.background;
+    gc.fillRect(0, 0, fpw, tier.viewport.height);
     if (retina) {
         gc.scale(2, 2);
     }
