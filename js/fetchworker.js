@@ -1,3 +1,11 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2014
+//
+// fetchworker.js
+//
 
 importScripts('bin.js', 'bam.js', '../jszlib/js/inflate.js')
 

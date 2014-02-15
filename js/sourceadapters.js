@@ -1096,6 +1096,36 @@ MappedFeatureSource.prototype.getScales = function() {
     return this.source.getScales();
 }
 
+MappedFeatureSource.prototype.simplifySegments = function(segs, minGap) {
+    if (segs.length == 0) return segs;
+
+    segs.sort(function(s1, s2) {
+        var d = s1.name - s2.name;
+        if (d)
+            return d;
+        d = s1.start - s2.start;
+        if (d)
+            return d;
+        return s1.end - s2.end;   // Should never come to this...?
+    });
+
+    var ssegs = [];
+    var currentSeg = segs[0];
+    for (var si = 0; si < segs.length; ++si) {
+        var ns = segs[si];
+
+        // console.log(ns.name + ' ' + ns.start + ' ' + ns.end);
+        if (ns.name != currentSeg.name || ns.start > (currentSeg.end + minGap)) {
+            ssegs.push(currentSeg);
+            currentSeg = ns;
+        } else {
+            currentSeg = new DASSegment(currentSeg.name, Math.min(currentSeg.start, ns.start), Math.max(currentSeg.end, ns.end));
+        }
+    }
+    ssegs.push(currentSeg);
+    return ssegs;
+}
+
 MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
 
@@ -1109,7 +1139,19 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 
             callback("No mapping available for this regions", [], scale);
         } else {
-            var seg = mseg[0];
+            mseg = thisB.simplifySegments(mseg, 500);
+
+            var segLen = 0;
+            var seg;
+
+            for (var si = 0; si < mseg.length; ++si) {
+                var ss = mseg[si];
+                var sl = ss.end - ss.start + 1;
+                if (sl > segLen) {
+                    segLen = sl; seg = ss;
+                }
+            }
+
             thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
                 thisB.busy--;
                 thisB.notifyActivity();
