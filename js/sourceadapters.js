@@ -66,14 +66,14 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = saf(config).features;
     } else if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
+    } else if ((config.bamURI || config.bamBlob) && this.useFetchWorkers && this.fetchWorker) {
+        fs = new RemoteBAMFeatureSource(config, this.fetchWorker);
     } else if (config.bamURI || config.bamBlob) {
         fs = new BAMFeatureSource(config);
     } else if (config.bamblrURI) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
-    } else if (config.tier_type == 'worker-bam') {
-        fs = new RemoteBAMFeatureSource(config, this.fetchWorker);
     } else if (config.uri || config.features_uri) {
         fs = new DASFeatureSource(config);
     }
@@ -961,10 +961,13 @@ RemoteBAMFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 RemoteBAMFeatureSource.prototype.init = function() {
     var thisB = this;
-    var uri = this.bamSource.uri;
-    var indexUri = this.bamSource.indexUri || this.bamSouce.uri + '.bai';
+    var uri = this.bamSource.uri || this.bamSource.bamURI;
+    var indexUri = this.bamSource.indexUri || this.bamSource.baiURI || uri + '.bai';
 
-    this.worker.postCommand({command: 'connectBAM', uri: uri, indexUri: indexUri}, function(result, err) {
+    var blob = this.bamSource.bamBlob || this.bamSource.blob;
+    var indexBlob = this.bamSource.baiBlob || this.bamSource.indexBlob;
+
+    var cnt = function(result, err) {
         thisB.readiness = null;
         thisB.notifyReadiness();
 
@@ -974,7 +977,13 @@ RemoteBAMFeatureSource.prototype.init = function() {
             thisB.error = err;
             thisB.keyHolder.provide(null);
         }
-    }); 
+    };
+
+    if (blob) {
+        this.worker.postCommand({command: 'connectBAM', blob: blob, indexBlob: indexBlob}, cnt /* , [blob, indexBlob] */);
+    } else {
+        this.worker.postCommand({command: 'connectBAM', uri: uri, indexUri: indexUri}, cnt); 
+    }
 }
 
 RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
@@ -991,6 +1000,8 @@ RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, p
         }
 
         thisB.worker.postCommand({command: 'fetch', connection: key, chr: chr, min: min, max: max}, function(bamRecords, error) {
+            console.log('retrieved ' + bamRecords.length + ' via worker.');
+
             thisB.busy--;
             thisB.notifyActivity();
 

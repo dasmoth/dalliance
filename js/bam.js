@@ -39,7 +39,7 @@ function makeBam(data, bai, callback) {
         var uncba = new Uint8Array(header);
         var baiMagic = readInt(uncba, 0);
         if (baiMagic != BAI_MAGIC) {
-            return callback(null, 'Not a BAI file');
+            return callback(null, 'Not a BAI file, magic=0x' + baiMagic.toString(16));
         }
 
         var nref = readInt(uncba, 4);

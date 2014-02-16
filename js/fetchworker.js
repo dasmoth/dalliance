@@ -27,7 +27,16 @@ onmessage = function(event) {
     if (command === 'connectBAM') {
         var id = newID();
 
-        makeBam(new URLFetchable(d.uri), new URLFetchable(d.indexUri), function(bam, err) {
+        var bam, bai;
+        if (d.blob) {
+            bam = new BlobFetchable(d.blob);
+            bai = new BlobFetchable(d.indexBlob);
+        } else {
+            bam = new URLFetchable(d.uri);
+            bai = new URLFetchable(d.indexUri);
+        }
+
+        makeBam(bam, bai, function(bam, err) {
             if (bam) {
                 connections[id] = new BAMWorkerFetcher(bam);
                 postMessage({tag: tag, result: id});

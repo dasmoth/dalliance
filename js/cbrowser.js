@@ -97,6 +97,7 @@ function Browser(opts) {
     this.sourceCache = new SourceCache();
     
     this.retina = true;
+    this.useFetchWorkers = false;
 
 
     for (var k in opts) {
@@ -1847,9 +1848,9 @@ function FetchWorker() {
     }
 }
 
-FetchWorker.prototype.postCommand = function(cmd, callback) {
+FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
     var tag = 'x' + (++this.tagSeed);
     cmd.tag = tag;
     this.callbacks[tag] = callback;
-    this.worker.postMessage(cmd);
+    this.worker.postMessage(cmd, transfer);
 }
