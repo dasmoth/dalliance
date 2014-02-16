@@ -208,14 +208,14 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();
         pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
-        this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
+        this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale, coverage) {
             if (!awaitedFeatures.res)
-                awaitedFeatures.provide({status: status, features: features, scale: scale});
+                awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});
         });
     } 
 
     awaitedFeatures.await(function(af) {
-        callback(af.status, af.features, af.scale);
+        callback(af.status, af.features, af.scale, af.coverage);
     });
 }
     
@@ -1087,7 +1087,6 @@ MappedFeatureSource.prototype.notifyActivity = function() {
     }
 }
 
-
 MappedFeatureSource.prototype.getStyleSheet = function(callback) {
     return this.source.getStyleSheet(callback);
 }
@@ -1152,6 +1151,9 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                 }
             }
 
+            var segDestCoverage = new Range(thisB.mapping.mapPoint(seg.name, seg.start).pos, thisB.mapping.mapPoint(seg.name, seg.end).pos);
+            console.log(segDestCoverage);
+
             thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
                 thisB.busy--;
                 thisB.notifyActivity();
@@ -1193,7 +1195,7 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                     }
                 }
 
-                callback(status, mappedFeatures, fscale);
+                callback(status, mappedFeatures, fscale, segDestCoverage);
             });
         }
     });

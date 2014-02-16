@@ -161,12 +161,12 @@ DasTier.prototype.needsSequence = function(scale ) {
     return false;
 }
 
-DasTier.prototype.viewFeatures = function(chr, min, max, scale, features, sequence) {
+DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequence) {
     this.currentFeatures = features;
     this.currentSequence = sequence;
     
     this.knownChr = chr;
-    this.knownStart = min; this.knownEnd = max;
+    this.knownCoverage = coverage;
     this.status = null; this.error = null;
 
     this.draw();
@@ -222,7 +222,7 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
         pos = (pos +  ((width * dir) / 2))|0
         this.featureSource.quantFindNextFeature(chr, pos, dir, this.quantLeapThreshold, callback);
     } else {
-        if (this.knownStart && pos >= this.knownStart && pos <= this.knownEnd) {
+        if (this.knownCoverage && pos >= this.knownCoverage.min() && pos <= this.knownCoverage.max()) {
             if (this.currentFeatures) {
                 var bestFeature = null;
                 for (var fi = 0; fi < this.currentFeatures.length; ++fi) {

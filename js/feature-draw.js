@@ -360,9 +360,14 @@ DasTier.prototype.paint = function() {
 
     {
         gc.fillStyle = this.background;
-        var knownMin = (this.knownStart - this.browser.viewStart) * this.browser.scale + 1000;
-        var knownMax = (this.knownEnd - this.browser.viewStart) * this.browser.scale + 1000;
-        gc.fillRect(knownMin, 0, knownMax - knownMin, lh);
+
+        var knownRanges = this.knownCoverage.ranges();
+        for (var ri = 0; ri < knownRanges.length; ++ri) {
+            var r = knownRanges[ri];
+            var knownMin = (r.min() - this.browser.viewStart) * this.browser.scale + 1000;
+            var knownMax = (r.max() - this.browser.viewStart) * this.browser.scale + 1000;
+            gc.fillRect(knownMin, 0, knownMax - knownMin, lh);
+        }
     }
 
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;

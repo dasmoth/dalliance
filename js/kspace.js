@@ -15,10 +15,11 @@ FetchPool.prototype.abortAll = function() {
     }
 }
 
-function KSCacheBaton(chr, min, max, scale, features, status) {
+function KSCacheBaton(chr, min, max, scale, features, status, coverage) {
     this.chr = chr;
     this.min = min;
     this.max = max;
+    this.coverage = coverage;
     this.scale = scale;
     this.features = features || [];
     this.status = status;
@@ -210,7 +211,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 //      console.log('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache (' + baton.min + ', ' + baton.max + ')');
 //      tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
 
-        thisB.provision(tier, baton.chr, Math.max(baton.min, min), Math.min(baton.max, max), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, baton.chr, intersection(baton.coverage, new Range(min, max)), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
 
         var availableScales = source.getScales();
         if (baton.scale <= this.scale || !availableScales) {
@@ -222,8 +223,8 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     }
 
     if (source.instrument)
-        console.log('Starting  fetch ' + viewID + ' (' + min + ', ' + tmax + ')');
-    source.fetch(chr, min, max, this.scale, wantedTypes, this.pool, function(status, features, scale) {
+        console.log('Starting  fetch ' + viewID + ' (' + min + ', ' + max + ')');
+    source.fetch(chr, min, max, this.scale, wantedTypes, this.pool, function(status, features, scale, coverage) {
     	if (source.instrument)
     	    console.log('Finishing fetch ' + viewID);
 
@@ -233,24 +234,21 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     	    return;
     	}
 
-        if (!baton || (min < baton.min) || (max > baton.max)) {         // FIXME should be merging in some cases?
-            thisB.featureCache[tier] = new KSCacheBaton(chr, min, max, scale, features, status);
+        if (!coverage) {
+            coverage = new Range(min, max);
         }
 
-        //if ((scale < (thisB.scale/2) && features.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-        //    features = downsample(features, thisB.scale);
-        //}
-        // dlog('Provisioning ' + tier.toString() + ' with fresh features');
-        //tier.viewFeatures(thisB.chr, thisB.min, thisB.max, this.scale, features);
+        if (!baton || (min < baton.min) || (max > baton.max)) {         // FIXME should be merging in some cases?
+            thisB.featureCache[tier] = new KSCacheBaton(chr, min, max, scale, features, status, coverage);
+        }
 
-
-	thisB.latestViews[tier] = viewID;
-        thisB.provision(tier, chr, min, max, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
+	    thisB.latestViews[tier] = viewID;
+        thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     });
     return needsSeq;
 }
 
-KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, wantedTypes, features, status, awaitedSeq) {
+KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq) {
     tier.updateStatus(status);
    
     if (!status) {
@@ -277,10 +275,10 @@ KnownSpace.prototype.provision = function(tier, chr, min, max, actualScale, want
 
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {
-                tier.viewFeatures(chr, min, max, actualScale, features, seq);
+                tier.viewFeatures(chr, coverage, actualScale, features, seq);
             });
         } else {
-            tier.viewFeatures(chr, min, max, actualScale, features);
+            tier.viewFeatures(chr, coverage, actualScale, features);
         }
     }
 }
