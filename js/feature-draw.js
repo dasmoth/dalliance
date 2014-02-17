@@ -13,6 +13,14 @@ function isDasBooleanTrue(s) {
     return s==='yes' || s==='true';
 }
 
+function isDasBooleanNotFalse(s) {
+    if (!s)
+        return false;
+
+    s = ('' + s).toLowerCase();
+    return s!=='no' || s!=='false';
+}
+
 function SubTier() {
     this.glyphs = [];
     this.height = 0;
@@ -708,11 +716,21 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 
                 quant = {min: smin, max: smax};
 
-                if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
-                    gg = new LabelledGlyph(gg, label, true);
+                var heightFudge = 0;
+                var featureLabel;
+                if (typeof(feature.forceLabel) !== 'undefined')
+                    featureLabel = feature.forceLabel;
+                else
+                    featureLabel = style.LABEL;
+
+                if (isDasBooleanNotFalse(featureLabel) && label && !noLabel) {
+                    gg = new LabelledGlyph(gg, label, true, null, featureLabel == 'above' ? 'above' : 'below');
+                    if (featureLabel == 'above') {
+                        heightFudge = gg.textHeight + 2;
+                    }
                     noLabel = true;
                 }
-                gg = new TranslatedGlyph(gg, 0, y - hh, requiredHeight);
+                gg = new TranslatedGlyph(gg, 0, y - hh - heightFudge, requiredHeight);
             }
         }
     } else if (gtype === 'HISTOGRAM' || gtype === 'GRADIENT' && score !== 'undefined') {

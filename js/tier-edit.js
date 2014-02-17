@@ -202,7 +202,9 @@ Browser.prototype.openTierPanel = function(tier) {
 
                 var setMinValue, setMaxValue;
                 if (s.MIN !== undefined) {
-                    setMinValue = s.MIN;
+                    var x = parseFloat(s.MIN);
+                    if (!isNaN(x))
+                        setMinValue = x;
                 }
                 if (!tier.forceMinDynamic && (s.MIN !== undefined || tier.forceMin !== undefined)) {
                     tierMinToggle.checked = true;
@@ -213,7 +215,9 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
 
                 if (s.MAX !== undefined) {
-                    setMaxValue = s.MAX;
+                    var x = parseFloat(s.MAX)
+                    if (!isNaN(x))
+                        setMaxValue = x;
                 }
                 if (!tier.forceMaxDynamic && (s.MAX !== undefined || tier.forceMax !== undefined)) {
                     tierMaxToggle.checked = true;
