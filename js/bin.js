@@ -32,7 +32,7 @@ BlobFetchable.prototype.slice = function(start, length) {
 
 BlobFetchable.prototype.salted = function() {return this;}
 
-if (typeof(FileReader) == 'function') {
+if (typeof(FileReader) !== 'undefined') {
     // console.log('defining async BlobFetchable.fetch');
 
     BlobFetchable.prototype.fetch = function(callback) {
