@@ -250,7 +250,7 @@ Browser.prototype.realInit2 = function() {
                 if (ch >= 40) {
                     tt.mergeConfig({height: ch-10});
                 }
-            } else if (ev.ctrlKey) {
+            } else if (ev.ctrlKey || ev.metaKey) {
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;
                 var tt = thisB.tiers[st];
@@ -323,7 +323,7 @@ Browser.prototype.realInit2 = function() {
                 var tt = thisB.tiers[st];
                 var ch = tt.forceHeight || tt.subtiers[0].height;
                 tt.mergeConfig({height: ch+10});
-            } else if (ev.ctrlKey) {
+            } else if (ev.ctrlKey || ev.metaKey) {
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;
                 var tt = thisB.tiers[st];
@@ -1746,7 +1746,7 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
     if (this.reverseKeyScrolling)
         dir = -dir;
     
-    if (ev.ctrlKey) {
+    if (ev.ctrlKey || ev.metaKey) {
         var fedge = false;
         if(ev.shiftKey){
             fedge = true;
