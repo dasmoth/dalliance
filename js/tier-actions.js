@@ -24,6 +24,13 @@ Browser.prototype.mergeSelectedTiers = function() {
             if (nsh.style.ZINDEX === undefined)
                 nsh.style.ZINDEX = sti;
 
+            if (tier.forceMin) {
+                nsh.style.MIN = tier.forceMin;
+            }
+            if (tier.forceMax) {
+                nsh.style.MAX = tier.forceMax;
+            }
+
             styles.push(nsh);
         }
     }
