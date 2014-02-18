@@ -337,6 +337,7 @@ DasTier.prototype.paint = function() {
         lh = lh + subtiers[s].height + MIN_PADDING;
     }
     lh += 6
+    lh = Math.max(lh, this.browser.minTierHeight);
 
     var canvasHeight = lh;
     if (retina) {
