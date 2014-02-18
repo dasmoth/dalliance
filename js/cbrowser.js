@@ -459,7 +459,7 @@ Browser.prototype.realInit2 = function() {
                 thisB.addTier(thisB.tiers[st].dasSource);
             }
         } else {
-            console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
+            // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
     };
     var keyUpHandler = function(ev) {
