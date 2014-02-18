@@ -441,11 +441,18 @@ Browser.prototype.realInit2 = function() {
             }
         } else if (ev.keyCode == 77 || ev.keyCode == 109) { // m
             ev.stopPropagation(); ev.preventDefault();
-            if (thisB.selectedTiers.length > 1) {
+            if ((ev.ctrlKey || ev.metaKey) && thisB.selectedTiers.length > 1) {
                 thisB.mergeSelectedTiers();
             }
+        } else if (ev.keyCode == 68 || ev.keyCode == 100) { // d
+            ev.stopPropagation(); ev.preventDefault();
+            if (ev.ctrlKey || ev.metaKey) {
+                var st = thisB.getSelectedTier();
+                if (st < 0) return;
+                thisB.addTier(thisB.tiers[st].dasSource);
+            }
         } else {
-            // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
+            console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
     };
     var keyUpHandler = function(ev) {
@@ -796,7 +803,12 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        thisB.removeTier(source);
+        for (var ti = 0; ti < thisB.tiers.length; ++ti) {
+            if (thisB.tiers[ti] === tier) {
+                thisB.removeTier({index: ti});
+                break;
+            }
+        }
     }, false);
     tier.nameButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
