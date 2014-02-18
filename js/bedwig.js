@@ -11,7 +11,16 @@ function BedWigParser(type) {
     this.type = type;
 }
 
-BedWigParser.prototype.parse = function(line) {
+BedWigParser.prototype.createSession = function(sink) {
+    return new BedWigParseSession(this, sink);
+}
+
+function BedWigParseSession(parser, sink) {
+    this.parser = parser;
+    this.sink = sink;
+}
+
+BedWigParseSession.prototype.parse = function(line) {
     var toks = line.split('\t');
     if (toks.length < 3)
         return;
@@ -28,8 +37,11 @@ BedWigParser.prototype.parse = function(line) {
     if (toks.length > 4) {
         f.score = parseFloat(toks[4])
     }
-    return f;
+
+    this.sink(f);
 }
+
+BedWigParseSession.prototype.flush = function() {};
 
 BedWigParser.prototype.getStyleSheet = function(callback) {
     var thisB = this;

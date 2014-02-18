@@ -53,12 +53,11 @@ TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool,
             thisB.notifyActivity();
 
             var features = [];
+            var session = thisB.parser.createSession(function(f) {features.push(f)});
             for (var ri = 0; ri < records.length; ++ri) {
-                var f = thisB.parser.parse(records[ri]);
-                if (f)
-                    features.push(f);
+                var f = session.parse(records[ri]);
             }
-
+            session.flush();
             callback(null, features, 1000000000);
         });
     });

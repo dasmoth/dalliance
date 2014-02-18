@@ -146,14 +146,16 @@ function MemStoreFeatureSource(source) {
             var store = new MemStore();
             var features = [];
             var lines = resp.split('\n');
+
+            var session = thisB.parser.createSession(function(f) {features.push(f)});
             for (var li = 0; li < lines.length; ++li) {
                 var line = lines[li];
                 if (line.length > 0) {
-                    var f = thisB.parser.parse(line);
-                    if (f)
-                        features.push(f);
+                    session.parse(line);
                 }
             }
+            session.flush();
+
             store.addFeatures(features);
 
             thisB.storeHolder.provide(store);

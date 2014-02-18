@@ -9,7 +9,16 @@
 
 function VCFParser() {}
 
-VCFParser.prototype.parse = function(line) {
+VCFParser.prototype.createSession = function(sink) {
+    return new VCFParseSession(this, sink);
+}
+
+function VCFParseSession(parser, sink) {
+    this.parser = parser;
+    this.sink  = sink;
+}
+
+VCFParseSession.prototype.parse = function(line) {
     var toks = line.split('\t');
     var f = new DASFeature();
     f.segment = toks[0];
@@ -35,8 +44,11 @@ VCFParser.prototype.parse = function(line) {
     } else {
         f.type = 'substitution';
     }
-    return f;
+
+    this.sink(f);
 }
+
+VCFParseSession.prototype.flush = function() {};
 
 VCFParser.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();
