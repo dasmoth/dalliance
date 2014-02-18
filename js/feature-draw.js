@@ -617,7 +617,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var fill = style.BGCOLOR || 'none';
         var outline = style.STROKECOLOR;
 
-        if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
+        if (style.BGITEM && feature.itemRgb) {
+            stroke = feature.itemRgb;
+        } else if (isDasBooleanTrue(style.COLOR_BY_SCORE2)) {
             var grad = style.BGGRAD || style._gradient;
             if (!grad) {
                 grad = makeGradient(50, style.COLOR1, style.COLOR2, style.COLOR3);
@@ -638,6 +640,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 stroke = grad[step];
             }
         }
+
+
 
         var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
         requiredHeight = height = 1.0 * height;
