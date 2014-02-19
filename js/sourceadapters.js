@@ -1138,6 +1138,7 @@ MappedFeatureSource.prototype.simplifySegments = function(segs, minGap) {
 
 MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
+    var fetchLength = max - min + 1;
 
     thisB.busy++;
     thisB.notifyActivity();
@@ -1149,64 +1150,67 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
 
             callback("No mapping available for this regions", [], scale);
         } else {
-            mseg = thisB.simplifySegments(mseg, 500);
+            mseg = thisB.simplifySegments(mseg, Math.max(100, 0.05 * fetchLength));
 
-            var segLen = 0;
-            var seg;
+            var mappedFeatures = [];
+            var mappedLoc = null;
+            var count = mseg.length;
+            var finalStatus;
 
-            for (var si = 0; si < mseg.length; ++si) {
-                var ss = mseg[si];
-                var sl = ss.end - ss.start + 1;
-                if (sl > segLen) {
-                    segLen = sl; seg = ss;
-                }
-            }
+            mseg.map(function(seg) {
+                thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
+                    if (status && !finalStatus)
+                        finalStatus = status;
 
-            var segDestCoverage = new Range(thisB.mapping.mapPoint(seg.name, seg.start).pos, thisB.mapping.mapPoint(seg.name, seg.end).pos);
-            console.log(segDestCoverage);
-
-            thisB.source.fetch(seg.name, seg.start, seg.end, scale, types, pool, function(status, features, fscale) {
-                thisB.busy--;
-                thisB.notifyActivity();
-
-                var mappedFeatures = [];
-                if (features) {
-                    for (var fi = 0; fi < features.length; ++fi) {
-                        var f = features[fi];
-                        var sn = f.segment;
-                        if (sn.indexOf('chr') == 0) {
-                            sn = sn.substr(3);
-                        }
-                        var mmin = thisB.mapping.mapPoint(sn, f.min);
-                        var mmax = thisB.mapping.mapPoint(sn, f.max);
-                        if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
-                            // Discard feature.
-                            // dlog('discarding ' + miniJSONify(f));
-                            if (f.parts && f.parts.length > 0) {    // FIXME: Ugly hack to make ASTD source map properly.
-                                 mappedFeatures.push(f);
+                    if (features) {
+                        for (var fi = 0; fi < features.length; ++fi) {
+                            var f = features[fi];
+                            var sn = f.segment;
+                            if (sn.indexOf('chr') == 0) {
+                                sn = sn.substr(3);
                             }
-                        } else {
-                            f.segment = mmin.seq;
-                            f.min = mmin.pos;
-                            f.max = mmax.pos;
-                            if (f.min > f.max) {
-                                var tmp = f.max;
-                                f.max = f.min;
-                                f.min = tmp;
-                            }
-                            if (mmin.flipped) {
-                                if (f.orientation == '-') {
-                                    f.orientation = '+';
-                                } else if (f.orientation == '+') {
-                                    f.orientation = '-';
+                            var mmin = thisB.mapping.mapPoint(sn, f.min);
+                            var mmax = thisB.mapping.mapPoint(sn, f.max);
+                            if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
+                                // Discard feature.
+                                // dlog('discarding ' + miniJSONify(f));
+                                if (f.parts && f.parts.length > 0) {    // FIXME: Ugly hack to make ASTD source map properly.
+                                     mappedFeatures.push(f);
                                 }
+                            } else {
+                                f.segment = mmin.seq;
+                                f.min = mmin.pos;
+                                f.max = mmax.pos;
+                                if (f.min > f.max) {
+                                    var tmp = f.max;
+                                    f.max = f.min;
+                                    f.min = tmp;
+                                }
+                                if (mmin.flipped) {
+                                    if (f.orientation == '-') {
+                                        f.orientation = '+';
+                                    } else if (f.orientation == '+') {
+                                        f.orientation = '-';
+                                    }
+                                }
+                                mappedFeatures.push(f);
                             }
-                            mappedFeatures.push(f);
                         }
                     }
-                }
 
-                callback(status, mappedFeatures, fscale, segDestCoverage);
+                    var segDestCoverage = new Range(thisB.mapping.mapPoint(seg.name, seg.start).pos, thisB.mapping.mapPoint(seg.name, seg.end).pos);
+                    if (mappedLoc)
+                        mappedLoc = union(mappedLoc, segDestCoverage);
+                    else
+                        mappedLoc = segDestCoverage;
+                    --count;
+
+                    if (count == 0) {
+                        thisB.busy--;
+                        thisB.notifyActivity();
+                        callback(finalStatus, mappedFeatures, fscale, mappedLoc);
+                    }
+                });
             });
         }
     });
