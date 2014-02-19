@@ -501,7 +501,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
             thisB.cirHeader = result;
             var la = new Int32Array(thisB.cirHeader);
             thisB.cirBlockSize = la[1];
-            thisB.readWigDataById(chr, min, max, callback);
+            thisB.getFirstAdjacentById(chr, pos, dir, callback);
         });
         return;
     }
