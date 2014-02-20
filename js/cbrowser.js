@@ -168,9 +168,9 @@ Browser.prototype.realInit2 = function() {
     removeChildren(this.tierHolder);
     this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
-    // this.zoomExpt = 250 / Math.log(/* MAX_VIEW_SIZE */ 500000.0 / this.zoomBase);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
+        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);
     }
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
@@ -220,14 +220,14 @@ Browser.prototype.realInit2 = function() {
         } else if (ev.keyCode == 32 || ev.charCode == 32) { // space
             if (!thisB.isSnapZooming) {
                 thisB.isSnapZooming = true;
-                var newZoom = thisB.savedZoom || 1.0;
-                thisB.savedZoom = thisB.zoomSliderValue;
+                var newZoom = (thisB.savedZoom || 0.0) + thisB.zoomMin;
+                thisB.savedZoom = thisB.zoomSliderValue - thisB.zoomMin;
                 thisB.zoomSliderValue = newZoom;
                 thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
             } else {
                 thisB.isSnapZooming = false;
-                var newZoom = thisB.savedZoom || 10.0;
-                thisB.savedZoom = thisB.zoomSliderValue;
+                var newZoom = (thisB.savedZoom || 20.0) + thisB.zoomMin;
+                thisB.savedZoom = thisB.zoomSliderValue - thisB.zoomMin;
                 thisB.zoomSliderValue = newZoom;
                 thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
             }
@@ -1224,6 +1224,10 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
     this.featurePanelWidth = width|0;
 
     if (oldFPW != this.featurePanelWidth) {
+        this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
+        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);
+        this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
+
         var viewWidth = this.viewEnd - this.viewStart;
         var nve = this.viewStart + (viewWidth * this.featurePanelWidth) / oldFPW;
 
@@ -1433,6 +1437,8 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
         this.refresh();
 
         if (this.savedZoom) {
+            newZS -= this.zoomMin;
+            oldZS -= this.zoomMin;
             var difToActive = newZS - oldZS;
             var difToSaved = newZS - this.savedZoom;
             if (Math.abs(difToActive) > Math.abs(difToSaved)) {
