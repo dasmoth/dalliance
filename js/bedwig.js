@@ -45,6 +45,17 @@ BedParseSession.prototype.parse = function(line) {
         f.score = parseFloat(toks[4])
     }
 
+    if (toks.length > 5) {
+        f.orientation = toks[5];
+    }
+
+    if (toks.length > 8) {
+        var color = toks[8];
+        if (BED_COLOR_REGEXP.test(color)) {
+            f.itemRgb = 'rgb(' + color + ')';
+        }
+    }
+
     this.sink(f);
 }
 
@@ -66,14 +77,16 @@ WigParseSession.prototype.parse = function(line) {
 
         for (var ti = 1; ti < toks.length; ++ti) {
             var m = __KV_REGEXP.exec(toks[ti]);
-            if (m[1] == 'chrom') {
-                this.chr = m[2];
-            } else if (m[1] == 'start') {
-                this.pos = parseInt(m[2]);
-            } else if (m[1] == 'step') {
-                this.step = parseInt(m[2]);
-            } else if (m[1] == 'span') {
-                this.span = parseInt(m[2]);
+            if (m) {
+                if (m[1] == 'chrom') {
+                    this.chr = m[2];
+                } else if (m[1] == 'start') {
+                    this.pos = parseInt(m[2]);
+                } else if (m[1] == 'step') {
+                    this.step = parseInt(m[2]);
+                } else if (m[1] == 'span') {
+                    this.span = parseInt(m[2]);
+                }
             }
         }
     } else if (toks[0] == 'variableStep') {
