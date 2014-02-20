@@ -83,7 +83,7 @@ DasTier.prototype.init = function() {
         tier.status = 'Fetching stylesheet';
         
         ssSource.getStyleSheet(function(ss, err) {
-            if (err) {
+            if (err || !ss) {
                 tier.error = 'No stylesheet';
                 var ss = new DASStylesheet();
                 var defStyle = new DASStyle();
