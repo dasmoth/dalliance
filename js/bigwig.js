@@ -964,7 +964,7 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                             }
                         }
 
-                        var childOffset = readInt(ba, offset);
+                        var childOffset = bwg_readOffset(ba, offset);
                         offset += 8;
                         
                         if (name.localeCompare(key) < 0 && lastChildOffset) {
@@ -986,7 +986,7 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
                         
                         // Specific for EI case.
                         if (key == name) {
-                            var start = readInt(ba, offset);
+                            var start = bwg_readOffset(ba, offset);
                             var length = readInt(ba, offset + 8);
 
                             return thisB.bbi.getUnzoomedView().fetchFeatures(
