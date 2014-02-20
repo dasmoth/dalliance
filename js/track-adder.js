@@ -139,7 +139,6 @@ Browser.prototype.showTrackAdder = function(ev) {
         return hubButton;
     }
 
-
     var firstDefButton = null;
     var firstDefSources = null;
     for (var g in groupedDefaults) {
@@ -605,7 +604,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var nds = new DASSource({name: 'temporary', uri: curi});
                 tryAddDAS(nds);
             } else if (customMode === 'bin') {
-                var opts = {name: 'temporary'};
                 var fileList = custFile.files;
 
                 if (fileList && fileList.length > 0) {
@@ -615,9 +613,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     if (!/^.+:\/\//.exec(curi)) {
                         curi = 'http://' + curi;
                     }
-                    opts.bwgURI = curi;
-                    var nds = new DASSource(opts);
-                    tryAddBin(nds);
+                    tryAddBin({uri: curi});
                 }
             } else if (customMode === 'reset') {
                 switchToCustomMode();
@@ -676,27 +672,15 @@ Browser.prototype.showTrackAdder = function(ev) {
                 for (var mi = 0; mi < multipleSet.length; ++mi) {
                     var s = multipleSet[mi];
 
-                    var nds = {name: s.name, noPersist: true};
-                    if (s.mapping && s.mapping != '__default__')
-                        nds.mapping = s.mapping;
 
-                    if (s.tier_type == 'bwg') {
-                        nds.bwgBlob = s.blob;
-                        thisB.addTier(nds);
-                    } else if (s.tier_type == 'bam' && s.indexBlob) {
-                        nds.bamBlob = s.blob;
-                        nds.baiBlob = s.indexBlob;
-                        thisB.addTier(nds);
-                    } else if (s.tier_type == 'tabix' && s.indexBlob) {
-                        nds.tier_type = 'tabix';
-                        nds.payload = s.payload;
-                        nds.blob = s.blob;
-                        nds.indexBlob = s.indexBlob;
-                        thisB.addTier(nds);
-                    } else if (s.tier_type == 'memstore') {
-                        nds.tier_type = 'memstore';
-                        nds.payload = s.payload;
-                        nds.blob = s.blob;
+                    if (s.tier_type == 'bam' && !s.indexBlob && !s.indexUri)
+                        continue;
+                    if (s.tier_type == 'tabix' && !s.indexBlob && !s.indexUri)
+                        continue;
+
+                    var nds = makeSourceConfig(s);
+                    if (nds) {
+                        nds.noPersist = true;
                         thisB.addTier(nds);
                     }
                 }
@@ -883,71 +867,63 @@ Browser.prototype.showTrackAdder = function(ev) {
         );
     }
 
-    var tryAddBin = function(nds, retry) {
-        var fetchable;
-        if (nds.bwgURI) {
-            fetchable = new URLFetchable(nds.bwgURI, null, null, {credentials: nds.credentials});
-        } else {
-            fetchable = new BlobFetchable(nds.bwgBlob);
-        }
+    var makeSourceConfig = function(s) {
+        var nds = {name: s.name};
+        if (s.mapping && s.mapping != '__default__')
+            nds.mapping = s.mapping;
 
-        fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
-            if (!result) {
-                if (!retry) {
-                    nds.credentials = true;
-                    tryAddBin(nds, true);
-                }
-
-                removeChildren(stabHolder);
-                stabHolder.appendChild(makeElement('h2', 'Custom data not found'));
-                if (nds.bwgURI) {
-                    stabHolder.appendChild(makeElement('p', 'Data URI: ' + nds.bwgURI + ' is not accessible.'));
-                } else {
-                    stabHolder.appendChild(makeElement('p', 'File access failed, are you using an up-to-date browser?'));
-                }
-
-                if (error) {
-                    stabHolder.appendChild(makeElement('p', '' + error));
-                }
-                stabHolder.appendChild(makeElement('p', 'If in doubt, please check that the server where the file is hosted supports CORS.'));
-                customMode = 'reset-bin';
-                return;
-            }
-
-            var ba = new Uint8Array(result);
-            var magic = readInt(ba, 0);
-            if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
-                var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb|.bigWig|.bigBed)?$');
-                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                if (match) {
-                    nds.name = match[1];
-                }
-
-                return addDasCompletionPage(nds, false, false, true);
+        if (s.tier_type == 'bwg') {
+            if (s.blob)
+                nds.bwgBlob = s.blob;
+            else if (s.uri)
+                nds.bwgURI = s.uri;
+            return nds;
+        } else if (s.tier_type == 'bam') {
+            if (s.blob) {
+                nds.bamBlob = s.blob;
+                nds.baiBlob = s.indexBlob;
             } else {
-                if (ba[0] != 31 || ba[1] != 139) {
-                    return binFormatErrorPage();
-                }
-                var unc = unbgzf(result);
-                var uncba = new Uint8Array(unc);
-                magic = readInt(uncba, 0);
-                if (magic == BAM_MAGIC) {
-                    if (nds.bwgBlob) {
-                        return promptForBAI(nds);
-                    } else {
-                        return completeBAM(nds);
-                    }
-                } else if (magic == 0x69662323) {
-                    // FIXME should check whole of first line
-                    if (nds.bwgBlob) {
-                        return promptForTabix(nds);
-                    } else {
-                        return completeTabixVCF(nds);
-                    }
+                nds.bamURI = s.uri;
+                nds.baiURI = s.indexUri;
+            }
+            return nds;
+        } else if (s.tier_type == 'tabix') {
+            nds.tier_type = 'tabix';
+            nds.payload = s.payload;
+            if (s.blob) {
+                nds.blob = s.blob;
+                nds.indexBlob = s.indexBlob;
+            } else {
+                nds.uri = s.uri;
+                nds.indexUri = s.indexUri;
+            }
+            return nds;
+        } else if (s.tier_type == 'memstore') {
+            nds.tier_type = 'memstore';
+            nds.payload = s.payload;
+            if (s.blob)
+                nds.blob = s.blob;
+            else
+                nds.uri = s.uri;
+            return nds;
+        }
+    }
+
+    var tryAddBin = function(source) {
+        probeResource(source, function(source, err) {
+            if (err) {
+                removeChildren(stabHolder);
+                stabHolder.appendChild(makeElement('h2', "Couldn't access custom data"));
+                stabHolder.appendChild('p', '' + err);
+                customMode = 'reset-bin';
+            } else {
+                var nds = makeSourceConfig(source);
+                if (source.tier_type == 'bam') {
+                    return completeBAM(nds);
+                } else if (source.tier_type == 'tabix') {
+                    return completeTabixVCF(nds);
                 } else {
-                    console.log('magic = ' + magic.toString(16));
-                    // maybe Tabix?
-                   return binFormatErrorPage();
+                    return addDasCompletionPage(nds, false, false, true);
                 }
             }
         });
@@ -990,7 +966,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (nds.baiBlob) {
             indexF = new BlobFetchable(nds.baiBlob);
         } else {
-            indexF = new URLFetchable(nds.bwgURI + '.bai');
+            indexF = new URLFetchable(nds.bamURI + '.bai');
         }
         indexF.slice(0, 256).fetch(function(r) {
                 var hasBAI = false;
@@ -1000,17 +976,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                     hasBAI = (magic2 == BAI_MAGIC);
                 }
                 if (hasBAI) {
-                    var nameExtractPattern = new RegExp('/?([^/]+?)(.bam)?$');
-                    var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                    if (match) {
-                        nds.name = match[1];
-                    }
-
-                    nds.bamURI = nds.bwgURI;
-                    nds.bamBlob = nds.bwgBlob;
-                    nds.bwgURI = undefined;
-                    nds.bwgBlob = undefined;
-                            
                     return addDasCompletionPage(nds, false, false, true);
                 } else {
                     return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
@@ -1023,7 +988,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (nds.indexBlob) {
             indexF = new BlobFetchable(nds.indexBlob);
         } else {
-            indexF = new URLFetchable(nds.bwgURI + '.tbi');
+            indexF = new URLFetchable(nds.uri + '.tbi');
         }
         indexF.slice(0, 1<<16).fetch(function(r) {
             var hasTabix = false;
@@ -1037,26 +1002,12 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
             }
             if (hasTabix) {
-                var nameExtractPattern = new RegExp('/?([^/]+?)(.vcf)?(.gz)?$');
-                var match = nameExtractPattern.exec(nds.bwgURI || nds.bwgBlob.name);
-                if (match) {
-                    nds.name = match[1];
-                }
-
-                nds.uri = nds.bwgURI;
-                nds.blob = nds.bwgBlob;
-                nds.bwgURI = undefined;
-                nds.bwgBlob = undefined;
-                nds.tier_type = 'tabix';
-                nds.payload = 'vcf';
-                        
                 return addDasCompletionPage(nds, false, false, true);
             } else {
                 return binFormatErrorPage('You have selected a valid VCF file, but a corresponding index (.tbi) file was not found.  Please index your VCF ("tabix -p vcf -f myfile.vcf.gz") and place the .tbi file in the same directory');
             }
         });
     }
-
 
     function binFormatErrorPage(message) {
         refreshButton.style.display = 'none';

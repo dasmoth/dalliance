@@ -97,7 +97,7 @@ function Browser(opts) {
     this.sourceCache = new SourceCache();
     
     this.retina = true;
-    this.useFetchWorkers = false;
+    this.useFetchWorkers = true;
 
 
     for (var k in opts) {

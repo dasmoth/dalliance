@@ -1,13 +1,17 @@
 For 0.12
 --------
 
+  - Better support for assembly mapping across fragmented alignments [DONE]
+  - BAM rendering speedups [DONE]
+  - More efficient BAM parsing?
+  - Use web-workers for fetching [DONE for BAMs]
   - Replace feature popups with inspector?
   - Feature selection
-  - Small BED/WIG support
+  - Small BED/WIG support. [DONE]
   - Animate when leaping/toggling.
   - Apply track-edit operations to multiple tracks at once.
   - Bulk addition of local files. [DONE]
-  - Typeahead for search-by-gene-ID>>>>>>> bfb213f71f5b9fdbe32ddb1491c662065835f033
+  - Typeahead for search-by-gene-ID
   - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
   - Overlay function plugin API
