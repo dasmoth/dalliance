@@ -104,8 +104,8 @@ Browser.prototype.popit = function(ev, name, ele, opts)
     my +=  document.documentElement.scrollTop || document.body.scrollTop;
     var winWidth = window.innerWidth;
 
-    var top = (my + 20);
-    var left = Math.min(mx - (width/2), (winWidth - width - 30));
+    var top = my;
+    var left = Math.min(mx - (width/2) - 4, (winWidth - width - 30));
 
     var popup = makeElement('div');
     popup.className = 'popover fade ' + (ev.clientX ? 'bottom ' : '') + 'in';
