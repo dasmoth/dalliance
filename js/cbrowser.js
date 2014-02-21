@@ -126,7 +126,7 @@ Browser.prototype.realInit = function() {
     var helpPopup;
     var thisB = this;
     this.browserHolderHolder = document.getElementById(this.pageName);
-    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
+    this.browserHolder = makeElement('div', null, {className: 'dalliance dalliance-root', tabIndex: -1});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
     this.svgHolder = makeElement('div', null, {className: 'main-holder'});
@@ -182,22 +182,31 @@ Browser.prototype.realInit2 = function() {
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
     // Event handlers
+
+
+
     this.tierHolder.addEventListener('mousewheel', function(ev) {
-        if (!ev.wheelDeltaX) {
-            return;
-        }
-
         ev.stopPropagation(); ev.preventDefault();
-        var delta = ev.wheelDeltaX/5;
-        if (!thisB.reverseScrolling) {
-            delta = -delta;
-        }
-        thisB.move(delta);
-    }, false);
-    this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
-        if (ev.axis == 1) {
-            ev.stopPropagation(); ev.preventDefault();
 
+        if (ev.wheelDeltaX) {
+            var delta = ev.wheelDeltaX/5;
+            if (!thisB.reverseScrolling) {
+                delta = -delta;
+            }
+            thisB.move(delta);
+        }
+
+        if (ev.wheelDeltaY) {
+            thisB.tierHolder.scrollTop += ev.wheelDeltaY;
+        }
+    }, false); 
+
+
+
+    this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        // console.log('axis=' + ev.axis + '; detail=' + ev.detail);
+        if (ev.axis == 1) {
             if (ev.detail != 0) {
                 var delta = ev.detail/4;
                 if (thisB.reverseScrolling) {
@@ -205,8 +214,10 @@ Browser.prototype.realInit2 = function() {
                 }
                 thisB.move(delta);
             }
+        } else {
+            thisB.tierHolder.scrollTop += ev.detail;
         }
-    }, false);
+    }, false); 
 
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
@@ -646,7 +657,7 @@ Browser.prototype.realMakeTier = function(source, config) {
          pointerEvents: 'none'
          });
 
-    var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
+    var vph = makeElement('div', [/* viewport*/ /* , viewportOverlay */], {className: 'view-holder'});
     // vph.className = 'tier-viewport-background';
     // vph.style.background = background;
 
@@ -663,7 +674,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         'canvas', null, 
         {width: '50', height: "56",
          className: 'quant-overlay'});
-    tier.holder.appendChild(tier.quantOverlay);
+    // tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
@@ -804,7 +815,7 @@ Browser.prototype.realMakeTier = function(source, config) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-    var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [viewport, /* vph, placard , */ tier.label /* , notifier */], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
@@ -1752,7 +1763,9 @@ Browser.prototype.updateHeight = function() {
     var tierTotal = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) 
         tierTotal += (this.tiers[ti].currentHeight || 30);
-    this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
+    this.ruler.style.height = '' + tierTotal + 'px';
+    this.ruler2.style.height = '' + tierTotal + 'px';
+    // this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
 Browser.prototype.scrollArrowKey = function(ev, dir) {
