@@ -110,12 +110,13 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var tierHeightField = makeElement('input', null, {type: 'text', value: '50'});
 
+        var bumpToggle = makeElement('input', null, {type: 'checkbox'});
+        var labelToggle = makeElement('input', null, {type: 'checkbox'});
+
         var mainStyle = null;
         if (tier.stylesheet.styles.length > 0) {
             var s = mainStyle = tier.stylesheet.styles[0].style;
         }
-
-        
 
         function refresh() {
             if (typeof tier.config.name === 'string')
@@ -159,9 +160,15 @@ Browser.prototype.openTierPanel = function(tier) {
                 if (isQuantitative) {
                     minRow.style.display = 'table-row';
                     maxRow.style.display = 'table-row';
+                    bumpRow.style.display = 'none';
+                    labelRow.style.display = 'none';
                 } else {
                     minRow.style.display = 'none';
                     maxRow.style.display = 'none';
+                    bumpRow.style.display = 'table-row';
+                    bumpToggle.checked = isDasBooleanTrue(mainStyle.BUMP);
+                    labelRow.style.display = 'table-row';
+                    labelToggle.checked = isDasBooleanTrue(mainStyle.LABEL);
                 }
 
                 if (isSimpleQuantitative) {
@@ -296,6 +303,13 @@ Browser.prototype.openTierPanel = function(tier) {
              makeElement('tr',
                 [makeElement('th', 'Threshold leap:'),
                  makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])]);
+        var bumpRow = makeElement('tr',
+                [makeElement('th', 'Bump overlaps'),
+                 makeElement('td', bumpToggle)]);
+        var labelRow = makeElement('tr',
+                [makeElement('th', 'Label features'),
+                 makeElement('td', labelToggle)]);
+
 
         var tierTable = makeElement('table',
             [makeElement('tr',
@@ -311,7 +325,8 @@ Browser.prototype.openTierPanel = function(tier) {
             minRow,
             maxRow,
             quantLeapRow,
-
+            bumpRow,
+            labelRow,
             seqMismatchRow,
             seqInsertRow
              ]);
@@ -404,6 +419,23 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
         quantLeapThreshField.addEventListener('input', function(ev) {
             updateQuant();
+        }, false);
+
+        labelToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            for (var i = 0; i < nss.styles.length; ++i) {
+                var style = nss.styles[i].style;
+                style.LABEL = labelToggle.checked ? 'yes' : 'no';
+            }
+            tier.mergeConfig({stylesheet: nss});
+        }, false);
+        bumpToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            for (var i = 0; i < nss.styles.length; ++i) {
+                var style = nss.styles[i].style;
+                style.BUMP = bumpToggle.checked ? 'yes' : 'no';
+            }
+            tier.mergeConfig({stylesheet: nss});
         }, false);
 
 
