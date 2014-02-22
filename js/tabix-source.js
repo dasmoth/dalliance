@@ -21,7 +21,7 @@ function TabixFeatureSource(source) {
     if (!parser) {
         throw 'Unsuported tabix payload ' + source.payload;
     } else {
-        this.parser = new VCFParser();
+        this.parser = parser;
     }
 
     var data, index;
