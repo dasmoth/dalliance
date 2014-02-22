@@ -32,10 +32,12 @@ BedParseSession.prototype.parse = function(line) {
     if (toks.length < 3)
         return;
 
+    var start = parseInt(toks[1]) + 1;
+    var end = parseInt(toks[2]);
+
     var f = {segment: toks[0], 
-             min: parseInt(toks[1]) + 1, 
-             max: parseInt(toks[2]),
-             type: 'bigwig'};
+             min: start,
+             max: end};
 
     if (toks.length > 3 && toks[3] !== '.') {
         f.label = toks[3];
@@ -56,7 +58,73 @@ BedParseSession.prototype.parse = function(line) {
         }
     }
 
-    this.sink(f);
+    if (toks.length >= 12) {
+        var thickStart = parseInt(toks[6]);
+        var thickEnd   = parseInt(toks[7]);
+        var blockCount = parseInt(toks[9]);
+        var blockSizes = toks[10].split(',').map(function(x) {return parseInt(x)});
+        var blockStarts = toks[11].split(',').map(function(x) {return parseInt(x)});
+        console.log(blockStarts);
+                    
+        f.type = 'transcript'
+        var grp = new DASGroup();
+        grp.id = toks[3];
+        grp.type = 'transcript'
+        grp.notes = [];
+        f.groups = [grp];
+
+        if (toks.length > 12) {
+            var geneId = toks[12];
+            var geneName = geneId;
+            if (toks.length > 13) {
+                geneName = toks[13];
+            }
+            var gg = new DASGroup();
+            gg.id = geneId;
+            gg.label = geneName;
+            gg.type = 'gene';
+            f.groups.push(gg);
+        }  
+
+        var spans = null;
+        for (var b = 0; b < blockCount; ++b) {
+            var bmin = blockStarts[b] + start;
+            var bmax = bmin + blockSizes[b];
+            var span = new Range(bmin, bmax);
+            if (spans) {
+                spans = union(spans, span);
+            } else {
+                spans = span;
+            }
+        }
+        console.log(spans);
+                    
+        var tsList = spans.ranges();
+        for (var s = 0; s < tsList.length; ++s) {
+            var ts = tsList[s];
+            var bf = shallowCopy(f);
+            bf.min = ts.min();
+            bf.max = ts.max();
+            this.sink(bf);
+        }
+
+        if (thickEnd > thickStart) {
+            var tl = intersection(spans, new Range(thickStart, thickEnd));
+            if (tl) {
+                f.type = 'translation';
+                var tlList = tl.ranges();
+                for (var s = 0; s < tlList.length; ++s) {
+                    var ts = tlList[s];
+                    var bf = shallowCopy(f);
+                    bf.min = ts.min();
+                    bf.max = ts.max();
+                    this.sink(bf);
+                }
+            }
+        }
+    } else {
+        this.sink(f);
+    }
 }
 
 BedParseSession.prototype.flush = function() {};
@@ -161,7 +229,7 @@ BedWigParser.prototype.getStyleSheet = function(callback) {
         wigStyle.HEIGHT = 10;
         wigStyle.BUMP = true;
         wigStyle.ZINDEX = 20;
-        stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
+        stylesheet.pushStyle({type: 'translation'}, null, wigStyle);
                 
         var tsStyle = new DASStyle();
         tsStyle.glyph = 'BOX';
@@ -171,7 +239,7 @@ BedWigParser.prototype.getStyleSheet = function(callback) {
         tsStyle.ZINDEX = 10;
         tsStyle.BUMP = true;
         tsStyle.LABEL = true;
-        stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+        stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
 
         var densStyle = new DASStyle();
         densStyle.glyph = 'HISTOGRAM';
