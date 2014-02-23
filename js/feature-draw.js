@@ -966,7 +966,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 }
 
 DasTier.prototype.styleForFeature = function(f) {
-    var ssScale = zoomForScale(this.browser.scale);
+    var ssScale = this.browser.zoomForCurrentScale();
 
     if (!this.stylesheet) {
         return null;

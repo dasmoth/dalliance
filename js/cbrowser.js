@@ -1748,6 +1748,22 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
     this.setLocation(null, newMid - (width/2), newMid + (width/2));
 }
 
+Browser.prototype.zoomForScale = function(scale) {
+    var ssScale;
+    if (scale > 0.2) {
+        ssScale = 'high';
+    } else if (scale > 0.01) {
+        ssScale = 'medium';
+    } else  {
+        ssScale = 'low';
+    }
+    return ssScale;
+}
+
+Browser.prototype.zoomForCurrentScale = function() {
+    return this.zoomForScale(this.scale);
+}
+
 Browser.prototype.updateHeight = function() {
     var tierTotal = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) 
