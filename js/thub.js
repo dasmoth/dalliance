@@ -127,7 +127,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
             
         thisB._tracks = toplevels;
         return callback(thisB._tracks, null);
-    }, {credentials: this.credentials});
+    }, {credentials: this.credentials, salt: true});
 }
 
 function connectTrackHub(hubURL, callback, opts) {

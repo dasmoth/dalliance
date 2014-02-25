@@ -118,6 +118,9 @@ function drawFeatureTier(tier)
             tier.groups[sg] = shallowCopy(tier.groups[sg]);
             tier.groups[sg].type = tier.groups[sgg[0]].type;   // HACK to make styling easier in DAS1.6
             var featsByType = {};
+
+            var sgMin = 10000000000, sgMax = -10000000000;
+            var sgSeg = null;
             for (var g = 0; g < sgg.length; ++g) {
                 var gf = tier.groupedFeatures[sgg[g]];
                 if (!gf)
@@ -126,6 +129,10 @@ function drawFeatureTier(tier)
                 for (var fi = 0; fi < gf.length; ++fi) {
                     var f = gf[fi];
                     pusho(featsByType, f.type, f);
+                    sgMin = Math.min(f.min, sgMin);
+                    sgMax = Math.max(f.max, sgMax);
+                    if (f.segment && !sgSeg)
+                        sgSeg = f.segment;
                 }
 
                 if (tier.groups[sg] && !tier.groups[sg].links || tier.groups[sg].links.length == 0) {
@@ -134,6 +141,10 @@ function drawFeatureTier(tier)
 
                 delete tier.groupedFeatures[sgg[g]];  // 'cos we don't want to render the unmerged version.
             }
+
+            tier.groups[sg].max = sgMax;
+            tier.groups[sg].min = sgMin;
+            tier.groups[sg].segment = sgSeg;
 
             for (var t in featsByType) {
                 var feats = featsByType[t];

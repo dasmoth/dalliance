@@ -422,8 +422,13 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     
                     featureOpts.type = 'bb-transcript'
                     var grp = new DASGroup();
+                    for (var k in featureOpts) {
+                        grp[k] = featureOpts[k];
+                    }
                     grp.id = bedColumns[0];
-                    grp.type = 'bb-transcript'
+                    grp.segment = this.bwg.idsToChroms[chromId];
+                    grp.min = start + 1;
+                    grp.max = end;
                     grp.notes = [];
                     featureOpts.groups = [grp];
 
@@ -433,7 +438,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                         if (bedColumns.length > 10) {
                             geneName = bedColumns[10];
                         }
-                        var gg = new DASGroup();
+                        var gg = shallowCopy(grp);
                         gg.id = geneId;
                         gg.label = geneName;
                         gg.type = 'gene';

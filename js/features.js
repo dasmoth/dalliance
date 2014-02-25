@@ -155,6 +155,12 @@ function sortFeatures(tier)
     }
 
     for (var gid in groupedFeatures) {
+        var group = groups[gid];
+        if (typeof(group.min) !== 'number') 
+            group.min = groupMins[gid];
+        if (typeof(group.max) !== 'number') 
+            group.max = groupMaxes[gid];
+
         if (groupMaxes[gid] >= dmin && groupMins[gid] <= dmax)
             drawnGroupedFeatures[gid] = groupedFeatures[gid];
     }
