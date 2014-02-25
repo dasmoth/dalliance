@@ -183,8 +183,6 @@ Browser.prototype.realInit2 = function() {
 
     // Event handlers
 
-
-
     this.tierHolder.addEventListener('mousewheel', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
@@ -200,8 +198,6 @@ Browser.prototype.realInit2 = function() {
             thisB.tierHolder.scrollTop += ev.wheelDeltaY;
         }
     }, false); 
-
-
 
     this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -326,7 +322,7 @@ Browser.prototype.realInit2 = function() {
                     var nst = thisB.tiers[thisB.getSelectedTier()];
                     var rect = nst.holder.getBoundingClientRect();
                     if (rect.bottom - rect.height < 0 || rect.botton > window.innerHeight) {
-                        nst.holder.scrollIntoView(true);
+                        nst.row.scrollIntoView(true);
                     }
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
@@ -402,7 +398,7 @@ Browser.prototype.realInit2 = function() {
                     var nst = thisB.tiers[thisB.getSelectedTier()];
                     var rect = nst.holder.getBoundingClientRect();
                     if (rect.bottom - rect.height < 0 || rect.bottom > window.innerHeight) {
-                        nst.holder.scrollIntoView(rect.height > window.innerHeight);
+                        nst.row.scrollIntoView(rect.height > window.innerHeight);
                     }
                 }
             }
@@ -722,10 +718,10 @@ Browser.prototype.realMakeTier = function(source, config) {
     }
         
 
-    vph.addEventListener('mousedown', function(ev) {
+    viewport.addEventListener('mousedown', function(ev) {
         thisB.browserHolder.focus();
         ev.preventDefault();
-        var br = vph.getBoundingClientRect();
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
 
         window.addEventListener('mousemove', dragMoveHandler, true);
@@ -734,8 +730,8 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false; // Not dragging until a movement event arrives.
     }, false);
 
-    vph.addEventListener('mousemove', function(ev) {
-        var br = vph.getBoundingClientRect();
+    viewport.addEventListener('mousemove', function(ev) {
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         if (hoverTimeout) {
@@ -758,8 +754,8 @@ Browser.prototype.realMakeTier = function(source, config) {
     });
 
     var doubleClickTimeout = null;
-    vph.addEventListener('mouseup', function(ev) {
-        var br = vph.getBoundingClientRect();
+    viewport.addEventListener('mouseup', function(ev) {
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
@@ -792,7 +788,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false;
     }, false);
 
-    vph.addEventListener('mouseout', function(ev) {
+    viewport.addEventListener('mouseout', function(ev) {
         isDragging = false;
     });
 
@@ -815,7 +811,7 @@ Browser.prototype.realMakeTier = function(source, config) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-    var row = makeElement('div', [viewport, /* vph, placard , */ tier.label /* , notifier */], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label /* , notifier */], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
 
 
