@@ -64,8 +64,7 @@ BedParseSession.prototype.parse = function(line) {
         var blockCount = parseInt(toks[9]);
         var blockSizes = toks[10].split(',').map(function(x) {return parseInt(x)});
         var blockStarts = toks[11].split(',').map(function(x) {return parseInt(x)});
-        console.log(blockStarts);
-                    
+
         f.type = 'transcript'
         var grp = new DASGroup();
         grp.id = toks[3];
@@ -97,7 +96,6 @@ BedParseSession.prototype.parse = function(line) {
                 spans = span;
             }
         }
-        console.log(spans);
                     
         var tsList = spans.ranges();
         for (var s = 0; s < tsList.length; ++s) {

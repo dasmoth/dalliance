@@ -39,14 +39,24 @@ Browser.prototype.openTierPanel = function(tier) {
             style._gradient = null;
         }
 
-        var changeColor = function(ev) {
+        var mutateStylesheet = function(visitor) {
             var nss = copyStylesheet(tier.stylesheet);
+            var ssScale = tier.browser.zoomForCurrentScale();
 
             for (var i = 0; i < nss.styles.length; ++i) {
-                var style = nss.styles[i].style;
-                setStyleColors(style);
+                var sh = nss.styles[i];
+                if (sh.zoom && sh.zoom != ssScale) {
+                    continue;
+                }
+
+                visitor(sh.style);
             }
-            tier.mergeConfig({stylesheet: nss});
+
+            return nss;
+        }
+
+        var changeColor = function(ev) {
+            tier.mergeConfig({stylesheet: mutateStylesheet(setStyleColors)});
         }
         
         this.manipulatingTier = tier;
@@ -57,6 +67,9 @@ Browser.prototype.openTierPanel = function(tier) {
             tierForm.appendChild(makeElement('div', 'Mapped from ' + coords.auth + coords.version , null, 
                 {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center'}));
         }
+        var semanticBanner = makeElement('div', 'Editing styles for current zoom level', null,
+                {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center', display: 'none'});
+        tierForm.appendChild(semanticBanner);
 
         var tierNameField = makeElement('input', null, {type: 'text'});
         var glyphField = makeElement('select');
@@ -143,10 +156,16 @@ Browser.prototype.openTierPanel = function(tier) {
             if (tier.stylesheet.styles.length > 0) {
                 var s = mainStyle = tier.stylesheet.styles[0].style;
                 var isQuantitative=false, isSimpleQuantitative = false;
-
-                var isGradient = s.COLOR2 || s.BGGRAD;
+                var ssScale = tier.browser.zoomForCurrentScale();
+                var activeStyleCount = 0;
 
                 for (var si = 0; si < tier.stylesheet.styles.length; ++si) {
+                    var sh = tier.stylesheet.styles[si];  
+                    if (sh.zoom && sh.zoom != ssScale) {
+                        continue;
+                    }
+                    ++activeStyleCount;
+
                     var ss = tier.stylesheet.styles[si].style;
                     if (ss.glyph == 'LINEPLOT' || ss.glyph == 'HISTOGRAM' || ss.glyph == 'GRADIENT' || isDasBooleanTrue(ss.SCATTER)) {
                         if (!isQuantitative)
@@ -155,7 +174,10 @@ Browser.prototype.openTierPanel = function(tier) {
                     }
                 }
 
-                isSimpleQuantitative = isQuantitative && tier.stylesheet.styles.length == 1;
+                semanticBanner.style.display = (activeStyleCount == tier.stylesheet.styles.length) ? 'none' : 'block';
+
+                isSimpleQuantitative = isQuantitative && activeStyleCount == 1;
+                var isGradient = s.COLOR2 || s.BGGRAD;
 
                 if (isQuantitative) {
                     minRow.style.display = 'table-row';
@@ -352,10 +374,7 @@ Browser.prototype.openTierPanel = function(tier) {
         }
 
         glyphField.addEventListener('change', function(ev) {
-            var nss = copyStylesheet(tier.stylesheet);
-            for (var i = 0; i < nss.styles.length; ++i) {
-                var ts = nss.styles[i].style;
-
+            var nss = mutateStylesheet(function(ts) {
                 if (glyphField.value === 'SCATTER') {
                     ts.SCATTER = true;
                     ts.glyph = 'DOT';
@@ -365,7 +384,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     ts.SCATTER = undefined;
                 }
                 setStyleColors(ts);
-            }
+            });
             tier.mergeConfig({stylesheet: nss});
         }, false);
 
@@ -422,19 +441,15 @@ Browser.prototype.openTierPanel = function(tier) {
         }, false);
 
         labelToggle.addEventListener('change', function(ev) {
-            var nss = copyStylesheet(tier.stylesheet);
-            for (var i = 0; i < nss.styles.length; ++i) {
-                var style = nss.styles[i].style;
+            var nss = mutateStylesheet(function(style) {
                 style.LABEL = labelToggle.checked ? 'yes' : 'no';
-            }
+            });
             tier.mergeConfig({stylesheet: nss});
         }, false);
         bumpToggle.addEventListener('change', function(ev) {
-            var nss = copyStylesheet(tier.stylesheet);
-            for (var i = 0; i < nss.styles.length; ++i) {
-                var style = nss.styles[i].style;
+            var nss = mutateStylesheet(function(style) {
                 style.BUMP = bumpToggle.checked ? 'yes' : 'no';
-            }
+            });
             tier.mergeConfig({stylesheet: nss});
         }, false);
 
@@ -443,6 +458,14 @@ Browser.prototype.openTierPanel = function(tier) {
         this.setUiMode('tier');
 
         tier.addTierListener(refresh);
+
+        var currentScale = tier.browser.scale;
+        tier.browser.addViewListener(function() {
+            if (tier.browser.scale != currentScale) {
+                currentScale = tier.browser.scale;
+                refresh();
+            }
+        });
     }
 }
 

@@ -124,7 +124,7 @@ DasTier.prototype.getSource = function() {
 DasTier.prototype.getDesiredTypes = function(scale) {
     var fetchTypes = [];
     var inclusive = false;
-    var ssScale = zoomForScale(this.browser.scale);
+    var ssScale = this.browser.zoomForCurrentScale();
 
     if (this.stylesheet) {
         // dlog('ss = ' + miniJSONify(this.stylesheet));
@@ -202,19 +202,6 @@ DasTier.prototype.draw = function() {
     this.originHaxx = 0;
     this.browser.arrangeTiers();
 }
-
-function zoomForScale(scale) {
-    var ssScale;
-    if (scale > 0.2) {
-        ssScale = 'high';
-    } else if (scale > 0.01) {
-        ssScale = 'medium';
-    } else  {
-        ssScale = 'low';
-    }
-    return ssScale;
-}
-
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
     if (this.quantLeapThreshold) {
