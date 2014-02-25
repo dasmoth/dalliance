@@ -320,9 +320,9 @@ Browser.prototype.realInit2 = function() {
                 if (st > 0) {
                     thisB.setSelectedTier(st - 1);
                     var nst = thisB.tiers[thisB.getSelectedTier()];
-                    var rect = nst.holder.getBoundingClientRect();
-                    if (rect.bottom - rect.height < 0 || rect.botton > window.innerHeight) {
-                        nst.row.scrollIntoView(true);
+                    var top = nst.row.offsetTop, bottom = top + nst.row.offsetHeight;
+                    if (top < thisB.tierHolder.scrollTop || bottom > thisB.tierHolder.scrollTop + thisB.tierHolder.offsetHeight) {
+                        thisB.tierHolder.scrollTop = top;
                     }
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
@@ -396,9 +396,9 @@ Browser.prototype.realInit2 = function() {
                 if (st < thisB.tiers.length -1) {
                     thisB.setSelectedTier(st + 1);
                     var nst = thisB.tiers[thisB.getSelectedTier()];
-                    var rect = nst.holder.getBoundingClientRect();
-                    if (rect.bottom - rect.height < 0 || rect.bottom > window.innerHeight) {
-                        nst.row.scrollIntoView(rect.height > window.innerHeight);
+                    var top = nst.row.offsetTop, bottom = top + nst.row.offsetHeight;
+                    if (top < thisB.tierHolder.scrollTop || bottom > thisB.tierHolder.scrollTop + thisB.tierHolder.offsetHeight) {
+                        thisB.tierHolder.scrollTop = bottom - thisB.tierHolder.offsetHeight;
                     }
                 }
             }
