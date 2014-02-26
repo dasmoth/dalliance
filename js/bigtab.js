@@ -32,20 +32,33 @@ function connectBigTab(res, callback) {
         }
 
         var version = sa[2];
-        if (version != 1) {
+        if (version != 2) {
             return callback(null, "Bad bigtab version " + version);
         }
 
         bt.uncBufSize = readInt(ba, 6);
-        bt.tableCount = readShort(ba, 10);
-        bt.allJoinerOffset = bwg_readOffset(ba, 12);
-        bt.autoSqlOffset = bwg_readOffset(ba, 20);
-        bt.indexOffset = bwg_readOffset(ba, 28);
-        bt.dataOffset = bwg_readOffset(ba, 36);
+        bt.autoSqlOffset = bwg_readOffset(ba, 10);
+        bt.indexCount = readShort(ba, 18);
+        bt.indexListOffset = bwg_readOffset(ba, 20);
 
-        bt.index = new BigTabIndex(bt);
+        bt.data.slice(bt.indexListOffset, bt.indexCount * 20).fetch(function(ilResult) {
+            if (!ilResult) {
+                return callback(null, "Couldn't access index list");
+            }
+            var ba = new Uint8Array(ilResult);
+            var indexType = readShort(ba, 0);
+            var fieldCount = readShort(ba, 2);
+            var offset = bwg_readOffset(ba, 4);
+            var fieldId = readShort(ba, 16);
 
-        return callback(bt);
+            if (indexType != 0)
+                return callback(null, "Bad index, type=" + indexType);
+
+            bt.indexOffset = offset;
+            bt.index = new BigTabIndex(bt);
+
+            return callback(bt);
+        });
     });
 }
 
@@ -136,13 +149,21 @@ BigTabIndex.prototype = Object.create(BPTIndex.prototype);
 
 BigTabIndex.prototype.readValue = function(ba, offset, valSize, callback) {
     var start = bwg_readOffset(ba, offset);
-    var length = bwg_readOffset(ba, offset + 8);
+    var length = readInt(ba, offset + 8);
+    var recordOffset = readInt(ba, offset + 12);
 
-    this.bt.data.slice(this.bt.dataOffset + start, length).fetchAsText(function(res) {
-        if (res == null) {
+    this.bt.data.slice(start, length).fetch(function(buf) {
+        if (buf == null) {
             return callback(null, "Couldn't fetch payload");
         } else {
-            return callback(res);
+            var unc = jszlib_inflate_buffer(buf, 2, buf.byteLength-2);
+            var i = recordOffset;
+            var record = '';
+            var ba = new Uint8Array(unc);
+            while (i < ba.length && ba[i] != 10) {
+                record += String.fromCharCode(ba[i++]);
+            }
+            callback(record);
         }
     });
 }
