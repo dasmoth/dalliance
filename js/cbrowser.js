@@ -1593,6 +1593,14 @@ Browser.prototype._highlightRegion = function(chr, min, max) {
     if ((chr == this.chr || chr == ('chr'+this.chr)) && min < visEnd && max > visStart) {
         this.drawOverlays();
     }
+
+    this.notifyLocation();
+}
+
+Browser.prototype.clearHighlights = function() {
+    this.highlights = [];
+    this.drawOverlays();
+    this.notifyLocation();
 }
 
 Browser.prototype.drawOverlays = function() {

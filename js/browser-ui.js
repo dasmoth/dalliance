@@ -18,7 +18,6 @@ function formatLongInt(n) {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
-    // FIXME shouldn't be hard-coded...
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
     document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/font-awesome.min.css'}));
@@ -47,6 +46,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
     var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'}, {width: '150px'});  // NB min and max get overwritten.
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
+
+    var clearHighlightsButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-eraser'})], {className: 'btn'});
 
     var addTrackBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-plus'})], {className: 'btn'});
     var favBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-bookmark'})], {className: 'btn'});
@@ -82,6 +83,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group title'}));
     }
     toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group loc-group'}));
+    toolbar.appendChild(clearHighlightsButton);
     toolbar.appendChild(makeElement('div', [zoomInBtn,
                                             makeElement('span', zoomSlider, {className: 'btn'}),
                                             zoomOutBtn], {className: 'btn-group'}));
@@ -91,13 +93,18 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.appendChild(genomePanel);
 
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
-        // locField.value = '';
         locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.min = zoom.min|0;
         zoomSlider.max = zoom.max|0;
         zoomSlider.value = zoom.current|0;
         if (b.storeStatus) {
             b.storeViewStatus();
+        }
+
+        if (b.highlights.length > 0) {
+            clearHighlightsButton.style.display = 'inline-block';
+        } else {
+            clearHighlightsButton.style.display = 'none';
         }
     });
 
@@ -124,22 +131,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                 }
             });
         }
-    }, false); 
-
-
-  this.addRegionSelectListener(function(chr, min, max) {
-      // console.log('chr' + chr + ':' + min + '..' + max);
-      // b.highlightRegion(chr, min, max);
-      // console.log('selected ' + b.featuresInRegion(chr, min, max).length);
-  });
-
-  this.addTierListener(function() {
-      if (b.storeStatus) {
-          b.storeStatus();
-      }
-  });
-
-
+    }, false);
     
     var trackAddPopup;
     addTrackBtn.addEventListener('click', function(ev) {
@@ -238,6 +230,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
     });
 
+    clearHighlightsButton.addEventListener('click', function(ev) {
+        b.clearHighlights();
+    }, false);
+    b.makeTooltip(clearHighlightsButton, 'Clear highlights (C)');
+
     b.addTierSelectionWrapListener(function(dir) {
         if (dir < 0) {
             b.setSelectedTier(null);
@@ -276,6 +273,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         } else if (ev.keyCode == 80 || ev.keyCode == 112) { // p
             ev.stopPropagation(); ev.preventDefault();
             b.openExportPanel();
+        } else if (ev.keyCode == 67 || ev.keyCode == 99) { // c
+            ev.stopPropagation(); ev.preventDefault();
+            b.clearHighlights();
         }
     };
 
