@@ -53,7 +53,6 @@ function drawSeqTier(tier, seq)
     tier.viewport.height = canvasHeight;
     tier.viewport.style.height = '' + height + 'px';
     tier.viewport.style.width = retina ? ('' + (fpw/2) + 'px') : ('' + fpw + 'px');
-    tier.holder.style.height = '' + height + 'px'
     tier.layoutHeight = height;
     tier.updateHeight();
 
@@ -64,7 +63,6 @@ function drawSeqTier(tier, seq)
         gc.scale(2, 2);
     }
     gc.translate(1000,0);
-
 
     var seqTierMax = knownEnd;
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {

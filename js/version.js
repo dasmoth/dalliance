@@ -13,7 +13,7 @@ var VERSION = {
     MINOR:  11,
     MICRO:  8,
     PATCH:  '',
-    BRANCH: 'dev'
+    BRANCH: 'newscroll'
 }
 
 VERSION.toString = function() {

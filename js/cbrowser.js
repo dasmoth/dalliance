@@ -201,7 +201,6 @@ Browser.prototype.realInit2 = function() {
 
     this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
-        // console.log('axis=' + ev.axis + '; detail=' + ev.detail);
         if (ev.axis == 1) {
             if (ev.detail != 0) {
                 var delta = ev.detail/4;
@@ -214,6 +213,11 @@ Browser.prototype.realInit2 = function() {
             thisB.tierHolder.scrollTop += ev.detail;
         }
     }, false); 
+
+    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
 
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
@@ -564,11 +568,11 @@ Browser.prototype.realInit2 = function() {
 // 
 // iOS touch support
 
-Browser.prototype.touchStartHandler = function(ev)
-{
+Browser.prototype.touchStartHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
     
     this.touchOriginX = ev.touches[0].pageX;
+    this.touchOriginY = ev.touches[0].pageY;
     if (ev.touches.length == 2) {
         var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
         this.zooming = true;
@@ -577,16 +581,20 @@ Browser.prototype.touchStartHandler = function(ev)
     }
 }
 
-Browser.prototype.touchMoveHandler = function(ev)
-{
+Browser.prototype.touchMoveHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
     
     if (ev.touches.length == 1) {
         var touchX = ev.touches[0].pageX;
+        var touchY = ev.touches[0].pageY;
         if (this.touchOriginX && touchX != this.touchOriginX) {
             this.move(touchX - this.touchOriginX);
         }
+        if (this.touchOriginY && touchY != this.touchOriginY) {
+            this.tierHolder.scrollTop -= (touchY - this.touchOriginY);
+        }
         this.touchOriginX = touchX;
+        this.touchOriginY = touchY;
     } else if (this.zooming && ev.touches.length == 2) {
         var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
         if (sep != this.zoomLastSep) {
@@ -595,17 +603,14 @@ Browser.prototype.touchMoveHandler = function(ev)
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
-	        this.tiers[i].draw();
+	           this.tiers[i].draw();
             }
         }
         this.zoomLastSep = sep;
     }
-
-
 }
 
-Browser.prototype.touchEndHandler = function(ev)
-{
+Browser.prototype.touchEndHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
 }
 
@@ -653,16 +658,9 @@ Browser.prototype.realMakeTier = function(source, config) {
          pointerEvents: 'none'
          });
 
-    var vph = makeElement('div', [/* viewport*/ /* , viewportOverlay */], {className: 'view-holder'});
-    // vph.className = 'tier-viewport-background';
-    // vph.style.background = background;
 
-    vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
-    vph.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
-    vph.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    vph.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
 
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent, notifier, config);
+    var tier = new DasTier(this, source, viewport, viewportOverlay, placard, placardContent, notifier, config);
     tier.oorigin = this.viewStart;
     tier.background = background;
 
@@ -670,7 +668,6 @@ Browser.prototype.realMakeTier = function(source, config) {
         'canvas', null, 
         {width: '50', height: "56",
          className: 'quant-overlay'});
-    // tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
@@ -713,8 +710,6 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragUpHandler = function(ev) {
         window.removeEventListener('mousemove', dragMoveHandler, true);
         window.removeEventListener('mouseup', dragUpHandler, true);
-        // thisB.isDragging = false;    // Can't clear here before the per-tier mouseups get called later :-(.
-                                        // Shouldn't matter because cleared on next mousedown. 
     }
         
 
@@ -1030,7 +1025,6 @@ Browser.prototype.arrangeTiers = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
         t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
-        // t.holder.style.background = t.background;
     }
 }
 

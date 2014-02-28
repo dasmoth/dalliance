@@ -9,14 +9,13 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, holder, overlay, placard, placardContent, notifier, config)
+function DasTier(browser, source, viewport, overlay, placard, placardContent, notifier, config)
 {
     this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
     this.dasSource = new DASSource(source);
     this.viewport = viewport;
-    this.holder = holder;
     this.overlay = overlay;
     this.placard = placard;
     this.placardContent = placardContent;
@@ -179,12 +178,10 @@ DasTier.prototype.updateStatus = function(status) {
         this.error = status;
         this.placardContent.textContent = status;
         this.placard.style.display = 'block';
-        this.holder.style.display = 'none';
         this.draw();
         this.updateHeight();
     } else if (this.error) {
         this.placard.style.display = 'none';
-        this.holder.style.display = 'block';
         this.error = null;
         this.updateHeight();
     }
@@ -288,7 +285,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.currentHeight = Math.max(this.layoutHeight, Math.max(this.holder.clientHeight, this.label.clientHeight + 4));
+    this.currentHeight = Math.max(this.layoutHeight, this.label.clientHeight + 4);
     if (this.placard.style.display !== 'none') {
         // Hard-coded because we don't know exactly when the CSS will have loaded.
         this.currentHeight = Math.max(this.currentHeight, /* this.placard.clientHeight + 2 */ 52);
