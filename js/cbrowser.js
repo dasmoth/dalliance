@@ -560,6 +560,10 @@ Browser.prototype.realInit2 = function() {
         }
     }
 
+    if (this.fullScreen) {
+        this.setFullScreenHeight();
+    }
+
     if (!this.statusRestored && this.storeStatus) {
         this.storeStatus();
     }
@@ -1258,6 +1262,15 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         }
         this.notifyLocation();
     }
+
+    if (this.fullScreen) {
+        this.setFullScreenHeight();
+    }
+}
+
+Browser.prototype.setFullScreenHeight = function() {
+    var rest = document.body.offsetHeight - this.browserHolder.offsetHeight;
+    this.browserHolder.style.maxHeight = Math.max(300, window.innerHeight - rest - 20) + 'px'
 }
 
 Browser.prototype.addTier = function(conf) {

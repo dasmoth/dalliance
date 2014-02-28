@@ -125,8 +125,8 @@
   -webkit-flex: 1 1 100%;
   flex: 1 1 100%;
 
-  overflow-x: hidden;
   overflow-y: scroll;
+  overflow-x: hidden;
 
   background-color: #eee;
   background-size: 25px 25px;
@@ -192,6 +192,7 @@
 
 *.dalliance .toolbar {
   flex: none;
+  -webkit-flex: none;
 }
 
 *.dalliance .toolbar > * {
