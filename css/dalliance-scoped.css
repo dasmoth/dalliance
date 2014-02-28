@@ -125,6 +125,7 @@
   -webkit-flex: 1 1 100%;
   flex: 1 1 100%;
 
+  overflow-x: hidden;
   overflow-y: scroll;
 
   background-color: #eee;
@@ -189,6 +190,9 @@
   vertical-align: top;
 }
 
+*.dalliance .toolbar {
+  flex: none;
+}
 
 *.dalliance .toolbar > * {
   vertical-align: top;
