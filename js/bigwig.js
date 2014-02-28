@@ -422,8 +422,13 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     
                     featureOpts.type = 'bb-transcript'
                     var grp = new DASGroup();
+                    for (var k in featureOpts) {
+                        grp[k] = featureOpts[k];
+                    }
                     grp.id = bedColumns[0];
-                    grp.type = 'bb-transcript'
+                    grp.segment = this.bwg.idsToChroms[chromId];
+                    grp.min = start + 1;
+                    grp.max = end;
                     grp.notes = [];
                     featureOpts.groups = [grp];
 
@@ -433,7 +438,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                         if (bedColumns.length > 10) {
                             geneName = bedColumns[10];
                         }
-                        var gg = new DASGroup();
+                        var gg = shallowCopy(grp);
                         gg.id = geneId;
                         gg.label = geneName;
                         gg.type = 'gene';
@@ -539,6 +544,15 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
                     --outstanding;
                     if (outstanding == 0) {
+                        if (!blockToFetch) {
+                            if (dir > 0 && (chr != 0 || pos > 0)) {
+                                return thisB.getFirstAdjacentById(0, 0, dir, callback);
+                            } else if (dir < 0 && (chr != thisB.bwg.maxID || pos < 1000000000)) {
+                                return thisB.getFirstAdjacentById(thisB.bwg.maxID, 1000000000, dir, callback);
+                            }
+                            return callback([]);
+                        }
+
                         thisB.fetchFeatures(function(chrx, fmin, fmax, toks) {
                             return (dir < 0 && (chrx < chr || fmax < pos)) || (dir > 0 && (chrx > chr || fmin > pos));
                         }, [blockToFetch], function(features) {
@@ -587,7 +601,7 @@ BigWigView.prototype.getFirstAdjacentById = function(chr, pos, dir, callback) {
                 if ((dir < 0 && ((startChrom < chr || (startChrom == chr && startBase <= pos)))) ||
                     (dir > 0 && ((endChrom > chr || (endChrom == chr && endBase >= pos)))))
                 {
-                    // dlog('Got an interesting block: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
+                    // console.log('Got an interesting block: startBase=' + startChrom + ':' + startBase + '; endBase=' + endChrom + ':' + endBase + '; offset=' + blockOffset + '; size=' + blockSize);
                     if (/_random/.exec(thisB.bwg.idsToChroms[startChrom])) {
                         // dlog('skipping random: ' + thisB.bwg.idsToChroms[startChrom]);
                     } else if (blockToFetch == null || ((dir < 0) && (endChrom > bestBlockChr || (endChrom == bestBlockChr && endBase > bestBlockOffset)) ||

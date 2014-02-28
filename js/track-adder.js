@@ -459,7 +459,12 @@ Browser.prototype.showTrackAdder = function(ev) {
                     stabBody.appendChild(r);
                     ++idx;
                 }
-                ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+
+                if (groups.length > 1 || group.shortLabel !== 'Others') {
+                    ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+                } else {
+                    ttab.appendChild(stab);
+                }
                 
             }
         }
@@ -482,8 +487,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         });
         
         stabHolder.appendChild(ttab);
-    };
-    
+    }
 
     if (regButton) {
         regButton.addEventListener('click', function(ev) {

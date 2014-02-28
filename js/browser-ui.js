@@ -94,9 +94,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
-        zoomSlider.min = zoom.min;
-        zoomSlider.max = zoom.max;
-        zoomSlider.value = zoom.current;
+        zoomSlider.min = zoom.min|0;
+        zoomSlider.max = zoom.max|0;
+        zoomSlider.value = zoom.current|0;
         if (b.storeStatus) {
             b.storeViewStatus();
         }
@@ -158,11 +158,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     b.makeTooltip(zoomOutBtn, 'Zoom out (-)');
 
     zoomSlider.addEventListener('change', function(ev) {
-	b.zoomSliderValue = (1.0 * zoomSlider.value);
-	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
+    	b.zoomSliderValue = (1.0 * zoomSlider.value);
+    	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
     }, false);
-    zoomSlider.min = b.zoomMin;
-    zoomSlider.max = b.zoomMax;
 
     favBtn.addEventListener('click', function(ev) {
        ev.stopPropagation(); ev.preventDefault();
