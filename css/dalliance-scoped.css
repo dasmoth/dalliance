@@ -16,6 +16,17 @@
 *.dalliance * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.dalliance-root {
+  display: inline-flex;
+  display: -webkit-inline-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+  max-height: 500px;
+  width: 100%;
+  outline: none;
+}
+
 *.dalliance .tier-viewport-background {
   background-color: #fff;
   background-image: -webkit-linear-gradient(#000 2px, transparent 2px), -webkit-linear-gradient(0, #000 2px, transparent 2px), -webkit-linear-gradient(rgba(0, 0, 0, .3) 1px, transparent 1px), -webkit-linear-gradient(0, rgba(0, 0, 0, .3) 1px, transparent 1px);
@@ -99,7 +110,7 @@
   position: relative;
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
+  -moz-user-select: none
 }
 
 *.dalliance .tier-holder {
@@ -114,7 +125,10 @@
   -webkit-flex: 1 1 100%;
   flex: 1 1 100%;
 
-    background-color: #eee;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  background-color: #eee;
   background-size: 25px 25px;
   background-image: -webkit-linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
                     -webkit-linear-gradient(-45deg, black 25%, transparent 25%, transparent 75%, black 75%, black);
@@ -176,6 +190,10 @@
   vertical-align: top;
 }
 
+*.dalliance .toolbar {
+  flex: none;
+  -webkit-flex: none;
+}
 
 *.dalliance .toolbar > * {
   vertical-align: top;
@@ -207,26 +225,13 @@
 }
 
 *.dalliance .viewport-overlay {
-  position: relative;
+  position: absolute;
   padding: 0px;
   margin: 0px;
   border: 0px;
   left: -1000px;
   z-index: 1000;
   pointer-events: none;
-}
-
-*.dalliance .placard {
-  display: none;
-  position: relative;
-  border-collapse: collapse;
-  margin-top: -1px;
-  height: 50px;
-  text-align: center;
-  line-height: 50px;
-  border-style: solid;
-  border-color: red;
-  border-width: 1px;
 }
 
 *.dalliance .quant-overlay {
@@ -236,15 +241,6 @@
   border: 0px;
   top: 0px;
   display: none;
-}
-
-*.dalliance .view-holder {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-
-
 }
 
 *.dalliance .tier-edit input {

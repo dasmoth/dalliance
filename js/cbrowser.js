@@ -63,10 +63,7 @@ function Browser(opts) {
     this.currentSeqMax = -1; // init once EPs are fetched.
 
     this.highlights = [];
-    
     this.selectedTiers = [1];
-
-    this.placards = [];
 
     this.maxViewWidth = 500000;
 
@@ -126,7 +123,7 @@ Browser.prototype.realInit = function() {
     var helpPopup;
     var thisB = this;
     this.browserHolderHolder = document.getElementById(this.pageName);
-    this.browserHolder = makeElement('div', null, {tabIndex: -1}, {outline: 'none', display: 'inline-block', width: '100%'});
+    this.browserHolder = makeElement('div', null, {className: 'dalliance dalliance-root', tabIndex: -1});
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
     this.svgHolder = makeElement('div', null, {className: 'main-holder'});
@@ -182,22 +179,26 @@ Browser.prototype.realInit2 = function() {
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
     // Event handlers
+
     this.tierHolder.addEventListener('mousewheel', function(ev) {
-        if (!ev.wheelDeltaX) {
-            return;
-        }
-
         ev.stopPropagation(); ev.preventDefault();
-        var delta = ev.wheelDeltaX/5;
-        if (!thisB.reverseScrolling) {
-            delta = -delta;
-        }
-        thisB.move(delta);
-    }, false);
-    this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
-        if (ev.axis == 1) {
-            ev.stopPropagation(); ev.preventDefault();
 
+        if (ev.wheelDeltaX) {
+            var delta = ev.wheelDeltaX/5;
+            if (!thisB.reverseScrolling) {
+                delta = -delta;
+            }
+            thisB.move(delta);
+        }
+
+        if (ev.wheelDeltaY) {
+            thisB.tierHolder.scrollTop += ev.wheelDeltaY;
+        }
+    }, false); 
+
+    this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
+        if (ev.axis == 1) {
             if (ev.detail != 0) {
                 var delta = ev.detail/4;
                 if (thisB.reverseScrolling) {
@@ -205,8 +206,15 @@ Browser.prototype.realInit2 = function() {
                 }
                 thisB.move(delta);
             }
+        } else {
+            thisB.tierHolder.scrollTop += ev.detail;
         }
-    }, false);
+    }, false); 
+
+    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
 
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
@@ -216,7 +224,6 @@ Browser.prototype.realInit2 = function() {
                 var t = thisB.tiers[ti];
                 if (t.wantedLayoutHeight && t.wantedLayoutHeight != t.layoutHeight) {
                     t.layoutHeight = t.wantedLayoutHeight;
-                    t.placard = null;
                     t.clipTier();
                     layoutsChanged = true;
                 }
@@ -313,9 +320,9 @@ Browser.prototype.realInit2 = function() {
                 if (st > 0) {
                     thisB.setSelectedTier(st - 1);
                     var nst = thisB.tiers[thisB.getSelectedTier()];
-                    var rect = nst.holder.getBoundingClientRect();
-                    if (rect.bottom - rect.height < 0 || rect.botton > window.innerHeight) {
-                        nst.holder.scrollIntoView(true);
+                    var top = nst.row.offsetTop, bottom = top + nst.row.offsetHeight;
+                    if (top < thisB.tierHolder.scrollTop || bottom > thisB.tierHolder.scrollTop + thisB.tierHolder.offsetHeight) {
+                        thisB.tierHolder.scrollTop = top;
                     }
                 } else {
                     thisB.notifyTierSelectionWrap(-1);
@@ -389,9 +396,9 @@ Browser.prototype.realInit2 = function() {
                 if (st < thisB.tiers.length -1) {
                     thisB.setSelectedTier(st + 1);
                     var nst = thisB.tiers[thisB.getSelectedTier()];
-                    var rect = nst.holder.getBoundingClientRect();
-                    if (rect.bottom - rect.height < 0 || rect.bottom > window.innerHeight) {
-                        nst.holder.scrollIntoView(rect.height > window.innerHeight);
+                    var top = nst.row.offsetTop, bottom = top + nst.row.offsetHeight;
+                    if (top < thisB.tierHolder.scrollTop || bottom > thisB.tierHolder.scrollTop + thisB.tierHolder.offsetHeight) {
+                        thisB.tierHolder.scrollTop = bottom - thisB.tierHolder.offsetHeight;
                     }
                 }
             }
@@ -549,6 +556,10 @@ Browser.prototype.realInit2 = function() {
         }
     }
 
+    if (this.fullScreen) {
+        this.setFullScreenHeight();
+    }
+
     if (!this.statusRestored && this.storeStatus) {
         this.storeStatus();
     }
@@ -557,11 +568,11 @@ Browser.prototype.realInit2 = function() {
 // 
 // iOS touch support
 
-Browser.prototype.touchStartHandler = function(ev)
-{
+Browser.prototype.touchStartHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
     
     this.touchOriginX = ev.touches[0].pageX;
+    this.touchOriginY = ev.touches[0].pageY;
     if (ev.touches.length == 2) {
         var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
         this.zooming = true;
@@ -570,16 +581,20 @@ Browser.prototype.touchStartHandler = function(ev)
     }
 }
 
-Browser.prototype.touchMoveHandler = function(ev)
-{
+Browser.prototype.touchMoveHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
     
     if (ev.touches.length == 1) {
         var touchX = ev.touches[0].pageX;
+        var touchY = ev.touches[0].pageY;
         if (this.touchOriginX && touchX != this.touchOriginX) {
             this.move(touchX - this.touchOriginX);
         }
+        if (this.touchOriginY && touchY != this.touchOriginY) {
+            this.tierHolder.scrollTop -= (touchY - this.touchOriginY);
+        }
         this.touchOriginX = touchX;
+        this.touchOriginY = touchY;
     } else if (this.zooming && ev.touches.length == 2) {
         var sep = Math.abs(ev.touches[0].pageX - ev.touches[1].pageX);
         if (sep != this.zoomLastSep) {
@@ -588,17 +603,14 @@ Browser.prototype.touchMoveHandler = function(ev)
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
-	        this.tiers[i].draw();
+	           this.tiers[i].draw();
             }
         }
         this.zoomLastSep = sep;
     }
-
-
 }
 
-Browser.prototype.touchEndHandler = function(ev)
-{
+Browser.prototype.touchEndHandler = function(ev) {
     ev.stopPropagation(); ev.preventDefault();
 }
 
@@ -629,15 +641,9 @@ Browser.prototype.realMakeTier = function(source, config) {
           height: "30",
           className: 'viewport-overlay'});
 
-    var placardContent = makeElement('span', '');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'fa fa-warning'}), ' ', placardContent], {className: 'placard'}, {display: 'none'});
-    
     var notifier = makeElement('div', 'Exciting message', {},
         {backgroundColor: 'black',
-         color: 'white', 
-         zIndex: 5000,
-         position: 'relative',
-         top: '-25px',
+         color: 'white',
          opacity: 0.0,
          padding: '6px',
          borderRadius: '4px',
@@ -645,17 +651,16 @@ Browser.prototype.realMakeTier = function(source, config) {
          transition: 'opacity 0.6s ease-in-out',
          pointerEvents: 'none'
          });
+    var notifierHolder = makeElement('div', notifier, {}, {
+        position: 'absolute',
+        top: '5px',
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 5000,
+        pointerEvents: 'none'
+    })
 
-    var vph = makeElement('div', [viewport, viewportOverlay], {className: 'view-holder'});
-    // vph.className = 'tier-viewport-background';
-    // vph.style.background = background;
-
-    vph.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
-    vph.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
-    vph.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    vph.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false); 
-
-    var tier = new DasTier(this, source, viewport, vph, viewportOverlay, placard, placardContent, notifier, config);
+    var tier = new DasTier(this, source, viewport, viewportOverlay, notifier, config);
     tier.oorigin = this.viewStart;
     tier.background = background;
 
@@ -663,7 +668,6 @@ Browser.prototype.realMakeTier = function(source, config) {
         'canvas', null, 
         {width: '50', height: "56",
          className: 'quant-overlay'});
-    tier.holder.appendChild(tier.quantOverlay);
     
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
@@ -706,15 +710,13 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragUpHandler = function(ev) {
         window.removeEventListener('mousemove', dragMoveHandler, true);
         window.removeEventListener('mouseup', dragUpHandler, true);
-        // thisB.isDragging = false;    // Can't clear here before the per-tier mouseups get called later :-(.
-                                        // Shouldn't matter because cleared on next mousedown. 
     }
         
 
-    vph.addEventListener('mousedown', function(ev) {
+    viewport.addEventListener('mousedown', function(ev) {
         thisB.browserHolder.focus();
         ev.preventDefault();
-        var br = vph.getBoundingClientRect();
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
 
         window.addEventListener('mousemove', dragMoveHandler, true);
@@ -723,8 +725,8 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false; // Not dragging until a movement event arrives.
     }, false);
 
-    vph.addEventListener('mousemove', function(ev) {
-        var br = vph.getBoundingClientRect();
+    viewport.addEventListener('mousemove', function(ev) {
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         if (hoverTimeout) {
@@ -747,8 +749,8 @@ Browser.prototype.realMakeTier = function(source, config) {
     });
 
     var doubleClickTimeout = null;
-    vph.addEventListener('mouseup', function(ev) {
-        var br = vph.getBoundingClientRect();
+    viewport.addEventListener('mouseup', function(ev) {
+        var br = row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
@@ -781,7 +783,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false;
     }, false);
 
-    vph.addEventListener('mouseout', function(ev) {
+    viewport.addEventListener('mouseout', function(ev) {
         isDragging = false;
     });
 
@@ -804,9 +806,8 @@ Browser.prototype.realMakeTier = function(source, config) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-    var row = makeElement('div', [vph, placard , tier.label, notifier], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label, notifierHolder], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
-
 
     tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -1023,7 +1024,6 @@ Browser.prototype.arrangeTiers = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
         t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
-        // t.holder.style.background = t.background;
     }
 }
 
@@ -1257,6 +1257,15 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
         }
         this.notifyLocation();
     }
+
+    if (this.fullScreen) {
+        this.setFullScreenHeight();
+    }
+}
+
+Browser.prototype.setFullScreenHeight = function() {
+    var rest = document.body.offsetHeight - this.browserHolder.offsetHeight;
+    this.browserHolder.style.maxHeight = Math.max(300, window.innerHeight - rest - 20) + 'px'
 }
 
 Browser.prototype.addTier = function(conf) {
@@ -1776,7 +1785,9 @@ Browser.prototype.updateHeight = function() {
     var tierTotal = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) 
         tierTotal += (this.tiers[ti].currentHeight || 30);
-    this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
+    this.ruler.style.height = '' + tierTotal + 'px';
+    this.ruler2.style.height = '' + tierTotal + 'px';
+    // this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 
 Browser.prototype.scrollArrowKey = function(ev, dir) {
