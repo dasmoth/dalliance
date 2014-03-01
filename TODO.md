@@ -5,31 +5,35 @@ For 0.12
   - BAM rendering speedups [DONE]
   - More efficient BAM parsing?
   - Use web-workers for fetching [DONE for BAMs]
-  - Replace feature popups with inspector?
-  - Feature selection
   - Small BED/WIG support. [DONE]
-  - Animate when leaping/toggling.
-  - Apply track-edit operations to multiple tracks at once.
   - Bulk addition of local files. [DONE]
-  - Typeahead for search-by-gene-ID
+  - Independent scrolling of tier-holder and tool panels [DONE]
+  - Support for full screen mode [DONE]
+  - Pinning tracks.
+  - Support for non-positional annotations
   - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
-  - Overlay function plugin API
   - Documentation of plugin APIs
-  - Move standalone browser to embedded with control
-  - Full screen function
 
 For 0.13
 --------
 
+  - Feature selection
+  - Replace feature popups with inspector-like interface
+  - Apply track-edit operations to multiple tracks at once.
+  - Typeahead for search-by-gene-ID
+  - Animate when leaping/toggling.
+  - Overlay function plugin API
+  - Clean up featureSource creation (make async?)
+
+For 1.0
+--------
+
   - Undo/redo.  
   - History of recently-viewed tracks.
-  - RDF/FALDO support?
   - Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.
-  - Stylesheet language revamp???  
-  - Incremental data fetching
   - Better zoom control
     + Show all toggle levels.
     + Some kind of feedback for toggling.
@@ -40,26 +44,23 @@ For 0.13
 Future
 -------------
 
- - Construct as a web-component
-   + (web component polyfills aren't quite ready yet).
+ - New stylesheet language
+ - More incremental data fetching.
+ - Construct as a web-component (polymer?)
  - Better tiling in renderer.
- - Non-positional annotation.
- - Alignment improvements.
+ - Better ways of loading alignments (HAL?)
 
 Nice to have
 ------------
 
- - State persistance between sessions
-     + Add a "make URL" button?
  - Tier groups
      + Should yZoom together.
-     + Other quantitative stuff?  If we support colourway switching then probably.
-     + Do they have any meaning for non-quant tracks?
+     + Other configuration stuff?
      + Drag together when re-ordering????
-     + How are these defined?  DASSTYLE is hopeless.  Extended SOURCES document?
  - Dedicated configuration/persistance language?
  - Distance between a pair of features.
  - Multiple configurations/session switching/etc?
+- RDF/FALDO support?
 
 Blue sky
 --------
