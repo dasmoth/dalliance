@@ -63,10 +63,7 @@ function Browser(opts) {
     this.currentSeqMax = -1; // init once EPs are fetched.
 
     this.highlights = [];
-    
     this.selectedTiers = [1];
-
-    this.placards = [];
 
     this.maxViewWidth = 500000;
 
@@ -227,7 +224,6 @@ Browser.prototype.realInit2 = function() {
                 var t = thisB.tiers[ti];
                 if (t.wantedLayoutHeight && t.wantedLayoutHeight != t.layoutHeight) {
                     t.layoutHeight = t.wantedLayoutHeight;
-                    t.placard = null;
                     t.clipTier();
                     layoutsChanged = true;
                 }
@@ -645,15 +641,9 @@ Browser.prototype.realMakeTier = function(source, config) {
           height: "30",
           className: 'viewport-overlay'});
 
-    var placardContent = makeElement('span', '');
-    var placard = makeElement('div', [makeElement('i', null, {className: 'fa fa-warning'}), ' ', placardContent], {className: 'placard'}, {display: 'none'});
-    
     var notifier = makeElement('div', 'Exciting message', {},
         {backgroundColor: 'black',
-         color: 'white', 
-         zIndex: 5000,
-         position: 'relative',
-         top: '-25px',
+         color: 'white',
          opacity: 0.0,
          padding: '6px',
          borderRadius: '4px',
@@ -661,10 +651,16 @@ Browser.prototype.realMakeTier = function(source, config) {
          transition: 'opacity 0.6s ease-in-out',
          pointerEvents: 'none'
          });
+    var notifierHolder = makeElement('div', notifier, {}, {
+        position: 'absolute',
+        top: '5px',
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 5000,
+        pointerEvents: 'none'
+    })
 
-
-
-    var tier = new DasTier(this, source, viewport, viewportOverlay, placard, placardContent, notifier, config);
+    var tier = new DasTier(this, source, viewport, viewportOverlay, notifier, config);
     tier.oorigin = this.viewStart;
     tier.background = background;
 
@@ -810,9 +806,8 @@ Browser.prototype.realMakeTier = function(source, config) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label /* , notifier */], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label, notifierHolder], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
     tier.row = row;
-
 
     tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();

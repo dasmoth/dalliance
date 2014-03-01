@@ -9,7 +9,7 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, overlay, placard, placardContent, notifier, config)
+function DasTier(browser, source, viewport, overlay, notifier, config)
 {
     this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
@@ -17,8 +17,6 @@ function DasTier(browser, source, viewport, overlay, placard, placardContent, no
     this.dasSource = new DASSource(source);
     this.viewport = viewport;
     this.overlay = overlay;
-    this.placard = placard;
-    this.placardContent = placardContent;
     this.req = null;
     this.layoutHeight = 25;
     this.bumped = true;
@@ -166,25 +164,13 @@ DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequen
     
     this.knownChr = chr;
     this.knownCoverage = coverage;
-    this.status = null; this.error = null;
+
+    if (this.status) {
+        this.status = null;
+        this._notifierToStatus();
+    }
 
     this.draw();
-}
-
-DasTier.prototype.updateStatus = function(status) {
-    if (status) {
-        this.currentFeatures = [];
-        this.currentSequence = null;
-        this.error = status;
-        this.placardContent.textContent = status;
-        this.placard.style.display = 'block';
-        this.draw();
-        this.updateHeight();
-    } else if (this.error) {
-        this.placard.style.display = 'none';
-        this.error = null;
-        this.updateHeight();
-    }
 }
 
 DasTier.prototype.draw = function() {
@@ -211,7 +197,6 @@ function zoomForScale(scale) {
     }
     return ssScale;
 }
-
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
     if (this.quantLeapThreshold) {
@@ -285,11 +270,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.currentHeight = Math.max(this.layoutHeight, this.label.clientHeight + 4);
-    if (this.placard.style.display !== 'none') {
-        // Hard-coded because we don't know exactly when the CSS will have loaded.
-        this.currentHeight = Math.max(this.currentHeight, /* this.placard.clientHeight + 2 */ 52);
-    }
+    this.currentHeight = Math.max(Math.max(this.layoutHeight, this.label.clientHeight + 4), 30);
     this.row.style.height = '' + this.currentHeight + 'px';
     this.browser.updateHeight();
  }
@@ -330,8 +311,25 @@ DasTier.prototype.drawOverlay = function() {
     t.overlay.style.left = '-1000px'
 }
 
+DasTier.prototype.updateStatus = function(status) {
+    if (status) {
+        this.status = status;
+        this.currentFeatures = [];
+        this.currentSequence = null;
+        this.draw();
+        this.updateHeight();
+        this._notifierToStatus();
+    } else {
+        if (this.status) {
+            this.status = null
+            this._notifierToStatus();
+        }
+    }
+}
+
 DasTier.prototype.notify = function(message, timeout) {
-    timeout = timeout || 2000;
+    if (typeof(timeout) !== 'number')
+        timeout = 2000;
 
     if (this.notifierFadeTimeout) {
         clearTimeout(this.notifierFadeTimeout);
@@ -339,20 +337,33 @@ DasTier.prototype.notify = function(message, timeout) {
     }
 
     if (message) {
-        this.notifier.textContent = message;
-        this.notifier.style.opacity = 0.8;
-    
+        this._notifierOn(message);
         if (timeout > 0) {
             var thisB = this;
             this.notifierFadeTimeout = setTimeout(function() {
-                thisB.notifier.style.opacity = 0;
-                thisB.notifierFadeTimeout = null;
+                thisB._notifierToStatus();
             }, timeout);
         }
     } else {
-        this.notifier.style.opacity = 0;
+        this._notifierToStatus();
     }
+}
 
+DasTier.prototype._notifierOn = function(message) {
+    this.notifier.textContent = message;
+    this.notifier.style.opacity = 0.8;
+}
+
+DasTier.prototype._notifierOff = function() {
+    this.notifier.style.opacity = 0;
+}
+
+DasTier.prototype._notifierToStatus = function() {
+    if (this.status) {
+        this._notifierOn(this.status)
+    } else {
+        this._notifierOff();
+    }
 }
 
 DasTier.prototype.setConfig = function(config) {

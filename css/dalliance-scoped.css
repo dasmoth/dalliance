@@ -234,19 +234,6 @@
   pointer-events: none;
 }
 
-*.dalliance .placard {
-  display: none;
-  position: relative;
-  border-collapse: collapse;
-  margin-top: -1px;
-  height: 50px;
-  text-align: center;
-  line-height: 50px;
-  border-style: solid;
-  border-color: red;
-  border-width: 1px;
-}
-
 *.dalliance .quant-overlay {
   position: absolute;
   padding: 0px;
@@ -254,15 +241,6 @@
   border: 0px;
   top: 0px;
   display: none;
-}
-
-*.dalliance .view-holder {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-
-
 }
 
 *.dalliance .tier-edit input {
