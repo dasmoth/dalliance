@@ -1051,11 +1051,11 @@ Browser.prototype.showTrackAdder = function(ev) {
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('h4', 'Coordinate system: '));
         custCS = makeElement('select', null);
-        custCS.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+        custCS.appendChild(makeElement('option', thisB.nameForCoordSystem(thisB.coordSystem), {value: '__default__'}));
         if (thisB.chains) {
             for (var csk in thisB.chains) {
                 var cs = thisB.chains[csk].coords;
-                custCS.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+                custCS.appendChild(makeElement('option', thisB.nameForCoordSystem(cs), {value: csk}));
             }
         }
         custCS.value = nds.mapping || '__default__';
@@ -1170,11 +1170,11 @@ Browser.prototype.showTrackAdder = function(ev) {
             var ccs;
             if (s.tier_type == 'bwg' || (s.tier_type == 'bam' && s.indexBlob) || (s.tier_type == 'tabix' && s.indexBlob) || s.tier_type == 'memstore') {
                 ccs = makeElement('select', null, null, {width: '100px'});
-                ccs.appendChild(makeElement('option', thisB.coordSystem.auth + thisB.coordSystem.version, {value: '__default__'}));
+                ccs.appendChild(makeElement('option', thisB.nameForCoordSystem(thisB.coordSystem), {value: '__default__'}));
                 if (thisB.chains) {
                     for (var csk in thisB.chains) {
                         var cs = thisB.chains[csk].coords;
-                        ccs.appendChild(makeElement('option', cs.auth + cs.version, {value: csk}));
+                        ccs.appendChild(makeElement('option', thisB.nameForCoordSystem(cs), {value: csk}));
                     }
                 }
                 ccs.value = s.mapping || '__default__';

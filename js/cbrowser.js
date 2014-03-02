@@ -54,7 +54,7 @@ function Browser(opts) {
     this.zoomMin = 10.0;
     this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
     this.origin = 0;
-    this.targetQuantRes = 5.0;
+    this.targetQuantRes = 1.0;
     this.featurePanelWidth = 750;
     this.zoomBase = 100;
     this.zoomExpt = 30.0; // Back to being fixed....
@@ -95,6 +95,9 @@ function Browser(opts) {
     
     this.retina = true;
     this.useFetchWorkers = true;
+
+    this.assemblyNamePrimary = true;
+    this.assemblyNameUcsc = true;
 
 
     for (var k in opts) {
@@ -1884,6 +1887,22 @@ function glyphLookup(glyphs, rx, ry, matches) {
         }
     }
     return matches;
+}
+
+Browser.prototype.nameForCoordSystem = function(cs) {
+    var primary = null, ucsc = null;
+    if (this.assemblyNamePrimary) {
+        primary = '' + cs.auth;
+        if (typeof(cs.version) !== 'undefined')
+            primary += cs.version;
+    }
+    if (this.assemblyNameUcsc) {
+        ucsc = cs.ucscName;
+    }
+    if (primary != null && ucsc != null)
+        return primary + '/' + ucsc;
+    else 
+        return primary || ucsc || 'unknown';
 }
 
 function FetchWorker() {

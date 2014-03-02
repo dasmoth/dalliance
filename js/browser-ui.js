@@ -33,7 +33,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     holder.classList.add('dalliance');
     var toolbar = b.toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
 
-    var title = b.coordSystem.speciesName + ' ' + b.coordSystem.auth + b.coordSystem.version;
+    var title = b.coordSystem.speciesName + ' ' + b.nameForCoordSystem(b.coordSystem);
     if (this.setDocumentTitle) {
         document.title = title + ' :: dalliance';
     }
