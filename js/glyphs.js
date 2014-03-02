@@ -74,9 +74,8 @@ function BoxGlyph(x, y, width, height, fill, stroke, alpha, radius) {
 BoxGlyph.prototype.draw = function(g) {
     var r = this._radius;
 
-    g.beginPath();
-
     if (r > 0) {
+        g.beginPath();
         g.moveTo(this.x + r, this.y);
         g.lineTo(this.x + this._width - r, this.y);
         g.arcTo(this.x + this._width, this.y, this.x + this._width, this.y + r, r);
@@ -86,35 +85,46 @@ BoxGlyph.prototype.draw = function(g) {
         g.arcTo(this.x, this.y + this._height, this.x, this.y + this._height - r, r);
         g.lineTo(this.x, this.y + r);
         g.arcTo(this.x, this.y, this.x + r, this.y, r);
+        g.closePath();
+
+        if (this._alpha != null) {
+            g.save();
+            g.globalAlpha = this._alpha;
+        }
+        
+        if (this.fill) {
+            g.fillStyle = this.fill;
+            g.fill();
+        }
+        if (this.stroke) {
+            g.strokeStyle = this.stroke;
+            g.lineWidth = 0.5;
+            g.stroke();
+        }
+
+        if (this._alpha != null) {
+            g.restore();
+        }
     } else {
-        g.lineJoin = 'miter';
-        g.lineCap = 'square';
-        g.moveTo(this.x, this.y);
-        g.lineTo(this.x + this._width, this.y);
-        g.lineTo(this.x + this._width, this.y + this._height);
-        g.lineTo(this.x, this.y + this._height);
-        g.lineTo(this.x, this.y);
-    }
+        if (this._alpha != null) {
+            g.save();
+            g.globalAlpha = this._alpha;
+        }
 
-    g.closePath();
+        if (this.fill) {
+            g.fillStyle = this.fill;
+            g.fillRect(this.x, this.y, this._width, this._height);
+        }
 
-    if (this._alpha != null) {
-        g.save();
-        g.globalAlpha = this._alpha;
-    }
-    
-    if (this.fill) {
-        g.fillStyle = this.fill;
-        g.fill();
-    }
-    if (this.stroke) {
-        g.strokeStyle = this.stroke;
-        g.lineWidth = 0.5;
-        g.stroke();
-    }
+        if (this.stroke) {
+            g.strokeStyle = this.stroke;
+            g.lineWidth = 0.5;
+            g.strokeRect(this.x, this.y, this._width, this._height)
+        }
 
-    if (this._alpha != null) {
-        g.restore();
+        if (this._alpha != null) {
+            g.restore();
+        }
     }
 }
 
