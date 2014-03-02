@@ -806,7 +806,7 @@ Browser.prototype.realMakeTier = function(source, config) {
        {className: 'btn-group'},
        {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
 
-    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label, notifierHolder], {}, {position: 'relative', display: 'block', textAlign: 'center' /*, transition: 'height 0.5s' */});
+    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label, notifierHolder], {}, {position: 'relative', display: 'block', textAlign: 'center', overflow: 'hidden'});
     tier.row = row;
 
     tier.removeButton.addEventListener('click', function(ev) {

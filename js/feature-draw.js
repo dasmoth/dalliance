@@ -67,6 +67,7 @@ var GLOBAL_GC;
 
 function drawFeatureTier(tier)
 {
+    var start = Date.now()|0;
     GLOBAL_GC = tier.viewport.getContext('2d'); // Should only be used for metrics.
     sortFeatures(tier);
 
@@ -94,7 +95,7 @@ function drawFeatureTier(tier)
                 pusho(gbsFeatures, style.id, f);
                 gbsStyles[style.id] = style;
             } else {
-                var g = glyphForFeature(f, 0, tier.styleForFeature(f), tier);
+                var g = glyphForFeature(f, 0, style, tier);
                 if (g)
                     glyphs.push(g);
             }
@@ -305,6 +306,9 @@ function drawFeatureTier(tier)
 
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
+
+    var end = Date.now()|0;
+    // console.log('dft took ' + (end-start) + 'ms');
 }
 
 function formatQuantLabel(v) {
@@ -327,6 +331,7 @@ function formatQuantLabel(v) {
 }
 
 DasTier.prototype.paint = function() {
+    var start = Date.now()|0;
     var retina = this.browser.retina && window.devicePixelRatio > 1;
 
     var subtiers = this.subtiers;
@@ -427,6 +432,9 @@ DasTier.prototype.paint = function() {
     }
 
     this.paintQuant();
+
+    var end = Date.now()|0;
+    // console.log('paint took ' + (end-start) + 'ms');
 }
 
 DasTier.prototype.paintQuant = function() {

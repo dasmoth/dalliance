@@ -53,6 +53,7 @@
 <script language="javascript" src="js/vcf.js"></script>
 <script language="javascript" src="js/bedwig.js"></script>
 <script language="javascript" src="js/probe.js"></script>
+<script language="javascript" src="js/trix.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -88,16 +89,17 @@
                         bwgURI: 'http://www.biodalliance.org/datasets/gencode.bb',
                         stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
                         collapseSuperGroups: true,
-                        trixURI: 'http://wwww.biodalliance.org/datasets/geneIndex.ix'},
-                  {name:                 'Repeats',
-                   desc:                 'Repeat annotation from Ensembl 59',
-                   uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',      
-                   stylesheet_uri:       'http://www.derkholm.net/dalliance-test/stylesheets/ens-repeats.xml'
-                  },
+                        trixURI: 'http://www.biodalliance.org/datasets/geneIndex.ix'},
+                    {name: 'Repeats',
+                    desc: 'Repeat annotation from RepeatMasker', 
+                    bwgURI: 'http://www.biodalliance.org/datasets/repeats.bb',
+                    stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats.xml',
+                    forceReduction: -1},
                   {name: 'SNPs',
                    tier_type: 'ensembl',
                    species:'human',
                    type: 'variation',
+                   disabled: true,
                    featureInfoPlugin: function(f, info) {
                     if (f.id) {
                       info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
@@ -114,33 +116,18 @@
                                            style: {glyph: 'LINEPLOT',
                                                    FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]
                   },
-                  {name:                 'MeDIP-raw',
-                   desc:                 'MeDIP-seq reads from Nature Biotech. 26:779-785',
-                   uri:                  'http://www.derkholm.net:8080/das/medipseq_reads/',
-                   mapping:              'hg18ToHg19',
-                  },
                   {name:                 'BWG test',
                    bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
                    stylesheet_uri:       'http://www.ebi.ac.uk/das-srv/genomicdas/das/batman_seq_SP/stylesheet',
                    mapping:              'hg18ToHg19',
                    quantLeapThreshold: 80
                   },
-                  {name:                 'BWG hist',
-                   bwgURI:               'http://www.biodalliance.org/datasets/spermMethylation.bw',
-                   style:     [{type: 'default',
-                                style:  {glyph: 'HISTOGRAM', HEIGHT: 50, MIN: 0, MAX: 100}}],
-                   mapping:              'hg18ToHg19',
-                   quantLeapThreshold: 80
-                  }
                 ],
 
     setDocumentTitle: true,
     uiPrefix: '',
 
-    fullScreen: true, 
-
-    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
-    karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
+    fullScreen: true,
 
     browserLinks: {
         Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',

@@ -64,6 +64,8 @@ Browser.prototype.createFeatureSource = function(config) {
     if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
         var saf = __dalliance_sourceAdapterFactories[config.tier_type];
         fs = saf(config).features;
+    } else if ((config.bwgURI || config.bwgBlob) && this.useFetchWorkers && this.fetchWorker) {
+        fs = new RemoteBWGFeatureSource(config, this.fetchWorker);
     } else if (config.bwgURI || config.bwgBlob) {
         fs =  new BWGFeatureSource(config);
     } else if ((config.bamURI || config.bamBlob) && this.useFetchWorkers && this.fetchWorker) {
@@ -740,6 +742,260 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
     });
 }
 
+function RemoteBWGFeatureSource(bwgSource, worker) {
+    FeatureSourceBase.call(this);
+
+    this.worker = worker;
+    this.readiness = 'Connecting';
+    this.bwgSource = this.opts = bwgSource;
+    this.keyHolder = new Awaited();
+    this.init();
+}
+
+RemoteBWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
+
+RemoteBWGFeatureSource.prototype.init = function() {
+    var thisB = this;
+    var uri = this.bwgSource.uri || this.bwgSource.bwgURI;
+    var blob = this.bwgSource.blob || this.bwgSource.bwgBlob;
+
+    var cnt = function(key, err) {
+        thisB.readiness = null;
+        thisB.notifyReadiness();
+
+        if (key) {
+            thisB.worker.postCommand({command: 'meta', connection: key}, function(meta, err) {
+                if (err) {
+                    thisB.error = err;
+                    thisB.keyHolder.provide(null);
+                } else {
+                    thisB.meta = meta;
+                    thisB.keyHolder.provide(key);
+                }
+            });
+        } else {
+            thisB.error = err;
+            thisB.keyHolder.provide(null);
+        }
+    };
+
+    if (blob) {
+        this.worker.postCommand({command: 'connectBBI', blob: blob}, cnt);
+    } else {
+        this.worker.postCommand({command: 'connectBBI', uri: uri}, cnt); 
+    }
+}
+
+RemoteBWGFeatureSource.prototype.capabilities = function() {
+    var caps = {leap: true};
+
+    if (this.meta && this.meta.type == 'bigwig')
+        caps.quantLeap = true;
+    if (this.meta && this.meta.extraIndices && this.meta.extraIndices.length > 0) {
+        caps.search = [];
+        for (var eii = 0; eii < this.meta.extraIndices.length; ++eii) {
+            caps.search.push(this.meta.extraIndices[eii].field);
+        }
+    }
+    return caps;
+}
+
+RemoteBWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var thisB = this;
+
+    thisB.busy++;
+    thisB.notifyActivity();
+
+    this.keyHolder.await(function(key) {
+        if (!key) {
+            thisB.busy--;
+            thisB.notifyActivity();
+            return callback(thisB.error || "Can't access binary file", null, null);
+        }
+
+        var zoom = -1;
+        var wantDensity = !types || types.length == 0 || arrayIndexOf(types, 'density') >= 0;
+        if (thisB.opts.clientBin) {
+            wantDensity = false;
+        }
+        if (thisB.meta.type == 'bigwig' || wantDensity || (typeof thisB.opts.forceReduction !== 'undefined')) {
+            for (var z = 1; z < thisB.meta.zoomLevels.length; ++z) {
+                if (thisB.meta.zoomLevels[z] <= scale) {
+                    zoom = z - 1; // Scales returned in metadata start at 1, unlike "real" zoom levels.
+                } else {
+                    break;
+                }
+            }
+            if (typeof thisB.opts.forceReduction !== 'undefined') {
+                zoom = thisB.opts.forceReduction;
+            }
+        }
+        
+        thisB.worker.postCommand({command: 'fetch', connection: key, chr: chr, min: min, max: max, zoom: zoom}, function(features, error) {
+            thisB.busy--;
+            thisB.notifyActivity();
+
+            var fs = 1000000000;
+            if (thisB.meta.type === 'bigwig') {
+                var is = (max - min) / features.length / 2;
+                if (is < fs) {
+                    fs = is;
+                }
+            } 
+            if (thisB.opts.link) {
+                for (var fi = 0; fi < features.length; ++fi) {
+                    var f = features[fi];
+                    if (f.label) {
+                        f.links = [new DASLink('Link', thisB.opts.link.replace(/\$\$/, f.label))];
+                    }
+                }
+            } 
+            callback(error, features, fs);
+        });
+    });
+}
+
+
+RemoteBWGFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    var thisB = this;
+    this.busy++;
+    this.notifyActivity();
+    this.worker.postCommand({command: 'quantLeap', connection: this.keyHolder.res, chr: chr, pos: pos, dir: dir, threshold: threshold, under: false}, function(result, err) {
+        console.log(result, err);
+        thisB.busy--;
+        thisB.notifyActivity();
+        return callback(result, err);
+    });
+}
+
+RemoteBWGFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    var thisB = this;
+    this.busy++;
+    this.notifyActivity();
+    this.worker.postCommand({command: 'leap', connection: this.keyHolder.res, chr: chr, pos: pos, dir: dir}, function(result, err) {
+        thisB.busy--;
+        thisB.notifyActivity();
+        if (result.length > 0 && result[0] != null) {
+            callback(result[0]);
+        }
+    });
+}
+
+RemoteBWGFeatureSource.prototype.getScales = function() {
+    var meta = this.meta;
+    if (meta) {
+        return meta.zoomLevels;
+    } else {
+        return null;
+    }
+}
+
+RemoteBWGFeatureSource.prototype.search = function(query, callback) {
+    if (!this.meta.extraIndices || this.meta.extraIndices.length == 0) {
+        return callback(null, 'No indices available');
+    }
+
+    var thisB = this;
+    this.busy++;
+    this.notifyActivity();
+    var index = this.meta.extraIndices[0];
+    this.worker.postCommand({command: 'search', connection: this.keyHolder.res, query: query, index: index}, function(result, err) {
+        thisB.busy--;
+        thisB.notifyActivity();
+
+        callback(result, err);
+    });
+}
+
+RemoteBWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.opts.noExtraFeatureInfo)
+        return true;
+
+    var thisB = this;
+    this.keyHolder.await(function(key) {
+        var bwg = thisB.meta;
+        if (!bwg) return;
+
+        if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
+            var fip = function(feature, featureInfo) {
+                for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
+                    var f = bwg.schema.fields[fi];
+                    featureInfo.add(f.comment, feature[f.name]);
+                }
+            };
+
+            callback(fip);
+        } else {
+            // No need to do anything.
+        }
+    });
+} 
+
+RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
+    var thisB = this;
+
+    this.keyHolder.await(function(key) {
+        var bwg = thisB.meta;
+        if (!bwg) {
+            return callback(null, 'bbi error');
+        } 
+
+        var bwg = {type: 'bigbed'};
+        var stylesheet = new DASStylesheet();
+        if (bwg.type == 'bigbed') {
+            var wigStyle = new DASStyle();
+            wigStyle.glyph = 'BOX';
+            wigStyle.FGCOLOR = 'black';
+            wigStyle.BGCOLOR = 'blue'
+            wigStyle.HEIGHT = 8;
+            wigStyle.BUMP = true;
+            wigStyle.LABEL = true;
+            wigStyle.ZINDEX = 20;
+            stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+        
+            wigStyle.glyph = 'BOX';
+            wigStyle.FGCOLOR = 'black';
+            wigStyle.BGCOLOR = 'red'
+            wigStyle.HEIGHT = 10;
+            wigStyle.BUMP = true;
+            wigStyle.ZINDEX = 20;
+            stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
+                    
+            var tsStyle = new DASStyle();
+            tsStyle.glyph = 'BOX';
+            tsStyle.FGCOLOR = 'black';
+            tsStyle.BGCOLOR = 'white';
+            tsStyle.HEIGHT = 10;
+            tsStyle.ZINDEX = 10;
+            tsStyle.BUMP = true;
+            tsStyle.LABEL = true;
+            stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+
+            var densStyle = new DASStyle();
+            densStyle.glyph = 'HISTOGRAM';
+            densStyle.COLOR1 = 'white';
+            densStyle.COLOR2 = 'black';
+            densStyle.HEIGHT=30;
+            stylesheet.pushStyle({type: 'density'}, null, densStyle);
+        } else {
+            var wigStyle = new DASStyle();
+            wigStyle.glyph = 'HISTOGRAM';
+            wigStyle.COLOR1 = 'white';
+            wigStyle.COLOR2 = 'black';
+            wigStyle.HEIGHT=30;
+            stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+        }
+
+
+        if (bwg.definedFieldCount == 12 && bwg.fieldCount >= 14) {
+            stylesheet.geneHint = true;
+        } 
+
+        return callback(stylesheet);
+    });
+}
+
+
 function BamblrFeatureSource(bamblrSource) {
     this.bamblr = bamblrSource.bamblrURI;
 }
@@ -959,8 +1215,7 @@ function RemoteBAMFeatureSource(bamSource, worker) {
 
 RemoteBAMFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
-RemoteBAMFeatureSource.prototype.init = function() {
-    var thisB = this;
+RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
     var uri = this.bamSource.uri || this.bamSource.bamURI;
     var indexUri = this.bamSource.indexUri || this.bamSource.baiURI || uri + '.bai';
 

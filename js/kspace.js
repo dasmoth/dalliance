@@ -261,7 +261,7 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
 		        src = src.source;
 	        }
         }
-        if (BWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src) || RemoteBAMFeatureSource.prototype.isPrototypeOf(src)) {
+        if (BWGFeatureSource.prototype.isPrototypeOf(src) || RemoteBWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src) || RemoteBAMFeatureSource.prototype.isPrototypeOf(src)) {
             mayDownsample = true;
         }
 

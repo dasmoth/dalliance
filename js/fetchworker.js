@@ -7,7 +7,7 @@
 // fetchworker.js
 //
 
-importScripts('bin.js', 'bam.js', '../jszlib/js/inflate.js')
+importScripts('utils.js', 'bin.js', 'spans.js', 'bam.js', 'das.js', 'bigwig.js', 'sha1.js', '../jszlib/js/inflate.js')
 
 var connections = {};
 
@@ -44,13 +44,58 @@ onmessage = function(event) {
                 postMessage({tag: tag, error: err || "Couldn't fetch BAM"});
             }
         });
+    } else if (command === 'connectBBI') {
+        var id = newID();
+        var bbi;
+        if (d.blob) {
+            bbi = new BlobFetchable(d.blob);
+        } else {
+            bbi = new URLFetchable(d.uri);
+        }
+
+        makeBwg(bbi, function(bwg, err) {
+            if (bwg) {
+                connections[id] = new BBIWorkerFetcher(bwg);
+                postMessage({tag: tag, result: id});
+            } else {
+                postMessage({tag: tag, error: err || "Couldn't fetch BBI"});
+            }
+        }, d.uri);
     } else if (command === 'fetch') {
         var con = connections[event.data.connection];
         if (!con) {
             return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
         }
 
-        con.fetch(d.tag, d.chr, d.min, d.max);
+        con.fetch(d.tag, d.chr, d.min, d.max, d.zoom);
+    } else if (command === 'leap') {
+        var con = connections[event.data.connection];
+        if (!con) {
+            return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
+        }
+
+        con.leap(d.tag, d.chr, d.pos, d.dir);
+    } else if (command === 'quantLeap') {
+        var con = connections[event.data.connection];
+        if (!con) {
+            return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
+        }
+
+        con.quantLeap(d.tag, d.chr, d.pos, d.dir, d.threshold, d.under);
+    } else if (command === 'meta') {
+        var con = connections[event.data.connection];
+        if (!con) {
+            return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
+        }
+
+        con.meta(d.tag);
+    } else if (command === 'search') {
+        var con = connections[event.data.connection];
+        if (!con) {
+            return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
+        }
+
+        con.search(d.tag, d.query, d.index);
     } else if (command === 'date') {
         return postMessage({tag: tag, result: Date.now()|0});
     } else {
@@ -60,7 +105,6 @@ onmessage = function(event) {
 
 function BAMWorkerFetcher(bam) {
     this.bam = bam;
-
 }
 
 BAMWorkerFetcher.prototype.fetch = function(tag, chr, min, max) {
@@ -70,5 +114,70 @@ BAMWorkerFetcher.prototype.fetch = function(tag, chr, min, max) {
         } else {
             postMessage({tag: tag, error: err});
         }
+    });
+}
+
+function BBIWorkerFetcher(bbi) {
+    this.bbi = bbi;
+}
+
+BBIWorkerFetcher.prototype.fetch = function(tag, chr, min, max, zoom) {
+    if (typeof(zoom) !== 'number')
+        zoom = -1;
+
+    var data;
+    console.log('zoom=' + zoom);
+    if (zoom < 0) {
+        data = this.bbi.getUnzoomedView();
+    } else {
+        data = this.bbi.getZoomedView(zoom);
+    }
+
+    data.readWigData(chr, min, max, function(features) {
+        postMessage({tag: tag, result: features});
+    });
+}
+
+BBIWorkerFetcher.prototype.meta = function(tag) {
+    var scales = [1];
+    for (var z = 0; z < this.bbi.zoomLevels.length; ++z) {
+        scales.push(this.bbi.zoomLevels[z].reduction);
+    }
+
+    var thisB = this;
+    var meta = {type: this.bbi.type,
+                zoomLevels: scales,
+                fieldCount: this.bbi.fieldCount,
+                definedFieldCount: this.bbi.definedFieldCount,
+                schema: this.bbi.schema};
+    if (this.bbi.type === 'bigbed') {
+        this.bbi.getExtraIndices(function(ei) {
+            if (ei) {
+                thisB.extraIndices = ei;
+                meta.extraIndices = ei.map(function(i) {return i.field});
+            }
+            postMessage({tag: tag, result: meta});
+        });
+    } else {
+        postMessage({tag: tag, result: meta});
+    }
+}
+
+BBIWorkerFetcher.prototype.leap = function(tag, chr, pos, dir) {
+    this.bbi.getUnzoomedView().getFirstAdjacent(chr, pos, dir, function(result, err) {
+        postMessage({tag: tag, result: result, error: err});
+    });
+}
+
+BBIWorkerFetcher.prototype.quantLeap = function(tag, chr, pos, dir, threshold, under) {
+    this.bbi.thresholdSearch(chr, pos, dir, threshold, function(result, err) {
+        postMessage({tag: tag, result: result, error: err});
+    });
+}
+
+BBIWorkerFetcher.prototype.search = function(tag, query, index) {
+    var is = this.extraIndices[0];
+    is.lookup(query, function(result, err) {
+        postMessage({tag: tag, result: result, error: err});
     });
 }

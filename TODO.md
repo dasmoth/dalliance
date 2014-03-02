@@ -4,12 +4,13 @@ For 0.12
   - Better support for assembly mapping across fragmented alignments [DONE]
   - BAM rendering speedups [DONE]
   - More efficient BAM parsing?
-  - Use web-workers for fetching [DONE for BAMs]
+  - Use web-workers for fetching [DONE]
   - Small BED/WIG support. [DONE]
   - Bulk addition of local files. [DONE]
   - Independent scrolling of tier-holder and tool panels [DONE]
   - Support for full screen mode [DONE]
   - Pinning tracks.
+  - Keep selected track visible when track heights change (?)
   - Support for non-positional annotations
   - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
