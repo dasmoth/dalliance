@@ -94,7 +94,9 @@ function Browser(opts) {
     this.sourceCache = new SourceCache();
     
     this.retina = true;
+
     this.useFetchWorkers = true;
+    this.maxWorkers = 8;
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
@@ -151,10 +153,16 @@ Browser.prototype.realInit = function() {
     this.svgHolder.appendChild(this.ruler);
     this.svgHolder.appendChild(this.ruler2);
 
-    try {
-        this.fetchWorker = new FetchWorker();
-    } catch (ex) {
-        console.log(ex);
+    if (this.maxWorkers > 0) {
+        try {
+            var fws = [];
+            for (var fi = 0; fi < this.maxWorkers; ++fi)
+                fws.push(new FetchWorker());
+            this.fetchWorkers = fws;
+            this.nextWorker = 0;
+        } catch (ex) {
+            console.log(ex);
+        }
     }
 
     if (window.getComputedStyle(this.browserHolderHolder).display != 'none') {
@@ -1001,6 +1009,7 @@ Browser.prototype.realMakeTier = function(source, config) {
             } else {
                 tier.loaderButton.style.display = 'none';
             }
+            thisB.pingActivity();
         });
     }
 
@@ -1421,7 +1430,6 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     }
 }
 
-
 Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
     if (newChr) {
         if (newChr.indexOf('chr') == 0)
@@ -1481,7 +1489,26 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     this.notifyLocation();
 
     this.spaceCheck();
+    if (this.instrumentActivity)
+        this.activityStartTime = Date.now()|0;
     return callback();
+}
+
+Browser.prototype.pingActivity = function() {
+    if (!this.instrumentActivity || !this.activityStartTime)
+        return;
+
+    var activity = 0;
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (this.tiers[ti].loaderButton.style.display !== 'none')
+            ++activity;
+    }
+
+    if (activity == 0) {
+        var now = Date.now()|0;
+        console.log('Loading took ' + (now-this.activityStartTime) + 'ms');
+        this.activityStartTime = null;
+    }
 }
 
 Browser.prototype.addFeatureListener = function(handler, opts) {
@@ -1903,6 +1930,15 @@ Browser.prototype.nameForCoordSystem = function(cs) {
         return primary + '/' + ucsc;
     else 
         return primary || ucsc || 'unknown';
+}
+
+Browser.prototype.getWorker = function() {
+    if (!this.useFetchWorkers || !this.fetchWorkers || this.fetchWorkers.length==0)
+        return null;
+
+    if (this.nextWorker >= this.fetchWorkers.length)
+        this.nextWorker = 0;
+    return this.fetchWorkers[this.nextWorker++];
 }
 
 function FetchWorker() {

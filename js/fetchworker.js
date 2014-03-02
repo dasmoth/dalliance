@@ -126,7 +126,6 @@ BBIWorkerFetcher.prototype.fetch = function(tag, chr, min, max, zoom) {
         zoom = -1;
 
     var data;
-    console.log('zoom=' + zoom);
     if (zoom < 0) {
         data = this.bbi.getUnzoomedView();
     } else {

@@ -64,14 +64,18 @@ Browser.prototype.createFeatureSource = function(config) {
     if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
         var saf = __dalliance_sourceAdapterFactories[config.tier_type];
         fs = saf(config).features;
-    } else if ((config.bwgURI || config.bwgBlob) && this.useFetchWorkers && this.fetchWorker) {
-        fs = new RemoteBWGFeatureSource(config, this.fetchWorker);
     } else if (config.bwgURI || config.bwgBlob) {
-        fs =  new BWGFeatureSource(config);
-    } else if ((config.bamURI || config.bamBlob) && this.useFetchWorkers && this.fetchWorker) {
-        fs = new RemoteBAMFeatureSource(config, this.fetchWorker);
+        var worker = this.getWorker();
+        if (worker)
+            fs = new RemoteBWGFeatureSource(config, worker);
+        else
+            fs = new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
-        fs = new BAMFeatureSource(config);
+        var worker = this.getWorker();
+        if (worker)
+            fs = new RemoteBAMFeatureSource(config, worker);
+        else
+            fs = new BAMFeatureSource(config);
     } else if (config.bamblrURI) {
         fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
