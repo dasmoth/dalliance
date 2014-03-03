@@ -130,7 +130,19 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
     }
 
     var cirFobRecur = function(offset, level) {
+        if (thisB.bwg.instrument)
+            console.log('level=' + level + '; offset=' + offset + '; time=' + (Date.now()|0));
+
         outstanding += offset.length;
+
+        if (offset.length == 1 && offset[0] - thisB.cirTreeOffset == 48 && thisB.cachedCirRoot) {
+            cirFobRecur2(thisB.cachedCirRoot, 0, level);
+            --outstanding;
+            if (outstanding == 0) {
+                thisB.fetchFeatures(filter, blocksToFetch, callback);
+            }
+            return;
+        }
 
         var maxCirBlockSpan = 4 +  (thisB.cirBlockSize * 32);   // Upper bound on size, based on a completely full leaf node.
         var spans;
@@ -152,6 +164,10 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
             for (var i = 0; i < offset.length; ++i) {
                 if (fr.contains(offset[i])) {
                     cirFobRecur2(resultBuffer, offset[i] - fr.min(), level);
+
+                    if (offset[i] - thisB.cirTreeOffset == 48 && offset[i] - fr.min() == 0)
+                        thisB.cachedCirRoot = resultBuffer;
+
                     --outstanding;
                     if (outstanding == 0) {
                         thisB.fetchFeatures(filter, blocksToFetch, callback);
