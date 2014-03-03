@@ -944,7 +944,6 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
             return callback(null, 'bbi error');
         } 
 
-        var bwg = {type: 'bigbed'};
         var stylesheet = new DASStylesheet();
         if (bwg.type == 'bigbed') {
             var wigStyle = new DASStyle();

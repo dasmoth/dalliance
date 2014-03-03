@@ -81,11 +81,11 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeHubButton = function(tdb) {
         var hub = tdb.hub;
-        var hubRemove = makeElement('i', null, {className: 'fa fa-times'});
+        var hubMenuButton = makeElement('i', null, {className: 'fa fa-list-alt'});
         var label = hub.shortLabel || 'Unknown';
         if (tdb.mapping)
             label = label + ' (' + tdb.genome + ')';
-        var hbContent = makeElement('span', [label, ' ', hubRemove]);
+        var hbContent = makeElement('span', [label, ' ', hubMenuButton]);
         var hubButton = thisB.makeButton(hbContent, hub.longLabel);
         addModeButtons.push(hubButton);
         
@@ -108,32 +108,85 @@ Browser.prototype.showTrackAdder = function(ev) {
             });
         }, false);
 
-        hubRemove.addEventListener('click', function(ev) {
+        hubMenuButton.addEventListener('click', function(ev) {
             ev.preventDefault(); ev.stopPropagation();
             
-            for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
-                if (thisB.hubObjects[hi].absURL == tdb.absURL) {
-                    thisB.hubObjects.splice(hi, 1);
-                    break;
+            var removeHubItem = makeElement('li', makeElement('a', 'Remove hub'));
+            var allOnItem = makeElement('li',  makeElement('a', 'Enable all'));
+            var allOffItem = makeElement('li',  makeElement('a', 'Disable all'));
+            var hubMenu = makeElement('ul', [removeHubItem, allOnItem, allOffItem], {className: 'dropdown-menu'}, {display: 'block'});
+
+            var mx =  ev.clientX, my = ev.clientY;
+            mx +=  document.documentElement.scrollLeft || document.body.scrollLeft;
+            my +=  document.documentElement.scrollTop || document.body.scrollTop;
+
+            hubMenu.style.position = 'absolute';
+            hubMenu.style.top = '' + (my+10) + 'px';
+            hubMenu.style.left = '' + (mx-30) + 'px';
+            thisB.hPopupHolder.appendChild(hubMenu);
+
+            var clickCatcher = function(ev) {
+                console.log('cc');
+                document.body.removeEventListener('click', clickCatcher, true);
+                thisB.hPopupHolder.removeChild(hubMenu);
+            };
+            document.body.addEventListener('click', clickCatcher, true);
+
+            removeHubItem.addEventListener('click', function(ev) {
+                for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
+                    if (thisB.hubObjects[hi].absURL == tdb.absURL) {
+                        thisB.hubObjects.splice(hi, 1);
+                        break;
+                    }
                 }
-            }
-            for (var hi = 0; hi < thisB.hubs.length; ++hi) {
-                var hc = thisB.hubs[hi];
-                if (typeof hc === 'string')
-                    hc = {url: hc};
-                if (hc.url == tdb.hub.url && !hc.genome || hc.genome == tdb.genome) {
-                    thisB.hubs.splice(hi, 1);
-                    break;
+                for (var hi = 0; hi < thisB.hubs.length; ++hi) {
+                    var hc = thisB.hubs[hi];
+                    if (typeof hc === 'string')
+                        hc = {url: hc};
+                    if (hc.url == tdb.hub.url && !hc.genome || hc.genome == tdb.genome) {
+                        thisB.hubs.splice(hi, 1);
+                        break;
+                    }
+
                 }
 
-            }
+                thisB.notifyTier();
+
+                modeButtonHolder.removeChild(hubButton);
+                activateButton(addModeButtons, addHubButton);
+                switchToHubConnectMode();
+            }, false);
 
 
-            thisB.notifyTier();
+            allOnItem.addEventListener('click', function(ev) {
+                tdb.getTracks(function(tracks, err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    
+                    for (var ti = 0; ti < tracks.length; ++ti) {
+                        var ds = tracks[ti].toDallianceSource();
+                        if (!thisB.currentlyActive(ds)) {
+                            thisB.addTier(ds);
+                        }
+                    }
+                });
+            }, false);
 
-            modeButtonHolder.removeChild(hubButton);
-            activateButton(addModeButtons, addHubButton);
-            switchToHubConnectMode();
+            allOffItem.addEventListener('click', function(ev) {
+                tdb.getTracks(function(tracks, err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    
+                    for (var ti = 0; ti < tracks.length; ++ti) {
+                        var ds = tracks[ti].toDallianceSource();
+                        if (thisB.currentlyActive(ds)) {
+                            thisB.removeTier(ds);
+                        }
+                    }
+                });
+            }, false);
         }, false);
 
         return hubButton;
@@ -286,9 +339,6 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         stabHolder.appendChild(stab);
     };
-
-
-
 
     function makeHubStab(tracks) {
         refreshButton.style.display = 'none';
