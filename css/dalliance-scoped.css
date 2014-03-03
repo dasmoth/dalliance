@@ -142,11 +142,15 @@
   background-color: gray;
   width: 8px;
   min-height: 100px;
-  display: inline-block;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
   -webkit-box-flex: 0;
   -moz-box-flex: 0;
   -webkit-flex: 0 0 8px;
   flex: 0 0 8px;
+
 }
 
 *.dalliance .tool-holder {

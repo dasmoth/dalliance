@@ -301,6 +301,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 }
 
 Browser.prototype.showToolPanel = function(panel, nowrap) {
+    var thisB = this;
+
     if (this.activeToolPanel) {
         this.activeToolPanel.parentElement.removeChild(this.activeToolPanel);
     }
@@ -311,7 +313,14 @@ Browser.prototype.showToolPanel = function(panel, nowrap) {
     else
         content = makeElement('div', panel, {}, {overflowY: 'auto', width: '100%'});
 
-    this.activeToolPanel = makeElement('div', [makeElement('div', null, {className: 'tool-divider'}), content], {className: 'tool-holder'});
+
+    var divider = makeElement('div', makeElement('i', null, {className: 'fa fa-caret-right'}), {className: 'tool-divider'});
+    divider.addEventListener('click', function(ev) {
+        thisB.hideToolPanel();
+        thisB.setUiMode('none');
+    }, false);
+    this.makeTooltip(divider, 'Close tool panel (ESC)');
+    this.activeToolPanel = makeElement('div', [divider, content], {className: 'tool-holder'});
     this.svgHolder.appendChild(this.activeToolPanel);
     this.resizeViewer();
 
