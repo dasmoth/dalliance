@@ -36,7 +36,6 @@ function Browser(opts) {
     this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
-    this.karyoEndpoint = new DASSource('http://www.derkholm.net:8080/das/hsa_54_36p/');
     this.registry = 'http://www.dasregistry.org/das/sources';
     this.coordSystem = {
         speciesName: 'Human',
@@ -641,45 +640,9 @@ Browser.prototype.realMakeTier = function(source, config) {
     var thisB = this;
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
-    var viewport = makeElement('canvas', null, 
-                               {width: '' + ((this.featurePanelWidth|0) + 2000), 
-                                height: "30",
-                                className: 'viewport'});
-                               
-
-    var viewportOverlay = makeElement('canvas', null,
-         {width: + ((this.featurePanelWidth|0) + 2000), 
-          height: "30",
-          className: 'viewport-overlay'});
-
-    var notifier = makeElement('div', 'Exciting message', {},
-        {backgroundColor: 'black',
-         color: 'white',
-         opacity: 0.0,
-         padding: '6px',
-         borderRadius: '4px',
-         display: 'inline-block',
-         transition: 'opacity 0.6s ease-in-out',
-         pointerEvents: 'none'
-         });
-    var notifierHolder = makeElement('div', notifier, {}, {
-        position: 'absolute',
-        top: '5px',
-        width: '100%',
-        textAlign: 'center',
-        zIndex: 5000,
-        pointerEvents: 'none'
-    })
-
-    var tier = new DasTier(this, source, viewport, viewportOverlay, notifier, config);
+    var tier = new DasTier(this, source, config, background);
     tier.oorigin = this.viewStart;
-    tier.background = background;
 
-    tier.quantOverlay = makeElement(
-        'canvas', null, 
-        {width: '50', height: "56",
-         className: 'quant-overlay'});
-    
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
     var hoverTimeout;
@@ -724,7 +687,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     }
         
 
-    viewport.addEventListener('mousedown', function(ev) {
+    tier.viewport.addEventListener('mousedown', function(ev) {
         thisB.browserHolder.focus();
         ev.preventDefault();
         var br = row.getBoundingClientRect();
@@ -736,8 +699,8 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false; // Not dragging until a movement event arrives.
     }, false);
 
-    viewport.addEventListener('mousemove', function(ev) {
-        var br = row.getBoundingClientRect();
+    tier.viewport.addEventListener('mousemove', function(ev) {
+        var br = tier.row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         if (hoverTimeout) {
@@ -760,8 +723,8 @@ Browser.prototype.realMakeTier = function(source, config) {
     });
 
     var doubleClickTimeout = null;
-    viewport.addEventListener('mouseup', function(ev) {
-        var br = row.getBoundingClientRect();
+    tier.viewport.addEventListener('mouseup', function(ev) {
+        var br = tier.row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
         var hit = featureLookup(rx, ry);
@@ -794,31 +757,9 @@ Browser.prototype.realMakeTier = function(source, config) {
         thisB.isDragging = false;
     }, false);
 
-    viewport.addEventListener('mouseout', function(ev) {
+    tier.viewport.addEventListener('mouseout', function(ev) {
         isDragging = false;
     });
-
-    tier.removeButton = makeElement('i', null, {className: 'fa fa-times'});
-    tier.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
-    tier.loaderButton = makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}, {display: 'none'});
-    tier.infoElement = makeElement('div', tier.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
-    tier.nameButton = makeElement('div', [], {className: 'tier-tab'});
-    tier.nameButton.appendChild(tier.removeButton);
-    if (source.pennant) {
-        tier.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
-    }
-    tier.nameElement = makeElement('span', source.name);
-    tier.nameButton.appendChild(makeElement('span', [tier.nameElement, tier.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
-    tier.nameButton.appendChild(tier.bumpButton);
-    tier.nameButton.appendChild(tier.loaderButton);
-    
-    tier.label = makeElement('span',
-       [tier.nameButton],
-       {className: 'btn-group'},
-       {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
-
-    var row = makeElement('div', [viewport, viewportOverlay, tier.quantOverlay, tier.label, notifierHolder], {}, {position: 'relative', height: '30px', display: 'block', textAlign: 'center', overflow: 'hidden'});
-    tier.row = row;
 
     tier.removeButton.addEventListener('click', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
@@ -994,7 +935,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
 
-    this.tierHolder.appendChild(row);    
+    this.tierHolder.appendChild(tier.row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
     tier.init(); // fetches stylesheet
@@ -1481,7 +1422,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
         for (var i = 0; i < this.tiers.length; ++i) {
             var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	    this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+	        this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
             var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
             this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
         }

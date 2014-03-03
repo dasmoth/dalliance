@@ -9,18 +9,77 @@
 
 var __tier_idSeed = 0;
 
-function DasTier(browser, source, viewport, overlay, notifier, config)
+function DasTier(browser, source, config, background)
 {
     this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
     this.dasSource = new DASSource(source);
-    this.viewport = viewport;
-    this.overlay = overlay;
-    this.req = null;
+    this.background = background;
+
+    this.viewport = makeElement('canvas', null, 
+                                {width: '' + ((this.browser.featurePanelWidth|0) + 2000), 
+                                 height: "30",
+                                 className: 'viewport'});
+    this.overlay = makeElement('canvas', null,
+         {width: + ((this.browser.featurePanelWidth|0) + 2000), 
+          height: "30",
+          className: 'viewport-overlay'});
+
+    this.notifier = makeElement('div', 'Exciting message', {},
+        {backgroundColor: 'black',
+         color: 'white',
+         opacity: 0.0,
+         padding: '6px',
+         borderRadius: '4px',
+         display: 'inline-block',
+         transition: 'opacity 0.6s ease-in-out',
+         pointerEvents: 'none'
+         });
+    this.notifierHolder = makeElement('div', this.notifier, {}, {
+        position: 'absolute',
+        top: '5px',
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 5000,
+        pointerEvents: 'none'
+    })
+    this.quantOverlay = makeElement(
+        'canvas', null, 
+        {width: '50', height: "56",
+         className: 'quant-overlay'});
+
+
+    this.removeButton = makeElement('i', null, {className: 'fa fa-times'});
+    this.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
+    this.loaderButton = makeElement('img', null, {src: this.browser.uiPrefix + 'img/loader.gif'}, {display: 'none'});
+    this.infoElement = makeElement('div', this.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
+    this.nameButton = makeElement('div', [], {className: 'tier-tab'});
+    this.nameButton.appendChild(this.removeButton);
+    if (source.pennant) {
+        this.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
+    }
+    this.nameElement = makeElement('span', source.name);
+    this.nameButton.appendChild(makeElement('span', [this.nameElement, this.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    this.nameButton.appendChild(this.bumpButton);
+    this.nameButton.appendChild(this.loaderButton);
+    
+    this.label = makeElement('span',
+       [this.nameButton],
+       {className: 'btn-group'},
+       {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+
+
+    this.row = makeElement('div', [this.viewport,
+                                   this.overlay, 
+                                   this.quantOverlay, 
+                                   this.label, 
+                                   this.notifierHolder], 
+                            {}, 
+                            {position: 'relative', height: '30px', display: 'block', textAlign: 'center', overflow: 'hidden'});
+
     this.layoutHeight = 25;
     this.bumped = true;
-    this.notifier = notifier;
     this.styleIdSeed = 0;
     if (source.quantLeapThreshold) {
         this.quantLeapThreshold = source.quantLeapThreshold;
@@ -28,7 +87,6 @@ function DasTier(browser, source, viewport, overlay, notifier, config)
     if (this.dasSource.collapseSuperGroups) {
         this.bumped = false;
     }
-    this.y = 0;
     this.layoutWasDone = false;
 
     if (source.featureInfoPlugin) {
