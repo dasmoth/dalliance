@@ -22,7 +22,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = 'http://www.biodalliance.org/release-0.12/';
+    this.uiPrefix = '//www.biodalliance.org/release-0.12/';
 
     this.sources = [];
     this.tiers = [];
