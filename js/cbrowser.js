@@ -203,7 +203,7 @@ Browser.prototype.realInit2 = function() {
 
         if (ev.wheelDeltaY) {
             var delta = ev.wheelDeltaY;
-            if (!thisB.reverseScrolling) {
+            if (thisB.reverseScrolling) {
                 delta = -delta;
             }
             thisB.tierHolder.scrollTop += delta;
@@ -222,7 +222,7 @@ Browser.prototype.realInit2 = function() {
             }
         } else {
             var delta = ev.detail;
-            if (thisB.reverseScrolling) {
+            if (!thisB.reverseScrolling) {
               delta = -delta;
             }
 
