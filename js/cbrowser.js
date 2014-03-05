@@ -22,7 +22,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = 'http://www.biodalliance.org/release-0.12/';
+    this.uiPrefix = '//www.biodalliance.org/release-0.12/';
 
     this.sources = [];
     this.tiers = [];
@@ -690,7 +690,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     tier.viewport.addEventListener('mousedown', function(ev) {
         thisB.browserHolder.focus();
         ev.preventDefault();
-        var br = row.getBoundingClientRect();
+        var br = tier.row.getBoundingClientRect();
         var rx = ev.clientX, ry = ev.clientY;
 
         window.addEventListener('mousemove', dragMoveHandler, true);
