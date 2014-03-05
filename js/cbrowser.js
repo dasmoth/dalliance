@@ -202,7 +202,11 @@ Browser.prototype.realInit2 = function() {
         }
 
         if (ev.wheelDeltaY) {
-            thisB.tierHolder.scrollTop += ev.wheelDeltaY;
+            var delta = ev.wheelDeltaY;
+            if (thisB.reverseScrolling) {
+                delta = -delta;
+            }
+            thisB.tierHolder.scrollTop += delta;
         }
     }, false); 
 
@@ -217,7 +221,12 @@ Browser.prototype.realInit2 = function() {
                 thisB.move(delta);
             }
         } else {
-            thisB.tierHolder.scrollTop += ev.detail;
+            var delta = ev.detail;
+            if (!thisB.reverseScrolling) {
+              delta = -delta;
+            }
+
+            thisB.tierHolder.scrollTop += delta;
         }
     }, false); 
 
