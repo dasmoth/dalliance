@@ -72,12 +72,13 @@ Browser.prototype.openTierPanel = function(tier) {
         tierForm.appendChild(semanticBanner);
 
         var tierNameField = makeElement('input', null, {type: 'text'});
+        var tierPinnedToggle = makeElement('input', null, {type: 'checkbox'});
+
         var glyphField = makeElement('select');
         glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));
         glyphField.appendChild(makeElement('option', 'Line Plot', {value: 'LINEPLOT'}));
         glyphField.appendChild(makeElement('option', 'Ribbon', {value: 'GRADIENT'}));
         glyphField.appendChild(makeElement('option', 'Scatter', {value: 'SCATTER'}));
-
 
         var tierColorField = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField2 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
@@ -136,6 +137,8 @@ Browser.prototype.openTierPanel = function(tier) {
                 tierNameField.value = tier.config.name;
             else 
                 tierNameField.value = tier.dasSource.name;
+
+            tierPinnedToggle.checked = tier.pinned;
 
             if (tier.forceHeight) {
                 tierHeightField.value = '' + tier.forceHeight;
@@ -339,6 +342,10 @@ Browser.prototype.openTierPanel = function(tier) {
                  tierNameField]),
 
              makeElement('tr',
+                [makeElement('th', 'Pin to top'),
+                 tierPinnedToggle]),
+
+             makeElement('tr',
                 [makeElement('th', 'Height'),
                  makeElement('td', tierHeightField)]),
 
@@ -368,6 +375,9 @@ Browser.prototype.openTierPanel = function(tier) {
             tier.mergeConfig({name: tierNameField.value});
         }, false);
 
+        tierPinnedToggle.addEventListener('change', function(ev) {
+            tier.mergeConfig({pinned: tierPinnedToggle.checked});
+        }, false);
 
         for (var ci = 0; ci < tierColorFields.length; ++ci) {
             tierColorFields[ci].addEventListener('change', changeColor, false);

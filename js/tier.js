@@ -428,6 +428,7 @@ DasTier.prototype.mergeConfig = function(newConfig) {
 
 DasTier.prototype._updateFromConfig = function() {
     var needsRefresh = false;
+    var needsReorder = false;
 
     if (typeof this.config.name === 'string')
         this.nameElement.textContent = this.config.name;
@@ -479,8 +480,17 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
 
+    var wantedPinned = this.config.pinned !== undefined ? this.config.pinned : this.dasSource.pinned;
+    if (wantedPinned !== this.pinned) {
+        this.pinned = wantedPinned;
+        needsReorder = true;
+    }
+
     if (needsRefresh)
         this.scheduleRedraw();
+
+    if (needsReorder)
+        this.browser.reorderTiers();
 }
 
 DasTier.prototype.scheduleRedraw = function() {

@@ -134,8 +134,10 @@ Browser.prototype.realInit = function() {
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder'});
-    this.svgHolder.appendChild(this.tierHolder);
+    this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder'}, {borderBottom: '3px solid gray', flex: 'none'});
+    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder'}, {flex: '1 1'});
+    this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {}, {width: '100%', display: 'flex', flexDirection: 'column'});
+    this.svgHolder.appendChild(this.tierHolderHolder);
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
@@ -149,8 +151,8 @@ Browser.prototype.realInit = function() {
 
     this.ruler = makeElement('div', null, {className: 'guideline'})
     this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
-    this.svgHolder.appendChild(this.ruler);
-    this.svgHolder.appendChild(this.ruler2);
+    this.tierHolderHolder.appendChild(this.ruler);
+    this.tierHolderHolder.appendChild(this.ruler2);
 
     if (this.maxWorkers > 0) {
         try {
@@ -179,7 +181,10 @@ Browser.prototype.realInit = function() {
 Browser.prototype.realInit2 = function() {
     var thisB = this;
 
+    // Remove the loader icon, if needed
     removeChildren(this.tierHolder);
+    removeChildren(this.pinnedTierHolder);
+
     this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
@@ -190,7 +195,7 @@ Browser.prototype.realInit2 = function() {
 
     // Event handlers
 
-    this.tierHolder.addEventListener('mousewheel', function(ev) {
+    this.tierHolderHolder.addEventListener('mousewheel', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
 
         if (ev.wheelDeltaX) {
@@ -210,7 +215,7 @@ Browser.prototype.realInit2 = function() {
         }
     }, false); 
 
-    this.tierHolder.addEventListener('MozMousePixelScroll', function(ev) {
+    this.tierHolderHolder.addEventListener('MozMousePixelScroll', function(ev) {
         ev.stopPropagation(); ev.preventDefault();
         if (ev.axis == 1) {
             if (ev.detail != 0) {
@@ -230,10 +235,10 @@ Browser.prototype.realInit2 = function() {
         }
     }, false); 
 
-    this.tierHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
-    this.tierHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
+    this.tierHolderHolder.addEventListener('touchstart', function(ev) {return thisB.touchStartHandler(ev)}, false);
+    this.tierHolderHolder.addEventListener('touchmove', function(ev) {return thisB.touchMoveHandler(ev)}, false);
+    this.tierHolderHolder.addEventListener('touchend', function(ev) {return thisB.touchEndHandler(ev)}, false);
+    this.tierHolderHolder.addEventListener('touchcancel', function(ev) {return thisB.touchCancelHandler(ev)}, false);
 
     var keyHandler = function(ev) {
         // console.log('cbkh: ' + ev.keyCode);
@@ -860,7 +865,6 @@ Browser.prototype.realMakeTier = function(source, config) {
             dragLabel.style.cursor = 'pointer';
             thisB.svgHolder.appendChild(dragLabel);
             label.style.visibility = 'hidden';
-            
 
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
                 if (thisB.tiers[ti] === tier) {
@@ -876,9 +880,18 @@ Browser.prototype.realMakeTier = function(source, config) {
         dragLabel.style.left = (label.getBoundingClientRect().left - holderBCR.left) + 'px'; 
         dragLabel.style.top = (ev.clientY - holderBCR.top - 10) + 'px';
 
-        var pty = ev.clientY - thisB.tierHolder.getBoundingClientRect().top;
+        var dragTierHolder;
+        if (tier.pinned) {
+            dragTierHolder = thisB.pinnedTierHolder;
+        } else {
+            dragTierHolder = thisB.tierHolder;
+        }
+        var pty = ev.clientY - dragTierHolder.getBoundingClientRect().top;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             var tt = thisB.tiers[ti];
+            if (tt.pinned ^ tier.pinned)
+                continue; 
+
             var ttr = tt.row.getBoundingClientRect();
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
@@ -944,7 +957,6 @@ Browser.prototype.realMakeTier = function(source, config) {
         document.addEventListener('mouseup', labelReleaseHandler, false);
     }, false);
 
-    this.tierHolder.appendChild(tier.row);    
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
     tier.init(); // fetches stylesheet
@@ -964,15 +976,19 @@ Browser.prototype.realMakeTier = function(source, config) {
     }
 
     tier._updateFromConfig();
+    this.reorderTiers();
 }
 
 Browser.prototype.reorderTiers = function() {
     removeChildren(this.tierHolder);
+    removeChildren(this.pinnedTierHolder);
     for (var i = 0; i < this.tiers.length; ++i) {
-        this.tierHolder.appendChild(this.tiers[i].row);
+        var t = this.tiers[i];
+        if (t.pinned)
+            this.pinnedTierHolder.appendChild(this.tiers[i].row);
+        else
+            this.tierHolder.appendChild(this.tiers[i].row);
     }
-    this.tierHolder.appendChild(this.ruler);
-    this.tierHolder.appendChild(this.ruler2);
     this.arrangeTiers();
 }
 
@@ -983,13 +999,25 @@ Browser.prototype.refreshTier = function(tier) {
 }
 
 Browser.prototype.arrangeTiers = function() {
+    var arrangedTiers = [];
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
+        if (t.pinned) {
+            arrangedTiers.push(t);
+        }
+    }
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        if (!t.pinned) {
+            arrangedTiers.push(t);
+        }
+    }
+
+     for (var ti = 0; ti < arrangedTiers.length; ++ti) {
+        var t = arrangedTiers[ti];
         t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
     }
 }
-
-
 
 Browser.prototype.refresh = function() {
     this.notifyLocation();
@@ -1313,7 +1341,6 @@ Browser.prototype.removeTier = function(conf, force) {
         throw "Can't remove sequence source tier";
     }
 
-    this.tierHolder.removeChild(victim.row);
     this.tiers.splice(target, 1);
 
     var nst = [];
@@ -1328,7 +1355,7 @@ Browser.prototype.removeTier = function(conf, force) {
     this.selectedTiers = nst;
     this.markSelectedTiers();
 
-    this.arrangeTiers();
+    this.reorderTiers();
     this.notifyTier();
 }
 
