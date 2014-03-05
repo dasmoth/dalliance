@@ -641,7 +641,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
 
     var tier = new DasTier(this, source, config, background);
-    tier.oorigin = this.viewStart;
+    tier.oorigin = this.viewStart
 
     var isDragging = false;
     var dragOrigin, dragMoveOrigin;
