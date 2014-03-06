@@ -33,15 +33,30 @@
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position: -15px -15px, -15px -15px, -14px -14px, -14px -14px;
 }
+
 *.dalliance .track-label {
   font-size: 10pt;
   position: absolute;
-  z-index: 999;
-  background: rgba(220, 220, 220, 0.8);
-  padding: 3px;
-  cursor: default;
-  border-radius: 4px;
+  z-index: 1001;
+  left: 2px;
+  top: 2px;
+  display: inline-block;
+  opacity: 0.8;
 }
+
+*.dalliance .track-label-info {
+  display: none;
+  max-width: 200px
+  white-space: normal;
+  color: rgb(100, 100, 100);
+}
+
+*.dalliance .track-name-holder {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
 *.dalliance .tier-tab {
   display: inline-block;
   *display: inline;
@@ -87,6 +102,15 @@
 *:focus.dalliance .tier-tab.active {
   border: 3px solid rgb(150, 150, 230);
 }
+
+*.dalliance .tier {
+  position: relative;
+  height: 30px;
+  display: block;
+  text-align: center;
+  overflow: hidden;
+}
+
 *.dalliance .loc-field {
   width: 240px;
   margin-bottom: 0px;
@@ -256,4 +280,24 @@
   text-align: right;
   padding-right: 10px;
   vertical-align: middle;
+}
+
+*.dalliance .notifier {
+  background-color: black;
+  color: white;
+  opacity: 0.;
+  padding: 6px;
+  border-radius: 4px;
+  display: inline-block;
+  transition: opacity 0.6s ease-in-out;
+  pointer-events: none;
+}
+
+*.dalliance .notifier-holder {
+  position: absolute;
+  top: 5px;
+  width: 100%;
+  text-align: center;
+  z-index: 5000;
+  pointer-events: none;
 }

@@ -26,48 +26,30 @@ function DasTier(browser, source, config, background)
           height: "30",
           className: 'viewport-overlay'});
 
-    this.notifier = makeElement('div', 'Exciting message', {},
-        {backgroundColor: 'black',
-         color: 'white',
-         opacity: 0.0,
-         padding: '6px',
-         borderRadius: '4px',
-         display: 'inline-block',
-         transition: 'opacity 0.6s ease-in-out',
-         pointerEvents: 'none'
-         });
-    this.notifierHolder = makeElement('div', this.notifier, {}, {
-        position: 'absolute',
-        top: '5px',
-        width: '100%',
-        textAlign: 'center',
-        zIndex: 5000,
-        pointerEvents: 'none'
-    })
+    this.notifier = makeElement('div', '', {className: 'notifier'});
+    this.notifierHolder = makeElement('div', this.notifier, {className: 'notifier-holder'});
     this.quantOverlay = makeElement(
         'canvas', null, 
         {width: '50', height: "56",
          className: 'quant-overlay'});
 
-
     this.removeButton = makeElement('i', null, {className: 'fa fa-times'});
     this.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
     this.loaderButton = makeElement('img', null, {src: this.browser.uiPrefix + 'img/loader.gif'}, {display: 'none'});
-    this.infoElement = makeElement('div', this.dasSource.desc, {}, {display: 'none', maxWidth: '200px', whiteSpace: 'normal', color: 'rgb(100,100,100)'});
+    this.infoElement = makeElement('div', this.dasSource.desc, {className: 'track-label-info'});
     this.nameButton = makeElement('div', [], {className: 'tier-tab'});
     this.nameButton.appendChild(this.removeButton);
     if (source.pennant) {
         this.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
     }
     this.nameElement = makeElement('span', source.name);
-    this.nameButton.appendChild(makeElement('span', [this.nameElement, this.infoElement], {}, {display: 'inline-block', marginLeft: '5px', marginRight: '5px'}));
+    this.nameButton.appendChild(makeElement('span', [this.nameElement, this.infoElement], {className: 'track-name-holder'}));
     this.nameButton.appendChild(this.bumpButton);
     this.nameButton.appendChild(this.loaderButton);
     
     this.label = makeElement('span',
        [this.nameButton],
-       {className: 'btn-group'},
-       {zIndex: 1001, position: 'absolute', left: '2px', top: '2px', opacity: 0.8, display: 'inline-block'});
+       {className: 'btn-group track-label'});
 
 
     this.row = makeElement('div', [this.viewport,
@@ -75,8 +57,7 @@ function DasTier(browser, source, config, background)
                                    this.quantOverlay, 
                                    this.label, 
                                    this.notifierHolder], 
-                            {}, 
-                            {position: 'relative', height: '30px', display: 'block', textAlign: 'center', overflow: 'hidden'});
+                            {className: 'tier'});
 
     this.layoutHeight = 25;
     this.bumped = true;

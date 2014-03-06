@@ -982,13 +982,20 @@ Browser.prototype.realMakeTier = function(source, config) {
 Browser.prototype.reorderTiers = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
+    var hasPinned = false;
     for (var i = 0; i < this.tiers.length; ++i) {
         var t = this.tiers[i];
-        if (t.pinned)
+        if (t.pinned) {
             this.pinnedTierHolder.appendChild(this.tiers[i].row);
-        else
+            hasPinned = true;
+        } else {
             this.tierHolder.appendChild(this.tiers[i].row);
+        }
     }
+    if (hasPinned)
+        this.pinnedTierHolder.style.borderBottom = '3px solid gray';
+    else
+        this.pinnedTierHolder.style.borderBottom = 'none';
     this.arrangeTiers();
 }
 

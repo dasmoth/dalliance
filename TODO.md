@@ -5,6 +5,7 @@ For 0.12
   - BAM rendering speedups [DONE]
   - More efficient BAM parsing?
   - Use web-workers for fetching [DONE]
+  - Fix cross-origin worker boot.
   - Small BED/WIG support. [DONE]
   - Bulk addition of local files. [DONE]
   - Independent scrolling of tier-holder and tool panels [DONE]
