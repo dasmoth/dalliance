@@ -162,6 +162,30 @@
                     linear-gradient(135deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
 }
 
+*.dalliance .tier-holder-pinned {
+  flex: none;
+  -webkit-flex: none;
+  display: none;
+}
+
+*.dalliance .tier-holder-pinned-full {
+  display: block;
+  border-bottom: 3px solid gray;
+}
+
+*.dalliance .tier-holder-rest {
+  flex: 1 1;
+  -webkit-flex: 1 1;
+}
+
+*.dalliance .tier-holder-holder {
+  width: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+}
+
 *.dalliance .tool-divider {
   background-color: gray;
   width: 8px;

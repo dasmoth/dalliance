@@ -134,9 +134,9 @@ Browser.prototype.realInit = function() {
 
     this.initUI(this.browserHolder, this.svgHolder);
 
-    this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder'}, {borderBottom: '3px solid gray', flex: 'none'});
-    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder'}, {flex: '1 1'});
-    this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {}, {width: '100%', display: 'flex', flexDirection: 'column'});
+    this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
+    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder tier-holder-rest'});
+    this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
     this.svgHolder.appendChild(this.tierHolderHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -993,9 +993,10 @@ Browser.prototype.reorderTiers = function() {
         }
     }
     if (hasPinned)
-        this.pinnedTierHolder.style.borderBottom = '3px solid gray';
+        this.pinnedTierHolder.classList.add('tier-holder-pinned-full');
     else
-        this.pinnedTierHolder.style.borderBottom = 'none';
+        this.pinnedTierHolder.classList.remove('tier-holder-pinned-full');
+    
     this.arrangeTiers();
 }
 
