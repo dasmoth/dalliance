@@ -853,17 +853,27 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     
     var dragLabel;
+    var dragTierHolder;
+    var dragTierHolderScrollLimit;
     var tierOrdinal;
     var yAtLastReorder;
     var tiersWereReordered = false;
 
     var labelDragHandler = function(ev) {
         var label = tier.label;
+
         ev.stopPropagation(); ev.preventDefault();
         if (!dragLabel) {
+            if (tier.pinned) {
+                dragTierHolder = thisB.pinnedTierHolder;
+            } else {
+                dragTierHolder = thisB.tierHolder;
+            }
+            dragTierHolderScrollLimit = dragTierHolder.scrollHeight - dragTierHolder.offsetHeight;
+
             dragLabel = label.cloneNode(true);
             dragLabel.style.cursor = 'pointer';
-            thisB.svgHolder.appendChild(dragLabel);
+            dragTierHolder.appendChild(dragLabel);
             label.style.visibility = 'hidden';
 
             for (var ti = 0; ti < thisB.tiers.length; ++ti) {
@@ -876,17 +886,11 @@ Browser.prototype.realMakeTier = function(source, config) {
             yAtLastReorder = ev.clientY;
         }
         
-        var holderBCR = thisB.svgHolder.getBoundingClientRect();
+        var holderBCR = dragTierHolder.getBoundingClientRect();
         dragLabel.style.left = (label.getBoundingClientRect().left - holderBCR.left) + 'px'; 
-        dragLabel.style.top = (ev.clientY - holderBCR.top - 10) + 'px';
+        dragLabel.style.top = (ev.clientY - holderBCR.top + dragTierHolder.scrollTop - 10) + 'px';
 
-        var dragTierHolder;
-        if (tier.pinned) {
-            dragTierHolder = thisB.pinnedTierHolder;
-        } else {
-            dragTierHolder = thisB.tierHolder;
-        }
-        var pty = ev.clientY - dragTierHolder.getBoundingClientRect().top;
+        var pty = ev.clientY - holderBCR.top + dragTierHolder.scrollTop;
         for (var ti = 0; ti < thisB.tiers.length; ++ti) {
             var tt = thisB.tiers[ti];
             if (tt.pinned ^ tier.pinned)
@@ -913,26 +917,30 @@ Browser.prototype.realMakeTier = function(source, config) {
                     tierOrdinal = ti;
                     yAtLastReorder = ev.clientY;
                     thisB.reorderTiers();
+                    dragTierHolder.appendChild(dragLabel); // Because reorderTiers removes all children.
                     tiersWereReordered = true;
                 }
                 break;
             }
         }
 
-        var labelBCR = dragLabel.getBoundingClientRect();
-        if (labelBCR.bottom - labelBCR.height < 0) {
-            dragLabel.scrollIntoView(true);
-        } else if (labelBCR.bottom > window.innerHeight) {
-            dragLabel.scrollIntoView(false);
+        if (dragLabel.offsetTop < dragTierHolder.scrollTop) {
+            dragTierHolder.scrollTop -= (dragTierHolder.scrollTop - dragLabel.offsetTop);
+        } else if ((dragLabel.offsetTop + dragLabel.offsetHeight) > (dragTierHolder.scrollTop + dragTierHolder.offsetHeight)) {
+            dragTierHolder.scrollTop = Math.min(dragTierHolder.scrollTop + 
+                                                   (dragLabel.offsetTop + dragLabel.offsetHeight) - 
+                                                   (dragTierHolder.scrollTop + dragTierHolder.offsetHeight),
+                                                dragTierHolderScrollLimit);
         }
     };
 
     var labelReleaseHandler = function(ev) {
         var label = tier.label;
+
         ev.stopPropagation(); ev.preventDefault();
         if (dragLabel) {
             dragLabel.style.cursor = 'auto';
-            thisB.svgHolder.removeChild(dragLabel);
+            dragTierHolder.removeChild(dragLabel);
             dragLabel = null;
             label.style.visibility = null;
         }
@@ -996,7 +1004,7 @@ Browser.prototype.reorderTiers = function() {
         this.pinnedTierHolder.classList.add('tier-holder-pinned-full');
     else
         this.pinnedTierHolder.classList.remove('tier-holder-pinned-full');
-    
+
     this.arrangeTiers();
 }
 
