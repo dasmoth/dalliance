@@ -171,7 +171,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
        ev.stopPropagation(); ev.preventDefault();
         b.openExportPanel();
     }, false);
-    b.makeTooltip(svgBtn, 'Export publication-quality SVG. (P)');
+    b.makeTooltip(svgBtn, 'Export publication-quality SVG. (X)');
 
     var optsPopup;
     optsButton.addEventListener('click', function(ev) {
@@ -270,7 +270,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             if (b.selectedTiers.length == 1) {
                 b.openTierPanel(b.tiers[b.selectedTiers[0]]);
             }
-        } else if (ev.keyCode == 80 || ev.keyCode == 112) { // p
+        } else if (ev.keyCode == 88 || ev.keyCode == 120) { // x
             ev.stopPropagation(); ev.preventDefault();
             b.openExportPanel();
         } else if (ev.keyCode == 67 || ev.keyCode == 99) { // c
@@ -400,8 +400,4 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         this.showToolPanel(optsForm);
         this.setUiMode('opts');
     }
-
 }
-
-
-

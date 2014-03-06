@@ -489,6 +489,18 @@ Browser.prototype.realInit2 = function() {
                 if (st < 0) return;
                 thisB.addTier(thisB.tiers[st].dasSource);
             }
+        } else if (ev.keyCode == 80 || ev.keyCode == 112) { // p
+            if (ev.ctrlKey || ev.metaKey) {
+                // Need to be careful because order of tiers could change
+                // once we start updating pinning.
+                var tt = [];
+                for (var st = 0; st < thisB.selectedTiers.length; ++st) {
+                    tt.push(thisB.tiers[thisB.selectedTiers[st]]);
+                }
+                for (var ti = 0; ti < tt.length; ++ti) {
+                    tt[ti].mergeConfig({pinned: !tt[ti].pinned});
+                }
+            }
         } else {
             // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
@@ -900,19 +912,10 @@ Browser.prototype.realMakeTier = function(source, config) {
             pty -= (ttr.bottom - ttr.top);
             if (pty < 0) {
                 if (ti < tierOrdinal && ev.clientY < yAtLastReorder || ti > tierOrdinal && ev.clientY > yAtLastReorder) {
-                    var st = [];
-                    for (var xi = 0; xi < thisB.selectedTiers.length; ++xi) {
-                        st.push(thisB.tiers[thisB.selectedTiers[xi]]);
-                    }
-
-                    thisB.tiers.splice(tierOrdinal, 1);
-                    thisB.tiers.splice(ti, 0, tier);
-
-                    thisB.selectedTiers = [];
-                    for (var sti = 0; sti < thisB.tiers.length; ++sti) {
-                        if (st.indexOf(thisB.tiers[sti]) >= 0)
-                            thisB.selectedTiers.push(sti);
-                    }
+                    thisB.withPreservedSelection(function() {
+                        thisB.tiers.splice(tierOrdinal, 1);
+                        thisB.tiers.splice(ti, 0, tier);
+                    });
 
                     tierOrdinal = ti;
                     yAtLastReorder = ev.clientY;
@@ -991,21 +994,48 @@ Browser.prototype.reorderTiers = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
     var hasPinned = false;
+    var pinnedTiers = [], unpinnedTiers = [];
     for (var i = 0; i < this.tiers.length; ++i) {
         var t = this.tiers[i];
         if (t.pinned) {
+            pinnedTiers.push(t);
             this.pinnedTierHolder.appendChild(this.tiers[i].row);
             hasPinned = true;
         } else {
+            unpinnedTiers.push(t);
             this.tierHolder.appendChild(this.tiers[i].row);
         }
     }
+
+    this.withPreservedSelection(function() {
+        this.tiers.splice(0, this.tiers.length);
+        for (var i = 0; i < pinnedTiers.length; ++i)
+            this.tiers.push(pinnedTiers[i]);
+        for (var i = 0; i < unpinnedTiers.length; ++i)
+            this.tiers.push(unpinnedTiers[i]);
+    });
+
     if (hasPinned)
         this.pinnedTierHolder.classList.add('tier-holder-pinned-full');
     else
         this.pinnedTierHolder.classList.remove('tier-holder-pinned-full');
 
     this.arrangeTiers();
+}
+
+Browser.prototype.withPreservedSelection = function(f) {
+    var st = [];
+    for (var xi = 0; xi < this.selectedTiers.length; ++xi) {
+        st.push(this.tiers[this.selectedTiers[xi]]);
+    }
+
+    f.call(this);
+
+    this.selectedTiers = [];
+    for (var sti = 0; sti < this.tiers.length; ++sti) {
+        if (st.indexOf(this.tiers[sti]) >= 0)
+            this.selectedTiers.push(sti);
+    }
 }
 
 Browser.prototype.refreshTier = function(tier) {
