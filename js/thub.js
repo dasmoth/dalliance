@@ -43,14 +43,14 @@ TrackHubDB.prototype.getTracks = function(callback) {
             return callback(null, err);
         }
         
-        trackFile = trackFile.replace(/\#.*/g, '');
+        // trackFile = trackFile.replace(/\#.*/g, '');
         trackFile = trackFile.replace('\\\n', ' ');
 
         var tracks = [];
         var tracksById = {};
         stanzas = trackFile.split(THUB_STANZA_REGEXP);
         for (var s = 0; s < stanzas.length; ++s) {
-            var toks = stanzas[s].split(THUB_PARSE_REGEXP);
+            var toks = stanzas[s].replace(/\#.*/g, '').split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
             track._db = thisB;
             for (var l = 0; l < toks.length - 2; l += 3) {
@@ -78,7 +78,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
                 }
             }
 
-            if (track.track && (track.type || track.container)) {
+            if (track.track && (track.type || track.container || track.view)) {
                 tracks.push(track);
                 tracksById[track.track] = track;
             }
@@ -101,6 +101,8 @@ TrackHubDB.prototype.getTracks = function(callback) {
 
                     if (parent)
                         top = false;
+                } else {
+                    // console.log("Couldn't find parent " + ptoks[0] + '(' + track.parent + ')');
                 }
                
             }
@@ -113,10 +115,14 @@ TrackHubDB.prototype.getTracks = function(callback) {
 
         for (var ci = 0; ci < composites.length; ++ci) {
             var comp = composites[ci];
+            if (!comp.children)
+                continue;
+
             var parentOfViews = false;
             for (var ki = 0; ki < comp.children.length; ++ki) {
                 var k = comp.children[ki];
                 if (k.view) {
+                    k.shortLabel = comp.shortLabel + ": " + k.shortLabel;
                     toplevels.push(k);
                     parentOfViews = true;
                 }
