@@ -162,13 +162,13 @@ function GroupGlyph(glyphs, connector) {
     this.connector = connector;
     this.h = glyphs[0].height();
 
-    var cov = new Range(glyphs[0].min(), glyphs[0].max());
-    for (g = 1; g < glyphs.length; ++g) {
+    var covList = [];
+    for (g = 0; g < glyphs.length; ++g) {
         var gg = glyphs[g];
-        cov = union(cov, new Range(gg.min(), gg.max()));
+        covList.push(new Range(gg.min(), gg.max()));
         this.h = Math.max(this.h, gg.height());
     }
-    this.coverage = cov;
+    this.coverage = union(covList);
 }
 
 GroupGlyph.prototype.drawConnectors = function(g) {

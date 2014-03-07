@@ -461,17 +461,14 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                         featureOpts.groups.push(gg);
                     }
 
-                    var spans = null;
+                    var spanList = [];
                     for (var b = 0; b < blockCount; ++b) {
                         var bmin = (blockStarts[b]|0) + start;
                         var bmax = bmin + (blockSizes[b]|0);
                         var span = new Range(bmin, bmax);
-                        if (spans) {
-                            spans = union(spans, span);
-                        } else {
-                            spans = span;
-                        }
+                        spanList.push(span);
                     }
+                    var spans = union(spanList);
                     
                     var tsList = spans.ranges();
                     for (var s = 0; s < tsList.length; ++s) {

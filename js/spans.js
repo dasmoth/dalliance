@@ -35,6 +35,10 @@ Range.prototype.ranges = function() {
     return [this];
 }
 
+Range.prototype._pushRanges = function(ranges) {
+    ranges.push(this);
+}
+
 Range.prototype.toString = function() {
     return '[' + this._min + '-' + this._max + ']';
 }
@@ -70,6 +74,11 @@ _Compound.prototype.ranges = function() {
     return this._ranges;
 }
 
+_Compound.prototype._pushRanges = function(ranges) {
+    for (var ri = 0; ri < this._ranges.length; ++ri)
+        ranges.push(this._ranges[ri]);
+}
+
 _Compound.prototype.toString = function() {
     var s = '';
     for (var r = 0; r < this._ranges.length; ++r) {
@@ -82,7 +91,22 @@ _Compound.prototype.toString = function() {
 }
 
 function union(s0, s1) {
-    var ranges = s0.ranges().concat(s1.ranges()).sort(rangeOrder);
+    if (! (s0 instanceof Array)) {
+        s0 = [s0];
+        if (s1)
+            s0.push(s1);
+    }
+
+    if (s0.length == 0)
+        return null;
+    else if (s0.length == 1)
+        return s0[0];
+
+    var ranges = [];
+    for (var si = 0; si < s0.length; ++si)
+        s0[si]._pushRanges(ranges);
+    ranges = ranges.sort(_rangeOrder);
+
     var oranges = [];
     var current = ranges[0];
 
@@ -157,6 +181,21 @@ function rangeOrder(a, b)
     } else if (a.max() < b.max()) {
         return -1;
     } else if (b.max() > a.max()) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+function _rangeOrder(a, b)
+{
+    if (a._min < b._min) {
+        return -1;
+    } else if (a._min > b._min) {
+        return 1;
+    } else if (a._max < b._max) {
+        return -1;
+    } else if (b._max > a._max) {
         return 1;
     } else {
         return 0;
