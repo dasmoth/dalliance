@@ -51,7 +51,7 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     var featureInfo = new FeatureInfo(hit, feature, group);
     featureInfo.tier = tier;
     var fips = this.featureInfoPlugins || [];
-    for (fipi = 0; fipi < fips.length; ++fipi) {
+    for (var fipi = 0; fipi < fips.length; ++fipi) {
         try {
             fips[fipi](feature, featureInfo);
         } catch (e) {

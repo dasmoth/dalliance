@@ -1797,7 +1797,7 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
     if (!hit || hit.length == 0)
         return;
 
-    f = hit[hit.length - 1];
+    var f = hit[hit.length - 1];
 
     if (!f.min || !f.max) {
         return;
