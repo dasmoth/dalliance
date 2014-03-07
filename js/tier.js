@@ -35,7 +35,8 @@ function DasTier(browser, source, config, background)
 
     this.removeButton = makeElement('i', null, {className: 'fa fa-times'});
     this.bumpButton = makeElement('i', null, {className: 'fa fa-plus-circle'});
-    this.loaderButton = makeElement('img', null, {src: this.browser.uiPrefix + 'img/loader.gif'}, {display: 'none'});
+    this.loaderButton = browser.makeLoader(16);
+    this.loaderButton.style.display = 'none';
     this.infoElement = makeElement('div', this.dasSource.desc, {className: 'track-label-info'});
     this.nameButton = makeElement('div', [], {className: 'tier-tab'});
     this.nameButton.appendChild(this.removeButton);

@@ -135,7 +135,7 @@ Browser.prototype.realInit = function() {
     this.initUI(this.browserHolder, this.svgHolder);
 
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
-    this.tierHolder = makeElement('div', makeElement('img', null, {src: this.uiPrefix + 'img/loader.gif'}), {className: 'tier-holder tier-holder-rest'});
+    this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
     this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
     this.svgHolder.appendChild(this.tierHolderHolder);
 
@@ -1953,6 +1953,16 @@ Browser.prototype.nameForCoordSystem = function(cs) {
         return primary + '/' + ucsc;
     else 
         return primary || ucsc || 'unknown';
+}
+
+Browser.prototype.makeLoader = function(size) {
+    size = size || 16;
+    var retina = window.devicePixelRatio > 1;
+    if (size < 20) {
+        return makeElement('img', null, {src: this.uiPrefix + 'img/spinner_' + (retina ? 16 : 32) + '.gif', width: '16', height: '16'});
+    } else {
+        return makeElement('img', null, {src: this.uiPrefix + 'img/spinner_' + (retina ? 24 : 48) + '.gif', width: '24', height: '24'});
+    }
 }
 
 Browser.prototype.getWorker = function() {

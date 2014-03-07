@@ -93,7 +93,11 @@ Browser.prototype.showTrackAdder = function(ev) {
             ev.preventDefault(); ev.stopPropagation();
             activateButton(addModeButtons, hubButton);
             removeChildren(stabHolder);
-            stabHolder.appendChild(makeElement('div', makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'}, {marginLeft: 'auto', marginRight: 'auto', marginTop: '100px'}), null, {textAlign: 'center'}));
+            var loader = thisB.makeLoader(24);
+            loader.style.marginLeft = 'auto';
+            loader.style.marginRight = 'auto';
+            loader.style.marginTop = '100px';
+            stabHolder.appendChild(makeElement('div', loader, null, {textAlign: 'center'}));
 
             refreshButton.style.display = 'none';
             addButton.style.display = 'none';
@@ -1214,7 +1218,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (s.tier_type) {
                 typeContent = s.payload || s.tier_type;
             } else {
-                typeContent = makeElement('img', null, {src: thisB.uiPrefix + 'img/loader.gif'})
+                typeContent = thisB.makeLoader(16);
             }
 
             var ccs;
