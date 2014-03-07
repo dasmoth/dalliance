@@ -7,6 +7,8 @@
 // bedwig.js
 //
 
+"use strict";
+
 function probeResource(source, listener, retry) {
     var BED_REGEXP = new RegExp('^.+\t[0-9]+\t[0-9]+.*$');
     var KV_REGEXP=/([^=]+)=\"?([^\"]+)\"?/;

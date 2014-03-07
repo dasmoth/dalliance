@@ -7,6 +7,8 @@
 // sourceadapters.js
 //
 
+"use strict";
+
 var __dalliance_sourceAdapterFactories = {};
 
 function dalliance_registerSourceAdapterFactory(type, factory) {

@@ -5,6 +5,8 @@
 // feature-draw.js: new feature-tier renderer
 //
 
+"use strict";
+
 var MIN_PADDING = 3;
 var DEFAULT_SUBTIER_MAX = 100;
 
@@ -179,7 +181,7 @@ function drawFeatureTier(tier)
                     // end coverage-counting
 
                     var newf = new DASFeature();
-                    for (k in template) {
+                    for (var k in template) {
                         newf[k] = template[k];
                     }
                     newf.min = r.min();
@@ -889,7 +891,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             var ops = parseCigar(feature.cigar);
             seq = ''
             quals = '';
-            cursor = 0;
+            var cursor = 0;
             for (var ci = 0; ci < ops.length; ++ci) {
                 var co = ops[ci];
                 if (co.op == 'M') {

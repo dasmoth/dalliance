@@ -7,6 +7,9 @@
 // spans.js: JavaScript Intset/Location port.
 //
 
+"use strict";
+
+
 function Range(min, max)
 {
     if (typeof(min) != 'number' || typeof(max) != 'number')

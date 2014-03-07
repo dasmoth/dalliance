@@ -7,6 +7,8 @@
 // utils.js: odds, sods, and ends.
 //
 
+"use strict";
+
 var NUM_REGEXP = new RegExp('[0-9]+');
 
 function stringToNumbersArray(str) {
@@ -266,8 +268,8 @@ function miniJSONify(o, exc) {
 }
 
 function shallowCopy(o) {
-    n = {};
-    for (k in o) {
+    var n = {};
+    for (var k in o) {
         n[k] = o[k];
     }
     return n;
@@ -327,7 +329,7 @@ Awaited.prototype.await = function(f) {
     }
 }
 
-__dalliance_saltSeed = 0;
+var __dalliance_saltSeed = 0;
 
 function saltURL(url) {
     return url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++__dalliance_saltSeed));

@@ -7,6 +7,8 @@
 // version.js
 //
 
+"use strict";
+
 var VERSION = {
     CONFIG: 5,
     MAJOR:  0,

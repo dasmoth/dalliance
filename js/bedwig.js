@@ -7,6 +7,8 @@
 // bedwig.js
 //
 
+"use strict";
+
 function BedWigParser(type) {
     this.type = type;
 }

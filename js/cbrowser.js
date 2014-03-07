@@ -7,6 +7,8 @@
 // cbrowser.js: canvas browser container
 //
 
+"use strict";
+
 var NS_SVG = 'http://www.w3.org/2000/svg';
 var NS_HTML = 'http://www.w3.org/1999/xhtml';
 var NS_XLINK = 'http://www.w3.org/1999/xlink';

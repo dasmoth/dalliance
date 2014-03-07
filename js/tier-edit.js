@@ -7,6 +7,8 @@
 // tier-edit.js
 //
 
+"use strict";
+
 var __dalliance_smallGlyphs = {DOT: true, EX: true, STAR: true, SQUARE: true, CROSS: true, TRIANGLE: true, PLIMSOLL: true}
 
 Browser.prototype.openTierPanel = function(tier) {
@@ -94,7 +96,7 @@ Browser.prototype.openTierPanel = function(tier) {
         var colorListMinus = makeElement('i', null, {className: 'fa fa-minus-circle'});
         var numColors = 1;
         var colorListElement = makeElement('td', tierColorFields);
-        function setNumColors(n) {
+        var setNumColors = function(n) {
             numColors = n;
             for (var i = 0; i < n; ++i) 
                 tierColorFields[i].style.display = 'block';
@@ -132,7 +134,7 @@ Browser.prototype.openTierPanel = function(tier) {
             var s = mainStyle = tier.stylesheet.styles[0].style;
         }
 
-        function refresh() {
+        var refresh = function() {
             if (typeof tier.config.name === 'string')
                 tierNameField.value = tier.config.name;
             else 
@@ -432,7 +434,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 tier.mergeConfig({height: Math.min(500, x|0)});
         }, false);
 
-        function updateQuant() {
+        var updateQuant = function() {
             quantLeapThreshField.disabled = !quantLeapToggle.checked;
             if (quantLeapToggle.checked) {
                 var x = parseFloat(quantLeapThreshField.value);

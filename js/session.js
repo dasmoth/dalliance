@@ -7,6 +7,8 @@
 // session.js
 //
 
+"use strict";
+
 Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     delete localStorage['dalliance.' + this.cookieKey + '.view-start'];

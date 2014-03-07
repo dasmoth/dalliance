@@ -7,6 +7,8 @@
 // trix.js: UCSC-style free text indices
 //
 
+"use strict";
+
 function connectTrix(ix, ixx, callback) {
     ixx.fetchAsText(function(ixxData) {
         if (!ixxData) 

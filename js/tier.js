@@ -7,6 +7,8 @@
 // tier.js: (try) to encapsulate the functionality of a browser tier.
 //
 
+"use strict";
+
 var __tier_idSeed = 0;
 
 function DasTier(browser, source, config, background)

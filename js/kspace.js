@@ -1,4 +1,4 @@
-
+"use strict";
 
 function FetchPool() {
     this.reqs = [];

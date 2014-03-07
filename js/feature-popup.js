@@ -7,6 +7,8 @@
 // feature-popup.js
 //
 
+"use strict";
+
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
 Browser.prototype.addFeatureInfoPlugin = function(handler) {

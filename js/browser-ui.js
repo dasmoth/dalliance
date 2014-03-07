@@ -7,6 +7,8 @@
 // browser-us.js: standard UI wiring
 //
 
+"use strict";
+
 function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
@@ -341,7 +343,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', seamless: 'seamless', className: 'help-panel'});
+        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', className: 'help-panel'});
         this.showToolPanel(helpFrame, true);
         this.setUiMode('help');
     }

@@ -7,6 +7,8 @@
 // memstore.js
 //
 
+"use strict";
+
 function MemStore() {
     this.featuresByChr = {};
     this.maxLength = 1;

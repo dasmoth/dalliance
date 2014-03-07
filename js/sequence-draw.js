@@ -5,6 +5,8 @@
 // sequence-draw.js: renderers for sequence-related data
 //
 
+"use strict";
+
 var MIN_TILE = 100;
 var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};

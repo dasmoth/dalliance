@@ -7,6 +7,8 @@
 // bigwig.js: indexed binary WIG (and BED) files
 //
 
+"use strict";
+
 var BIG_WIG_MAGIC = -2003829722;
 var BIG_BED_MAGIC = -2021002517;
 
@@ -18,6 +20,8 @@ var M1 = 256;
 var M2 = 256*256;
 var M3 = 256*256*256;
 var M4 = 256*256*256*256;
+
+var BED_COLOR_REGEXP = new RegExp("^[0-9]+,[0-9]+,[0-9]+");
 
 function bwg_readOffset(ba, o) {
     var offset = ba[o] + ba[o+1]*M1 + ba[o+2]*M2 + ba[o+3]*M3 + ba[o+4]*M4;
@@ -93,7 +97,7 @@ function BigWigView(bwg, cirTreeOffset, cirTreeLength, isSummary) {
     this.isSummary = isSummary;
 }
 
-BED_COLOR_REGEXP = new RegExp("^[0-9]+,[0-9]+,[0-9]+");
+
 
 BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
     var chr = this.bwg.chromsToIDs[chrName];
@@ -251,7 +255,7 @@ BigWigView.prototype.fetchFeatures = function(filter, blocksToFetch, callback) {
             f.max = fmax;
             f.type = 'bigwig';
             
-            for (k in opts) {
+            for (var k in opts) {
                 f[k] = opts[k];
             }
             

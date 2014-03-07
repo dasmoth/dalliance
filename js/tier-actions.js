@@ -7,6 +7,8 @@
 // tier-actions.js
 //
 
+"use strict";
+
 Browser.prototype.mergeSelectedTiers = function() {
     var sources = [];
     var styles = [];

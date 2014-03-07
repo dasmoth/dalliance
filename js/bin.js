@@ -7,6 +7,8 @@
 // bin.js general binary data support
 //
 
+"use strict";
+
 function BlobFetchable(b) {
     this.blob = b;
 }

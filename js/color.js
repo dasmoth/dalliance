@@ -1,3 +1,14 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2010
+//
+// color.js
+//
+
+"use strict";
+
 function DColour(red, green, blue, name) {
     this.red = red|0;
     this.green = green|0;
@@ -16,7 +27,7 @@ DColour.prototype.toSvgString = function() {
 }
 
 function hex2(x) {
-    y = '00' + x.toString(16);
+    var y = '00' + x.toString(16);
     return y.substring(y.length - 2);
 }
 

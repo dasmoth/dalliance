@@ -97,7 +97,6 @@ Browser.prototype.makeSVG = function(opts) {
            x: (b.featurePanelWidth + margin + 20)/2,
            y: 30,
            strokeWidth: 0,
-           fill: 'black',
            fontSize: '12pt',
 	       textAnchor: 'middle',
 	       fill: 'blue'

@@ -7,6 +7,8 @@
 // das.js: queries and low-level data model.
 //
 
+"use strict";
+
 var dasLibErrorHandler = function(errMsg) {
     alert(errMsg);
 }

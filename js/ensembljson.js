@@ -7,6 +7,8 @@
 // ensembljson.js -- query the Ensembl REST API.
 //
 
+"use strict";
+
 function EnsemblFeatureSource(source) {
     this.source = source;
     this.base = source.uri || 'http://beta.rest.ensembl.org';

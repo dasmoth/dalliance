@@ -7,6 +7,7 @@
 // track-adder.js
 //
 
+"use strict";
 
 Browser.prototype.currentlyActive = function(source) {
     for (var ti = 0; ti < this.tiers.length; ++ti) {

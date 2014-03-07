@@ -7,6 +7,8 @@
 // sample.js: downsampling of quantitative features
 //
 
+"use strict";
+
 var __DS_SCALES = [1, 2, 5];
 
 function ds_scale(n) {

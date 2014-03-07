@@ -5,6 +5,8 @@
 // glyphs.js: components which know how to draw themselves
 //
 
+"use strict";
+
 function SVGPath() {
     this.ops = [];
 }
@@ -163,7 +165,7 @@ function GroupGlyph(glyphs, connector) {
     this.h = glyphs[0].height();
 
     var covList = [];
-    for (g = 0; g < glyphs.length; ++g) {
+    for (var g = 0; g < glyphs.length; ++g) {
         var gg = glyphs[g];
         covList.push(new Range(gg.min(), gg.max()));
         this.h = Math.max(this.h, gg.height());
@@ -1006,7 +1008,7 @@ TextGlyph.prototype.toSVG = function() {
 (function(scope) {
 
 var isRetina = window.devicePixelRatio > 1;
-__dalliance_SequenceGlyphCache = {};
+var __dalliance_SequenceGlyphCache = {};
 
 function SequenceGlyph(min, max, height, seq, ref, scheme, quals) {
     this._min = min;

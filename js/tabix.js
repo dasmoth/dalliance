@@ -7,6 +7,8 @@
 // tabix.js: basic support for tabix-indexed flatfiles
 //
 
+"use strict";
+
 var TABIX_MAGIC = 0x01494254;
 
 function TabixFile() {
@@ -90,7 +92,7 @@ function connectTabix(data, tbi, callback) {
             p += (nintv * 8);
 
 
-            ub = uncba;
+            var ub = uncba;
             if (nbin > 0) {
                 tabix.indices[ref] = new Uint8Array(unchead, blockStart, p - blockStart);
             }                     

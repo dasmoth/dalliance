@@ -7,6 +7,8 @@
 // thub.js: support for track-hub style registries
 //
 
+"use strict";
+
 var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
 var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
@@ -48,7 +50,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
 
         var tracks = [];
         var tracksById = {};
-        stanzas = trackFile.split(THUB_STANZA_REGEXP);
+        var stanzas = trackFile.split(THUB_STANZA_REGEXP);
         for (var s = 0; s < stanzas.length; ++s) {
             var toks = stanzas[s].replace(/\#.*/g, '').split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
@@ -90,7 +92,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
             var track = tracks[ti];
             var top = true;
             if (track.parent) {
-                ptoks = track.parent.split(/\s+/);
+                var ptoks = track.parent.split(/\s+/);
                 var parent = tracksById[ptoks[0]];
                 if (parent) {
                     track._parent = parent;
@@ -162,7 +164,7 @@ function connectTrackHub(hubURL, callback, opts) {
                     return callback(null, err);
                 }
 
-                stanzas = genFile.split(THUB_STANZA_REGEXP);
+                var stanzas = genFile.split(THUB_STANZA_REGEXP);
                 for (var s = 0; s < stanzas.length; ++s) {
                     var toks = stanzas[s].split(THUB_PARSE_REGEXP);
                     var gprops = new TrackHubDB(hub);
@@ -240,7 +242,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 
         
     } else {
-        typeToks = this.type.split(/\s+/);
+        var typeToks = this.type.split(/\s+/);
         if (typeToks[0] == 'bigBed') {
             var bedTokens = typeToks[1]|0
             var bedPlus = typeToks[2] == '+';
@@ -280,6 +282,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 }
 
 TrackHubTrack.prototype.bigwigStyles = function() {
+    var typeToks = this.type.split(/\s+/);
     var min, max;
     if (typeToks.length >= 3) {
         min = 1.0 * typeToks[1];

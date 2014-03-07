@@ -7,6 +7,8 @@
 // twoBit.js: packed-binary reference sequences
 //
 
+"use strict";
+
 var TWOBIT_MAGIC = 0x1a412743;
 
 function TwoBitFile() {

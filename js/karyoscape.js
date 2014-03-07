@@ -7,6 +7,8 @@
 // karyoscape.js
 //
 
+"use strict";
+
 function Karyoscape(browser, dsn)
 {
     this.browser = browser; // for tooltips.

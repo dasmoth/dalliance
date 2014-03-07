@@ -7,6 +7,7 @@
 // tabix-source.js
 //
 
+"use strict";
 
 function TabixFeatureSource(source) {
     FeatureSourceBase.call(this);

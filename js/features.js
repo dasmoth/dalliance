@@ -1,3 +1,5 @@
+"use strict";
+
 function sortFeatures(tier)
 {
     var dmin = tier.browser.drawnStart, dmax = tier.browser.drawnEnd;
@@ -55,7 +57,7 @@ function sortFeatures(tier)
         }
 
         if (f.score && f.score != '.' && f.score != '-') {
-            sc = 1.0 * f.score;
+            var sc = 1.0 * f.score;
             if (!minScore || sc < minScore) {
                 minScore = sc;
             }

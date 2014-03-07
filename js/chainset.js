@@ -7,6 +7,8 @@
 // chainset.js: liftover support
 //
 
+"use strict";
+
 function Chainset(uri, srcTag, destTag, coords) {
     this.uri = uri;
     this.srcTag = srcTag;

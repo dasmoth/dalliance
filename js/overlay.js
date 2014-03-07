@@ -7,6 +7,8 @@
 // overlay.js: featuresources composed from multiple underlying sources
 //
 
+"use strict";
+
 function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};

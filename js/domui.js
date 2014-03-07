@@ -7,6 +7,8 @@
 // domui.js: SVG UI components
 //
 
+"use strict";
+
 Browser.prototype.removeAllPopups = function() {
     removeChildren(this.hPopupHolder);
     removeChildren(this.popupHolder);

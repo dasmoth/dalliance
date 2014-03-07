@@ -7,6 +7,8 @@
 // bin.js general binary data support
 //
 
+"use strict";
+
 var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;
 
 function parseLocCardinal(n, m) {
@@ -43,7 +45,7 @@ Browser.prototype.search = function(g, statusCallback) {
         var searchCount = 0;
         var foundLatch = false;
 
-        function searchCallback(found, err) {
+        var searchCallback = function(found, err) {
             --searchCount;
             if (err) {
                 return statusCallback(err);

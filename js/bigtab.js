@@ -7,6 +7,8 @@
 // bigtab.js: indexed tab-delimited flatfiles
 //
 
+"use strict";
+
 var BIGTAB_MAGIC = 0x8789F2EB;
 var BPT_MAGIC    = 0x78ca8c91;
   

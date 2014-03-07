@@ -7,6 +7,8 @@
 // fetchworker.js
 //
 
+"use strict";
+
 importScripts('utils.js', 'bin.js', 'spans.js', 'bam.js', 'das.js', 'bigwig.js', 'sha1.js', '../jszlib/js/inflate.js')
 
 var connections = {};

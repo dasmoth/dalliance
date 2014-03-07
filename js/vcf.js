@@ -7,6 +7,8 @@
 // vcf.js
 //
 
+"use strict";
+
 function VCFParser() {}
 
 VCFParser.prototype.createSession = function(sink) {
