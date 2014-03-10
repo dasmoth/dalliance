@@ -1,3 +1,12 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2013
+//
+// kspace.js
+//
+
 "use strict";
 
 function FetchPool() {
@@ -81,7 +90,7 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     
 function filterFeatures(features, min, max) {
     var ff = [];
-    featuresByGroup = {};
+    var featuresByGroup = {};
 
     for (var fi = 0; fi < features.length; ++fi) {
         var f = features[fi];
@@ -230,7 +239,6 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
     	var latestViewID = thisB.latestViews[tier] || -1;
     	if (latestViewID > viewID) {
-    	    // console.log('Ignoring out of date view');
     	    return;
     	}
 

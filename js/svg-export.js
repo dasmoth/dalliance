@@ -80,6 +80,8 @@ Browser.prototype.openExportPanel = function(tier) {
 
 Browser.prototype.makeSVG = function(opts) {
     opts = opts || {};
+    var minTierHeight = opts.minTierHeight || 20;
+    var padding = 3;
 
     var b = this;
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
@@ -140,6 +142,7 @@ Browser.prototype.makeSVG = function(opts) {
     	    var offset = ((tier.glyphCacheOrigin - b.viewStart) * b.scale);
             var hasQuant = false;
             for (var sti = 0; sti < tier.subtiers.length; ++sti) {
+                pos += padding;
         		var subtier = tier.subtiers[sti];
                     
         		var glyphElements = [];
@@ -183,9 +186,12 @@ Browser.prototype.makeSVG = function(opts) {
                     }
         		}
 
-    		    pos += subtier.height + 3;
+    		    pos += subtier.height + padding;
             }
-    	    pos += 10;
+
+            if (pos - tierTopPos < minTierHeight) {
+                pos = tierTopPos + minTierHeight;
+            }
     	}
 
         var labelName;
@@ -197,7 +203,7 @@ Browser.prototype.makeSVG = function(opts) {
     	    makeElementNS(
     		NS_SVG, 'text',
     		labelName,
-    		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+5)/2, fontSize: '12pt', textAnchor: 'end'}));
+    		{x: margin - (hasQuant ? 20 : 12), y: (pos+tierTopPos+8)/2, fontSize: '10pt', textAnchor: 'end'}));
 
     	
     	tierBackground.setAttribute('height', pos - tierTopPos);
@@ -237,11 +243,4 @@ Browser.prototype.makeSVG = function(opts) {
 
     var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)], {type: 'image/svg+xml'});
     return svgBlob;
-
-    /*
-    var fr = new FileReader();
-    fr.onload = function(fre) {
-        window.open('data:image/svg+xml;' + fre.target.result.substring(6), 'Dalliance graphics', 'width=' + ( b.featurePanelWidth + 20 + margin + 'px'));
-    };
-    fr.readAsDataURL(svgBlob); */
 }

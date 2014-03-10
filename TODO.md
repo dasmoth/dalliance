@@ -13,12 +13,11 @@ For 0.12
   - Pinning tracks. [DONE]
   - Keep selected track visible when track heights change (?)
   - Support for non-positional annotations
-  - Search-by-name (or description) in track-adder.
   - Export track configuration for current browser state.
-  - Documentation of plugin APIs
 
 For 0.13
 --------
+
 
   - Feature selection
   - Replace feature popups with inspector-like interface
@@ -27,6 +26,7 @@ For 0.13
   - Animate when leaping/toggling.
   - Overlay function plugin API
   - Clean up featureSource creation (make async?)
+  - Search-by-name (or description) in track-adder.
 
 For 1.0
 --------

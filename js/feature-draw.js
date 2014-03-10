@@ -461,9 +461,6 @@ DasTier.prototype.paintQuant = function() {
         if (retina)
             ctx.scale(2, 2);
 
-        ctx.fillStyle = 'white'
-        ctx.globalAlpha = 0.6;
-
         var numTics = 2;
         if (h > 40) {
             numTics = 1 + ((h/20) | 0);
@@ -471,18 +468,12 @@ DasTier.prototype.paintQuant = function() {
         var ticSpacing = (h+MIN_PADDING*2) / (numTics - 1);
         var ticInterval = (quant.max - quant.min) / (numTics - 1);
 
+        ctx.fillStyle = 'white'
+        ctx.globalAlpha = 0.6;
         if (this.browser.rulerLocation == 'right') {
-            ctx.fillRect(w-30, 0, 30, 20);
-            ctx.fillRect(w-30, h-20 + MIN_PADDING*2, 30, 20);
-            for (var t = 1; t < numTics-1; ++t) {
-                ctx.fillRect(w-30, t*ticSpacing - 10, 30, 20);
-            }
+            ctx.fillRect(w-30, 0, 30, h + MIN_PADDING*2);
         } else {
-            ctx.fillRect(0, 0, 30, 20);
-            ctx.fillRect(0, h - 20 + MIN_PADDING*2, 30, 20);
-            for (var t = 1; t < numTics-1; ++t) {
-                ctx.fillRect(0, t*ticSpacing - 10, 30, 20);
-            }
+            ctx.fillRect(0, 0, 30, h + MIN_PADDING*2);
         }
         ctx.globalAlpha = 1.0;
 

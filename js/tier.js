@@ -300,7 +300,7 @@ DasTier.prototype.updateLabel = function() {
 }
 
 DasTier.prototype.updateHeight = function() {
-    this.currentHeight = Math.max(Math.max(this.layoutHeight, this.label.clientHeight + 4), 30);
+    this.currentHeight = Math.max(Math.max(this.layoutHeight, this.label.clientHeight + 2), this.browser.minTierHeight);
     this.row.style.height = '' + this.currentHeight + 'px';
     this.browser.updateHeight();
  }

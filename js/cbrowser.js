@@ -81,7 +81,7 @@ function Browser(opts) {
 
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
-    this.minTierHeight = 30;
+    this.minTierHeight = 20;
 
     // Registry
 
