@@ -1456,10 +1456,13 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
 }
 
 Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
+    var chrChanged = false;
     if (newChr) {
         if (newChr.indexOf('chr') == 0)
             newChr = newChr.substring(3);
 
+        if (this.chr != newChr)
+            chrChanged = true;
         this.chr = newChr;
         this.currentSeqMax = newChrInfo.length;
     }
@@ -1485,7 +1488,12 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     oldZS = this.zoomSliderValue;
     this.zoomSliderValue = newZS = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
     
-    if (scaleChanged) {
+    if (scaleChanged || chrChanged) {
+        for (var i = 0; i < this.tiers.length; ++i) {
+            this.tiers[i].viewport.style.left = '5000px';
+            this.tiers[i].overlay.style.left = '5000px';
+        }
+
         this.refresh();
 
         if (this.savedZoom) {
