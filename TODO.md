@@ -43,6 +43,14 @@ For 1.0
   - More Tabix payloads (GFF/GTF)
   - Chromosome overviews.
 
+Workshop
+========
+
+For 1.1
+--------
+
+
+
 Future
 -------------
 
