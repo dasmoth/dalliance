@@ -22,8 +22,21 @@ function DSBin(scale, min, max) {
     this.cnt = 0;
     this.hasScore = false;
     this.min = min; this.max = max;
-    this.lap = 0;
-    this.covered = null;
+    this.features = [];
+}
+
+function _featureOrder(a, b) {
+    if (a.min < b.min) {
+        return -1;
+    } else if (a.min > b.min) {
+        return 1;
+    } else if (a.max < b.max) {
+        return -1;
+    } else if (b.max > a.max) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 DSBin.prototype.score = function() {
@@ -32,32 +45,48 @@ DSBin.prototype.score = function() {
     } else if (this.hasScore) {
         return this.tot / this.cnt;
     } else {
-        return this.lap / coverage(this.covered);
+        var features = this.features;
+        features.sort(_featureOrder);
+
+        var maxSeen = -10000000000;
+        var cov=0, lap=0;
+
+        for (var fi = 1; fi < features.length; ++fi) {
+            var f = features[fi];
+            var lMin = Math.max(f.min, this.min);
+            var lMax = Math.min(f.max, this.max);
+            lap += (lMax - lMin + 1);
+
+            if (lMin > maxSeen) {
+                cov += lMax - lMin + 1;
+                maxSeen = lMax;
+            } else {
+                if (lMax > maxSeen) {
+                    cov += (lMax - maxSeen);
+                    maxSeen = lMax;
+                }
+            }
+        }
+
+        if (cov > 0)
+            return (1.0 * lap) / cov;
+        else
+            return 0;
     }
 }
 
 DSBin.prototype.feature = function(f) {
-    if (f.score != undefined) {
+    if (f.score !== undefined) {
         this.tot += f.score;
         this.hasScore = true
     }
-    var fMin = f.min|0;
-    var fMax = f.max|0;
-    var lMin = Math.max(this.min, fMin);
-    var lMax = Math.min(this.max, fMax);
-    // dlog('f.min=' + fMin + '; f.max=' + fMax + '; lMin=' + lMin + '; lMax=' + lMax + '; lap=' + (1.0 * (lMax - lMin + 1))/(fMax - fMin + 1));
-    this.lap += (1.0 * (lMax - lMin + 1));
+
     ++this.cnt;
-    var newRange = new Range(lMin, lMax);
-    if (this.covered) {
-        this.covered = union(this.covered, newRange);
-    } else {
-        this.covered = newRange;
-    }
+    this.features.push(f);
 }
 
 function downsample(features, targetRez) {
-    // var beforeDS = Date.now();
+    var beforeDS = Date.now();
 
     var sn = 0;
     while (ds_scale(sn + 1) < targetRez) {
@@ -90,6 +119,8 @@ function downsample(features, targetRez) {
 //      }
     }
 
+    var midDS = Date.now();
+
     var sampledFeatures = [];
     for (var b = minBin; b <= maxBin; ++b) {
         var bm = binTots[b];
@@ -104,7 +135,7 @@ function downsample(features, targetRez) {
         }
     }
 
-    // var afterDS = Date.now();
-    // dlog('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms');
+    var afterDS = Date.now();
+    console.log('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms' + ' (' + (midDS-beforeDS) + ')');
     return sampledFeatures;
 }

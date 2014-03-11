@@ -973,7 +973,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             if (err) {
                 removeChildren(stabHolder);
                 stabHolder.appendChild(makeElement('h2', "Couldn't access custom data"));
-                stabHolder.appendChild('p', '' + err);
+                stabHolder.appendChild(makeElement('p', '' + err));
                 customMode = 'reset-bin';
             } else {
                 var nds = makeSourceConfig(source);

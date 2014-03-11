@@ -112,15 +112,16 @@ function union(s0, s1) {
 
     var oranges = [];
     var current = ranges[0];
+    current = new Range(current._min, current._max);  // Copy now so we don't have to later.
 
     for (var i = 1; i < ranges.length; ++i) {
         var nxt = ranges[i];
-        if (nxt.min() > (current.max() + 1)) {
+        if (nxt._min > (current._max + 1)) {
             oranges.push(current);
-            current = nxt;
+            current = new Range(nxt._min, nxt._max);
         } else {
-            if (nxt.max() > current.max()) {
-                current = new Range(current.min(), nxt.max());
+            if (nxt._max > current._max) {
+                current._max = nxt._max;
             }
         }
     }
