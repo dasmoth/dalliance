@@ -307,6 +307,8 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
         record.flag = flag;
         record.pos = pos;
         record.mq = mq;
+        if (opts.light)
+            record.seqLength = lseq;
 
         if (!opts.light) {
             var readName = '';

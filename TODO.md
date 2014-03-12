@@ -3,7 +3,7 @@ For 0.12
 
   - Better support for assembly mapping across fragmented alignments [DONE]
   - BAM rendering speedups [DONE]
-  - More efficient BAM parsing?
+  - Lightweight mode for BAM parser [DONE]
   - Use web-workers for fetching [DONE]
   - Fix cross-origin worker boot.
   - Small BED/WIG support. [DONE]
@@ -18,9 +18,9 @@ For 0.12
 For 0.13
 --------
 
-
   - Feature selection
   - Replace feature popups with inspector-like interface
+  - Keep labels of large features on-screen (maybe needs to be optional?)
   - Apply track-edit operations to multiple tracks at once.
   - Typeahead for search-by-gene-ID
   - Animate when leaping/toggling.

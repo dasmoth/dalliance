@@ -1050,6 +1050,40 @@ BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
     });
 }
 
+function bamRecordToFeature(r) {
+    if (r.flag & 0x4)
+        return; 
+    
+    var len;
+    if (r.seq)
+        len = r.seq.length;
+    else 
+        len = r.seqLength;
+    
+    if (r.cigar) {
+        len = 0;
+        var ops = parseCigar(r.cigar);
+        for (var ci = 0; ci < ops.length; ++ci) {
+            var co = ops[ci];
+            if (co.op == 'M' || co.op == 'D')
+                len += co.cnt;
+        }
+    }
+
+    var f = new DASFeature();
+    f.min = r.pos + 1;
+    f.max = r.pos + len;
+    f.segment = r.segment;
+    f.type = 'bam';
+    f.id = r.readName;
+    f.notes = [/* 'Sequence=' + r.seq, 'CIGAR=' + r.cigar, */ 'MQ=' + r.mq];
+    f.cigar = r.cigar;
+    f.seq = r.seq;
+    f.quals = r.quals;
+
+    return f;
+}
+
 function BAMFeatureSource(bamSource) {
     FeatureSourceBase.call(this);
 
@@ -1117,6 +1151,8 @@ BAMFeatureSource.prototype.init = function() {
 }
 
 BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var light = types && (types.length == 1) && (types[0] == 'density');
+
     var thisB = this;
     
     thisB.busy++;
@@ -1140,40 +1176,13 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
 
-                    if (r.flag & 0x4)
-                        continue; 
-                    
-                    var len;
-                    if (r.seq)
-                        len = r.seq.length;
-                    else 
-                        len = 50;
-                    
-                    if (r.cigar) {
-                        len = 0;
-                        var ops = parseCigar(r.cigar);
-                        for (var ci = 0; ci < ops.length; ++ci) {
-                            var co = ops[ci];
-                            if (co.op == 'M' || co.op == 'D')
-                                len += co.cnt;
-                        }
-                    }
-
-                    var f = new DASFeature();
-                    f.min = r.pos + 1;
-                    f.max = r.pos + len;
-                    f.segment = r.segment;
-                    f.type = 'bam';
-                    f.id = r.readName;
-                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
-                    f.cigar = r.cigar;
-                    f.seq = r.seq;
-                    f.quals = r.quals;
-                    features.push(f);
+                    var f = bamRecordToFeature(r);
+                    if (f)
+                        features.push(f);
                 }
                 callback(null, features, 1000000000);
             }
-        }, {light: false});
+        }, {light: light});
     });
 }
 
@@ -1183,7 +1192,7 @@ BAMFeatureSource.prototype.getScales = function() {
 
 BAMFeatureSource.prototype.getStyleSheet = function(callback) {
     this.bamHolder.await(function(bam) {
-	var stylesheet = new DASStylesheet();
+	    var stylesheet = new DASStylesheet();
                 
         var densStyle = new DASStyle();
         densStyle.glyph = 'HISTOGRAM';
@@ -1202,13 +1211,10 @@ BAMFeatureSource.prototype.getStyleSheet = function(callback) {
         wigStyle.LABEL = false;
         wigStyle.ZINDEX = 20;
         stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
-	//                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
 
-	return callback(stylesheet);
+	    return callback(stylesheet);
     });
 }
-
-
 
 
 function RemoteBAMFeatureSource(bamSource, worker) {
@@ -1252,6 +1258,7 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
 }
 
 RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var light = types && (types.length == 1) && (types[0] == 'density');
     var thisB = this;
     
     thisB.busy++;
@@ -1264,8 +1271,8 @@ RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, p
             return callback(thisB.error || "Couldn't fetch BAM");
         }
 
-        thisB.worker.postCommand({command: 'fetch', connection: key, chr: chr, min: min, max: max}, function(bamRecords, error) {
-            console.log('retrieved ' + bamRecords.length + ' via worker.');
+        thisB.worker.postCommand({command: 'fetch', connection: key, chr: chr, min: min, max: max, opts: {light: light}}, function(bamRecords, error) {
+            // console.log('retrieved ' + bamRecords.length + ' via worker.');
 
             thisB.busy--;
             thisB.notifyActivity();
@@ -1276,32 +1283,9 @@ RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, p
                 var features = [];
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
-
-                    if (r.flag & 0x4)
-                        continue; 
-                    
-                    var len = r.seq.length;
-                    if (r.cigar) {
-                        len = 0;
-                        var ops = parseCigar(r.cigar);
-                        for (var ci = 0; ci < ops.length; ++ci) {
-                            var co = ops[ci];
-                            if (co.op == 'M' || co.op == 'D')
-                                len += co.cnt;
-                        }
-                    }
-
-                    var f = new DASFeature();
-                    f.min = r.pos + 1;
-                    f.max = r.pos + len;
-                    f.segment = r.segment;
-                    f.type = 'bam';
-                    f.id = r.readName;
-                    f.notes = ['Sequence=' + r.seq, 'CIGAR=' + r.cigar, 'MQ=' + r.mq];
-                    f.cigar = r.cigar;
-                    f.seq = r.seq;
-                    f.quals = r.quals;
-                    features.push(f);
+                    var f = bamRecordToFeature(r);
+                    if (f)
+                        features.push(f);
                 }
                 callback(null, features, 1000000000);
             }
@@ -1334,8 +1318,6 @@ RemoteBAMFeatureSource.prototype.getStyleSheet = function(callback) {
         wigStyle.LABEL = false;
         wigStyle.ZINDEX = 20;
         stylesheet.pushStyle({type: 'bam'}, 'high', wigStyle);
-    //                thisTier.stylesheet.pushStyle({type: 'bam'}, 'medium', wigStyle);
-
         return callback(stylesheet);
     });
 }

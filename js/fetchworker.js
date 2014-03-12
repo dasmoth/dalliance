@@ -69,7 +69,7 @@ onmessage = function(event) {
             return postMessage({tag: tag, error: 'No such connection: ' + event.data.connection});
         }
 
-        con.fetch(d.tag, d.chr, d.min, d.max, d.zoom);
+        con.fetch(d.tag, d.chr, d.min, d.max, d.zoom, d.opts);
     } else if (command === 'leap') {
         var con = connections[event.data.connection];
         if (!con) {
@@ -109,14 +109,15 @@ function BAMWorkerFetcher(bam) {
     this.bam = bam;
 }
 
-BAMWorkerFetcher.prototype.fetch = function(tag, chr, min, max) {
+BAMWorkerFetcher.prototype.fetch = function(tag, chr, min, max, zoom, opts) {
+    opts = opts || {};
     this.bam.fetch(chr, min, max, function(records, err) {
         if (records) {
             postMessage({tag: tag, result: records, time: Date.now()|0});
         } else {
             postMessage({tag: tag, error: err});
         }
-    });
+    }, opts);
 }
 
 function BBIWorkerFetcher(bbi) {
