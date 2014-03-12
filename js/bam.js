@@ -226,8 +226,9 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
     return mergedChunks;
 }
 
-BamFile.prototype.fetch = function(chr, min, max, callback) {
+BamFile.prototype.fetch = function(chr, min, max, callback, opts) {
     var thisB = this;
+    opts = opts || {};
 
     var chrId = this.chrToIndex[chr];
     var chunks;
@@ -258,7 +259,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback) {
             });
         } else {
             var ba = new Uint8Array(data);
-            thisB.readBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
+            thisB.readBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId, opts);
             data = null;
             ++index;
             return tramp();
@@ -273,7 +274,7 @@ var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?',
 function BamRecord() {
 }
 
-BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
+BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, opts) {
     while (true) {
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
@@ -302,105 +303,108 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         
         var tlen = readInt(ba, offset + 32);
     
-        var readName = '';
-        for (var j = 0; j < nl-1; ++j) {
-            readName += String.fromCharCode(ba[offset + 36 + j]);
-        }
-    
-        var p = offset + 36 + nl;
-
-        var cigar = '';
-        for (var c = 0; c < nc; ++c) {
-            var cigop = readInt(ba, p);
-            cigar = cigar + (cigop>>4) + CIGAR_DECODER[cigop & 0xf];
-            p += 4;
-        }
-        record.cigar = cigar;
-    
-        var seq = '';
-        var seqBytes = (lseq + 1) >> 1;
-        for (var j = 0; j < seqBytes; ++j) {
-            var sb = ba[p + j];
-            seq += SEQRET_DECODER[(sb & 0xf0) >> 4];
-            seq += SEQRET_DECODER[(sb & 0x0f)];
-        }
-        p += seqBytes;
-        record.seq = seq;
-
-        var qseq = '';
-        for (var j = 0; j < lseq; ++j) {
-            qseq += String.fromCharCode(ba[p + j] + 33);
-        }
-        p += lseq;
-        record.quals = qseq;
-        
-        record.pos = pos;
-        record.mq = mq;
-        record.readName = readName;
         record.segment = this.indexToChr[refID];
         record.flag = flag;
+        record.pos = pos;
+        record.mq = mq;
 
-        while (p < blockEnd) {
-            var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-            var type = String.fromCharCode(ba[p + 2]);
-            var value;
-
-            if (type == 'A') {
-                value = String.fromCharCode(ba[p + 3]);
-                p += 4;
-            } else if (type == 'i' || type == 'I') {
-                value = readInt(ba, p + 3);
-                p += 7;
-            } else if (type == 'c' || type == 'C') {
-                value = ba[p + 3];
-                p += 4;
-            } else if (type == 's' || type == 'S') {
-                value = readShort(ba, p + 3);
-                p += 5;
-            } else if (type == 'f') {
-                throw 'FIXME need floats';
-            } else if (type == 'Z' || type == 'H') {
-                p += 3;
-                value = '';
-                for (;;) {
-                    var cc = ba[p++];
-                    if (cc == 0) {
-                        break;
-                    } else {
-                        value += String.fromCharCode(cc);
-                    }
-                }
-            } else if (type == 'B') {
-                var atype = String.fromCharCode(ba[p + 3]);
-                var alen = readInt(ba, p + 4);
-                var elen;
-                var reader;
-                if (atype == 'i' || atype == 'I' || atype == 'f') {
-                    elen = 4;
-                    if (atype == 'f')
-                        reader = readFloat;
-                    else
-                        reader = readInt;
-                } else if (atype == 's' || atype == 'S') {
-                    elen = 2;
-                    reader = readShort;
-                } else if (atype == 'c' || atype == 'C') {
-                    elen = 1;
-                    reader = readByte;
-                } else {
-                    throw 'Unknown array type ' + atype;
-                }
-
-                p += 8;
-                value = [];
-                for (var i = 0; i < alen; ++i) {
-                    value.push(reader(ba, p));
-                    p += elen;
-                }
-            } else {
-                throw 'Unknown type '+ type;
+        if (!opts.light) {
+            var readName = '';
+            for (var j = 0; j < nl-1; ++j) {
+                readName += String.fromCharCode(ba[offset + 36 + j]);
             }
-            record[tag] = value;
+            record.readName = readName;
+        
+            var p = offset + 36 + nl;
+
+            var cigar = '';
+            for (var c = 0; c < nc; ++c) {
+                var cigop = readInt(ba, p);
+                cigar = cigar + (cigop>>4) + CIGAR_DECODER[cigop & 0xf];
+                p += 4;
+            }
+            record.cigar = cigar;
+        
+            var seq = '';
+            var seqBytes = (lseq + 1) >> 1;
+            for (var j = 0; j < seqBytes; ++j) {
+                var sb = ba[p + j];
+                seq += SEQRET_DECODER[(sb & 0xf0) >> 4];
+                seq += SEQRET_DECODER[(sb & 0x0f)];
+            }
+            p += seqBytes;
+            record.seq = seq;
+
+            var qseq = '';
+            for (var j = 0; j < lseq; ++j) {
+                qseq += String.fromCharCode(ba[p + j] + 33);
+            }
+            p += lseq;
+            record.quals = qseq;
+
+            while (p < blockEnd) {
+                var tag = String.fromCharCode(ba[p], ba[p + 1]);
+                var type = String.fromCharCode(ba[p + 2]);
+                var value;
+
+                if (type == 'A') {
+                    value = String.fromCharCode(ba[p + 3]);
+                    p += 4;
+                } else if (type == 'i' || type == 'I') {
+                    value = readInt(ba, p + 3);
+                    p += 7;
+                } else if (type == 'c' || type == 'C') {
+                    value = ba[p + 3];
+                    p += 4;
+                } else if (type == 's' || type == 'S') {
+                    value = readShort(ba, p + 3);
+                    p += 5;
+                } else if (type == 'f') {
+                    value = readFloat(ba, p + 3);
+                    p += 7;
+                } else if (type == 'Z' || type == 'H') {
+                    p += 3;
+                    value = '';
+                    for (;;) {
+                        var cc = ba[p++];
+                        if (cc == 0) {
+                            break;
+                        } else {
+                            value += String.fromCharCode(cc);
+                        }
+                    }
+                } else if (type == 'B') {
+                    var atype = String.fromCharCode(ba[p + 3]);
+                    var alen = readInt(ba, p + 4);
+                    var elen;
+                    var reader;
+                    if (atype == 'i' || atype == 'I' || atype == 'f') {
+                        elen = 4;
+                        if (atype == 'f')
+                            reader = readFloat;
+                        else
+                            reader = readInt;
+                    } else if (atype == 's' || atype == 'S') {
+                        elen = 2;
+                        reader = readShort;
+                    } else if (atype == 'c' || atype == 'C') {
+                        elen = 1;
+                        reader = readByte;
+                    } else {
+                        throw 'Unknown array type ' + atype;
+                    }
+
+                    p += 8;
+                    value = [];
+                    for (var i = 0; i < alen; ++i) {
+                        value.push(reader(ba, p));
+                        p += elen;
+                    }
+                } else {
+                    throw 'Unknown type '+ type;
+                }
+                record[tag] = value;
+            }
         }
 
         if (!min || record.pos <= max && record.pos + lseq >= min) {

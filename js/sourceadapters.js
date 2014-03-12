@@ -1143,7 +1143,12 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                     if (r.flag & 0x4)
                         continue; 
                     
-                    var len = r.seq.length;
+                    var len;
+                    if (r.seq)
+                        len = r.seq.length;
+                    else 
+                        len = 50;
+                    
                     if (r.cigar) {
                         len = 0;
                         var ops = parseCigar(r.cigar);
@@ -1168,7 +1173,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 }
                 callback(null, features, 1000000000);
             }
-        });
+        }, {light: false});
     });
 }
 

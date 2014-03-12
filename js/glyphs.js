@@ -1031,7 +1031,10 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
-    var scale = (this._max - this._min + 1) / this._seq.length;
+    if (!seq)
+        seq = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN';    // FIXME       
+
+    var scale = (this._max - this._min + 1) / seq.length;
 
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();

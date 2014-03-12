@@ -86,8 +86,6 @@ DSBin.prototype.feature = function(f) {
 }
 
 function downsample(features, targetRez) {
-    var beforeDS = Date.now();
-
     var sn = 0;
     while (ds_scale(sn + 1) < targetRez) {
         ++sn;
@@ -103,23 +101,20 @@ function downsample(features, targetRez) {
             // Don't downsample complex features (?)
             return features;
         }
-//      if (f.score) {
-            var minLap = (f.min / scale)|0;
-            var maxLap = (f.max / scale)|0;
-            maxBin = Math.max(maxBin, maxLap);
-            minBin = Math.min(minBin, minLap);
-            for (var b = minLap; b <= maxLap; ++b) {
-                var bm = binTots[b];
-                if (!bm) {
-                    bm = new DSBin(scale, b * scale, (b + 1) * scale - 1);
-                    binTots[b] = bm;
-                }
-                bm.feature(f);
-            }
-//      }
-    }
 
-    var midDS = Date.now();
+        var minLap = (f.min / scale)|0;
+        var maxLap = (f.max / scale)|0;
+        maxBin = Math.max(maxBin, maxLap);
+        minBin = Math.min(minBin, minLap);
+        for (var b = minLap; b <= maxLap; ++b) {
+            var bm = binTots[b];
+            if (!bm) {
+                bm = new DSBin(scale, b * scale, (b + 1) * scale - 1);
+                binTots[b] = bm;
+            }
+            bm.feature(f);
+        }
+    }
 
     var sampledFeatures = [];
     for (var b = minBin; b <= maxBin; ++b) {
@@ -136,6 +131,5 @@ function downsample(features, targetRez) {
     }
 
     var afterDS = Date.now();
-    console.log('downsampled ' + features.length + ' -> ' + sampledFeatures.length + ' in ' + (afterDS - beforeDS) + 'ms' + ' (' + (midDS-beforeDS) + ')');
     return sampledFeatures;
 }
