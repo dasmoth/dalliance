@@ -331,7 +331,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var t = thisB.currentlyActive(b.dalliance_source);
                 if (t) {
                     b.checked = true;
-                    b.disabled = t.sequenceSource != null;
                 } else {
                     b.checked = false;
                 }

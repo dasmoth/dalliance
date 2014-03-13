@@ -525,7 +525,6 @@ Browser.prototype.realInit2 = function() {
     this.hPopupHolder.classList.add('dalliance');
     document.body.appendChild(this.hPopupHolder);
 
-    var actualSources = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
         var config = {};
@@ -534,11 +533,9 @@ Browser.prototype.realInit2 = function() {
         }
 
         if (!source.disabled) {
-            actualSources.push(source);
             this.makeTier(source, config);
         }
     }
-    this.sources = actualSources;
 
     thisB.arrangeTiers();
     thisB.refresh();
@@ -547,17 +544,11 @@ Browser.prototype.realInit2 = function() {
     thisB.positionRuler();
 
 
-    for (var ti = 0; ti < this.tiers.length; ++ti) {
-        var t = this.tiers[ti];
-        if (t.sequenceSource) {
-            t.sequenceSource.getSeqInfo(this.chr, function(si) {
-                if (si) {
-                    // console.log(si);
-                    thisB.currentSeqMax = si.length;
-                }
-            });
-            break;
-        }
+    var ss = this.getSequenceSource();
+    if (ss) {
+        ss.getSeqInfo(this.chr, function(si) {
+            thisB.currentSeqMax = si.length;
+        });
     }
 
     this.queryRegistry();
@@ -1093,13 +1084,7 @@ Browser.prototype.refresh = function() {
     var outerDrawnEnd = Math.min((this.viewEnd|0) + maxExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000));
 
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
-        var ss = null;
-        for (var i = 0; i < this.tiers.length; ++i) {
-            if (this.tiers[i].sequenceSource) {
-                ss = this.tiers[i].sequenceSource;
-                break;
-            }
-        }
+        var ss = this.getSequenceSource();
         this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
     
@@ -1384,11 +1369,6 @@ Browser.prototype.removeTier = function(conf, force) {
         throw "Couldn't find requested tier";
     }
 
-    var victim = this.tiers[target];
-    if (victim.sequenceSource && !force) {
-        throw "Can't remove sequence source tier";
-    }
-
     this.tiers.splice(target, 1);
 
     var nst = [];
@@ -1408,9 +1388,26 @@ Browser.prototype.removeTier = function(conf, force) {
 }
 
 Browser.prototype.getSequenceSource = function() {
+    if (this._sequenceSource === undefined)
+        this._sequenceSource = this._getSequenceSource();
+    return this._sequenceSource;
+}
+
+Browser.prototype._getSequenceSource = function() {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (this.tiers[ti].sequenceSource) {
             return this.tiers[ti].sequenceSource;
+        }
+    }
+
+    for (var si = 0; si < this.defaultSources.length; ++si) {
+        var s = this.defaultSources[si];
+        if (s.provides_entrypoints || s.tier_type == 'sequence' || s.twoBitURI) {
+            if (s.twoBitURI) {
+                return new TwoBitSequenceSource(s);
+            } else {
+                return new DASSequenceSource(s);
+            }
         }
     }
 }
