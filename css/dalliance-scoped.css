@@ -310,7 +310,7 @@
   background-color: black;
   color: white;
   opacity: 0.;
-  padding: 6px;
+  padding: 2px 8px;
   border-radius: 4px;
   display: inline-block;
   transition: opacity 0.6s ease-in-out;
@@ -319,7 +319,7 @@
 
 *.dalliance .notifier-holder {
   position: absolute;
-  top: 5px;
+  top: 0px;
   width: 100%;
   text-align: center;
   z-index: 5000;

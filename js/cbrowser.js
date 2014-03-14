@@ -107,10 +107,14 @@ function Browser(opts) {
         this[k] = opts[k];
     }
 
-    // this.uiPrefix = 'http://www.biodalliance.org/dev/'
+    this.workerPath = '$$js/fetchworker.js';
 
     var thisB = this;
     window.addEventListener('load', function(ev) {thisB.realInit();}, false);
+}
+
+Browser.prototype.resolveURL(url) {
+    return url.replace('$$', this.uiPrefix);
 }
 
 Browser.prototype.realInit = function() {
