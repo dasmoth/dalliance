@@ -98,7 +98,7 @@ function Browser(opts) {
     this.retina = true;
 
     this.useFetchWorkers = true;
-    this.maxWorkers = 8;
+    this.maxWorkers = 0;
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
@@ -143,11 +143,6 @@ Browser.prototype.realInit = function() {
 
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
     this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
-
-    if (!this.tierBackgroundColors) {
-        this.tierHolder.style.background = 'none';
-        this.pinnedTierHolder.style.background = 'none';
-    }
 
     this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
     this.svgHolder.appendChild(this.tierHolderHolder);

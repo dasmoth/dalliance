@@ -60,6 +60,10 @@ function DasTier(browser, source, config, background)
                                    this.quantOverlay],
                             {className: 'tier'});
 
+    if (!background) {
+        this.row.style.background = 'none';
+    }
+
     if (!browser.noDefaultLabels)
         this.row.appendChild(this.label);
     this.row.appendChild(this.notifierHolder);
