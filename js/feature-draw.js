@@ -384,7 +384,7 @@ DasTier.prototype.paint = function() {
         gc.scale(2, 2);
     }
 
-    {
+    if (this.background) {
         gc.fillStyle = this.background;
 
         if (this.knownCoverage) {

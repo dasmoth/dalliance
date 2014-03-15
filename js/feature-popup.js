@@ -93,7 +93,6 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
             makeElement('th', 'Location'),
             makeElement('td', loc.segment + ':' + loc.min + '-' + loc.max)
         ]);
-        row.style.backgroundColor = this.tierBackgroundColors[idx % this.tierBackgroundColors.length];
         table.appendChild(row);
         ++idx;
     }

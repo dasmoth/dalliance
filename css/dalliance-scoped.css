@@ -170,6 +170,7 @@
 
 *.dalliance .tier-holder-pinned-full {
   display: block;
+  overflow-y: hidden;
   border-bottom: 3px solid gray;
 }
 

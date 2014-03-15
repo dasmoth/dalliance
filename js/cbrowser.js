@@ -82,6 +82,7 @@ function Browser(opts) {
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 20;
+    this.noDefaultLabels = false;
 
     // Registry
 
@@ -113,7 +114,7 @@ function Browser(opts) {
     window.addEventListener('load', function(ev) {thisB.realInit();}, false);
 }
 
-Browser.prototype.resolveURL(url) {
+Browser.prototype.resolveURL = function(url) {
     return url.replace('$$', this.uiPrefix);
 }
 
@@ -142,6 +143,12 @@ Browser.prototype.realInit = function() {
 
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
     this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
+
+    if (!this.tierBackgroundColors) {
+        this.tierHolder.style.background = 'none';
+        this.pinnedTierHolder.style.background = 'none';
+    }
+
     this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
     this.svgHolder.appendChild(this.tierHolderHolder);
 
@@ -661,7 +668,10 @@ Browser.prototype.makeTier = function(source, config) {
 
 Browser.prototype.realMakeTier = function(source, config) {
     var thisB = this;
-    var background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
+    var background = null;
+    if (this.tierBackgroundColors) {
+        background = this.tierBackgroundColors[this.tiers.length % this.tierBackgroundColors.length];
+    }
 
     var tier = new DasTier(this, source, config, background);
     tier.oorigin = this.viewStart
@@ -1056,9 +1066,11 @@ Browser.prototype.arrangeTiers = function() {
         }
     }
 
-     for (var ti = 0; ti < arrangedTiers.length; ++ti) {
-        var t = arrangedTiers[ti];
-        t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+    if (this.tierBackgroundColors) {
+        for (var ti = 0; ti < arrangedTiers.length; ++ti) {
+            var t = arrangedTiers[ti];
+            t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+        }
     }
 }
 

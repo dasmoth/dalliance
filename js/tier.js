@@ -57,11 +57,13 @@ function DasTier(browser, source, config, background)
 
     this.row = makeElement('div', [this.viewport,
                                    this.overlay, 
-                                   this.quantOverlay, 
-                                   this.label, 
-                                   this.notifierHolder], 
+                                   this.quantOverlay],
                             {className: 'tier'});
 
+    if (!browser.noDefaultLabels)
+        this.row.appendChild(this.label);
+    this.row.appendChild(this.notifierHolder);
+    
     this.layoutHeight = 25;
     this.bumped = true;
     this.styleIdSeed = 0;
