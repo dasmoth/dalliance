@@ -495,9 +495,9 @@ function copyStylesheet(ss) {
     nss.styles = [];
     for (var si = 0; si < ss.styles.length; ++si) {
         var sh = nss.styles[si] = shallowCopy(ss.styles[si]);
-        sh._methodRE = sh._labelRE = sh._typeRE = null;
+        sh._methodRE = sh._labelRE = sh._typeRE = undefined;
         sh.style = shallowCopy(sh.style);
-        // sh.style.id = 'style' + (++this.styleIdSeed);
+        sh.style.id = undefined;
     }
     return nss;
 }

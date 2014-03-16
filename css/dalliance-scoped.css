@@ -326,3 +326,18 @@
   z-index: 5000;
   pointer-events: none;
 }
+
+*.dalliance .export-form {
+  flex: none;
+  -webkit-flex: none;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  -webkit-justify-content: space-between;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  align-items: flex-start;
+  -webkit-align-items: flex-start;
+}

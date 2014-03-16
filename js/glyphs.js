@@ -237,14 +237,17 @@ GroupGlyph.prototype.toSVG = function() {
     var p = new SVGPath();
     this.drawConnectors(p);
 
-    var path = makeElementNS(
-        NS_SVG, 'path',
-        null,
-        {d: p.toPathData(),
-         fill: 'none',
-         stroke: 'black',
-         strokeWidth: 0.5});
-    g.appendChild(path);
+    var pathData = p.toPathData();
+    if (pathData.length > 0) {
+        var path = makeElementNS(
+            NS_SVG, 'path',
+            null,
+            {d: p.toPathData(),
+             fill: 'none',
+             stroke: 'black',
+             strokeWidth: 0.5});
+        g.appendChild(path);
+    }
 
     return g;
 }

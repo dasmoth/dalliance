@@ -13,7 +13,7 @@ For 0.12
   - Pinning tracks. [DONE]
   - Keep selected track visible when track heights change (?)
   - Support for non-positional annotations
-  - Export track configuration for current browser state.
+  - Export track configuration for current browser state. [DONE]
 
 For 0.13
 --------
