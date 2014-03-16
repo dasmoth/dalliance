@@ -16,7 +16,7 @@ function DasTier(browser, source, config, background)
     this.config = config || {};
     this.id = 'tier' + (++__tier_idSeed);
     this.browser = browser;
-    this.dasSource = new DASSource(source);
+    this.dasSource = shallowCopy(source);
     this.background = background;
 
     this.viewport = makeElement('canvas', null, 

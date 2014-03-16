@@ -1303,7 +1303,7 @@ Browser.prototype.setFullScreenHeight = function() {
 }
 
 Browser.prototype.addTier = function(conf) {
-    conf = new DASSource(conf);
+    conf = shallowCopy(conf);
     conf.disabled = false;
     
     this.makeTier(conf);

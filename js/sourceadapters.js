@@ -284,7 +284,7 @@ FeatureSourceBase.prototype.getStyleSheet = function(callback) {
 
 
 function DASFeatureSource(dasSource) {
-    this.dasSource = dasSource;
+    this.dasSource = new DASSource(dasSource);
     this.busy = 0;
     this.activityListeners = [];
 }
@@ -384,7 +384,7 @@ DASFeatureSource.prototype.findNextFeature = this.sourceFindNextFeature = functi
 };
 
 function DASSequenceSource(dasSource) {
-    this.dasSource = dasSource;
+    this.dasSource = new DASSource(dasSource);
     this.awaitedEntryPoints = new Awaited();
 
     var thisB = this;
