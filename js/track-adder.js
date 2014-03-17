@@ -783,7 +783,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     }
 
                     if (okay) {
-                        hc = {url: curi, genome: genome};
+                        var hc = {url: curi, genome: genome};
                         if (opts.credentials)
                             hc.credentials = true;
                         if (mapping) {
