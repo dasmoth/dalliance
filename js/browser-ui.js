@@ -64,7 +64,18 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-left'})], {className: 'btn'});
     var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-right'})], {className: 'btn pull-right'});
 
-    var modeButtons = makeElement('div', [addTrackBtn, tierEditButton, svgBtn, optsButton, helpButton], {className: 'btn-group pull-right'});
+    var modeButtons = makeElement('div', null, {className: 'btn-group pull-right'});
+    if (!this.noTrackAdder)
+        modeButtons.appendChild(addTrackBtn);
+    if (!this.noTrackEditor)
+        modeButtons.appendChild(tierEditButton);
+    if (!this.noExport)
+        modeButtons.appendChild(svgBtn);
+    if (!this.noOptions)
+        modeButtons.appendChild(optsButton);
+    if (!this.noHelp)
+        modeButtons.appendChild(helpButton);
+
     this.setUiMode = function(m) {
         this.uiMode = m;
         var mb = {help: helpButton, add: addTrackBtn, opts: optsButton, 'export': svgBtn, tier: tierEditButton};
@@ -77,18 +88,27 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
 
-    toolbar.appendChild(leapRightButton);
-    toolbar.appendChild(modeButtons);
+    if (!this.noLeapButtons)
+        toolbar.appendChild(leapRightButton);
+
+    if (modeButtons.firstChild)
+        toolbar.appendChild(modeButtons);
     
-    toolbar.appendChild(leapLeftButton);
+    if (!this.noLeapButtons)
+        toolbar.appendChild(leapLeftButton);
     if (!this.noTitle) {
         toolbar.appendChild(makeElement('div', makeElement('h4', title, {}, {margin: '0px'}), {className: 'btn-group title'}));
     }
-    toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group loc-group'}));
-    toolbar.appendChild(clearHighlightsButton);
-    toolbar.appendChild(makeElement('div', [zoomInBtn,
-                                            makeElement('span', zoomSlider, {className: 'btn'}),
-                                            zoomOutBtn], {className: 'btn-group'}));
+    if (!this.noLocationField)
+        toolbar.appendChild(makeElement('div', [locField, locStatusField], {className: 'btn-group loc-group'}));
+    if (!this.noClearHighlightsButton)
+        toolbar.appendChild(clearHighlightsButton);
+
+    if (!this.noZoomSlider) {
+        toolbar.appendChild(makeElement('div', [zoomInBtn,
+                                                makeElement('span', zoomSlider, {className: 'btn'}),
+                                                zoomOutBtn], {className: 'btn-group'}));
+    }
     
 
     holder.appendChild(toolbar);
