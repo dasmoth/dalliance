@@ -119,6 +119,13 @@ Browser.prototype.resolveURL = function(url) {
 }
 
 Browser.prototype.realInit = function() {
+    if (this.wasInitialized) {
+        console.log('Attemping to call realInit on an already-initialized Dalliance instance');
+        return;
+    }
+
+    this.wasInitialized = true;
+
     this.defaultChr = this.chr;
     this.defaultStart = this.viewStart;
     this.defaultEnd = this.viewEnd;

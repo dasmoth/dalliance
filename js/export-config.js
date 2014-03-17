@@ -18,7 +18,7 @@ Browser.prototype.exportFullConfig = function(opts) {
 
         coordSystem: this.coordSystem,
 
-        sources: this.exportSourceConfig(),
+        sources: this.exportSourceConfig()
     };
 
     if (this.uiPrefix)

@@ -36,6 +36,7 @@
 
 *.dalliance .track-label {
   font-size: 10pt;
+  line-height: 15px;
   position: absolute;
   z-index: 1001;
   left: 2px;
