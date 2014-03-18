@@ -1267,8 +1267,11 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
     var width = this.tierHolder.getBoundingClientRect().width | 0;
+    if (width == 0)
+        return;
 
-    var oldFPW = this.featurePanelWidth;
+    var oldFPW = Math.max(this.featurePanelWidth, 300); // Can get silly values stored
+                                                        // when the browser is hidden.
     this.featurePanelWidth = width|0;
 
     if (oldFPW != this.featurePanelWidth) {
@@ -1494,7 +1497,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
 
     this.viewStart = newMin;
     this.viewEnd = newMax;
-    var newScale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    var newScale = Math.max(this.featurePanelWidth, 50) / (this.viewEnd - this.viewStart);
     var oldScale = this.scale;
     var scaleChanged = (Math.abs(newScale - oldScale)) > 0.0001;
     this.scale = newScale;
