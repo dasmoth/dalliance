@@ -82,6 +82,8 @@ TwoBitFile.prototype.fetch = function(chr, min, max, cnt) {
     var seq = this.getSeq(chr);
     if (!seq) {
         return cnt(null, "Couldn't find " + chr);
+    } else if (max <= min) {
+        return cnt('');
     } else {
         seq.fetch(min, max, cnt);
     }
