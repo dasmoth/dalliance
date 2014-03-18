@@ -364,7 +364,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.setUiMode('none');
     } else {
         var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', className: 'help-panel'});
-        this.showToolPanel(helpFrame, true);
+        this.showToolPanel(helpFrame, false);
         this.setUiMode('help');
     }
 }

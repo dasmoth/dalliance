@@ -219,7 +219,7 @@
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   vertical-align: top;      /* Should be done by flex mechanism? */
-  min-height: 500px;
+  /* min-height: 500px; */
   -webkit-box-flex: 0;
   -moz-box-flex: 0;
   -webkit-flex: 0 0 500px;
@@ -249,6 +249,7 @@
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   vertical-align: top;
+  min-height: 500px;
 }
 
 *.dalliance .toolbar {
