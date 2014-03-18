@@ -103,6 +103,8 @@ function Browser(opts) {
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
 
+    this.initListeners = [];
+
 
     for (var k in opts) {
         this[k] = opts[k];
@@ -606,6 +608,15 @@ Browser.prototype.realInit2 = function() {
     if (!this.statusRestored && this.storeStatus) {
         this.storeStatus();
     }
+
+    // Ping any init listeners.
+    for (var ii = 0; ii < this.initListeners.length; ++ii) {
+        try {
+            this.initListeners[ii].call(this);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
 
 // 
@@ -663,7 +674,7 @@ Browser.prototype.touchCancelHandler = function(ev) {
 
 Browser.prototype.makeTier = function(source, config) {
     try {
-        this.realMakeTier(source, config);
+        return this.realMakeTier(source, config);
     } catch (e) {
         console.log(e.stack || e);
     }
@@ -998,6 +1009,8 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     tier._updateFromConfig();
     this.reorderTiers();
+
+    return tier;
 }
 
 Browser.prototype.reorderTiers = function() {
@@ -1317,10 +1330,11 @@ Browser.prototype.addTier = function(conf) {
     conf = shallowCopy(conf);
     conf.disabled = false;
     
-    this.makeTier(conf);
+    var tier = this.makeTier(conf);
     this.markSelectedTiers();
     this.positionRuler();
     this.notifyTier();
+    return tier;
 }
 
 function sourceDataURI(conf) {
@@ -1561,6 +1575,10 @@ Browser.prototype.pingActivity = function() {
         console.log('Loading took ' + (now-this.activityStartTime) + 'ms');
         this.activityStartTime = null;
     }
+}
+
+Browser.prototype.addInitListener = function(handler) {
+    this.initListeners.push(handler);
 }
 
 Browser.prototype.addFeatureListener = function(handler, opts) {

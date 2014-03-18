@@ -100,6 +100,7 @@ function DasTier(browser, source, config, background)
     }
 
     this.listeners = [];
+    this.featuresLoadedListeners = [];
 }
 
 DasTier.prototype.toString = function() {
@@ -209,6 +210,7 @@ DasTier.prototype.needsSequence = function(scale ) {
 DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequence) {
     this.currentFeatures = features;
     this.currentSequence = sequence;
+    this.notifyFeaturesLoaded();
     
     this.knownChr = chr;
     this.knownCoverage = coverage;
@@ -322,7 +324,6 @@ DasTier.prototype.drawOverlay = function() {
     if (retina) {
         g.scale(2, 2);
     }
-    // g.clearRect(0, 0, t.overlay.width, t.overlay.height);
     
     var origin = b.viewStart - (1000/b.scale);
     var visStart = b.viewStart - (1000/b.scale);
@@ -511,4 +512,18 @@ DasTier.prototype.notifyTierListeners = function(change) {
         }
     }
     this.browser.notifyTier();
+}
+
+DasTier.prototype.addFeaturesLoadedListener = function(handler) {
+    this.featuresLoadedListeners.push(handler);
+}
+
+DasTier.prototype.notifyFeaturesLoaded = function() {
+    for (var li = 0; li < this.featuresLoadedListeners.length; ++li) {
+        try {
+            this.featuresLoadedListeners[li].call(this);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
