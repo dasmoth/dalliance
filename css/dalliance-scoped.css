@@ -17,7 +17,14 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+.dalliance-injection-point {
+  display: flex;
+  display: -webkit-flex;
+}
+
 .dalliance-root {
+  flex: 100% 1 1;
+  -webkit-flex: 100% 1 1;
   display: inline-flex;
   display: -webkit-inline-flex;
   flex-direction: column;
