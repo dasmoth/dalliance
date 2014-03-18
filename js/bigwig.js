@@ -9,6 +9,22 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
+    var das = require('./das');
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+
+    var jszlib_inflate_buffer = require('jszlib');
+}
+
 var BIG_WIG_MAGIC = -2003829722;
 var BIG_BED_MAGIC = -2021002517;
 
@@ -412,7 +428,9 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                 featureOpts.label = bedColumns[0];
             }
             if (bedColumns.length > 1 && dfc > 4) {
-                featureOpts.score = stringToInt(bedColumns[1]);
+                var score = parseInt(bedColumns[1]);
+                if (!isNaN(score))
+                    featureOpts.score = score;
             }
             if (bedColumns.length > 2 && dfc > 5) {
                 featureOpts.orientation = bedColumns[2];
@@ -1037,4 +1055,10 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
 
         bptReadNode(thisB.offset + rootNodeOffset);
     });
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeBwg: makeBwg
+    }
 }

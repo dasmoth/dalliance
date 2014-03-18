@@ -205,3 +205,14 @@ function _rangeOrder(a, b)
         return 0;
     }
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        Range: Range,
+        union: union,
+        intersection: intersection,
+        coverage: coverage,
+        rangeOver: rangeOrder,
+        _rangeOrder: _rangeOrder
+    }
+}

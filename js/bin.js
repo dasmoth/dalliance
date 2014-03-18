@@ -9,6 +9,16 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+
+    var sha1 = require('./sha1');
+    var b64_sha1 = sha1.b64_sha1;
+} 
+
+console.log(JSON.stringify(shallowCopy({foo: 'bar'})));
+
 function BlobFetchable(b) {
     this.blob = b;
 }
@@ -206,3 +216,11 @@ function bstringToBuffer(result) {
     return ba.buffer;
 }
 
+// Exports if we are being used as a module
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        BlobFetchable: BlobFetchable,
+        URLFetchable: URLFetchable
+    }
+}

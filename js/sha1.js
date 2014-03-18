@@ -330,3 +330,9 @@ function bit_rol(num, cnt)
 {
   return (num << cnt) | (num >>> (32 - cnt));
 }
+
+if (typeof(module) !== 'undefined') {
+  module.exports = {
+    b64_sha1: b64_sha1
+  }
+}

@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var gconcat = require('gulp-concat');
 var closure = require('gulp-closure-compiler');
+var browserify = require('gulp-browserify');
 
 var mainSrc = [
   'bam',
@@ -53,6 +54,21 @@ gulp.task('dalliance-compiled', function() {
      .pipe(gulp.dest('build/'))
      .pipe(closure())
      .pipe(gulp.dest('build/')); 
+});
+
+gulp.task('dalliance-worker', function() {
+  gulp.src('js/fetchworker.js')
+  .pipe(browserify({
+    debug: true,
+    nobuiltins: true,
+    shim: {
+      jszlib: {
+        path: 'jszlib/js/inflate.js',
+        exports: 'jszlib_inflate_buffer'
+      }
+    }
+  }))
+  .pipe(gulp.dest('build/'));
 });
 
 gulp.task('default', ['dalliance-compiled']);

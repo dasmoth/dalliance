@@ -384,3 +384,11 @@ if (!('trim' in String.prototype)) {
         return this.replace(/^\s+/, '').replace(/\s+$/, '');
     };
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        textXHR: textXHR,
+        relativeURL: relativeURL,
+        shallowCopy: shallowCopy
+    }
+}

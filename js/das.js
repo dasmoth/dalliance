@@ -784,3 +784,10 @@ DASSource.prototype.doCrossDomainRequest = function(url, handler, errHandler) {
         }
     }
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        DASGroup: DASGroup,
+        DASFeature: DASFeature
+    };
+}

@@ -531,6 +531,7 @@ DasTier.prototype.paintQuant = function() {
 function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var gstyle = tier.styleForFeature(groupElement);
     var label;
+    var labelWanted = false;
 
     var glyphs = [];
     var strand = null;
@@ -550,6 +551,8 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
         if (f.parts) {  // FIXME shouldn't really be needed
             continue;
         }
+        if (isDasBooleanTrue(style.LABEL))
+            labelWanted = true;
 
         var g = glyphForFeature(f, 0, style, tier, null, true);
         if (g) {
@@ -576,14 +579,8 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     }
 
     var labelText = null;
-    if (label || (gstyle && (gstyle.LABEL || gstyle.LABELS))) {  // HACK, LABELS should work.
+    if ((label && labelWanted) || (gstyle && (isDasBooleanTrue(gstyle.LABEL) || isDasBooleanTrue(gstyle.LABELS)))) {  // HACK, LABELS should work.
         labelText = groupElement.label || label;
-        var sg = tier.groupsToSupers[groupElement.id];
-        if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
-            //if (groupElement.id != tier.superGroups[sg][0]) {
-            //    dg.label = null;
-            // }
-        }
     }
 
     var gg = new GroupGlyph(glyphs, connector);
