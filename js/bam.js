@@ -9,6 +9,19 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
+    var utils = require('./utils');
+    // var shallowCopy = utils.shallowCopy;
+
+    var jszlib_inflate_buffer = require('jszlib');
+}
+
+
 var BAM_MAGIC = 21840194;
 var BAI_MAGIC = 21578050;
 
@@ -520,4 +533,10 @@ function reg2bins(beg, end)
     for (k = 585 + (beg>>17); k <= 585 + (end>>17); ++k) list.push(k);
     for (k = 4681 + (beg>>14); k <= 4681 + (end>>14); ++k) list.push(k);
     return list;
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeBam: makeBam
+    };
 }

@@ -31,18 +31,18 @@ self.onmessage = function(event) {
     if (command === 'connectBAM') {
         var id = newID();
 
-        var bam, bai;
+        var bamF, baiF;
         if (d.blob) {
-            bam = new bin.BlobFetchable(d.blob);
-            bai = new bin.BlobFetchable(d.indexBlob);
+            bamF = new bin.BlobFetchable(d.blob);
+            baiF = new bin.BlobFetchable(d.indexBlob);
         } else {
-            bam = new bin.URLFetchable(d.uri);
-            bai = new bin.URLFetchable(d.indexUri);
+            bamF = new bin.URLFetchable(d.uri);
+            baiF = new bin.URLFetchable(d.indexUri);
         }
 
-        bam.makeBam(bam, bai, function(bam, err) {
-            if (bam) {
-                connections[id] = new BAMWorkerFetcher(bam);
+        bam.makeBam(bamF, baiF, function(bamObj, err) {
+            if (bamObj) {
+                connections[id] = new BAMWorkerFetcher(bamObj);
                 postMessage({tag: tag, result: id});
             } else {
                 postMessage({tag: tag, error: err || "Couldn't fetch BAM"});

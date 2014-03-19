@@ -2023,7 +2023,7 @@ Browser.prototype.getWorker = function() {
 
 function FetchWorker() {
     var thisB = this;
-    this.worker = new Worker('js/fetchworker.js');
+    this.worker = new Worker('build/fetchworker.js');
     this.tagSeed = 0;
     this.callbacks = {};
 
