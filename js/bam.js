@@ -443,6 +443,10 @@ function readInt(ba, offset) {
     return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
 }
 
+function readIntBE(ba, offset) {
+    return (ba[offset] << 24) | (ba[offset + 1] << 16) | (ba[offset + 2] << 8) | (ba[offset + 3]);
+}
+
 function readShort(ba, offset) {
     return (ba[offset + 1] << 8) | (ba[offset]);
 }
