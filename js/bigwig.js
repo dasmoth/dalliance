@@ -9,8 +9,10 @@
 
 "use strict";
 
-var BIG_WIG_MAGIC = -2003829722;
-var BIG_BED_MAGIC = -2021002517;
+var BIG_WIG_MAGIC = 0x888FFC26;
+var BIG_WIG_MAGIC_BE = 0x26FC8F88;
+var BIG_BED_MAGIC = 0x8789F2EB;
+var BIG_BED_MAGIC_BE = 0xEBF28987;
 
 var BIG_WIG_TYPE_GRAPH = 1;
 var BIG_WIG_TYPE_VSTEP = 2;
@@ -712,12 +714,15 @@ function makeBwg(data, callback, name) {
         var ba = new Uint8Array(header);
         var sa = new Int16Array(header);
         var la = new Int32Array(header);
-        if (la[0] == BIG_WIG_MAGIC) {
+        var magic = ba[0] + (M1 * ba[1]) + (M2 * ba[2]) + (M3 * ba[3]);
+        if (magic == BIG_WIG_MAGIC) {
             bwg.type = 'bigwig';
-        } else if (la[0] == BIG_BED_MAGIC) {
+        } else if (magic == BIG_BED_MAGIC) {
             bwg.type = 'bigbed';
+        } else if (magic == BIG_WIG_MAGIC_BE || magic == BIG_BED_MAGIC_BE) {
+            callback(null, "Currently don't support big-endian BBI files");
         } else {
-            callback(null, "Not a supported format");
+            callback(null, "Not a supported format, magic=0x" + magic.toString(16));
         }
         // console.log('magic okay');
 
