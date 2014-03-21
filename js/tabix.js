@@ -271,3 +271,10 @@ TabixFile.prototype.readRecords = function(ba, offset, sink, min, max, chr) {
         return;
     }
 }
+
+if (typeof(module) !== 'module') {
+    module.exports = {
+        connectTabix: connectTabix,
+        TABIX_MAGIC: TABIX_MAGIC
+    };
+}

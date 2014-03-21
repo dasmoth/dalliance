@@ -25,6 +25,8 @@ if (typeof(require) !== 'undefined') {
 
     var domui = require('./domui');
     var makeTreeTableSection = domui.makeTreeTableSection;
+
+    var probeResource = require('./probe').probeResource;
 }
 
 Browser.prototype.currentlyActive = function(source) {

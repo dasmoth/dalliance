@@ -25,6 +25,7 @@ if (typeof(require) !== 'undefined') {
     var DASStyle = das.DASStyle;
     var DASSource = das.DASSource;
     var DASSegment = das.DASSegment;
+    var DASFeature = das.DASFeature;
 
     var bin = require('./bin');
     var URLFetchable = bin.URLFetchable;
@@ -35,6 +36,8 @@ if (typeof(require) !== 'undefined') {
 
     var bbi = require('./bigwig');
     var makeBwg = bbi.makeBwg;
+
+    var makeBam = require('./bam').makeBam;
 
     var spans = require('./spans');
     var Range = spans.Range;

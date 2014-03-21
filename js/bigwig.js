@@ -22,7 +22,9 @@ if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
 
-    var jszlib_inflate_buffer = require('jszlib');
+    var jszlib = require('../jszlib/js/inflate');
+    var jszlib_inflate_buffer = jszlib.inflateBuffer;
+    var arrayCopy = jszlib.arrayCopy;
 }
 
 var BIG_WIG_MAGIC = -2003829722;
@@ -1059,6 +1061,8 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
 
 if (typeof(module) !== 'undefined') {
     module.exports = {
-        makeBwg: makeBwg
+        makeBwg: makeBwg,
+        BIG_BED_MAGIC: BIG_BED_MAGIC,
+        BIG_WIG_MAGIC: BIG_WIG_MAGIC
     }
 }

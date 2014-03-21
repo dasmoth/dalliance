@@ -9,6 +9,27 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var bin = require('./bin');
+    var URLFetchable = bin.URLFetchable;
+    var BlobFetchable = bin.BlobFetchable;
+    var readInt = bin.readInt;
+
+    var bbi = require('./bigwig');
+    var BIG_WIG_MAGIC = bbi.BIG_WIG_MAGIC;
+    var BIG_BED_MAGIC = bbi.BIG_BED_MAGIC;
+
+    var lh3utils = require('./lh3utils');
+    var unbgzf = lh3utils.unbgzf;
+
+    var bam = require('./bam');
+    var BAM_MAGIC = bam.BAM_MAGIC;
+    var BAI_MAGIC = bam.BAI_MAGIC;
+
+    var tbi = require('./tabix');
+    var TABIX_MAGIC = tbi.TABIX_MAGIC;
+}
+
 function probeResource(source, listener, retry) {
     var BED_REGEXP = new RegExp('^.+\t[0-9]+\t[0-9]+.*$');
     var KV_REGEXP=/([^=]+)=\"?([^\"]+)\"?/;
@@ -136,4 +157,10 @@ function finishProbeBedWig(source, maybeType) {
         }
     }
     source.payload = maybeType || 'bed';
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        probeResource: probeResource
+    };
 }

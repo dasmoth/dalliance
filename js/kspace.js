@@ -27,6 +27,10 @@ if (typeof(require) !== 'undefined') {
 
     var spans = require('./spans');
     var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
+    var downsample = require('./sample').downsample;
 }
 
 function FetchPool() {

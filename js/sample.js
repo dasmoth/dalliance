@@ -9,6 +9,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var das = require('./das');
+    var DASFeature = das.DASFeature;
+}
+
 var __DS_SCALES = [1, 2, 5];
 
 function ds_scale(n) {
@@ -132,4 +137,10 @@ function downsample(features, targetRez) {
 
     var afterDS = Date.now();
     return sampledFeatures;
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        downsample: downsample
+    };
 }

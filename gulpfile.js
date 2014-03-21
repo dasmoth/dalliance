@@ -67,8 +67,7 @@ gulp.task('dalliance-worker', function() {
   gulp.src('js/fetchworker.js')
   .pipe(browserify({
     debug: true,
-    nobuiltins: true,
-    shim: moduleShims
+    nobuiltins: true
   }))
   .pipe(gulp.dest('build/'));
 });
@@ -77,8 +76,7 @@ gulp.task('dalliance-compiled', function() {
   gulp.src('js/exports.js')
   .pipe(browserify({
     debug: true,
-    nobuiltins: true,
-    shim: moduleShims
+    nobuiltins: true
   }))
   .pipe(gulp.dest('build/'));
 });

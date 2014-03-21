@@ -16,6 +16,7 @@ if (typeof(require) !== 'undefined') {
     var spans = require('./spans');
     var Range = spans.Range;
     var union = spans.union;
+    var intersection = spans.intersection;
 }
 
 var TWOBIT_MAGIC = 0x1a412743;
