@@ -7,6 +7,15 @@
 // export-ui.js
 //
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+}
+
 Browser.prototype.openExportPanel = function() {
     var b = this;
     if (this.uiMode === 'export') {

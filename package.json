@@ -11,6 +11,6 @@
     "gulp-concat": "~2.2.0",
     "gulp": "~3.5.6",
     "gulp-closure-compiler": "~0.1.2",
-    "gulp-browserify": "~0.5.0"
+    "gulp-browserify": "~0.5.0",
   }
 }

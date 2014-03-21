@@ -9,8 +9,21 @@
 
 "use strict";
 
-function formatLongInt(n) {
-    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+    var formatLongInt = utils.formatLongInt;
+
+    // For side effects
+
+    require('./tier-edit');
+    require('./export-config');
+    require('./export-ui');
+    require('./svg-export'); 
 }
 
 /*

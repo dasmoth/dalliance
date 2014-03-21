@@ -7,6 +7,20 @@
 // export-config.js
 //
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+
+    var sha1 = require('./sha1');
+    var hex_sha1 = sha1.hex_sha1;
+
+    var das = require('./das');
+    var copyStylesheet = das.copyStylesheet;
+}
+
 Browser.prototype.exportFullConfig = function(opts) {
     opts = opts || {};
 

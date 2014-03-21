@@ -333,6 +333,7 @@ function bit_rol(num, cnt)
 
 if (typeof(module) !== 'undefined') {
   module.exports = {
-    b64_sha1: b64_sha1
+    b64_sha1: b64_sha1,
+    hex_sha1: hex_sha1
   }
 }

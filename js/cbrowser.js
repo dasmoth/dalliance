@@ -9,6 +9,27 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var Observed = utils.Observed;
+    var Awaited = utils.Awaited;
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+    var miniJSONify = utils.miniJSONify;
+    var shallowCopy = utils.shallowCopy;
+
+    var tier = require('./tier');
+    var DasTier = tier.DasTier;
+
+    var sha1 = require('./sha1');
+    var hex_sha1 = sha1.hex_sha1;
+
+    var thub = require('./thub');
+    var connectTrackHub = thub.connectTrackHub;
+
+    var VERSION = require('./version');
+}
+
 var NS_SVG = 'http://www.w3.org/2000/svg';
 var NS_HTML = 'http://www.w3.org/1999/xhtml';
 var NS_XLINK = 'http://www.w3.org/1999/xlink';
@@ -701,9 +722,9 @@ Browser.prototype.realMakeTier = function(source, config) {
         }
 
         var sti = 0;
-        ry -= MIN_PADDING;
+        ry -= tier.padding;;
         while (sti < st.length && ry > st[sti].height && sti < (st.length - 1)) {
-            ry = ry - st[sti].height - MIN_PADDING;
+            ry = ry - st[sti].height - tier.padding;
             ++sti;
         }
         if (sti >= st.length) {
@@ -2041,4 +2062,52 @@ FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
     cmd.tag = tag;
     this.callbacks[tag] = callback;
     this.worker.postMessage(cmd, transfer);
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        Browser: Browser,
+        sourcesAreEqual: sourcesAreEqual
+    };
+
+    // Required because they add stuff to Browser.prototype
+    require('./browser-ui');
+    require('./track-adder');
+    require('./feature-popup');
+    require('./tier-actions');
+    require('./domui');
+
+    var sa = require('./sourceadapters');
+    var TwoBitSequenceSource = sa.TwoBitSequenceSource;
+    var DASSequenceSource = sa.DASSequenceSource;
+
+    var KnownSpace = require('./kspace').KnownSpace;
+
+    var DASRegistry = require('./das').DASRegistry;
+}
+
+function SourceCache() {
+    this.sourcesByURI = {}
+}
+
+SourceCache.prototype.get = function(conf) {
+    var scb = this.sourcesByURI[sourceDataURI(conf)];
+    if (scb) {
+        for (var si = 0; si < scb.configs.length; ++si) {
+            if (sourcesAreEqual(scb.configs[si], conf)) {
+                return scb.sources[si];
+            }
+        }
+    }
+}
+
+SourceCache.prototype.put = function(conf, source) {
+    var uri = sourceDataURI(conf);
+    var scb = this.sourcesByURI[uri];
+    if (!scb) {
+        scb = {configs: [], sources: []};
+        this.sourcesByURI[uri] = scb;
+    }
+    scb.configs.push(conf);
+    scb.sources.push(source);
 }

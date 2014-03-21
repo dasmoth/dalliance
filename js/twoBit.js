@@ -9,6 +9,15 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+}
+
 var TWOBIT_MAGIC = 0x1a412743;
 
 function TwoBitFile() {
@@ -215,4 +224,10 @@ TwoBitSeq.prototype.length = function(cnt) {
             return cnt(thisB._length);
         }
     });
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeTwoBit: makeTwoBit
+    };
 }

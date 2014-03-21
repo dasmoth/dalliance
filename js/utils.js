@@ -9,6 +9,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var sha1 = require('./sha1');
+    var b64_sha1 = sha1.b64_sha1;
+}
+
 var NUM_REGEXP = new RegExp('[0-9]+');
 
 function stringToNumbersArray(str) {
@@ -374,6 +379,9 @@ function relativeURL(base, rel) {
     }
 }
 
+function formatLongInt(n) {
+    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 //
 // Missing APIs
@@ -389,6 +397,22 @@ if (typeof(module) !== 'undefined') {
     module.exports = {
         textXHR: textXHR,
         relativeURL: relativeURL,
-        shallowCopy: shallowCopy
+        shallowCopy: shallowCopy,
+        pusho: pusho,
+        pushnew: pushnew,
+        pushnewo: pushnewo,
+        arrayIndexOf: arrayIndexOf,
+        pick: pick,
+
+        makeElement: makeElement,
+        makeElementNS: makeElementNS,
+        removeChildren: removeChildren,
+
+        miniJSONify: miniJSONify,
+
+        Observed: Observed,
+        Awaited: Awaited,
+
+        formatLongInt: formatLongInt
     }
 }

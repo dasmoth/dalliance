@@ -9,6 +9,26 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var Awaited = utils.Awaited;
+
+    var sa = require('./sourceadapters');
+    var MappedFeatureSource = sa.MappedFeatureSource;
+    var CachingFeatureSource = sa.CachingFeatureSource;
+    var BWGFeatureSource = sa.BWGFeatureSource;
+    var RemoteBWGFeatureSource = sa.RemoteBWGFeatureSource;
+    var BAMFeatureSource = sa.BAMFeatureSource;
+    var RemoteBAMFeatureSource = sa.RemoteBAMFeatureSource;
+    var DummySequenceSource = sa.DummySequenceSource;
+    var DummyFeatureSource = sa.DummyFeatureSource;
+
+    var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
+
+    var spans = require('./spans');
+    var Range = spans.Range;
+}
+
 function FetchPool() {
     this.reqs = [];
     this.awaitedFeatures = {};
@@ -289,4 +309,10 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
             tier.viewFeatures(chr, coverage, actualScale, features);
         }
     }
+}
+
+if (typeof(module) !== null) {
+    module.exports = {
+        KnownSpace: KnownSpace
+    };
 }

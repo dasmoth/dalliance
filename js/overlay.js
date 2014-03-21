@@ -279,3 +279,9 @@ function OverlayFeatureSource_merge_concat(featureSets) {
     }
     return features;
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        OverlayFeatureSource: OverlayFeatureSource
+    };
+}

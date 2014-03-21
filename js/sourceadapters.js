@@ -9,6 +9,39 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var tier = require('./tier');
+    var DasTier = tier.DasTier;
+
+    var utils = require('./utils')
+    var Awaited = utils.Awaited;
+    var arrayIndexOf = utils.arrayIndexOf;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASSource = das.DASSource;
+    var DASSegment = das.DASSegment;
+
+    var bin = require('./bin');
+    var URLFetchable = bin.URLFetchable;
+    var BlobFetchable = bin.BlobFetchable;
+
+    var twoBit = require('./twoBit');
+    var makeTwoBit = twoBit.makeTwoBit;
+
+    var bbi = require('./bigwig');
+    var makeBwg = bbi.makeBwg;
+
+    var spans = require('./spans');
+    var Range = spans.Range;
+
+    var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
+}
+
 var __dalliance_sourceAdapterFactories = {};
 
 function dalliance_registerSourceAdapterFactory(type, factory) {
@@ -54,7 +87,6 @@ DasTier.prototype.initSources = function() {
             thisTier.browser.refreshTier(thisTier);
         });
     }
-
 }
 
 Browser.prototype.createFeatureSource = function(config) {
@@ -112,30 +144,15 @@ Browser.prototype.createFeatureSource = function(config) {
     return fs;
 }
 
-function SourceCache() {
-    this.sourcesByURI = {}
-}
-
-SourceCache.prototype.get = function(conf) {
-    var scb = this.sourcesByURI[sourceDataURI(conf)];
-    if (scb) {
-        for (var si = 0; si < scb.configs.length; ++si) {
-            if (sourcesAreEqual(scb.configs[si], conf)) {
-                return scb.sources[si];
-            }
-        }
+DasTier.prototype.fetchStylesheet = function(cb) {
+    var ssSource;
+    if (this.dasSource.stylesheet_uri) {
+        ssSource = new DASFeatureSource(this.dasSource);
+    } else {
+        ssSource = this.getSource();
     }
-}
-
-SourceCache.prototype.put = function(conf, source) {
-    var uri = sourceDataURI(conf);
-    var scb = this.sourcesByURI[uri];
-    if (!scb) {
-        scb = {configs: [], sources: []};
-        this.sourcesByURI[uri] = scb;
-    }
-    scb.configs.push(conf);
-    scb.sources.push(source);
+    
+    ssSource.getStyleSheet(cb);
 }
 
 var __cfs_id_seed = 0;
@@ -510,16 +527,16 @@ BWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
-    var make, arg;
+    var arg;
     if (this.bwgSource.bwgURI) {
-        make = makeBwgFromURL;
-        arg = this.bwgSource.bwgURI;
+        // make = makeBwgFromURL;
+        arg = new URLFetchable(this.bwgSource.bwgURI);
     } else {
-        make = makeBwgFromFile;
-        arg = this.bwgSource.bwgBlob;
+        // make = makeBwgFromFile;
+        arg = new BlobFetchable(this.bwgSource.bwgBlob);
     }
 
-    make(arg, function(bwg, err) {
+    makeBwg(arg, function(bwg, err) {
         if (err) {
             thisB.error = err;
             thisB.readiness = null;
@@ -1535,4 +1552,19 @@ function sourceAdapterIsCapable(s, cap) {
     if (!s.capabilities)
         return false;
     else return s.capabilities()[cap];
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        TwoBitSequenceSource: TwoBitSequenceSource,
+        DASSequenceSource: DASSequenceSource,
+        MappedFeatureSource: MappedFeatureSource,
+        CachingFeatureSource: CachingFeatureSource,
+        BWGFeatureSource: BWGFeatureSource,
+        RemoteBWGFeatureSource: RemoteBWGFeatureSource,
+        BAMFeatureSource: BAMFeatureSource,
+        RemoteBAMFeatureSource: RemoteBAMFeatureSource,
+        DummyFeatureSource: DummyFeatureSource,
+        DummySequenceSource: DummySequenceSource
+    }
 }

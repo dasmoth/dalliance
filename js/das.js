@@ -9,6 +9,15 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+    var pusho = utils.pusho;
+
+    var color = require('./color');
+    var makeColourSteps = color.makeColourSteps;
+}
+
 var dasLibErrorHandler = function(errMsg) {
     alert(errMsg);
 }
@@ -785,9 +794,43 @@ DASSource.prototype.doCrossDomainRequest = function(url, handler, errHandler) {
     }
 }
 
+function isDasBooleanTrue(s) {
+    s = ('' + s).toLowerCase();
+    return s==='yes' || s==='true';
+}
+
+function isDasBooleanNotFalse(s) {
+    if (!s)
+        return false;
+
+    s = ('' + s).toLowerCase();
+    return s!=='no' || s!=='false';
+}
+
+function copyStylesheet(ss) {
+    var nss = shallowCopy(ss);
+    nss.styles = [];
+    for (var si = 0; si < ss.styles.length; ++si) {
+        var sh = nss.styles[si] = shallowCopy(ss.styles[si]);
+        sh._methodRE = sh._labelRE = sh._typeRE = undefined;
+        sh.style = shallowCopy(sh.style);
+        sh.style.id = undefined;
+    }
+    return nss;
+}
+
 if (typeof(module) !== 'undefined') {
     module.exports = {
         DASGroup: DASGroup,
-        DASFeature: DASFeature
+        DASFeature: DASFeature,
+        DASStylesheet: DASStylesheet,
+        DASStyle: DASStyle,
+        DASSource: DASSource,
+        DASSegment: DASSegment,
+        DASRegistry: DASRegistry,
+
+        isDasBooleanTrue: isDasBooleanTrue,
+        isDasBooleanNotFalse: isDasBooleanNotFalse,
+        copyStylesheet: copyStylesheet
     };
 }

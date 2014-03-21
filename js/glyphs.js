@@ -7,6 +7,12 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var union = spans.union;
+    var Range = spans.Range;
+}
+
 function SVGPath() {
     this.ops = [];
 }
@@ -322,7 +328,7 @@ LineGraphGlyph.prototype.toSVG = function() {
          strokeWidth: '2px'});
 }
 
-function LabelledGlyph(glyph, text, unmeasured, anchor, align, font) {
+function LabelledGlyph(GLOBAL_GC, glyph, text, unmeasured, anchor, align, font) {
     this.glyph = glyph;
     this.text = text;
     this.anchor = anchor || 'left';
@@ -986,7 +992,7 @@ TooManyGlyph.prototype.draw = function(g) {
     }
 }
 
-function TextGlyph(min, max, height, fill, string) {
+function TextGlyph(GLOBAL_GC, min, max, height, fill, string) {
     this._min = min;
     this._max = max;
     this._height = height;
@@ -1375,3 +1381,29 @@ PlimsollGlyph.prototype.height = function() {
     return this._height;
 }
 
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        BoxGlyph: BoxGlyph,
+        GroupGlyph: GroupGlyph,
+        LineGraphGlyph: LineGraphGlyph,
+        LabelledGlyph: LabelledGlyph,
+        CrossGlyph: CrossGlyph,
+        ExGlyph: ExGlyph,
+        TriangleGlyph: TriangleGlyph,
+        DotGlyph: DotGlyph,
+        PaddedGlyph: PaddedGlyph,
+        AArrowGlyph: AArrowGlyph,
+        SpanGlyph: SpanGlyph,
+        LineGlyph: LineGlyph,
+        PrimersGlyph: PrimersGlyph,
+        ArrowGlyph: ArrowGlyph,
+        TooManyGlyph: TooManyGlyph,
+        TextGlyph: TextGlyph,
+        SequenceGlyph: this.SequenceGlyph,
+        TranslatedGlyph: TranslatedGlyph,
+        GridGlyph: GridGlyph,
+        StarGlyph: StarGlyph,
+        PointGlyph: PointGlyph,
+        PlimsollGlyph: PlimsollGlyph
+    }
+}

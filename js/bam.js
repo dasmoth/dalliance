@@ -15,10 +15,14 @@ if (typeof(require) !== 'undefined') {
     var union = spans.union;
     var intersection = spans.intersection;
 
-    var utils = require('./utils');
-    // var shallowCopy = utils.shallowCopy;
-
     var jszlib_inflate_buffer = require('jszlib');
+
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+    var readShort = bin.readShort;
+    var readByte = bin.readByte;
+    var readInt64 = bin.readInt64;
+    var readFloat = bin.readFloat;
 }
 
 
@@ -432,37 +436,6 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
 
     // Exits via top of loop.
 };
-
-(function(global) {
-    var convertBuffer = new ArrayBuffer(8);
-    var ba = new Uint8Array(convertBuffer);
-    var fa = new Float32Array(convertBuffer);
-
-
-    global.readFloat = function(buf, offset) {
-        ba[0] = buf[offset];
-        ba[1] = buf[offset+1];
-        ba[2] = buf[offset+2];
-        ba[3] = buf[offset+3];
-        return fa[0];
-    };
- }(this));
-
-function readInt64(ba, offset) {
-    return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
-}
-
-function readInt(ba, offset) {
-    return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
-}
-
-function readShort(ba, offset) {
-    return (ba[offset + 1] << 8) | (ba[offset]);
-}
-
-function readByte(ba, offset) {
-    return ba[offset];
-}
 
 function readVob(ba, offset) {
     var block = ((ba[offset+6] & 0xff) * 0x100000000) + ((ba[offset+5] & 0xff) * 0x1000000) + ((ba[offset+4] & 0xff) * 0x10000) + ((ba[offset+3] & 0xff) * 0x100) + ((ba[offset+2] & 0xff));

@@ -9,6 +9,10 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var das = require('./das');
+}
+
 function Chainset(uri, srcTag, destTag, coords) {
     this.uri = uri;
     this.srcTag = srcTag;
@@ -237,4 +241,10 @@ Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
         }
         callback(srcBlocks);
     }
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        Chainset: Chainset
+    };
 }

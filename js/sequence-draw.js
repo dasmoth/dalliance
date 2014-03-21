@@ -7,6 +7,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var formatLongInt = utils.formatLongInt;
+}
+
 var MIN_TILE = 100;
 var rulerTileColors = ['black', 'white'];
 var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
@@ -190,4 +195,10 @@ function svgSeqTier(tier, seq) {
     } 
 
     return g;
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        drawSeqTier: drawSeqTier
+    };
 }

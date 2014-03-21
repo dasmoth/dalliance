@@ -28,3 +28,7 @@ VERSION.toString = function() {
     }
     return vs;
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = VERSION;
+}

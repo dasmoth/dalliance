@@ -9,6 +9,15 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var pick = utils.pick;
+}
+
+
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
 Browser.prototype.addFeatureInfoPlugin = function(handler) {

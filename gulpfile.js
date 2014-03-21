@@ -48,7 +48,14 @@ var mainSrc = [
   'export-ui',
   'export-config'].map(function(n) {return "js/" + n + ".js"});
 
-gulp.task('dalliance-compiled', function() {
+var moduleShims = {
+      jszlib: {
+        path: 'jszlib/js/inflate.js',
+        exports: 'jszlib_inflate_buffer'
+      }
+    };
+
+gulp.task('dalliance-compiled-old', function() {
    return gulp.src(mainSrc.concat(['jszlib/js/inflate.js', 'polyfills/html5slider.js']))
      .pipe(gconcat('dalliance-all.js'))
      .pipe(gulp.dest('build/'))
@@ -61,14 +68,23 @@ gulp.task('dalliance-worker', function() {
   .pipe(browserify({
     debug: true,
     nobuiltins: true,
-    shim: {
-      jszlib: {
-        path: 'jszlib/js/inflate.js',
-        exports: 'jszlib_inflate_buffer'
-      }
-    }
+    shim: moduleShims
   }))
   .pipe(gulp.dest('build/'));
+});
+
+gulp.task('dalliance-compiled', function() {
+  gulp.src('js/exports.js')
+  .pipe(browserify({
+    debug: true,
+    nobuiltins: true,
+    shim: moduleShims
+  }))
+  .pipe(gulp.dest('build/'));
+});
+
+gulp.task('watch', function() {
+  gulp.watch('js/*.js', ['dalliance-compiled']);
 });
 
 gulp.task('default', ['dalliance-compiled']);

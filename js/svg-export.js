@@ -7,6 +7,11 @@
 // svg-export.js
 //
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+}
+
 Browser.prototype.makeSVG = function(opts) {
     opts = opts || {};
     var minTierHeight = opts.minTierHeight || 20;
