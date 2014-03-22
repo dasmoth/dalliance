@@ -12,15 +12,22 @@ To try it, visit [http://www.biodalliance.org/human37.html](http://www.biodallia
 Development
 -----------
 
-You should be able to run Dalliance directly from a git checkout.  You
-first need to download a couple of dependencies using:
+Dalliance has now switched to a [Gulp](http://gulpjs.com/)-based build
+system.  It it still possible to use the files in the js directory
+directly, but this is now deprecated and may not be supported in future.
 
-          git submodule init
-          git submodule update
+Before building, please install [Node.js](http://nodejs.org/), which
+is needed for the NPM package manager.
 
-Then point your web browser at the file `test.html`.  Once you've
-confirmed this is working, you can customize your display by editing
-the block of configuration javascript within the HTML file.
+To build:
+
+        git submodule init
+        git submodule update
+        # (or checkout with "git clone --recursive")
+
+        (sudo?) npm install -g gulp
+        npm install # Install dependencies
+        gulp        # Build Dalliance
 
 Adding extra data
 -----------------
