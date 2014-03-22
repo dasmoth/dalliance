@@ -9,6 +9,9 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+}
+
 var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;
 
 function parseLocCardinal(n, m) {
@@ -94,7 +97,7 @@ Browser.prototype.search = function(g, statusCallback) {
 
         for (var ti = 0; ti < this.tiers.length; ++ti) {
             (function(tier) {
-                if (sourceAdapterIsCapable(tier.featureSource, 'search')) {
+                if (thisB.sourceAdapterIsCapable(tier.featureSource, 'search')) {
                     if (tier.dasSource.trixURI) {
                         ++searchCount;
                         if (tier.trix) {

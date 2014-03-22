@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git@github.com:dasmoth/dalliance.git"
   },
+  "dependencies": {
+    "jszlib": "dasmoth/jszlib"
+  },
   "devDependencies": {
     "gulp-concat": "~2.2.0",
     "gulp": "~3.5.6",

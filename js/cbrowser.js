@@ -1935,8 +1935,8 @@ Browser.prototype.leap = function(dir, fedge) {
     if (st < 0) return;
     var tier = thisB.tiers[st];
 
-    if (tier && ((tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
-                 || (tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')))) {
+    if (tier && ((tier.featureSource && this.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
+                 || (tier.featureSource && this.sourceAdapterIsCapable(tier.featureSource, 'leap')))) {
         tier.findNextFeature(
               thisB.chr,
               pos,

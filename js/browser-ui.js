@@ -238,9 +238,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (st >= 0)
             tier = b.tiers[st];
 
-        if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
+        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
             return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+LEFT)';
-        } else if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')) {
+        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
             return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+LEFT)';
         } else {
             return 'Jump left (shift+LEFT)';
@@ -256,9 +256,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (st >= 0)
             tier = b.tiers[st];
 
-        if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
+        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
             return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+RIGHT)';
-        } else if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')) {
+        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
             return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+RIGHT)';
         } else {
             return 'Jump right (shift+RIGHT)';

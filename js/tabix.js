@@ -272,7 +272,7 @@ TabixFile.prototype.readRecords = function(ba, offset, sink, min, max, chr) {
     }
 }
 
-if (typeof(module) !== 'module') {
+if (typeof(module) !== 'undefined') {
     module.exports = {
         connectTabix: connectTabix,
         TABIX_MAGIC: TABIX_MAGIC

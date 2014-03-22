@@ -11,6 +11,11 @@
 
 if (typeof(require) !== 'undefined') {
     var das = require('./das');
+    var DASSource = das.DASSource;
+    var DASSegment = das.DASSegment;
+
+    var utils = require('./utils');
+    var pusho = utils.pusho;
 }
 
 function Chainset(uri, srcTag, destTag, coords) {
@@ -23,7 +28,6 @@ function Chainset(uri, srcTag, destTag, coords) {
     this.postFetchQueues = {};
 };
 
-(function(scope) {
 
 var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
 
@@ -40,10 +44,6 @@ function parseCigar(cigar)
     }
     return cigops;
 }
-
-scope.parseCigar = parseCigar;
-
-}(this));
 
 Chainset.prototype.fetchChainsTo = function(chr) {
     var thisCS = this;

@@ -22,7 +22,7 @@ if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
 
-    var jszlib = require('../jszlib/js/inflate');
+    var jszlib = require('jszlib');
     var jszlib_inflate_buffer = jszlib.inflateBuffer;
     var arrayCopy = jszlib.arrayCopy;
 }

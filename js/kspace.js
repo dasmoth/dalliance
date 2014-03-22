@@ -315,7 +315,7 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
     }
 }
 
-if (typeof(module) !== null) {
+if (typeof(module) !== 'undefined') {
     module.exports = {
         KnownSpace: KnownSpace
     };

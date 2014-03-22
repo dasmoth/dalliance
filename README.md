@@ -21,10 +21,6 @@ is needed for the NPM package manager.
 
 To build:
 
-        git submodule init
-        git submodule update
-        # (or checkout with "git clone --recursive")
-
         (sudo?) npm install -g gulp
         npm install # Install dependencies
         gulp        # Build Dalliance

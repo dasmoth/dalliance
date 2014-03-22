@@ -19,10 +19,10 @@ if (typeof(require) !== 'undefined') {
     var das = require('./das');
     var isDasBooleanTrue = das.isDasBooleanTrue;
     var isDasBooleanNotFalse = das.isDasBooleanNotFalse;
+    var copyStylesheet = das.copyStylesheet;
 
     var color = require('./color');
     var dasColourForName = color.dasColourForName;
-    var copyStylesheet = das.copyStylesheet;
 }
 
 var __dalliance_smallGlyphs = {DOT: true, EX: true, STAR: true, SQUARE: true, CROSS: true, TRIANGLE: true, PLIMSOLL: true}
@@ -302,7 +302,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
 
-            if (isQuantitative && sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
+            if (isQuantitative && thisB.sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
                 quantLeapRow.style.display = 'table-row';
             else 
                 quantLeapRow.style.display = 'none';

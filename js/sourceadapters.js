@@ -42,7 +42,7 @@ if (typeof(require) !== 'undefined') {
     var spans = require('./spans');
     var Range = spans.Range;
 
-    var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
+    // var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
 }
 
 var __dalliance_sourceAdapterFactories = {};
@@ -1551,7 +1551,7 @@ JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     );
 }
 
-function sourceAdapterIsCapable(s, cap) {
+Browser.prototype.sourceAdapterIsCapable = function(s, cap) {
     if (!s.capabilities)
         return false;
     else return s.capabilities()[cap];
@@ -1570,4 +1570,6 @@ if (typeof(module) !== 'undefined') {
         DummyFeatureSource: DummyFeatureSource,
         DummySequenceSource: DummySequenceSource
     }
+
+    var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
 }
