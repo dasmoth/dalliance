@@ -2067,7 +2067,8 @@ FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
 if (typeof(module) !== 'undefined') {
     module.exports = {
         Browser: Browser,
-        sourcesAreEqual: sourcesAreEqual
+        sourcesAreEqual: sourcesAreEqual,
+        sourceDataURI: sourceDataURI
     };
 
     // Required because they add stuff to Browser.prototype

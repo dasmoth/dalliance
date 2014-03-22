@@ -26,6 +26,7 @@ if (typeof(require) !== 'undefined') {
     var DASSource = das.DASSource;
     var DASSegment = das.DASSegment;
     var DASFeature = das.DASFeature;
+    var DASSequence = das.DASSequence;
 
     var bin = require('./bin');
     var URLFetchable = bin.URLFetchable;
@@ -41,6 +42,8 @@ if (typeof(require) !== 'undefined') {
 
     var spans = require('./spans');
     var Range = spans.Range;
+
+    var parseCigar = require('./cigar').parseCigar;
 
     // var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
 }

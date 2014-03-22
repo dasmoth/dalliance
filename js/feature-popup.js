@@ -15,6 +15,7 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var pick = utils.pick;
+    var makeElement = utils.makeElement;
 }
 
 
@@ -154,4 +155,19 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     }        
 
     this.popit(ev, featureInfo.title || 'Feature', table, {width: 400});
+}
+
+function maybeConcat(a, b) {
+    var l = [];
+    if (a) {
+        for (var i = 0; i < a.length; ++i) {
+            pushnew(l, a[i]);
+        }
+    }
+    if (b) {
+        for (var i = 0; i < b.length; ++i) {
+            pushnew(l, b[i]);
+        }
+    }
+    return l;
 }

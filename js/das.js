@@ -828,6 +828,7 @@ if (typeof(module) !== 'undefined') {
         DASSource: DASSource,
         DASSegment: DASSegment,
         DASRegistry: DASRegistry,
+        DASSequence: DASSequence,
 
         isDasBooleanTrue: isDasBooleanTrue,
         isDasBooleanNotFalse: isDasBooleanNotFalse,

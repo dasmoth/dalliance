@@ -52,6 +52,8 @@ if (typeof(require) !== 'undefined') {
     var DASFeature = das.DASFeature;
     var isDasBooleanTrue = das.isDasBooleanTrue;
     var isDasBooleanNotFalse = das.isDasBooleanNotFalse;
+
+    var parseCigar = require('./cigar').parseCigar;
 }
 
 var MIN_PADDING = 3;

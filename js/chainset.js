@@ -16,6 +16,8 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var pusho = utils.pusho;
+
+    var parseCigar = require('./cigar').parseCigar;
 }
 
 function Chainset(uri, srcTag, destTag, coords) {
@@ -29,21 +31,7 @@ function Chainset(uri, srcTag, destTag, coords) {
 };
 
 
-var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
 
-function parseCigar(cigar)
-{
-    var cigops = [];
-    var match;
-    while ((match = CIGAR_REGEXP.exec(cigar)) != null) {
-        var count = match[1];
-        if (count.length == 0) {
-            count = 1;
-        }
-        cigops.push({cnt: count|0, op: match[2]});
-    }
-    return cigops;
-}
 
 Chainset.prototype.fetchChainsTo = function(chr) {
     var thisCS = this;

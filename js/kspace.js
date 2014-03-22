@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var Awaited = utils.Awaited;
+    var pusho = utils.pusho;
 
     var sa = require('./sourceadapters');
     var MappedFeatureSource = sa.MappedFeatureSource;
@@ -31,6 +32,9 @@ if (typeof(require) !== 'undefined') {
     var intersection = spans.intersection;
 
     var downsample = require('./sample').downsample;
+
+    var das = require('./das');
+    var DASSequence = das.DASSequence;
 }
 
 function FetchPool() {
