@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
@@ -11,26 +13,14 @@ if (typeof(require) !== 'undefined') {
     var spans = require('./spans');
     var union = spans.union;
     var Range = spans.Range;
-}
 
-function SVGPath() {
-    this.ops = [];
-}
+    var utils = require('./utils');
+    var makeElementNS = utils.makeElementNS;
 
-SVGPath.prototype.moveTo = function(x, y) {
-    this.ops.push('M ' + x + ' ' + y);
-}
-
-SVGPath.prototype.lineTo = function(x, y) {
-    this.ops.push('L ' + x + ' ' + y);
-}
-
-SVGPath.prototype.closePath = function() {
-    this.ops.push('Z');
-}
-
-SVGPath.prototype.toPathData = function() {
-    return this.ops.join(' ');
+    var svgu = require('./svg-utils');
+    var NS_SVG = svgu.NS_SVG;
+    var NS_XLINK = svgu.NS_XLINK;
+    var SVGPath = svgu.SVGPath;
 }
 
 function PathGlyphBase(stroke, fill) {
@@ -1019,7 +1009,8 @@ TextGlyph.prototype.toSVG = function() {
 var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
 
-function SequenceGlyph(min, max, height, seq, ref, scheme, quals) {
+function SequenceGlyph(baseColors, min, max, height, seq, ref, scheme, quals) {
+    this.baseColors = baseColors;
     this._min = min;
     this._max = max;
     this._height = height;
@@ -1047,7 +1038,7 @@ SequenceGlyph.prototype.draw = function(gc) {
 
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
-        var color = baseColors[base];
+        var color = this.baseColors[base];
         if (!color) {
             color = 'gray';
         }

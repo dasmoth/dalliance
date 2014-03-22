@@ -1,3 +1,5 @@
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
 // 
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2012
@@ -10,12 +12,24 @@
 if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var formatLongInt = utils.formatLongInt;
+    var makeElementNS = utils.makeElementNS;
+
+    var svgu = require('./svg-utils');
+    var NS_SVG = svgu.NS_SVG;
+    var NS_XLINK = svgu.NS_XLINK;
+    var SVGPath = svgu.SVGPath;
+
+    var nf = require('./numformats');
+    var formatLongInt = nf.formatLongInt;
 }
 
 var MIN_TILE = 100;
 var rulerTileColors = ['black', 'white'];
-var baseColors = {A: 'green', C: 'blue', G: 'black', T: 'red'};
+
 var steps = [1,2,5];
+
+
+var NS_SVG = 'http://www.w3.org/2000/svg';
 
 
 function tileSizeForScale(scale, min)
@@ -105,7 +119,7 @@ function drawSeqTier(tier, seq)
 		for (var p = knownStart; p <= knownEnd; ++p) {
 		    if (p >= seq.start && p <= seq.end) {
 				var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
-				var color = baseColors[base];
+				var color = tier.browser.baseColors[base];
 				if (!color) {
 		            color = 'gray';
 				}
@@ -141,57 +155,55 @@ function svgSeqTier(tier, seq) {
 
     var  g = makeElementNS(NS_SVG, 'g', [], {fontSize: '8pt'}); 
     while (pos <= seqTierMax) {
-	g.appendChild(
-	    makeElementNS(
-		NS_SVG, 'rect',
-		null,
-		{x: (pos-origin)*scale,
-		 y: 8,
-		 width: tile*scale,
-		 height: 3,
-		 fill: ((pos / tile) % 2 == 0) ? 'white' : 'black',
-		 stroke: 'black'}));
+    	g.appendChild(
+    	    makeElementNS(
+    		NS_SVG, 'rect',
+    		null,
+    		{x: (pos-origin)*scale,
+    		 y: 8,
+    		 width: tile*scale,
+    		 height: 3,
+    		 fill: ((pos / tile) % 2 == 0) ? 'white' : 'black',
+    		 stroke: 'black'}));
 
-	g.appendChild(
-	    makeElementNS(
-		NS_SVG, 'text',
-		formatLongInt(pos),
-		{x: (pos-origin)*scale,
-		 y: 28,
-		 fill: 'black', stroke: 'none'}));
-	
-	pos += tile;
+    	g.appendChild(
+    	    makeElementNS(
+    		NS_SVG, 'text',
+    		formatLongInt(pos),
+    		{x: (pos-origin)*scale,
+    		 y: 28,
+    		 fill: 'black', stroke: 'none'}));
+    	
+    	pos += tile;
     }
 
     if (seq && seq.seq) {
-	for (var p = knownStart; p <= knownEnd; ++p) {
-	    if (p >= seq.start && p <= seq.end) {
-		var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
-		var color = baseColors[base];
-		if (!color) {
+    	for (var p = knownStart; p <= knownEnd; ++p) {
+    	    if (p >= seq.start && p <= seq.end) {
+        		var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
+        		var color = baseColors[base];
+        		if (!color) {
                     color = 'gray';
-		}
+        		}
 
+        		if (scale >= 8) {
+        		    g.appendChild(
+        			makeElementNS(NS_SVG, 'text', base, {
+        			    x: (p-origin)*scale,
+        			    y: 52,
+        			    fill: color}));
+        		} else {
+        		    g.appendChild(
+        			makeElementNS(NS_SVG, 'rect', null, {
+        			    x: (p - origin)*scale,
+        			    y: 42,
+        			    width: scale,
+        			    height: 12,
+        	            fill: color}));
 
-		if (scale >= 8) {
-		    // gc.fillText(base, (p - origin) * scale, 12);
-		    g.appendChild(
-			makeElementNS(NS_SVG, 'text', base, {
-			    x: (p-origin)*scale,
-			    y: 52,
-			    fill: color}));
-		} else {
-		    g.appendChild(
-			makeElementNS(NS_SVG, 'rect', null, {
-			    x: (p - origin)*scale,
-			    y: 42,
-			    width: scale,
-			    height: 12,
-	                    fill: color}));
-
-		}
-	    }
-	}
+        		}
+    	    }
+    	}
     } 
 
     return g;
@@ -199,6 +211,7 @@ function svgSeqTier(tier, seq) {
 
 if (typeof(module) !== 'undefined') {
     module.exports = {
-        drawSeqTier: drawSeqTier
+        drawSeqTier: drawSeqTier,
+        svgSeqTier: svgSeqTier
     };
 }

@@ -16,7 +16,9 @@ if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var makeElement = utils.makeElement;
     var removeChildren = utils.removeChildren;
-    var formatLongInt = utils.formatLongInt;
+
+    var nf = require('./numformats');
+    var formatLongInt = nf.formatLongInt;
 
     // For side effects
 

@@ -91,20 +91,7 @@ function pushnew(l, o)
     l.push(o);
 }
 
-function maybeConcat(a, b) {
-    var l = [];
-    if (a) {
-        for (var i = 0; i < a.length; ++i) {
-            pushnew(l, a[i]);
-        }
-    }
-    if (b) {
-        for (var i = 0; i < b.length; ++i) {
-            pushnew(l, b[i]);
-        }
-    }
-    return l;
-}
+
 
 function arrayIndexOf(a, x) {
     if (!a) {
@@ -379,10 +366,6 @@ function relativeURL(base, rel) {
     }
 }
 
-function formatLongInt(n) {
-    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
-
 //
 // Missing APIs
 // 
@@ -412,7 +395,5 @@ if (typeof(module) !== 'undefined') {
 
         Observed: Observed,
         Awaited: Awaited,
-
-        formatLongInt: formatLongInt
     }
 }

@@ -28,11 +28,12 @@ if (typeof(require) !== 'undefined') {
     var connectTrackHub = thub.connectTrackHub;
 
     var VERSION = require('./version');
+
+    var nf = require('./numformats');
+    var formatQuantLabel = nf.formatQuantLabel;
 }
 
-var NS_SVG = 'http://www.w3.org/2000/svg';
-var NS_HTML = 'http://www.w3.org/1999/xhtml';
-var NS_XLINK = 'http://www.w3.org/1999/xlink';
+
 
 function Region(chr, min, max) {
     this.min = min;
@@ -104,6 +105,12 @@ function Browser(opts) {
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 20;
     this.noDefaultLabels = false;
+    this.baseColors = {
+        A: 'green', 
+        C: 'blue', 
+        G: 'black', 
+        T: 'red'
+    };
 
     // Registry
 

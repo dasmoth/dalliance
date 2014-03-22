@@ -10,7 +10,24 @@
 if (typeof(require) !== 'undefined') {
     var browser = require('./cbrowser');
     var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var makeElementNS = utils.makeElementNS;
+
+    var VERSION = require('./version');
+
+    var svgSeqTier = require('./sequence-draw').svgSeqTier;
+
+    var svgu = require('./svg-utils');
+    var NS_SVG = svgu.NS_SVG;
+    var NS_XLINK = svgu.NS_XLINK;
+    var SVGPath = svgu.SVGPath;
+
+    var nf = require('./numformats');
+    var formatQuantLabel = nf.formatQuantLabel;
 }
+
 
 Browser.prototype.makeSVG = function(opts) {
     opts = opts || {};

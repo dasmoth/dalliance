@@ -302,7 +302,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
 
-            if (isQuantitative && thisB.sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
+            if (isQuantitative && tier.browser.sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
                 quantLeapRow.style.display = 'table-row';
             else 
                 quantLeapRow.style.display = 'none';

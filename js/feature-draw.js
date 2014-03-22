@@ -54,6 +54,9 @@ if (typeof(require) !== 'undefined') {
     var isDasBooleanNotFalse = das.isDasBooleanNotFalse;
 
     var parseCigar = require('./cigar').parseCigar;
+
+    var nf = require('./numformats');
+    var formatQuantLabel = nf.formatQuantLabel;
 }
 
 var MIN_PADDING = 3;
@@ -351,24 +354,7 @@ function drawFeatureTier(tier)
     // console.log('dft took ' + (end-start) + 'ms');
 }
 
-function formatQuantLabel(v) {
-    var t = '' + v;
-    var dot = t.indexOf('.');
-    if (dot < 0) {
-        return t;
-    } else {
-        var dotThreshold = 2;
-        if (t.substring(0, 1) == '-') {
-            ++dotThreshold;
-        }
 
-        if (dot >= dotThreshold) {
-            return t.substring(0, dot);
-        } else {
-            return t.substring(0, dot + 2);
-        }
-    }
-}
 
 DasTier.prototype.paint = function() {
     var start = Date.now()|0;
@@ -965,7 +951,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
+        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {
