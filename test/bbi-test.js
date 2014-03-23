@@ -7,6 +7,9 @@
 // bbi-test.js
 //
 
+var bbi = require('../js/bigwig');
+var bin = require('../js/bin');
+
 describe('bigbed files', function() {
     var bbURI = 'http://www.biodalliance.org/datasets/tests/test-leap.bb';
     // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';
@@ -14,7 +17,7 @@ describe('bigbed files', function() {
     it('can be created by connecting to a URI', function() {
         var cb, err;
         runs(function() {
-             makeBwgFromURL(bbURI,
+             bbi.makeBwg(new bin.URLFetchable(bbURI),
                 function(_bb, _err) {
                     bb = _bb;
                     err = _err;
@@ -135,7 +138,7 @@ describe('BBI objects', function() {
     it('can be created by connecting to a URI', function() {
         var cb, err;
         runs(function() {
-           makeBwgFromURL(ensGeneURI,
+           bbi.makeBwg(new bin.URLFetchable(ensGeneURI),
                 function(_bb, _err) {
                     bb = _bb;
                     err = _err;

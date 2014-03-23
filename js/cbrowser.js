@@ -2084,6 +2084,7 @@ if (typeof(module) !== 'undefined') {
     require('./feature-popup');
     require('./tier-actions');
     require('./domui');
+    require('./search');
 
     var sa = require('./sourceadapters');
     var TwoBitSequenceSource = sa.TwoBitSequenceSource;

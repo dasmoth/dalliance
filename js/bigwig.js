@@ -22,6 +22,9 @@ if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
 
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+
     var jszlib = require('jszlib');
     var jszlib_inflate_buffer = jszlib.inflateBuffer;
     var arrayCopy = jszlib.arrayCopy;

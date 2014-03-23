@@ -26,6 +26,7 @@ if (typeof(require) !== 'undefined') {
     var readVob = lh3utils.readVob;
     var unbgzf = lh3utils.unbgzf;
     var reg2bins = lh3utils.reg2bins;
+    var Chunk = lh3utils.Chunk;
 }
 
 
@@ -35,9 +36,6 @@ var BAI_MAGIC = 21578050;
 function BamFile() {
 }
 
-function Chunk(minv, maxv) {
-    this.minv = minv; this.maxv = maxv;
-}
 
 function makeBam(data, bai, callback) {
     var bam = new BamFile();

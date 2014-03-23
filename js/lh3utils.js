@@ -62,6 +62,11 @@ function unbgzf(data, lim) {
     }
 }
 
+function Chunk(minv, maxv) {
+    this.minv = minv; this.maxv = maxv;
+}
+
+
 //
 // Binning (transliterated from SAM1.3 spec)
 //
@@ -98,6 +103,7 @@ if (typeof(module) !== 'undefined') {
         unbgzf: unbgzf,
         readVob: readVob,
         reg2bin: reg2bin,
-        reg2bins: reg2bins
+        reg2bins: reg2bins,
+        Chunk: Chunk
     };
 }

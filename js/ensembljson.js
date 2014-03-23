@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var sa = require('./sourceadapters');
+    var dalliance_registerSourceAdapterFactory = sa.registerSourceAdapterFactory;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+}
+
 function EnsemblFeatureSource(source) {
     this.source = source;
     this.base = source.uri || 'http://beta.rest.ensembl.org';
@@ -167,9 +178,6 @@ EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     wigStyle.LABEL = true;
     wigStyle.ZINDEX = 20;
     stylesheet.pushStyle({type: 'default'}, null, wigStyle);
-
-
-
     return callback(stylesheet);
 }
 
@@ -180,7 +188,7 @@ EnsemblFeatureSource.prototype.getScales = function() {
 
 EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
-    url = this.base + '/feature/region/' + this.species + '/' + chr + ':' + min + '-' + max;
+    var url = this.base + '/feature/region/' + this.species + '/' + chr + ':' + min + '-' + max;
 
     var filters = [];
     for (var ti = 0; ti < this.type.length; ++ti) {
@@ -208,7 +216,7 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     	    } else {
         		var jf = JSON.parse(req.response);
         		var features = [];
-        		for (fi = 0; fi < jf.length; ++fi) {
+        		for (var fi = 0; fi < jf.length; ++fi) {
         		    var j = jf[fi];
 
         		    var notes = [];

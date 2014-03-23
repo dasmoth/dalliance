@@ -9,6 +9,25 @@
 
 "use strict";
 
+if (typeof(module) !== 'undefined') {
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+    var readShort = bin.readShort;
+
+    var zlib = require('jszlib');
+    var jszlib_inflate_buffer = zlib.inflateBuffer;
+}
+
+// FIXME redundant...
+var M1 = 256;
+var M2 = 256*256;
+var M3 = 256*256*256;
+var M4 = 256*256*256*256;
+function bwg_readOffset(ba, o) {
+    var offset = ba[o] + ba[o+1]*M1 + ba[o+2]*M2 + ba[o+3]*M3 + ba[o+4]*M4;
+    return offset;
+}
+
 var BIGTAB_MAGIC = 0x8789F2EB;
 var BPT_MAGIC    = 0x78ca8c91;
   
@@ -168,5 +187,11 @@ BigTabIndex.prototype.readValue = function(ba, offset, valSize, callback) {
             callback(record);
         }
     });
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        connectBigTab: connectBigTab
+    };
 }
 

@@ -15,6 +15,7 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var pick = utils.pick;
+    var pushnew = utils.pushnew;
     var makeElement = utils.makeElement;
 }
 

@@ -57,3 +57,9 @@ TrixIndex.prototype.lookup = function(query, callback) {
         return callback(null);
     });
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        connectTrix: connectTrix
+    };
+}

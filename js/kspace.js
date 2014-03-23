@@ -89,7 +89,6 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
 }
 
 KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
-    // dlog('viewFeatures(' + chr + ', ' + min + ', ' + max + ', ' + scale +')');
     if (scale != scale) {
         throw "viewFeatures called with silly scale";
     }
@@ -181,7 +180,6 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
 
     if (needSeq && !this.seqWasFetched) {
         this.seqWasFetched = true;
-        // dlog('needSeq ' + this.chr + ':' + this.min + '..' + this.max);
         var smin = this.min, smax = this.max;
 
         if (this.cs) {
@@ -207,7 +205,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 }
                 awaitedSeq.provide(seq);
             } else {
-                dlog('Noseq: ' + miniJSONify(err));
+                console.log('Sequence loading failed', err);
                 awaitedSeq.provide(null);
             }
         });
@@ -229,11 +227,9 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 
     if (wantedTypes === undefined) {
-//         dlog('skipping because wantedTypes is undef');
         return false;
     }
     if (baton) {
-//      dlog('considering cached features: ' + baton);
     }
     if (baton && baton.chr === this.chr && baton.min <= min && baton.max >= max) {
         var cachedFeatures = baton.features;
@@ -241,21 +237,12 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
             cachedFeatures = filterFeatures(cachedFeatures, min, max);
         }
         
-        // dlog('cached scale=' + baton.scale + '; wanted scale=' + thisB.scale);
-//      if ((baton.scale < (thisB.scale/2) && cachedFeatures.length > 200) || (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0) ) {
-//          cachedFeatures = downsample(cachedFeatures, thisB.scale);
-//      }
-//      console.log('Provisioning ' + tier.toString() + ' with ' + cachedFeatures.length + ' features from cache (' + baton.min + ', ' + baton.max + ')');
-//      tier.viewFeatures(baton.chr, Math.max(baton.min, this.min), Math.min(baton.max, this.max), baton.scale, cachedFeatures);   // FIXME change scale if downsampling
-
         thisB.provision(tier, baton.chr, intersection(baton.coverage, new Range(min, max)), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
 
         var availableScales = source.getScales();
         if (baton.scale <= this.scale || !availableScales) {
-//          dlog('used cached features');
             return needsSeq;
         } else {
-//          dlog('used cached features (temporarily)');
         }
     }
 

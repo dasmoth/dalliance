@@ -10,6 +10,13 @@
 "use strict";
 
 if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var bin = require('./bin');
+    var URLFetchable = bin.URLFetchable;
+
+    var connectTrix = require('./trix').connectTrix;
 }
 
 var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,]+)([KkMmGg])?([\-,\,.]+([0-9,]+)([KkMmGg])?)?/;

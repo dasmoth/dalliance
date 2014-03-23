@@ -728,7 +728,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 if (custUser.value.length > 1 && custPass.value.length > 1) {
-                    dlog('password');
                     dataToFinalize.xUser = custUser.value;
                     dataToFinalize.xPass = custPass.value;
                 }
@@ -852,7 +851,6 @@ Browser.prototype.showTrackAdder = function(ev) {
         nds.features(testSegment, {}, function(features, status) {
             if (status) {
                 if (!retry) {
-                    dlog('retrying with credentials');
                     nds.credentials = true;
                     tryAddDAS(nds, true);
                 } else {
