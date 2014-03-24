@@ -78,6 +78,7 @@ gulp.task('dalliance-compiled', function() {
     debug: true,
     nobuiltins: true
   }))
+ // .rename('dalliance-all.js')
   .pipe(gulp.dest('build/'));
 });
 

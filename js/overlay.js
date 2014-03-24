@@ -9,6 +9,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+}
+
 function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};

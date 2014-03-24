@@ -9,6 +9,22 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var sa = require('./sourceadapters');
+    var dalliance_registerSourceAdapterFactory = sa.registerSourceAdapterFactory;
+    var dalliance_makeParser = sa.makeParser;
+    var FeatureSourceBase = sa.FeatureSourceBase;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+
+    var utils = require('./utils');
+    var Awaited = utils.Awaited;
+}
+
 function MemStore() {
     this.featuresByChr = {};
     this.maxLength = 1;

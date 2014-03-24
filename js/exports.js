@@ -11,6 +11,7 @@ var browser = require('./cbrowser');
 var chainset = require('./chainset');
 var sa = require('./sourceadapters');
 var utils = require('./utils');
+var das = require('./das');
 
 window.Browser = browser.Browser;
 window.Chainset = chainset.Chainset;
@@ -22,3 +23,10 @@ window.makeElement = utils.makeElement;
 window.dalliance_registerSourceAdapterFactory = sa.registerSourceAdapterFactory;
 window.dalliance_registerParserFactory = sa.registerParserFactory;
 window.dalliance_makeParser = sa.makeParser;
+
+// DAS* objects for some plugins -- remove when plugin API changes...
+
+window.DASFeature = das.DASFeature;
+window.DASGroup = das.DASGroup;
+window.DASStylesheet = das.DASStylesheet;
+window.DASStyle = das.DASStyle;

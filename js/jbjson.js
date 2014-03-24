@@ -7,12 +7,18 @@
 // jbjson.js -- query JBrowse-style REST data stores
 //
 
+if (typeof(require) !== 'undefined') {
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+}
+
 function JBrowseStore(base, query) {
     this.base = base;
     this.query = query;
 }
-
-var topLevelResp;
 
 JBrowseStore.prototype.features = function(segment, opts, callback) {
     opts = opts || {};
@@ -21,21 +27,21 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 
     var filters = [];
     if (this.query) {
-	filters.push(this.query);
+	   filters.push(this.query);
     }
     if (segment.isBounded) {
-	filters.push('start=' + segment.start);
-	filters.push('end=' + segment.end);
+    	filters.push('start=' + segment.start);
+    	filters.push('end=' + segment.end);
     }
     if (filters.length > 0) {
-	url = url + '?' + filters.join('&');
+	    url = url + '?' + filters.join('&');
     }
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
 	if (req.readyState == 4) {
 	    if (req.status >= 300) {
-		callback(null, 'Error code ' + req.status);
+		    callback(null, 'Error code ' + req.status);
 	    } else {
 		var jf = JSON.parse(req.response)['features'];
 		var features = [];
@@ -62,4 +68,10 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
     req.open('GET', url, true);
     req.responseType = 'text';
     req.send('');
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        JBrowseStore: JBrowseStore
+    };
 }

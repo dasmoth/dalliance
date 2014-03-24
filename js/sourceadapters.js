@@ -46,6 +46,8 @@ if (typeof(require) !== 'undefined') {
     var parseCigar = require('./cigar').parseCigar;
 
     var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
+
+    var JBrowseStore = require('./jbjson').JBrowseStore;
 }
 
 var __dalliance_sourceAdapterFactories = {};
@@ -1507,6 +1509,8 @@ Browser.prototype.sourceAdapterIsCapable = function(s, cap) {
 
 if (typeof(module) !== 'undefined') {
     module.exports = {
+        FeatureSourceBase: FeatureSourceBase,
+
         TwoBitSequenceSource: TwoBitSequenceSource,
         DASSequenceSource: DASSequenceSource,
         MappedFeatureSource: MappedFeatureSource,
@@ -1523,5 +1527,9 @@ if (typeof(module) !== 'undefined') {
         makeParser: dalliance_makeParser
     }
 
+    // Standard set of plugins.
     require('./ensembljson');
+    require('./memstore');
+    require('./bedwig');
+    require('./vcf');
 }
