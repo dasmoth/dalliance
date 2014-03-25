@@ -21,6 +21,8 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var Awaited = utils.Awaited;
+
+    var connectTabix = require('./tabix').connectTabix;
 }
 
 function TabixFeatureSource(source) {

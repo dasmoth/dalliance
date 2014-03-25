@@ -1529,6 +1529,7 @@ if (typeof(module) !== 'undefined') {
 
     // Standard set of plugins.
     require('./ensembljson');
+    require('./tabix-source');
     require('./memstore');
     require('./bedwig');
     require('./vcf');
