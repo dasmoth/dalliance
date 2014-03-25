@@ -19,6 +19,7 @@
     "karma-chrome-launcher": "~0.1.2",
     "karma-jasmine": "~0.1.5",
     "browserify": "~3.33.0",
-    "karma-browserify": "~0.1.0"
+    "karma-browserify": "~0.1.0",
+    "gulp-rename": "~1.2.0"
   }
 }

@@ -394,6 +394,6 @@ if (typeof(module) !== 'undefined') {
         miniJSONify: miniJSONify,
 
         Observed: Observed,
-        Awaited: Awaited,
+        Awaited: Awaited
     }
 }

@@ -229,8 +229,6 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     if (wantedTypes === undefined) {
         return false;
     }
-    if (baton) {
-    }
     if (baton && baton.chr === this.chr && baton.min <= min && baton.max >= max) {
         var cachedFeatures = baton.features;
         if (baton.min < min || baton.max > max) {

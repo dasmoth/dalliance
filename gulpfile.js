@@ -2,88 +2,62 @@ var gulp = require('gulp');
 var gconcat = require('gulp-concat');
 var closure = require('gulp-closure-compiler');
 var browserify = require('gulp-browserify');
+var rename = require('gulp-rename');
+// var utils = require('gulp-util');
+// var gif = require('gulp-if');
 
-var mainSrc = [
-  'bam',
-  'bigwig',
-  'bin',
-  'cbrowser',
-  'feature-popup',
-  'chainset',
-  'color',
-  'das',
-  'domui',
-  'feature-draw',
-  'sequence-draw',
-  'features',
-  'feature-popup',
-  'kspace',
-  'sample',
-  'sha1',
-  'svg-export',
-  'spans',
-  'thub',
-  'tier',
-  'track-adder',
-  'twoBit',
-  'utils',
-  'version',
-  'browser-ui',
-  'glyphs',
-  'session',
-  'sourceadapters',
-  'jbjson',
-  'ensembljson',
-  'overlay',
-  'tier-actions',
-  'search',
-  'tier-edit',
-  'trix',
-  'tabix',
-  'tabix-source',
-  'memstore',
-  'vcf',
-  'bedwig',
-  'probe',
-  'export-ui',
-  'export-config'].map(function(n) {return "js/" + n + ".js"});
+/* Want to gulp-if conditional compile everything, but currently doesn't seem to work */
 
-var moduleShims = {
-      jszlib: {
-        path: 'jszlib/js/inflate.js',
-        exports: 'jszlib_inflate_buffer'
-      }
-    };
-
-gulp.task('dalliance-compiled-old', function() {
-   return gulp.src(mainSrc.concat(['jszlib/js/inflate.js', 'polyfills/html5slider.js']))
-     .pipe(gconcat('dalliance-all.js'))
-     .pipe(gulp.dest('build/'))
-     .pipe(closure())
-     .pipe(gulp.dest('build/')); 
-});
-
-gulp.task('dalliance-worker', function() {
+gulp.task('build-worker', function() {
   gulp.src('js/fetchworker.js')
   .pipe(browserify({
     debug: true,
     nobuiltins: true
   }))
+  .pipe(rename('worker-all.js'))
   .pipe(gulp.dest('build/'));
 });
 
-gulp.task('dalliance-compiled', function() {
+
+gulp.task('build-main', function() {
   gulp.src('js/exports.js')
   .pipe(browserify({
     debug: true,
     nobuiltins: true
   }))
- // .rename('dalliance-all.js')
+  .pipe(rename('dalliance-all.js'))
+  .pipe(gulp.dest('build/'));
+});
+
+gulp.task('compile-worker', function() {
+  gulp.src('js/fetchworker.js')
+  .pipe(browserify({
+    debug: true,
+    nobuiltins: true
+  }))
+  .pipe(rename('worker-all.js'))
+  .pipe(gulp.dest('tmp/'))
+  // .pipe(gif(!isDev, closure()))   // Doesn't work
+  .pipe(closure())
+  .pipe(gulp.dest('build/'));
+});
+
+gulp.task('compile-main', function() {
+  gulp.src('js/exports.js')
+  .pipe(browserify({
+    debug: true,
+    nobuiltins: true
+  }))
+  .pipe(rename('dalliance-all.js'))
+  .pipe(gulp.dest('tmp/'))
+  // .pipe(gif(!isDev, closure()))   // Doesn't work
+  .pipe(closure())
   .pipe(gulp.dest('build/'));
 });
 
 gulp.task('watch', function() {
-  gulp.watch('js/*.js', ['dalliance-compiled']);
+  gulp.watch('js/*.js', ['default']);
 });
 
-gulp.task('default', ['dalliance-compiled']);
+gulp.task('default', ['build-main', 'build-worker']);
+gulp.task('compile', ['compile-main', 'compile-worker']);

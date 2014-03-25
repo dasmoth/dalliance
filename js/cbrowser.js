@@ -75,7 +75,7 @@ function Browser(opts) {
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
     this.zoomMin = 10.0;
-    this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
+    // this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
     this.origin = 0;
     this.targetQuantRes = 1.0;
     this.featurePanelWidth = 750;
