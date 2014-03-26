@@ -30,7 +30,8 @@ function probeResource(source, listener, retry) {
         }
 
         var ba = new Uint8Array(result);
-        var magic = readInt(ba, 0);
+        var la = new Uint32Array(result);
+        var magic = la[0];
         if (magic == BIG_WIG_MAGIC || magic == BIG_BED_MAGIC) {
             source.tier_type = 'bwg';
             var nameExtractPattern = new RegExp('/?([^/]+?)(.bw|.bb|.bigWig|.bigBed)?$');
