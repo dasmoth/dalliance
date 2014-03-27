@@ -271,3 +271,39 @@ TabixFile.prototype.readRecords = function(ba, offset, sink, min, max, chr) {
         return;
     }
 }
+
+TabixFile.prototype.fetchHeader = function(callback) {
+    var self = this;
+    var fetchPtr = 0, ptr = 0, ba = null, line='';
+    var lines = [];
+
+    function tramp() {
+        if (!ba || ptr >= ba.length) {
+            self.data.slice(fetchPtr, 1<<15).fetch(function(chnk) {
+                if (!chnk) {
+                    return callback(null, "Fetch failed");
+                }
+                ba = new Uint8Array(unbgzf(chnk));
+                return tramp();
+            });
+        } else {
+            while (ptr < ba.length) {
+                var ch = ba[ptr++]
+                if (ch == 10) {
+                    if (line.charCodeAt(0) == self.meta) {
+                        lines.push(line);
+                        line = '';
+                    } else {
+                        return callback(lines);
+                    }
+                } else {
+                    line += String.fromCharCode(ch);
+                }
+            }
+            // FIXME handle  header extending beyond first chunk.
+            callback(lines);
+        }
+    }
+
+    tramp();
+}

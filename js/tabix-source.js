@@ -35,6 +35,15 @@ function TabixFeatureSource(source) {
     }
     connectTabix(data, index, function(tabix, err) {
         thisB.tabixHolder.provide(tabix);
+        tabix.fetchHeader(function(lines, err) {
+            if (lines) {
+                var session = parser.createSession(function() { /* Null sink because we shouldn't get records */ });
+                for (var li = 0; li < lines.length; ++li) {
+                    session.parse(lines[li]);
+                }
+                session.flush();
+            }
+        });
         thisB.readiness = null
         thisB.notifyReadiness();
     });

@@ -144,5 +144,5 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
             makeElement('td', section.info)]));
     }        
 
-    this.popit(ev, featureInfo.title || 'Feature', table, {width: 400});
+    this.popit(ev, featureInfo.title || 'Feature', table, {width: 450});
 }
