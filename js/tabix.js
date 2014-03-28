@@ -98,6 +98,8 @@ function connectTabix(data, tbi, callback) {
             }                     
         }
 
+        tabix.headerMax = minBlockIndex;
+
         callback(tabix);
     });
 }
@@ -122,7 +124,6 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
     for (var b = 0; b < nbin; ++b) {
         var bin = readInt(index, p);
         var nchnk = readInt(index, p+4);
-//        dlog('bin=' + bin + '; nchnk=' + nchnk);
         p += 8;
         if (intBins[bin]) {
             for (var c = 0; c < nchnk; ++c) {
@@ -135,8 +136,6 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
             p +=  (nchnk * 16);
         }
     }
-    // console.log('leafChunks = ' + miniJSONify(leafChunks));
-    // console.log('otherChunks = ' + miniJSONify(otherChunks));
 
     var nintv = readInt(index, p);
     var lowest = null;
@@ -150,7 +149,6 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
             lowest = lb;
         }
     }
-   //  console.log('Lowest LB = ' + lowest);
     
     var prunedOtherChunks = [];
     if (lowest != null) {
@@ -161,7 +159,6 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
             }
         }
     } 
-    // console.log('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
     otherChunks = prunedOtherChunks;
 
     var intChunks = [];
@@ -194,7 +191,6 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
-    // console.log('mergedChunks = ' + miniJSONify(mergedChunks));
 
     return mergedChunks;
 }
@@ -274,36 +270,28 @@ TabixFile.prototype.readRecords = function(ba, offset, sink, min, max, chr) {
 
 TabixFile.prototype.fetchHeader = function(callback) {
     var self = this;
-    var fetchPtr = 0, ptr = 0, ba = null, line='';
+    var fetchPtr = 0, ptr = 0, line='';
     var lines = [];
 
-    function tramp() {
-        if (!ba || ptr >= ba.length) {
-            self.data.slice(fetchPtr, 1<<15).fetch(function(chnk) {
-                if (!chnk) {
-                    return callback(null, "Fetch failed");
-                }
-                ba = new Uint8Array(unbgzf(chnk));
-                return tramp();
-            });
-        } else {
-            while (ptr < ba.length) {
-                var ch = ba[ptr++]
-                if (ch == 10) {
-                    if (line.charCodeAt(0) == self.meta) {
-                        lines.push(line);
-                        line = '';
-                    } else {
-                        return callback(lines);
-                    }
-                } else {
-                    line += String.fromCharCode(ch);
-                }
-            }
-            // FIXME handle  header extending beyond first chunk.
-            callback(lines);
+    self.data.slice(0, self.headerMax).fetch(function(chnk) {
+        if (!chnk) {
+            return callback(null, "Fetch failed");
         }
-    }
-
-    tramp();
+        var ba = new Uint8Array(unbgzf(chnk, chnk.byteLength));
+        var ptr = 0, line = '', lines = [];
+        while (ptr < ba.length) {
+            var ch = ba[ptr++]
+            if (ch == 10) {
+                if (line.charCodeAt(0) == self.meta) {
+                    lines.push(line);
+                    line = '';
+                } else {
+                    return callback(lines);
+                }
+            } else {
+                line += String.fromCharCode(ch);
+            }
+        }
+        callback(lines);
+    });
 }

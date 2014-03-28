@@ -91,7 +91,7 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         }
         var row = makeElement('tr', [
             makeElement('th', 'Location'),
-            makeElement('td', loc.segment + ':' + loc.min + '-' + loc.max)
+            makeElement('td', loc.segment + ':' + loc.min + '-' + loc.max, {}, {minWidth: '200px'})
         ]);
         table.appendChild(row);
         ++idx;
