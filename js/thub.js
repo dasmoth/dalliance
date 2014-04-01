@@ -286,6 +286,14 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 source.credentials = true;
             }
             return source;
+        } else if (typeToks[0] == 'vcfTabix') {
+            source.uri = relativeURL(this._db.absURL, this.bigDataUrl);
+            source.tier_type = 'tabix';
+            source.payload = 'vcf';
+            if (this._db.credentials) {
+                source.credentials = true;
+            }
+            return source;
         } else {
             console.log('Unsupported ' + this.type);
         }
