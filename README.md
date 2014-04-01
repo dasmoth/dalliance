@@ -25,6 +25,8 @@ To build:
         npm install # Install dependencies
         gulp        # Build Dalliance
 
+...then open the `test37-compiled.html` file to test.
+
 Adding extra data
 -----------------
 
