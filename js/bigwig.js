@@ -9,10 +9,33 @@
 
 "use strict";
 
+
+if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
+    var das = require('./das');
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+
+    var jszlib = require('jszlib');
+    var jszlib_inflate_buffer = jszlib.inflateBuffer;
+    var arrayCopy = jszlib.arrayCopy;
+}
+
 var BIG_WIG_MAGIC = 0x888FFC26;
 var BIG_WIG_MAGIC_BE = 0x26FC8F88;
 var BIG_BED_MAGIC = 0x8789F2EB;
 var BIG_BED_MAGIC_BE = 0xEBF28987;
+
 
 var BIG_WIG_TYPE_GRAPH = 1;
 var BIG_WIG_TYPE_VSTEP = 2;
@@ -414,7 +437,9 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                 featureOpts.label = bedColumns[0];
             }
             if (bedColumns.length > 1 && dfc > 4) {
-                featureOpts.score = stringToInt(bedColumns[1]);
+                var score = parseInt(bedColumns[1]);
+                if (!isNaN(score))
+                    featureOpts.score = score;
             }
             if (bedColumns.length > 2 && dfc > 5) {
                 featureOpts.orientation = bedColumns[2];
@@ -1042,4 +1067,12 @@ BBIExtraIndex.prototype.lookup = function(name, callback) {
 
         bptReadNode(thisB.offset + rootNodeOffset);
     });
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeBwg: makeBwg,
+        BIG_BED_MAGIC: BIG_BED_MAGIC,
+        BIG_WIG_MAGIC: BIG_WIG_MAGIC
+    }
 }

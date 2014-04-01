@@ -9,6 +9,47 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var tier = require('./tier');
+    var DasTier = tier.DasTier;
+
+    var utils = require('./utils')
+    var Awaited = utils.Awaited;
+    var arrayIndexOf = utils.arrayIndexOf;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASSource = das.DASSource;
+    var DASSegment = das.DASSegment;
+    var DASFeature = das.DASFeature;
+    var DASSequence = das.DASSequence;
+
+    var bin = require('./bin');
+    var URLFetchable = bin.URLFetchable;
+    var BlobFetchable = bin.BlobFetchable;
+
+    var twoBit = require('./twoBit');
+    var makeTwoBit = twoBit.makeTwoBit;
+
+    var bbi = require('./bigwig');
+    var makeBwg = bbi.makeBwg;
+
+    var makeBam = require('./bam').makeBam;
+
+    var spans = require('./spans');
+    var Range = spans.Range;
+
+    var parseCigar = require('./cigar').parseCigar;
+
+    var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
+
+    var JBrowseStore = require('./jbjson').JBrowseStore;
+}
+
 var __dalliance_sourceAdapterFactories = {};
 
 function dalliance_registerSourceAdapterFactory(type, factory) {
@@ -16,20 +57,17 @@ function dalliance_registerSourceAdapterFactory(type, factory) {
 };
 
 
-(function(global) {
-    var __dalliance_parserFactories = {};
+var __dalliance_parserFactories = {};
 
-    global.dalliance_registerParserFactory = function(type, factory) {
-        __dalliance_parserFactories[type] = factory;
-    };
+function dalliance_registerParserFactory(type, factory) {
+    __dalliance_parserFactories[type] = factory;
+};
 
-    global.dalliance_makeParser = function(type) {
-        if (__dalliance_parserFactories[type]) {
-            return __dalliance_parserFactories[type](type);
-        }
-    };
-}(this));
-
+function dalliance_makeParser(type) {
+    if (__dalliance_parserFactories[type]) {
+        return __dalliance_parserFactories[type](type);
+    }
+};
 
 
 DasTier.prototype.initSources = function() {
@@ -54,7 +92,6 @@ DasTier.prototype.initSources = function() {
             thisTier.browser.refreshTier(thisTier);
         });
     }
-
 }
 
 Browser.prototype.createFeatureSource = function(config) {
@@ -78,8 +115,6 @@ Browser.prototype.createFeatureSource = function(config) {
             fs = new RemoteBAMFeatureSource(config, worker);
         else
             fs = new BAMFeatureSource(config);
-    } else if (config.bamblrURI) {
-        fs = new BamblrFeatureSource(config);
     } else if (config.jbURI) {
         fs = new JBrowseFeatureSource(config);
     } else if (config.uri || config.features_uri) {
@@ -112,30 +147,15 @@ Browser.prototype.createFeatureSource = function(config) {
     return fs;
 }
 
-function SourceCache() {
-    this.sourcesByURI = {}
-}
-
-SourceCache.prototype.get = function(conf) {
-    var scb = this.sourcesByURI[sourceDataURI(conf)];
-    if (scb) {
-        for (var si = 0; si < scb.configs.length; ++si) {
-            if (sourcesAreEqual(scb.configs[si], conf)) {
-                return scb.sources[si];
-            }
-        }
+DasTier.prototype.fetchStylesheet = function(cb) {
+    var ssSource;
+    if (this.dasSource.stylesheet_uri) {
+        ssSource = new DASFeatureSource(this.dasSource);
+    } else {
+        ssSource = this.getSource();
     }
-}
-
-SourceCache.prototype.put = function(conf, source) {
-    var uri = sourceDataURI(conf);
-    var scb = this.sourcesByURI[uri];
-    if (!scb) {
-        scb = {configs: [], sources: []};
-        this.sourcesByURI[uri] = scb;
-    }
-    scb.configs.push(conf);
-    scb.sources.push(source);
+    
+    ssSource.getStyleSheet(cb);
 }
 
 var __cfs_id_seed = 0;
@@ -510,16 +530,16 @@ BWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
-    var make, arg;
+    var arg;
     if (this.bwgSource.bwgURI) {
-        make = makeBwgFromURL;
-        arg = this.bwgSource.bwgURI;
+        // make = makeBwgFromURL;
+        arg = new URLFetchable(this.bwgSource.bwgURI);
     } else {
-        make = makeBwgFromFile;
-        arg = this.bwgSource.bwgBlob;
+        // make = makeBwgFromFile;
+        arg = new BlobFetchable(this.bwgSource.bwgBlob);
     }
 
-    make(arg, function(bwg, err) {
+    makeBwg(arg, function(bwg, err) {
         if (err) {
             thisB.error = err;
             thisB.readiness = null;
@@ -997,56 +1017,6 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
         } 
 
         return callback(stylesheet);
-    });
-}
-
-
-function BamblrFeatureSource(bamblrSource) {
-    this.bamblr = bamblrSource.bamblrURI;
-}
-
-BamblrFeatureSource.prototype.getScales = function() {
-    return [];
-}
-
-BamblrFeatureSource.prototype.getStyleSheet = function(callback) {
-    var stylesheet = new DASStylesheet();
-
-    var densStyle = new DASStyle();
-    densStyle.glyph = 'HISTOGRAM';
-    densStyle.COLOR1 = 'black';
-    densStyle.COLOR2 = 'red';
-    densStyle.HEIGHT=30;
-    stylesheet.pushStyle({type: 'default'}, null, densStyle);
-
-    return callback(stylesheet);
-}
-
-BamblrFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
-    var rez = scale|0;
-    if (rez < 1) {
-        rez = 1;
-    }
-    var url = this.bamblr + '?seq=' + chr + '&min=' + min + '&max=' + max + '&rez=' + rez;
-    new URLFetchable(url).fetch(function(data) {
-        if (data == null) {
-            dlog('failing bamblr');
-            return;
-        } else {
-            var id = new Int32Array(data);
-            var features = [];
-            for (var ri = 0; ri < id.length; ++ri) {
-                var f = new DASFeature();
-                f.min = min + (ri * rez)
-                f.max = f.min + rez - 1;
-                f.segment = chr;
-                f.type = 'bamblr';
-                f.score = id[ri];
-                features.push(f);
-            }
-            callback(null, features, rez);
-            return;
-        }
     });
 }
 
@@ -1531,8 +1501,36 @@ JBrowseFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
     );
 }
 
-function sourceAdapterIsCapable(s, cap) {
+Browser.prototype.sourceAdapterIsCapable = function(s, cap) {
     if (!s.capabilities)
         return false;
     else return s.capabilities()[cap];
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        FeatureSourceBase: FeatureSourceBase,
+
+        TwoBitSequenceSource: TwoBitSequenceSource,
+        DASSequenceSource: DASSequenceSource,
+        MappedFeatureSource: MappedFeatureSource,
+        CachingFeatureSource: CachingFeatureSource,
+        BWGFeatureSource: BWGFeatureSource,
+        RemoteBWGFeatureSource: RemoteBWGFeatureSource,
+        BAMFeatureSource: BAMFeatureSource,
+        RemoteBAMFeatureSource: RemoteBAMFeatureSource,
+        DummyFeatureSource: DummyFeatureSource,
+        DummySequenceSource: DummySequenceSource,
+
+        registerSourceAdapterFactory: dalliance_registerSourceAdapterFactory,
+        registerParserFactory: dalliance_registerParserFactory,
+        makeParser: dalliance_makeParser
+    }
+
+    // Standard set of plugins.
+    require('./ensembljson');
+    require('./tabix-source');
+    require('./memstore');
+    require('./bedwig');
+    require('./vcf');
 }

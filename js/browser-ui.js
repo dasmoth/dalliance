@@ -9,8 +9,24 @@
 
 "use strict";
 
-function formatLongInt(n) {
-    return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+
+    var nf = require('./numformats');
+    var formatLongInt = nf.formatLongInt;
+
+    // For side effects
+
+    require('./tier-edit');
+    require('./export-config');
+    require('./export-ui');
+    require('./svg-export');
+    require('./session');
 }
 
 /*
@@ -225,9 +241,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (st >= 0)
             tier = b.tiers[st];
 
-        if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
+        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
             return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+LEFT)';
-        } else if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')) {
+        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
             return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+LEFT)';
         } else {
             return 'Jump left (shift+LEFT)';
@@ -243,9 +259,9 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         if (st >= 0)
             tier = b.tiers[st];
 
-        if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
+        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
             return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+RIGHT)';
-        } else if (tier && tier.featureSource && sourceAdapterIsCapable(tier.featureSource, 'leap')) {
+        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
             return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+RIGHT)';
         } else {
             return 'Jump right (shift+RIGHT)';

@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var sa = require('./sourceadapters');
+    var dalliance_registerParserFactory = sa.registerParserFactory;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+    var DASFeature = das.DASFeature;
+    var DASGroup = das.DASGroup;
+}
+
 function VCFParser() {
     this.info = [];
 }

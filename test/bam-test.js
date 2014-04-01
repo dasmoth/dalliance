@@ -7,6 +7,9 @@
 // bam-test.js
 //
 
+var makeBam = require('../js/bam').makeBam;
+var URLFetchable = require('../js/bin').URLFetchable;
+
 describe('BAM files', function() {
     var bamURI = 'http://www.biodalliance.org/datasets/bodymap-skeletal_muscle-chr22.bam';
     // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';

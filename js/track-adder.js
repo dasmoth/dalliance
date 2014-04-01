@@ -9,6 +9,26 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+    var sourcesAreEqual = browser.sourcesAreEqual;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+    var Observed = utils.Observed;
+
+    var thub = require('./thub');
+    var THUB_COMPARE = thub.THUB_COMPARE;
+    var connectTrackHub = thub.connectTrackHub;
+
+    var domui = require('./domui');
+    var makeTreeTableSection = domui.makeTreeTableSection;
+
+    var probeResource = require('./probe').probeResource;
+}
+
 Browser.prototype.currentlyActive = function(source) {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (sourcesAreEqual(this.tiers[ti].dasSource, source))
@@ -708,7 +728,6 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 if (custUser.value.length > 1 && custPass.value.length > 1) {
-                    dlog('password');
                     dataToFinalize.xUser = custUser.value;
                     dataToFinalize.xPass = custPass.value;
                 }
@@ -833,7 +852,6 @@ Browser.prototype.showTrackAdder = function(ev) {
         nds.features(testSegment, {}, function(features, status) {
             if (status) {
                 if (!retry) {
-                    dlog('retrying with credentials');
                     nds.credentials = true;
                     tryAddDAS(nds, true);
                 } else {

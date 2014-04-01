@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var das = require('./das');
+    var DASSource = das.DASSource;
+    var DASSegment = das.DASSegment;
+
+    var utils = require('./utils');
+    var pusho = utils.pusho;
+
+    var parseCigar = require('./cigar').parseCigar;
+}
+
 function Chainset(uri, srcTag, destTag, coords) {
     this.uri = uri;
     this.srcTag = srcTag;
@@ -19,27 +30,8 @@ function Chainset(uri, srcTag, destTag, coords) {
     this.postFetchQueues = {};
 };
 
-(function(scope) {
 
-var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');
 
-function parseCigar(cigar)
-{
-    var cigops = [];
-    var match;
-    while ((match = CIGAR_REGEXP.exec(cigar)) != null) {
-        var count = match[1];
-        if (count.length == 0) {
-            count = 1;
-        }
-        cigops.push({cnt: count|0, op: match[2]});
-    }
-    return cigops;
-}
-
-scope.parseCigar = parseCigar;
-
-}(this));
 
 Chainset.prototype.fetchChainsTo = function(chr) {
     var thisCS = this;
@@ -237,4 +229,10 @@ Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
         }
         callback(srcBlocks);
     }
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        Chainset: Chainset
+    };
 }

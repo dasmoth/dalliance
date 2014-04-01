@@ -9,6 +9,21 @@
 
 "use strict";
 
+if (typeof(require) != 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+    var sourceDataURI = browser.sourceDataURI;
+    var sourcesAreEqual = browser.sourcesAreEqual;
+
+    var VERSION = require('./version');
+
+    var utils = require('./utils');
+    var miniJSONify = utils.miniJSONify;
+
+    var sha1 = require('./sha1');
+    var hex_sha1 = sha1.hex_sha1;
+}
+
 Browser.prototype.nukeStatus = function() {
     delete localStorage['dalliance.' + this.cookieKey + '.view-chr'];
     delete localStorage['dalliance.' + this.cookieKey + '.view-start'];

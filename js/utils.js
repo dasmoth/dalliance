@@ -9,6 +9,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var sha1 = require('./sha1');
+    var b64_sha1 = sha1.b64_sha1;
+}
+
 var NUM_REGEXP = new RegExp('[0-9]+');
 
 function stringToNumbersArray(str) {
@@ -86,20 +91,7 @@ function pushnew(l, o)
     l.push(o);
 }
 
-function maybeConcat(a, b) {
-    var l = [];
-    if (a) {
-        for (var i = 0; i < a.length; ++i) {
-            pushnew(l, a[i]);
-        }
-    }
-    if (b) {
-        for (var i = 0; i < b.length; ++i) {
-            pushnew(l, b[i]);
-        }
-    }
-    return l;
-}
+
 
 function arrayIndexOf(a, x) {
     if (!a) {
@@ -374,7 +366,6 @@ function relativeURL(base, rel) {
     }
 }
 
-
 //
 // Missing APIs
 // 
@@ -383,4 +374,26 @@ if (!('trim' in String.prototype)) {
     String.prototype.trim = function() {
         return this.replace(/^\s+/, '').replace(/\s+$/, '');
     };
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        textXHR: textXHR,
+        relativeURL: relativeURL,
+        shallowCopy: shallowCopy,
+        pusho: pusho,
+        pushnew: pushnew,
+        pushnewo: pushnewo,
+        arrayIndexOf: arrayIndexOf,
+        pick: pick,
+
+        makeElement: makeElement,
+        makeElementNS: makeElementNS,
+        removeChildren: removeChildren,
+
+        miniJSONify: miniJSONify,
+
+        Observed: Observed,
+        Awaited: Awaited
+    }
 }

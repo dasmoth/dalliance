@@ -9,16 +9,11 @@ module.exports = function(config) {
 
 
     // frameworks to use
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'browserify'],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'js/cbrowser.js',
-      'js/tier.js',
-      'js/sourceadapters.js',
-      'js/*.js',
-      'jszlib/js/*.js',
       'test/*.js',
 
       {pattern: 'plants/**', included: false, served: true}
@@ -27,7 +22,8 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'js/fetchworker.js'
+      'js/fetchworker.js',
+      'js/exports.js'
     ],
 
 
@@ -70,6 +66,13 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: false,
+
+    preprocessors: {'test/*.js': ['browserify']},
+
+    browserify: {
+      watch: true,
+      debug: true
+    }
   });
 };

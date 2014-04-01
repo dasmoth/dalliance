@@ -11,6 +11,26 @@
 
 var TABIX_MAGIC = 0x01494254;
 
+if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
+    var bin = require('./bin');
+    var readInt = bin.readInt;
+    var readShort = bin.readShort;
+    var readByte = bin.readByte;
+    var readInt64 = bin.readInt64;
+    var readFloat = bin.readFloat;
+
+    var lh3utils = require('./lh3utils');
+    var readVob = lh3utils.readVob;
+    var unbgzf = lh3utils.unbgzf;
+    var reg2bins = lh3utils.reg2bins;
+    var Chunk = lh3utils.Chunk;
+}
+
 function TabixFile() {
 }
 
@@ -294,4 +314,11 @@ TabixFile.prototype.fetchHeader = function(callback) {
         }
         callback(lines);
     });
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        connectTabix: connectTabix,
+        TABIX_MAGIC: TABIX_MAGIC
+    };
 }

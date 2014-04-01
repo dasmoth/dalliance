@@ -9,20 +9,21 @@
 
 "use strict";
 
-var require = importScripts;
-require('utils.js', 'bin.js', 'spans.js', 'bam.js', 'das.js', 'bigwig.js', 'sha1.js', '../jszlib/js/inflate.js');
+// importScripts('utils.js', 'bin.js', 'spans.js', 'bam.js', 'das.js', 'bigwig.js', 'sha1.js', '../jszlib/js/inflate.js');
+
+var bin = require('./bin');
+var bam = require('./bam');
+var bigwig = require('./bigwig');
 
 var connections = {};
 
-(function(global) {
-    var idSeed = 0;
+var idSeed = 0;
 
-    global.newID = function() {
-        return 'cn' + (++idSeed);
-    }
-}(self));
+global.newID = function() {
+    return 'cn' + (++idSeed);
+}
 
-onmessage = function(event) {
+self.onmessage = function(event) {
     var d = event.data;
     var command = event.data.command;
     var tag = event.data.tag;
@@ -30,18 +31,18 @@ onmessage = function(event) {
     if (command === 'connectBAM') {
         var id = newID();
 
-        var bam, bai;
+        var bamF, baiF;
         if (d.blob) {
-            bam = new BlobFetchable(d.blob);
-            bai = new BlobFetchable(d.indexBlob);
+            bamF = new bin.BlobFetchable(d.blob);
+            baiF = new bin.BlobFetchable(d.indexBlob);
         } else {
-            bam = new URLFetchable(d.uri);
-            bai = new URLFetchable(d.indexUri);
+            bamF = new bin.URLFetchable(d.uri);
+            baiF = new bin.URLFetchable(d.indexUri);
         }
 
-        makeBam(bam, bai, function(bam, err) {
-            if (bam) {
-                connections[id] = new BAMWorkerFetcher(bam);
+        bam.makeBam(bamF, baiF, function(bamObj, err) {
+            if (bamObj) {
+                connections[id] = new BAMWorkerFetcher(bamObj);
                 postMessage({tag: tag, result: id});
             } else {
                 postMessage({tag: tag, error: err || "Couldn't fetch BAM"});
@@ -51,12 +52,12 @@ onmessage = function(event) {
         var id = newID();
         var bbi;
         if (d.blob) {
-            bbi = new BlobFetchable(d.blob);
+            bbi = new bin.BlobFetchable(d.blob);
         } else {
-            bbi = new URLFetchable(d.uri);
+            bbi = new bin.URLFetchable(d.uri);
         }
 
-        makeBwg(bbi, function(bwg, err) {
+        bigwig.makeBwg(bbi, function(bwg, err) {
             if (bwg) {
                 connections[id] = new BBIWorkerFetcher(bwg);
                 postMessage({tag: tag, result: id});

@@ -7,6 +7,9 @@
 // tabix-test.js
 //
 
+var connectTabix = require('../js/tabix').connectTabix;
+var URLFetchable = require('../js/bin').URLFetchable;
+
 describe('Tabix files', function() {
     var vcfURI = 'http://www.biodalliance.org/datasets/tests/PG0000566-BLD.snps.vcf.gz';
     var tbiURI = 'http://www.biodalliance.org/datasets/tests/PG0000566-BLD.snps.vcf.gz.tbi'

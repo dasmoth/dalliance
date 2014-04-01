@@ -9,6 +9,11 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+}
+
 function OverlayFeatureSource(sources, opts) {
     this.sources = sources;
     this.opts = opts || {};
@@ -278,4 +283,10 @@ function OverlayFeatureSource_merge_concat(featureSets) {
         }
     }
     return features;
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        OverlayFeatureSource: OverlayFeatureSource
+    };
 }

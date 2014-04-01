@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var shallowCopy = utils.shallowCopy;
+    var pushnew = utils.pushnew;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+}
+
 var __tier_idSeed = 0;
 
 function DasTier(browser, source, config, background)
@@ -120,15 +131,8 @@ DasTier.prototype.init = function() {
         this.setStylesheet({styles: tier.dasSource.style});
         this.browser.refreshTier(this);
     } else {
-        var ssSource;
-        if (tier.dasSource.stylesheet_uri) {
-            ssSource = new DASFeatureSource(tier.dasSource);
-        } else {
-            ssSource = tier.getSource();
-        }
         tier.status = 'Fetching stylesheet';
-        
-        ssSource.getStyleSheet(function(ss, err) {
+        tier.fetchStylesheet(function(ss, err) {
             if (err || !ss) {
                 tier.error = 'No stylesheet';
                 var ss = new DASStylesheet();
@@ -526,4 +530,17 @@ DasTier.prototype.notifyFeaturesLoaded = function() {
             console.log(e);
         }
     }
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        DasTier: DasTier
+    };
+
+    // Imported for side effects
+    var fd = require('./feature-draw');
+    var drawFeatureTier = fd.drawFeatureTier;
+    var sd = require('./sequence-draw');
+    var drawSeqTier = sd.drawSeqTier;
+    // require('./sourceadapters');  /* Done in cbrowser instead */
 }

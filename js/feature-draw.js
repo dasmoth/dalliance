@@ -7,21 +7,61 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
+    var pusho = utils.pusho;
+
+    var tier = require('./tier');
+    var DasTier = tier.DasTier;
+
+    var sortFeatures = require('./features').sortFeatures;
+
+    var g = require('./glyphs');
+    var BoxGlyph = g.BoxGlyph;
+    var GroupGlyph = g.GroupGlyph;
+    var LineGraphGlyph = g.LineGraphGlyph;
+    var LabelledGlyph = g.LabelledGlyph;
+    var CrossGlyph = g.CrossGlyph;
+    var ExGlyph = g.ExGlyph;
+    var TriangleGlyph = g.TriangleGlyph;
+    var DotGlyph = g.DotGlyph;
+    var PaddedGlyph = g.PaddedGlyph;
+    var AArrowGlyph = g.AArrowGlyph;
+    var SpanGlyph = g.SpanGlyph;
+    var LineGlyph = g.LineGlyph;
+    var PrimersGlyph = g.PrimersGlyph;
+    var ArrowGlyph = g.ArrowGlyph;
+    var TooManyGlyph = g.TooManyGlyph;
+    var TextGlyph = g.TextGlyph;
+    var SequenceGlyph = g.SequenceGlyph;
+    var TranslatedGlyph = g.TranslatedGlyph;
+    var PointGlyph = g.PointGlyph;
+    var GridGlyph = g.GridGlyph;
+    var StarGlyph = g.StarGlyph;
+    var PlimsollGlyph = g.PlimsollGlyph;
+
+    var color = require('./color');
+    var makeGradient = color.makeGradient;
+
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+
+    var das = require('./das');
+    var DASFeature = das.DASFeature;
+    var isDasBooleanTrue = das.isDasBooleanTrue;
+    var isDasBooleanNotFalse = das.isDasBooleanNotFalse;
+
+    var parseCigar = require('./cigar').parseCigar;
+
+    var nf = require('./numformats');
+    var formatQuantLabel = nf.formatQuantLabel;
+}
+
 var MIN_PADDING = 3;
 var DEFAULT_SUBTIER_MAX = 100;
 
-function isDasBooleanTrue(s) {
-    s = ('' + s).toLowerCase();
-    return s==='yes' || s==='true';
-}
-
-function isDasBooleanNotFalse(s) {
-    if (!s)
-        return false;
-
-    s = ('' + s).toLowerCase();
-    return s!=='no' || s!=='false';
-}
 
 function SubTier() {
     this.glyphs = [];
@@ -72,6 +112,7 @@ function drawFeatureTier(tier)
     var start = Date.now()|0;
     GLOBAL_GC = tier.viewport.getContext('2d'); // Should only be used for metrics.
     sortFeatures(tier);
+    tier.padding = MIN_PADDING;
 
     var glyphs = [];
     var specials = false;
@@ -313,24 +354,7 @@ function drawFeatureTier(tier)
     // console.log('dft took ' + (end-start) + 'ms');
 }
 
-function formatQuantLabel(v) {
-    var t = '' + v;
-    var dot = t.indexOf('.');
-    if (dot < 0) {
-        return t;
-    } else {
-        var dotThreshold = 2;
-        if (t.substring(0, 1) == '-') {
-            ++dotThreshold;
-        }
 
-        if (dot >= dotThreshold) {
-            return t.substring(0, dot);
-        } else {
-            return t.substring(0, dot + 2);
-        }
-    }
-}
 
 DasTier.prototype.paint = function() {
     var start = Date.now()|0;
@@ -350,9 +374,9 @@ DasTier.prototype.paint = function() {
         this.viewport.width = fpw = desiredWidth;
     }
 
-    var lh = MIN_PADDING;
+    var lh = this.padding;
     for (var s = 0; s < subtiers.length; ++s) {
-        lh = lh + subtiers[s].height + MIN_PADDING;
+        lh = lh + subtiers[s].height + this.padding;
     }
     lh += 6
     lh = Math.max(lh, this.browser.minTierHeight);
@@ -399,7 +423,7 @@ DasTier.prototype.paint = function() {
     }
 
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
-    gc.translate(offset, MIN_PADDING);
+    gc.translate(offset, this.padding);
    
     for (var s = 0; s < subtiers.length; ++s) {
         var quant = null;
@@ -414,11 +438,11 @@ DasTier.prototype.paint = function() {
                 }
             }
         }
-        gc.translate(0, subtiers[s].height + MIN_PADDING);
+        gc.translate(0, subtiers[s].height + this.padding);
     }
     gc.restore();
 
-    if (quant && this.quantLeapThreshold && this.featureSource && sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
+    if (quant && this.quantLeapThreshold && this.featureSource && this.browser.sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
         var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
         gc.save();
@@ -465,15 +489,15 @@ DasTier.prototype.paintQuant = function() {
         if (h > 40) {
             numTics = 1 + ((h/20) | 0);
         }
-        var ticSpacing = (h+MIN_PADDING*2) / (numTics - 1);
+        var ticSpacing = (h + this.padding*2) / (numTics - 1);
         var ticInterval = (quant.max - quant.min) / (numTics - 1);
 
         ctx.fillStyle = 'white'
         ctx.globalAlpha = 0.6;
         if (this.browser.rulerLocation == 'right') {
-            ctx.fillRect(w-30, 0, 30, h + MIN_PADDING*2);
+            ctx.fillRect(w-30, 0, 30, h + this.padding*2);
         } else {
-            ctx.fillRect(0, 0, 30, h + MIN_PADDING*2);
+            ctx.fillRect(0, 0, 30, h + this.padding*2);
         }
         ctx.globalAlpha = 1.0;
 
@@ -482,20 +506,20 @@ DasTier.prototype.paintQuant = function() {
         ctx.beginPath();
 
         if (this.browser.rulerLocation == 'right') {
-            ctx.moveTo(w - 8, MIN_PADDING);
-            ctx.lineTo(w, MIN_PADDING);
-            ctx.lineTo(w, h + MIN_PADDING);
-            ctx.lineTo(w - 8, h + MIN_PADDING);
+            ctx.moveTo(w - 8, this.padding);
+            ctx.lineTo(w, this.padding);
+            ctx.lineTo(w, h + this.padding);
+            ctx.lineTo(w - 8, h + this.padding);
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.moveTo(w, ty);
                 ctx.lineTo(w - 5, ty);
             }
         } else {
-            ctx.moveTo(8, MIN_PADDING);
-            ctx.lineTo(0, MIN_PADDING);
-            ctx.lineTo(0, h+MIN_PADDING);
-            ctx.lineTo(8, h+MIN_PADDING);
+            ctx.moveTo(8, this.padding);
+            ctx.lineTo(0, this.padding);
+            ctx.lineTo(0, h + this.padding);
+            ctx.lineTo(8, h + this.padding);
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.moveTo(0, ty);
@@ -509,7 +533,7 @@ DasTier.prototype.paintQuant = function() {
         if (this.browser.rulerLocation == 'right') {
             ctx.textAlign = 'right';
             ctx.fillText(formatQuantLabel(quant.max), w-9, 8);
-            ctx.fillText(formatQuantLabel(quant.min), w-9, h + MIN_PADDING);
+            ctx.fillText(formatQuantLabel(quant.min), w-9, h + this.padding);
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), w - 9, ty + 3);
@@ -517,7 +541,7 @@ DasTier.prototype.paintQuant = function() {
         } else {
             ctx.textAlign = 'left';
             ctx.fillText(formatQuantLabel(quant.max), 9, 8);
-            ctx.fillText(formatQuantLabel(quant.min), 9, h + MIN_PADDING);
+            ctx.fillText(formatQuantLabel(quant.min), 9, h + this.padding);
             for (var t = 1; t < numTics-1; ++t) {
                 var ty = t*ticSpacing;
                 ctx.fillText(formatQuantLabel((1.0*quant.max) - (t*ticInterval)), 9, ty + 3);
@@ -581,12 +605,6 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
     var labelText = null;
     if ((label && labelWanted) || (gstyle && (isDasBooleanTrue(gstyle.LABEL) || isDasBooleanTrue(gstyle.LABELS)))) {  // HACK, LABELS should work.
         labelText = groupElement.label || label;
-        var sg = tier.groupsToSupers[groupElement.id];
-        if (sg && tier.superGroups[sg]) {    // workaround case where group and supergroup IDs match.
-            //if (groupElement.id != tier.superGroups[sg][0]) {
-            //    dg.label = null;
-            // }
-        }
     }
 
     var gg = new GroupGlyph(glyphs, connector);
@@ -596,7 +614,7 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
         } else if (strand === '-') {
             labelText = '<' + labelText;
         }
-        gg = new LabelledGlyph(gg, labelText, false);
+        gg = new LabelledGlyph(GLOBAL_GC, gg, labelText, false);
     }
     gg.bump = true;
     return gg;
@@ -745,7 +763,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     featureLabel = style.LABEL;
 
                 if (isDasBooleanNotFalse(featureLabel) && label && !noLabel) {
-                    gg = new LabelledGlyph(gg, label, true, null, featureLabel == 'above' ? 'above' : 'below');
+                    gg = new LabelledGlyph(GLOBAL_GC, gg, label, true, null, featureLabel == 'above' ? 'above' : 'below');
                     if (featureLabel == 'above') {
                         heightFudge = gg.textHeight + 2;
                     }
@@ -844,7 +862,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     } else if (gtype === 'TEXT') {
         var string = style.STRING || 'text';
         var fill = style.FGCOLOR || 'black';
-        gg = new TextGlyph(minPos, maxPos, height, fill, string);
+        gg = new TextGlyph(GLOBAL_GC, minPos, maxPos, height, fill, string);
     } else if (gtype === 'TOOMANY') {
         var stroke = style.FGCOLOR || 'gray';
         var fill = style.BGCOLOR || 'orange';
@@ -901,7 +919,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     var inseq =  rawseq.substr(cursor, co.cnt);
                     var ig = new TriangleGlyph(minPos + (seq.length*scale), 5, 'S', 5, 'red');
                     if (insertionLabels)
-                        ig = new LabelledGlyph(ig, inseq, false, 'center', 'above', '7px sans-serif');
+                        ig = new LabelledGlyph(GLOBAL_GC, ig, inseq, false, 'center', 'above', '7px sans-serif');
                     ig.feature = {label: 'Insertion: ' + inseq, type: 'insertion', method: 'insertion'};
                     indels.push(ig);
 
@@ -933,7 +951,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        gg = new SequenceGlyph(minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
+        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {
@@ -942,7 +960,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
     } else if (gtype === '__INSERTION') {
         var ig = new TriangleGlyph(minPos, 5, 'S', 5, 'red');
-        gg = new LabelledGlyph(ig, feature.insertion || feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
+        gg = new LabelledGlyph(GLOBAL_GC, ig, feature.insertion || feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
         if ((maxPos - minPos) > 1) {
             var fill = style.BGCOLOR || style.COLOR1 || 'green';
             var bg = new BoxGlyph(minPos, 5, (maxPos - minPos), height, fill, stroke);
@@ -960,7 +978,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) && label && !noLabel) {
-        gg = new LabelledGlyph(gg, label, false);
+        gg = new LabelledGlyph(GLOBAL_GC, gg, label, false);
     }
 
     if (bump) {
@@ -1083,4 +1101,12 @@ DasTier.prototype.quantMax = function(style) {
     } else {
         return style.MAX || this.currentFeaturesMaxScore || 0;
     }
+}
+
+
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        drawFeatureTier: drawFeatureTier
+    };
 }

@@ -7,9 +7,11 @@
 // bam-test.js
 //
 
+var makeTwoBit = require('../js/twoBit').makeTwoBit;
+var URLFetchable = require('../js/bin').URLFetchable;
+
 describe('2bit files', function() {
     var twoBitURI = 'http://www.biodalliance.org/datasets/hg19.2bit';
-    // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';
     var twoBit;
 
     it('can be created by connecting to a URI', function() {

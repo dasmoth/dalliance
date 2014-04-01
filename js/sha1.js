@@ -70,7 +70,7 @@ function rstr_hmac_sha1(key, data)
  */
 function rstr2hex(input)
 {
-  try { hexcase } catch(e) { hexcase=0; }
+  // try { hexcase } catch(e) { hexcase=0; }
   var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
   var output = "";
   var x;
@@ -88,7 +88,7 @@ function rstr2hex(input)
  */
 function rstr2b64(input)
 {
-  try { b64pad } catch(e) { b64pad=''; }
+  // try { b64pad } catch(e) { b64pad=''; }
   var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   var output = "";
   var len = input.length;
@@ -329,4 +329,11 @@ function safe_add(x, y)
 function bit_rol(num, cnt)
 {
   return (num << cnt) | (num >>> (32 - cnt));
+}
+
+if (typeof(module) !== 'undefined') {
+  module.exports = {
+    b64_sha1: b64_sha1,
+    hex_sha1: hex_sha1
+  }
 }

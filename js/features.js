@@ -1,5 +1,11 @@
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var pusho = utils.pusho;
+    var pushnewo = utils.pushnewo;
+}
+
 function sortFeatures(tier)
 {
     var dmin = tier.browser.drawnStart, dmax = tier.browser.drawnEnd;
@@ -182,4 +188,10 @@ function sortFeatures(tier)
         tier.currentFeaturesMinScore = minScore;
         tier.currentFeaturesMaxScore = maxScore;
     }
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        sortFeatures: sortFeatures
+    };
 }

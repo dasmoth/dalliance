@@ -9,6 +9,15 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
+}
+
 Browser.prototype.removeAllPopups = function() {
     removeChildren(this.hPopupHolder);
     removeChildren(this.popupHolder);
@@ -213,4 +222,10 @@ function makeTreeTableSection(title, content, visible) {
 
 function dlog(msg) {
     console.log(msg);
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeTreeTableSection: makeTreeTableSection
+    };
 }

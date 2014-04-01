@@ -1,3 +1,6 @@
+var connectBigTab = require('../js/bigtab').connectBigTab;
+var URLFetchable = require('../js/bin').URLFetchable;
+
 describe('bigtab files', function() {
     // var btURI = 'http://localhost/dalliance/test.bt';
     var btURI = 'http://www.biodalliance.org/datasets/ensg-to-desc.bt';

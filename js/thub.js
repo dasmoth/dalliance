@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var utils = require('./utils');
+    var textXHR = utils.textXHR;
+    var relativeURL = utils.relativeURL;
+    var shallowCopy = utils.shallowCopy;
+
+    var das = require('./das');
+    var DASStylesheet = das.DASStylesheet;
+    var DASStyle = das.DASStyle;
+}
+
 var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
 var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
@@ -414,4 +425,11 @@ function THUB_COMPARE(g, h) {
     } else {
         return g.shortLabel.localeCompare(h.shortLabel);
     }
+}
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        connectTrackHub: connectTrackHub,
+        THUB_COMPARE: THUB_COMPARE
+    };
 }

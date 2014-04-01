@@ -111,3 +111,11 @@ function makeGradient(steps, color1, color2, color3) {
         return makeColourSteps(steps, [0, 1], [color1, color2]);
     }
 }
+
+if (typeof(module) !== 'undefined') {
+    module.exports = {
+        makeColourSteps: makeColourSteps,
+        makeGradient: makeGradient,
+        dasColourForName: dasColourForName
+    };
+}

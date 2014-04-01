@@ -9,6 +9,17 @@
 
 "use strict";
 
+if (typeof(require) !== 'undefined') {
+    var browser = require('./cbrowser');
+    var Browser = browser.Browser;
+
+    var utils = require('./utils');
+    var pick = utils.pick;
+    var pushnew = utils.pushnew;
+    var makeElement = utils.makeElement;
+}
+
+
 var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
 
 Browser.prototype.addFeatureInfoPlugin = function(handler) {
@@ -145,4 +156,19 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     }        
 
     this.popit(ev, featureInfo.title || 'Feature', table, {width: 450});
+}
+
+function maybeConcat(a, b) {
+    var l = [];
+    if (a) {
+        for (var i = 0; i < a.length; ++i) {
+            pushnew(l, a[i]);
+        }
+    }
+    if (b) {
+        for (var i = 0; i < b.length; ++i) {
+            pushnew(l, b[i]);
+        }
+    }
+    return l;
 }
