@@ -532,10 +532,8 @@ BWGFeatureSource.prototype.init = function() {
     var thisB = this;
     var arg;
     if (this.bwgSource.bwgURI) {
-        // make = makeBwgFromURL;
-        arg = new URLFetchable(this.bwgSource.bwgURI);
+        arg = new URLFetchable(this.bwgSource.bwgURI, {credentials: this.opts.credentials});
     } else {
-        // make = makeBwgFromFile;
         arg = new BlobFetchable(this.bwgSource.bwgBlob);
     }
 
@@ -555,7 +553,7 @@ BWGFeatureSource.prototype.init = function() {
                 });
             }
         }
-    }, this.opts.credentials);
+    });
 }
 
 BWGFeatureSource.prototype.capabilities = function() {

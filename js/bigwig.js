@@ -717,15 +717,6 @@ BigWig.prototype.getZoomedView = function(z) {
     return zh.view;
 }
 
-
-function makeBwgFromURL(url, callback, creds) {
-    makeBwg(new URLFetchable(url, {credentials: creds}), callback, url);
-}
-
-function makeBwgFromFile(file, callback) {
-    makeBwg(new BlobFetchable(file), callback, 'file');
-}
-
 function makeBwg(data, callback, name) {
     var bwg = new BigWig();
     bwg.data = data;
@@ -749,7 +740,6 @@ function makeBwg(data, callback, name) {
         } else {
             callback(null, "Not a supported format, magic=0x" + magic.toString(16));
         }
-        // console.log('magic okay');
 
         bwg.version = sa[2];             // 4
         bwg.numZoomLevels = sa[3];       // 6
@@ -762,15 +752,6 @@ function makeBwg(data, callback, name) {
         bwg.totalSummaryOffset = bwg_readOffset(ba, 44);
         bwg.uncompressBufSize = la[13];  // 52
         bwg.extHeaderOffset = bwg_readOffset(ba, 56);
-        
-        // console.log('bwgVersion: ' + bwg.version);
-        // dlog('bigType: ' + bwg.type);
-        // dlog('chromTree at: ' + bwg.chromTreeOffset);
-        // dlog('uncompress: ' + bwg.uncompressBufSize);
-        // dlog('data at: ' + bwg.unzoomedDataOffset);
-        // dlog('index at: ' + bwg.unzoomedIndexOffset);
-        // dlog('field count: ' + bwg.fieldCount);
-        // dlog('defined count: ' + bwg.definedFieldCount);
 
         bwg.zoomLevels = [];
         for (var zl = 0; zl < bwg.numZoomLevels; ++zl) {
