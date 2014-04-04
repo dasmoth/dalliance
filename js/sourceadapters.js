@@ -1048,6 +1048,7 @@ function bamRecordToFeature(r) {
     f.cigar = r.cigar;
     f.seq = r.seq;
     f.quals = r.quals;
+    f.bamRecord = r;
 
     return f;
 }

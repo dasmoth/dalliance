@@ -14,6 +14,7 @@ For 0.12
   - Keep selected track visible when track heights change (?)
   - Support for non-positional annotations
   - Export track configuration for current browser state. [DONE]
+  - Allow liftover chains to be loaded from a bigbed file. [DONE]
 
 For 0.13
 --------
