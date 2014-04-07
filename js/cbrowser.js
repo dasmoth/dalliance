@@ -468,7 +468,7 @@ Browser.prototype.realInit2 = function() {
                     var nst = thisB.tiers[thisB.getSelectedTier()];
                     var top = nst.row.offsetTop, bottom = top + nst.row.offsetHeight;
                     if (top < thisB.tierHolder.scrollTop || bottom > thisB.tierHolder.scrollTop + thisB.tierHolder.offsetHeight) {
-                        thisB.tierHolder.scrollTop = bottom - thisB.tierHolder.offsetHeight;
+                        thisB.tierHolder.scrollTop = Math.min(top, bottom - thisB.tierHolder.offsetHeight);
                     }
                 }
             }

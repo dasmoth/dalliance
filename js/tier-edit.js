@@ -199,7 +199,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     }
                 }
                 if (!s) {
-                    console.log('odd, no active style... (asc=' + activeStyleCount + ')');
+                    return;
                 }
 
                 semanticBanner.style.display = (activeStyleCount == tier.stylesheet.styles.length) ? 'none' : 'block';
