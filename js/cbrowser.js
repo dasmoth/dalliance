@@ -46,7 +46,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.uiPrefix = '//www.biodalliance.org/release-0.12/';
+    this.prefix = '//www.biodalliance.org/release-0.12/';
 
     this.sources = [];
     this.tiers = [];
@@ -127,18 +127,19 @@ function Browser(opts) {
 
     this.useFetchWorkers = true;
     this.maxWorkers = 0;
+    this.workerPath = '$$js/fetchworker.js';
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
 
     this.initListeners = [];
 
-
     for (var k in opts) {
         this[k] = opts[k];
     }
-
-    this.workerPath = '$$js/fetchworker.js';
+    if (opts.uiPrefix && !opts.prefix) {
+        this.prefix = opts.uiPrefix;
+    }
 
     var thisB = this;
 
@@ -150,7 +151,7 @@ function Browser(opts) {
 }
 
 Browser.prototype.resolveURL = function(url) {
-    return url.replace('$$', this.uiPrefix);
+    return url.replace('$$', this.prefix);
 }
 
 Browser.prototype.realInit = function() {
@@ -2039,9 +2040,9 @@ Browser.prototype.makeLoader = function(size) {
     size = size || 16;
     var retina = window.devicePixelRatio > 1;
     if (size < 20) {
-        return makeElement('img', null, {src: this.uiPrefix + 'img/spinner_' + (retina ? 16 : 32) + '.gif', width: '16', height: '16'});
+        return makeElement('img', null, {src: this.resolveURL('$$img/spinner_' + (retina ? 16 : 32) + '.gif'), width: '16', height: '16'});
     } else {
-        return makeElement('img', null, {src: this.uiPrefix + 'img/spinner_' + (retina ? 24 : 48) + '.gif', width: '24', height: '24'});
+        return makeElement('img', null, {src: this.resolveURL('$$img/spinner_' + (retina ? 24 : 48) + '.gif'), width: '24', height: '24'});
     }
 }
 

@@ -36,9 +36,9 @@ if (typeof(require) !== 'undefined') {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/bootstrap-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/dalliance-scoped.css'}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.uiPrefix + 'css/font-awesome.min.css'}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/bootstrap-scoped.css')}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/dalliance-scoped.css')}));
+    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/font-awesome.min.css')}));
 
     var b = this;
 
@@ -379,7 +379,7 @@ Browser.prototype.toggleHelpPopup = function(ev) {
         this.hideToolPanel();
         this.setUiMode('none');
     } else {
-        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.uiPrefix + 'help/index.html', className: 'help-panel'});
+        var helpFrame = makeElement('iframe', null, {scrolling: 'yes', seamless: 'seamless', src: this.resolveURL('$$help/index.html'), className: 'help-panel'});
         this.showToolPanel(helpFrame, false);
         this.setUiMode('help');
     }

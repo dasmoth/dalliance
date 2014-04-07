@@ -35,8 +35,8 @@ Browser.prototype.exportFullConfig = function(opts) {
         sources: this.exportSourceConfig()
     };
 
-    if (this.uiPrefix)
-        config.uiPrefix = this.uiPrefix;
+    if (this.prefix)
+        config.prefix = this.prefix;
 
     return config;
 }
@@ -88,7 +88,7 @@ Browser.prototype.exportPageTemplate = function(opts) {
     opts = opts || {};
     var template = '<html>\n' +
                    '  <head>\n' +
-                   '    <script language="javascript" src="' + this.uiPrefix + 'dalliance-compiled.js"></script>\n' +
+                   '    <script language="javascript" src="' + this.resolveURL('$$dalliance-compiled.js') + "></script>\n' +
                    '    <script language="javascript">\n' +
                    '      var dalliance_browser = new Browser(' + JSON.stringify(this.exportFullConfig(opts), null, 2) + ');\n' +
                    '    </script>\n' +  
