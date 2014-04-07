@@ -175,7 +175,7 @@ Browser.prototype.openTierPanel = function(tier) {
             }
 
             if (tier.stylesheet.styles.length > 0) {
-                var s = mainStyle = tier.stylesheet.styles[0].style;
+                var s = null;
                 var isQuantitative=false, isSimpleQuantitative = false;
                 var ssScale = tier.browser.zoomForCurrentScale();
                 var activeStyleCount = 0;
@@ -186,13 +186,20 @@ Browser.prototype.openTierPanel = function(tier) {
                         continue;
                     }
                     ++activeStyleCount;
-
                     var ss = tier.stylesheet.styles[si].style;
+
+                    if (!s) {
+                        s = mainStyle = ss;
+                    }
+                    
                     if (ss.glyph == 'LINEPLOT' || ss.glyph == 'HISTOGRAM' || ss.glyph == 'GRADIENT' || isDasBooleanTrue(ss.SCATTER)) {
                         if (!isQuantitative)
                             s = mainStyle = ss;
                         isQuantitative = true;
                     }
+                }
+                if (!s) {
+                    console.log('odd, no active style... (asc=' + activeStyleCount + ')');
                 }
 
                 semanticBanner.style.display = (activeStyleCount == tier.stylesheet.styles.length) ? 'none' : 'block';
