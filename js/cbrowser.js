@@ -141,7 +141,12 @@ function Browser(opts) {
     this.workerPath = '$$js/fetchworker.js';
 
     var thisB = this;
-    window.addEventListener('load', function(ev) {thisB.realInit();}, false);
+
+    if (document.readyState === 'complete') {
+        thisB.realInit();
+    } else {
+        window.addEventListener('load', function(ev) {thisB.realInit();}, false);
+    }
 }
 
 Browser.prototype.resolveURL = function(url) {
