@@ -181,11 +181,11 @@ DASSource.prototype.sequence = function(segment, callback) {
 //
 
 function DASFeature() {
-    // We initialize these in the parser...
 }
 
-function DASGroup() {
-    // We initialize these in the parser, too...
+function DASGroup(id) {
+    if (id)
+        this.id = id;
 }
 
 function DASLink(desc, uri) {

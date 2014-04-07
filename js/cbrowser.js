@@ -446,7 +446,7 @@ Browser.prototype.realInit2 = function() {
                     if (si > 0)
                         discontig += (thisB.selectedTiers[si] - thisB.selectedTiers[si - 1] - 1);
                 }
-                contiguous = discontig == 0;
+                var contiguous = discontig == 0;
 
                 if (contiguous && st + cnt >= thisB.tiers.length)
                     return;

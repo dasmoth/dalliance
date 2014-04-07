@@ -38,7 +38,9 @@ if (typeof(require) !== 'undefined') {
     var bbi = require('./bigwig');
     var makeBwg = bbi.makeBwg;
 
-    var makeBam = require('./bam').makeBam;
+    var bam = require('./bam');
+    var makeBam = bam.makeBam;
+    var BamFlags = bam.BamFlags;
 
     var spans = require('./spans');
     var Range = spans.Range;
@@ -1018,8 +1020,8 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
     });
 }
 
-function bamRecordToFeature(r) {
-    if (r.flag & 0x4)
+function bamRecordToFeature(r, group) {
+    if (r.flag & BamFlags.SEGMENT_UNMAPPED)
         return; 
     
     var len;
@@ -1048,7 +1050,13 @@ function bamRecordToFeature(r) {
     f.cigar = r.cigar;
     f.seq = r.seq;
     f.quals = r.quals;
+    f.orientation = (r.flag & BamFlags.REVERSE_COMPLEMENT) ? '-' : '+';
     f.bamRecord = r;
+
+    if (group && (r.flag & BamFlags.MULTIPLE_SEGMENTS)) {
+        f.groups = [{id: r.readName, 
+                     type: 'readpair'}];
+    }
 
     return f;
 }
@@ -1058,7 +1066,7 @@ function BAMFeatureSource(bamSource) {
 
     var thisB = this;
     this.bamSource = bamSource;
-    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
+    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight, bamGroup: bamSource.bamGroup};
     this.bamHolder = new Awaited();
     
     if (this.opts.preflight) {
@@ -1145,7 +1153,7 @@ BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
 
-                    var f = bamRecordToFeature(r);
+                    var f = bamRecordToFeature(r, thisB.opts.bamGroup);
                     if (f)
                         features.push(f);
                 }
@@ -1192,7 +1200,7 @@ function RemoteBAMFeatureSource(bamSource, worker) {
     var thisB = this;
     this.bamSource = bamSource;
     this.worker = worker;
-    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight};
+    this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight, bamGroup: bamSource.bamGroup};
     this.keyHolder = new Awaited();
     
     this.init();
@@ -1252,7 +1260,7 @@ RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, p
                 var features = [];
                 for (var ri = 0; ri < bamRecords.length; ++ri) {
                     var r = bamRecords[ri];
-                    var f = bamRecordToFeature(r);
+                    var f = bamRecordToFeature(r, thisB.opts.bamGroup);
                     if (f)
                         features.push(f);
                 }

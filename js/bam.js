@@ -30,12 +30,26 @@ if (typeof(require) !== 'undefined') {
 }
 
 
-var BAM_MAGIC = 21840194;
-var BAI_MAGIC = 21578050;
+var BAM_MAGIC = 0x14d4142;
+var BAI_MAGIC = 0x1494142;
+
+var BamFlags = {
+    MULTIPLE_SEGMENTS:       0x1,
+    ALL_SEGMENTS_ALIGN:      0x2,
+    SEGMENT_UNMAPPED:        0x4,
+    NEXT_SEGMENT_UNMAPPED:   0x8,
+    REVERSE_COMPLEMENT:      0x10,
+    NEXT_REVERSE_COMPLEMENT: 0x20,
+    FIRST_SEGMENT:           0x40,
+    LAST_SEGMENT:            0x80,
+    SECONDARY_ALIGNMENT:     0x100,
+    QC_FAIL:                 0x200,
+    DUPLICATE:               0x400,
+    SUPPLEMENTARY:           0x800
+};
 
 function BamFile() {
 }
-
 
 function makeBam(data, bai, callback) {
     var bam = new BamFile();
@@ -320,6 +334,11 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
             record.seqLength = lseq;
 
         if (!opts.light) {
+            if (nextRef >= 0) {
+                record.nextSegment = this.indexToChr[nextRef];
+                record.nextPos = nextPos;
+            }
+
             var readName = '';
             for (var j = 0; j < nl-1; ++j) {
                 readName += String.fromCharCode(ba[offset + 36 + j]);
@@ -433,6 +452,7 @@ if (typeof(module) !== 'undefined') {
     module.exports = {
         makeBam: makeBam,
         BAM_MAGIC: BAM_MAGIC,
-        BAI_MAGIC: BAI_MAGIC
+        BAI_MAGIC: BAI_MAGIC,
+        BamFlags: BamFlags
     };
 }

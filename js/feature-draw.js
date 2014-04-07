@@ -112,7 +112,10 @@ function drawFeatureTier(tier)
     var start = Date.now()|0;
     GLOBAL_GC = tier.viewport.getContext('2d'); // Should only be used for metrics.
     sortFeatures(tier);
-    tier.padding = MIN_PADDING;
+    if (typeof(tier.dasSource.padding) === 'number')
+        tier.padding = tier.dasSource.padding;
+    else
+        tier.padding = MIN_PADDING;
 
     var glyphs = [];
     var specials = false;
@@ -588,19 +591,23 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
         return null;
     
     var connector = 'flat';
-    if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
-        if (strand === '+') {
-            connector = 'collapsed+';
-        } else if (strand === '-') {
-            connector = 'collapsed-';
-        }
+    if (gstyle && gstyle.glyph === 'LINE') {
+        // Stick with flat...
     } else {
-        if (strand === '+') {
-            connector = 'hat+';
-        } else if (strand === '-') {
-            connector = 'hat-';
+        if (tier.dasSource.collapseSuperGroups && !tier.bumped) {
+            if (strand === '+') {
+                connector = 'collapsed+';
+            } else if (strand === '-') {
+                connector = 'collapsed-';
+            }
+        } else {
+            if (strand === '+') {
+                connector = 'hat+';
+            } else if (strand === '-') {
+                connector = 'hat-';
+            }
         }
-    }
+    }   
 
     var labelText = null;
     if ((label && labelWanted) || (gstyle && (isDasBooleanTrue(gstyle.LABEL) || isDasBooleanTrue(gstyle.LABELS)))) {  // HACK, LABELS should work.
