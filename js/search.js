@@ -19,7 +19,7 @@ if (typeof(require) !== 'undefined') {
     var connectTrix = require('./trix').connectTrix;
 }
 
-var REGION_PATTERN = /([\d+,\w,\.,\_,\-]+):([0-9,\.]+)([KkMmGg])?((-|\.\.)+([0-9,\.]+)([KkMmGg])?)?/;
+var REGION_PATTERN = /^([\d+,\w,\.,\_,\-]+):([0-9,\.]+?)([KkMmGg])?((-|\.\.)+([0-9,\.]+)([KkMmGg])?)?$/;
 
 function parseLocCardinal(n, m) {
     var i = parseFloat(n.replace(/,/g, ''));
