@@ -88,7 +88,7 @@ Browser.prototype.exportPageTemplate = function(opts) {
     opts = opts || {};
     var template = '<html>\n' +
                    '  <head>\n' +
-                   '    <script language="javascript" src="' + this.resolveURL('$$dalliance-compiled.js') + "></script>\n' +
+                   '    <script language="javascript" src="' + this.resolveURL('$$dalliance-compiled.js') + '"></script>\n' +
                    '    <script language="javascript">\n' +
                    '      var dalliance_browser = new Browser(' + JSON.stringify(this.exportFullConfig(opts), null, 2) + ');\n' +
                    '    </script>\n' +  
