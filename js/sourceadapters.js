@@ -1422,13 +1422,18 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                         }
                     }
 
-                    var segDestCoverage = new Range(thisB.mapping.mapPoint(seg.name, seg.start).pos, thisB.mapping.mapPoint(seg.name, seg.end).pos);
-                    if (mappedLoc)
-                        mappedLoc = union(mappedLoc, segDestCoverage);
-                    else
-                        mappedLoc = segDestCoverage;
-                    --count;
+                    var m1 = thisB.mapping.mapPoint(seg.name, seg.start);
+                    var m2 = thisB.mapping.mapPoint(seg.name, seg.end);
 
+                    if (m1 && m2) {
+                        var segDestCoverage = new Range(m1.pos, m2.pos);
+                        if (mappedLoc)
+                            mappedLoc = union(mappedLoc, segDestCoverage);
+                        else
+                            mappedLoc = segDestCoverage;
+                    }
+
+                    --count;
                     if (count == 0) {
                         thisB.busy--;
                         thisB.notifyActivity();

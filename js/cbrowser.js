@@ -134,6 +134,15 @@ function Browser(opts) {
 
     this.initListeners = [];
 
+
+
+    if (opts.viewStart !== undefined && typeof(opts.viewStart) !== 'number') {
+        throw Error('viewStart must be an integer');
+    }
+    if (opts.viewEnd !== undefined && typeof(opts.viewEnd) !== 'number') {
+        throw Error('viewEnd must be an integer');
+    }
+
     for (var k in opts) {
         this[k] = opts[k];
     }
@@ -1483,6 +1492,13 @@ Browser.prototype._getSequenceSource = function() {
 }
 
 Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
+    if (typeof(newMin) !== 'number') {
+        throw Error('minimum must be a number (got ' + JSON.stringify(newMin) + ')');
+    }
+    if (typeof(newMax) !== 'number') {
+        throw Error('maximum must be a number (got ' + JSON.stringify(newMax) + ')');
+    }
+
     if (!callback) {
         callback = function(err) {
             if (err) {
