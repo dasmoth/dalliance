@@ -29,6 +29,9 @@ Browser.prototype.openExportPanel = function() {
         exportSelect.appendChild(makeElement('option', 'Dalliance sources', {value: 'sources'}));
         exportSelect.appendChild(makeElement('option', 'Dalliance page', {value: 'page'}));
         exportSelect.value = 'svg';
+        exportSelect.addEventListener('change', function(ev) {
+            removeChildren(exportContent);
+        }, false);
         exportForm.appendChild(makeElement('p', ['Export as: ', exportSelect]));
 
         var exportHighlightsToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportHighlights});
