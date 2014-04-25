@@ -32,13 +32,24 @@ Browser.prototype.exportFullConfig = function(opts) {
 
         coordSystem: this.coordSystem,
 
-        sources: this.exportSourceConfig()
+        sources: this.exportSourceConfig(),
+
+        chains: this.exportChains(),
     };
 
     if (this.prefix)
         config.prefix = this.prefix;
 
     return config;
+}
+
+Browser.prototype.exportChains = function() {
+    var cc = {};
+    var cs = this.chains || {};
+    for (var k in cs) {
+        cc[k] = cs[k].exportConfig();
+    }
+    return cc;
 }
 
 Browser.prototype.exportSourceConfig = function(opts) {

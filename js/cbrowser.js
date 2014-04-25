@@ -31,9 +31,9 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+
+    var Chainset = require('./chainset').Chainset;
 }
-
-
 
 function Region(chr, min, max) {
     this.min = min;
@@ -61,13 +61,6 @@ function Browser(opts) {
 
     this.cookieKey = 'browser';
     this.registry = 'http://www.dasregistry.org/das/sources';
-    this.coordSystem = {
-        speciesName: 'Human',
-        taxon: 9606,
-        auth: 'NCBI',
-        version: '36',
-        ucscName: 'hg18'
-    };
     this.chains = {};
 
     this.pageName = 'svgHolder'
@@ -134,8 +127,6 @@ function Browser(opts) {
 
     this.initListeners = [];
 
-
-
     if (opts.viewStart !== undefined && typeof(opts.viewStart) !== 'number') {
         throw Error('viewStart must be an integer');
     }
@@ -148,6 +139,14 @@ function Browser(opts) {
     }
     if (opts.uiPrefix && !opts.prefix) {
         this.prefix = opts.uiPrefix;
+    }
+
+    if (!this.coordSystem) {
+        throw Error('Coordinate system must be configured');
+    }
+
+    if (this.chr === undefined || this.viewStart === undefined || this.viewEnd === undefined) {
+        throw Error('Viewed region (chr:start..end) must be defined');
     }
 
     var thisB = this;
@@ -202,7 +201,7 @@ Browser.prototype.realInit = function() {
 
     this.bhtmlRoot = makeElement('div');
     if (!this.disablePoweredBy) {
-        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Dalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION], {className: 'powered-by'}));
+        this.bhtmlRoot.appendChild(makeElement('span', ['Powered by ', makeElement('a', 'Biodalliance', {href: 'http://www.biodalliance.org/'}), ' ' + VERSION], {className: 'powered-by'}));
     }
     this.browserHolder.appendChild(this.bhtmlRoot);
     
@@ -214,6 +213,16 @@ Browser.prototype.realInit = function() {
     this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
     this.tierHolderHolder.appendChild(this.ruler);
     this.tierHolderHolder.appendChild(this.ruler2);
+
+    this.chainConfigs = this.chains || {};
+    this.chains = {};
+    for (var k in this.chainConfigs) {
+        var cc = this.chainConfigs[k];
+        if (cc instanceof Chainset) {
+            console.log('WARNING: Should no longer use "new Chainset" in Biodalliance configurations.');
+        }
+        this.chains[k] = new Chainset(cc);
+    }
 
     if (this.maxWorkers > 0) {
         try {

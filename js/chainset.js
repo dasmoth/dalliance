@@ -55,7 +55,16 @@ function Chainset(conf, srcTag, destTag, coords) {
     }
 };
 
-
+Chainset.prototype.exportConfig = function() {
+    return {
+        uri: this.uri,
+        srcTag: this.srcTag,
+        destTag: this.destTag,
+        coords: this.coords,
+        type: this.type,
+        credentials: this.credentials
+    };
+}
 
 Chainset.prototype.mapPoint = function(chr, pos) {
     var chains = this.chainsBySrc[chr] || [];
