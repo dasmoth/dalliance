@@ -137,7 +137,7 @@ function Browser(opts) {
     for (var k in opts) {
         this[k] = opts[k];
     }
-    if (opts.uiPrefix && !opts.prefix) {
+    if (typeof(opts.uiPrefix) === 'string' && typeof(opts.prefix) !== 'string') {
         this.prefix = opts.uiPrefix;
     }
 
