@@ -34,7 +34,7 @@ Browser.prototype.exportFullConfig = function(opts) {
 
         sources: this.exportSourceConfig(),
 
-        chains: this.exportChains(),
+        chains: this.exportChains()
     };
 
     if (this.prefix)
