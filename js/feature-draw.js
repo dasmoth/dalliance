@@ -163,6 +163,7 @@ function drawFeatureTier(tier)
         for (var sg in tier.superGroups) {
             var sgg = tier.superGroups[sg];
             tier.groups[sg] = shallowCopy(tier.groups[sg]);
+            tier.groups[sg].isSuperGroup = true;
             var featsByType = {};
 
             var sgMin = 10000000000, sgMax = -10000000000;

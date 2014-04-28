@@ -694,6 +694,10 @@ BWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
 
         if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
             var fip = function(feature, featureInfo) {
+                for (var hi = 0; hi < featureInfo.hit.length; ++hi) {
+                    if (featureInfo.hit[hi].isSuperGroup)
+                        return;
+                }
                 for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
                     var f = bwg.schema.fields[fi];
                     featureInfo.add(f.comment, feature[f.name]);
@@ -944,6 +948,10 @@ RemoteBWGFeatureSource.prototype.getDefaultFIPs = function(callback) {
 
         if (bwg.schema && bwg.definedFieldCount < bwg.schema.fields.length) {
             var fip = function(feature, featureInfo) {
+                for (var hi = 0; hi < featureInfo.hit.length; ++hi) {
+                    if (featureInfo.hit[hi].isSuperGroup)
+                        return;
+                }
                 for (var fi = bwg.definedFieldCount; fi < bwg.schema.fields.length; ++fi) {
                     var f = bwg.schema.fields[fi];
                     featureInfo.add(f.comment, feature[f.name]);
