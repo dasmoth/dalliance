@@ -97,7 +97,7 @@ function DasTier(browser, source, config, background)
     this.initSources();
 
     var thisB = this;
-    if (this.featureSource && this.featureSource.getDefaultFIPs) {
+    if (this.featureSource && this.featureSource.getDefaultFIPs && !source.noSourceFeatureInfo) {
         this.featureSource.getDefaultFIPs(function(fip) {
             if (fip)
                 thisB.addFeatureInfoPlugin(fip);
