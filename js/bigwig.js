@@ -467,7 +467,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     var blockSizes = bedColumns[7].split(',');
                     var blockStarts = bedColumns[8].split(',');
                     
-                    featureOpts.type = 'bb-transcript'
+                    featureOpts.type = 'transcript'
                     var grp = new DASGroup();
                     for (var k in featureOpts) {
                         grp[k] = featureOpts[k];
@@ -510,7 +510,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     if (thickEnd > thickStart) {
                         var tl = intersection(spans, new Range(thickStart, thickEnd));
                         if (tl) {
-                            featureOpts.type = 'bb-translation';
+                            featureOpts.type = 'translation';
                             var tlList = tl.ranges();
                             for (var s = 0; s < tlList.length; ++s) {
                                 var ts = tlList[s];

@@ -400,7 +400,7 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     tlStyle.HEIGHT = 10;
     tlStyle.BUMP = true;
     tlStyle.ZINDEX = 20;
-    stylesheet.pushStyle({type: 'bb-translation'}, null, tlStyle);
+    stylesheet.pushStyle({type: 'translation'}, null, tlStyle);
     
     var tsStyle = new DASStyle();
     tsStyle.glyph = 'BOX';
@@ -410,15 +410,7 @@ TrackHubTrack.prototype.bigbedStyles = function() {
     tsStyle.ZINDEX = 10;
     tsStyle.BUMP = true;
     tsStyle.LABEL = true;
-    stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
-
-/*
-    var densStyle = new DASStyle();
-    densStyle.glyph = 'HISTOGRAM';
-    densStyle.COLOR1 = 'white';
-    densStyle.COLOR2 = 'black';
-    densStyle.HEIGHT=30;
-    stylesheet.pushStyle({type: 'density'}, null, densStyle); */
+    stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
 
     return stylesheet.styles;
 }

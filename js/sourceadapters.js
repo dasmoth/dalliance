@@ -733,7 +733,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
             wigStyle.HEIGHT = 10;
             wigStyle.BUMP = true;
             wigStyle.ZINDEX = 20;
-            stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
+            stylesheet.pushStyle({type: 'translation'}, null, wigStyle);
                     
             var tsStyle = new DASStyle();
             tsStyle.glyph = 'BOX';
@@ -743,7 +743,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
             tsStyle.ZINDEX = 10;
             tsStyle.BUMP = true;
             tsStyle.LABEL = true;
-            stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+            stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
 
             var densStyle = new DASStyle();
             densStyle.glyph = 'HISTOGRAM';
@@ -984,7 +984,7 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
             wigStyle.HEIGHT = 10;
             wigStyle.BUMP = true;
             wigStyle.ZINDEX = 20;
-            stylesheet.pushStyle({type: 'bb-translation'}, null, wigStyle);
+            stylesheet.pushStyle({type: 'translation'}, null, wigStyle);
                     
             var tsStyle = new DASStyle();
             tsStyle.glyph = 'BOX';
@@ -994,7 +994,7 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
             tsStyle.ZINDEX = 10;
             tsStyle.BUMP = true;
             tsStyle.LABEL = true;
-            stylesheet.pushStyle({type: 'bb-transcript'}, null, tsStyle);
+            stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
 
             var densStyle = new DASStyle();
             densStyle.glyph = 'HISTOGRAM';

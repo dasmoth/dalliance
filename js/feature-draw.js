@@ -163,7 +163,6 @@ function drawFeatureTier(tier)
         for (var sg in tier.superGroups) {
             var sgg = tier.superGroups[sg];
             tier.groups[sg] = shallowCopy(tier.groups[sg]);
-            tier.groups[sg].type = tier.groups[sgg[0]].type;   // HACK to make styling easier in DAS1.6
             var featsByType = {};
 
             var sgMin = 10000000000, sgMax = -10000000000;
