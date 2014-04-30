@@ -9,8 +9,6 @@
 
 "use strict";
 
-// importScripts('utils.js', 'bin.js', 'spans.js', 'bam.js', 'das.js', 'bigwig.js', 'sha1.js', '../jszlib/js/inflate.js');
-
 var bin = require('./bin');
 var bam = require('./bam');
 var bigwig = require('./bigwig');
@@ -22,6 +20,8 @@ var idSeed = 0;
 global.newID = function() {
     return 'cn' + (++idSeed);
 }
+
+postMessage({tag: 'init'});
 
 self.onmessage = function(event) {
     var d = event.data;

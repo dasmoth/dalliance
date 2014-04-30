@@ -120,7 +120,7 @@ function Browser(opts) {
 
     this.useFetchWorkers = true;
     this.maxWorkers = 0;
-    this.workerPath = '$$js/fetchworker.js';
+    this.workerPath = '$$worker-all.js';
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
@@ -141,7 +141,7 @@ function Browser(opts) {
         this.prefix = opts.uiPrefix;
     }
     if (this.prefix.indexOf('//') === 0) {
-        if (window.location.href.indexOf('http:') === 0 || window.location.href.indexOf('https:') === 0) {
+        if (window.location.prototol === 'http:' || window.location.protocol === 'https:') {
             // Protocol-relative URLs okay.
         } else {
             this.prefix = 'http:' + this.prefix;
@@ -233,10 +233,9 @@ Browser.prototype.realInit = function() {
 
     if (this.maxWorkers > 0) {
         try {
-            var fws = [];
+            this.fetchWorkers = [];
             for (var fi = 0; fi < this.maxWorkers; ++fi)
-                fws.push(new FetchWorker());
-            this.fetchWorkers = fws;
+                new FetchWorker(this);
             this.nextWorker = 0;
         } catch (ex) {
             console.log(ex);
@@ -244,7 +243,7 @@ Browser.prototype.realInit = function() {
     }
 
     if (window.getComputedStyle(this.browserHolderHolder).display != 'none') {
-        setTimeout(function() {thisB.realInit2()}, 1);
+        setTimeout(function() {thisB.realInit2()}, 100);
     } else {
         var pollInterval = setInterval(function() {
             if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
@@ -2087,13 +2086,30 @@ Browser.prototype.getWorker = function() {
     return this.fetchWorkers[this.nextWorker++];
 }
 
-function FetchWorker() {
+function FetchWorker(browser) {
     var thisB = this;
-    this.worker = new Worker('build/fetchworker.js');
     this.tagSeed = 0;
     this.callbacks = {};
+    this.browser = browser;
+
+    var wurl = browser.resolveURL(browser.workerPath);
+    if (wurl.indexOf('//') == 0) {
+        if (window.location.prototype === 'https:')
+            wurl = 'https:' + wurl;
+        else
+            wurl = 'http:' + wurl;
+    }
+
+    var wscript = 'importScripts("' + wurl + '");';
+    var wblob = new Blob([wscript]);
+    this.worker = new Worker(URL.createObjectURL(wblob));
 
     this.worker.onmessage = function(ev) {
+        if (ev.data.tag === 'init') {
+            console.log('Worker initialized');
+            thisB.browser.fetchWorkers.push(thisB);
+        }
+
         var cb = thisB.callbacks[ev.data.tag];
         if (cb) {
             cb(ev.data.result, ev.data.error);
