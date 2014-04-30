@@ -140,6 +140,13 @@ function Browser(opts) {
     if (typeof(opts.uiPrefix) === 'string' && typeof(opts.prefix) !== 'string') {
         this.prefix = opts.uiPrefix;
     }
+    if (this.prefix.indexOf('//') === 0) {
+        if (window.location.href.indexOf('http:') === 0 || window.location.href.indexOf('https:') === 0) {
+            // Protocol-relative URLs okay.
+        } else {
+            this.prefix = 'http:' + this.prefix;
+        }
+    }
 
     if (!this.coordSystem) {
         throw Error('Coordinate system must be configured');
