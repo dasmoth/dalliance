@@ -14,7 +14,7 @@ var utils = require('./utils');
 var das = require('./das');
 
 window.Browser = browser.Browser;
-window.Chainset = chainset.Chainset;
+window.Chainset = chainset.Chainset;    // Pre-0.12 configurations need this.
 
 // Useful for info plugins.  Should be reconsidered in the future.
 window.makeElement = utils.makeElement;
@@ -30,3 +30,4 @@ window.DASFeature = das.DASFeature;
 window.DASGroup = das.DASGroup;
 window.DASStylesheet = das.DASStylesheet;
 window.DASStyle = das.DASStyle;
+window.DASSource = das.DASSource;    // Pre-0.8 configurations used this.  Still some around...

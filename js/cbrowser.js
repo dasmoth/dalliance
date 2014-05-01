@@ -121,7 +121,7 @@ function Browser(opts) {
     this.retina = true;
 
     this.useFetchWorkers = true;
-    this.maxWorkers = 0;
+    this.maxWorkers = 2;
     this.workerPath = '$$worker-all.js';
 
     this.assemblyNamePrimary = true;
