@@ -33,6 +33,8 @@ if (typeof(require) !== 'undefined') {
     var formatQuantLabel = nf.formatQuantLabel;
 
     var Chainset = require('./chainset').Chainset;
+
+    var Promise = require('es6-promise').Promise;
 }
 
 function Region(chr, min, max) {
@@ -231,27 +233,35 @@ Browser.prototype.realInit = function() {
         this.chains[k] = new Chainset(cc);
     }
 
+    var promisedWorkers;
     if (this.maxWorkers > 0) {
-        try {
-            this.fetchWorkers = [];
-            for (var fi = 0; fi < this.maxWorkers; ++fi)
-                new FetchWorker(this);
-            this.nextWorker = 0;
-        } catch (ex) {
-            console.log(ex);
-        }
+        var pw = [];
+        for (var fi = 0; fi < this.maxWorkers; ++fi)
+            pw.push(makeFetchWorker(this));
+        promisedWorkers = Promise.all(pw);
+    } else {
+        promisedWorkers = Promise.resolve(null);
     }
 
-    if (window.getComputedStyle(this.browserHolderHolder).display != 'none') {
-        setTimeout(function() {thisB.realInit2()}, 100);
-    } else {
-        var pollInterval = setInterval(function() {
-            if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
-                clearInterval(pollInterval);
-                thisB.realInit2();
-            } 
-        }, 300);
-    }
+    this.fetchWorkers = null;
+    this.nextWorker = 0;
+    promisedWorkers.then(function(v) {
+        console.log('Booted ' + v.length + ' workers');
+        thisB.fetchWorkers = v; 
+    }, function(v) {
+        console.log('Failed to boot workers', v);
+    }).then(function() {
+        if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
+            setTimeout(function() {thisB.realInit2()}, 1);
+        } else {
+            var pollInterval = setInterval(function() {
+                if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
+                    clearInterval(pollInterval);
+                    thisB.realInit2();
+                } 
+            }, 300);
+        }
+    });
 }
 
 Browser.prototype.realInit2 = function() {
@@ -2086,12 +2096,23 @@ Browser.prototype.getWorker = function() {
     return this.fetchWorkers[this.nextWorker++];
 }
 
-function FetchWorker(browser) {
+function FetchWorker(browser, worker) {
     var thisB = this;
     this.tagSeed = 0;
     this.callbacks = {};
     this.browser = browser;
+    this.worker = worker;
 
+    this.worker.onmessage = function(ev) {
+        var cb = thisB.callbacks[ev.data.tag];
+        if (cb) {
+            cb(ev.data.result, ev.data.error);
+            delete thisB.callbacks[ev.data.tag];
+        }
+    };
+}
+
+function makeFetchWorker(browser) {
     var wurl = browser.resolveURL(browser.workerPath);
     if (wurl.indexOf('//') == 0) {
         if (window.location.prototype === 'https:')
@@ -2101,21 +2122,24 @@ function FetchWorker(browser) {
     }
 
     var wscript = 'importScripts("' + wurl + '");';
-    var wblob = new Blob([wscript]);
-    this.worker = new Worker(URL.createObjectURL(wblob));
+    var wblob = new Blob([wscript], {type: 'application/javascript'});
 
-    this.worker.onmessage = function(ev) {
-        if (ev.data.tag === 'init') {
-            console.log('Worker initialized');
-            thisB.browser.fetchWorkers.push(thisB);
+
+    return new Promise(function(resolve, reject) {
+        var worker = new Worker(URL.createObjectURL(wblob));
+
+        worker.onmessage = function(ev) {
+            if (ev.data.tag === 'init') {
+                console.log('Worker initialized');
+                resolve(new FetchWorker(browser, worker))
+            }
+            
         }
 
-        var cb = thisB.callbacks[ev.data.tag];
-        if (cb) {
-            cb(ev.data.result, ev.data.error);
-            delete thisB.callbacks[ev.data.tag];
+        worker.onerror = function(ev) {
+            reject(ev.message);
         }
-    }
+    });    
 }
 
 FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
