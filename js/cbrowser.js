@@ -240,7 +240,7 @@ Browser.prototype.realInit = function() {
             pw.push(makeFetchWorker(this));
         promisedWorkers = Promise.all(pw);
     } else {
-        promisedWorkers = Promise.resolve(null);
+        promisedWorkers = Promise.resolve([]);
     }
 
     this.fetchWorkers = null;
