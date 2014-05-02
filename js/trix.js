@@ -34,7 +34,7 @@ function TrixIndex(keys, offsets, ix) {
 TrixIndex.prototype.lookup = function(query, callback) {
     var ixslice;
 
-    qtag = (query + '     ').substring(0,5).toLowerCase();
+    var qtag = (query + '     ').substring(0,5).toLowerCase();
     for (var i = 0; i < this.keys.length; ++i) {
         if (qtag.localeCompare(this.keys[i]) < 0) {
             ixslice = this.ix.slice(this.offsets[i - 1], this.offsets[i] - this.offsets[i - 1]);
