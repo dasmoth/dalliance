@@ -8,6 +8,7 @@
 //
 
 var TWOBIT_MAGIC = 0x1a412743;
+var TWOBIT_MAGIC_BE = 0x4327411a;
 
 function TwoBitFile() {
 }
@@ -23,16 +24,20 @@ function makeTwoBit(fetchable, cnt) {
         }
         var ba = new Uint8Array(r);
         var magic = readInt(ba, 0);
-        if (magic != TWOBIT_MAGIC) {
-            return cnt(null, "Not a .2bit fie");
+        if (magic == TWOBIT_MAGIC) {
+            tb.readInt = readInt;
+        } else if (magic == TWOBIT_MAGIC_BE) {
+            tb.readInt = readIntBE;
+        } else {
+            return cnt(null, "Not a .2bit file, magic=0x" + magic.toString(16));
         }
 
-        var version = readInt(ba, 4);
+        var version = tb.readInt(ba, 4);
         if (version != 0) {
             return cnt(null, 'Unsupported version ' + version);
         }
 
-        tb.seqCount = readInt(ba, 8);
+        tb.seqCount = tb.readInt(ba, 8);
         tb.seqDict = {};
 
         var p = 16, i=0;
@@ -54,7 +59,7 @@ function makeTwoBit(fetchable, cnt) {
                     for (var j = 1; j <= ns; ++j) {
                         name += String.fromCharCode(ba[p++]);
                     }
-                    var offset = readInt(ba, p);
+                    var offset = tb.readInt(ba, p);
                     p += 4;
                     tb.seqDict[name] = new TwoBitSeq(tb, offset);
                     ++i;
@@ -101,8 +106,8 @@ TwoBitSeq.prototype.init = function(cnt) {
             return cnt('Fetch failed');
         }
         var ba = new Uint8Array(r1);
-        thisB._length = readInt(ba, 0);
-        thisB.nBlockCnt = readInt(ba, 4);
+        thisB._length = thisB.tbf.readInt(ba, 0);
+        thisB.nBlockCnt = thisB.tbf.readInt(ba, 4);
         thisB.tbf.data.slice(thisB.offset + 8, thisB.nBlockCnt*8 + 4).fetch(function(r2) {
             if (!r2) {
                 return cnt('Fetch failed');
@@ -110,8 +115,8 @@ TwoBitSeq.prototype.init = function(cnt) {
             var ba = new Uint8Array(r2);
             var nbs = null;
             for (var b = 0; b < thisB.nBlockCnt; ++b) {
-                var nbMin = readInt(ba, b * 4);
-                var nbLen = readInt(ba, (b + thisB.nBlockCnt) * 4);
+                var nbMin = thisB.tbf.readInt(ba, b * 4);
+                var nbLen = thisB.tbf.readInt(ba, (b + thisB.nBlockCnt) * 4);
                 var nb = new Range(nbMin, nbMin + nbLen - 1);
                 if (!nbs) {
                     nbs = nb;
@@ -120,7 +125,7 @@ TwoBitSeq.prototype.init = function(cnt) {
                 }
             }
             thisB.nBlocks = nbs;
-            thisB.mBlockCnt = readInt(ba, thisB.nBlockCnt*8);
+            thisB.mBlockCnt = thisB.tbf.readInt(ba, thisB.nBlockCnt*8);
             thisB.seqLength = ((thisB._length + 3)/4)|0;
             thisB.seqOffset = thisB.offset + 16 + ((thisB.nBlockCnt + thisB.mBlockCnt) * 8);
             return cnt();
