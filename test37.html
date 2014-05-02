@@ -48,6 +48,7 @@
 <script language="javascript" src="js/search.js"></script>
 <script language="javascript" src="js/tabix.js"></script>
 <script language="javascript" src="js/tabix-source.js"></script>
+<script language="javascript" src="js/trix.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -80,25 +81,16 @@
                    tier_type:            'sequence',
                    provides_entrypoints: true,
                   },
-                  {name:                 'e! transcripts',
-                   uri:                  'http://beta.rest.ensembl.org',
-                   tier_type:            'ensembl',
-                   species:              'human',
-                   type:                 ['transcript', 'exon', 'cds'],
-                  },
-                  {name:                 'Genes',     
-                   desc:                 'Gene structures from Ensembl 54',
-                   uri:                  'http://www.derkholm.net:8080/das/hsa_54_36p/',      
-                   collapseSuperGroups:  true,
-                   provides_karyotype:   true,
-                   provides_search:      true,
-                   provides_entrypoints: true,
-                   maxbins:              false,
-                   mapping:              'hg18ToHg19',
-                   featureInfoPlugin: function(f, info) {
-                      info.add('Testing', 'This is another test!');
-                   }
-                  },
+                  {name: 'GENCODE',
+                        bwgURI: 'http://www.biodalliance.org/datasets/gencode.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
+                        collapseSuperGroups: true,
+                        trixURI: 'http://www.biodalliance.org/datasets/geneIndex.ix'},
+                    {name: 'Repeats',
+                    desc: 'Repeat annotation from RepeatMasker', 
+                    bwgURI: 'http://www.biodalliance.org/datasets/repeats.bb',
+                    stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats.xml',
+                    forceReduction: -1},
                   {name:                 'Repeats',
                    desc:                 'Repeat annotation from Ensembl 59',
                    uri:                  'http://www.derkholm.net:8080/das/hsa_59_37d/',      
@@ -147,7 +139,6 @@
     setDocumentTitle: true,
     uiPrefix: '',
 
-    searchEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
     karyotypeEndpoint: new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/'),
 
     browserLinks: {
