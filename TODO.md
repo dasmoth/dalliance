@@ -5,14 +5,12 @@ For 0.12
   - BAM rendering speedups [DONE]
   - Lightweight mode for BAM parser [DONE]
   - Use web-workers for fetching [DONE]
-  - Fix cross-origin worker boot.
+  - Fix cross-origin worker boot. [DONE]
   - Small BED/WIG support. [DONE]
   - Bulk addition of local files. [DONE]
   - Independent scrolling of tier-holder and tool panels [DONE]
   - Support for full screen mode [DONE]
   - Pinning tracks. [DONE]
-  - Keep selected track visible when track heights change (?)
-  - Support for non-positional annotations
   - Export track configuration for current browser state. [DONE]
   - Allow liftover chains to be loaded from a bigbed file. [DONE]
 
@@ -28,6 +26,7 @@ For 0.13
   - Overlay function plugin API
   - Clean up featureSource creation (make async?)
   - Search-by-name (or description) in track-adder.
+  - Support for non-positional annotations (UI hookup for bigtab client)
 
 For 1.0
 --------
