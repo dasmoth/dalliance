@@ -9,12 +9,13 @@ module.exports = function(config) {
 
 
     // frameworks to use
-    frameworks: ['jasmine', 'browserify'],
+    frameworks: ['browserify', 'jasmine'],
 
 
     // list of files / patterns to load in the browser
     files: [
       'test/*.js',
+      'js/*.js',
 
       {pattern: 'plants/**', included: false, served: true}
     ],
@@ -68,10 +69,9 @@ module.exports = function(config) {
     // if true, it capture browsers, run tests and exit
     singleRun: false,
 
-    preprocessors: {'test/*.js': ['browserify']},
+    preprocessors: {'*/*.js': ['browserify']},
 
     browserify: {
-      watch: true,
       debug: true
     }
   });
