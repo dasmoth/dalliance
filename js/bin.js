@@ -247,6 +247,9 @@ function readByte(ba, offset) {
     return ba[offset];
 }
 
+function readIntBE(ba, offset) {
+    return (ba[offset] << 24) | (ba[offset + 1] << 16) | (ba[offset + 2] << 8) | (ba[offset + 3]);
+}
 
 // Exports if we are being used as a module
 
@@ -256,6 +259,7 @@ if (typeof(module) !== 'undefined') {
         URLFetchable: URLFetchable,
 
         readInt: readInt,
+        readIntBE: readIntBE,
         readInt64: readInt64,
         readShort: readShort,
         readByte: readByte,

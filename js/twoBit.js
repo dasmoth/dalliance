@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var bin = require('./bin');
     var readInt = bin.readInt;
+    var readIntBE = bin.readIntBE;
 
     var spans = require('./spans');
     var Range = spans.Range;
