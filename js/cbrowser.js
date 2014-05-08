@@ -196,6 +196,11 @@ Browser.prototype.realInit = function() {
     this.browserHolderHolder = document.getElementById(this.pageName);
     this.browserHolderHolder.classList.add('dalliance-injection-point');
     this.browserHolder = makeElement('div', null, {className: 'dalliance dalliance-root', tabIndex: -1});
+    if (this.maxHeight) {
+        this.browserHolder.style.maxHeight = this.maxHeight + 'px';
+    } else if (this.maxHeight != undefined) {
+        this.browserHolder.style.maxHeight = null;
+    }
     removeChildren(this.browserHolderHolder);
     this.browserHolderHolder.appendChild(this.browserHolder);
     this.svgHolder = makeElement('div', null, {className: 'main-holder'});
