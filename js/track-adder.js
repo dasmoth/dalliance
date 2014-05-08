@@ -82,7 +82,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var thisB = this;
 
-    var popup = makeElement('div', null, {className: 'dalliance'} , {width: '100%', display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top'});
+    var popup = makeElement('div', null, {className: 'dalliance'} , {width: '100%', display: 'inline-block', boxSizing: 'border-box', MozBoxSizing: 'border-box', verticalAlign: 'top', paddingRight: '15px'});
 
     var addModeButtons = [];
     var makeStab, makeStabObserver;
