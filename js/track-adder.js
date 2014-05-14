@@ -44,6 +44,11 @@ if (typeof(require) !== 'undefined') {
 
     var tbi = require('./tabix');
     var TABIX_MAGIC = tbi.TABIX_MAGIC;
+
+    var das = require('./das');
+    var DASSource = das.DASSource;
+    var DASSegment = das.DASSegment;
+    var DASRegistry = das.DASRegistry;
 }
 
 Browser.prototype.currentlyActive = function(source) {
