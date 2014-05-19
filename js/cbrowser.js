@@ -1274,28 +1274,19 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 Browser.prototype.move = function(pos)
 {
     var wid = this.viewEnd - this.viewStart;
-    this.viewStart -= pos / this.scale;
-    this.viewEnd = this.viewStart + wid;
-    if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
-        this.viewEnd = this.currentSeqMax;
-        this.viewStart = this.viewEnd - wid;
+    var nStart = this.viewStart - pos / this.scale;
+    var nEnd = nStart + wid;
+
+    if (this.currentSeqMax > 0 && nEnd > this.currentSeqMax) {
+        nEnd = this.currentSeqMax;
+        nStart = this.viewEnd - wid;
     }
-    if (this.viewStart < 1) {
-        this.viewStart = 1;
-        this.viewEnd = this.viewStart + wid;
-    }
-    this.notifyLocation();
-    
-    var viewCenter = (this.viewStart + this.viewEnd)/2;
-    
-    for (var i = 0; i < this.tiers.length; ++i) {
-        var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
-        var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
-        this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
+    if (nStart < 1) {
+        nStart = 1;
+        nEnd = nStart + wid;
     }
 
-    this.spaceCheck();
+    this.setLocation(null, nStart, nEnd);
 }
 
 Browser.prototype.zoomStep = function(delta) {
