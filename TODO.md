@@ -1,19 +1,3 @@
-For 0.12
---------
-
-  - Better support for assembly mapping across fragmented alignments [DONE]
-  - BAM rendering speedups [DONE]
-  - Lightweight mode for BAM parser [DONE]
-  - Use web-workers for fetching [DONE]
-  - Fix cross-origin worker boot. [DONE]
-  - Small BED/WIG support. [DONE]
-  - Bulk addition of local files. [DONE]
-  - Independent scrolling of tier-holder and tool panels [DONE]
-  - Support for full screen mode [DONE]
-  - Pinning tracks. [DONE]
-  - Export track configuration for current browser state. [DONE]
-  - Allow liftover chains to be loaded from a bigbed file. [DONE]
-
 For 0.13
 --------
 

@@ -212,10 +212,10 @@ GroupGlyph.prototype.drawConnectors = function(g) {
     }
 }
 
-GroupGlyph.prototype.draw = function(g) {
+GroupGlyph.prototype.draw = function(g, oc) {
     for (var i = 0; i < this.glyphs.length; ++i) {
         var gl = this.glyphs[i];
-        gl.draw(g);
+        gl.draw(g, oc);
     }
 
     g.strokeStyle = 'black';
@@ -389,7 +389,7 @@ LabelledGlyph.prototype.height = function() {
     return h;
 }
 
-LabelledGlyph.prototype.draw = function(g) {
+LabelledGlyph.prototype.draw = function(g, oc) {
     if (this.align == 'above') {
         g.save();
         g.translate(0, this.textHeight + 2);
@@ -399,6 +399,11 @@ LabelledGlyph.prototype.draw = function(g) {
         g.restore();
     }
 
+
+    oc.registerGlyph(this);
+}
+
+LabelledGlyph.prototype.drawOverlay = function(g, minVisible, maxVisible) {
     g.fillStyle = 'black';
     if (this.font) {
         g.save();
@@ -409,6 +414,9 @@ LabelledGlyph.prototype.draw = function(g) {
         p = (this.glyph.min() + this.glyph.max() - this.textLen) / 2;
     } else {
         p = this.glyph.min();
+        if (p < minVisible) {
+            p = Math.min(minVisible, this.glyph.max() - this.textLen);
+        }
     }
     g.fillText(this.text, p, this.align == 'above' ? this.textHeight : this.glyph.height() + 15);
     if (this.font) {
@@ -1372,6 +1380,37 @@ PlimsollGlyph.prototype.height = function() {
     return this._height;
 }
 
+
+function OverlayLabelCanvas() {
+    this.ox = 0;
+    this.oy = 0;
+    this.glyphs = [];
+}
+
+OverlayLabelCanvas.prototype.translate = function(x, y) {
+    this.ox += x;
+    this.oy += y;
+}
+
+OverlayLabelCanvas.prototype.registerGlyph = function(g) {
+    this.glyphs.push({
+        x: this.ox,
+        y: this.oy,
+        glyph: g
+    });
+}
+
+
+OverlayLabelCanvas.prototype.draw = function(g, minVisible, maxVisible) {
+    for (var gi = 0; gi < this.glyphs.length; ++gi) {
+        var gg = this.glyphs[gi];
+        g.save();
+        g.translate(gg.x, gg.y);
+        gg.glyph.drawOverlay(g, minVisible, maxVisible);
+        g.restore();
+    }
+}
+
 if (typeof(module) !== 'undefined') {
     module.exports = {
         BoxGlyph: BoxGlyph,
@@ -1395,6 +1434,8 @@ if (typeof(module) !== 'undefined') {
         GridGlyph: GridGlyph,
         StarGlyph: StarGlyph,
         PointGlyph: PointGlyph,
-        PlimsollGlyph: PlimsollGlyph
+        PlimsollGlyph: PlimsollGlyph,
+
+        OverlayLabelCanvas: OverlayLabelCanvas
     }
 }

@@ -1619,10 +1619,10 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
         for (var i = 0; i < this.tiers.length; ++i) {
             var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
 	        this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
-            var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
-            this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
+            this.tiers[i].drawOverlay();
         }
     }
+
     this.notifyLocation();
 
     this.spaceCheck();

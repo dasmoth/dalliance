@@ -40,6 +40,7 @@ if (typeof(require) !== 'undefined') {
     var GridGlyph = g.GridGlyph;
     var StarGlyph = g.StarGlyph;
     var PlimsollGlyph = g.PlimsollGlyph;
+    var OverlayLabelCanvas = g.OverlayLabelCanvas;
 
     var color = require('./color');
     var makeGradient = color.makeGradient;
@@ -357,10 +358,7 @@ function drawFeatureTier(tier)
     // console.log('dft took ' + (end-start) + 'ms');
 }
 
-
-
 DasTier.prototype.paint = function() {
-    var start = Date.now()|0;
     var retina = this.browser.retina && window.devicePixelRatio > 1;
 
     var subtiers = this.subtiers;
@@ -400,7 +398,6 @@ DasTier.prototype.paint = function() {
     this.layoutHeight =  Math.max(lh, this.browser.minTierHeight);
 
     this.updateHeight();
-    this.drawOverlay();
     this.norigin = this.browser.viewStart;
 
     var gc = this.viewport.getContext('2d');
@@ -425,8 +422,10 @@ DasTier.prototype.paint = function() {
         }
     }
 
+    var oc = new OverlayLabelCanvas();
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
     gc.translate(offset, this.padding);
+    oc.translate(0, this.padding);
    
     for (var s = 0; s < subtiers.length; ++s) {
         var quant = null;
@@ -435,14 +434,19 @@ DasTier.prototype.paint = function() {
             var glyph = glyphs[i];
             if (glyph.min() < fpw-offset && glyph.max() > -offset) { 
                 var glyph = glyphs[i];
-                glyph.draw(gc);
+                glyph.draw(gc, oc);
                 if (glyph.quant) {
                     quant = glyph.quant;
                 }
             }
         }
         gc.translate(0, subtiers[s].height + this.padding);
+        oc.translate(0, subtiers[s].height + this.padding);
     }
+    if (oc.glyphs.length > 0)
+        this.overlayLabelCanvas = oc;
+    else
+        this.overlayLabelCanvas = null;
     gc.restore();
 
     if (quant && this.quantLeapThreshold && this.featureSource && this.browser.sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
@@ -460,10 +464,8 @@ DasTier.prototype.paint = function() {
         gc.restore();
     }
 
+    this.drawOverlay();
     this.paintQuant();
-
-    var end = Date.now()|0;
-    // console.log('paint took ' + (end-start) + 'ms');
 }
 
 DasTier.prototype.paintQuant = function() {
@@ -1109,8 +1111,6 @@ DasTier.prototype.quantMax = function(style) {
         return style.MAX || this.currentFeaturesMaxScore || 0;
     }
 }
-
-
 
 if (typeof(module) !== 'undefined') {
     module.exports = {

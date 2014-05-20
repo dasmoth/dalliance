@@ -35,7 +35,7 @@ function DasTier(browser, source, config, background)
                                  height: "30",
                                  className: 'viewport'});
     this.overlay = makeElement('canvas', null,
-         {width: + ((this.browser.featurePanelWidth|0) + 2000), 
+         {width: + ((this.browser.featurePanelWidth|0)), 
           height: "30",
           className: 'viewport-overlay'});
 
@@ -317,22 +317,31 @@ DasTier.prototype.updateHeight = function() {
     this.browser.updateHeight();
  }
 
+
 DasTier.prototype.drawOverlay = function() {
     var t = this;
     var b = this.browser;
     var retina = b.retina && window.devicePixelRatio > 1;
-    var g = t.overlay.getContext('2d');
     
     t.overlay.height = t.viewport.height;
-    t.overlay.width = t.viewport.width;
+    t.overlay.width = retina ? b.featurePanelWidth * 2 : b.featurePanelWidth;
+
+    var g = t.overlay.getContext('2d');
     if (retina) {
         g.scale(2, 2);
     }
     
-    var origin = b.viewStart - (1000/b.scale);
-    var visStart = b.viewStart - (1000/b.scale);
-    var visEnd = b.viewEnd + (1000/b.scale);
+    var origin = b.viewStart;
+    var visStart = b.viewStart;
+    var visEnd = b.viewEnd;
 
+    if (this.overlayLabelCanvas) {
+        var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale);
+        g.save();
+        g.translate(offset, 0);
+        this.overlayLabelCanvas.draw(g, -offset, b.featurePanelWidth-offset);
+        g.restore();
+    }
 
     for (var hi = 0; hi < b.highlights.length; ++hi) {
         var h = b.highlights[hi];
@@ -344,13 +353,14 @@ DasTier.prototype.drawOverlay = function() {
                        (h.max - h.min) * b.scale,
                        t.overlay.height);
         }
-    }
+    } 
 
-    t.oorigin = b.viewStart;
-    t.overlay.style.width = t.viewport.style.width;
+    // t.oorigin = b.viewStart;
+    t.overlay.style.width = b.featurePanelWidth;
     t.overlay.style.height = t.viewport.style.height;
-    t.overlay.style.left = '-1000px'
+    t.overlay.style.left = '0px';
 }
+
 
 DasTier.prototype.updateStatus = function(status) {
     if (status) {
