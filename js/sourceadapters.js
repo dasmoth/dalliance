@@ -76,8 +76,8 @@ DasTier.prototype.initSources = function() {
     var thisTier = this;
     var fs = new DummyFeatureSource(), ss;
 
-    if (this.dasSource.tier_type == 'sequence') {
-        if (this.dasSource.twoBitURI) {
+    if (this.dasSource.tier_type == 'sequence' || this.dasSource.twoBitURI || this.dasSource.twoBitBlob) {
+        if (this.dasSource.twoBitURI || this.dasSource.twoBitBlob) {
             ss = new TwoBitSequenceSource(this.dasSource);
         } else {
             ss = new DASSequenceSource(this.dasSource);
@@ -446,9 +446,18 @@ function TwoBitSequenceSource(source) {
     var thisB = this;
     this.source = source;
     this.twoBit = new Awaited();
-    makeTwoBit(new URLFetchable(source.twoBitURI), function(tb, error) {
+    var data;
+    if (source.twoBitURI) {
+        data = new URLFetchable(source.twoBitURI);
+    } else if (source.twoBitBlob) {
+        data = new BlobFetchable(source.twoBitBlob);
+    } else {
+        throw Error("No twoBitURI or twoBitBlob parameter");
+    }
+
+    makeTwoBit(data, function(tb, error) {
         if (error) {
-            dlog(error);
+            console.log(error);
         } else {
             thisB.twoBit.provide(tb);
         }

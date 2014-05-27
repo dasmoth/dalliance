@@ -181,7 +181,7 @@ function svgSeqTier(tier, seq) {
     	for (var p = knownStart; p <= knownEnd; ++p) {
     	    if (p >= seq.start && p <= seq.end) {
         		var base = seq.seq.substr(p - seq.start, 1).toUpperCase();
-        		var color = baseColors[base];
+        		var color = tier.browser.baseColors[base];
         		if (!color) {
                     color = 'gray';
         		}

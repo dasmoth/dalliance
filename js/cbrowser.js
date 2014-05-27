@@ -794,7 +794,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragMoveHandler = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         var rx = ev.clientX;
-        if (tier.dasSource.tier_type !== 'sequence' && rx != dragMoveOrigin) {
+        if (tier.sequenceSource && rx != dragMoveOrigin) {
             thisB.move((rx - dragMoveOrigin));
             dragMoveOrigin = rx;
         }
@@ -861,7 +861,7 @@ Browser.prototype.realMakeTier = function(source, config) {
             }
         }
 
-        if (thisB.isDragging && rx != dragOrigin && tier.dasSource.tier_type === 'sequence') {
+        if (thisB.isDragging && rx != dragOrigin && tier.sequenceSource) {
             var a = thisB.viewStart + (rx/thisB.scale);
             var b = thisB.viewStart + (dragOrigin/thisB.scale);
 
@@ -1410,6 +1410,8 @@ function sourceDataURI(conf) {
         return 'file:' + conf.bwgBlob.name;
     } else if (conf.bamBlob) {
         return 'file:' + conf.bamBlob.name;
+    } else if (conf.twoBitBlob) {
+        return 'file:' + conf.twoBitBlob.name;
     }
 
     return conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
@@ -1418,7 +1420,7 @@ function sourceDataURI(conf) {
 function sourceStyleURI(conf) {
     if (conf.stylesheet_uri)
         return conf.stylesheet_uri;
-    else if (conf.tier_type == 'sequence')
+    else if (conf.tier_type == 'sequence' || conf.twoBitURI || conf.twoBitBlob)
         return 'http://www.biodalliance.org/magic/sequence'
     else
         return sourceDataURI(conf);
@@ -1502,8 +1504,8 @@ Browser.prototype._getSequenceSource = function() {
 
     for (var si = 0; si < this.defaultSources.length; ++si) {
         var s = this.defaultSources[si];
-        if (s.provides_entrypoints || s.tier_type == 'sequence' || s.twoBitURI) {
-            if (s.twoBitURI) {
+        if (s.provides_entrypoints || s.tier_type == 'sequence' || s.twoBitURI || s.twoBitBlob) {
+            if (s.twoBitURI || s.twoBitBlob) {
                 return new TwoBitSequenceSource(s);
             } else {
                 return new DASSequenceSource(s);
