@@ -301,11 +301,16 @@ Browser.prototype.openTierPanel = function(tier) {
                 if (seqStyle) {
                     seqMismatchRow.style.display = 'table-row';
                     seqMismatchToggle.checked = (seqStyle.__SEQCOLOR === 'mismatch');
+
                     seqInsertRow.style.display = 'table-row';
                     seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
+
+                    seqOnlyMismatchRow.style.display = 'table-row';
+                    seqOnlyMismatchToggle.checked = isDasBooleanTrue(seqStyle.__ONLY_MISMATCH);
                 } else {
                     seqMismatchRow.style.display = 'none';
                     seqInsertRow.style.display = 'none';
+                    seqOnlyMismatchToggle.style.display = 'none';
                 }
             }
 
@@ -334,6 +339,17 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
             seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
+            tier.mergeConfig({stylesheet: nss});
+        });
+
+        var seqOnlyMismatchToggle = makeElement('input', null, {type: 'checkbox'});
+        var seqOnlyMismatchRow = makeElement('tr',
+                                       [makeElement('th', 'Only show mismatches'),
+                                        makeElement('td', seqOnlyMismatchToggle)]);
+        seqOnlyMismatchToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            var seqStyle = getSeqStyle(nss);
+            seqStyle.__ONLY_MISMATCH = seqOnlyMismatchToggle.checked ? 'yes' : 'no';
             tier.mergeConfig({stylesheet: nss});
         });
 
@@ -382,7 +398,8 @@ Browser.prototype.openTierPanel = function(tier) {
             bumpRow,
             labelRow,
             seqMismatchRow,
-            seqInsertRow
+            seqInsertRow,
+            seqOnlyMismatchRow
              ]);
 
 
