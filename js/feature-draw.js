@@ -961,11 +961,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        debugger
         var mismatchSeq = '';
         if (onlyMismatch) {
             for (var i = 0; i < seq.length; ++i) {
-                mismatchSeq += seq[i] == refSeq[i] ? '.' : seq[i];
+                var c = feature.orientation == '-' ? ',' : '.';
+                mismatchSeq += seq[i] == refSeq[i] ? c : seq[i];
             }
             seq = mismatchSeq;
         }
