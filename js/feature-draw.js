@@ -906,6 +906,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var rawquals = feature.quals;
         var quals = rawquals;
         var insertionLabels = isDasBooleanTrue(style.__INSERTIONS);
+        var onlyMismatch = isDasBooleanTrue(style.__ONLY_MISMATCH);
 
         var indels = [];
         if (feature.cigar) {
@@ -959,6 +960,14 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     sfMax++;
                 }
             }
+        }
+        debugger
+        var mismatchSeq = '';
+        if (onlyMismatch) {
+            for (var i = 0; i < seq.length; ++i) {
+                mismatchSeq += seq[i] == refSeq[i] ? '.' : seq[i];
+            }
+            seq = mismatchSeq;
         }
         gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
         if (insertionLabels)
