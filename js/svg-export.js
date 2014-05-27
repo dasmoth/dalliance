@@ -80,7 +80,7 @@ Browser.prototype.makeSVG = function(opts) {
     	var tierBackground = makeElementNS(NS_SVG, 'rect', null, {x: 0, y: tierTopPos, width: '10000', height: 50, fill: tier.background});
     	tierSVG.appendChild(tierBackground);
 
-    	if (tier.dasSource.tier_type === 'sequence') {
+    	if (tier.sequenceSource) {
     	    var seqTrack = svgSeqTier(tier, tier.currentSequence);
     	    
     	    tierSVG.appendChild(makeElementNS(NS_SVG, 'g', seqTrack, {transform: 'translate(' + (margin) + ', ' + pos + ')'}));

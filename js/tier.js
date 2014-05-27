@@ -203,7 +203,7 @@ DasTier.prototype.getDesiredTypes = function(scale) {
 }
 
 DasTier.prototype.needsSequence = function(scale ) {
-    if (this.dasSource.tier_type === 'sequence' && scale < 5) {
+    if (this.sequenceSource && scale < 5) {
         return true;
     } else if ((this.dasSource.bamURI || this.dasSource.bamBlob) && scale < 20) {
         return true
@@ -230,7 +230,7 @@ DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequen
 DasTier.prototype.draw = function() {
     var features = this.currentFeatures;
     var seq = this.currentSequence;
-    if (this.dasSource.tier_type === 'sequence') {
+    if (this.sequenceSource) {
         drawSeqTier(this, seq); 
     } else {
         drawFeatureTier(this);
