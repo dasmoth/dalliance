@@ -286,19 +286,37 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
                     }
                 }
                 if (bestFeature) {
-                    //                dlog('bestFeature = ' + miniJSONify(bestFeature));
                     return callback(bestFeature);
                 }
                 if (dir < 0) {
-                    pos = this.knownStart;
+                    pos = this.browser.knownSpace.min;
                 } else {
-                    pos = this.knownEnd;
+                    pos = this.browser.knownSpace.max;
                 }
             }
         }
 
-        this.featureSource.findNextFeature(chr, pos, dir, callback);
+        this.trySourceFNF(chr, pos, dir, callback);
     }
+}
+
+DasTier.prototype.trySourceFNF = function(chr, pos, dir, callback) {
+    var self = this;
+    this.featureSource.findNextFeature(chr, pos, dir, function(feature) {
+        if (!feature)
+            callback(feature);
+
+        var ss = self.browser.getSequenceSource();
+        if (!ss) // We're probably in trouble, but return anyway.
+            callback(feature)
+
+        ss.getSeqInfo(feature.segment, function(si) {
+            if (si)
+                callback(feature);
+            else
+                self.trySourceFNF(feature.segment, dir > 0 ? 10000000000 : 0, dir, callback);
+        });
+    });
 }
 
 
