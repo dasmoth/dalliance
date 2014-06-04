@@ -286,13 +286,12 @@ DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
                     }
                 }
                 if (bestFeature) {
-                    //                dlog('bestFeature = ' + miniJSONify(bestFeature));
                     return callback(bestFeature);
                 }
                 if (dir < 0) {
-                    pos = this.knownStart;
+                    pos = this.browser.knownSpace.min;
                 } else {
-                    pos = this.knownEnd;
+                    pos = this.browser.knownSpace.max;
                 }
             }
         }
