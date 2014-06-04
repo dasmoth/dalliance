@@ -44,6 +44,7 @@ if (typeof(require) !== 'undefined') {
 
     var spans = require('./spans');
     var Range = spans.Range;
+    var union = spans.union;
 
     var parseCigar = require('./cigar').parseCigar;
 
