@@ -1991,6 +1991,11 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
 Browser.prototype.leap = function(dir, fedge) {
     var thisB = this;
     var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
+    if (dir > 0 && thisB.viewStart <= 1) {
+        pos -= 100000000;
+    } else if (dir < 0 && thisB.viewEnd >= thisB.currentSeqMax) {
+        pos += 100000000;
+    }
 
     var st = thisB.getSelectedTier();
     if (st < 0) return;
