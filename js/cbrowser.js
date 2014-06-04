@@ -52,6 +52,7 @@ function Browser(opts) {
 
     this.sources = [];
     this.tiers = [];
+    this.tierGroups = {};
 
     this.featureListeners = [];
     this.featureHoverListeners = [];
@@ -1142,17 +1143,58 @@ Browser.prototype.refreshTier = function(tier) {
 
 Browser.prototype.arrangeTiers = function() {
     var arrangedTiers = [];
+    var groupedTiers = {};
+
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
         if (t.pinned) {
             arrangedTiers.push(t);
+            if (t.dasSource.tierGroup) {
+                pusho(groupedTiers, t.dasSource.tierGroup, t);
+            }
         }
+        
     }
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var t = this.tiers[ti];
         if (!t.pinned) {
             arrangedTiers.push(t);
+            if (t.dasSource.tierGroup) {
+                pusho(groupedTiers, t.dasSource.tierGroup, t);
+            }
         }
+    }
+
+    for (var g in groupedTiers) {
+        var tiers = groupedTiers[g];
+        var tierGroup = this.tierGroups[g];
+        if (!tierGroup) {
+            tierGroup = {
+                element: makeElement('div', g, {className: "tier-group"},
+                    {
+                        position: 'absolute',
+                        backgroundColor: 'red'
+                    })
+            };
+            this.tierGroups[g] = tierGroup;
+        }
+
+        if (tierGroup.element.parentNode)
+            tierGroup.element.parentNode.removeChild(tierGroup.element);
+
+        var holder = tiers[0].pinned ? this.pinnedTierHolder : this.tierHolder;
+        var min = 10000000, max = 0;
+        for (var ti = 0; ti < tiers.length; ++ti) {
+            var row = tiers[ti].row;
+            min = Math.min(min, row.offsetTop);
+            max = Math.max(max, row.offsetTop + row.offsetHeight);
+        }
+        tierGroup.element.style.top = min + 'px';
+        tierGroup.element.style.left = '5px';
+        tierGroup.element.style.width = '10px';
+        tierGroup.element.style.height = (max-min) + 'px';
+        holder.appendChild(tierGroup.element);
+
     }
 
     if (this.tierBackgroundColors) {
