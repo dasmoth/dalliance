@@ -1190,7 +1190,7 @@ Browser.prototype.arrangeTiers = function() {
             max = Math.max(max, row.offsetTop + row.offsetHeight);
         }
         tierGroup.element.style.top = min + 'px';
-        tierGroup.element.style.left = '5px';
+        tierGroup.element.style.left = '0px';
         tierGroup.element.style.width = '10px';
         tierGroup.element.style.height = (max-min) + 'px';
         holder.appendChild(tierGroup.element);
@@ -1200,6 +1200,10 @@ Browser.prototype.arrangeTiers = function() {
     if (this.tierBackgroundColors) {
         for (var ti = 0; ti < arrangedTiers.length; ++ti) {
             var t = arrangedTiers[ti];
+            if (t.dasSource.tierGroup) 
+                t.label.style.left = '20px';
+            else
+                t.label.style.left = '2px';
             t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
         }
     }
