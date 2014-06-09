@@ -386,7 +386,7 @@ DASFeatureSource.prototype.findNextFeature = this.sourceFindNextFeature = functi
     if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
         var thisB = this;
         if (this.dasAdjLock) {
-            return dlog('Already looking for a next feature, be patient!');
+            return console.log('Already looking for a next feature, be patient!');
         }
         this.dasAdjLock = true;
         var fops = {
@@ -399,7 +399,6 @@ DASFeatureSource.prototype.findNextFeature = this.sourceFindNextFeature = functi
         thisTier.dasSource.features(null, fops, function(res) {
             thisB.dasAdjLock = false;
             if (res.length > 0 && res[0] != null) {
-                dlog('DAS adjacent seems to be working...');
                 callback(res[0]);
             }
         });
@@ -588,13 +587,8 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             return callback(thisB.error || "Can't access binary file", null, null);
         }
 
-        // dlog('bwg: ' + bwg.name + '; want scale: ' + scale);
         var data;
-        // dlog(miniJSONify(types));
         var wantDensity = !types || types.length == 0 || arrayIndexOf(types, 'density') >= 0;
-/*        if (wantDensity) {
-            dlog('want density; scale=' + scale);
-        } */
         if (thisB.opts.clientBin) {
             wantDensity = false;
         }
@@ -610,7 +604,7 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
             if (typeof thisB.opts.forceReduction !== 'undefined') {
                 zoom = thisB.opts.forceReduction;
             }
-           // dlog('selected zoom: ' + zoom);
+
             if (zoom < 0) {
                 data = bwg.getUnzoomedView();
             } else {
@@ -1414,8 +1408,6 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                             var mmin = thisB.mapping.mapPoint(sn, f.min);
                             var mmax = thisB.mapping.mapPoint(sn, f.max);
                             if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
-                                // Discard feature.
-                                // dlog('discarding ' + miniJSONify(f));
                                 if (f.parts && f.parts.length > 0) {    // FIXME: Ugly hack to make ASTD source map properly.
                                      mappedFeatures.push(f);
                                 }

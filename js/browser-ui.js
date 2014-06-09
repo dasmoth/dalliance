@@ -77,8 +77,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var tierEditButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-road'})], {className: 'btn'});
     b.makeTooltip(tierEditButton, 'Configure currently selected track(s) (E)')
 
-    var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-left'})], {className: 'btn'});
-    var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-chevron-right'})], {className: 'btn pull-right'});
+    var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-left'})], {className: 'btn'}, {width: '5px'});
+    var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-right'})], {className: 'btn pull-right'}, {width: '5px'});
 
     var modeButtons = makeElement('div', null, {className: 'btn-group pull-right'});
     if (!this.noTrackAdder)
@@ -266,6 +266,23 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         } else {
             return 'Jump right (shift+RIGHT)';
         }
+    });
+    b.addTierSelectionListener(function() {
+        var st = b.getSelectedTier();
+        var tier;
+        if (st >= 0)
+            tier = b.tiers[st];
+
+        var canLeap = false;
+        if (tier && tier.featureSource) {
+            if (b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
+                canLeap = true;
+            else if (b.sourceAdapterIsCapable(tier.featureSource, 'leap'))
+                canLeap = true;
+        }
+
+        leapLeftButton.firstChild.className = canLeap ? 'fa fa-angle-double-left' : 'fa fa-angle-left';
+        leapRightButton.firstChild.className = canLeap ? 'fa fa-angle-double-right' : 'fa fa-angle-right';
     });
 
     clearHighlightsButton.addEventListener('click', function(ev) {

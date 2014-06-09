@@ -794,7 +794,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragMoveHandler = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         var rx = ev.clientX;
-        if (tier.sequenceSource && rx != dragMoveOrigin) {
+        if (rx != dragMoveOrigin) {
             thisB.move((rx - dragMoveOrigin));
             dragMoveOrigin = rx;
         }

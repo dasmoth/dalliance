@@ -41,7 +41,7 @@ function connectTabix(data, tbi, callback) {
 
     tabix.tbi.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
         if (!header) {
-            return dlog("Couldn't access Tabix");
+            return callback(null, "Couldn't access Tabix");
         }
 
         var unchead = unbgzf(header, header.byteLength);
