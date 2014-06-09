@@ -128,9 +128,6 @@ BigWigView.prototype.readWigData = function(chrName, min, max, callback) {
     var chr = this.bwg.chromsToIDs[chrName];
     if (chr === undefined) {
         // Not an error because some .bwgs won't have data for all chromosomes.
-
-        // dlog("Couldn't find chr " + chrName);
-        // dlog('Chroms=' + miniJSONify(this.bwg.chromsToIDs));
         return callback([]);
     } else {
         this.readWigDataById(chr, min, max, callback);
@@ -522,7 +519,7 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
             }
         }
     } else {
-        dlog("Don't know what to do with " + this.bwg.type);
+        throw Error("Don't know what to do with " + this.bwg.type);
     }
 }
 
@@ -534,9 +531,6 @@ BigWigView.prototype.getFirstAdjacent = function(chrName, pos, dir, callback) {
     var chr = this.bwg.chromsToIDs[chrName];
     if (chr === undefined) {
         // Not an error because some .bwgs won't have data for all chromosomes.
-
-        // dlog("Couldn't find chr " + chrName);
-        // dlog('Chroms=' + miniJSONify(this.bwg.chromsToIDs));
         return callback([]);
     } else {
         this.getFirstAdjacentById(chr, pos, dir, callback);
