@@ -25,6 +25,7 @@ if (typeof(require) !== 'undefined') {
     require('./tier-edit');
     require('./export-config');
     require('./export-ui');
+    require('./export-image');
     require('./svg-export');
     require('./session');
 }

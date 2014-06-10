@@ -25,6 +25,7 @@ Browser.prototype.openExportPanel = function() {
         var exportForm = makeElement('div', null, {className: 'export-form'});
         var exportSelect = makeElement('select');
         exportSelect.appendChild(makeElement('option', 'SVG', {value: 'svg'}));
+        exportSelect.appendChild(makeElement('option', 'Image', {value: 'png'}));
         exportSelect.appendChild(makeElement('option', 'Dalliance config', {value: 'config'}));
         exportSelect.appendChild(makeElement('option', 'Dalliance sources', {value: 'sources'}));
         exportSelect.appendChild(makeElement('option', 'Dalliance page', {value: 'page'}));
@@ -57,6 +58,11 @@ Browser.prototype.openExportPanel = function() {
                 note = 'SVG';
                 type = 'image/svg';
                 name = 'dalliance-view.svg';
+            } else if (exportSelect.value === 'png') {
+                blobURL = b.exportImage();
+                note = 'Image';
+                type = 'image/png';
+                name = 'dalliance-view.png';
             } else if (exportSelect.value === 'config') {
                 var config = JSON.stringify(b.exportFullConfig(), null, 2);
                 var blob = new Blob([config], {type: 'text/plain'});
@@ -83,7 +89,7 @@ Browser.prototype.openExportPanel = function() {
             if (blobURL) {
                 var downloadLink = makeElement('a', '[Download]', {
                     href: blobURL,
-                    download: 'dalliance-view.svg',
+                    download: name,
                     type: type
                 });
 

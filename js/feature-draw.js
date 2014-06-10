@@ -426,7 +426,24 @@ DasTier.prototype.paint = function() {
     var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale)+1000;
     gc.translate(offset, this.padding);
     oc.translate(0, this.padding);
-   
+
+    this.paintToContext(gc, oc, offset);
+
+    if (oc.glyphs.length > 0)
+        this.overlayLabelCanvas = oc;
+    else
+        this.overlayLabelCanvas = null;
+
+    gc.restore();
+    this.drawOverlay();
+    this.paintQuant();
+}
+
+DasTier.prototype.paintToContext = function(gc, oc, offset) {
+    var subtiers = this.subtiers;
+    var fpw = this.viewport.width|0;
+
+    gc.save();
     for (var s = 0; s < subtiers.length; ++s) {
         var quant = null;
         var glyphs = subtiers[s].glyphs;
@@ -443,18 +460,13 @@ DasTier.prototype.paint = function() {
         gc.translate(0, subtiers[s].height + this.padding);
         oc.translate(0, subtiers[s].height + this.padding);
     }
-    if (oc.glyphs.length > 0)
-        this.overlayLabelCanvas = oc;
-    else
-        this.overlayLabelCanvas = null;
     gc.restore();
 
+    // FIXME check offsets.  Should this really be per-subtier?
     if (quant && this.quantLeapThreshold && this.featureSource && this.browser.sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
         var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
         gc.save();
-        if (retina)
-            gc.scale(2, 2);
         gc.strokeStyle = 'red';
         gc.lineWidth = 0.3;
         gc.beginPath();
@@ -462,10 +474,7 @@ DasTier.prototype.paint = function() {
         gc.lineTo(5000, ry);
         gc.stroke();
         gc.restore();
-    }
-
-    this.drawOverlay();
-    this.paintQuant();
+    }    
 }
 
 DasTier.prototype.paintQuant = function() {

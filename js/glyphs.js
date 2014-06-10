@@ -399,7 +399,6 @@ LabelledGlyph.prototype.draw = function(g, oc) {
         g.restore();
     }
 
-
     oc.registerGlyph(this);
 }
 
