@@ -108,24 +108,7 @@
                         collapseSuperGroups: true,
                         trixURI: 'http://www.biodalliance.org/datasets/geneIndex.ix', 
                         tierGroup: 'Genomics'},
-                    {name: 'Repeats',
-                    desc: 'Repeat annotation from RepeatMasker', 
-                    bwgURI: 'http://www.biodalliance.org/datasets/repeats.bb',
-                    stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats.xml',
-                    forceReduction: -1,
-                    tierGroup: 'Genomics'},
-                  {name: 'SNPs',
-                   tier_type: 'ensembl',
-                   species:'human',
-                   type: 'variation',
-                   disabled: true,
-                   featureInfoPlugin: function(f, info) {
-                    if (f.id) {
-                      info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
-                    }
-                   }
-                  },
-                  {name: 'CpG',
+                   {name: 'CpG',
                    desc: 'CpG observed/expected ratio',
                    uri: 'http://www.derkholm.net:8080/das/hg19comp/',
                    // stylesheet_uri: 'http://www.derkholm.net/dalliance-test/stylesheets/cpg.xml'
@@ -134,7 +117,34 @@
                    style:                [{type: 'cpgoe',
                                            style: {glyph: 'LINEPLOT',
                                                    FGCOLOR: 'green', HEIGHT: '50', MIN: 0, MAX: 1.2}}]
-                  }
+                  },                   
+                  {name: 'SNPs',
+                   tier_type: 'ensembl',
+                   species:'human',
+                   type: 'variation',
+                   featureInfoPlugin: function(f, info) {
+                    if (f.id) {
+                      info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
+                    }
+                   }
+                  },
+                  {name: 'Repeats',
+                    desc: 'Repeat annotation from RepeatMasker', 
+                    bwgURI: 'http://www.biodalliance.org/datasets/repeats.bb',
+                    stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats.xml',
+                    forceReduction: -1,
+                    tierGroup: 'Genomics'},
+
+                  {name: 'SNPs',
+                   tier_type: 'ensembl',
+                   species:'human',
+                   type: 'variation',
+                   featureInfoPlugin: function(f, info) {
+                    if (f.id) {
+                      info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
+                    }
+                   }
+                  },
                 ],
 
     setDocumentTitle: true,

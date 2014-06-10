@@ -427,6 +427,7 @@ Browser.prototype.realInit2 = function() {
                     thisB.selectedTiers.push(ip + si);
                 }
 
+                thisB.withPreservedSelection(thisB._ensureTiersGrouped);
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
@@ -503,6 +504,9 @@ Browser.prototype.realInit2 = function() {
                     thisB.selectedTiers.push(ip + si);
                 }
 
+                thisB.withPreservedSelection(function() {
+                    thisB._ensureTiersGrouped(true);
+                });
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
@@ -627,7 +631,9 @@ Browser.prototype.realInit2 = function() {
         }
     }
 
+    thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
+    thisB.reorderTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
 
@@ -1010,9 +1016,13 @@ Browser.prototype.realMakeTier = function(source, config) {
                     thisB.withPreservedSelection(function() {
                         thisB.tiers.splice(tierOrdinal, 1);
                         thisB.tiers.splice(ti, 0, tier);
+                        thisB._ensureTiersGrouped(ti > tierOrdinal);
                     });
 
-                    tierOrdinal = ti;
+                    for (var tix = 0; tix < thisB.tiers.length; ++tix)
+                        if (thisB.tiers[tix] == tier)
+                            tierOrdinal = tix;
+
                     yAtLastReorder = ev.clientY;
                     thisB.reorderTiers();
                     dragTierHolder.appendChild(dragLabel); // Because reorderTiers removes all children.
@@ -1141,6 +1151,42 @@ Browser.prototype.refreshTier = function(tier) {
     }
 }
 
+/* Internal use only, assumes selection is being managed elsewhere... */
+
+Browser.prototype._ensureTiersGrouped = function(down) {
+    var groupedTiers = {};
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        if (t.dasSource.tierGroup) {
+            pusho(groupedTiers, t.dasSource.tierGroup, t);
+        }   
+    }
+
+    var newTiers = [];
+    if (down)
+        this.tiers.reverse();
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        if (t.dasSource.tierGroup) {
+            var nt = groupedTiers[t.dasSource.tierGroup];
+            if (nt) {
+                if (down)
+                    nt.reverse();
+                for (var nti = 0; nti < nt.length; ++nti)
+                    newTiers.push(nt[nti]);
+                groupedTiers[t.dasSource.tierGroup] = null;
+            }
+        } else {
+            newTiers.push(t);
+        }
+    }
+    if (down)
+        newTiers.reverse();
+    this.tiers.splice(0, this.tiers.length);
+    for (var nti = 0; nti < newTiers.length; ++nti)
+        this.tiers.push(newTiers[nti]);
+}
+
 Browser.prototype.arrangeTiers = function() {
     var arrangedTiers = [];
     var groupedTiers = {};
@@ -1201,7 +1247,7 @@ Browser.prototype.arrangeTiers = function() {
         for (var ti = 0; ti < arrangedTiers.length; ++ti) {
             var t = arrangedTiers[ti];
             if (t.dasSource.tierGroup) 
-                t.label.style.left = '20px';
+                t.label.style.left = '12px';
             else
                 t.label.style.left = '2px';
             t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
