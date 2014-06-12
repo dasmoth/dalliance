@@ -30,8 +30,10 @@ Browser.prototype.openExportPanel = function() {
         exportSelect.appendChild(makeElement('option', 'Dalliance sources', {value: 'sources'}));
         exportSelect.appendChild(makeElement('option', 'Dalliance page', {value: 'page'}));
         exportSelect.value = 'svg';
+
         exportSelect.addEventListener('change', function(ev) {
             removeChildren(exportContent);
+            setupEOT();
         }, false);
         exportForm.appendChild(makeElement('p', ['Export as: ', exportSelect]));
 
@@ -45,6 +47,7 @@ Browser.prototype.openExportPanel = function() {
             b.exportRuler = exportRulerToggle.checked;
             b.storeStatus();
         }, false);
+        var exportScale = makeElement('input', null, {type: 'text', value: '1.0'});
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
@@ -59,7 +62,16 @@ Browser.prototype.openExportPanel = function() {
                 type = 'image/svg';
                 name = 'dalliance-view.svg';
             } else if (exportSelect.value === 'png') {
-                blobURL = b.exportImage();
+                var mult = parseFloat(exportScale.value);
+                if (mult < 0.1 || mult > 10) {
+                    alert('bad scale ' + mult);
+                    return;
+                }
+                console.log(mult);
+
+                blobURL = b.exportImage({highlights: exportHighlightsToggle.checked,
+                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
+                                         resolutionMultiplier: mult});
                 note = 'Image';
                 type = 'image/png';
                 name = 'dalliance-view.png';
@@ -112,14 +124,27 @@ Browser.prototype.openExportPanel = function() {
 
         var exportContent = makeElement('p', '');
 
-        var exportOptsTable = makeElement('table',
-            [makeElement('tr',
+        var eotHighlights = makeElement('tr',
                 [makeElement('th', 'Include highlights', {}, {width: '200px', textAlign: 'right'}),
-                 makeElement('td', exportHighlightsToggle)]),
-             makeElement('tr',
+                 makeElement('td', exportHighlightsToggle)]);
+        var eotGuideline = makeElement('tr',
                 [makeElement('th', 'Include vertical guideline'),
-                 makeElement('td', exportRulerToggle)])
-            ]);
+                 makeElement('td', exportRulerToggle)]);
+        var eotScale = makeElement('tr',
+            [makeElement('th', 'Scale multiplier'),
+             makeElement('td', exportScale)]);
+
+        var exportOptsTable = makeElement('table',
+            [eotHighlights,
+             eotGuideline,
+             eotScale]);
+        var setupEOT = function() {
+            var es = exportSelect.value;
+            eotHighlights.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
+            eotGuideline.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
+            eotScale.style.display = (es == 'png') ? 'table-row' : 'none';
+        }
+        setupEOT();
 
         exportForm.appendChild(exportOptsTable);
         exportForm.appendChild(exportButton);

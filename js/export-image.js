@@ -7,6 +7,8 @@
 // export-image.js
 //
 
+"use strict";
+
 if (typeof(require) !== 'undefined') {
     var browser = require('./cbrowser');
     var Browser = browser.Browser;
@@ -15,7 +17,9 @@ if (typeof(require) !== 'undefined') {
     var OverlayLabelCanvas = g.OverlayLabelCanvas;
 }
 
-Browser.prototype.exportImage = function() {
+Browser.prototype.exportImage = function(opts) {
+    opts = opts || {};
+
     var fpw = this.featurePanelWidth;
     var totHeight = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
@@ -23,7 +27,7 @@ Browser.prototype.exportImage = function() {
         if (tier.layoutHeight !== undefined)
             totHeight += tier.layoutHeight;
     }
-    var mult = 1.0;
+    var mult = opts.resolutionMultiplier || 1.0;
     var margin = 200;
 
     var c = makeElement('canvas', null, {width: ((fpw + margin) * mult)|0, height: (totHeight * mult)|0});
@@ -55,15 +59,68 @@ Browser.prototype.exportImage = function() {
         g.closePath();
         g.clip();
         g.translate(margin, 0);
+
         g.save();
+        g.translate(offset, 0);
         if (tier.subtiers) {
             tier.paintToContext(g, oc, offset + 1000);
         }
         g.restore();
-        oc.draw(g, offset, offset + fpw);
+        
+        g.save()
+        g.translate(offset, 0);
+        oc.draw(g, -offset, fpw - offset);
+        g.restore();
+
         g.restore();
 
         ypos += tier.layoutHeight;
+    }
+
+    if (opts.highlights) {
+        g.save();
+
+        g.beginPath();
+        g.moveTo(margin, 0);
+        g.lineTo(margin + fpw, 0);
+        g.lineTo(margin + fpw, ypos);
+        g.lineTo(margin, ypos);
+        g.closePath();
+        g.clip();
+
+        g.translate(margin + offset, 0);
+        var origin = b.viewStart;
+        var visStart = b.viewStart;
+        var visEnd = b.viewEnd;
+
+        for (var hi = 0; hi < this.highlights.length; ++hi) {
+            var h = this.highlights[hi];
+            if (((h.chr === this.chr) || (h.chr === ('chr' + b.chr))) && h.min < visEnd && h.max > visStart) {
+                g.globalAlpha = b.defaultHighlightAlpha;
+                g.fillStyle = b.defaultHighlightFill;
+                g.fillRect((h.min - origin) * this.scale,
+                           0,
+                           (h.max - h.min) * this.scale,
+                           ypos);
+            }
+        } 
+        g.restore();
+    }
+
+    var rulerPos = -1; 
+    if (opts.ruler == 'center') {
+        rulerPos = margin + ((this.viewEnd - this.viewStart + 1)*this.scale) / 2;
+    } else if (opts.ruler == 'left') {
+        rulerPos = margin;
+    } else if (opts.ruler == 'right') {
+        rulerPos = margin + ((this.viewEnd - this.viewStart + 1)*this.scale);
+    }
+    if (rulerPos >= 0) {
+        g.strokeStyle = 'blue';
+        g.beginPath();
+        g.moveTo(rulerPos, 0);
+        g.lineTo(rulerPos, ypos);
+        g.stroke();
     }
 
     return c.toDataURL('image/png');
