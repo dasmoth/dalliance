@@ -462,16 +462,15 @@ DasTier.prototype.paintToContext = function(gc, oc, offset) {
     }
     gc.restore();
 
-    // FIXME check offsets.  Should this really be per-subtier?
     if (quant && this.quantLeapThreshold && this.featureSource && this.browser.sourceAdapterIsCapable(this.featureSource, 'quantLeap')) {
-        var ry = 3 + subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
+        var ry = subtiers[0].height * (1.0 - ((this.quantLeapThreshold - quant.min) / (quant.max - quant.min)));
 
         gc.save();
         gc.strokeStyle = 'red';
         gc.lineWidth = 0.3;
         gc.beginPath();
-        gc.moveTo(0, ry);
-        gc.lineTo(5000, ry);
+        gc.moveTo(-1000, ry);
+        gc.lineTo(fpw + 1000, ry);
         gc.stroke();
         gc.restore();
     }    

@@ -17,18 +17,26 @@ if (typeof(require) !== 'undefined') {
     var OverlayLabelCanvas = g.OverlayLabelCanvas;
 }
 
+function fillTextRightJustified(g, text, x, y) {
+    g.fillText(text, x - g.measureText(text).width, y);
+}
+
 Browser.prototype.exportImage = function(opts) {
     opts = opts || {};
 
     var fpw = this.featurePanelWidth;
+    var padding = 3;
     var totHeight = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
+        if (ti > 0)
+            totHeight += padding;
         var tier = this.tiers[ti];
         if (tier.layoutHeight !== undefined)
             totHeight += tier.layoutHeight;
     }
     var mult = opts.resolutionMultiplier || 1.0;
     var margin = 200;
+
 
     var c = makeElement('canvas', null, {width: ((fpw + margin) * mult)|0, height: (totHeight * mult)|0});
     var g = c.getContext('2d');
@@ -43,14 +51,7 @@ Browser.prototype.exportImage = function(opts) {
         g.save();
         g.translate(0, ypos);
 
-        var labelName;
-        if (typeof tier.config.name === 'string')
-            labelName = tier.config.name;
-        else
-            labelName = tier.dasSource.name;
-        var labelWidth = g.measureText(labelName).width;
-        g.fillText(labelName, margin - 12 - labelWidth, (tier.layoutHeight + 8) / 2);
-
+        g.save();
         g.beginPath();
         g.moveTo(margin, 0);
         g.lineTo(margin + fpw, 0);
@@ -71,10 +72,63 @@ Browser.prototype.exportImage = function(opts) {
         g.translate(offset, 0);
         oc.draw(g, -offset, fpw - offset);
         g.restore();
+        g.restore();
+
+        var hasQuant = false;
+        var pos = 0;
+        var subtiers = tier.subtiers || [];
+        for (var sti = 0; sti < subtiers.length; ++sti) {
+            var subtier = subtiers[sti];
+                    
+            if (subtier.quant) {
+                hasQuant = true;
+                var q = subtier.quant;
+                var h = subtier.height;
+
+                var numTics = 2;
+                if (h > 40) {
+                    numTics = 1 + ((h/20) | 0);
+                }
+                var ticSpacing = h / (numTics - 1);
+                var ticInterval = (q.max - q.min) / (numTics - 1);
+
+                g.beginPath();
+                g.moveTo(margin + 5, pos);
+                g.lineTo(margin, pos);
+                g.lineTo(margin, pos + subtier.height);
+                g.lineTo(margin + 5, pos + subtier.height);
+                for (var t = 1; t < numTics-1; ++t) {
+                    var ty = t*ticSpacing;
+                    g.moveTo(margin, pos + ty);
+                    g.lineTo(margin+3, pos + ty);
+                }
+                g.strokeStyle = 'black';
+                g.strokeWidth = 2;
+                g.stroke();
+
+                g.fillStyle = 'black';
+                fillTextRightJustified(g, formatQuantLabel(q.max), margin - 3, pos + 7);
+                fillTextRightJustified(g, formatQuantLabel(q.min), margin - 3, pos + subtier.height);
+                for (var t = 1; t < numTics-1; ++t) {
+                    var ty = t*ticSpacing;
+                    fillTextRightJustified(g, formatQuantLabel((1.0*q.max) - (t*ticInterval)), margin - 3, pos + ty + 3);
+                }
+            }
+
+            pos += subtier.height + padding;
+        }
+
+        var labelName;
+        if (typeof tier.config.name === 'string')
+            labelName = tier.config.name;
+        else
+            labelName = tier.dasSource.name;
+        var labelWidth = g.measureText(labelName).width;
+        g.fillText(labelName, margin - (hasQuant ? 22 : 12) - labelWidth, (tier.layoutHeight + 6) / 2);
 
         g.restore();
 
-        ypos += tier.layoutHeight;
+        ypos += tier.layoutHeight + padding;
     }
 
     if (opts.highlights) {
