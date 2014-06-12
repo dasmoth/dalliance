@@ -15,6 +15,9 @@ if (typeof(require) !== 'undefined') {
 
     var g = require('./glyphs');
     var OverlayLabelCanvas = g.OverlayLabelCanvas;
+
+    var nf = require('./numformats');
+    var formatQuantLabel = nf.formatQuantLabel;
 }
 
 function fillTextRightJustified(g, text, x, y) {
