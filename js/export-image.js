@@ -41,8 +41,13 @@ Browser.prototype.exportImage = function(opts) {
     var margin = 200;
 
 
-    var c = makeElement('canvas', null, {width: ((fpw + margin) * mult)|0, height: (totHeight * mult)|0});
+    var cw = ((fpw + margin) * mult)|0;
+    var ch = (totHeight * mult)|0;
+    var c = makeElement('canvas', null, {width: cw, height: ch});
     var g = c.getContext('2d');
+    g.fillStyle = 'white';
+    g.fillRect(0, 0, cw, ch);
+
     g.scale(mult, mult);
     
     var ypos = 0;
