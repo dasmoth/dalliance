@@ -922,7 +922,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     cursor += co.cnt;
                 } else if (co.op == 'D') {
                     for (var oi = 0; oi < co.cnt; ++oi) {
-                        seq += '#'; //seq has deletion
+                        seq += '#'; // seq has deletion
                         quals += 'Z';
                     }
                 } else if (co.op == 'I') {
