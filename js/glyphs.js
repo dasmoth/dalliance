@@ -1068,7 +1068,7 @@ SequenceGlyph.prototype.draw = function(gc) {
             gc.globalAlpha = this.alphaForQual(qc);
         }
 
-        if (scale >= 8) {
+        if (scale >= 8 && !(base == ',' || base == '.')) {//show no text for match
             var key = color + '_' + base
             var img = __dalliance_SequenceGlyphCache[key];
             if (!img) {

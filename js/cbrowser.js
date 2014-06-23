@@ -104,7 +104,9 @@ function Browser(opts) {
         A: 'green', 
         C: 'blue', 
         G: 'black', 
-        T: 'red'
+        T: 'red',
+        '.': "rgb(179,204,252)", //+ strand: pastel blue
+        ',': "rgb(245,171,171)" //- strand: pastel red
     };
 
     // Registry

@@ -43,7 +43,9 @@ var palette = {
     white: new DColour(255, 255, 255, 'white'),
     black: new DColour(0, 0, 0, 'black'),
     gray: new DColour(180, 180, 180, 'gray'),
-    grey: new DColour(180, 180, 180, 'grey')
+    grey: new DColour(180, 180, 180, 'grey'),
+    faded_blue : new DColour(179,204,252, 'faded_blue'),
+    faded_red : new DColour(245,171,171, 'faded_red')
 };
 
 var COLOR_RE = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
