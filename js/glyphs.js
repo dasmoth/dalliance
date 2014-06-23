@@ -1110,7 +1110,7 @@ SequenceGlyph.prototype.toSVG = function() {
 
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
-        var color = baseColors[base];
+        var color = this.baseColors[base];
         if (!color) {
             color = 'gray';
         }
@@ -1132,7 +1132,7 @@ SequenceGlyph.prototype.toSVG = function() {
             alpha = this.alphaForQual(qc);
         }
 
-        if (scale >= 8) {
+        if (scale >= 8 && !(base == ',' || base == '.')) {
             g.appendChild(
                     makeElementNS(NS_SVG, 'text', base, {
                         x: this._min + p*scale,
