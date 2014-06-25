@@ -103,8 +103,11 @@ function Browser(opts) {
     this.baseColors = {
         A: 'green', 
         C: 'blue', 
-        G: 'black', 
-        T: 'red'
+        G: 'orange', 
+        T: 'red',
+        ',': "rgb(97, 196, 216)", // - strand: cyan blue
+        '.': "rgb(166, 71, 73)", // + strand: brick red
+        '#' : "rgb(255, 0, 225)" // deletions: pink
     };
 
     // Registry
