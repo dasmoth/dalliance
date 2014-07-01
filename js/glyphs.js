@@ -637,9 +637,9 @@ function PaddedGlyph(glyph, minp, maxp) {
     }
 }
 
-PaddedGlyph.prototype.draw = function(g) {
+PaddedGlyph.prototype.draw = function(g, oc) {
     if (this.glyph) 
-        this.glyph.draw(g);
+        this.glyph.draw(g, oc);
 }
 
 PaddedGlyph.prototype.toSVG = function() {
