@@ -67,7 +67,6 @@ Browser.prototype.openExportPanel = function() {
                     alert('bad scale ' + mult);
                     return;
                 }
-                console.log(mult);
 
                 blobURL = b.exportImage({highlights: exportHighlightsToggle.checked,
                                          ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',

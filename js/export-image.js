@@ -56,10 +56,10 @@ Browser.prototype.exportImage = function(opts) {
         var offset = ((tier.glyphCacheOrigin - this.viewStart)*this.scale);
 
         var oc = new OverlayLabelCanvas();
-        g.save();
+        g.save();       // 1
         g.translate(0, ypos);
 
-        g.save();
+        g.save();       // 2
         g.beginPath();
         g.moveTo(margin, 0);
         g.lineTo(margin + fpw, 0);
@@ -69,18 +69,18 @@ Browser.prototype.exportImage = function(opts) {
         g.clip();
         g.translate(margin, 0);
 
-        g.save();
+        g.save();      // 3
         g.translate(offset, 0);
         if (tier.subtiers) {
             tier.paintToContext(g, oc, offset + 1000);
         }
-        g.restore();
+        g.restore();   // 2
         
-        g.save()
+        g.save()       // 3
         g.translate(offset, 0);
         oc.draw(g, -offset, fpw - offset);
-        g.restore();
-        g.restore();
+        g.restore();   // 2
+        g.restore();   // 1
 
         var hasQuant = false;
         var pos = 0;
@@ -132,9 +132,11 @@ Browser.prototype.exportImage = function(opts) {
         else
             labelName = tier.dasSource.name;
         var labelWidth = g.measureText(labelName).width;
+        console.log(labelName, labelWidth);
+        g.fillStyle = 'black';
         g.fillText(labelName, margin - (hasQuant ? 22 : 12) - labelWidth, (tier.layoutHeight + 6) / 2);
 
-        g.restore();
+        g.restore(); // 0
 
         ypos += tier.layoutHeight + padding;
     }
