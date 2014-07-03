@@ -823,6 +823,13 @@ Browser.prototype.realMakeTier = function(source, config) {
         var br = tier.row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
 
+        var hit = featureLookup(rx, ry);
+        if (hit && hit.length > 0) {
+            tier.row.style.cursor = 'pointer';
+        } else {
+            tier.row.style.cursor = 'default';
+        }
+
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
         }
