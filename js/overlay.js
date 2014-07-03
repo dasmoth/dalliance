@@ -147,7 +147,7 @@ OverlayFeatureSource.prototype.capabilities = function() {
 
 OverlayFeatureSource.prototype.search = function(query, callback) {
     for (var i = 0; i < this.sources.length; ++i) {
-        if (sourceAdapterIsCapable(this.sources[i], 'search')) {
+        if (_sourceAdapterIsCapable(this.sources[i], 'search')) {
             return this.sources[i].search(query, callback);
         }
     }
@@ -156,13 +156,13 @@ OverlayFeatureSource.prototype.search = function(query, callback) {
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var baton = new OverlayBaton(this, callback, this.sources.length);
     for (var si = 0; si < this.sources.length; ++si) {
-	this.fetchN(baton, si, chr, min, max, scale, types, pool);
+	   this.fetchN(baton, si, chr, min, max, scale, types, pool);
     }
 }
 
 OverlayFeatureSource.prototype.fetchN = function(baton, si, chr, min, max, scale, types, pool) {
     this.sources[si].fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
-	return baton.completed(si, status, features, scale);
+	   return baton.completed(si, status, features, scale);
     });
 }
 
@@ -287,8 +287,17 @@ function OverlayFeatureSource_merge_concat(featureSets) {
     return features;
 }
 
+function _sourceAdapterIsCapable(s, cap) {
+    if (!s.capabilities)
+        return false;
+    else 
+        return s.capabilities()[cap];
+}
+
 if (typeof(module) !== 'undefined') {
     module.exports = {
         OverlayFeatureSource: OverlayFeatureSource
     };
 }
+
+
