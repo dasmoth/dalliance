@@ -963,13 +963,14 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
         var mismatchSeq = '';
         if (onlyMismatch) {
+            style.__SEQCOLOR = 'mismatch';
             for (var i = 0; i < seq.length; ++i) {
                 var c = feature.orientation == '-' ? ',' : '.';
                 mismatchSeq += seq[i] == refSeq[i] ? c : seq[i];
             }
             seq = mismatchSeq;
         }
-        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
+        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, feature.orientation, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {

@@ -1016,8 +1016,9 @@ TextGlyph.prototype.toSVG = function() {
 
 var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
+var altDelPatt = new RegExp('^[ACGT#]$');
 
-function SequenceGlyph(baseColors, min, max, height, seq, ref, scheme, quals) {
+function SequenceGlyph(baseColors, min, max, height, seq, ref, orientation, scheme, quals) {
     this.baseColors = baseColors;
     this._min = min;
     this._max = max;
@@ -1025,6 +1026,7 @@ function SequenceGlyph(baseColors, min, max, height, seq, ref, scheme, quals) {
     this._seq = seq;
     this._ref = ref;
     this._scheme = scheme;
+    this._orientation = orientation;
     this._quals = quals;
 }
 
@@ -1037,6 +1039,14 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
     return 0.1 + 0.9*Math.max(0.0, Math.min((1.0 * qual) / 30.0, 1.0));
 }
 
+SequenceGlyph.prototype.colorForOrientation = function(orientation){
+    if (orientation === '+')
+        return "rgb(166, 71, 73)"; //Brick red
+    else 
+        return "rgb(97, 196, 216)"; //Pastel blue
+    
+}
+
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
     if (!seq)
@@ -1044,26 +1054,37 @@ SequenceGlyph.prototype.draw = function(gc) {
 
     var scale = (this._max - this._min + 1) / seq.length;
 
+    if(this._scheme === 'mismatch'){
+        console.log("Filling base rect with color ", this.colorForOrientation(this._orientation), "corresponding to ", this._orientation)
+        var readColor = this.colorForOrientation(this._orientation);
+        gc.fillStyle = readColor;
+        gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
+    }
+
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
-        var color = this.baseColors[base];
+        
+        if(!altDelPatt.test(base))
+            continue;
 
-        if (this._scheme === 'mismatch' && this._ref) {
-            var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === 'N') {
-                color = 'gray';
-            } else if (refbase === base) {
-                color = 'black';
-            } else {
-                color = 'red';
-            }
-        }
+        var color = this.baseColors[base];
+        // if (this._scheme === 'mismatch' && this._ref) {
+        //     var refbase = this._ref.substr(p, 1).toUpperCase();
+        //     if (refbase === 'N') {
+        //         color = 'gray';
+        //     } else if (refbase === base) {
+        //         color = 'black';
+        //     } else {
+        //         color = 'red';
+        //     }
+        // }
 
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
             var oldAlpha = gc.globalAlpha;            // NB hoisted!
             gc.globalAlpha = this.alphaForQual(qc);
         }
+
         if (!color){
             color = 'white'
         }
