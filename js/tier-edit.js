@@ -106,7 +106,7 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
 
 
-        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#fa8072'});
+        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#ffa07a'});
         var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#87cefa'});
 
         try {

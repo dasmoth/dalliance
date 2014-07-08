@@ -45,7 +45,7 @@ var palette = {
     gray: new DColour(180, 180, 180, 'gray'),
     grey: new DColour(180, 180, 180, 'grey'),
     lightskyblue: new DColour(135, 206, 250, 'lightskyblue'),
-    salmon: new DColour(250, 128, 144, 'pale_red'),
+    lightsalmon: new DColour(255, 160, 122, 'lightsalmon'),
     pink: new DColour(255, 0, 225, 'pink')
 };
 

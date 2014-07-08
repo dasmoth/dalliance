@@ -1020,8 +1020,8 @@ var altDelPatt = new RegExp('^[ACGT#]$');
 
 function SequenceGlyph(colorStyle, min, max, height, seq, ref, orientation, scheme, quals) {
     this.baseColors = colorStyle.baseColors;
-    this.plusColor = colorStyle.plusColor || "rgb(252, 192, 192)";
-    this.minusColor = colorStyle.minusColor || "rgb(97, 196, 216)";
+    this.plusColor = colorStyle.plusColor || "lightsalmon";
+    this.minusColor = colorStyle.minusColor || "lightskyblue";
     this._min = min;
     this._max = max;
     this._height = height;
@@ -1077,7 +1077,6 @@ SequenceGlyph.prototype.draw = function(gc) {
                 color = 'white';
         }
 
-
         gc.fillStyle = color;
 
         gc.fillRect(this._min + p*scale, 0, scale, this._height);
@@ -1123,7 +1122,7 @@ SequenceGlyph.prototype.toSVG = function() {
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
         var color = this.baseColors[base];
-        
+
         if (!color){
             if (base == '.')
                 color = this.plusColor;
