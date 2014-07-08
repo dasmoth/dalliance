@@ -106,7 +106,7 @@ function Browser(opts) {
         G: 'orange', 
         T: 'red',
         ',': "rgb(97, 196, 216)", // - strand: cyan blue
-        '.': "rgb(166, 71, 73)", // + strand: brick red
+        '.': "rgb(252, 192, 192)", // + strand: pastel red
         '#' : "rgb(255, 0, 225)" // deletions: pink
     };
 

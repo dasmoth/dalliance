@@ -1041,7 +1041,7 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.colorForOrientation = function(orientation){
     if (orientation === '+')
-        return "rgb(166, 71, 73)"; //Brick red
+        return "rgb(252, 192, 192)"; //Pastel red
     else 
         return "rgb(97, 196, 216)"; //Pastel blue
     
@@ -1054,8 +1054,7 @@ SequenceGlyph.prototype.draw = function(gc) {
 
     var scale = (this._max - this._min + 1) / seq.length;
 
-    if(this._scheme === 'mismatch'){
-        console.log("Filling base rect with color ", this.colorForOrientation(this._orientation), "corresponding to ", this._orientation)
+    if(this._scheme === 'mismatch' && scale < 8){
         var readColor = this.colorForOrientation(this._orientation);
         gc.fillStyle = readColor;
         gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
@@ -1064,7 +1063,7 @@ SequenceGlyph.prototype.draw = function(gc) {
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
         
-        if(!altDelPatt.test(base))
+        if(!altDelPatt.test(base) && scale < 8)
             continue;
 
         var color = this.baseColors[base];
