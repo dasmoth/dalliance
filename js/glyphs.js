@@ -1018,8 +1018,10 @@ var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
 var altDelPatt = new RegExp('^[ACGT#]$');
 
-function SequenceGlyph(baseColors, min, max, height, seq, ref, orientation, scheme, quals) {
-    this.baseColors = baseColors;
+function SequenceGlyph(colorStyle, min, max, height, seq, ref, orientation, scheme, quals) {
+    this.baseColors = colorStyle.baseColors;
+    this.plusColor = colorStyle.plusColor || "rgb(252, 192, 192)";
+    this.minusColor = colorStyle.minusColor || "rgb(97, 196, 216)";
     this._min = min;
     this._max = max;
     this._height = height;
@@ -1039,14 +1041,6 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
     return 0.1 + 0.9*Math.max(0.0, Math.min((1.0 * qual) / 30.0, 1.0));
 }
 
-SequenceGlyph.prototype.colorForOrientation = function(orientation){
-    if (orientation === '+')
-        return "rgb(252, 192, 192)"; //Pastel red
-    else 
-        return "rgb(97, 196, 216)"; //Pastel blue
-    
-}
-
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
     if (!seq)
@@ -1055,7 +1049,7 @@ SequenceGlyph.prototype.draw = function(gc) {
     var scale = (this._max - this._min + 1) / seq.length;
 
     if(this._scheme === 'mismatch' && scale < 8){
-        var readColor = this.colorForOrientation(this._orientation);
+        var readColor = this._orientation === '+' ? this.plusColor : this.minusColor;
         gc.fillStyle = readColor;
         gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
     }
@@ -1067,16 +1061,10 @@ SequenceGlyph.prototype.draw = function(gc) {
             continue;
 
         var color = this.baseColors[base];
-        // if (this._scheme === 'mismatch' && this._ref) {
-        //     var refbase = this._ref.substr(p, 1).toUpperCase();
-        //     if (refbase === 'N') {
-        //         color = 'gray';
-        //     } else if (refbase === base) {
-        //         color = 'black';
-        //     } else {
-        //         color = 'red';
-        //     }
-        // }
+        if (base == '.')
+            color = this.plusColor
+        else if (base == ',')
+            color = this.minusColor
 
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
@@ -1087,8 +1075,12 @@ SequenceGlyph.prototype.draw = function(gc) {
         if (!color){
             color = 'white'
         }
+
+
         gc.fillStyle = color;
+
         gc.fillRect(this._min + p*scale, 0, scale, this._height);
+
 
         if (scale >= 8 && !(base == ',' || base == '.')) { // TODO: fix hardcoding
             var key = color + '_' + base
@@ -1134,16 +1126,16 @@ SequenceGlyph.prototype.toSVG = function() {
             color = 'white';
         }
 
-        if (this._scheme === 'mismatch' && this._ref) {
-            var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === 'N') {
-                color = 'gray';
-            } else if (refbase === base) {
-                color = 'black';
-            } else {
-                color = 'red';
-            }
-        }
+        // if (this._scheme === 'mismatch' && this._ref) {
+        //     var refbase = this._ref.substr(p, 1).toUpperCase();
+        //     if (refbase === 'N') {
+        //         color = 'gray';
+        //     } else if (refbase === base) {
+        //         color = 'black';
+        //     } else {
+        //         color = 'red';
+        //     }
+        // }
 
         var alpha = 1.0;
         if (this._quals) {

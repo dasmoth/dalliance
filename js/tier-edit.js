@@ -55,6 +55,9 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
             style._gradient = null;
+
+            style._plusColor = tierPlusColorField.value;
+            style._minusColor = tierMinusColorField.value;
         }
 
         var mutateStylesheet = function(visitor) {
@@ -101,8 +104,14 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierColorField = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField2 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
+
+
+        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#fcc0c0'});
+        var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#61c4d8'});
+
         try {
             tierColorField.type = tierColorField2.type = tierColorField3.type = 'color';
+            tierPlusColorField.type = tierMinusColorField.type = 'color';
         } catch (e) {
             // IE throws if attempt to set type to 'color'.
         }
@@ -131,6 +140,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 changeColor(null);
             }
         }, false);
+
 
         var tierMinField = makeElement('input', null, {type: 'text', value: '0.0'});
         var tierMaxField = makeElement('input', null, {type: 'text', value: '10.0'});
@@ -307,10 +317,16 @@ Browser.prototype.openTierPanel = function(tier) {
 
                     seqOnlyMismatchRow.style.display = 'table-row';
                     seqOnlyMismatchToggle.checked = isDasBooleanTrue(seqStyle.__ONLY_MISMATCH);
+
+                    plusStrandColorRow.style.display = 'table-row';
+                    minusStrandColorRow.style.display = 'table-row';
                 } else {
                     seqMismatchRow.style.display = 'none';
                     seqInsertRow.style.display = 'none';
                     seqOnlyMismatchToggle.style.display = 'none';
+
+                    plusStrandColorRow.style.display = 'none';
+                    minusStrandColorRow.style.display = 'none';
                 }
             }
 
@@ -359,6 +375,12 @@ Browser.prototype.openTierPanel = function(tier) {
         var colorRow = makeElement('tr',
                 [makeElement('th', ['Colour(s)', colorListPlus, colorListMinus]),
                  colorListElement]);
+        var plusStrandColorRow = makeElement('tr',
+                [makeElement('th', 'Plus Strand Color'),
+                 makeElement('td', tierPlusColorField)]);
+        var minusStrandColorRow = makeElement('tr',
+                [makeElement('th', 'Minus Strand Color'),
+                 makeElement('td', tierMinusColorField)]);
         var minRow = makeElement('tr',
                 [makeElement('th', 'Min value'),
                  makeElement('td', [tierMinToggle, ' ', tierMinField])]);
@@ -392,6 +414,8 @@ Browser.prototype.openTierPanel = function(tier) {
 
             styleRow,
             colorRow,
+            plusStrandColorRow,
+            minusStrandColorRow,
             minRow,
             maxRow,
             quantLeapRow,
@@ -424,6 +448,9 @@ Browser.prototype.openTierPanel = function(tier) {
         for (var ci = 0; ci < tierColorFields.length; ++ci) {
             tierColorFields[ci].addEventListener('change', changeColor, false);
         }
+
+        tierPlusColorField.addEventListener('change', changeColor, false);
+        tierMinusColorField.addEventListener('change', changeColor, false);
 
         glyphField.addEventListener('change', function(ev) {
             var nss = mutateStylesheet(function(ts) {

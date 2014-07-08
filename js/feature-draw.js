@@ -970,7 +970,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
             seq = mismatchSeq;
         }
-        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, feature.orientation, style.__SEQCOLOR, quals);
+
+        var colors = {baseColors: tier.browser.baseColors, plusColor: style._plusColor, minusColor: style._minusColor}
+        gg = new SequenceGlyph(colors, minPos, maxPos, height, seq, refSeq, feature.orientation, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {
