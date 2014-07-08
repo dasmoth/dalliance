@@ -1061,10 +1061,6 @@ SequenceGlyph.prototype.draw = function(gc) {
             continue;
 
         var color = this.baseColors[base];
-        if (base == '.')
-            color = this.plusColor
-        else if (base == ',')
-            color = this.minusColor
 
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
@@ -1073,7 +1069,12 @@ SequenceGlyph.prototype.draw = function(gc) {
         }
 
         if (!color){
-            color = 'white'
+            if (base == '.')
+                color = this.plusColor;
+            else if (base == ',')
+                color = this.minusColor;
+            else
+                color = 'white';
         }
 
 
@@ -1122,20 +1123,15 @@ SequenceGlyph.prototype.toSVG = function() {
     for (var p = 0; p < seq.length; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
         var color = this.baseColors[base];
-        if (!color) {
-            color = 'white';
+        
+        if (!color){
+            if (base == '.')
+                color = this.plusColor;
+            else if (base == ',')
+                color = this.minusColor;
+            else
+                color = 'white';
         }
-
-        // if (this._scheme === 'mismatch' && this._ref) {
-        //     var refbase = this._ref.substr(p, 1).toUpperCase();
-        //     if (refbase === 'N') {
-        //         color = 'gray';
-        //     } else if (refbase === base) {
-        //         color = 'black';
-        //     } else {
-        //         color = 'red';
-        //     }
-        // }
 
         var alpha = 1.0;
         if (this._quals) {

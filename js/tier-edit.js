@@ -106,8 +106,8 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
 
 
-        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#fcc0c0'});
-        var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#61c4d8'});
+        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#fa8072'});
+        var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#87cefa'});
 
         try {
             tierColorField.type = tierColorField2.type = tierColorField3.type = 'color';
@@ -261,6 +261,10 @@ Browser.prototype.openTierPanel = function(tier) {
                 } 
                 setNumColors(numColors);
 
+                if (s._plusColor)
+                    tierPlusColorField.value = dasColourForName(s._plusColor).toHexString() || s._plusColor;
+                if(s._minusColor)
+                    tierMinusColorField.value = dasColourForName(s._minusColor).toHexString() || s._minusColor;
                 if (isDasBooleanTrue(s.SCATTER)) {
                     glyphField.value = 'SCATTER';
                 } else {

@@ -44,8 +44,8 @@ var palette = {
     black: new DColour(0, 0, 0, 'black'),
     gray: new DColour(180, 180, 180, 'gray'),
     grey: new DColour(180, 180, 180, 'grey'),
-    cyan: new DColour(97, 196, 216, 'cyan'),
-    brick_red: new DColour(166, 71, 73, 'brick_red'),
+    lightskyblue: new DColour(135, 206, 250, 'lightskyblue'),
+    salmon: new DColour(250, 128, 144, 'pale_red'),
     pink: new DColour(255, 0, 225, 'pink')
 };
 
