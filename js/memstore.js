@@ -23,6 +23,7 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var Awaited = utils.Awaited;
+    var textXHR = utils.textXHR;
 }
 
 function MemStore() {

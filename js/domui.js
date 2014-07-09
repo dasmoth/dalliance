@@ -68,7 +68,6 @@ Browser.prototype.makeTooltip = function(ele, text)
                     window.removeEventListener('mousemove', moveHandler, false);
                     if (isin) {
                         if (ele.offsetParent == null) {
-                            // dlog('Null parent...');
                         } else {
                             setup(ev);
                         }
@@ -218,10 +217,6 @@ function makeTreeTableSection(title, content, visible) {
 
     var heading = makeElement('h6', [ttButton, ' ', title], {}, {display: 'block', background: 'gray', color: 'white', width: '100%', padding: '5px 2px', margin: '0px'});
     return makeElement('div', [heading, content], {});
-}
-
-function dlog(msg) {
-    console.log(msg);
 }
 
 if (typeof(module) !== 'undefined') {
