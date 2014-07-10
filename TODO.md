@@ -1,31 +1,33 @@
 For 0.13
 --------
 
-  - Feature selection
-  - Replace feature popups with inspector-like interface
-  - Keep labels of large features on-screen (maybe needs to be optional?)
-  - Apply track-edit operations to multiple tracks at once.
-  - Typeahead for search-by-gene-ID
-  - Animate when leaping/toggling.
-  - Overlay function plugin API
-  - Clean up featureSource creation (make async?)
-  - Search-by-name (or description) in track-adder.
-  - Support for non-positional annotations (UI hookup for bigtab client)
+  - [*] Leaping bug fixes.
+  - [ ] Feature selection
+  - [ ] Replace feature popups with inspector-like interface
+  - [*] Keep labels of large features on-screen (maybe needs to be optional?)
+  - [ ] Apply track-edit operations to multiple tracks at once.
+  - [ ] Typeahead for search-by-gene-ID
+  - [ ] Animate when leaping/toggling.
+  - [ ] Overlay function plugin API
+  - [ ] Clean up featureSource creation (make async?)
+  - [ ] Search-by-name (or description) in track-adder.
+  - [ ] Support for non-positional annotations (UI hookup for bigtab client)
+  - [ ] High-res image export.
 
 For 1.0
 --------
 
-  - Undo/redo.  
-  - History of recently-viewed tracks.
-  - Out-to-chromosome zooming
+  - [ ] Undo/redo.  
+  - [ ] History of recently-viewed tracks.
+  - [ ]Out-to-chromosome zooming
     + Probably needs a better set of semantic zoom hints in the
       stylesheet language.
-  - Better zoom control
+  - [ ] Better zoom control
     + Show all toggle levels.
     + Some kind of feedback for toggling.
-  - Try to preserve layout when expanding/collapsing variants.
-  - More Tabix payloads (GFF/GTF)
-  - Chromosome overviews.
+  - [ ] Try to preserve layout when expanding/collapsing variants.
+  - [ ] More Tabix payloads (GFF/GTF)
+  - [ ] Chromosome overviews.
 
 Workshop
 ========

@@ -129,10 +129,14 @@ function makeElement(tag, children, attribs, styles)
         }
         for (var i = 0; i < children.length; ++i) {
             var c = children[i];
-            if (typeof c == 'string') {
-                c = document.createTextNode(c);
+            if (c) {
+                if (typeof c == 'string') {
+                    c = document.createTextNode(c);
+                } else if (typeof c == 'number') {
+                    c = document.createTextNode('' + c);
+                }
+                ele.appendChild(c);
             }
-            ele.appendChild(c);
         }
     }
     

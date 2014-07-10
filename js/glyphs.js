@@ -399,7 +399,6 @@ LabelledGlyph.prototype.draw = function(g, oc) {
         g.restore();
     }
 
-
     oc.registerGlyph(this);
 }
 
@@ -1043,11 +1042,9 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
-    var ref = this._ref;
-    if (!seq)
-        seq = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN';    // FIXME       
 
-    var scale = (this._max - this._min + 1) / seq.length;
+    var seqLength = seq ? seq.length : (this._max - this._min + 1);
+    var scale = (this._max - this._min + 1) / seqLength;
 
     if (this._scheme === 'mismatch' && scale < 8){
         var readColor = this._orientation === '+' ? this.plusColor : this.minusColor;

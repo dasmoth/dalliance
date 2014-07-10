@@ -27,7 +27,9 @@ function OverlayFeatureSource(sources, opts) {
         this.initN(i);
     }
 
-    if (opts.merge == 'concat') {
+    if (typeof(opts.merge) === 'function') {
+        this.merge = opts.merge;
+    } else if (opts.merge == 'concat') {
         this.merge = OverlayFeatureSource_merge_concat;
     } else {
         this.merge = OverlayFeatureSource_merge_byKey;

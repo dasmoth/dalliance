@@ -795,7 +795,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragMoveHandler = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         var rx = ev.clientX;
-        if (tier.sequenceSource && rx != dragMoveOrigin) {
+        if (rx != dragMoveOrigin) {
             thisB.move((rx - dragMoveOrigin));
             dragMoveOrigin = rx;
         }
@@ -823,6 +823,13 @@ Browser.prototype.realMakeTier = function(source, config) {
     tier.viewport.addEventListener('mousemove', function(ev) {
         var br = tier.row.getBoundingClientRect();
         var rx = ev.clientX - br.left, ry = ev.clientY - br.top;
+
+        var hit = featureLookup(rx, ry);
+        if (hit && hit.length > 0) {
+            tier.row.style.cursor = 'pointer';
+        } else {
+            tier.row.style.cursor = 'default';
+        }
 
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
@@ -1983,6 +1990,11 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
 Browser.prototype.leap = function(dir, fedge) {
     var thisB = this;
     var pos=((thisB.viewStart + thisB.viewEnd + 1)/2)|0;
+    if (dir > 0 && thisB.viewStart <= 1) {
+        pos -= 100000000;
+    } else if (dir < 0 && thisB.viewEnd >= thisB.currentSeqMax) {
+        pos += 100000000;
+    }
 
     var st = thisB.getSelectedTier();
     if (st < 0) return;
