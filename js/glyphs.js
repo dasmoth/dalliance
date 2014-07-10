@@ -1043,12 +1043,13 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
+    var ref = this._ref;
     if (!seq)
         seq = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN';    // FIXME       
 
     var scale = (this._max - this._min + 1) / seq.length;
 
-    if(this._scheme === 'mismatch' && scale < 8){
+    if (this._scheme === 'mismatch' && scale < 8){
         var readColor = this._orientation === '+' ? this.plusColor : this.minusColor;
         gc.fillStyle = readColor;
         gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
@@ -1069,9 +1070,12 @@ SequenceGlyph.prototype.draw = function(gc) {
         }
 
         if (!color){
-            if (base == '.')
+            var refBase = ref.substr(p, 1).toUpperCase();
+            if (base == 'N' || refBase == 'N')
+                color = 'gray';
+            else if (this._orientation == '+')
                 color = this.plusColor;
-            else if (base == ',')
+            else if (this._orientation == '-')
                 color = this.minusColor;
             else
                 color = 'white';
@@ -1081,8 +1085,7 @@ SequenceGlyph.prototype.draw = function(gc) {
 
         gc.fillRect(this._min + p*scale, 0, scale, this._height);
 
-
-        if (scale >= 8 && !(base == ',' || base == '.')) { // TODO: fix hardcoding
+        if (scale >= 8 && altDelPatt.test(base)) {
             var key = color + '_' + base
             var img = __dalliance_SequenceGlyphCache[key];
             if (!img) {
@@ -1116,6 +1119,7 @@ SequenceGlyph.prototype.draw = function(gc) {
 
 SequenceGlyph.prototype.toSVG = function() {
     var seq = this._seq;
+    var ref = this._ref;
     var scale = (this._max - this._min + 1) / this._seq.length;
     var  g = makeElementNS(NS_SVG, 'g'); 
 
@@ -1124,9 +1128,12 @@ SequenceGlyph.prototype.toSVG = function() {
         var color = this.baseColors[base];
 
         if (!color){
-            if (base == '.')
+            var refBase = ref.substr(p, 1).toUpperCase();
+            if (base == 'N' || refBase == 'N')
+                color = 'gray';
+            else if (this._orientation == '+')
                 color = this.plusColor;
-            else if (base == ',')
+            else if (this._orientation == '-')
                 color = this.minusColor;
             else
                 color = 'white';
@@ -1147,7 +1154,7 @@ SequenceGlyph.prototype.toSVG = function() {
                     fill: color,
                     fillOpacity: alpha}));
 
-        if (scale >= 8 && !(base == ',' || base == '.')) { // TODO: fix hardcoding
+        if (scale >= 8 && altDelPatt.test(base)) {
             var fillColor = color == 'black' ? 'white' : 'black'
             g.appendChild(
                     makeElementNS(NS_SVG, 'text', base, {
