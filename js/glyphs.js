@@ -1042,7 +1042,8 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
-
+    var ref = this._ref;
+    
     var seqLength = seq ? seq.length : (this._max - this._min + 1);
     var scale = (this._max - this._min + 1) / seqLength;
 
@@ -1052,7 +1053,7 @@ SequenceGlyph.prototype.draw = function(gc) {
         gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
     }
 
-    for (var p = 0; p < seq.length; ++p) {
+    for (var p = 0; p < seqLength; ++p) {
         var base = seq.substr(p, 1).toUpperCase();
         
         if(!altDelPatt.test(base) && scale < 8)
