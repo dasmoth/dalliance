@@ -128,8 +128,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
     
 
-    holder.appendChild(toolbar);
-    holder.appendChild(genomePanel);
+    if (this.toolbarBelow) {
+        holder.appendChild(genomePanel);
+        holder.appendChild(toolbar);
+    } else {
+        holder.appendChild(toolbar);
+        holder.appendChild(genomePanel);
+    }
 
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
