@@ -1188,10 +1188,10 @@ TranslatedGlyph.prototype.maxY = function() {
     return this._y + this.glyph.height();
 }
 
-TranslatedGlyph.prototype.draw = function(g) {
+TranslatedGlyph.prototype.draw = function(g, o) {
     g.save();
     g.translate(this._x, this._y);
-    this.glyph.draw(g);
+    this.glyph.draw(g, o);
     g.restore();
 }
 
