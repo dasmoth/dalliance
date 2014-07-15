@@ -84,6 +84,7 @@ function Browser(opts) {
     this.selectedTiers = [1];
 
     this.maxViewWidth = 500000;
+    this.defaultSubtierMax = 100;
 
     // Options.
     
