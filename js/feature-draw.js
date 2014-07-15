@@ -60,8 +60,6 @@ if (typeof(require) !== 'undefined') {
 }
 
 var MIN_PADDING = 3;
-var DEFAULT_SUBTIER_MAX = 100;
-
 
 function SubTier() {
     this.glyphs = [];
@@ -302,8 +300,9 @@ function drawFeatureTier(tier)
     var unbumpedST = new SubTier();
     var bumpedSTs = [];
     var hasBumpedFeatures = false;
-    var subtierMax = tier.dasSource.subtierMax || DEFAULT_SUBTIER_MAX;
-    
+    var subtierMax = tier.subtierMax || tier.dasSource.subtierMax || tier.browser.defaultSubtierMax;
+    var subtiersExceeded = false;
+
   GLYPH_LOOP:
     for (var i = 0; i < glyphs.length; ++i) {
         var g = glyphs[i];
@@ -319,7 +318,7 @@ function drawFeatureTier(tier)
                 }
             }
             if (bumpedSTs.length >= subtierMax) {
-                // tier.status = 'Too many overlapping features, truncating at ' + subtierMax;
+                subtiersExceeded = true;
             } else {
                 var st = new SubTier();
                 st.add(g);
@@ -353,8 +352,10 @@ function drawFeatureTier(tier)
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
 
-    var end = Date.now()|0;
-    // console.log('dft took ' + (end-start) + 'ms');
+    if (subtiersExceeded)
+        tier.notify('Bumping limit exceeded, use the track editor to see more features', 0);
+    else
+        tier.notify();
 }
 
 

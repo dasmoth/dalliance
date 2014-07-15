@@ -499,6 +499,13 @@ DasTier.prototype._updateFromConfig = function() {
         needsReorder = true;
     }
 
+    var wantedSubtierMax = (typeof(this.config.subtierMax === 'number') ? 
+        this.config.subtierMax : this.dasSource.subtierMax || this.browser.defaultSubtierMax);
+    if (wantedSubtierMax != this.subtierMax) {
+        this.subtierMax = wantedSubtierMax;
+        needsRefresh = true;
+    }
+
     if (needsRefresh)
         this.scheduleRedraw();
 
