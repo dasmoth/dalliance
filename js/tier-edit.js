@@ -143,6 +143,7 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierHeightField = makeElement('input', null, {type: 'text', value: '50'});
 
         var bumpToggle = makeElement('input', null, {type: 'checkbox'});
+        var bumpLimit = makeElement('input', null, {type: 'text'});
         var labelToggle = makeElement('input', null, {type: 'checkbox'});
 
         var mainStyle = null;
@@ -172,6 +173,12 @@ Browser.prototype.openTierPanel = function(tier) {
             } else {
                 quantLeapToggle.checked = false;
                 quantLeapThreshField.disabled = true;
+            }
+
+            if (typeof tier.subtierMax == 'number') {
+                bumpLimit.value = '' + tier.subtierMax;
+            } else {
+                bumpLimit.value = '' + (tier.dasSource.subtierMax || tier.browser.defaultSubtierMax);
             }
 
             if (tier.stylesheet.styles.length > 0) {
@@ -217,6 +224,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     maxRow.style.display = 'none';
                     bumpRow.style.display = 'table-row';
                     bumpToggle.checked = isDasBooleanTrue(mainStyle.BUMP);
+                    bumpLimit.disabled = !isDasBooleanTrue(mainStyle.BUMP);
                     labelRow.style.display = 'table-row';
                     labelToggle.checked = isDasBooleanTrue(mainStyle.LABEL);
                 }
@@ -355,7 +363,7 @@ Browser.prototype.openTierPanel = function(tier) {
                  makeElement('td', [quantLeapToggle, ' ', quantLeapThreshField])]);
         var bumpRow = makeElement('tr',
                 [makeElement('th', 'Bump overlaps'),
-                 makeElement('td', bumpToggle)]);
+                 makeElement('td', [bumpToggle, ' limit: ', bumpLimit])]);
         var labelRow = makeElement('tr',
                 [makeElement('th', 'Label features'),
                  makeElement('td', labelToggle)]);
@@ -486,6 +494,12 @@ Browser.prototype.openTierPanel = function(tier) {
                 style.BUMP = bumpToggle.checked ? 'yes' : 'no';
             });
             tier.mergeConfig({stylesheet: nss});
+        }, false);
+        bumpLimit.addEventListener('input', function(ev) {
+            var x = parseInt(bumpLimit.value);
+            if (typeof(x) == 'number' && x > 0) {
+                tier.mergeConfig({subtierMax: x});
+            }
         }, false);
 
 
