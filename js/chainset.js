@@ -47,6 +47,8 @@ function Chainset(conf, srcTag, destTag, coords) {
     this.chainsBySrc = {};
     this.chainsByDest = {};
     this.postFetchQueues = {};
+    this.fetchedTiles = {};
+    this.granularity = 1000000;  // size in bases of tile to fetch
 
     if (this.type == 'bigbed') {
         this.chainFetcher = new BBIChainFetcher(this.uri, this.credentials);
@@ -139,20 +141,66 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
 }
 
 Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
-    if (!this.chainsByDest[chr]) {
-        var fetchNeeded = !this.postFetchQueues[chr];
-        var thisCS = this;
-        pusho(this.postFetchQueues, chr, function() {
-            thisCS.sourceBlocksForRange(chr, min, max, callback);
-        });
-        if (fetchNeeded) {
-            this.chainFetcher.fetchChains(chr).then(function(chains, err) {
+    var thisCS = this;
+    var minTile = (min/this.granularity)|0;
+    var maxTile = (min/this.granularity)|0;
+
+    var needsNewFetch = false;
+    for (var t = minTile; t <= maxTile; ++t) {
+        var tn = chr + '_' + t;
+        if (!this.fetchedTiles[tn]) {
+            needsNewFetch = true;
+            this.fetchedTiles[tn] = true;
+        }
+    }
+
+    if (needsNewFetch) {
+        if (!this.postFetchQueues[chr]) {
+            this.chainFetcher.fetchChains(
+                chr, 
+                minTile * this.granularity, 
+                (maxTile+1) * this.granularity - 1)
+              .then(function(chains) {
                 if (!thisCS.chainsByDest)
                     thisCS.chainsByDest[chr] = [];
                 for (var ci = 0; ci < chains.length; ++ci) {
                     var chain = chains[ci];
-                    pusho(thisCS.chainsBySrc, chain.srcChr, chain);
-                    pusho(thisCS.chainsByDest, chain.destChr, chain);
+
+                    {
+                        var cbs = thisCS.chainsBySrc[chain.srcChr];
+                        if (!cbs) {
+                            thisCS.chainsBySrc[chain.srcChr] = [chain];
+                        } else {
+                            var present = false;
+                            for (var oci = 0; oci < cbs.length; ++oci) {
+                                var oc = cbs[oci];
+                                if (oc.srcMin == chain.srcMin && oc.srcMax == chain.srcMax) {
+                                    present = true;
+                                    break;
+                                }
+                            }
+                            if (!present)
+                                cbs.push(chain);
+                        }
+                    }
+
+                    {
+                        var cbd = thisCS.chainsByDest[chain.destChr];
+                        if (!cbd) {
+                            thisCS.chainsByDest[chain.destChr] = [chain];
+                        } else {
+                            var present = false;
+                            for (var oci = 0; oci < cbd.length; ++oci) {
+                                var oc = cbd[oci];
+                                if (oc.destMin == chain.destMin && oc.destMax == chain.destMax) {
+                                    present = true;
+                                    break;
+                                }
+                            }
+                            if (!present)
+                                cbd.push(chain);
+                        }
+                    }
                 }
                 if (thisCS.postFetchQueues[chr]) {
                     var pfq = thisCS.postFetchQueues[chr];
@@ -161,8 +209,15 @@ Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
                     }
                     thisCS.postFetchQueues[chr] = null;
                 }
-            });
+              });
         }
+
+        pusho(this.postFetchQueues, chr, function() {
+            // Will either succeed if the tiles that are needed have already been fetched,
+            // or queue up a new fetch.
+
+            thisCS.sourceBlocksForRange(chr, min, max, callback);
+        });
     } else {
         var srcBlocks = [];
         var chains = this.chainsByDest[chr] || [];
@@ -331,7 +386,7 @@ BBIChainFetcher.prototype.fetchChains = function(chr, _min, _max) {
             throw Error("No BWG");
 
         return new Promise(function(resolve, reject) {
-            bwg.getUnzoomedView().readWigData(chr, 1, 30000000000, function(feats) {
+            bwg.getUnzoomedView().readWigData(chr, _min, _max, function(feats) {
                 resolve(feats.map(bbiFeatureToChain));
             });
         });
