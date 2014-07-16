@@ -969,7 +969,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        if (seq && style.__SEQCOLOR === 'mismatch') {
+        if (seq && refSeq && style.__SEQCOLOR === 'mismatch') {
             var mismatchSeq = '';
             for (var i = 0; i < seq.length; ++i) {
                 var c = feature.orientation === '-' ? ',' : '.';

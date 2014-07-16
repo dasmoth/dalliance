@@ -327,7 +327,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     seqInsertRow.style.display = 'none';
                 }
 
-                if (seqStyle && seqMismatchToggle.checked) {
+                if (seqStyle && seqMismatchToggle.checked && !isSimpleQuantitative) {
                     plusStrandColorRow.style.display = 'table-row';
                     minusStrandColorRow.style.display = 'table-row';
                 } else {
