@@ -915,7 +915,6 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var rawquals = feature.quals;
         var quals = rawquals;
         var insertionLabels = isDasBooleanTrue(style.__INSERTIONS);
-        var onlyMismatch = isDasBooleanTrue(style.__ONLY_MISMATCH);
 
         var indels = [];
         if (feature.cigar) {
@@ -931,7 +930,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     cursor += co.cnt;
                 } else if (co.op == 'D') {
                     for (var oi = 0; oi < co.cnt; ++oi) {
-                        seq += '#'; // seq has deletion
+                        seq += '-'; // seq has deletion
                         quals += 'Z';
                     }
                 } else if (co.op == 'I') {
@@ -971,8 +970,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
         }
         var mismatchSeq = '';
-        if (onlyMismatch) {
-            style.__SEQCOLOR = 'mismatch';
+        if (style.__SEQCOLOR === 'mismatch') {
             for (var i = 0; i < seq.length; ++i) {
                 var c = feature.orientation == '-' ? ',' : '.';
                 mismatchSeq += seq[i] == refSeq[i] ? c : seq[i];

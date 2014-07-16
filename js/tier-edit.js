@@ -271,7 +271,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
                 if (s._plusColor)
                     tierPlusColorField.value = dasColourForName(s._plusColor).toHexString() || s._plusColor;
-                if(s._minusColor)
+                if (s._minusColor)
                     tierMinusColorField.value = dasColourForName(s._minusColor).toHexString() || s._minusColor;
                 if (isDasBooleanTrue(s.SCATTER)) {
                     glyphField.value = 'SCATTER';
@@ -326,17 +326,15 @@ Browser.prototype.openTierPanel = function(tier) {
 
                     seqInsertRow.style.display = 'table-row';
                     seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
-
-                    seqOnlyMismatchRow.style.display = 'table-row';
-                    seqOnlyMismatchToggle.checked = isDasBooleanTrue(seqStyle.__ONLY_MISMATCH);
-
-                    plusStrandColorRow.style.display = 'table-row';
-                    minusStrandColorRow.style.display = 'table-row';
                 } else {
                     seqMismatchRow.style.display = 'none';
                     seqInsertRow.style.display = 'none';
-                    seqOnlyMismatchToggle.style.display = 'none';
+                }
 
+                if (seqStyle && seqMismatchToggle.checked) {
+                    plusStrandColorRow.style.display = 'table-row';
+                    minusStrandColorRow.style.display = 'table-row';
+                } else {
                     plusStrandColorRow.style.display = 'none';
                     minusStrandColorRow.style.display = 'none';
                 }
@@ -350,7 +348,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var seqMismatchToggle = makeElement('input', null, {type: 'checkbox'});
         var seqMismatchRow = makeElement('tr',
-            [makeElement('th', 'Color mismatches'),
+            [makeElement('th', 'Highlight mismatches & strands'),
              makeElement('td', seqMismatchToggle)]);
         seqMismatchToggle.addEventListener('change', function(ev) {
             var nss = copyStylesheet(tier.stylesheet);
@@ -367,17 +365,6 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
             seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
-            tier.mergeConfig({stylesheet: nss});
-        });
-
-        var seqOnlyMismatchToggle = makeElement('input', null, {type: 'checkbox'});
-        var seqOnlyMismatchRow = makeElement('tr',
-                                       [makeElement('th', 'Only show mismatches'),
-                                        makeElement('td', seqOnlyMismatchToggle)]);
-        seqOnlyMismatchToggle.addEventListener('change', function(ev) {
-            var nss = copyStylesheet(tier.stylesheet);
-            var seqStyle = getSeqStyle(nss);
-            seqStyle.__ONLY_MISMATCH = seqOnlyMismatchToggle.checked ? 'yes' : 'no';
             tier.mergeConfig({stylesheet: nss});
         });
 
@@ -435,7 +422,6 @@ Browser.prototype.openTierPanel = function(tier) {
             labelRow,
             seqMismatchRow,
             seqInsertRow,
-            seqOnlyMismatchRow
              ]);
 
 
