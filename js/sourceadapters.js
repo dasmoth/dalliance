@@ -51,6 +51,8 @@ if (typeof(require) !== 'undefined') {
     var OverlayFeatureSource = require('./overlay').OverlayFeatureSource;
 
     var JBrowseStore = require('./jbjson').JBrowseStore;
+
+    var Chainset = require('./chainset').Chainset;
 }
 
 var __dalliance_sourceAdapterFactories = {};
@@ -133,6 +135,10 @@ Browser.prototype.createFeatureSource = function(config) {
             sources.push(this.createFeatureSource(config.overlay[oi]));
         }
         fs = new OverlayFeatureSource(sources, config);
+    }
+
+    if (config.sequenceAliases) {
+        fs = new MappedFeatureSource(fs, new Chainset({type: 'alias', sequenceAliases: config.sequenceAliases}));
     }
 
     if (config.mapping) {

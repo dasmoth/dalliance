@@ -52,6 +52,8 @@ function Chainset(conf, srcTag, destTag, coords) {
 
     if (this.type == 'bigbed') {
         this.chainFetcher = new BBIChainFetcher(this.uri, this.credentials);
+    } else if (this.type == 'alias') {
+        this.chainFetcher = new AliasChainFetcher(conf);
     } else {
         this.chainFetcher = new DASChainFetcher(this.uri, this.srcTag, this.destTag);
     }
@@ -380,18 +382,55 @@ function bbiFeatureToChain(feature) {
     return chain;
 }
 
-BBIChainFetcher.prototype.fetchChains = function(chr, _min, _max) {
+BBIChainFetcher.prototype.fetchChains = function(chr, min, max) {
     return this.bwg.then(function(bwg, err) {
         if (!bwg)
             throw Error("No BWG");
 
         return new Promise(function(resolve, reject) {
-            bwg.getUnzoomedView().readWigData(chr, _min, _max, function(feats) {
+            bwg.getUnzoomedView().readWigData(chr, min, max, function(feats) {
                 resolve(feats.map(bbiFeatureToChain));
             });
         });
     });
 };
+
+function AliasChainFetcher(conf) {
+    this.conf = conf;
+    this.forwardAliases = {};
+    var sa = conf.sequenceAliases || [];
+    for (var ai = 0; ai < sa.length; ++ai) {
+        var al = sa[ai];
+        if (al.length < 2)
+            continue;
+
+        var fa = [];
+        for (var i = 0; i < al.length - 1; ++i)
+            fa.push(al[i]);
+        this.forwardAliases[al[al.length - 1]] = fa;
+    }
+}
+
+AliasChainFetcher.prototype.fetchChains = function(chr, min, max) {
+    var resp = [];
+    var fa = this.forwardAliases[chr] || [];
+    for (var i = 0; i < fa.length; ++i) {
+        resp.push(
+            {
+                srcChr:         fa[i],
+                srcMin:         1,
+                srcMax:         1000000000,
+                srcOri:         '+',
+                destChr:        chr,
+                destMin:        1,
+                destMax:        1000000000,
+                destOri:        '+',
+                blocks: [[1, 1, 1000000000]]
+            });
+    }
+
+    return Promise.resolve(resp);
+}
 
 if (typeof(module) !== 'undefined') {
     module.exports = {
