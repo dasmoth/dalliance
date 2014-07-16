@@ -148,6 +148,7 @@ function Browser(opts) {
         if (window.location.prototol === 'http:' || window.location.protocol === 'https:') {
             // Protocol-relative URLs okay.
         } else {
+            console.log('WARNING: prefix is set to a protocol-relative URL (' + this.prefix + ' when loading from a non-HTTP source');
             this.prefix = 'http:' + this.prefix;
         }
     }
@@ -1540,7 +1541,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     }
     var thisB = this;
 
-    if (!newChr || newChr == this.chr) {
+    if ((!newChr || newChr == this.chr) && this.currentSeqMax > 0) {
         return this._setLocation(null, newMin, newMax, null, callback);
     } else {
         var ss = this.getSequenceSource();
