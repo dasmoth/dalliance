@@ -1054,7 +1054,7 @@ SequenceGlyph.prototype.draw = function(gc) {
     }
 
     for (var p = 0; p < seqLength; ++p) {
-        var base = seq.substr(p, 1).toUpperCase();
+        var base = seq ? seq.substr(p, 1).toUpperCase() : 'N';
         
         if(!altPatt.test(base) && scale < 8)
             continue;
@@ -1068,7 +1068,7 @@ SequenceGlyph.prototype.draw = function(gc) {
         }
 
         if (!color) {
-            var refBase = ref.substr(p, 1).toUpperCase();
+            var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
             if (base == 'N' || refBase == 'N')
                 color = 'gray';
             else if (this._orientation == '+')
@@ -1099,7 +1099,7 @@ SequenceGlyph.prototype.draw = function(gc) {
                 if (isRetina) {
                     imgGc.scale(2, 2);
                 }
-                imgGc.fillStyle = color == 'black' ? 'white' : 'black';
+                imgGc.fillStyle = 'black';
                 imgGc.fillText(base, 0, 8);
                 __dalliance_SequenceGlyphCache[key] = img;
             }
@@ -1122,11 +1122,11 @@ SequenceGlyph.prototype.toSVG = function() {
     var  g = makeElementNS(NS_SVG, 'g'); 
 
     for (var p = 0; p < seq.length; ++p) {
-        var base = seq.substr(p, 1).toUpperCase();
+        var base = seq ? seq.substr(p, 1).toUpperCase() : 'N';
         var color = this.baseColors[base];
 
         if (!color) {
-            var refBase = ref.substr(p, 1).toUpperCase();
+            var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
             if (base == 'N' || refBase == 'N')
                 color = 'gray';
             else if (this._orientation == '+')
@@ -1153,12 +1153,11 @@ SequenceGlyph.prototype.toSVG = function() {
                     fillOpacity: alpha}));
 
         if (scale >= 8 && altPatt.test(base)) {
-            var fillColor = color == 'black' ? 'white' : 'black'
             g.appendChild(
                     makeElementNS(NS_SVG, 'text', base, {
                         x: this._min + p*scale,
                         y: 8,
-                        fill: fillColor,
+                        fill: 'black',
                         fillOpacity: alpha}));
         }
     }

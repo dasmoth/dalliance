@@ -930,7 +930,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     cursor += co.cnt;
                 } else if (co.op == 'D') {
                     for (var oi = 0; oi < co.cnt; ++oi) {
-                        seq += '-'; // seq has deletion
+                        seq += '-'; // del char is hardcoded into baseColors in cbrowser.js
                         quals += 'Z';
                     }
                 } else if (co.op == 'I') {
@@ -969,10 +969,10 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        var mismatchSeq = '';
-        if (style.__SEQCOLOR === 'mismatch') {
+        if (seq && style.__SEQCOLOR === 'mismatch') {
+            var mismatchSeq = '';
             for (var i = 0; i < seq.length; ++i) {
-                var c = feature.orientation == '-' ? ',' : '.';
+                var c = feature.orientation === '-' ? ',' : '.';
                 mismatchSeq += seq[i] == refSeq[i] ? c : seq[i];
             }
             seq = mismatchSeq;
