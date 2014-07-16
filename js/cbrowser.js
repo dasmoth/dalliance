@@ -1540,7 +1540,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     }
     var thisB = this;
 
-    if (!newChr || newChr == this.chr) {
+    if ((!newChr || newChr == this.chr) && this.currentSeqMax > 0) {
         return this._setLocation(null, newMin, newMax, null, callback);
     } else {
         var ss = this.getSequenceSource();
