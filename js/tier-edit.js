@@ -55,7 +55,6 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
             style._gradient = null;
-
             style._plusColor = tierPlusColorField.value;
             style._minusColor = tierMinusColorField.value;
         }
@@ -105,7 +104,6 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierColorField2 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
 
-
         var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#ffa07a'});
         var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#87cefa'});
 
@@ -140,7 +138,6 @@ Browser.prototype.openTierPanel = function(tier) {
                 changeColor(null);
             }
         }, false);
-
 
         var tierMinField = makeElement('input', null, {type: 'text', value: '0.0'});
         var tierMaxField = makeElement('input', null, {type: 'text', value: '10.0'});
@@ -323,7 +320,6 @@ Browser.prototype.openTierPanel = function(tier) {
                 if (seqStyle) {
                     seqMismatchRow.style.display = 'table-row';
                     seqMismatchToggle.checked = (seqStyle.__SEQCOLOR === 'mismatch');
-
                     seqInsertRow.style.display = 'table-row';
                     seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
                 } else {
@@ -421,7 +417,7 @@ Browser.prototype.openTierPanel = function(tier) {
             bumpRow,
             labelRow,
             seqMismatchRow,
-            seqInsertRow,
+            seqInsertRow
              ]);
 
 
