@@ -1015,7 +1015,10 @@ TextGlyph.prototype.toSVG = function() {
 
 var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
-var altPatt = new RegExp('^[ACGT-]$');
+var altPattern = new RegExp('^[ACGT-]$');
+var isCloseUp = function(scale) {
+    return scale >= 8;
+}
 
 function SequenceGlyph(colorStyle, min, max, height, seq, ref, orientation, scheme, quals) {
     this.baseColors = colorStyle.baseColors;
@@ -1047,7 +1050,7 @@ SequenceGlyph.prototype.draw = function(gc) {
     var seqLength = seq ? seq.length : (this._max - this._min + 1);
     var scale = (this._max - this._min + 1) / seqLength;
 
-    if (this._scheme === 'mismatch' && scale < 8) {
+    if (this._scheme === 'mismatch' && !isCloseUp(scale)) {
         var readColor = this._orientation === '+' ? this.plusColor : this.minusColor;
         gc.fillStyle = readColor;
         gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
@@ -1056,7 +1059,7 @@ SequenceGlyph.prototype.draw = function(gc) {
     for (var p = 0; p < seqLength; ++p) {
         var base = seq ? seq.substr(p, 1).toUpperCase() : 'N';
         
-        if(!altPatt.test(base) && scale < 8)
+        if (!altPattern.test(base) && !isCloseUp(scale))
             continue;
 
         var color = this.baseColors[base];
@@ -1083,7 +1086,7 @@ SequenceGlyph.prototype.draw = function(gc) {
 
         gc.fillRect(this._min + p*scale, 0, scale, this._height);
 
-        if (scale >= 8 && altPatt.test(base)) {
+        if (isCloseUp(scale) && altPattern.test(base)) {
             var key = color + '_' + base
             var img = __dalliance_SequenceGlyphCache[key];
             if (!img) {
@@ -1144,21 +1147,21 @@ SequenceGlyph.prototype.toSVG = function() {
         }
 
         g.appendChild(
-                makeElementNS(NS_SVG, 'rect', null, {
-                    x:this._min + p*scale,
-                    y: 0,
-                    width: scale,
-                    height: this._height,
-                    fill: color,
-                    fillOpacity: alpha}));
+            makeElementNS(NS_SVG, 'rect', null, {
+                x:this._min + p*scale,
+                y: 0,
+                width: scale,
+                height: this._height,
+                fill: color,
+                fillOpacity: alpha}));
 
-        if (scale >= 8 && altPatt.test(base)) {
+        if (isCloseUp(scale) && altPattern.test(base)) {
             g.appendChild(
-                    makeElementNS(NS_SVG, 'text', base, {
-                        x: this._min + p*scale,
-                        y: 8,
-                        fill: 'black',
-                        fillOpacity: alpha}));
+                makeElementNS(NS_SVG, 'text', base, {
+                    x: this._min + p*scale,
+                    y: 8,
+                    fill: 'black',
+                    fillOpacity: alpha}));
         }
     }
 
