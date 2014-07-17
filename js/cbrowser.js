@@ -106,7 +106,7 @@ function Browser(opts) {
         C: 'blue', 
         G: 'orange', 
         T: 'red',
-        '-' : 'hotPink' // deletion
+        '-' : 'hotpink' // deletion
     };
 
     // Registry

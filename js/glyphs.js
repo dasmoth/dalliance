@@ -1020,17 +1020,15 @@ var isCloseUp = function(scale) {
     return scale >= 8;
 }
 
-function SequenceGlyph(colorStyle, min, max, height, seq, ref, orientation, scheme, quals) {
-    this.baseColors = colorStyle.baseColors;
-    this.plusColor = colorStyle.plusColor || "lightsalmon";
-    this.minusColor = colorStyle.minusColor || "lightskyblue";
+function SequenceGlyph(baseColors, strandColor, min, max, height, seq, ref, scheme, quals) {
+    this.baseColors = baseColors;
+    this._strandColor = strandColor;
     this._min = min;
     this._max = max;
     this._height = height;
     this._seq = seq;
     this._ref = ref;
     this._scheme = scheme;
-    this._orientation = orientation;
     this._quals = quals;
 }
 
@@ -1051,9 +1049,8 @@ SequenceGlyph.prototype.draw = function(gc) {
     var scale = (this._max - this._min + 1) / seqLength;
 
     if (this._scheme === 'mismatch' && !isCloseUp(scale)) {
-        var readColor = this._orientation === '+' ? this.plusColor : this.minusColor;
-        gc.fillStyle = readColor;
-        gc.fillRect(this._min, this._height/4, this._max-this._min, this._height/2);
+        gc.fillStyle = this._strandColor;
+        gc.fillRect(this._min, this._height/4, this._max - this._min, this._height/2);
     }
 
     for (var p = 0; p < seqLength; ++p) {
@@ -1074,12 +1071,8 @@ SequenceGlyph.prototype.draw = function(gc) {
             var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
             if (base == 'N' || refBase == 'N')
                 color = 'gray';
-            else if (this._orientation == '+')
-                color = this.plusColor;
-            else if (this._orientation == '-')
-                color = this.minusColor;
             else
-                color = 'white';
+                color = this._strandColor;
         }
 
         gc.fillStyle = color;
@@ -1132,12 +1125,8 @@ SequenceGlyph.prototype.toSVG = function() {
             var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
             if (base == 'N' || refBase == 'N')
                 color = 'gray';
-            else if (this._orientation == '+')
-                color = this.plusColor;
-            else if (this._orientation == '-')
-                color = this.minusColor;
             else
-                color = 'white';
+                color = this._strandColor;
         }
 
         var alpha = 1.0;
