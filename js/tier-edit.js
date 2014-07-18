@@ -55,6 +55,8 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
             }
             style._gradient = null;
+            style._plusColor = tierPlusColorField.value;
+            style._minusColor = tierMinusColorField.value;
         }
 
         var mutateStylesheet = function(visitor) {
@@ -101,8 +103,13 @@ Browser.prototype.openTierPanel = function(tier) {
         var tierColorField = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField2 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
         var tierColorField3 = makeElement('input', null, {type: 'text', value: '#dd00dd'});
+
+        var tierPlusColorField = makeElement('input', null, {type: 'text', value: '#ffa07a'});
+        var tierMinusColorField = makeElement('input', null, {type: 'text', value: '#87cefa'});
+
         try {
             tierColorField.type = tierColorField2.type = tierColorField3.type = 'color';
+            tierPlusColorField.type = tierMinusColorField.type = 'color';
         } catch (e) {
             // IE throws if attempt to set type to 'color'.
         }
@@ -259,6 +266,10 @@ Browser.prototype.openTierPanel = function(tier) {
                 } 
                 setNumColors(numColors);
 
+                if (s._plusColor)
+                    tierPlusColorField.value = dasColourForName(s._plusColor).toHexString() || s._plusColor;
+                if (s._minusColor)
+                    tierMinusColorField.value = dasColourForName(s._minusColor).toHexString() || s._minusColor;
                 if (isDasBooleanTrue(s.SCATTER)) {
                     glyphField.value = 'SCATTER';
                 } else {
@@ -315,6 +326,14 @@ Browser.prototype.openTierPanel = function(tier) {
                     seqMismatchRow.style.display = 'none';
                     seqInsertRow.style.display = 'none';
                 }
+
+                if (seqStyle && seqMismatchToggle.checked && !isSimpleQuantitative) {
+                    plusStrandColorRow.style.display = 'table-row';
+                    minusStrandColorRow.style.display = 'table-row';
+                } else {
+                    plusStrandColorRow.style.display = 'none';
+                    minusStrandColorRow.style.display = 'none';
+                }
             }
 
             if (isQuantitative && tier.browser.sourceAdapterIsCapable(tier.featureSource, 'quantLeap'))
@@ -325,7 +344,7 @@ Browser.prototype.openTierPanel = function(tier) {
 
         var seqMismatchToggle = makeElement('input', null, {type: 'checkbox'});
         var seqMismatchRow = makeElement('tr',
-            [makeElement('th', 'Color mismatches'),
+            [makeElement('th', 'Highlight mismatches & strands'),
              makeElement('td', seqMismatchToggle)]);
         seqMismatchToggle.addEventListener('change', function(ev) {
             var nss = copyStylesheet(tier.stylesheet);
@@ -351,6 +370,12 @@ Browser.prototype.openTierPanel = function(tier) {
         var colorRow = makeElement('tr',
                 [makeElement('th', ['Colour(s)', colorListPlus, colorListMinus]),
                  colorListElement]);
+        var plusStrandColorRow = makeElement('tr',
+                [makeElement('th', 'Plus Strand Color'),
+                 makeElement('td', tierPlusColorField)]);
+        var minusStrandColorRow = makeElement('tr',
+                [makeElement('th', 'Minus Strand Color'),
+                 makeElement('td', tierMinusColorField)]);
         var minRow = makeElement('tr',
                 [makeElement('th', 'Min value'),
                  makeElement('td', [tierMinToggle, ' ', tierMinField])]);
@@ -384,6 +409,8 @@ Browser.prototype.openTierPanel = function(tier) {
 
             styleRow,
             colorRow,
+            plusStrandColorRow,
+            minusStrandColorRow,
             minRow,
             maxRow,
             quantLeapRow,
@@ -415,6 +442,9 @@ Browser.prototype.openTierPanel = function(tier) {
         for (var ci = 0; ci < tierColorFields.length; ++ci) {
             tierColorFields[ci].addEventListener('change', changeColor, false);
         }
+
+        tierPlusColorField.addEventListener('change', changeColor, false);
+        tierMinusColorField.addEventListener('change', changeColor, false);
 
         glyphField.addEventListener('change', function(ev) {
             var nss = mutateStylesheet(function(ts) {

@@ -1015,9 +1015,14 @@ TextGlyph.prototype.toSVG = function() {
 
 var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
+var altPattern = new RegExp('^[ACGT-]$');
+var isCloseUp = function(scale) {
+    return scale >= 8;
+}
 
-function SequenceGlyph(baseColors, min, max, height, seq, ref, scheme, quals) {
+function SequenceGlyph(baseColors, strandColor, min, max, height, seq, ref, scheme, quals) {
     this.baseColors = baseColors;
+    this._strandColor = strandColor;
     this._min = min;
     this._max = max;
     this._height = height;
@@ -1038,35 +1043,43 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
-
+    var ref = this._ref;
+    
     var seqLength = seq ? seq.length : (this._max - this._min + 1);
     var scale = (this._max - this._min + 1) / seqLength;
 
+    if (this._scheme === 'mismatch' && !isCloseUp(scale)) {
+        gc.fillStyle = this._strandColor;
+        gc.fillRect(this._min, this._height/4, this._max - this._min, this._height/2);
+    }
+
     for (var p = 0; p < seqLength; ++p) {
         var base = seq ? seq.substr(p, 1).toUpperCase() : 'N';
-        var color = this.baseColors[base];
-        if (!color) {
-            color = 'gray';
-        }
-
-        if (this._scheme === 'mismatch' && this._ref) {
-            var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === 'N') {
-                color = 'gray';
-            } else if (refbase === base) {
-                color = 'black';
-            } else {
-                color = 'red';
-            }
-        }
         
+        if (!altPattern.test(base) && !isCloseUp(scale))
+            continue;
+
+        var color = this.baseColors[base];
+
         if (this._quals) {
             var qc = this._quals.charCodeAt(p) - 33;
             var oldAlpha = gc.globalAlpha;            // NB hoisted!
             gc.globalAlpha = this.alphaForQual(qc);
         }
 
-        if (scale >= 8) {
+        if (!color) {
+            var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
+            if (base == 'N' || refBase == 'N')
+                color = 'gray';
+            else
+                color = this._strandColor;
+        }
+
+        gc.fillStyle = color;
+
+        gc.fillRect(this._min + p*scale, 0, scale, this._height);
+
+        if (isCloseUp(scale) && altPattern.test(base)) {
             var key = color + '_' + base
             var img = __dalliance_SequenceGlyphCache[key];
             if (!img) {
@@ -1082,7 +1095,7 @@ SequenceGlyph.prototype.draw = function(gc) {
                 if (isRetina) {
                     imgGc.scale(2, 2);
                 }
-                imgGc.fillStyle = color;
+                imgGc.fillStyle = 'black';
                 imgGc.fillText(base, 0, 8);
                 __dalliance_SequenceGlyphCache[key] = img;
             }
@@ -1090,10 +1103,7 @@ SequenceGlyph.prototype.draw = function(gc) {
                 gc.drawImage(img, this._min + p*scale, 0, 8, 10);
             else
                 gc.drawImage(img, this._min + p*scale, 0);
-        } else {
-            gc.fillStyle = color;
-            gc.fillRect(this._min + p*scale, 0, scale, this._height);
-        }
+        } 
 
         if (this._quals) {
             gc.globalAlpha = oldAlpha;
@@ -1103,25 +1113,20 @@ SequenceGlyph.prototype.draw = function(gc) {
 
 SequenceGlyph.prototype.toSVG = function() {
     var seq = this._seq;
+    var ref = this._ref;
     var scale = (this._max - this._min + 1) / this._seq.length;
     var  g = makeElementNS(NS_SVG, 'g'); 
 
     for (var p = 0; p < seq.length; ++p) {
-        var base = seq.substr(p, 1).toUpperCase();
-        var color = baseColors[base];
-        if (!color) {
-            color = 'gray';
-        }
+        var base = seq ? seq.substr(p, 1).toUpperCase() : 'N';
+        var color = this.baseColors[base];
 
-        if (this._scheme === 'mismatch' && this._ref) {
-            var refbase = this._ref.substr(p, 1).toUpperCase();
-            if (refbase === 'N') {
+        if (!color) {
+            var refBase = ref ? ref.substr(p, 1).toUpperCase() : 'N';
+            if (base == 'N' || refBase == 'N')
                 color = 'gray';
-            } else if (refbase === base) {
-                color = 'black';
-            } else {
-                color = 'red';
-            }
+            else
+                color = this._strandColor;
         }
 
         var alpha = 1.0;
@@ -1130,23 +1135,22 @@ SequenceGlyph.prototype.toSVG = function() {
             alpha = this.alphaForQual(qc);
         }
 
-        if (scale >= 8) {
-            g.appendChild(
-                    makeElementNS(NS_SVG, 'text', base, {
-                        x: this._min + p*scale,
-                        y: 8,
-                        fill: color,
-                        fillOpacity: alpha}));
-        } else {
-            g.appendChild(
-                    makeElementNS(NS_SVG, 'rect', null, {
-                        x:this._min + p*scale,
-                        y: 0,
-                        width: scale,
-                        height: this._height,
-                        fill: color,
-                        fillOpacity: alpha}));
+        g.appendChild(
+            makeElementNS(NS_SVG, 'rect', null, {
+                x:this._min + p*scale,
+                y: 0,
+                width: scale,
+                height: this._height,
+                fill: color,
+                fillOpacity: alpha}));
 
+        if (isCloseUp(scale) && altPattern.test(base)) {
+            g.appendChild(
+                makeElementNS(NS_SVG, 'text', base, {
+                    x: this._min + p*scale,
+                    y: 8,
+                    fill: 'black',
+                    fillOpacity: alpha}));
         }
     }
 

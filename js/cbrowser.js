@@ -104,8 +104,9 @@ function Browser(opts) {
     this.baseColors = {
         A: 'green', 
         C: 'blue', 
-        G: 'black', 
-        T: 'red'
+        G: 'orange', 
+        T: 'red',
+        '-' : 'hotpink' // deletion
     };
 
     // Registry

@@ -969,7 +969,21 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                 }
             }
         }
-        gg = new SequenceGlyph(tier.browser.baseColors, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
+        if (seq && refSeq && style.__SEQCOLOR === 'mismatch') {
+            var mismatchSeq = [];
+            var match = feature.orientation === '-' ? ',' : '.';
+            for (var i = 0; i < seq.length; ++i)
+                mismatchSeq.push(seq[i] == refSeq[i] ? match : seq[i]);
+            seq = mismatchSeq.join('');
+        }
+
+        var strandColor;
+        if (feature.orientation === '-')
+            strandColor = style._minusColor || 'lightskyblue';
+        else
+            strandColor = style._plusColor || 'lightsalmon';
+        
+        gg = new SequenceGlyph(tier.browser.baseColors, strandColor, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {

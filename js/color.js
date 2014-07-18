@@ -43,7 +43,10 @@ var palette = {
     white: new DColour(255, 255, 255, 'white'),
     black: new DColour(0, 0, 0, 'black'),
     gray: new DColour(180, 180, 180, 'gray'),
-    grey: new DColour(180, 180, 180, 'grey')
+    grey: new DColour(180, 180, 180, 'grey'),
+    lightskyblue: new DColour(135, 206, 250, 'lightskyblue'),
+    lightsalmon: new DColour(255, 160, 122, 'lightsalmon'),
+    hotpink: new DColour(255, 105, 180, 'hotpink')
 };
 
 var COLOR_RE = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
