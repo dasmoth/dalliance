@@ -34,6 +34,7 @@ function DasTier(browser, source, config, background)
                                 {width: '' + ((this.browser.featurePanelWidth|0) + 2000), 
                                  height: "30",
                                  className: 'viewport'});
+    this.viewportHolder = makeElement('div', this.viewport, {className: 'viewport-holder'}, {background: background});
     this.overlay = makeElement('canvas', null,
          {width: + ((this.browser.featurePanelWidth|0) + 2000), 
           height: "30",
@@ -66,7 +67,7 @@ function DasTier(browser, source, config, background)
        {className: 'btn-group track-label'});
 
 
-    this.row = makeElement('div', [this.viewport,
+    this.row = makeElement('div', [this.viewportHolder,
                                    this.overlay, 
                                    this.quantOverlay],
                             {className: 'tier'});
@@ -112,6 +113,11 @@ function DasTier(browser, source, config, background)
 
     this.listeners = [];
     this.featuresLoadedListeners = [];
+}
+
+DasTier.prototype.setBackground = function(b) {
+    this.background = b;
+    this.viewportHolder.style.background = b;
 }
 
 DasTier.prototype.toString = function() {

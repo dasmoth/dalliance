@@ -1162,7 +1162,7 @@ Browser.prototype.arrangeTiers = function() {
     if (this.tierBackgroundColors) {
         for (var ti = 0; ti < arrangedTiers.length; ++ti) {
             var t = arrangedTiers[ti];
-            t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+            t.setBackground(this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
         }
     }
 }
@@ -1294,7 +1294,7 @@ Browser.prototype.move = function(pos)
     
     for (var i = 0; i < this.tiers.length; ++i) {
         var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+	    this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
         var ooffset = (this.viewStart - this.tiers[i].oorigin)*this.scale;
         this.tiers[i].overlay.style.left = '' + ((-ooffset|0) - 1000) + 'px';
     }
@@ -1609,7 +1609,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
     if (scaleChanged || chrChanged) {
         for (var i = 0; i < this.tiers.length; ++i) {
-            this.tiers[i].viewport.style.left = '5000px';
+            this.tiers[i].viewportHolder.style.left = '5000px';
             this.tiers[i].overlay.style.left = '5000px';
         }
 
