@@ -360,13 +360,18 @@ function pi(x) {
     return parseInt(x);
 }
 
+function cleanChr(c) {
+    if (c.indexOf('chr') == 0)
+        return c.substr(3);
+}
+
 function bbiFeatureToChain(feature) {
     var chain = {
-        srcChr:     feature.srcChrom,
+        srcChr:     cleanChr(feature.srcChrom),
         srcMin:     parseInt(feature.srcStart),
         srcMax:     parseInt(feature.srcEnd),
         srcOri:     feature.srcOri,
-        destChr:    feature.segment,
+        destChr:    cleanChr(feature.segment),
         destMin:    feature.min - 1,     // Convert back from bigbed parser
         destMax:    feature.max,
         destOri:    feature.ori,
