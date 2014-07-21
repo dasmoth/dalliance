@@ -393,7 +393,7 @@ DasTier.prototype.paint = function() {
     }
     
     var tierHeight = Math.max(lh, this.browser.minTierHeight);
-    this.viewport.style.left = '-1000px';
+    this.viewportHolder.style.left = '-1000px';
     this.viewport.style.width = retina ? ('' + (fpw/2) + 'px') : ('' + fpw + 'px');
     this.viewport.style.height = '' + lh + 'px';
     this.layoutHeight =  Math.max(lh, this.browser.minTierHeight);
@@ -409,6 +409,7 @@ DasTier.prototype.paint = function() {
         gc.scale(2, 2);
     }
 
+    /*
     if (this.background) {
         gc.fillStyle = this.background;
 
@@ -420,6 +421,35 @@ DasTier.prototype.paint = function() {
                 var knownMax = (r.max() - this.browser.viewStart) * this.browser.scale + 1000;
                 gc.fillRect(knownMin, 0, knownMax - knownMin, lh);
             }
+        }
+    }*/
+
+    var drawStart =  this.browser.viewStart - 1000.0/this.browser.scale;
+    var drawEnd = this.browser.viewEnd + 1000.0/this.browser.scale;
+    var unmappedBlocks = [];
+    if (this.knownCoverage) {
+        var knownRanges = this.knownCoverage.ranges();
+        for (var ri = 0; ri < knownRanges.length; ++ri) {
+            var r = knownRanges[ri];
+            if (ri == 0) {
+                if (r.min() > drawStart) 
+                   unmappedBlocks.push({min: drawStart, max: r.min() - 1});
+            } else {
+                unmappedBlocks.push({min: knownRanges[ri-1].max() + 1, max: r.min() - 1});
+            }
+
+            if (ri == knownRanges.length - 1 && r.max() < drawEnd) {
+                unmappedBlocks.push({min: r.max() + 1, max: drawEnd});
+            } 
+        }
+    }
+    if (unmappedBlocks.length > 0) {
+        gc.fillStyle = 'gray';
+        for (var i = 0; i < unmappedBlocks.length; ++i) {
+            var b = unmappedBlocks[i];
+            var min = (b.min - this.browser.viewStart) * this.browser.scale + 1000;
+            var max = (b.max - this.browser.viewStart) * this.browser.scale + 1000;
+            gc.fillRect(min, 0, max - min, lh);
         }
     }
 

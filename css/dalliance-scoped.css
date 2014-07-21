@@ -279,11 +279,19 @@
 
 *.dalliance .viewport {
   /* Width and height set in code */
+  position: inline-block;
+  margin: 0px;
+  border: 0px;
+}
+
+*.dalliance .viewport-holder {
   position: absolute;
   padding: 0px;
   margin: 0px;
   border: 0px;
   left: -1000px;
+  background: red;
+  min-height: 200px;
 }
 
 *.dalliance .viewport-overlay {

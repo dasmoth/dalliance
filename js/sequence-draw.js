@@ -136,7 +136,7 @@ function drawSeqTier(tier, seq)
     } 
 
     tier.norigin = tier.browser.viewStart;
-    tier.viewport.style.left = '-1000px';
+    tier.viewportHolder.style.left = '-1000px';
 }
 
 function svgSeqTier(tier, seq) {

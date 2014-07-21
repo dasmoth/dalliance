@@ -696,11 +696,12 @@ Browser.prototype.realInit2 = function() {
 }
 
 // 
-// iOS touch support
+// Touch event support
+//
 
 Browser.prototype.touchStartHandler = function(ev) {
-    ev.stopPropagation(); ev.preventDefault();
-    
+    // Events not consumed so they can be interpretted as clicks as well.
+
     this.touchOriginX = ev.touches[0].pageX;
     this.touchOriginY = ev.touches[0].pageY;
     if (ev.touches.length == 2) {
@@ -712,6 +713,9 @@ Browser.prototype.touchStartHandler = function(ev) {
 }
 
 Browser.prototype.touchMoveHandler = function(ev) {
+    // These events *are* consumed to ensure we never get any dragging that
+    // we don't manage ourselves.
+
     ev.stopPropagation(); ev.preventDefault();
     
     if (ev.touches.length == 1) {
@@ -741,7 +745,6 @@ Browser.prototype.touchMoveHandler = function(ev) {
 }
 
 Browser.prototype.touchEndHandler = function(ev) {
-    ev.stopPropagation(); ev.preventDefault();
 }
 
 Browser.prototype.touchCancelHandler = function(ev) {
@@ -1168,7 +1171,7 @@ Browser.prototype.arrangeTiers = function() {
     if (this.tierBackgroundColors) {
         for (var ti = 0; ti < arrangedTiers.length; ++ti) {
             var t = arrangedTiers[ti];
-            t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];
+            t.setBackground(this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
         }
     }
 }
@@ -1606,7 +1609,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
     if (scaleChanged || chrChanged) {
         for (var i = 0; i < this.tiers.length; ++i) {
-            this.tiers[i].viewport.style.left = '5000px';
+            this.tiers[i].viewportHolder.style.left = '5000px';
             this.tiers[i].overlay.style.left = '5000px';
         }
 
@@ -1630,7 +1633,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
         for (var i = 0; i < this.tiers.length; ++i) {
             var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	        this.tiers[i].viewport.style.left = '' + ((-offset|0) - 1000) + 'px';
+	        this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
             this.tiers[i].drawOverlay();
         }
     }
