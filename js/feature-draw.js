@@ -35,6 +35,7 @@ if (typeof(require) !== 'undefined') {
     var TooManyGlyph = g.TooManyGlyph;
     var TextGlyph = g.TextGlyph;
     var SequenceGlyph = g.SequenceGlyph;
+    var AminoAcidGlyph = g.AminoAcidGlyph;
     var TranslatedGlyph = g.TranslatedGlyph;
     var PointGlyph = g.PointGlyph;
     var GridGlyph = g.GridGlyph;
@@ -670,6 +671,29 @@ function glyphsForGroup(features, y, groupElement, tier, connectorType) {
 
 function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 {
+    function getRefSeq(tier, min, max) {
+        var refSeq = null;
+        if (tier.currentSequence) {
+            var csStart = tier.currentSequence.start|0;
+            var csEnd = tier.currentSequence.end|0;
+            if (csStart <= max && csEnd >= min) {
+                var sfMin = Math.max(min, csStart);
+                var sfMax = Math.min(max, csEnd);
+
+                refSeq = tier.currentSequence.seq.substr(sfMin - csStart, sfMax - sfMin + 1);
+                while (min < sfMin) {
+                    refSeq = 'N' + refSeq;
+                    sfMin--;
+                }
+                while (max > sfMax) {
+                    refSeq = refSeq + 'N';
+                    sfMax++;
+                }
+            }
+        }
+        return refSeq;
+    }
+
     var scale = tier.browser.scale, origin = tier.browser.viewStart;
     var gtype = style.glyph || 'BOX';
     var glyph;
@@ -980,25 +1004,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             }
         }
 
-        var refSeq = null;
-        if (tier.currentSequence) {
-            var csStart = tier.currentSequence.start|0;
-            var csEnd = tier.currentSequence.end|0;
-            if (csStart <= max && csEnd >= min) {
-                var sfMin = Math.max(min, csStart);
-                var sfMax = Math.min(max, csEnd);
-
-                refSeq = tier.currentSequence.seq.substr(sfMin - csStart, sfMax - sfMin + 1);
-                while (min < sfMin) {
-                    refSeq = 'N' + refSeq;
-                    sfMin--;
-                }
-                while (max > sfMax) {
-                    refSeq = refSeq + 'N';
-                    sfMax++;
-                }
-            }
-        }
+        var refSeq = getRefSeq(tier, min, max);
         if (seq && refSeq && style.__SEQCOLOR === 'mismatch') {
             var mismatchSeq = [];
             var match = feature.orientation === '-' ? ',' : '.';
@@ -1035,7 +1041,16 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         var fill = style.BGCOLOR || style.COLOR1 || 'green';
         if (style.BGITEM && feature.itemRgb)
             fill = feature.itemRgb;
-        gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
+        var scale = (maxPos - minPos) / (max - min);
+        if (feature.type == 'translation' &&
+            feature.method == 'protein_coding' &&
+            (!tier.dasSource.collapseSuperGroups || tier.bumped)
+            && scale >= 0.5) {
+            var refSeq = getRefSeq(tier, min, max);
+            gg = new AminoAcidGlyph(minPos, maxPos, height, fill, refSeq, feature.orientation, feature.readframe);    
+        } else {
+            gg = new BoxGlyph(minPos, 0, (maxPos - minPos), height, fill, stroke);
+        }
         // gg.bump = true;
     }
 
