@@ -1,9 +1,9 @@
 {
   "name": "dalliance",
   "version": "0.12.5",
-  "homepage": "https://github.com/wookoouk/dalliance",
+  "homepage": "https://github.com/dasmouth/dalliance",
   "authors": [
-    "Martin Page <martin.page@tsl.ac.uk>"
+    "Thomas Down <thomas.a.down@gmail.com>"
   ],
   "description": "Fast, embeddable genome visualization",
   "main": "build/dalliance-all.js",
