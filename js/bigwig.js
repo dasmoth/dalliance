@@ -516,8 +516,9 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                             var tlList = tl.ranges();
                             var readingFrame = 0;
                             for (var s = 0; s < tlList.length; ++s) {
+                                // Record reading frame for every exon
                                 var index = s;
-                                if(featureOpts.orientation == '-')
+                                if (featureOpts.orientation == '-')
                                     index = tlList.length - s - 1;
                                 var ts = tlList[index];
                                 featureOpts.readframe = readingFrame;

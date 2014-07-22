@@ -132,9 +132,10 @@ BedParseSession.prototype.parse = function(line) {
                 var tlList = tl.ranges();
                 var readingFrame = 0;
                 for (var s = 0; s < tlList.length; ++s) {
+                    // Record reading frame for every exon
                     var index = s;
-                    if (f.orientation == '-')
-                        index = tsList.length - 1 - s;
+                    if (featureOpts.orientation == '-')
+                        index = tlList.length - s - 1;
                     var ts = tlList[index];
                     var bf = shallowCopy(f);
                     bf.min = ts.min();

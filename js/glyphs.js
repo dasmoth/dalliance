@@ -1039,13 +1039,13 @@ function aminoTileColor(aa, start, color) {
 
 function reverseComplement(sequence) {
     var seq_dict = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'};
-    var rev_seq = sequence.split("").reverse().join("");
-    var rev_compl_seq = '';
+    var rev_seq = sequence.split('').reverse().join('');
+    var rev_compl_seq = [];
     for (var b = 0; b < rev_seq.length; ++b) {
         var base = rev_seq.substr(b, 1).toUpperCase();
-        rev_compl_seq += base in seq_dict ? seq_dict[base] : 'N';
+        rev_compl_seq.push(base in seq_dict ? seq_dict[base] : 'N');
     }
-    return rev_compl_seq;
+    return rev_compl_seq.join('');
 }
 
 function AminoAcidGlyph(min, max, height, fill, seq, orientation, readframe) {
@@ -1133,11 +1133,11 @@ AminoAcidGlyph.prototype.toSVG = function() {
                 fill: color}));
 
         if (scale >= 8 && codon.length == 3) {
-        g.appendChild(
-            makeElementNS(NS_SVG, 'text', aa, {
-                x: this._min + (p+1) * scale,
-                y: this._height,
-                fill: 'white'}));
+            g.appendChild(
+                makeElementNS(NS_SVG, 'text', aa, {
+                    x: this._min + (p+1) * scale,
+                    y: this._height,
+                    fill: 'white'}));
         }
     }
     return g;
