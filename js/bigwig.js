@@ -505,12 +505,24 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     }
 
                     if (thickEnd > thickStart) {
-                        var tl = intersection(spans, new Range(thickStart, thickEnd));
+                        var codingRegion = (featureOpts.orientation == '+') ?
+                            new Range(thickStart, thickEnd + 3) :
+                            new Range(thickStart - 3, thickEnd);
+                            // +/- 3 to account for stop codon
+
+                        var tl = intersection(spans, codingRegion);
                         if (tl) {
                             featureOpts.type = 'translation';
                             var tlList = tl.ranges();
+                            var readingFrame = 0;
                             for (var s = 0; s < tlList.length; ++s) {
-                                var ts = tlList[s];
+                                var index = s;
+                                if(featureOpts.orientation == '-')
+                                    index = tlList.length - s - 1;
+                                var ts = tlList[index];
+                                featureOpts.readframe = readingFrame;
+                                var length = ts.max() - ts.min();
+                                readingFrame = (readingFrame + length) % 3;
                                 createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
                             }
                         }

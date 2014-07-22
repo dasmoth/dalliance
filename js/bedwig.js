@@ -121,15 +121,27 @@ BedParseSession.prototype.parse = function(line) {
         }
 
         if (thickEnd > thickStart) {
-            var tl = intersection(spans, new Range(thickStart, thickEnd));
+            var codingRegion = (f.orientation == '+') ? 
+                new Range(thickStart, thickEnd + 3) : 
+                new Range(thickStart - 3, thickEnd);
+                // +/- 3 to account for stop codon
+
+            var tl = intersection(spans, codingRegion);
             if (tl) {
                 f.type = 'translation';
                 var tlList = tl.ranges();
+                var readingFrame = 0;
                 for (var s = 0; s < tlList.length; ++s) {
-                    var ts = tlList[s];
+                    var index = s;
+                    if (f.orientation == '-')
+                        index = tsList.length - 1 - s;
+                    var ts = tlList[index];
                     var bf = shallowCopy(f);
                     bf.min = ts.min();
                     bf.max = ts.max();
+                    f.readframe = readingFrame;
+                    var length = ts.max() - ts.min();
+                    readingFrame = (readframe + length) % 3;
                     this.sink(bf);
                 }
             }
