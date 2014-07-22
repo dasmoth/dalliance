@@ -278,19 +278,28 @@
 /* Tier stuff */
 
 *.dalliance .viewport {
+  /* NB. obsolete definition as of Dalliance 0.12.5, keeping for compatibility during 0.12.x series */
+  /* Width and height set in code */
+  position: absolute;
+  padding: 0px;
+  margin: 0px;
+  border: 0px;
+  left: -1000px;
+}
+
+*.dalliance .viewport_12_5 {
   /* Width and height set in code */
   position: inline-block;
   margin: 0px;
   border: 0px;
 }
 
-*.dalliance .viewport-holder {
+*.dalliance .viewport-holder_12_5 {
   position: absolute;
   padding: 0px;
   margin: 0px;
   border: 0px;
   left: -1000px;
-  background: red;
   min-height: 200px;
 }
 
