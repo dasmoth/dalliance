@@ -211,7 +211,7 @@ DasTier.prototype.getDesiredTypes = function(scale) {
 DasTier.prototype.needsSequence = function(scale ) {
     if (this.sequenceSource && scale < 5) {
         return true;
-    } else if ((this.dasSource.bamURI || this.dasSource.bamBlob || this.dasSource.bwgURI)
+    } else if ((this.dasSource.bamURI || this.dasSource.bamBlob || this.dasSource.bwgURI || this.dasSource.bwgBlob)
                  && scale < 20) {
         return true
     }
