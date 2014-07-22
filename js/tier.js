@@ -33,8 +33,16 @@ function DasTier(browser, source, config, background)
     this.viewport = makeElement('canvas', null, 
                                 {width: '' + ((this.browser.featurePanelWidth|0) + 2000), 
                                  height: "30",
-                                 className: 'viewport'});
-    this.viewportHolder = makeElement('div', this.viewport, {className: 'viewport-holder'}, {background: background});
+                                 className: 'viewport_12_5'},
+                                {position: 'inline-block',
+                                 margin: '0px', border: '0px'});
+    this.viewportHolder = makeElement('div', this.viewport, {className: 'viewport-holder_12_5'}, 
+                                      {background: background,
+                                       position: 'absolute',
+                                       padding: '0px', margin: '0px',
+                                       border: '0px',
+                                       left: '-1000px',
+                                       minHeight: '200px'});
     this.overlay = makeElement('canvas', null,
          {width: + ((this.browser.featurePanelWidth|0) + 2000), 
           height: "30",
