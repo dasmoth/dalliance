@@ -1412,30 +1412,34 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                             if (sn.indexOf('chr') == 0) {
                                 sn = sn.substr(3);
                             }
-                            var mmin = thisB.mapping.mapPoint(sn, f.min);
-                            var mmax = thisB.mapping.mapPoint(sn, f.max);
-                            if (!mmin || !mmax || mmin.seq != mmax.seq || mmin.seq != chr) {
-                                if (f.parts && f.parts.length > 0) {    // FIXME: Ugly hack to make ASTD source map properly.
+
+                            var mappings = thisB.mapping.mapSegment(sn, f.min, f.max);
+
+                            if (mappings.length == 0) {
+                                if (f.parts && f.parts.length > 0) {
                                      mappedFeatures.push(f);
                                 }
                             } else {
-                                f = shallowCopy(f);
-                                f.segment = mmin.seq;
-                                f.min = mmin.pos;
-                                f.max = mmax.pos;
-                                if (f.min > f.max) {
-                                    var tmp = f.max;
-                                    f.max = f.min;
-                                    f.min = tmp;
-                                }
-                                if (mmin.flipped) {
-                                    if (f.orientation == '-') {
-                                        f.orientation = '+';
-                                    } else if (f.orientation == '+') {
-                                        f.orientation = '-';
+                                for (var mi = 0; mi < mappings.length; ++mi) {
+                                    var m = mappings[mi];
+                                    var mf = shallowCopy(f);
+                                    mf.segment = m.segment;
+                                    mf.min = m.min;
+                                    mf.max = m.max;
+                                    if (m.partialMin)
+                                        mf.partialMin = m.partialMin;
+                                    if (m.partialMax)
+                                        mf.partialMax = m.partialMax;
+
+                                    if (m.flipped) {
+                                        if (f.orientation == '-') {
+                                            mf.orientation = '+';
+                                        } else if (f.orientation == '+') {
+                                            mf.orientation = '-';
+                                        }
                                     }
+                                    mappedFeatures.push(mf);
                                 }
-                                mappedFeatures.push(f);
                             }
                         }
                     }

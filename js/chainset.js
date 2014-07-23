@@ -104,6 +104,66 @@ Chainset.prototype.mapPoint = function(chr, pos) {
     return null;
 }
 
+Chainset.prototype.mapSegment = function(chr, min, max) {
+    var chains = this.chainsBySrc[chr] || [];
+    var mappings = [];
+    for (var ci = 0; ci < chains.length; ++ci) {
+        var c = chains[ci];
+        if (max >= c.srcMin && min <= c.srcMax) {
+            var cmin, cmax;
+            if (c.srcOri == '-') {
+                cmin = c.srcMax - max;
+                cmax = c.srcMax - min;
+            } else {
+                cmin = min - c.srcMin;
+                cmax = max - c.srcMin;
+            }
+            var blocks = c.blocks;
+            for (var bi = 0; bi < blocks.length; ++bi) {
+                var b = blocks[bi];
+                var bSrc = b[0];
+                var bDest = b[1];
+                var bSize = b[2];
+                if (cmax >= bSrc && cmin <= (bSrc + bSize)) {
+                    var m = {
+                        segment: c.destChr,
+                        flipped: (c.srcOri == '-') ^ (c.destOri == '-')};
+
+                    if (c.destOri == '-') {
+                        if (cmin >= bSrc) {
+                            m.max = c.destMax - bDest - cmin + bSrc;
+                        } else {
+                            m.max = c.destMax - bDest;
+                            m.partialMax = bSrc - cmin;
+                        }
+                        if (cmax <= (bSrc + bSize)) {
+                            m.min = c.destMax - bDest - cmax + bSrc;
+                        } else {
+                            m.min = c.destMax - bDest - bSize;
+                            m.partialMin = cmax - bSrc - bSize;
+                        }
+                    } else {
+                        if (cmin >= bSrc) {
+                            m.min = c.destMin + bDest + cmin - bSrc;
+                        } else {
+                            m.min = c.destMin + bDest;
+                            m.partialMin = bSrc - cmin;
+                        }
+                        if (cmax <= (bSrc + bSize)) {
+                            m.max = c.destMin + bDest + cmax - bSrc;
+                        } else {
+                            m.max = c.destMin + bDest + bSize;
+                            m.partialMax = cmax - bSrc - bSize;
+                        }
+                    }
+                    mappings.push(m);
+                }
+            }
+        }
+    }
+    return mappings;
+}
+
 Chainset.prototype.unmapPoint = function(chr, pos) {
     var chains = this.chainsByDest[chr] || [];
     for (var ci = 0; ci < chains.length; ++ci) {
