@@ -363,6 +363,8 @@ function pi(x) {
 function cleanChr(c) {
     if (c.indexOf('chr') == 0)
         return c.substr(3);
+    else
+        return c;
 }
 
 function bbiFeatureToChain(feature) {
