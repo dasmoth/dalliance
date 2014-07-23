@@ -19,6 +19,7 @@ if (typeof(require) !== 'undefined') {
     var utils = require('./utils')
     var Awaited = utils.Awaited;
     var arrayIndexOf = utils.arrayIndexOf;
+    var shallowCopy = utils.shallowCopy;
 
     var das = require('./das');
     var DASStylesheet = das.DASStylesheet;
@@ -1418,6 +1419,7 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                                      mappedFeatures.push(f);
                                 }
                             } else {
+                                f = shallowCopy(f);
                                 f.segment = mmin.seq;
                                 f.min = mmin.pos;
                                 f.max = mmax.pos;
