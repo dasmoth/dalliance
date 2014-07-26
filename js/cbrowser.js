@@ -182,6 +182,12 @@ Browser.prototype.realInit = function() {
 
     this.wasInitialized = true;
 
+    var ua = navigator.userAgent || 'dummy';
+    if (ua.indexOf('Trident') >= 0 && ua.indexOf('rv:11') >= 0) {
+        // console.log('Detected IE11, disabling tier pinning.');
+        this.disablePinning = true;
+    }
+
     this.defaultChr = this.chr;
     this.defaultStart = this.viewStart;
     this.defaultEnd = this.viewEnd;
@@ -213,7 +219,12 @@ Browser.prototype.realInit = function() {
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
     this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
 
-    this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
+    if (this.disablePinning) {
+        this.tierHolderHolder = this.tierHolder;
+    } else {
+        this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
+        this.svgHolder.appendChild(this.tierHolderHolder);
+    }
     this.svgHolder.appendChild(this.tierHolderHolder);
 
     this.bhtmlRoot = makeElement('div');
@@ -1102,11 +1113,15 @@ Browser.prototype.realMakeTier = function(source, config) {
 Browser.prototype.reorderTiers = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
+    if (this.disablePinning) {
+        this.tierHolder.appendChild(this.ruler);
+        this.tierHolder.appendChild(this.ruler2);
+    }
     var hasPinned = false;
     var pinnedTiers = [], unpinnedTiers = [];
     for (var i = 0; i < this.tiers.length; ++i) {
         var t = this.tiers[i];
-        if (t.pinned) {
+        if (t.pinned && !this.disablePinning) {
             pinnedTiers.push(t);
             this.pinnedTierHolder.appendChild(this.tiers[i].row);
             hasPinned = true;

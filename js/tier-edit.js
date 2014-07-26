@@ -92,7 +92,7 @@ Browser.prototype.openTierPanel = function(tier) {
         tierForm.appendChild(semanticBanner);
 
         var tierNameField = makeElement('input', null, {type: 'text'});
-        var tierPinnedToggle = makeElement('input', null, {type: 'checkbox'});
+        var tierPinnedToggle = makeElement('input', null, {type: 'checkbox', disabled: this.disablePinning});
 
         var glyphField = makeElement('select');
         glyphField.appendChild(makeElement('option', 'Histogram', {value: 'HISTOGRAM'}));

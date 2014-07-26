@@ -59,6 +59,10 @@ Browser.prototype.exportSourceConfig = function(opts) {
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var source = shallowCopy(tier.dasSource);
+
+        if (source.noPersist)
+            continue;
+
         source.coords = undefined;
         source.props = undefined;
         if (!source.disabled)
