@@ -171,7 +171,12 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
                 needSeq = true;
             }
         } catch (ex) {
-            tiers[t].updateStatus(ex);
+            var tier = tiers[t];
+            tier.currentFeatures = [];
+            tier.currentSequence = null;
+            tier.draw();
+            tier.updateHeight();
+            tier.updateStatus(ex);
             console.log('Error fetching tier source');
             console.log(ex);
             gex = ex;
@@ -270,6 +275,12 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 }
 
 KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq) {
+    if (status) {
+        tier.currentFeatures = [];
+        tier.currentSequence = null;
+        tier.draw();
+        tier.updateHeight();
+    }
     tier.updateStatus(status);
    
     if (!status) {

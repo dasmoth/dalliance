@@ -398,10 +398,6 @@ DasTier.prototype.drawOverlay = function() {
 DasTier.prototype.updateStatus = function(status) {
     if (status) {
         this.status = status;
-        this.currentFeatures = [];
-        this.currentSequence = null;
-        this.draw();
-        this.updateHeight();
         this._notifierToStatus();
     } else {
         if (this.status) {

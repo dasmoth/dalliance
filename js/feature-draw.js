@@ -355,9 +355,9 @@ function drawFeatureTier(tier)
     tier.glyphCacheOrigin = tier.browser.viewStart;
 
     if (subtiersExceeded)
-        tier.notify('Bumping limit exceeded, use the track editor to see more features', 0);
+        tier.updateStatus('Bumping limit exceeded, use the track editor to see more features');
     else
-        tier.notify();
+        tier.updateStatus();
 }
 
 DasTier.prototype.paint = function() {
