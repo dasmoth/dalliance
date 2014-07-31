@@ -137,6 +137,9 @@ Browser.prototype.restoreStatus = function() {
     var defaultSourcesByURI = {};
     for (var si = 0; si < this.sources.length; ++si) {
         var source = this.sources[si];
+        if (!source)
+            continue;
+
         var uri = sourceDataURI(source);
         var ul = defaultSourcesByURI[uri];
         if (!ul)

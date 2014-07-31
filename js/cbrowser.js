@@ -191,7 +191,9 @@ Browser.prototype.realInit = function() {
     this.defaultEnd = this.viewEnd;
     this.defaultSources = [];
     for (var i = 0; i < this.sources.length; ++i) {
-        this.defaultSources.push(this.sources[i]);
+        var s = this.sources[i];
+        if (s)
+            this.defaultSources.push(s);
     }
 
     if (this.restoreStatus) {
@@ -628,6 +630,9 @@ Browser.prototype.realInit2 = function() {
 
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
+        if (!source)
+            continue;
+        
         var config = {};
         if (this.restoredConfigs) {
             config = this.restoredConfigs[t];
