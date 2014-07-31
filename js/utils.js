@@ -437,6 +437,10 @@ var AMINO_ACID_TRANSLATION = {
     'GGG': 'G'
 }
 
+function resolveUrlToPage(rel) {
+    return makeElement('a', null, {href: rel}).href;
+}
+
 //
 // Missing APIs
 // 
@@ -451,6 +455,7 @@ if (typeof(module) !== 'undefined') {
     module.exports = {
         textXHR: textXHR,
         relativeURL: relativeURL,
+        resolveUrlToPage: resolveUrlToPage,
         shallowCopy: shallowCopy,
         pusho: pusho,
         pushnew: pushnew,
