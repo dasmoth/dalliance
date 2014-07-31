@@ -20,6 +20,7 @@ if (typeof(require) !== 'undefined') {
     var Awaited = utils.Awaited;
     var arrayIndexOf = utils.arrayIndexOf;
     var shallowCopy = utils.shallowCopy;
+    var resolveUrlToPage = utils.resolveUrlToPage;
 
     var das = require('./das');
     var DASStylesheet = das.DASStylesheet;
@@ -817,7 +818,7 @@ RemoteBWGFeatureSource.prototype.init = function() {
     if (blob) {
         this.worker.postCommand({command: 'connectBBI', blob: blob}, cnt);
     } else {
-        this.worker.postCommand({command: 'connectBBI', uri: uri}, cnt); 
+        this.worker.postCommand({command: 'connectBBI', uri: resolveUrlToPage(uri)}, cnt); 
     }
 }
 
@@ -1241,9 +1242,13 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
     };
 
     if (blob) {
-        this.worker.postCommand({command: 'connectBAM', blob: blob, indexBlob: indexBlob}, cnt /* , [blob, indexBlob] */);
+        this.worker.postCommand({command: 'connectBAM', blob: blob, indexBlob: indexBlob}, cnt);
     } else {
-        this.worker.postCommand({command: 'connectBAM', uri: uri, indexUri: indexUri}, cnt); 
+        this.worker.postCommand({
+            command: 'connectBAM', 
+            uri: resolveUrlToPage(uri), 
+            indexUri: resolveUrlToPage(indexUri)}, 
+          cnt); 
     }
 }
 

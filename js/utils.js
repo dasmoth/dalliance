@@ -366,6 +366,10 @@ function relativeURL(base, rel) {
     }
 }
 
+function resolveUrlToPage(rel) {
+    return makeElement('a', null, {href: rel}).href;
+}
+
 //
 // Missing APIs
 // 
@@ -380,6 +384,7 @@ if (typeof(module) !== 'undefined') {
     module.exports = {
         textXHR: textXHR,
         relativeURL: relativeURL,
+        resolveUrlToPage: resolveUrlToPage,
         shallowCopy: shallowCopy,
         pusho: pusho,
         pushnew: pushnew,
