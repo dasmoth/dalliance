@@ -1871,7 +1871,9 @@ Browser.prototype.markSelectedTiers = function() {
         }
     }
     if (this.selectedTiers.length > 0) {
-        this.browserHolder.focus();
+        var browserMid = this.browserHolder.offsetTop + this.browserHolder.offsetHeight/2;
+        if (browserMid > document.body.scrollTop && (browserMid + 100) < document.body.scrollTop + window.innerHeight)
+            this.browserHolder.focus();
     }
 }
 
