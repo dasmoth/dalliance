@@ -817,7 +817,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         ev.preventDefault(); ev.stopPropagation();
         var rx = ev.clientX;
         if (rx != dragMoveOrigin) {
-            thisB.move((rx - dragMoveOrigin));
+            thisB.move((rx - dragMoveOrigin), true);
             dragMoveOrigin = rx;
         }
         thisB.isDragging = true;
@@ -826,6 +826,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     var dragUpHandler = function(ev) {
         window.removeEventListener('mousemove', dragMoveHandler, true);
         window.removeEventListener('mouseup', dragUpHandler, true);
+        thisB.move((ev.clientX - dragMoveOrigin)); // Snap back (FIXME: consider animation)
     }
         
 
@@ -1304,22 +1305,25 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 // Navigation
 //
 
-Browser.prototype.move = function(pos)
+Browser.prototype.move = function(pos, soft)
 {
+    console.log(soft);
     var wid = this.viewEnd - this.viewStart;
     var nStart = this.viewStart - pos / this.scale;
     var nEnd = nStart + wid;
 
-    if (this.currentSeqMax > 0 && nEnd > this.currentSeqMax) {
-        nEnd = this.currentSeqMax;
-        nStart = this.viewEnd - wid;
-    }
-    if (nStart < 1) {
-        nStart = 1;
-        nEnd = nStart + wid;
+    if (!soft) {
+        if (this.currentSeqMax > 0 && nEnd > this.currentSeqMax) {
+            nEnd = this.currentSeqMax;
+            nStart = this.viewEnd - wid;
+        }
+        if (nStart < 1) {
+            nStart = 1;
+            nEnd = nStart + wid;
+        }
     }
 
-    this.setLocation(null, nStart, nEnd);
+    this.setLocation(null, nStart, nEnd, null, soft);
 }
 
 Browser.prototype.zoomStep = function(delta) {
@@ -1547,7 +1551,7 @@ Browser.prototype._getSequenceSource = function() {
     }
 }
 
-Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
+Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft) {
     if (typeof(newMin) !== 'number') {
         throw Error('minimum must be a number (got ' + JSON.stringify(newMin) + ')');
     }
@@ -1565,7 +1569,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
     var thisB = this;
 
     if ((!newChr || newChr == this.chr) && this.currentSeqMax > 0) {
-        return this._setLocation(null, newMin, newMax, null, callback);
+        return this._setLocation(null, newMin, newMax, null, callback, soft);
     } else {
         var ss = this.getSequenceSource();
         if (!ss) {
@@ -1584,17 +1588,17 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback) {
                     if (!si2) {
                         return callback("Couldn't find sequence '" + newChr + "'");
                     } else {
-                        return thisB._setLocation(altChr, newMin, newMax, si2, callback);
+                        return thisB._setLocation(altChr, newMin, newMax, si2, callback, soft);
                     }
                 });
             } else {
-                return thisB._setLocation(newChr, newMin, newMax, si, callback);
+                return thisB._setLocation(newChr, newMin, newMax, si, callback, soft);
             }
         });
     }
 }
 
-Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback) {
+Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback, soft) {
     var chrChanged = false;
     if (newChr) {
         if (newChr.indexOf('chr') == 0)
@@ -1607,13 +1611,17 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     }
 
     newMin|=0; newMax|=0;
+
     var newWidth = Math.max(10, newMax-newMin+1);
-    if (newMin < 1) {
-        newMin = 1; newMax = newMin + newWidth - 1;
-    }
-    if (newMax > this.currentSeqMax) {
-        newMax = this.currentSeqMax;
-        newMin = Math.max(1, newMax - newWidth + 1);
+
+    if (!soft) {
+        if (newMin < 1) {
+            newMin = 1; newMax = newMin + newWidth - 1;
+        }
+        if (newMax > this.currentSeqMax) {
+            newMax = this.currentSeqMax;
+            newMin = Math.max(1, newMax - newWidth + 1);
+        }
     }
 
     this.viewStart = newMin;
@@ -1724,9 +1732,14 @@ Browser.prototype.addViewListener = function(handler, opts) {
 }
 
 Browser.prototype.notifyLocation = function() {
+    var nvs = Math.max(1, this.viewStart|0);
+    var nve = this.viewEnd|0;
+    if (this.currentSeqMax && nve > this.currentSeqMax)
+        nve = this.currentSeqMax;
+
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
-            this.viewListeners[lli](this.chr, this.viewStart|0, this.viewEnd|0, this.zoomSliderValue, {current: this.zoomSliderValue, min: this.zoomMin, max: this.zoomMax});
+            this.viewListeners[lli](this.chr, nvs, nve, this.zoomSliderValue, {current: this.zoomSliderValue, min: this.zoomMin, max: this.zoomMax});
         } catch (ex) {
             console.log(ex.stack);
         }
