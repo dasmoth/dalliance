@@ -240,13 +240,20 @@ CachingFeatureSource.prototype.capabilities = function() {
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     if (pool == null) {
-        throw 'pool is null...';
+        throw Error('Fetch pool is null');
     }
 
-    var awaitedFeatures = pool.awaitedFeatures[this.cfsid];
+    var cacheKey = this.cfsid;
+    if (types) {
+        var tc = types.slice(0, types.length);
+        tc.sort();
+        cacheKey = cacheKey + '_' + tc.join(',');
+    }
+
+    var awaitedFeatures = pool.awaitedFeatures[cacheKey];
     if (!awaitedFeatures) {
         var awaitedFeatures = new Awaited();
-        pool.awaitedFeatures[this.cfsid] = awaitedFeatures;
+        pool.awaitedFeatures[cacheKey] = awaitedFeatures;
         this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale, coverage) {
             if (!awaitedFeatures.res)
                 awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});

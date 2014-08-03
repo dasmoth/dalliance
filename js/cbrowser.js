@@ -1307,7 +1307,6 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 
 Browser.prototype.move = function(pos, soft)
 {
-    console.log(soft);
     var wid = this.viewEnd - this.viewStart;
     var nStart = this.viewStart - pos / this.scale;
     var nEnd = nStart + wid;
