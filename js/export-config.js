@@ -69,7 +69,7 @@ Browser.prototype.exportSourceConfig = function(opts) {
             source.disabled = undefined;
 
         if (tier.config.stylesheet) {
-            source.style = tier.config.stylesheet.styles;
+            source.style = copyStylesheet(tier.config.stylesheet).styles;
             source.stylesheet_uri = undefined;
         } else if (source.style) {
             source.style = copyStylesheet({styles: source.style}).styles;

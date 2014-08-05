@@ -815,6 +815,7 @@ function copyStylesheet(ss) {
         sh._methodRE = sh._labelRE = sh._typeRE = undefined;
         sh.style = shallowCopy(sh.style);
         sh.style.id = undefined;
+        sh.style._gradient = undefined;
     }
     return nss;
 }
