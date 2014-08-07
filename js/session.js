@@ -200,8 +200,10 @@ Browser.prototype.restoreStatus = function() {
             for (var osi = 0; osi < ul.length; ++osi) {    
                 var oldSource = ul[osi];
                 if (sourcesAreEqual(source, oldSource)) {
-                    if (oldSource.featureInfoPlugin) {
-                        source.featureInfoPlugin = oldSource.featureInfoPlugin;
+                    for (var k in oldSource) {
+                        if (oldSource.hasOwnProperty(k) && typeof(oldSource[k]) === 'function') {
+                            source[k] = oldSource[k];
+                        }
                     }
                 }
             }

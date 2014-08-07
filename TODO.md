@@ -7,7 +7,7 @@ For 0.13
   - [ ] Apply track-edit operations to multiple tracks at once.
   - [ ] Typeahead for search-by-gene-ID
   - [ ] Animate when leaping/toggling.
-  - [ ] Overlay function plugin API
+  - [*] Overlay function plugin API
   - [ ] Search-by-name (or description) in track-adder.
   - [ ] Support for non-positional annotations (UI hookup for bigtab client)
   - [*] High-res image export.
