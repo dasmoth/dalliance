@@ -205,7 +205,7 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
 Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
     var thisCS = this;
     var minTile = (min/this.granularity)|0;
-    var maxTile = (min/this.granularity)|0;
+    var maxTile = (max/this.granularity)|0;
 
     var needsNewFetch = false;
     for (var t = minTile; t <= maxTile; ++t) {
