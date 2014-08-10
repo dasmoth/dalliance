@@ -1733,7 +1733,7 @@ Browser.prototype.addViewListener = function(handler, opts) {
 Browser.prototype.notifyLocation = function() {
     var nvs = Math.max(1, this.viewStart|0);
     var nve = this.viewEnd|0;
-    if (this.currentSeqMax && nve > this.currentSeqMax)
+    if (this.currentSeqMax > 0 && nve > this.currentSeqMax)
         nve = this.currentSeqMax;
 
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
