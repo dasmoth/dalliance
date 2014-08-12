@@ -1361,6 +1361,11 @@ MappedFeatureSource.prototype.getScales = function() {
     return this.source.getScales();
 }
 
+MappedFeatureSource.prototype.getDefaultFIPs = function(callback) {
+    if (this.source.getDefaultFIPs)
+        return this.source.getDefaultFIPs(callback);
+}
+
 MappedFeatureSource.prototype.simplifySegments = function(segs, minGap) {
     if (segs.length == 0) return segs;
 
