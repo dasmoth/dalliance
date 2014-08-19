@@ -22,7 +22,7 @@ if (typeof(require) !== 'undefined') {
 
 function EnsemblFeatureSource(source) {
     this.source = source;
-    this.base = source.uri || 'http://beta.rest.ensembl.org';
+    this.base = source.uri || 'http://rest.ensembl.org';
     this.species = source.species || 'human';
 
     this.activityListeners = [];
@@ -188,7 +188,7 @@ EnsemblFeatureSource.prototype.getScales = function() {
 
 EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
-    var url = this.base + '/feature/region/' + this.species + '/' + chr + ':' + min + '-' + max;
+    var url = this.base + '/overlap/region/' + this.species + '/' + chr + ':' + min + '-' + max;
 
     var filters = [];
     for (var ti = 0; ti < this.type.length; ++ti) {
