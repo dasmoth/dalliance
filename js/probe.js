@@ -31,7 +31,7 @@ if (typeof(require) !== 'undefined') {
 }
 
 function probeResource(source, listener, retry) {
-    var BED_REGEXP = new RegExp('^.+\t[0-9]+\t[0-9]+.*$');
+    var BED_REGEXP = new RegExp('^\\w+\\s[0-9]+\\s[0-9]+.*$');
     var KV_REGEXP=/([^=]+)=\"?([^\"]+)\"?/;
     var VCFHEAD_RE = /^##\s*fileformat=VCFv4\..+/;
 
