@@ -10,6 +10,11 @@
 "use strict";
 
 if (typeof(require) !== 'undefined') {
+    var spans = require('./spans');
+    var Range = spans.Range;
+    var union = spans.union;
+    var intersection = spans.intersection;
+
     var sa = require('./sourceadapters');
     var dalliance_registerParserFactory = sa.registerParserFactory;
 
@@ -18,6 +23,9 @@ if (typeof(require) !== 'undefined') {
     var DASStyle = das.DASStyle;
     var DASFeature = das.DASFeature;
     var DASGroup = das.DASGroup;
+
+    var utils = require('./utils');
+    var shallowCopy = utils.shallowCopy;
 }
 
 
@@ -34,7 +42,7 @@ BedWigParser.prototype.createSession = function(sink) {
 
 var __KV_REGEXP=/([^=]+)=(.+)/;
 var __SPACE_REGEXP=/\s/;
-
+var BED_COLOR_REGEXP = new RegExp("^[0-9]+,[0-9]+,[0-9]+");
 
 function BedParseSession(parser, sink) {
     this.parser = parser;
@@ -134,7 +142,7 @@ BedParseSession.prototype.parse = function(line) {
                 for (var s = 0; s < tlList.length; ++s) {
                     // Record reading frame for every exon
                     var index = s;
-                    if (featureOpts.orientation == '-')
+                    if (f.orientation == '-')
                         index = tlList.length - s - 1;
                     var ts = tlList[index];
                     var bf = shallowCopy(f);
@@ -142,7 +150,7 @@ BedParseSession.prototype.parse = function(line) {
                     bf.max = ts.max();
                     f.readframe = readingFrame;
                     var length = ts.max() - ts.min();
-                    readingFrame = (readframe + length) % 3;
+                    readingFrame = (readingFrame + length) % 3;
                     this.sink(bf);
                 }
             }
