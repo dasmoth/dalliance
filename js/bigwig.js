@@ -528,10 +528,8 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                             var readingFrame = 0;
 
                             var tlOffset = 0;
-                            console.log(tlList, tsList);
                             while (tlList[0].min() > tsList[tlOffset].max())
                                 tlOffset++;
-                            console.log(tlOffset);
 
                             for (var s = 0; s < tlList.length; ++s) {
                                 // Record reading frame for every exon

@@ -164,6 +164,7 @@ DasTier.prototype.init = function() {
                     tier.bumped = false;
                     tier.updateLabel();
                 }
+                tier._updateFromConfig();
                 tier.browser.refreshTier(tier);
             }
         });
@@ -527,7 +528,8 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
 
-    var wantedBumped = this.config.bumped;
+    var wantedBumped = this.config.bumped !== undefined ?
+        this.config.bumped : this.dasSource.bumped;
     if (wantedBumped !== this.bumped) {
         this.bumped = wantedBumped;
         needsRefresh = true;

@@ -90,6 +90,9 @@ Browser.prototype.exportSourceConfig = function(opts) {
         if (tier.config.forceMax !== undefined) {
             source.forceMax = tier.config.forceMax;
         }
+        if (tier.config.bumped !== undefined) {
+            source.bumped = tier.config.bumped;
+        }
         if (tier.config.forceMaxDynamic)
             source.forceMaxDynamic = tier.config.forceMaxDynamic;
 
