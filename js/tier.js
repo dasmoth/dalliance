@@ -527,6 +527,13 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
 
+    var wantedBumped = this.config.bumped;
+    if (wantedBumped !== this.bumped) {
+        this.bumped = wantedBumped;
+        needsRefresh = true;
+        this.updateLabel();
+    }
+
     if (needsRefresh)
         this.scheduleRedraw();
 

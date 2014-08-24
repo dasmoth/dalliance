@@ -563,10 +563,7 @@ Browser.prototype.realInit2 = function() {
                         if (bumpStatus === undefined) {
                             bumpStatus = !t.bumped;
                         }
-                        t.bumped = bumpStatus;
-                        t.layoutWasDone = false;
-                        t.draw();
-                        t.updateLabel();
+                        t.mergeConfig({bumped: bumpStatus});
                     }
                 }
             } else if (!ev.ctrlKey && !ev.metaKey) {
@@ -574,14 +571,12 @@ Browser.prototype.realInit2 = function() {
                 var st = thisB.getSelectedTier();
                 if (st < 0) return;
                 var t = thisB.tiers[st];
+
                 if (t.dasSource.collapseSuperGroups) {
                     if (bumpStatus === undefined) {
                         bumpStatus = !t.bumped;
                     }
-                    t.bumped = bumpStatus;
-                    t.layoutWasDone = false;
-                    t.draw();
-                    t.updateLabel();
+                    t.mergeConfig({bumped: bumpStatus});
                 }
             }
         } else if (ev.keyCode == 77 || ev.keyCode == 109) { // m
@@ -975,15 +970,10 @@ Browser.prototype.realMakeTier = function(source, config) {
         var bumpStatus;
         var t = tier;
         if (t.dasSource.collapseSuperGroups) {
-            
             if (bumpStatus === undefined) {
                 bumpStatus = !t.bumped;
             }
-            t.bumped = bumpStatus;
-            t.layoutWasDone = false;
-            t.draw();
-            
-            t.updateLabel();
+            t.mergeConfig({bumped: bumpStatus});
         }
     }, false);
 
