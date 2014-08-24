@@ -463,6 +463,11 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     var blockCount = bedColumns[6]|0;
                     var blockSizes = bedColumns[7].split(',');
                     var blockStarts = bedColumns[8].split(',');
+
+                    if (featureOpts.exonFrames) {
+                        var exonFrames = featureOpts.exonFrames.split(',');
+                        featureOpts.exonFrames = undefined;
+                    }
                     
                     featureOpts.type = 'transcript'
                     var grp = new DASGroup();
@@ -476,12 +481,18 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                     grp.notes = [];
                     featureOpts.groups = [grp];
 
+                    // Moving towards using bigGenePred model, but will
+                    // still support old Dalliance-style BED12+gene-name for the
+                    // foreseeable future.
                     if (bedColumns.length > 9) {
-                        var geneId = bedColumns[9];
+                        var geneId = featureOpts.geneName || bedColumns[9];
                         var geneName = geneId;
                         if (bedColumns.length > 10) {
                             geneName = bedColumns[10];
                         }
+                        if (featureOpts.geneName2)
+                            geneName = featureOpts.geneName2;
+
                         var gg = shallowCopy(grp);
                         gg.id = geneId;
                         gg.label = geneName;
@@ -515,6 +526,13 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                             featureOpts.type = 'translation';
                             var tlList = tl.ranges();
                             var readingFrame = 0;
+
+                            var tlOffset = 0;
+                            console.log(tlList, tsList);
+                            while (tlList[0].min() > tsList[tlOffset].max())
+                                tlOffset++;
+                            console.log(tlOffset);
+
                             for (var s = 0; s < tlList.length; ++s) {
                                 // Record reading frame for every exon
                                 var index = s;
@@ -522,6 +540,11 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                                     index = tlList.length - s - 1;
                                 var ts = tlList[index];
                                 featureOpts.readframe = readingFrame;
+                                if (exonFrames) {
+                                    var brf = parseInt(exonFrames[index + tlOffset]);
+                                    if (typeof(brf) === 'number' && brf >= 0 && brf <= 2)
+                                        featureOpts.readframe = brf;
+                                }
                                 var length = ts.max() - ts.min();
                                 readingFrame = (readingFrame + length) % 3;
                                 createFeature(chromId, ts.min() + 1, ts.max(), featureOpts);
