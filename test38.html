@@ -1,0 +1,168 @@
+<!DOCTYPE html> 
+
+<html>
+
+<head>
+
+<style>
+</style>
+
+<title>Human GRCh38 :: Dalliance</title> 
+<script language="javascript" src="node_modules/es6-promise/dist/promise-0.1.2.js"></script>
+<script language="javascript" src="js/bam.js"></script>
+<script language="javascript" src="js/bigwig.js"></script>
+<script language="javascript" src="js/das.js"></script>
+<script language="javascript" src="js/spans.js"></script>
+<script language="javascript" src="js/utils.js"></script>
+<script language="javascript" src="js/cbrowser.js"></script>
+<script language="javascript" src="js/feature-popup.js"></script>
+<script language="javascript" src="js/tier.js"></script>
+<script language="javascript" src="js/features.js"></script>
+<script language="javascript" src="js/color.js"></script>
+<script language="javascript" src="js/feature-draw.js"></script>
+<script language="javascript" src="js/sequence-draw.js"></script>
+<script language="javascript" src="js/domui.js"></script>
+<script language="javascript" src="js/track-adder.js"></script>
+<script language="javascript" src="js/chainset.js"></script>
+<script language="javascript" src="js/version.js"></script>
+<script language="javascript" src="js/sha1.js"></script>
+<script language="javascript" src="js/sample.js"></script>
+<script language="javascript" src="js/kspace.js"></script>
+<script language="javascript" src="js/bin.js"></script>
+<script language="javascript" src="js/twoBit.js"></script>
+<script language="javascript" src="js/thub.js"></script>
+<script language="javascript" src="js/svg-export.js"></script>
+<script language="javascript" src="node_modules/jszlib/js/inflate.js"></script>
+<script language="javascript" src="js/browser-ui.js"></script>
+<script language="javascript" src="js/glyphs.js"></script>
+<script language="javascript" src="js/session.js"></script>
+<script language="javascript" src="js/jbjson.js"></script>
+<script language="javascript" src="js/sourceadapters.js"></script>
+<script language="javascript" src="polyfills/html5slider.js"></script>
+<script language="javascript" src="js/ensembljson.js"></script>
+<script language="javascript" src="js/overlay.js"></script>
+<script language="javascript" src="js/tier-actions.js"></script>
+<script language="javascript" src="js/tier-edit.js"></script>
+<script language="javascript" src="js/search.js"></script>
+<script language="javascript" src="js/tabix.js"></script>
+<script language="javascript" src="js/tabix-source.js"></script>
+<script language="javascript" src="js/bigtab.js"></script>
+<script language="javascript" src="js/memstore.js"></script>
+<script language="javascript" src="js/vcf.js"></script>
+<script language="javascript" src="js/bedwig.js"></script>
+<script language="javascript" src="js/probe.js"></script>
+<script language="javascript" src="js/trix.js"></script>
+<script language="javascript" src="js/export-ui.js"></script>
+<script language="javascript" src="js/export-config.js"></script>
+<script language="javascript" src="js/export-image.js"></script>
+<script language="javascript" src="js/lh3utils.js"></script>
+<script language="javascript" src="js/svg-utils.js"></script>
+<script language="javascript" src="js/numformats.js"></script>
+<script language="javascript" src="js/cigar.js"></script>
+
+<script language="javascript">
+  var b = new Browser({
+    chr:          '22',
+    viewStart:    30000000,
+    viewEnd:      30030000,
+    cookieKey:    'human-grc_h38-test',
+
+    coordSystem: {
+      speciesName: 'Human',
+      taxon: 9606,
+      auth: 'GRCh',
+      version: '38',
+      ucscName: 'hg38',
+    },
+
+    chains: {
+      hg19ToHg38: {uri: 'http://www.derkholm.net:8080/das/hg19ToHg38/',
+                   srcTag: 'GRCh37',
+                   destTag: 'GRCh38',
+                   coords: {
+                       speciesName: 'Human',
+                       taxon: 9606,
+                       auth: 'GRCh',
+                       version: 37
+                  }
+      }
+    },
+
+    sources:     [{name:                 'Genome',
+                   twoBitURI:            'http://www.biodalliance.org/datasets/hg38.2bit',
+                   tier_type:            'sequence',
+                   provides_entrypoints: true,
+                   pinned: true
+                  },
+                   {name: 'GENCODE',
+                        bwgURI: 'http://ngs.sanger.ac.uk/production/gencode/gencode.v20.annotation.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode2.xml',
+                        collapseSuperGroups: true,
+                        trixURI: 'http://ngs.sanger.ac.uk/production/gencode/gencode.v20.annotation.ix'},
+                    {name: 'Repeats',
+                    desc: 'Repeat annotation from RepeatMasker', 
+                    bwgURI: 'http://www.biodalliance.org/datasets/GRCh38/repeats.bb',
+                    stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats2.xml',
+                    forceReduction: -1},
+                  {name: 'SNPs',
+                   tier_type: 'ensembl',
+                   species:'human',
+                   type: 'variation',
+                   disabled: true,
+                   featureInfoPlugin: function(f, info) {
+                    if (f.id) {
+                      info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
+                    }
+                   }
+                  }
+                ],
+
+    setDocumentTitle: true,
+    prefix: '',
+
+    fullScreen: true,
+  });
+  
+  b.hubs = [
+            'http://www.biodalliance.org/datasets/testhub/hub.txt',
+            'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt'
+           ];
+  
+  b.addFeatureInfoPlugin(function(f, info) {
+      info.add('Testing', 'This is a test!');
+  });
+
+  b.addViewListener(function(chr, min, max) {
+    var link = document.getElementById('enslink');
+    link.href = 'http://www.ensembl.org/Homo_sapiens/Location/View?r=' + chr + ':' + min + '-' + max;
+  });
+
+
+  var geneDescriptions;
+  connectBigTab(new URLFetchable('http://www.biodalliance.org/datasets/ensg-to-desc.bt'), function(bt) {
+    geneDescriptions = bt;
+  });
+
+b.addFeatureInfoPlugin(function(f, info) {
+  if (f.geneId) {
+    var desc = makeElement('div', 'Loading...');
+    info.add('Description', desc);
+    geneDescriptions.index.lookup(f.geneId, function(res, err) {
+      if (err) {
+        console.log(err);
+      } else {
+        desc.textContent = res;
+      }
+    });
+  }
+});
+
+</script>
+</head>
+
+<body>
+<a href='http://www.ensembl.org/' id='enslink' target='_newtab'>Link to Ensembl</a>
+<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
+</body>
+</html>
+
