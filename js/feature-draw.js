@@ -1043,8 +1043,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             fill = feature.itemRgb;
         var scale = (maxPos - minPos) / (max - min);
         if (feature.type == 'translation' &&
-            feature.method == 'protein_coding' &&
-            (!feature.tags || feature.tags.indexOf('cds_start_NF') < 0) &&
+            (feature.method == 'protein_coding' || feature.readframeExplicit) &&
+            (!feature.tags || feature.tags.indexOf('cds_start_NF') < 0 || feature.readframeExplicit) &&
             (!tier.dasSource.collapseSuperGroups || tier.bumped)
             && scale >= 0.5) {
             var refSeq = getRefSeq(tier, min, max);

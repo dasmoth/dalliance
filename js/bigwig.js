@@ -540,8 +540,10 @@ BigWigView.prototype.parseFeatures = function(data, createFeature, filter) {
                                 featureOpts.readframe = readingFrame;
                                 if (exonFrames) {
                                     var brf = parseInt(exonFrames[index + tlOffset]);
-                                    if (typeof(brf) === 'number' && brf >= 0 && brf <= 2)
+                                    if (typeof(brf) === 'number' && brf >= 0 && brf <= 2) {
                                         featureOpts.readframe = brf;
+                                        featureOpts.readframeExplicit = true;
+                                    }
                                 }
                                 var length = ts.max() - ts.min();
                                 readingFrame = (readingFrame + length) % 3;
