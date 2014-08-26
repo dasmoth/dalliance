@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
+    var saltURL = utils.saltURL;
 
     var sha1 = require('./sha1');
     var b64_sha1 = sha1.b64_sha1;
