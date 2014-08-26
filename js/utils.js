@@ -456,6 +456,7 @@ if (typeof(module) !== 'undefined') {
         textXHR: textXHR,
         relativeURL: relativeURL,
         resolveUrlToPage: resolveUrlToPage,
+        saltURL: saltURL,
         shallowCopy: shallowCopy,
         pusho: pusho,
         pushnew: pushnew,
