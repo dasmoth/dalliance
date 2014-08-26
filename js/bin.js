@@ -113,7 +113,6 @@ URLFetchable.prototype.fetchAsText = function(callback) {
     var length;
     var url = this.url;
     if (isSafari || this.opts.salt) {
-        url = saltURL(url);
         url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
     }
     req.open('GET', url, true);
