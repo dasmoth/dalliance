@@ -528,8 +528,14 @@ DasTier.prototype._updateFromConfig = function() {
         needsRefresh = true;
     }
 
-    var wantedBumped = this.config.bumped !== undefined ?
-        this.config.bumped : this.dasSource.bumped;
+    var wantedBumped;
+    if (this.config.bumped !== undefined) {
+        wantedBumped = this.config.bumped;
+    } else if (this.dasSource.bumped !== undefined) {
+        wantedBumped = this.dasSource.bumped;
+    } else {
+        wantedBumped = this.dasSource.collapseSuperGroups ? false : true;
+    }
     if (wantedBumped !== this.bumped) {
         this.bumped = wantedBumped;
         needsRefresh = true;
