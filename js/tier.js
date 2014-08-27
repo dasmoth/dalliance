@@ -14,10 +14,14 @@ if (typeof(require) !== 'undefined') {
     var makeElement = utils.makeElement;
     var shallowCopy = utils.shallowCopy;
     var pushnew = utils.pushnew;
+    var miniJSONify = utils.miniJSONify;
 
     var das = require('./das');
     var DASStylesheet = das.DASStylesheet;
     var DASStyle = das.DASStyle;
+
+    var sha1 = require('./sha1');
+    var b64_sha1 = sha1.b64_sha1;
 }
 
 var __tier_idSeed = 0;
@@ -179,6 +183,7 @@ DasTier.prototype.setStylesheet = function(ss) {
         sh.style = shallowCopy(sh.style);
         sh.style.id = 'style' + (++this.styleIdSeed);
     }
+    this.baseStylesheetValidity = b64_sha1(miniJSONify(this.baseStylesheet));
     this._updateFromConfig();
 }
 
@@ -192,7 +197,6 @@ DasTier.prototype.getDesiredTypes = function(scale) {
     var ssScale = this.browser.zoomForCurrentScale();
 
     if (this.stylesheet) {
-        // dlog('ss = ' + miniJSONify(this.stylesheet));
         var ss = this.stylesheet.styles;
         for (var si = 0; si < ss.length; ++si) {
             var sh = ss[si];
@@ -453,6 +457,13 @@ DasTier.prototype.setConfig = function(config) {
     this.notifyTierListeners();
 }
 
+DasTier.prototype.mergeStylesheet = function(newStyle) {
+    this.mergeConfig({
+        stylesheet: newStyle, 
+        stylesheetValidity: this.baseStylesheetValidity
+    });
+}
+
 DasTier.prototype.mergeConfig = function(newConfig) {
     for (var k in newConfig) {
         this.config[k] = newConfig[k];
@@ -509,7 +520,10 @@ DasTier.prototype._updateFromConfig = function() {
     }
     
     // Possible FIXME -- are there cases where style IDs need to be reassigned?
-    var stylesheet = this.config.stylesheet || this.baseStylesheet;
+    var stylesheet = null;
+    if (this.config.stylesheetValidity == this.baseStylesheetValidity)
+        stylesheet = this.config.stylesheet;
+    stylesheet = stylesheet || this.baseStylesheet;
     if (this.stylesheet !== stylesheet) {
         this.stylesheet = stylesheet;
         needsRefresh = true;

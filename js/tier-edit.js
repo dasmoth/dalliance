@@ -76,7 +76,7 @@ Browser.prototype.openTierPanel = function(tier) {
         }
 
         var changeColor = function(ev) {
-            tier.mergeConfig({stylesheet: mutateStylesheet(setStyleColors)});
+            tier.mergeStylesheet(mutateStylesheet(setStyleColors));
         }
         
         this.manipulatingTier = tier;
@@ -350,7 +350,7 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
             seqStyle.__SEQCOLOR = seqMismatchToggle.checked ? 'mismatch' : 'base';
-            tier.mergeConfig({stylesheet: nss});
+            tier.mergeStylesheet(nss);
         });
 
         var seqInsertToggle = makeElement('input', null, {type: 'checkbox'});
@@ -361,7 +361,7 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
             seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
-            tier.mergeConfig({stylesheet: nss});
+            tier.mergeStylesheet(nss);
         });
 
         var styleRow = makeElement('tr',
@@ -458,7 +458,7 @@ Browser.prototype.openTierPanel = function(tier) {
                 }
                 setStyleColors(ts);
             });
-            tier.mergeConfig({stylesheet: nss});
+            tier.mergeStylesheet(nss);
         }, false);
 
         tierMinToggle.addEventListener('change', function(ev) {
@@ -517,13 +517,13 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = mutateStylesheet(function(style) {
                 style.LABEL = labelToggle.checked ? 'yes' : 'no';
             });
-            tier.mergeConfig({stylesheet: nss});
+            tier.mergeStylesheet(nss);
         }, false);
         bumpToggle.addEventListener('change', function(ev) {
             var nss = mutateStylesheet(function(style) {
                 style.BUMP = bumpToggle.checked ? 'yes' : 'no';
             });
-            tier.mergeConfig({stylesheet: nss});
+            tier.mergeStylesheet(nss);
         }, false);
         bumpLimit.addEventListener('input', function(ev) {
             var x = parseInt(bumpLimit.value);
