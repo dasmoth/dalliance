@@ -31,7 +31,9 @@ if (typeof(require) !== 'undefined') {
     var union = spans.union;
     var intersection = spans.intersection;
 
-    var downsample = require('./sample').downsample;
+    var sample = require('./sample');
+    var downsample = sample.downsample;
+    var getBaseCoverage = sample.getBaseCoverage;
 
     var das = require('./das');
     var DASSequence = das.DASSequence;
@@ -285,6 +287,7 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
    
     if (!status) {
         var mayDownsample = false;
+        var needBaseComposition = false;
         var src = tier.getSource();
         while (MappedFeatureSource.prototype.isPrototypeOf(src) || CachingFeatureSource.prototype.isPrototypeOf(src) || OverlayFeatureSource.prototype.isPrototypeOf(src)) {
 	        if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
@@ -305,8 +308,16 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
             }
     	}
 
+        if (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('base-coverage') >= 0)
+        {
+            // Base-composition coverage track
+            needBaseComposition = true;
+        }
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {
+                if (needBaseComposition) {
+                    features = getBaseCoverage(features, seq, tier.browser.baseColors);
+                }
                 tier.viewFeatures(chr, coverage, actualScale, features, seq);
             });
         } else {

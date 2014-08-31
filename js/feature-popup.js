@@ -20,7 +20,7 @@ if (typeof(require) !== 'undefined') {
 }
 
 
-var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z]+)=(.+)');
+var TAGVAL_NOTE_RE = new RegExp('^([A-Za-z_-]+)=(.+)');
 
 Browser.prototype.addFeatureInfoPlugin = function(handler) {
     if (!this.featureInfoPlugins) {
@@ -107,7 +107,8 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         table.appendChild(row);
         ++idx;
     }
-    if (feature.score !== undefined && feature.score !== null && feature.score != '-') {
+    if (feature.score !== undefined && feature.score !== null && feature.score != '-'
+        && !feature.suppressScore) {
         var row = makeElement('tr', [
             makeElement('th', 'Score'),
             makeElement('td', '' + feature.score)
