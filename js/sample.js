@@ -293,7 +293,7 @@ function alignSeqUsingCigar(rawseq, rawquals, cigar) {
                 quals.push('Z');
             }
         } else if (co.op == 'I') {
-            continue;
+            cursor += co.cnt;
         } else if (co.op == 'S') {
             cursor += co.cnt;
         } else {
