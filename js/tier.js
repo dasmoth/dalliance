@@ -68,6 +68,12 @@ function DasTier(browser, source, config, background)
     this.nameButton.appendChild(this.removeButton);
     if (source.pennant) {
         this.nameButton.appendChild(makeElement('img', null, {src: source.pennant, width: '16', height: '16'}))
+    } else if (source.mapping) {
+        var version = null;
+        if (this.browser.chains[source.mapping])
+            version = this.browser.chains[source.mapping].coords.version;
+        if (version)
+            this.nameButton.appendChild(makeElement('span', '' + version, null, {fontSize: '8pt', background: 'black', color: 'white', paddingLeft: '3px', paddingRight: '3px', paddingTop: '1px', paddingBottom: '1px', marginLeft: '2px', borderRadius: '10px'}));
     }
     this.nameElement = makeElement('span', source.name);
     this.nameButton.appendChild(makeElement('span', [this.nameElement, this.infoElement], {className: 'track-name-holder'}));
