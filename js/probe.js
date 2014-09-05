@@ -39,7 +39,7 @@ function probeResource(source, listener, retry) {
     if (source.blob)
         fetchable = new BlobFetchable(source.blob);
     else 
-        fetchable = new URLFetchable(source.uri);
+        fetchable = new URLFetchable(source.uri, {credentials: source.credentials});
 
     fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
         if (!result) {

@@ -831,7 +831,7 @@ RemoteBWGFeatureSource.prototype.init = function() {
     if (blob) {
         this.worker.postCommand({command: 'connectBBI', blob: blob}, cnt);
     } else {
-        this.worker.postCommand({command: 'connectBBI', uri: resolveUrlToPage(uri)}, cnt); 
+        this.worker.postCommand({command: 'connectBBI', uri: resolveUrlToPage(uri), credentials: this.bwgSource.credentials}, cnt); 
     }
 }
 
@@ -1260,7 +1260,8 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
         this.worker.postCommand({
             command: 'connectBAM', 
             uri: resolveUrlToPage(uri), 
-            indexUri: resolveUrlToPage(indexUri)}, 
+            indexUri: resolveUrlToPage(indexUri),
+            credentials: this.bamSource.credentials}, 
           cnt); 
     }
 }

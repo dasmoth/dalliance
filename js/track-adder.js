@@ -968,6 +968,9 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeSourceConfig = function(s) {
         var nds = {name: s.name};
+        if (s.credentials)
+            nds.credentials = s.credentials;
+        
         if (s.mapping && s.mapping != '__default__')
             nds.mapping = s.mapping;
 
