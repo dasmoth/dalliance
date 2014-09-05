@@ -36,8 +36,8 @@ self.onmessage = function(event) {
             bamF = new bin.BlobFetchable(d.blob);
             baiF = new bin.BlobFetchable(d.indexBlob);
         } else {
-            bamF = new bin.URLFetchable(d.uri);
-            baiF = new bin.URLFetchable(d.indexUri);
+            bamF = new bin.URLFetchable(d.uri, {credentials: d.credentials});
+            baiF = new bin.URLFetchable(d.indexUri, {credentials: d.credentials});
         }
 
         bam.makeBam(bamF, baiF, function(bamObj, err) {
@@ -54,7 +54,7 @@ self.onmessage = function(event) {
         if (d.blob) {
             bbi = new bin.BlobFetchable(d.blob);
         } else {
-            bbi = new bin.URLFetchable(d.uri);
+            bbi = new bin.URLFetchable(d.uri, {credentials: d.credentials});
         }
 
         bigwig.makeBwg(bbi, function(bwg, err) {
