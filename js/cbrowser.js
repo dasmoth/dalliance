@@ -766,6 +766,7 @@ Browser.prototype.makeTier = function(source, config) {
     try {
         return this.realMakeTier(source, config);
     } catch (e) {
+        console.log('Error initializing', source);
         console.log(e.stack || e);
     }
 }
@@ -1450,6 +1451,31 @@ function sourceStyleURI(conf) {
         return 'http://www.biodalliance.org/magic/sequence'
     else
         return sourceDataURI(conf);
+}
+
+function sourcesAreEqualModuloStyle(a, b) {
+    if (sourceDataURI(a) != sourceDataURI(b))
+        return false;
+
+    if (a.mapping != b.mapping)
+        return false;
+
+    if (a.tier_type != b.tier_type)
+        return false;
+
+    if (a.overlay) {
+        if (!b.overlay || b.overlay.length != a.overlay.length)
+            return false;
+        for (var oi = 0; oi < a.overlay.length; ++oi) {
+            if (!sourcesAreEqualModuloStyle(a.overlay[oi], b.overlay[oi]))
+                return false;
+        }
+    } else {
+        if (b.overlay)
+            return false;
+    }
+
+    return true;
 }
 
 function sourcesAreEqual(a, b) {
@@ -2221,7 +2247,7 @@ SourceCache.prototype.get = function(conf) {
     var scb = this.sourcesByURI[sourceDataURI(conf)];
     if (scb) {
         for (var si = 0; si < scb.configs.length; ++si) {
-            if (sourcesAreEqual(scb.configs[si], conf)) {
+            if (sourcesAreEqualModuloStyle(scb.configs[si], conf)) {
                 return scb.sources[si];
             }
         }

@@ -40,8 +40,12 @@ if (typeof(require) !== 'undefined') {
 }
 
 function FetchPool() {
+    var self = this;
     this.reqs = [];
     this.awaitedFeatures = {};
+    this.requestsIssued = new Promise(function(resolve, reject) {
+        self.notifyRequestsIssued = resolve;
+    });
 }
 
 FetchPool.prototype.addRequest = function(xhr) {
@@ -115,6 +119,7 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     this.viewCount++;
     
     this.startFetchesForTiers(this.tierMap);
+    this.pool.notifyRequestsIssued();
 }
     
 function filterFeatures(features, min, max) {

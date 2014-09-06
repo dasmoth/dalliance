@@ -160,12 +160,21 @@ Browser.prototype.createFeatureSource = function(config) {
 
 DasTier.prototype.fetchStylesheet = function(cb) {
     var ssSource;
-    if (this.dasSource.stylesheet_uri) {
+    // Somewhat ugly workaround for the special case of DAS sources...
+    if (this.dasSource.stylesheet_uri || (
+        !this.dasSource.tier_type &&
+        !this.dasSource.bwgURI &&
+        !this.dasSource.bwgBlob &&
+        !this.dasSource.bamURI &&
+        !this.dasSource.bamBlob &&
+        !this.dasSource.twoBitURI &&
+        !this.dasSource.twoBitBlob &&
+        !this.dasSource.jbURI))
+    {
         ssSource = new DASFeatureSource(this.dasSource);
     } else {
         ssSource = this.getSource();
     }
-    
     ssSource.getStyleSheet(cb);
 }
 
@@ -243,20 +252,46 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
         throw Error('Fetch pool is null');
     }
 
+    var self = this;
     var cacheKey = this.cfsid;
-    if (types) {
-        var tc = types.slice(0, types.length);
-        tc.sort();
-        cacheKey = cacheKey + '_' + tc.join(',');
-    }
 
     var awaitedFeatures = pool.awaitedFeatures[cacheKey];
-    if (!awaitedFeatures) {
-        var awaitedFeatures = new Awaited();
+    if (awaitedFeatures && awaitedFeatures.started) {
+        if (awaitedFeatures.types) {
+            for (var ti = 0; ti < types.length; ++ti) {
+                var type = types[ti];
+                if (awaitedFeatures.types.indexOf(type) < 0) {
+                    // console.log('Fetch already started with wrong parameters, skipping cache.');
+                    self.source.fetch(chr, min, max, scale, types, pool, callback);
+                    return;
+                }
+            }
+        }
+    } else if (awaitedFeatures) {
+        if (types == null) {
+            awaitedFeatures.types = null;
+        } else if (awaitedFeatures.types) {
+            var nt = awaitedFeatures.types.slice(0, types.length);
+            for (var ti = 0; ti < types.length; ++ti) {
+                var type = types[ti];
+                if (nt.indexOf(type) < 0)
+                    nt.push(type);
+            }
+            awaitedFeatures.types = nt;
+        }
+    } else {
+        awaitedFeatures = new Awaited();
+        awaitedFeatures.types = types;
         pool.awaitedFeatures[cacheKey] = awaitedFeatures;
-        this.source.fetch(chr, min, max, scale, types, pool, function(status, features, scale, coverage) {
-            if (!awaitedFeatures.res)
-                awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});
+
+        pool.requestsIssued.then(function() {
+            awaitedFeatures.started = true;
+            self.source.fetch(chr, min, max, scale, awaitedFeatures.types, pool, function(status, features, scale, coverage) {
+                if (!awaitedFeatures.res)
+                    awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});
+            });
+        }).catch(function(err) {
+            console.log(err);
         });
     } 
 
