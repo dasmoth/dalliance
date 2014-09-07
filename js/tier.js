@@ -22,6 +22,10 @@ if (typeof(require) !== 'undefined') {
 
     var sha1 = require('./sha1');
     var b64_sha1 = sha1.b64_sha1;
+
+    var style = require('./style');
+    var StyleFilter = style.StyleFilter;
+    var StyleFilterSet = style.StyleFilterSet;
 }
 
 var __tier_idSeed = 0;
@@ -198,32 +202,24 @@ DasTier.prototype.getSource = function() {
 }
 
 DasTier.prototype.getDesiredTypes = function(scale) {
-    var fetchTypes = [];
-    var inclusive = false;
+    var sfs = this.getActiveStyleFilters(scale);
+    if (sfs)
+        return sfs.typeList();
+}
+
+DasTier.prototype.getActiveStyleFilters = function(scale) {
     var ssScale = this.browser.zoomForCurrentScale();
 
     if (this.stylesheet) {
+        var styles = new StyleFilterSet();
         var ss = this.stylesheet.styles;
         for (var si = 0; si < ss.length; ++si) {
             var sh = ss[si];
             if (!sh.zoom || sh.zoom == ssScale) {
-                if (!sh.type || sh.type == 'default') {
-                    inclusive = true;
-                    break;
-                } else {
-                    pushnew(fetchTypes, sh.type);
-                }
+                styles.add(new StyleFilter(sh.type, sh.method, sh.label));
             }
         }
-    } else {
-        // inclusive = true;
-        return undefined;
-    }
-
-    if (inclusive) {
-        return null;
-    } else {
-        return fetchTypes;
+        return styles;
     }
 }
 

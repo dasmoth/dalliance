@@ -55,6 +55,9 @@ if (typeof(require) !== 'undefined') {
     var JBrowseStore = require('./jbjson').JBrowseStore;
 
     var Chainset = require('./chainset').Chainset;
+
+    var style = require('./style');
+    var StyleFilterSet = style.StyleFilterSet;
 }
 
 var __dalliance_sourceAdapterFactories = {};
@@ -247,7 +250,7 @@ CachingFeatureSource.prototype.capabilities = function() {
     }
 }
 
-CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback, styleFilters) {
     if (pool == null) {
         throw Error('Fetch pool is null');
     }
@@ -257,39 +260,32 @@ CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 
     var awaitedFeatures = pool.awaitedFeatures[cacheKey];
     if (awaitedFeatures && awaitedFeatures.started) {
-        if (awaitedFeatures.types) {
-            for (var ti = 0; ti < types.length; ++ti) {
-                var type = types[ti];
-                if (awaitedFeatures.types.indexOf(type) < 0) {
-                    // console.log('Fetch already started with wrong parameters, skipping cache.');
-                    self.source.fetch(chr, min, max, scale, types, pool, callback);
-                    return;
-                }
-            }
+        if (awaitedFeatures.styleFilters.doesNotContain(styleFilters)) {
+            // console.log('Fetch already started with wrong parameters, skipping cache.');
+            self.source.fetch(chr, min, max, scale, types, pool, callback, styleFilters);
+            return;
         }
     } else if (awaitedFeatures) {
-        if (types == null) {
-            awaitedFeatures.types = null;
-        } else if (awaitedFeatures.types) {
-            var nt = awaitedFeatures.types.slice(0, types.length);
-            for (var ti = 0; ti < types.length; ++ti) {
-                var type = types[ti];
-                if (nt.indexOf(type) < 0)
-                    nt.push(type);
-            }
-            awaitedFeatures.types = nt;
-        }
+        awaitedFeatures.styleFilters.addAll(styleFilters);
     } else {
         awaitedFeatures = new Awaited();
-        awaitedFeatures.types = types;
+        awaitedFeatures.styleFilters = styleFilters;
         pool.awaitedFeatures[cacheKey] = awaitedFeatures;
 
         pool.requestsIssued.then(function() {
             awaitedFeatures.started = true;
-            self.source.fetch(chr, min, max, scale, awaitedFeatures.types, pool, function(status, features, scale, coverage) {
-                if (!awaitedFeatures.res)
-                    awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});
-            });
+            self.source.fetch(
+                chr, 
+                min, 
+                max, 
+                scale, 
+                awaitedFeatures.styleFilters.typeList(), 
+                pool, 
+                function(status, features, scale, coverage) {
+                    if (!awaitedFeatures.res)
+                        awaitedFeatures.provide({status: status, features: features, scale: scale, coverage: coverage});
+                }, 
+                awaitedFeatures.styleFilters);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1432,7 +1428,7 @@ MappedFeatureSource.prototype.simplifySegments = function(segs, minGap) {
     return ssegs;
 }
 
-MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback, styleFilters) {
     var thisB = this;
     var fetchLength = max - min + 1;
 
@@ -1514,7 +1510,7 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                         thisB.notifyActivity();
                         callback(finalStatus, mappedFeatures, fscale, mappedLoc);
                     }
-                });
+                }, styleFilters);
             });
         }
     });

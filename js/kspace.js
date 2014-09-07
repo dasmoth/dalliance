@@ -234,7 +234,10 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     var source = tier.getSource() || new DummyFeatureSource();
     var needsSeq = tier.needsSequence(this.scale);
     var baton = thisB.featureCache[tier];
-    var wantedTypes = tier.getDesiredTypes(this.scale);
+    var styleFilters = tier.getActiveStyleFilters(this.scale);
+    var wantedTypes;
+    if (styleFilters)
+        wantedTypes = styleFilters.typeList();
     var chr = this.chr, min = this.min, max = this.max;
 
 
@@ -277,7 +280,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
 
 	    thisB.latestViews[tier] = viewID;
         thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
-    });
+    }, styleFilters);
     return needsSeq;
 }
 
@@ -306,7 +309,7 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
         }
 
     	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
-            if ((actualScale < (this.scale/2) && features.length > 200)  ||
+            if (/* (actualScale < (this.scale/2) && features.length > 200)  || */
 		        (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
             {
 		        features = downsample(features, this.scale);
