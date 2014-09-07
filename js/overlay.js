@@ -31,6 +31,9 @@ function OverlayFeatureSource(sources, opts) {
         this.merge = opts.merge;
     } else if (opts.merge == 'concat') {
         this.merge = OverlayFeatureSource_merge_concat;
+    } else if (opts.merge == 'alternates') {
+        this.merge = OverlayFeatureSource_merge_concat;
+        this.filterDispatchOnMethod = true;
     } else {
         this.merge = OverlayFeatureSource_merge_byKey;
     }
@@ -154,14 +157,33 @@ OverlayFeatureSource.prototype.search = function(query, callback) {
 }
 
 OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback, styleFilters) {
-    var baton = new OverlayBaton(this, callback, this.sources.length);
-    for (var si = 0; si < this.sources.length; ++si) {
-	   this.fetchN(baton, si, chr, min, max, scale, types, pool, styleFilters);
+    var sources;
+    if (this.filterDispatchOnMethod) {
+        sources = [];
+        var sfl = styleFilters.list();
+        for (var si = 0; si < this.sources.length; ++si) {
+            var source = this.sources[si];
+            for (var fi = 0; fi < sfl.length; ++fi) {
+                var filter = sfl[fi];
+                if (!filter.method || filter.method == source.name) {
+                    sources.push(source);
+                    break;
+                }
+            }
+        }
+    } else {
+        sources = this.sources;
+    }
+
+    var baton = new OverlayBaton(this, callback, sources);
+    for (var si = 0; si < sources.length; ++si) {
+	   this.fetchN(baton, si, sources[si], chr, min, max, scale, types, pool, styleFilters);
     }
 }
 
-OverlayFeatureSource.prototype.fetchN = function(baton, si, chr, min, max, scale, types, pool, styleFilters) {
-    this.sources[si].fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
+OverlayFeatureSource.prototype.fetchN = function(baton, si, source, chr, min, max, scale, types, pool, styleFilters) {
+    // FIXME should we try to prune styleFilters?
+    source.fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
 	   return baton.completed(si, status, features, scale);
     }, styleFilters);
 }
@@ -174,10 +196,11 @@ OverlayFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callbac
     return this.sources[0].findNextFeature(chr, pos, dir, callback);
 }
 
-function OverlayBaton(source, callback, count) {
+function OverlayBaton(source, callback, sources) {
     this.source = source;
     this.callback = callback;
-    this.count = count;
+    this.sources = sources;
+    this.count = sources.length;
 
     this.returnCount = 0;
     this.statusCount = 0;
@@ -218,7 +241,7 @@ OverlayBaton.prototype.completed = function(index, status, features, scale) {
     	    }
     	    return this.callback(message, null, this.scale);
     	} else {
-    	    this.callback(null, this.source.merge(this.features), this.scale);
+    	    this.callback(null, this.source.merge(this.features, this.sources), this.scale);
     	}
     }
 }
@@ -273,11 +296,11 @@ function OverlayFeatureSource_merge_byKey(featureSets) {
     return mf;
 }
 
-function OverlayFeatureSource_merge_concat(featureSets) {
+function OverlayFeatureSource_merge_concat(featureSets, sources) {
     var features = [];
     for (var fsi = 0; fsi < featureSets.length; ++fsi) {
         var fs = featureSets[fsi];
-        var name = this.sources[fsi].name;
+        var name = sources[fsi].name;
         for (var fi = 0; fi < fs.length; ++fi) {
             var f = fs[fi];
             f.method = name;

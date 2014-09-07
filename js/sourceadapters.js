@@ -172,7 +172,8 @@ DasTier.prototype.fetchStylesheet = function(cb) {
         !this.dasSource.bamBlob &&
         !this.dasSource.twoBitURI &&
         !this.dasSource.twoBitBlob &&
-        !this.dasSource.jbURI))
+        !this.dasSource.jbURI &&
+        !this.dasSource.overlay))
     {
         ssSource = new DASFeatureSource(this.dasSource);
     } else {
