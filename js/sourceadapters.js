@@ -252,7 +252,7 @@ CachingFeatureSource.prototype.capabilities = function() {
 }
 
 CachingFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback, styleFilters) {
-    if (pool == null) {
+    if (!pool) {
         throw Error('Fetch pool is null');
     }
 

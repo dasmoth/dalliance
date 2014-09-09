@@ -82,7 +82,7 @@ StyleFilterSet.prototype.typeList = function() {
         var filter = list[fi];
         var type = filter.type;
         if (!type || type == 'default')
-            return [];
+            return null;
         if (types.indexOf(type) < 0)
             types.push(type);
     }
