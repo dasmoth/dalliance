@@ -1352,6 +1352,7 @@ Browser.prototype.zoom = function(factor) {
     
     var scaleRat = (this.scale / this.scaleAtLastRedraw);
 
+    this.notifyLocation();
     this.refresh();
 }
 
