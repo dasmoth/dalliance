@@ -160,10 +160,10 @@ DASSource.prototype.sequence = function(segment, callback) {
                         while (true) {
                             var space = rawSeq.indexOf('\n', idx);
                             if (space >= 0) {
-                                segSeq += rawSeq.substring(idx, space);
+                                segSeq += rawSeq.substring(idx, space).toUpperCase();
                                 idx = space + 1;
                             } else {
-                                segSeq += rawSeq.substring(idx);
+                                segSeq += rawSeq.substring(idx).toUpperCase();
                                 break;
                             }
                         }
