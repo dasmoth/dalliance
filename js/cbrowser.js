@@ -48,7 +48,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.prefix = '//www.biodalliance.org/release-0.12/';
+    this.prefix = '//www.biodalliance.org/release-0.13/';
 
     this.sources = [];
     this.tiers = [];
@@ -443,6 +443,7 @@ Browser.prototype.realInit2 = function() {
                     thisB.selectedTiers.push(ip + si);
                 }
 
+                thisB.withPreservedSelection(thisB._ensureTiersGrouped);
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
@@ -519,6 +520,9 @@ Browser.prototype.realInit2 = function() {
                     thisB.selectedTiers.push(ip + si);
                 }
 
+                thisB.withPreservedSelection(function() {
+                    thisB._ensureTiersGrouped(true);
+                });
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
@@ -641,7 +645,9 @@ Browser.prototype.realInit2 = function() {
         }
     }
 
+    thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
+    thisB.reorderTiers();
     thisB.refresh();
     thisB.setSelectedTier(1);
 
@@ -1031,9 +1037,13 @@ Browser.prototype.realMakeTier = function(source, config) {
                     thisB.withPreservedSelection(function() {
                         thisB.tiers.splice(tierOrdinal, 1);
                         thisB.tiers.splice(ti, 0, tier);
+                        thisB._ensureTiersGrouped(ti > tierOrdinal);
                     });
 
-                    tierOrdinal = ti;
+                    for (var tix = 0; tix < thisB.tiers.length; ++tix)
+                        if (thisB.tiers[tix] == tier)
+                            tierOrdinal = tix;
+
                     yAtLastReorder = ev.clientY;
                     thisB.reorderTiers();
                     dragTierHolder.appendChild(dragLabel); // Because reorderTiers removes all children.
@@ -1102,6 +1112,7 @@ Browser.prototype.realMakeTier = function(source, config) {
         });
     }
 
+    this.withPreservedSelection(thisB._ensureTiersGrouped);
     tier._updateFromConfig();
     this.reorderTiers();
 
@@ -1166,6 +1177,42 @@ Browser.prototype.refreshTier = function(tier) {
     }
 }
 
+/* Internal use only, assumes selection is being managed elsewhere... */
+
+Browser.prototype._ensureTiersGrouped = function(down) {
+    var groupedTiers = {};
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        if (t.dasSource.tierGroup) {
+            pusho(groupedTiers, t.dasSource.tierGroup, t);
+        }   
+    }
+
+    var newTiers = [];
+    if (down)
+        this.tiers.reverse();
+    for (var ti = 0; ti < this.tiers.length; ++ti) {
+        var t = this.tiers[ti];
+        if (t.dasSource.tierGroup) {
+            var nt = groupedTiers[t.dasSource.tierGroup];
+            if (nt) {
+                if (down)
+                    nt.reverse();
+                for (var nti = 0; nti < nt.length; ++nti)
+                    newTiers.push(nt[nti]);
+                groupedTiers[t.dasSource.tierGroup] = null;
+            }
+        } else {
+            newTiers.push(t);
+        }
+    }
+    if (down)
+        newTiers.reverse();
+    this.tiers.splice(0, this.tiers.length);
+    for (var nti = 0; nti < newTiers.length; ++nti)
+        this.tiers.push(newTiers[nti]);
+}
+
 Browser.prototype.arrangeTiers = function() {
     var arrangedTiers = [];
     var groupedTiers = {};
@@ -1195,11 +1242,10 @@ Browser.prototype.arrangeTiers = function() {
         var tierGroup = this.tierGroups[g];
         if (!tierGroup) {
             tierGroup = {
-                element: makeElement('div', g, {className: "tier-group"},
-                    {
-                        position: 'absolute',
-                        backgroundColor: 'red'
-                    })
+                element: makeElement(
+                    'div',
+                    makeElement('span', g, {className: 'tier-group-label'}),
+                    {className: "tier-group"})
             };
             this.tierGroups[g] = tierGroup;
         }
@@ -1216,10 +1262,8 @@ Browser.prototype.arrangeTiers = function() {
         }
         tierGroup.element.style.top = min + 'px';
         tierGroup.element.style.left = '0px';
-        tierGroup.element.style.width = '10px';
         tierGroup.element.style.height = (max-min) + 'px';
         holder.appendChild(tierGroup.element);
-
     }
 
     if (this.tierBackgroundColors) {
@@ -1227,7 +1271,7 @@ Browser.prototype.arrangeTiers = function() {
             var t = arrangedTiers[ti];
             t.setBackground(this.tierBackgroundColors[ti % this.tierBackgroundColors.length]);
             if (t.dasSource.tierGroup) 
-                t.label.style.left = '20px';
+                t.label.style.left = '18px';
             else
                 t.label.style.left = '2px';
             t.background = this.tierBackgroundColors[ti % this.tierBackgroundColors.length];

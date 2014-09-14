@@ -367,3 +367,19 @@
   align-items: flex-start;
   -webkit-align-items: flex-start;
 }
+
+*.dalliance .tier-group {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 15px;
+  background-color: rgb(231,214,214);
+  overflow: hidden;
+  z-index: 2000;
+}
+
+*.dalliance .tier-group-label {
+  transform: rotate(90deg);
+  display: inline-block;
+  transform-origin: 8px 55% 0;
+}

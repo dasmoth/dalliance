@@ -379,7 +379,10 @@ DasTier.prototype.drawOverlay = function() {
         var offset = ((this.glyphCacheOrigin - this.browser.viewStart)*this.browser.scale);
         g.save();
         g.translate(offset, 0);
-        this.overlayLabelCanvas.draw(g, -offset, b.featurePanelWidth-offset);
+        var drawStart = -offset + 2;
+        if (this.dasSource.tierGroup)
+            drawStart += 15;
+        this.overlayLabelCanvas.draw(g, drawStart, b.featurePanelWidth-offset);
         g.restore();
     }
 
