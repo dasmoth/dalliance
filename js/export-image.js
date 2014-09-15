@@ -18,6 +18,8 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+
+    var drawSeqTierGC = require('./sequence-draw').drawSeqTierGC;
 }
 
 function fillTextRightJustified(g, text, x, y) {
