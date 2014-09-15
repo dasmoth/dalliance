@@ -73,6 +73,8 @@ Browser.prototype.exportImage = function(opts) {
         g.translate(offset, 0);
         if (tier.subtiers) {
             tier.paintToContext(g, oc, offset + 1000);
+        } else {
+            drawSeqTierGC(tier, tier.currentSequence, g);
         }
         g.restore();   // 2
         

@@ -48,12 +48,10 @@ function tileSizeForScale(scale, min)
     return ts(pow);
 }
 
-function drawSeqTier(tier, seq)
-{
-	var retina = tier.browser.retina && window.devicePixelRatio > 1;
-    var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
-
-	var desiredWidth = tier.browser.featurePanelWidth + 2000;
+function drawSeqTier(tier, seq) {
+    var gc = tier.viewport.getContext('2d');
+    var retina = tier.browser.retina && window.devicePixelRatio > 1;
+    var desiredWidth = tier.browser.featurePanelWidth + 2000;
     if (retina) {
         desiredWidth *= 2;
     }
@@ -64,12 +62,12 @@ function drawSeqTier(tier, seq)
 
     var height = 50;
     if (seq && seq.seq) {
-		height += 25;
+        height += 25;
     }
 
     var canvasHeight = height;
     if (retina) 
-    	canvasHeight *= 2;
+        canvasHeight *= 2;
 
     tier.viewport.height = canvasHeight;
     tier.viewport.style.height = '' + height + 'px';
@@ -77,7 +75,7 @@ function drawSeqTier(tier, seq)
     tier.layoutHeight = height;
     tier.updateHeight();
 
-    var gc = tier.viewport.getContext('2d');
+    
     if (tier.background) {
         gc.fillStyle = tier.background;
         gc.fillRect(0, 0, fpw, tier.viewport.height);
@@ -85,6 +83,13 @@ function drawSeqTier(tier, seq)
     if (retina) {
         gc.scale(2, 2);
     }
+
+    drawSeqTierGC(tier, seq, gc);
+}
+
+function drawSeqTierGC(tier, seq, gc)
+{
+    var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
     gc.translate(1000,0);
 
     var seqTierMax = knownEnd;
@@ -212,6 +217,7 @@ function svgSeqTier(tier, seq) {
 if (typeof(module) !== 'undefined') {
     module.exports = {
         drawSeqTier: drawSeqTier,
+        drawSeqTierGC: drawSeqTierGC,
         svgSeqTier: svgSeqTier
     };
 }
