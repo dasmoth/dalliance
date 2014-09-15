@@ -132,7 +132,6 @@ Browser.prototype.exportImage = function(opts) {
         else
             labelName = tier.dasSource.name;
         var labelWidth = g.measureText(labelName).width;
-        console.log(labelName, labelWidth);
         g.fillStyle = 'black';
         g.fillText(labelName, margin - (hasQuant ? 22 : 12) - labelWidth, (tier.layoutHeight + 6) / 2);
 
@@ -153,15 +152,15 @@ Browser.prototype.exportImage = function(opts) {
         g.clip();
 
         g.translate(margin + offset, 0);
-        var origin = b.viewStart;
-        var visStart = b.viewStart;
-        var visEnd = b.viewEnd;
+        var origin = this.viewStart;
+        var visStart = this.viewStart;
+        var visEnd = this.viewEnd;
 
         for (var hi = 0; hi < this.highlights.length; ++hi) {
             var h = this.highlights[hi];
-            if (((h.chr === this.chr) || (h.chr === ('chr' + b.chr))) && h.min < visEnd && h.max > visStart) {
-                g.globalAlpha = b.defaultHighlightAlpha;
-                g.fillStyle = b.defaultHighlightFill;
+            if (((h.chr === this.chr) || (h.chr === ('chr' + this.chr))) && h.min < visEnd && h.max > visStart) {
+                g.globalAlpha = this.defaultHighlightAlpha;
+                g.fillStyle = this.defaultHighlightFill;
                 g.fillRect((h.min - origin) * this.scale,
                            0,
                            (h.max - h.min) * this.scale,
