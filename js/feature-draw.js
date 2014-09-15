@@ -1005,7 +1005,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         var refSeq = getRefSeq(tier, min, max);
-        if (seq && refSeq && style.__SEQCOLOR === 'mismatch') {
+        if (seq && refSeq && (style.__SEQCOLOR === 'mismatch' || style.__SEQCOLOR === 'mismatch-all')) {
             var mismatchSeq = [];
             var match = feature.orientation === '-' ? ',' : '.';
             for (var i = 0; i < seq.length; ++i)

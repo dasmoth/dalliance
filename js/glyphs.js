@@ -1176,11 +1176,13 @@ SequenceGlyph.prototype.alphaForQual = function(qual) {
 SequenceGlyph.prototype.draw = function(gc) {
     var seq = this._seq;
     var ref = this._ref;
+    var mismatch = this._scheme === 'mismatch' || this._scheme === 'mismatch-all';
+    var all = this._scheme === 'mismatch-all';
     
     var seqLength = seq ? seq.length : (this._max - this._min + 1);
     var scale = (this._max - this._min + 1) / seqLength;
 
-    if (this._scheme === 'mismatch' && !isCloseUp(scale)) {
+    if (mismatch && !isCloseUp(scale)) {
         gc.fillStyle = this._strandColor;
         gc.fillRect(this._min, this._height/4, this._max - this._min, this._height/2);
     }
@@ -1205,6 +1207,9 @@ SequenceGlyph.prototype.draw = function(gc) {
                 color = 'gray';
             else
                 color = this._strandColor;
+
+            if (all)
+                base = refBase;
         }
 
         gc.fillStyle = color;
@@ -1246,6 +1251,8 @@ SequenceGlyph.prototype.draw = function(gc) {
 SequenceGlyph.prototype.toSVG = function() {
     var seq = this._seq;
     var ref = this._ref;
+    var mismatch = this._scheme === 'mismatch' || this._scheme === 'mismatch-all';
+    var all = this._scheme === 'mismatch-all';
     var scale = (this._max - this._min + 1) / this._seq.length;
     var  g = makeElementNS(NS_SVG, 'g'); 
 
@@ -1259,6 +1266,9 @@ SequenceGlyph.prototype.toSVG = function() {
                 color = 'gray';
             else
                 color = this._strandColor;
+
+            if (all)
+                base = refBase;
         }
 
         var alpha = 1.0;
