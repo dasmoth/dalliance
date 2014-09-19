@@ -82,20 +82,10 @@ function dalliance_makeParser(type) {
 
 DasTier.prototype.initSources = function() {
     var thisTier = this;
-    var fs = new DummyFeatureSource(), ss;
 
-    if (this.dasSource.tier_type == 'sequence' || this.dasSource.twoBitURI || this.dasSource.twoBitBlob) {
-        if (this.dasSource.twoBitURI || this.dasSource.twoBitBlob) {
-            ss = new TwoBitSequenceSource(this.dasSource);
-        } else {
-            ss = new DASSequenceSource(this.dasSource);
-        }
-    } else {
-        fs = this.browser.createFeatureSource(this.dasSource);
-    }
-
-    this.featureSource = fs;
-    this.sequenceSource = ss;
+    var sources = this.browser.createSources(this.dasSource);
+    this.featureSource = sources.features || new DummyFeatureSource();
+    this.sequenceSource = sources.sequence;
 
     if (this.featureSource && this.featureSource.addChangeListener) {
         this.featureSource.addChangeListener(function() {
@@ -104,15 +94,24 @@ DasTier.prototype.initSources = function() {
     }
 }
 
-Browser.prototype.createFeatureSource = function(config) {
-    var fs = this.sourceCache.get(config);
-    if (fs) {
-        return fs;
-    }
+Browser.prototype.createSources = function(config) {
+    var sources = this.sourceCache.get(config);
+    if (sources)
+        return sources;
 
-    if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
+    var fs, ss;
+
+    if (config.tier_type == 'sequence' || config.twoBitURI || config.twoBitBlob) {
+        if (config.twoBitURI || config.twoBitBlob) {
+            ss = new TwoBitSequenceSource(config);
+        } else {
+            ss = new DASSequenceSource(config);
+        }
+    } else if (config.tier_type && __dalliance_sourceAdapterFactories[config.tier_type]) {
         var saf = __dalliance_sourceAdapterFactories[config.tier_type];
-        fs = saf(config).features;
+        var ns = saf(config);
+        fs = ns.features;
+        ss = ns.sequence;
     } else if (config.bwgURI || config.bwgBlob) {
         var worker = this.getWorker();
         if (worker)
@@ -137,7 +136,9 @@ Browser.prototype.createFeatureSource = function(config) {
             sources.push(new CachingFeatureSource(fs));
 
         for (var oi = 0; oi < config.overlay.length; ++oi) {
-            sources.push(this.createFeatureSource(config.overlay[oi]));
+            var cs = this.createSources(config.overlay[oi]);
+            if (cs && cs.features)
+                sources.push(cs.features);
         }
         fs = new OverlayFeatureSource(sources, config);
     }
@@ -150,15 +151,23 @@ Browser.prototype.createFeatureSource = function(config) {
         fs = new MappedFeatureSource(fs, this.chains[config.mapping]);
     }
 
-    if (config.name && !fs.name) {
+    if (config.name && fs && !fs.name) {
         fs.name = config.name;
     }
 
     if (fs != null) {
         fs = new CachingFeatureSource(fs);
-        this.sourceCache.put(config, fs);
     }
-    return fs;
+
+    if (fs != null || ss != null) {
+        sources = {
+            features: fs,
+            sequence: ss
+        };
+        this.sourceCache.put(config, sources);
+    }
+
+    return sources;
 }
 
 DasTier.prototype.fetchStylesheet = function(cb) {
