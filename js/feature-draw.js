@@ -1019,7 +1019,18 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         else
             strandColor = style._plusColor || 'lightsalmon';
         
-        gg = new SequenceGlyph(tier.browser.baseColors, strandColor, minPos, maxPos, height, seq, refSeq, style.__SEQCOLOR, quals);
+        gg = new SequenceGlyph(
+            tier.browser.baseColors, 
+            strandColor, 
+            minPos, 
+            maxPos, 
+            height, 
+            seq, 
+            refSeq, 
+            style.__SEQCOLOR, 
+            quals,
+            !isDasBooleanTrue(style.__CLEARBG)
+        );
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
         if (indels.length > 0) {
