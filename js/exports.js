@@ -26,6 +26,7 @@ window.dalliance_makeParser = sa.makeParser;
 
 // DAS* objects for some plugins -- remove when plugin API changes...
 
+window.DASSequence = das.DASSequence;
 window.DASFeature = das.DASFeature;
 window.DASGroup = das.DASGroup;
 window.DASStylesheet = das.DASStylesheet;
