@@ -1,6 +1,6 @@
 {
   "name": "dalliance",
-  "version:": "0.12.7",
+  "version:": "0.12.8",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
   "repository": {

@@ -1298,7 +1298,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 Browser.prototype.move = function(pos)
 {
     var wid = this.viewEnd - this.viewStart;
-    this.viewStart -= pos / this.scale;
+    this.viewStart -= (1.0 * pos) / this.scale;
     this.viewEnd = this.viewStart + wid;
     if (this.currentSeqMax > 0 && this.viewEnd > this.currentSeqMax) {
         this.viewEnd = this.currentSeqMax;
