@@ -29,6 +29,7 @@ if (typeof(require) !== 'undefined') {
     var DASSegment = das.DASSegment;
     var DASFeature = das.DASFeature;
     var DASSequence = das.DASSequence;
+    var DASLink = das.DASLink;
 
     var bin = require('./bin');
     var URLFetchable = bin.URLFetchable;

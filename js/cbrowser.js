@@ -1390,7 +1390,7 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
 Browser.prototype.move = function(pos, soft)
 {
     var wid = this.viewEnd - this.viewStart;
-    var nStart = this.viewStart - pos / this.scale;
+    var nStart = this.viewStart - ((1.0 * pos) / this.scale);
     var nEnd = nStart + wid;
 
     if (!soft) {
@@ -1404,6 +1404,7 @@ Browser.prototype.move = function(pos, soft)
         }
     }
 
+    console.log(nStart, nEnd);
     this.setLocation(null, nStart, nEnd, null, soft);
 }
 
@@ -1717,7 +1718,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
         this.currentSeqMax = newChrInfo.length;
     }
 
-    newMin|=0; newMax|=0;
+    newMin = parseFloat(newMin); newMax=parseFloat(newMax);
 
     var newWidth = Math.max(10, newMax-newMin+1);
 
