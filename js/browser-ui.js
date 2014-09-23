@@ -38,7 +38,7 @@ if (typeof(require) !== 'undefined') {
 
 Browser.prototype.initUI = function(holder, genomePanel) {
     if (!this.noSourceCSS) {
-      ['bootstrap-scoped.css', 'dalliance-scoped.css', 'font-awesome.min.css'].each(function(path) {
+      ['bootstrap-scoped.css', 'dalliance-scoped.css', 'font-awesome.min.css'].forEach(function(path) {
         document.head.appendChild(makeElement('link', '', {
           rel: 'stylesheet',
           href: this.resolveURL('$$css/' + path)
