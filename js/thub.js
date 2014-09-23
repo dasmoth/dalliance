@@ -254,7 +254,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
         
     } else {
         var typeToks = this.type.split(/\s+/);
-        if (typeToks[0] == 'bigBed') {
+        if (typeToks[0] == 'bigBed' && this.bigDataUrl) {
             var bedTokens = typeToks[1]|0
             var bedPlus = typeToks[2] == '+';
 
@@ -266,7 +266,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
             if (bedTokens >= 12 && bedPlus)
                 source.collapseSuperGroups = true;
             return source;
-        } else if (typeToks[0] == 'bigWig') {
+        } else if (typeToks[0] == 'bigWig' && this.bigDataUrl) {
             source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
             source.style = this.bigwigStyles();
             source.noDownsample = true;     // FIXME seems like a blunt instrument...
@@ -280,13 +280,13 @@ TrackHubTrack.prototype.toDallianceSource = function() {
             }
 
             return source;
-        } else if (typeToks[0] == 'bam') {
+        } else if (typeToks[0] == 'bam'  && this.bigDataUrl) {
             source.bamURI = relativeURL(this._db.absURL, this.bigDataUrl);
             if (this._db.credentials) {
                 source.credentials = true;
             }
             return source;
-        } else if (typeToks[0] == 'vcfTabix') {
+        } else if (typeToks[0] == 'vcfTabix' && this.bigDataUrl) {
             source.uri = relativeURL(this._db.absURL, this.bigDataUrl);
             source.tier_type = 'tabix';
             source.payload = 'vcf';
