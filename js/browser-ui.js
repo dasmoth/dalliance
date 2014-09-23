@@ -20,6 +20,8 @@ if (typeof(require) !== 'undefined') {
     var nf = require('./numformats');
     var formatLongInt = nf.formatLongInt;
 
+    var makeZoomSlider = require('./zoomslider');
+
     // For side effects
 
     require('./tier-edit');
@@ -68,7 +70,10 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
-    var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'}, {width: '150px'});  // NB min and max get overwritten.
+    // var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'}, {width: '150px'});  // NB min and max get overwritten.
+    var zoomSlider = new makeZoomSlider();
+
+
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
 
     var clearHighlightsButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-eraser'})], {className: 'btn'});
@@ -108,7 +113,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                 mb[x].classList.remove('active');
         }
     }
-
 
     if (!this.noLeapButtons)
         toolbar.appendChild(leapRightButton);

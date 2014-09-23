@@ -383,3 +383,31 @@
   display: inline-block;
   transform-origin: 8px 55% 0;
 }
+
+
+*.dalliance .slider {
+    position: relative;
+    width: 210px;
+    height: 20px;
+}
+
+*.dalliance .slider hr.slider-track {
+    width: 200px;
+    height: 4px;
+    background-color: gray;
+    position: absolute;
+    top: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin: 7px;
+}
+
+*.dalliance .slider hr.slider-thumb {
+    border: 1.5px solid #888888;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    margin-top: 3px;
+    left: 50px;
+    background-color: #dddddd;
+}
