@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
@@ -37,9 +37,14 @@ if (typeof(require) !== 'undefined') {
  */
 
 Browser.prototype.initUI = function(holder, genomePanel) {
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/bootstrap-scoped.css')}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/dalliance-scoped.css')}));
-    document.head.appendChild(makeElement('link', '', {rel: 'stylesheet', href: this.resolveURL('$$css/font-awesome.min.css')}));
+    if (!this.noSourceCSS) {
+      ['bootstrap-scoped.css', 'dalliance-scoped.css', 'font-awesome.min.css'].each(function(path) {
+        document.head.appendChild(makeElement('link', '', {
+          rel: 'stylesheet',
+          href: this.resolveURL('$$css/' + path)
+        }));
+      }.bind(this));
+    }
 
     var b = this;
 
@@ -56,7 +61,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     if (this.setDocumentTitle) {
         document.title = title + ' :: dalliance';
     }
-    
+
     var locField = makeElement('input', '', {className: 'loc-field'});
     b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
