@@ -164,7 +164,8 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
             return cnt('Coordinates out of bounds: ' + min + ':' + max);
         }
 
-        thisB.tbf.data.slice(thisB.seqOffset + fetchMin, fetchMax - fetchMin).fetch(function(r) {
+        thisB.tbf.data.slice(thisB.seqOffset + fetchMin, fetchMax - fetchMin).salted().fetch(function(r) {
+            console.log(r.byteLength);
             if (r == null) {
                 return cnt('SeqFetch failed');
             }
@@ -216,7 +217,6 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
             if (ptr <= max) {
                 fillSeq(max);
             }
-
             return cnt(seqstr);
         });
     });
