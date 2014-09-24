@@ -83,16 +83,16 @@ function DasTier(browser, source, config, background)
     this.nameButton.appendChild(makeElement('span', [this.nameElement, this.infoElement], {className: 'track-name-holder'}));
     this.nameButton.appendChild(this.bumpButton);
     this.nameButton.appendChild(this.loaderButton);
-    
+
     this.label = makeElement('span',
        [this.nameButton],
        {className: 'btn-group track-label'});
 
-
+    var classes = 'tier' + (source.className ? ' ' + source.className : '');
     this.row = makeElement('div', [this.viewportHolder,
-                                   this.overlay, 
+                                   this.overlay,
                                    this.quantOverlay],
-                            {className: 'tier'});
+                            {className: classes});
 
     if (!background) {
         this.row.style.background = 'none';
