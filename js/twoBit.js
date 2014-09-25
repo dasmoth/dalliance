@@ -165,7 +165,6 @@ TwoBitSeq.prototype.fetch = function(min, max, cnt) {
         }
 
         thisB.tbf.data.slice(thisB.seqOffset + fetchMin, fetchMax - fetchMin).salted().fetch(function(r) {
-            console.log(r.byteLength);
             if (r == null) {
                 return cnt('SeqFetch failed');
             }
