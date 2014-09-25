@@ -14,9 +14,9 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  12,
     MICRO:  8,
-    PATCH:  '',
+    PATCH:  'a',
     BRANCH: 'dev'
-}
+};
 
 VERSION.toString = function() {
     var vs = '' + this.MAJOR + '.' + this.MINOR + '.' + this.MICRO;

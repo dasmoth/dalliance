@@ -91,9 +91,11 @@ TrackHubDB.prototype.getTracks = function(callback) {
                 }
             }
 
-            if (track.track && (track.type || track.container || track.view)) {
+            if (track.track && (track.type || track.container || track.view || track.bigDataUrl)) {
                 tracks.push(track);
                 tracksById[track.track] = track;
+            } else {
+                // console.log('skipping ', track);
             }
         }
         
@@ -115,7 +117,7 @@ TrackHubDB.prototype.getTracks = function(callback) {
                     if (parent)
                         top = false;
                 } else {
-                    // console.log("Couldn't find parent " + ptoks[0] + '(' + track.parent + ')');
+                    console.log("Couldn't find parent " + ptoks[0] + '(' + track.parent + ')');
                 }
                
             }
@@ -249,11 +251,19 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 }
             }
         }
-        return source;
-
-        
+        return source;       
     } else {
-        var typeToks = this.type.split(/\s+/);
+        var type = this.type;
+        if (!type) {
+            var p = this;
+            while (p._parent && !p.type) {
+                p = p._parent;
+            }
+            type = p.type;
+        }
+        if (!type)
+            return;
+        var typeToks = type.split(/\s+/);
         if (typeToks[0] == 'bigBed' && this.bigDataUrl) {
             var bedTokens = typeToks[1]|0
             var bedPlus = typeToks[2] == '+';
@@ -301,7 +311,18 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 }
 
 TrackHubTrack.prototype.bigwigStyles = function() {
-    var typeToks = this.type.split(/\s+/);
+    var type = this.type;
+    if (!type) {
+        var p = this;
+        while (p._parent && !p.type) {
+            p = p._parent;
+        }
+        type = p.type;
+    }
+    if (!type)
+        return;
+    var typeToks = type.split(/\s+/);
+
     var min, max;
     if (typeToks.length >= 3) {
         min = 1.0 * typeToks[1];
