@@ -1404,7 +1404,6 @@ Browser.prototype.move = function(pos, soft)
         }
     }
 
-    console.log(nStart, nEnd);
     this.setLocation(null, nStart, nEnd, null, soft);
 }
 
