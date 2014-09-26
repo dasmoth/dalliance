@@ -124,7 +124,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeHubButton = function(tdb) {
         var hub = tdb.hub;
-        var hubMenuButton = makeElement('i', null, {className: 'fa fa-list-alt'});
+        var hubMenuButton = makeElement('i', null, {className: 'fa fa-list-alt'}, {cursor: 'context-menu'});
         var label = hub.shortLabel || 'Unknown';
         if (tdb.mapping)
             label = label + ' (' + tdb.genome + ')';
