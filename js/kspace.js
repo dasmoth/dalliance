@@ -37,6 +37,8 @@ if (typeof(require) !== 'undefined') {
 
     var das = require('./das');
     var DASSequence = das.DASSequence;
+    
+    var Promise = require('es6-promise').Promise;
 }
 
 function FetchPool() {
