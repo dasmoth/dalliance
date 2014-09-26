@@ -320,6 +320,7 @@
   border: 0px;
   top: 0px;
   display: none;
+  pointer-events: none;
 }
 
 *.dalliance .tier-edit input {
