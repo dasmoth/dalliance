@@ -124,12 +124,13 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var makeHubButton = function(tdb) {
         var hub = tdb.hub;
-        var hubMenuButton = makeElement('i', null, {className: 'fa fa-list-alt'});
+        var hubMenuButton = makeElement('i', null, {className: 'fa fa-list-alt'}, {cursor: 'context-menu'});
         var label = hub.shortLabel || 'Unknown';
         if (tdb.mapping)
             label = label + ' (' + tdb.genome + ')';
         var hbContent = makeElement('span', [label, ' ', hubMenuButton]);
         var hubButton = thisB.makeButton(hbContent, hub.longLabel);
+        hubButton.hub = tdb;
         addModeButtons.push(hubButton);
         
         hubButton.addEventListener('click', function(ev) {
@@ -794,6 +795,24 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     function tryAddHub(curi, opts, retry) {
         opts = opts || {};
+        for (var hi = 0; hi < thisB.hubObjects.length; ++hi) {
+            var h = thisB.hubObjects[hi];
+            if (h.hub.url == curi) {
+                for (var bi = 0; bi < addModeButtons.length; ++bi) {
+                    if (addModeButtons[bi].hub == h) {
+                        activateButton(addModeButtons, addModeButtons[bi]);
+                    }
+                }
+                h.getTracks(function(tracks, err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    makeHubStab(tracks);
+                });
+                return;
+            }
+
+        }
         
         connectTrackHub(curi, function(hub, err) {
             if (err) {
