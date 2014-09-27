@@ -1,6 +1,5 @@
 *~
-dalliance-all.js
-dalliance-compiled.js
-build
-tmp
-node_modules
+tmp/
+node_modules/
+json/
+jszlib/
