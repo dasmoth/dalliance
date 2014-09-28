@@ -149,7 +149,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.min = zoom.min|0;
         zoomSlider.max = zoom.max|0;
-        zoomSlider.value = zoom.current|0;
+        if (zoom.isSnapZooming) {
+            zoomSlider.value = zoom.alternate
+            zoomSlider.value2 = zoom.current;
+            zoomSlider.active = 2;
+        } else {
+            zoomSlider.value = zoom.current;
+            zoomSlider.value2 = zoom.alternate;
+            zoomSlider.active = 1;
+        }
+
         if (b.storeStatus) {
             b.storeViewStatus();
         }
@@ -211,8 +220,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     b.makeTooltip(zoomOutBtn, 'Zoom out (-)');
 
     zoomSlider.addEventListener('change', function(ev) {
-    	b.zoomSliderValue = (1.0 * zoomSlider.value);
-    	b.zoom(Math.exp((1.0 * zoomSlider.value) / b.zoomExpt));
+        var wantSnap = zoomSlider.active == 2;
+        if (wantSnap != b.isSnapZooming) {
+            console.log('trying to change snap');
+            b.savedZoom = b.zoomSliderValue  - b.zoomMin;
+            b.isSnapZooming = wantSnap;
+        }
+        var activeZSV = zoomSlider.active == 1 ? zoomSlider.value : zoomSlider.value2;
+
+    	b.zoomSliderValue = (1.0 * activeZSV);
+    	b.zoom(Math.exp((1.0 * activeZSV) / b.zoomExpt));
     }, false);
 
     favBtn.addEventListener('click', function(ev) {

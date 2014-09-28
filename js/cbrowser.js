@@ -377,7 +377,6 @@ Browser.prototype.realInit2 = function() {
                 thisB.zoomSliderValue = newZoom;
                 thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
             }
-            thisB.snapZoomLockout = true;
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
@@ -612,9 +611,6 @@ Browser.prototype.realInit2 = function() {
             // console.log('key: ' + ev.keyCode + '; char: ' + ev.charCode);
         }
     };
-    var keyUpHandler = function(ev) {
-        thisB.snapZoomLockout = false;
-    }
 
     this.browserHolder.addEventListener('focus', function(ev) {
         thisB.browserHolder.addEventListener('keydown', keyHandler, false);
@@ -1846,7 +1842,16 @@ Browser.prototype.notifyLocation = function() {
 
     for (var lli = 0; lli < this.viewListeners.length; ++lli) {
         try {
-            this.viewListeners[lli](this.chr, nvs, nve, this.zoomSliderValue, {current: this.zoomSliderValue, min: this.zoomMin, max: this.zoomMax});
+            this.viewListeners[lli](
+                this.chr, 
+                nvs, 
+                nve, 
+                this.zoomSliderValue, 
+                {current: this.zoomSliderValue,
+                 alternate: this.savedZoom || this.zoomMin,
+                 isSnapZooming: this.isSnapZooming,
+                 min: this.zoomMin, 
+                 max: this.zoomMax});
         } catch (ex) {
             console.log(ex.stack);
         }

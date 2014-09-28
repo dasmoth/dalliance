@@ -405,10 +405,17 @@
 
 *.dalliance .slider hr.slider-thumb {
     border: 1.5px solid #888888;
-    width: 12px; height: 12px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     position: absolute;
-    margin-top: 3px;
+    margin-top: 4px;
     left: 50px;
     background-color: #dddddd;
+}
+
+*.dalliance .slider hr.slider-thumb.active {
+  background-color: #bbbbee;
+  z-index: 20;
+  width: 12px; height: 12px;
+  margin-top: 3px;
 }

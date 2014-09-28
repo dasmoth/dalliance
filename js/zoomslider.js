@@ -17,11 +17,12 @@ if (typeof(require) !== 'undefined') {
 
 function makeZoomSlider() {
     var track = makeElement('hr', null, {className: 'slider-track'});
-    var thumb = makeElement('hr', null, {className: 'slider-thumb'});
-    var slider = makeElement('div', [track, thumb], {className: 'slider'});
+    var thumb = makeElement('hr', null, {className: 'slider-thumb active'});
+    var thumb2 = makeElement('hr', null, {className: 'slider-thumb'});
+    var slider = makeElement('div', [track, thumb, thumb2], {className: 'slider'});
     var minPos = 0, maxPos = 200;
     var min = 0, max = 200;
-    var pos = 50;
+    var pos = 50, pos2 = 100;
 
     var onChange = document.createEvent('HTMLEvents');
     onChange.initEvent('change', true, false);
@@ -33,11 +34,39 @@ function makeZoomSlider() {
         thumb.style.left = '' + pos + 'px';
     }
 
+    function setPos2(np) {
+        np = Math.min(np, maxPos);
+        np = Math.max(np, minPos);
+        pos2 = np;
+        thumb2.style.left = '' + pos2 + 'px';
+    }
+
     Object.defineProperty(slider, 'value', {
         get: function()  {return min + ((pos * (max-min)) / (maxPos - minPos));},
         set: function(v) {
           var np = minPos + (v * (maxPos-minPos))/(max-min);
           setPos(np);
+        }
+    });
+
+    Object.defineProperty(slider, 'value2', {
+        get: function()  {return min + ((pos2 * (max-min)) / (maxPos - minPos));},
+        set: function(v) {
+          var np = minPos + (v * (maxPos-minPos))/(max-min);
+          setPos2(np);
+        }
+    });
+
+    Object.defineProperty(slider, 'active', {
+        get: function() {return thumb.classList.contains('active') ? 1 : 2},
+        set: function(x) {
+            if (x == 1) {
+                thumb.classList.add('active');
+                thumb2.classList.remove('active');
+            } else {
+                thumb2.classList.add('active');
+                thumb.classList.remove('active');
+            }
         }
     });
 
@@ -52,16 +81,28 @@ function makeZoomSlider() {
     });
 
     var offset;
+    var which;
 
-    thumb.addEventListener('mousedown', function(ev) {
+    var thumbMouseDown = function(ev) {
+        which = this == thumb ? 1 : 2;
+        if (which != slider.active) {
+            slider.active = which;
+            slider.dispatchEvent(onChange);
+        }
         ev.stopPropagation(); ev.preventDefault();
         window.addEventListener('mousemove', thumbDragHandler, false);
         window.addEventListener('mouseup', thumbDragEndHandler, false);
         offset = ev.clientX - pos;
-    }, false);
+    };
+
+    thumb.addEventListener('mousedown', thumbMouseDown, false);
+    thumb2.addEventListener('mousedown', thumbMouseDown, false);
 
     var thumbDragHandler = function(ev) {
-        setPos(ev.clientX - offset);
+        if (which == 1)
+            setPos(ev.clientX - offset);
+        else
+            setPos2(ev.clientX - offset);
         slider.dispatchEvent(onChange);
     };
 
