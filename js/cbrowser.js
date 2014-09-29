@@ -751,7 +751,7 @@ Browser.prototype.touchMoveHandler = function(ev) {
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
-	           this.tiers[i].draw();
+                this.tiers[i].draw();
             }
         }
         this.zoomLastSep = sep;
@@ -1316,6 +1316,7 @@ Browser.prototype.refresh = function() {
     
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
     this.drawOverlays();
+    this.positionRuler();
 }
 
 function setSources(msh, availableSources, maybeMapping) {
@@ -1764,7 +1765,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
         for (var i = 0; i < this.tiers.length; ++i) {
             var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	        this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
+            this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
             this.tiers[i].drawOverlay();
         }
     }
@@ -2030,6 +2031,7 @@ Browser.prototype.notifyTierSelectionWrap = function(i) {
     }
 }
 
+
 Browser.prototype.positionRuler = function() {
     var display = 'none';
     var left = '';
@@ -2052,7 +2054,23 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.left = left;
     this.ruler.style.right = right;
 
-    this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    if (this.scale >= 8) { // Zoomed in so that single bases are displayed
+        this.ruler2.style.display = 'block';
+        this.ruler2.style.opacity = '0.15';
+        this.ruler2.style.borderLeft = '1px solid black';
+        this.ruler2.style.borderTop = '1px solid black';
+        if (window.devicePixelRatio > 1) { // Make ruler larger for high pixel-density displays
+            this.ruler2.style.width = '18px';
+        } else {
+            this.ruler2.style.width = '9px';
+        }
+        this.rulerLocation = 'center';
+    } else {
+        this.ruler2.style.width = '1px';
+        this.ruler2.style.opacity = '0.5';
+        this.ruler2.style.borderStyle = 'none';
+        this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    }
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
 
     for (var ti = 0; ti < this.tiers.length; ++ti) {
