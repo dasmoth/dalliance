@@ -239,12 +239,10 @@ Browser.prototype.realInit = function() {
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
-
     this.ruler = makeElement('div', null, {className: 'guideline'})
     this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
     this.tierHolderHolder.appendChild(this.ruler);
     this.tierHolderHolder.appendChild(this.ruler2);
-
     this.chainConfigs = this.chains || {};
     this.chains = {};
     for (var k in this.chainConfigs) {
@@ -2065,11 +2063,15 @@ Browser.prototype.positionRuler = function() {
             this.ruler2.style.width = '9px';
         }
         this.rulerLocation = 'center';
+        // Position accompanying single base location
+        this.locSingleBase.style.visibility = 'visible';
+        this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
     } else {
         this.ruler2.style.width = '1px';
         this.ruler2.style.opacity = '0.5';
         this.ruler2.style.borderStyle = 'none';
         this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+        this.locSingleBase.style.visibility = 'hidden';
     }
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
 
