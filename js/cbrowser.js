@@ -1848,7 +1848,7 @@ Browser.prototype.notifyLocation = function() {
                 nve, 
                 this.zoomSliderValue, 
                 {current: this.zoomSliderValue,
-                 alternate: this.savedZoom || this.zoomMin,
+                 alternate: (this.savedZoom+this.zoomMin) || this.zoomMin,
                  isSnapZooming: this.isSnapZooming,
                  min: this.zoomMin, 
                  max: this.zoomMax});
@@ -2120,6 +2120,8 @@ Browser.prototype.updateHeight = function() {
         tierTotal += (this.tiers[ti].currentHeight || 30);
     this.ruler.style.height = '' + tierTotal + 'px';
     this.ruler2.style.height = '' + tierTotal + 'px';
+    this.browserHolder.style.display = 'block';
+    this.browserHolder.style.display = 'flex';
     // this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
 

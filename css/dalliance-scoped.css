@@ -398,8 +398,8 @@
     background-color: gray;
     position: absolute;
     top: 0px;
-    margin-left: 4px;
-    margin-right: 4px;
+    margin-left: 5px;
+    margin-right: 5px;
     margin: 7px;
 }
 
@@ -411,6 +411,7 @@
     margin-top: 4px;
     left: 50px;
     background-color: #dddddd;
+    margin-left: 1px;
 }
 
 *.dalliance .slider hr.slider-thumb.active {
@@ -418,4 +419,5 @@
   z-index: 20;
   width: 12px; height: 12px;
   margin-top: 3px;
+  margin-left: 0px;
 }

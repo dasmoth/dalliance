@@ -42,17 +42,17 @@ function makeZoomSlider() {
     }
 
     Object.defineProperty(slider, 'value', {
-        get: function()  {return min + ((pos * (max-min)) / (maxPos - minPos));},
+        get: function()  {return min + (((pos-minPos) * (max-min)) / (maxPos - minPos));},
         set: function(v) {
-          var np = minPos + (v * (maxPos-minPos))/(max-min);
+          var np = minPos + ((v-min) * (maxPos-minPos))/(max-min);
           setPos(np);
         }
     });
 
     Object.defineProperty(slider, 'value2', {
-        get: function()  {return min + ((pos2 * (max-min)) / (maxPos - minPos));},
+        get: function()  {return min + (((pos2-minPos) * (max-min)) / (maxPos - minPos));},
         set: function(v) {
-          var np = minPos + (v * (maxPos-minPos))/(max-min);
+          var np = minPos + ((v-min) * (maxPos-minPos))/(max-min);
           setPos2(np);
         }
     });
@@ -92,7 +92,7 @@ function makeZoomSlider() {
         ev.stopPropagation(); ev.preventDefault();
         window.addEventListener('mousemove', thumbDragHandler, false);
         window.addEventListener('mouseup', thumbDragEndHandler, false);
-        offset = ev.clientX - pos;
+        offset = ev.clientX - (which == 1 ? pos : pos2);
     };
 
     thumb.addEventListener('mousedown', thumbMouseDown, false);
