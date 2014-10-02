@@ -2065,15 +2065,9 @@ Browser.prototype.positionRuler = function() {
     //this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
 
     // Position accompanying single base location
-    //this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0 - (this.locSingleBase.offsetWidth/2)|0) + 'px';
-    this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-    
-    console.log(this.featurePanelWidth/2);
-    console.log(this.locSingleBase.offsetWidth/2);
-    var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/3; 
-    console.log(centreOffset);
-    
+    var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/2 + this.ruler2.offsetWidth/2; 
     this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
+    
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var q = tier.quantOverlay;
