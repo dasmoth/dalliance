@@ -135,13 +135,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                                                 zoomOutBtn], {className: 'btn-group'}));
     }
     
-    var locSingleBase = makeElement('span', null, {className: 'loc-single-base'}, {
-                                                   position: 'relative',
-                                                   fontSize: '11px'
-                                                  });
-
-    //locSingleBase.style.left = locSingleBase.offsetLeft
-    var locSingleBaseHolder = makeElement('div', locSingleBase,{className: 'loc-single-base-holder'}, {display: 'inline-block'}); 
+    var locSingleBase = makeElement('span', null, {className: 'loc-single-base'});
+    var locSingleBaseHolder = makeElement('div', locSingleBase,{className: 'loc-single-base-holder'}); 
     b.locSingleBase = locSingleBase;
     if (this.toolbarBelow) {
         holder.appendChild(genomePanel);
@@ -179,7 +174,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     // Add listener to update single base location
     this.addViewListener(function(chr, min, max) {
-        locSingleBase.innerHTML = (chr + ':' + formatLongInt(Math.round((max + min)/2)));
+        locSingleBase.innerHTML = (chr + ':' + formatLongInt((max + min)/2 + 1));
     });
 
 

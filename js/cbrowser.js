@@ -240,7 +240,7 @@ Browser.prototype.realInit = function() {
         thisB.resizeViewer();
     }, false);
     this.ruler = makeElement('div', null, {className: 'guideline'})
-    this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
+    this.ruler2 = makeElement('div', null, {className: 'single-base-guideline'});
     this.tierHolderHolder.appendChild(this.ruler);
     this.tierHolderHolder.appendChild(this.ruler2);
     this.chainConfigs = this.chains || {};
@@ -2052,29 +2052,28 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.left = left;
     this.ruler.style.right = right;
 
-    if (this.scale >= 8) { // Zoomed in so that single bases are displayed
-        this.ruler2.style.display = 'block';
-        this.ruler2.style.opacity = '0.15';
-        this.ruler2.style.borderLeft = '1px solid black';
-        this.ruler2.style.borderTop = '1px solid black';
-        if (window.devicePixelRatio > 1) { // Make ruler larger for high pixel-density displays
-            this.ruler2.style.width = '18px';
-        } else {
-            this.ruler2.style.width = '9px';
-        }
-        this.rulerLocation = 'center';
-        // Position accompanying single base location
-        this.locSingleBase.style.visibility = 'visible';
-        this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+    // Style single-base ruler
+    this.ruler2.style.display = 'block';
+    if (this.scale < 1) {
+        this.ruler2.style.width = '0px';
+        this.ruler2.style.borderRightWidth = '0px' 
     } else {
-        this.ruler2.style.width = '1px';
-        this.ruler2.style.opacity = '0.5';
-        this.ruler2.style.borderStyle = 'none';
-        this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
-        this.locSingleBase.style.visibility = 'hidden';
-    }
+        this.ruler2.style.width = this.scale + 'px';
+        this.ruler2.style.borderRightWidth = '1px' 
+    } 
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+    //this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
 
+    // Position accompanying single base location
+    //this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0 - (this.locSingleBase.offsetWidth/2)|0) + 'px';
+    this.locSingleBase.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
+    
+    console.log(this.featurePanelWidth/2);
+    console.log(this.locSingleBase.offsetWidth/2);
+    var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/3; 
+    console.log(centreOffset);
+    
+    this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var q = tier.quantOverlay;
