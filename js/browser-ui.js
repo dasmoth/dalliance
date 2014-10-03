@@ -68,7 +68,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     b.makeTooltip(locField, 'Enter a genomic location or gene name');
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
 
-
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
     // var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'}, {width: '150px'});  // NB min and max get overwritten.
     var zoomSlider = new makeZoomSlider();
@@ -136,12 +135,15 @@ Browser.prototype.initUI = function(holder, genomePanel) {
                                                 zoomOutBtn], {className: 'btn-group'}));
     }
     
-
+    var locSingleBase = makeElement('span', null, {className: 'loc-single-base'});
+    var locSingleBaseHolder = makeElement('div', locSingleBase,{className: 'loc-single-base-holder'}); 
+    b.locSingleBase = locSingleBase;
     if (this.toolbarBelow) {
         holder.appendChild(genomePanel);
         holder.appendChild(toolbar);
     } else {
         holder.appendChild(toolbar);
+        holder.appendChild(locSingleBaseHolder);
         holder.appendChild(genomePanel);
     }
 
@@ -169,6 +171,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             clearHighlightsButton.style.display = 'none';
         }
     });
+
+    // Add listener to update single base location
+    this.addViewListener(function(chr, min, max) {
+        locSingleBase.innerHTML = (chr + ':' + formatLongInt((max + min)/2 + 1));
+    });
+
 
     this.addTierListener(function() {
         if (b.storeStatus) {
@@ -475,7 +483,16 @@ Browser.prototype.toggleOptsPopup = function(ev) {
             b.storeStatus();
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
+        
+        var singleBaseHighlightButton = makeElement('input', '', {type: 'checkbox', checked: b.singleBaseHighlight}); 
+        singleBaseHighlightButton.addEventListener('change', function(ev) {
+            b.singleBaseHighlight = singleBaseHighlightButton.checked;
+            b.positionRuler();
+            b.storeStatus();
+        }, false);
 
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Display and highlight current genome location', {align: 'right'}), makeElement('td', singleBaseHighlightButton)]));
+        
         optsForm.appendChild(optsTable);
 
         var resetButton = makeElement('button', 'Reset browser', {className: 'btn'}, {marginLeft: 'auto', marginRight: 'auto', display: 'block'});

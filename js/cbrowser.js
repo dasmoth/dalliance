@@ -95,7 +95,8 @@ function Browser(opts) {
     this.defaultHighlightAlpha = 0.3;
     this.exportHighlights = true;
     this.exportRuler = true;
-
+    this.singleBaseHighlight = true;
+    
     // Visual config.
 
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
@@ -239,12 +240,10 @@ Browser.prototype.realInit = function() {
     window.addEventListener('resize', function(ev) {
         thisB.resizeViewer();
     }, false);
-
     this.ruler = makeElement('div', null, {className: 'guideline'})
-    this.ruler2 = makeElement('div', null, {className: 'guideline'}, {backgroundColor: 'gray', opacity: '0.5', zIndex: 899});
+    this.ruler2 = makeElement('div', null, {className: 'single-base-guideline'});
     this.tierHolderHolder.appendChild(this.ruler);
     this.tierHolderHolder.appendChild(this.ruler2);
-
     this.chainConfigs = this.chains || {};
     this.chains = {};
     for (var k in this.chainConfigs) {
@@ -751,7 +750,7 @@ Browser.prototype.touchMoveHandler = function(ev) {
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
-	           this.tiers[i].draw();
+                this.tiers[i].draw();
             }
         }
         this.zoomLastSep = sep;
@@ -1316,6 +1315,7 @@ Browser.prototype.refresh = function() {
     
     this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
     this.drawOverlays();
+    this.positionRuler();
 }
 
 function setSources(msh, availableSources, maybeMapping) {
@@ -1764,7 +1764,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     
         for (var i = 0; i < this.tiers.length; ++i) {
             var offset = (this.viewStart - this.tiers[i].norigin)*this.scale;
-	        this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
+            this.tiers[i].viewportHolder.style.left = '' + ((-offset|0) - 1000) + 'px';
             this.tiers[i].drawOverlay();
         }
     }
@@ -2030,6 +2030,7 @@ Browser.prototype.notifyTierSelectionWrap = function(i) {
     }
 }
 
+
 Browser.prototype.positionRuler = function() {
     var display = 'none';
     var left = '';
@@ -2052,9 +2053,29 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.left = left;
     this.ruler.style.right = right;
 
-    this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    if(this.singleBaseHighlight) {
+        this.ruler2.style.display = 'block';
+        this.ruler2.style.borderWidth = '1px';
+        if (this.scale < 1) {
+            this.ruler2.style.width = '0px';
+            this.ruler2.style.borderRightWidth = '0px' 
+        } else {
+            this.ruler2.style.width = this.scale + 'px';
+            this.ruler2.style.borderRightWidth = '1px' 
+        } 
+        // Position accompanying single base location text
+        this.locSingleBase.style.visibility = 'visible';
+        var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/2 + this.ruler2.offsetWidth/2; 
+        this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
+    } else {
+        this.locSingleBase.style.visibility = 'hidden';
+        this.ruler2.style.width = '1px';
+        this.ruler2.style.borderWidth = '0px';
+        this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    }
+   
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-
+    
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var q = tier.quantOverlay;

@@ -239,6 +239,27 @@
   /* left set by code... */
 }
 
+*.dalliance .single-base-guideline {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 899;
+  height: 100%;
+  top: 0px;
+  border: 1px solid rgba(0, 0, 0, 0.75);
+  /* left and width set by code... */
+}
+
+*.dalliance .loc-single-base {
+  position: relative;
+  font-size: 11px;
+}
+
+*.dalliance .loc-single-base-holder {
+  display: inline-block;
+  flex-shrink: 0;
+  -webkit-flex-shrink: 0;
+}
+
 *.dalliance .powered-by {
   font-size: 10pt;
 }
