@@ -419,9 +419,9 @@
     background-color: gray;
     position: absolute;
     top: 0px;
-    margin-left: 5px;
-    margin-right: 5px;
-    margin: 7px;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 3px;
 }
 
 *.dalliance .slider hr.slider-thumb {
@@ -429,7 +429,7 @@
     width: 10px; height: 10px;
     border-radius: 50%;
     position: absolute;
-    margin-top: 4px;
+    margin-top: 0px;
     left: 50px;
     background-color: #dddddd;
     margin-left: 1px;
@@ -439,6 +439,16 @@
   background-color: #bbbbee;
   z-index: 20;
   width: 12px; height: 12px;
-  margin-top: 3px;
   margin-left: 0px;
+  margin-top: -1px;
+}
+
+*.dalliance .slider div.slider-label {
+  top: 9px;
+  font-size: 7pt;
+  display: block;
+  position: absolute;
+  width: 50px;
+  text-align: center;
+  margin-left: -21px;
 }

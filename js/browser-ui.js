@@ -161,6 +161,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             zoomSlider.active = 1;
         }
 
+        zoomSlider.removeLabels();
+        zoomSlider.addLabel(zoom.min, humanReadableScale(Math.exp(b.zoomMin / b.zoomExpt) * b.zoomBase));
+        zoomSlider.addLabel((zoom.min + zoom.max) / 2, humanReadableScale(Math.exp((b.zoomMin + b.zoomMax) / 2 / b.zoomExpt) * b.zoomBase));
+        zoomSlider.addLabel(zoom.max, humanReadableScale(Math.exp(b.zoomMax / b.zoomExpt) * b.zoomBase));
+
         if (b.storeStatus) {
             b.storeViewStatus();
         }
@@ -230,7 +235,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     zoomSlider.addEventListener('change', function(ev) {
         var wantSnap = zoomSlider.active == 2;
         if (wantSnap != b.isSnapZooming) {
-            console.log('trying to change snap');
             b.savedZoom = b.zoomSliderValue  - b.zoomMin;
             b.isSnapZooming = wantSnap;
         }
@@ -504,4 +508,19 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         this.showToolPanel(optsForm);
         this.setUiMode('opts');
     }
+}
+
+function humanReadableScale(x) {
+    var suffix = 'bp';
+    if (x > 1000000000) {
+        x /= 1000000000;
+        suffix = 'Gb';
+    } else if (x > 1000000) {
+        x /= 1000000
+        suffix = 'Mb';
+    } else if (x > 1000) {
+        x /= 1000;
+        suffix = 'kb';
+    }
+    return '' + Math.round(x) + suffix;
 }

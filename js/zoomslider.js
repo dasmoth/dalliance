@@ -23,6 +23,24 @@ function makeZoomSlider() {
     var minPos = 0, maxPos = 200;
     var min = 0, max = 200;
     var pos = 50, pos2 = 100;
+    var labels = [];
+
+    slider.removeLabels = function() {
+        for (var li = 0; li < labels.length; ++li) {
+            slider.removeChild(labels[li]);
+        }
+        labels = [];
+    }
+
+    slider.addLabel = function(val, txt) {
+        var pos = (minPos + ((val - min) * (maxPos - minPos))/(max-min))|0;
+        console.log(pos);
+        var label = makeElement('div', txt, {className: 'slider-label'}, {
+            left: '' + ((minPos + ((val - min) * (maxPos - minPos))/(max-min))|0) + 'px'
+        });
+        slider.appendChild(label);
+        labels.push(label);
+    }
 
     var onChange = document.createEvent('HTMLEvents');
     onChange.initEvent('change', true, false);
