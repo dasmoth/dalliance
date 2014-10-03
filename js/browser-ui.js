@@ -483,7 +483,10 @@ Browser.prototype.toggleOptsPopup = function(ev) {
             b.storeStatus();
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
-
+        
+        var locHighlightSelect = makeElement('input', '', {type: 'checkbox', checked: b.locHighlight}); 
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Display and highlight current genome location', {align: 'right'}), makeElement('td', locHighlightSelect)]));
+        
         optsForm.appendChild(optsTable);
 
         var resetButton = makeElement('button', 'Reset browser', {className: 'btn'}, {marginLeft: 'auto', marginRight: 'auto', display: 'block'});
