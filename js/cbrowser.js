@@ -2055,6 +2055,7 @@ Browser.prototype.positionRuler = function() {
 
     if(this.singleBaseHighlight) {
         this.ruler2.style.display = 'block';
+        this.ruler2.style.borderWidth = '1px';
         if (this.scale < 1) {
             this.ruler2.style.width = '0px';
             this.ruler2.style.borderRightWidth = '0px' 
@@ -2068,6 +2069,8 @@ Browser.prototype.positionRuler = function() {
         this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
     } else {
         this.locSingleBase.style.visibility = 'hidden';
+        this.ruler2.style.width = '1px';
+        this.ruler2.style.borderWidth = '0px';
         this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
     }
    
