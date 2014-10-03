@@ -484,8 +484,14 @@ Browser.prototype.toggleOptsPopup = function(ev) {
         }, false);
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Vertical guideline', {align: 'right'}), makeElement('td', rulerSelect)]));
         
-        var locHighlightSelect = makeElement('input', '', {type: 'checkbox', checked: b.locHighlight}); 
-        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Display and highlight current genome location', {align: 'right'}), makeElement('td', locHighlightSelect)]));
+        var singleBaseHighlightButton = makeElement('input', '', {type: 'checkbox', checked: b.singleBaseHighlight}); 
+        singleBaseHighlightButton.addEventListener('change', function(ev) {
+            b.singleBaseHighlight = singleBaseHighlightButton.checked;
+            b.positionRuler();
+            b.storeStatus();
+        }, false);
+
+        optsTable.appendChild(makeElement('tr', [makeElement('td', 'Display and highlight current genome location', {align: 'right'}), makeElement('td', singleBaseHighlightButton)]));
         
         optsForm.appendChild(optsTable);
 

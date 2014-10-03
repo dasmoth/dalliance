@@ -95,7 +95,8 @@ function Browser(opts) {
     this.defaultHighlightAlpha = 0.3;
     this.exportHighlights = true;
     this.exportRuler = true;
-
+    this.singleBaseHighlight = true;
+    
     // Visual config.
 
     // this.tierBackgroundColors = ["rgb(245,245,245)", "rgb(230,230,250)" /* 'white' */];
@@ -2052,21 +2053,25 @@ Browser.prototype.positionRuler = function() {
     this.ruler.style.left = left;
     this.ruler.style.right = right;
 
-    // Style single-base ruler
-    this.ruler2.style.display = 'block';
-    if (this.scale < 1) {
-        this.ruler2.style.width = '0px';
-        this.ruler2.style.borderRightWidth = '0px' 
+    if(this.singleBaseHighlight) {
+        this.ruler2.style.display = 'block';
+        if (this.scale < 1) {
+            this.ruler2.style.width = '0px';
+            this.ruler2.style.borderRightWidth = '0px' 
+        } else {
+            this.ruler2.style.width = this.scale + 'px';
+            this.ruler2.style.borderRightWidth = '1px' 
+        } 
+        // Position accompanying single base location text
+        this.locSingleBase.style.visibility = 'visible';
+        var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/2 + this.ruler2.offsetWidth/2; 
+        this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
     } else {
-        this.ruler2.style.width = this.scale + 'px';
-        this.ruler2.style.borderRightWidth = '1px' 
-    } 
+        this.locSingleBase.style.visibility = 'hidden';
+        this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
+    }
+   
     this.ruler2.style.left = '' + ((this.featurePanelWidth/2)|0) + 'px';
-    //this.ruler2.style.display = this.rulerLocation == 'center' ? 'none' : 'block';
-
-    // Position accompanying single base location
-    var centreOffset = this.featurePanelWidth/2 - this.locSingleBase.offsetWidth/2 + this.ruler2.offsetWidth/2; 
-    this.locSingleBase.style.left = '' + (centreOffset|0) + 'px';
     
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
