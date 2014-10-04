@@ -69,8 +69,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
-    // var zoomSlider = makeElement('input', '', {type: 'range', min: 100, max: 250}, {className: 'zoom-slider'}, {width: '150px'});  // NB min and max get overwritten.
     var zoomSlider = new makeZoomSlider();
+    b.makeTooltip(zoomSlider, "Highlighted button shows current zoom level, gray button shows inactive zoom level (click or tap SPACE to toggle).")
 
 
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
@@ -162,8 +162,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         }
 
         zoomSlider.removeLabels();
-        zoomSlider.addLabel(zoom.min, humanReadableScale(Math.exp(b.zoomMin / b.zoomExpt) * b.zoomBase));
-        zoomSlider.addLabel((zoom.min + zoom.max) / 2, humanReadableScale(Math.exp((b.zoomMin + b.zoomMax) / 2 / b.zoomExpt) * b.zoomBase));
+        var zmin = zoom.min;
+        var zmax = zoom.max;
+        var zrange = zmax - zmin;
+        zoomSlider.addLabel(zmin, humanReadableScale(Math.exp(zmin / b.zoomExpt) * b.zoomBase));
+        zoomSlider.addLabel(zmin + (1.0*zrange/3.0), humanReadableScale(Math.exp((zmin + (1.0*zrange/3.0)) / b.zoomExpt) * b.zoomBase));
+        zoomSlider.addLabel(zmin + (2.0*zrange/3.0), humanReadableScale(Math.exp((zmin + (2.0*zrange/3.0)) / b.zoomExpt) * b.zoomBase));
         zoomSlider.addLabel(zoom.max, humanReadableScale(Math.exp(b.zoomMax / b.zoomExpt) * b.zoomBase));
 
         if (b.storeStatus) {

@@ -34,7 +34,6 @@ function makeZoomSlider() {
 
     slider.addLabel = function(val, txt) {
         var pos = (minPos + ((val - min) * (maxPos - minPos))/(max-min))|0;
-        console.log(pos);
         var label = makeElement('div', txt, {className: 'slider-label'}, {
             left: '' + ((minPos + ((val - min) * (maxPos - minPos))/(max-min))|0) + 'px'
         });
