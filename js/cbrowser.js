@@ -2157,6 +2157,24 @@ Browser.prototype.scrollArrowKey = function(ev, dir) {
         }
 
         this.leap(dir, fedge);
+    } else if (this.scale > 1) {
+        // per-base scrolling mode, tries to perfectly center.
+        var mid = (this.viewStart + this.viewEnd)/2
+        var err = mid - Math.round(mid);
+        var n = 1;
+        if (ev.shiftKey)
+            n *= 10;
+        if (dir > 0) {
+            n = -n;
+            n -= err;
+            if (err > 0)
+                n += 1;
+        } else {
+            n -= err;
+            if (err < 0)
+                n -= 1;
+        }
+        this.setLocation(null, this.viewStart + n, this.viewEnd + n);
     } else {
         this.move(ev.shiftKey ? 100*dir : 25*dir);
     }
