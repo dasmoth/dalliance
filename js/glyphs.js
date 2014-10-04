@@ -1236,13 +1236,14 @@ SequenceGlyph.prototype.draw = function(gc) {
                     imgGc.scale(2, 2);
                 }
                 imgGc.fillStyle = this._fillbg ? 'black' : color;
-                imgGc.fillText(base, 0, 8);
+                var w = imgGc.measureText(base).width;
+                imgGc.fillText(base, 0.5 * (8.0 - w), 8);
                 __dalliance_SequenceGlyphCache[key] = img;
             }
             if (isRetina)
-                gc.drawImage(img, this._min + p*scale, 0, 8, 10);
+                gc.drawImage(img, this._min + p*scale + 0.5*(scale-8), 0, 8, 10);
             else
-                gc.drawImage(img, this._min + p*scale, 0);
+                gc.drawImage(img, this._min + p*scale + 0.5*(scale-8), 0);
         } 
 
         if (this._quals) {
@@ -1295,8 +1296,9 @@ SequenceGlyph.prototype.toSVG = function() {
         if (isCloseUp(scale) && alt) {
             g.appendChild(
                 makeElementNS(NS_SVG, 'text', base, {
-                    x: this._min + p*scale,
+                    x: this._min + (0.5+p)*scale,
                     y: 8,
+                    textAnchor: 'middle',
                     fill: this._fillbg ? 'black' : color,
                     fillOpacity: alpha}));
         }

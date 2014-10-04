@@ -132,7 +132,9 @@ function drawSeqTierGC(tier, seq, gc)
 				gc.fillStyle = color;
 
 				if (scale >= 8) {
-				    gc.fillText(base, (p - origin) * scale, 52);
+                    var w = gc.measureText(base).width;
+                    // console.log(scale-w);
+				    gc.fillText(base, (p - origin) * scale + ((scale-w)*0.5) , 52);
 				} else {
 				    gc.fillRect((p - origin) * scale, 42, scale, 12); 
 				}
@@ -194,8 +196,9 @@ function svgSeqTier(tier, seq) {
         		if (scale >= 8) {
         		    g.appendChild(
         			makeElementNS(NS_SVG, 'text', base, {
-        			    x: (p-origin)*scale,
+        			    x: (0.5+p-origin)*scale,
         			    y: 52,
+                        textAnchor: 'middle',
         			    fill: color}));
         		} else {
         		    g.appendChild(
