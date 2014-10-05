@@ -177,6 +177,8 @@ Browser.prototype.resolveURL = function(url) {
 }
 
 Browser.prototype.realInit = function() {
+    var self = this;
+
     if (this.wasInitialized) {
         console.log('Attemping to call realInit on an already-initialized Dalliance instance');
         return;
@@ -223,10 +225,20 @@ Browser.prototype.realInit = function() {
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
     this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
 
+    this.locSingleBase = makeElement('span', 'foo', {className: 'loc-single-base'});
+    var locSingleBaseHolder = makeElement('div', this.locSingleBase,{className: 'loc-single-base-holder'}); 
+    // Add listener to update single base location
+    this.addViewListener(function(chr, min, max) {
+        // Just setting textContent causes layout flickering in Blink.
+        // This approach means that the element is never empty.
+        self.locSingleBase.appendChild(document.createTextNode(chr + ':' + formatLongInt((max + min)/2 + 1)));
+        self.locSingleBase.removeChild(self.locSingleBase.firstChild);
+    });
+
     if (this.disablePinning) {
         this.tierHolderHolder = this.tierHolder;
     } else {
-        this.tierHolderHolder = makeElement('div', [this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
+        this.tierHolderHolder = makeElement('div', [locSingleBaseHolder, this.pinnedTierHolder, this.tierHolder], {className: 'tier-holder-holder'});
         this.svgHolder.appendChild(this.tierHolderHolder);
     }
     this.svgHolder.appendChild(this.tierHolderHolder);
@@ -1459,6 +1471,7 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
 }
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
+    console.log('resize');
     var width = this.tierHolder.getBoundingClientRect().width | 0;
     if (width == 0)
         return;

@@ -235,7 +235,7 @@
   background-color: blue;
   position: absolute;
   z-index: 900;
-  top: 0px;
+  top: 15px;
   /* left set by code... */
 }
 
@@ -244,7 +244,7 @@
   background-color: rgba(0, 0, 0, 0.25);
   z-index: 899;
   height: 100%;
-  top: 0px;
+  top: 15px;
   border: 1px solid rgba(0, 0, 0, 0.75);
   /* left and width set by code... */
 }
