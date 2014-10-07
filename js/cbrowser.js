@@ -31,6 +31,7 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+    var formatLongInt = nf.formatLongInt;
 
     var Chainset = require('./chainset').Chainset;
 
