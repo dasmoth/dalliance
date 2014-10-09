@@ -1079,7 +1079,7 @@ Browser.prototype.realMakeTier = function(source, config) {
             dragLabel.style.cursor = 'auto';
             dragTierHolder.removeChild(dragLabel);
             dragLabel = null;
-            label.style.visibility = null;
+            label.style.visibility = 'visible';
         }
         document.removeEventListener('mousemove', labelDragHandler, false);
         document.removeEventListener('mouseup', labelReleaseHandler, false);
