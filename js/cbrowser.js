@@ -390,6 +390,10 @@ Browser.prototype.realInit2 = function() {
                 thisB.zoom(Math.exp((1.0 * newZoom) / thisB.zoomExpt));
             }
             ev.stopPropagation(); ev.preventDefault();      
+        } else if (ev.keyCode == 85) { // u
+            thisB.singleBaseHighlight = !thisB.singleBaseHighlight;
+            thisB.positionRuler();
+            ev.stopPropagation(); ev.preventDefault();
         } else if (ev.keyCode == 39) { // right arrow
             ev.stopPropagation(); ev.preventDefault();
             thisB.scrollArrowKey(ev, -1);
