@@ -391,6 +391,10 @@ Browser.prototype.realInit2 = function() {
             }
             ev.stopPropagation(); ev.preventDefault();      
         } else if (ev.keyCode == 85) { // u
+            if (thisB.uiMode === 'opts') { // if the options are visible, toggle the checkbox too
+                var check = document.getElementById("singleBaseHightlightButton").checked;
+                document.getElementById("singleBaseHightlightButton").checked = !check;
+            } 
             thisB.singleBaseHighlight = !thisB.singleBaseHighlight;
             thisB.positionRuler();
             ev.stopPropagation(); ev.preventDefault();
