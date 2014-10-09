@@ -204,7 +204,9 @@ Browser.prototype.restoreStatus = function() {
                 var oldSource = ul[osi];
                 if (sourcesAreEqual(source, oldSource)) {
                     for (var k in oldSource) {
-                        if (oldSource.hasOwnProperty(k) && typeof(oldSource[k]) === 'function') {
+                        if (oldSource.hasOwnProperty(k) && 
+                            (typeof(oldSource[k]) === 'function' || oldSource[k] instanceof Blob))
+                        {
                             source[k] = oldSource[k];
                         }
                     }
