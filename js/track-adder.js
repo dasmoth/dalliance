@@ -49,6 +49,7 @@ if (typeof(require) !== 'undefined') {
     var DASSource = das.DASSource;
     var DASSegment = das.DASSegment;
     var DASRegistry = das.DASRegistry;
+    var coordsMatch = das.coordsMatch;
 }
 
 Browser.prototype.currentlyActive = function(source) {

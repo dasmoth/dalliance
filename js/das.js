@@ -835,6 +835,7 @@ if (typeof(module) !== 'undefined') {
 
         isDasBooleanTrue: isDasBooleanTrue,
         isDasBooleanNotFalse: isDasBooleanNotFalse,
-        copyStylesheet: copyStylesheet
+        copyStylesheet: copyStylesheet,
+        coordsMatch: coordsMatch
     };
 }
