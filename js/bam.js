@@ -185,8 +185,8 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             p +=  (nchnk * 16);
         }
     }
-//    dlog('leafChunks = ' + miniJSONify(leafChunks));
-//    dlog('otherChunks = ' + miniJSONify(otherChunks));
+    // console.log('leafChunks = ' + miniJSONify(leafChunks));
+    // console.log('otherChunks = ' + miniJSONify(otherChunks));
 
     var nintv = readInt(index, p);
     var lowest = null;
@@ -200,7 +200,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             lowest = lb;
         }
     }
-    // dlog('Lowest LB = ' + lowest);
+    // console.log('Lowest LB = ' + lowest);
     
     var prunedOtherChunks = [];
     if (lowest != null) {
@@ -211,7 +211,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             }
         }
     }
-    // dlog('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
+    // console.log('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
     otherChunks = prunedOtherChunks;
 
     var intChunks = [];
@@ -272,7 +272,6 @@ BamFile.prototype.fetch = function(chr, min, max, callback, opts) {
         if (index >= chunks.length) {
             return callback(records);
         } else if (!data) {
-            // dlog('fetching ' + index);
             var c = chunks[index];
             var fetchMin = c.minv.block;
             var fetchMax = c.maxv.block + (1<<16); // *sigh*
@@ -282,10 +281,13 @@ BamFile.prototype.fetch = function(chr, min, max, callback, opts) {
             });
         } else {
             var ba = new Uint8Array(data);
-            thisB.readBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId, opts);
+            var finished = thisB.readBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId, opts);
             data = null;
             ++index;
-            return tramp();
+            if (finished)
+                return callback(records);
+            else
+                return tramp();
         }
     }
     tramp();
@@ -441,6 +443,9 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
             if (chrId === undefined || refID == chrId) {
                 sink.push(record);
             }
+        }
+        if (record.pos > max) {
+            return true;
         }
         offset = blockEnd;
     }
