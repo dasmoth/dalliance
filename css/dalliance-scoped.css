@@ -256,6 +256,7 @@
 
 *.dalliance .loc-single-base-holder {
   display: inline-block;
+  margin-top: -4px;
   flex-shrink: 0;
   -webkit-flex-shrink: 0;
 }
@@ -276,6 +277,7 @@
 *.dalliance .toolbar {
   flex: none;
   -webkit-flex: none;
+  margin-bottom: 5px;
 }
 
 *.dalliance .toolbar > * {
