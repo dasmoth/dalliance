@@ -488,7 +488,7 @@ Browser.prototype.toggleOptsPopup = function(ev) {
             b.positionRuler();
             b.storeStatus();
         }, false);
-
+        singleBaseHighlightButton.setAttribute('id','singleBaseHightlightButton'); // making this because access is required when the key 'u' is pressed and the options are visible
         optsTable.appendChild(makeElement('tr', [makeElement('td', 'Display and highlight current genome location', {align: 'right'}), makeElement('td', singleBaseHighlightButton)]));
         
         optsForm.appendChild(optsTable);
