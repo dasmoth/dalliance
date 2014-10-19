@@ -1480,7 +1480,6 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
 }
 
 Browser.prototype.resizeViewer = function(skipRefresh) {
-    console.log('resize');
     var width = this.tierHolder.getBoundingClientRect().width | 0;
     if (width == 0)
         return;

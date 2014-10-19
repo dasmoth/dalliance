@@ -143,6 +143,33 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         holder.appendChild(genomePanel);
     }
 
+
+    var lt2 = Math.log10(2);
+    var lt5 = Math.log10(5);
+    var roundSliderValue = function(x) {
+        var ltx = (x / b.zoomExpt + Math.log(b.zoomBase)) / Math.log(10);
+        
+        var whole = ltx|0
+        var frac = ltx - whole;
+        var rounded
+
+        if (frac < 0.01)
+            rounded = whole;
+        else if (frac <= (lt2 + 0.01))
+            rounded = whole + lt2;
+        else if (frac <= (lt5 + 0.01))
+            rounded = whole + lt5;
+        else {
+            rounded = whole + 1;
+        }
+
+        return (rounded * Math.log(10) -Math.log(b.zoomBase)) * b.zoomExpt;
+    }
+
+    var markSlider = function(x) {
+        zoomSlider.addLabel(x, humanReadableScale(Math.exp(x / b.zoomExpt) * b.zoomBase));
+    }
+
     this.addViewListener(function(chr, min, max, _oldZoom, zoom) {
         locField.value = (chr + ':' + formatLongInt(min) + '..' + formatLongInt(max));
         zoomSlider.min = zoom.min|0;
@@ -161,10 +188,12 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         var zmin = zoom.min;
         var zmax = zoom.max;
         var zrange = zmax - zmin;
-        zoomSlider.addLabel(zmin, humanReadableScale(Math.exp(zmin / b.zoomExpt) * b.zoomBase));
-        zoomSlider.addLabel(zmin + (1.0*zrange/3.0), humanReadableScale(Math.exp((zmin + (1.0*zrange/3.0)) / b.zoomExpt) * b.zoomBase));
-        zoomSlider.addLabel(zmin + (2.0*zrange/3.0), humanReadableScale(Math.exp((zmin + (2.0*zrange/3.0)) / b.zoomExpt) * b.zoomBase));
-        zoomSlider.addLabel(zoom.max, humanReadableScale(Math.exp(b.zoomMax / b.zoomExpt) * b.zoomBase));
+
+        
+        markSlider(roundSliderValue(zmin));
+        markSlider(roundSliderValue(zmin + (1.0*zrange/3.0)));
+        markSlider(roundSliderValue(zmin + (2.0*zrange/3.0)));
+        markSlider(roundSliderValue(zmax));
 
         if (b.storeStatus) {
             b.storeViewStatus();
