@@ -1323,6 +1323,8 @@ Browser.prototype.refresh = function() {
 
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
         var ss = this.getSequenceSource();
+        if (this.knownSpace)
+            this.knownSpace.cancel();
         this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
     
@@ -1491,7 +1493,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
     if (oldFPW != this.featurePanelWidth) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
-        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);
+        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);   // FIXME hard-coded minimum.
         this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
         var viewWidth = this.viewEnd - this.viewStart;

@@ -87,6 +87,10 @@ function KnownSpace(tierMap, chr, min, max, scale, seqSource) {
     this.latestViews = {};
 }
 
+KnownSpace.prototype.cancel = function() {
+    this.cancelled = true;
+}
+
 KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
     var baton = this.featureCache[this.tierMap[0]];
     if (baton) {
@@ -268,7 +272,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     	    console.log('Finishing fetch ' + viewID);
 
     	var latestViewID = thisB.latestViews[tier] || -1;
-    	if (latestViewID > viewID) {
+    	if (thisB.cancelled || latestViewID > viewID) {
     	    return;
     	}
 
