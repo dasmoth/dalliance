@@ -231,7 +231,7 @@ Browser.prototype.realInit = function() {
     // Add listener to update single base location
     this.addViewListener(function(chr, minFloor, maxFloor, zoomSliderValue, zoomSliderDict, min, max) {
         // Just setting textContent causes layout flickering in Blink.
-        // This approach means that the element is never empty.');
+        // This approach means that the element is never empty.
         var loc = Math.round((max + min) / 2);
         self.locSingleBase.appendChild(document.createTextNode(chr + ':' + formatLongInt(loc)));
         self.locSingleBase.removeChild(self.locSingleBase.firstChild);
@@ -1799,6 +1799,13 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     if (this.instrumentActivity)
         this.activityStartTime = Date.now()|0;
     return callback();
+}
+
+Browser.prototype.setCenterLocation = function(newChr, newCenterLoc) {
+    var halfWidth = (this.viewEnd - this.viewStart)/2,
+    newMin = newCenterLoc - halfWidth,
+    newMax = newCenterLoc + halfWidth;
+    this.setLocation(newChr, newMin, newMax);
 }
 
 Browser.prototype.pingActivity = function() {
