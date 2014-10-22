@@ -145,7 +145,7 @@ function makeBam(data, bai, indexChunks, callback) {
 
     function parseBai(header) {
         if (!header) {
-            return callback(null, "Couldn't access BAI");
+            return "Couldn't access BAI";
         }
 
         var uncba = new Uint8Array(header);
@@ -172,13 +172,18 @@ function makeBam(data, bai, indexChunks, callback) {
                 bam.indices[ref] = new Uint8Array(header, blockStart, p - blockStart);
             }
         }
+
+        return true;
     }
 
     if (!bam.indexChunks) {
         bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
-            parseBai(header);
-            // bail out if parseBai fails?
-            bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
+            var result = parseBai(header);
+            if (result !== true) {
+              callback(null, result);
+            } else {
+              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
+            }
         });
     } else {
         var chunks = bam.indexChunks.chunks;

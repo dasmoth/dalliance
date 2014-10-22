@@ -95,4 +95,37 @@ describe('BAM files', function() {
             expect(features.length > 0).toBeTruthy();
         });
     });
+
+    it('does not fetch BAM when BAI load fails', function() {
+        var failUrl = { fetch: function(cb) { cb(null); } };
+        var countingUrl = {
+          count: 0,
+          fetch: function(cb) {
+            this.count += 1;
+            cb();
+          },
+          slice: function() {
+            return this;
+          }
+        };
+
+        var cb, err;
+        runs(function() {
+            makeBam(countingUrl, failUrl, null,
+                function(_bam, _err) {
+                    bam = _bam;
+                    err = _err;
+                    cb = true;
+                });
+        });
+
+        waitsFor(function() {
+            return cb;
+        }, "callback after fetch");
+
+        runs(function() {
+            expect(err).toEqual("Couldn't access BAI");
+            expect(countingUrl.count).toEqual(0);
+        });
+    });
 });
