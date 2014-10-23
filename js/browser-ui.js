@@ -410,13 +410,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
     holder.addEventListener('keydown', function(ev) {
         if (ev.keyCode === 27) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            b.uiMode = 'none';
-            b.hideToolPanel();
+            if (b.uiMode !== 'none') {
+                // Only consume event if tool panel is open.
+                ev.preventDefault();
+                ev.stopPropagation();
+                b.setUiMode('none');
+                b.hideToolPanel();
 
-            if (b.selectedTiers && b.selectedTiers.length > 0) {
-                b.browserHolder.focus();
+                if (b.selectedTiers && b.selectedTiers.length > 0) {
+                    b.browserHolder.focus();
+                }
             }
         }
     }, false);
