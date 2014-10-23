@@ -1183,7 +1183,7 @@ BAMFeatureSource.prototype.init = function() {
         bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials});
         baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
     }
-    makeBam(bamF, baiF, function(bam, err) {
+    makeBam(bamF, baiF, null, function(bam, err) {
         thisB.readiness = null;
         thisB.notifyReadiness();
 
@@ -1303,7 +1303,8 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
             command: 'connectBAM', 
             uri: resolveUrlToPage(uri), 
             indexUri: resolveUrlToPage(indexUri),
-            credentials: this.bamSource.credentials}, 
+            credentials: this.bamSource.credentials,
+            indexChunks: this.bamSource.indexChunks},
           cnt); 
     }
 }

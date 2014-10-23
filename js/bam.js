@@ -51,14 +51,101 @@ var BamFlags = {
 function BamFile() {
 }
 
-function makeBam(data, bai, callback) {
+
+// Calculate the length (in bytes) of the BAI ref starting at offset.
+// Returns {nbin, length, minBlockIndex}
+function _getBaiRefLength(uncba, offset) {
+    var p = offset;
+    var nbin = readInt(uncba, p); p += 4;
+    for (var b = 0; b < nbin; ++b) {
+        var bin = readInt(uncba, p);
+        var nchnk = readInt(uncba, p+4);
+        p += 8 + (nchnk * 16);
+    }
+    var nintv = readInt(uncba, p); p += 4;
+
+    var minBlockIndex = 1000000000;
+    var q = p;
+    for (var i = 0; i < nintv; ++i) {
+        var v = readVob(uncba, q); q += 8;
+        if (v) {
+            var bi = v.block;
+            if (v.offset > 0)
+                bi += 65536;
+
+            if (bi < minBlockIndex)
+                minBlockIndex = bi;
+            break;
+        }
+    }
+    p += (nintv * 8);
+
+    return {
+        minBlockIndex: minBlockIndex,
+        nbin: nbin,
+        length: p - offset
+    };
+}
+
+
+function makeBam(data, bai, indexChunks, callback) {
     var bam = new BamFile();
     bam.data = data;
     bam.bai = bai;
+    bam.indexChunks = indexChunks;
 
-    bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
+    var minBlockIndex = bam.indexChunks ? bam.indexChunks.minBlockIndex : 1000000000;
+
+    // Fills out bam.chrToIndex and bam.indexToChr based on the first few bytes of the BAM.
+    function parseBamHeader(r) {
+        if (!r) {
+            return callback(null, "Couldn't access BAM");
+        }
+
+        var unc = unbgzf(r, r.byteLength);
+        var uncba = new Uint8Array(unc);
+
+        var magic = readInt(uncba, 0);
+        if (magic != BAM_MAGIC) {
+            return callback(null, "Not a BAM file, magic=0x" + magic.toString(16));
+        }
+        var headLen = readInt(uncba, 4);
+        var header = '';
+        for (var i = 0; i < headLen; ++i) {
+            header += String.fromCharCode(uncba[i + 8]);
+        }
+
+        var nRef = readInt(uncba, headLen + 8);
+        var p = headLen + 12;
+
+        bam.chrToIndex = {};
+        bam.indexToChr = [];
+        for (var i = 0; i < nRef; ++i) {
+            var lName = readInt(uncba, p);
+            var name = '';
+            for (var j = 0; j < lName-1; ++j) {
+                name += String.fromCharCode(uncba[p + 4 + j]);
+            }
+            var lRef = readInt(uncba, p + lName + 4);
+            bam.chrToIndex[name] = i;
+            if (name.indexOf('chr') == 0) {
+                bam.chrToIndex[name.substring(3)] = i;
+            } else {
+                bam.chrToIndex['chr' + name] = i;
+            }
+            bam.indexToChr.push(name);
+
+            p = p + 8 + lName;
+        }
+
+        if (bam.indices) {
+            return callback(bam);
+        }
+    }
+
+    function parseBai(header) {
         if (!header) {
-            return callback(null, "Couldn't access BAI");
+            return "Couldn't access BAI";
         }
 
         var uncba = new Uint8Array(header);
@@ -72,84 +159,40 @@ function makeBam(data, bai, callback) {
         bam.indices = [];
 
         var p = 8;
-        var minBlockIndex = 1000000000;
         for (var ref = 0; ref < nref; ++ref) {
             var blockStart = p;
-            var nbin = readInt(uncba, p); p += 4;
-            for (var b = 0; b < nbin; ++b) {
-                var bin = readInt(uncba, p);
-                var nchnk = readInt(uncba, p+4);
-                p += 8 + (nchnk * 16);
-            }
-            var nintv = readInt(uncba, p); p += 4;
-            
-            var q = p;
-            for (var i = 0; i < nintv; ++i) {
-                var v = readVob(uncba, q); q += 8;
-                if (v) {
-                    var bi = v.block;
-                    if (v.offset > 0)
-                        bi += 65536;
+            var o = _getBaiRefLength(uncba, blockStart);
+            p += o.length;
 
-                    if (bi < minBlockIndex)
-                        minBlockIndex = bi;
-                    break;
-                }
-            }
-            p += (nintv * 8);
+            minBlockIndex = Math.min(o.minBlockIndex, minBlockIndex);
 
+            var nbin = o.nbin;
 
             if (nbin > 0) {
                 bam.indices[ref] = new Uint8Array(header, blockStart, p - blockStart);
-            }                     
+            }
         }
 
-        bam.data.slice(0, minBlockIndex).fetch(function(r) {
-            if (!r) {
-                return callback(null, "Couldn't access BAM");
-            }
-            
-            var unc = unbgzf(r, r.byteLength);
-            var uncba = new Uint8Array(unc);
+        return true;
+    }
 
-            var magic = readInt(uncba, 0);
-            if (magic != BAM_MAGIC) {
-                return callback(null, "Not a BAM file, magic=0x" + magic.toString(16));
-            }
-            var headLen = readInt(uncba, 4);
-            var header = '';
-            for (var i = 0; i < headLen; ++i) {
-                header += String.fromCharCode(uncba[i + 8]);
-            }
-
-            var nRef = readInt(uncba, headLen + 8);
-            var p = headLen + 12;
-
-            bam.chrToIndex = {};
-            bam.indexToChr = [];
-            for (var i = 0; i < nRef; ++i) {
-                var lName = readInt(uncba, p);
-                var name = '';
-                for (var j = 0; j < lName-1; ++j) {
-                    name += String.fromCharCode(uncba[p + 4 + j]);
-                }
-                var lRef = readInt(uncba, p + lName + 4);
-                bam.chrToIndex[name] = i;
-                if (name.indexOf('chr') == 0) {
-                    bam.chrToIndex[name.substring(3)] = i;
-                } else {
-                    bam.chrToIndex['chr' + name] = i;
-                }
-                bam.indexToChr.push(name);
-
-                p = p + 8 + lName;
-            }
-
-            if (bam.indices) {
-                return callback(bam);
+    if (!bam.indexChunks) {
+        bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
+            var result = parseBai(header);
+            if (result !== true) {
+              callback(null, result);
+            } else {
+              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
             }
         });
-    });
+    } else {
+        var chunks = bam.indexChunks.chunks;
+        bam.indices = []
+        for (var i = 0; i < chunks.length; i++) {
+           bam.indices[i] = null;  // To be filled out lazily as needed
+        }
+        bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
+    }
 }
 
 
@@ -258,6 +301,16 @@ BamFile.prototype.fetch = function(chr, min, max, callback, opts) {
     if (chrId === undefined) {
         chunks = [];
     } else {
+        // Fetch this portion of the BAI if it hasn't been loaded yet.
+        if (this.indices[chrId] === null && this.indexChunks.chunks[chrId]) {
+            var start_stop = this.indexChunks.chunks[chrId];
+            return this.bai.slice(start_stop[0], start_stop[1]).fetch(function(data) {
+                var buffer = new Uint8Array(data);
+                this.indices[chrId] = buffer;
+                return this.fetch(chr, min, max, callback, opts);
+            }.bind(this));
+        }
+
         chunks = this.blocksForRange(chrId, min, max);
         if (!chunks) {
             callback(null, 'Error in index fetch');
