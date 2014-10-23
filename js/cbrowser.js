@@ -71,8 +71,7 @@ function Browser(opts) {
     this.maxExtra = 2.5;
     this.minExtra = 0.5;
     this.zoomFactor = 1.0;
-    this.zoomMin = 10.0;
-    // this.zoomMax;       // Allow configuration for compatibility, but otherwise clobber.
+    this.maxPixelsPerBase = 10;
     this.origin = 0;
     this.targetQuantRes = 1.0;
     this.featurePanelWidth = 750;
@@ -310,7 +309,7 @@ Browser.prototype.realInit2 = function() {
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
-        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);
+        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / this.maxPixelsPerBase / this.zoomBase);
     }
     this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
@@ -1493,7 +1492,7 @@ Browser.prototype.resizeViewer = function(skipRefresh) {
 
     if (oldFPW != this.featurePanelWidth) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
-        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / 10 / this.zoomBase);   // FIXME hard-coded minimum.
+        this.zoomMin = this.zoomExpt * Math.log(this.featurePanelWidth / this.maxPixelsPerBase / this.zoomBase);   // FIXME hard-coded minimum.
         this.zoomSliderValue = this.zoomExpt * Math.log((this.viewEnd - this.viewStart + 1) / this.zoomBase);
 
         var viewWidth = this.viewEnd - this.viewStart;
