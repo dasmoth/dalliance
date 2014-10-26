@@ -225,7 +225,7 @@ Browser.prototype.realInit = function() {
     this.pinnedTierHolder = makeElement('div', null, {className: 'tier-holder tier-holder-pinned'});
     this.tierHolder = makeElement('div', this.makeLoader(24), {className: 'tier-holder tier-holder-rest'});
 
-    this.locSingleBase = makeElement('span', 'foo', {className: 'loc-single-base'});
+    this.locSingleBase = makeElement('span', '', {className: 'loc-single-base'});
     var locSingleBaseHolder = makeElement('div', this.locSingleBase,{className: 'loc-single-base-holder'}); 
     // Add listener to update single base location
     this.addViewListener(function(chr, minFloor, maxFloor, zoomSliderValue, zoomSliderDict, min, max) {

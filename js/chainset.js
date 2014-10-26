@@ -203,20 +203,27 @@ Chainset.prototype.unmapPoint = function(chr, pos) {
 }
 
 Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
+    var STATE_PENDING = 1;
+    var STATE_FETCHED = 2;
+
     var thisCS = this;
     var minTile = (min/this.granularity)|0;
     var maxTile = (max/this.granularity)|0;
 
+    var needsNewOrPending = false;
     var needsNewFetch = false;
     for (var t = minTile; t <= maxTile; ++t) {
         var tn = chr + '_' + t;
-        if (!this.fetchedTiles[tn]) {
-            needsNewFetch = true;
-            this.fetchedTiles[tn] = true;
+        if (this.fetchedTiles[tn] != STATE_FETCHED) {
+            needsNewOrPending = true;
+            if (this.fetchedTiles[tn] != STATE_PENDING) {
+                this.fetchedTiles[tn] = STATE_PENDING;
+                needsNewFetch = true;
+            }
         }
     }
 
-    if (needsNewFetch) {
+    if (needsNewOrPending) {
         if (!this.postFetchQueues[chr]) {
             this.chainFetcher.fetchChains(
                 chr, 
@@ -264,6 +271,10 @@ Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
                         }
                     }
                 }
+                for (var t = minTile; t <= maxTile; ++t) {
+                    var tn = chr + '_' + t;
+                    thisCS.fetchedTiles[tn] = STATE_FETCHED;
+                }
                 if (thisCS.postFetchQueues[chr]) {
                     var pfq = thisCS.postFetchQueues[chr];
                     for (var i = 0; i < pfq.length; ++i) {
@@ -271,7 +282,9 @@ Chainset.prototype.sourceBlocksForRange = function(chr, min, max, callback) {
                     }
                     thisCS.postFetchQueues[chr] = null;
                 }
-              });
+              }).catch(function (err) {
+                console.log(err);
+              });   
         }
 
         pusho(this.postFetchQueues, chr, function() {
