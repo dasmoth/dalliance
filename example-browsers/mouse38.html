@@ -1,0 +1,67 @@
+<!DOCTYPE html> 
+
+<html>
+
+<head>
+
+<style>
+</style>
+
+<title>Mouse GRCm38 :: Dalliance</title> 
+<script language="javascript" src="../build/dalliance-all.js"></script>
+
+<script language="javascript">
+
+var b = new Browser({
+      chr:        '19',
+      viewStart:  30000000,
+      viewEnd:    30100000,
+      cookieKey:  'mouse38',
+
+      coordSystem: {
+          speciesName: 'Mouse',
+          taxon: 10090,
+          auth: 'GRCm',
+          version: 38,
+          ucscName: 'mm10'
+      },
+
+
+    chains: {
+      mm9ToMm10: new Chainset('http://www.derkholm.net:8080/das/mm9ToMm10/', 'NCBIM37', 'GRCm38',
+                               {
+                                  speciesName: 'Mouse',
+                                  taxon: 10090,
+                                  auth: 'NCBIM',
+                                  version: 37,
+                                  ucscName: 'mm9'
+                               })
+    }, 
+
+
+      sources:      [{name: 'Genome',
+                     twoBitURI:  'http://www.biodalliance.org/datasets/GRCm38/mm10.2bit',
+                     desc: 'Mouse reference genome build GRCm38',
+                     tier_type: 'sequence',
+                     provides_entrypoints: true}
+                      ,{name: 'Genes',
+                        desc: 'Gene structures from GENCODE M2',
+                        bwgURI: 'http://www.biodalliance.org/datasets/GRCm38/gencodeM2.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
+                        collapseSuperGroups: true,
+                        trixURI: 'http://www.biodalliance.org/datasets/GRCm38/gencodeM2.ix'}
+                      ,{name: 'Repeats',
+                        desc: 'Repeat annotation from UCSC', 
+                        bwgURI: 'http://www.biodalliance.org/datasets/GRCm38/repeats.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats2.xml'}],
+        uiPrefix: '../',
+        fullScreen: true                    
+});
+</script>
+</head>
+
+<body>
+<div id='svgHolder'>Failed to load the Biodalliance genome browser.  Have you run "gulp"?</div>
+</body>
+</html>
+

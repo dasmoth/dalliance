@@ -8,7 +8,7 @@
 </style>
 
 <title>Human GRCh37 :: Dalliance</title> 
-<script language="javascript" src="build/dalliance-all.js"></script>
+<script language="javascript" src="../build/dalliance-all.js"></script>
 
 <script language="javascript">
   var b = new Browser({
@@ -81,21 +81,16 @@
                 ],
 
     setDocumentTitle: true,
-    uiPrefix: '',
+    uiPrefix: '../',
 
     fullScreen: true,
 
-    browserLinks: {
-        Ensembl: 'http://ncbi36.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-        UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',
-        Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'
-    }
-  });
-  
-  b.hubs = [
+    hubs: [
             'http://www.biodalliance.org/datasets/testhub/hub.txt',
             'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt'
-           ];
+           ]
+  });
+  
   
   b.addFeatureInfoPlugin(function(f, info) {
       info.add('Testing', 'This is a test!');
@@ -106,32 +101,12 @@
     link.href = 'http://www.ensembl.org/Homo_sapiens/Location/View?r=' + chr + ':' + min + '-' + max;
   });
 
-/*
-  var geneDescriptions;
-  connectBigTab(new URLFetchable('http://www.biodalliance.org/datasets/ensg-to-desc.bt'), function(bt) {
-    geneDescriptions = bt;
-  });
-
-b.addFeatureInfoPlugin(function(f, info) {
-  if (f.geneId) {
-    var desc = makeElement('div', 'Loading...');
-    info.add('Description', desc);
-    geneDescriptions.index.lookup(f.geneId, function(res, err) {
-      if (err) {
-        console.log(err);
-      } else {
-        desc.textContent = res;
-      }
-    });
-  }
-}); */
-
 </script>
 </head>
 
 <body>
 <a href='http://www.ensembl.org/' id='enslink' target='_newtab'>Link to Ensembl</a>
-<div id='svgHolder'>Dalliance genome browser goes here.  Unless you have an ancient web browser or something.</div>
+<div id='svgHolder'>Failed to load the Biodalliance genome browser.  Have you run "gulp"?</div>
 </body>
 </html>
 
