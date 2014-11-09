@@ -1754,7 +1754,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     this.viewEnd = newMax;
     var newScale = Math.max(this.featurePanelWidth, 50) / (this.viewEnd - this.viewStart);
     var oldScale = this.scale;
-    var scaleChanged = (Math.abs(newScale - oldScale)) > 0.0001;
+    var scaleChanged = (Math.abs(newScale - oldScale)) > 0.000001;
     this.scale = newScale;
 
     var newZS, oldZS;
