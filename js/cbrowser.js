@@ -151,6 +151,7 @@ function Browser(opts) {
         if (proto == 'http:' || proto == 'https:') {
             // Protocol-relative URLs okay.
         } else {
+            console.log(window.location.protocol);
             console.log('WARNING: prefix is set to a protocol-relative URL (' + this.prefix + ' when loading from a non-HTTP source');
             this.prefix = 'http:' + this.prefix;
         }
@@ -2352,7 +2353,8 @@ function FetchWorker(browser, worker) {
 function makeFetchWorker(browser) {
     var wurl = browser.resolveURL(browser.workerPath);
     if (wurl.indexOf('//') == 0) {
-        if (window.location.prototype === 'https:')
+        var proto = window.location.protocol;
+        if (proto == 'https:')
             wurl = 'https:' + wurl;
         else
             wurl = 'http:' + wurl;
