@@ -64,7 +64,7 @@ function Browser(opts) {
     this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
-    this.registry = 'http://www.dasregistry.org/das/sources';
+    this.registry = '//www.dasregistry.org/das/sources';
     this.chains = {};
 
     this.pageName = 'svgHolder'
@@ -147,7 +147,8 @@ function Browser(opts) {
         this.prefix = opts.uiPrefix;
     }
     if (this.prefix.indexOf('//') === 0) {
-        if (window.location.prototol === 'http:' || window.location.protocol === 'https:') {
+        var proto = window.location.protocol;
+        if (proto == 'http:' || proto == 'https:') {
             // Protocol-relative URLs okay.
         } else {
             console.log('WARNING: prefix is set to a protocol-relative URL (' + this.prefix + ' when loading from a non-HTTP source');
