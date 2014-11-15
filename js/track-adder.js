@@ -1088,7 +1088,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (nds.baiBlob) {
             indexF = new BlobFetchable(nds.baiBlob);
         } else {
-            indexF = new URLFetchable(nds.bamURI + '.bai');
+            indexF = new URLFetchable(nds.bamURI + '.bai', {credentials: nds.credentials});
         }
         indexF.slice(0, 256).fetch(function(r) {
                 var hasBAI = false;
