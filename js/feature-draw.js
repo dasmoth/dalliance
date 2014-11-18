@@ -870,11 +870,11 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
 
         if (gtype === 'HISTOGRAM') {
             if (relScore >= relOrigin) {
-                height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-                y = y + ((1.0 - relOrigin) * requiredHeight) - height;
+                height = (relScore - Math.max(0, relOrigin)) * requiredHeight;
+                y = y + ((1.0 - Math.max(0, relOrigin)) * requiredHeight) - height;
             } else {
-                height = Math.max(1, (relOrigin - relScore) * requiredHeight);
-                y = y + ((1.0 - relOrigin) * requiredHeight);
+                height = (Math.max(0, relOrigin) - relScore) * requiredHeight;
+                y = y + ((1.0 - Math.max(0, relOrigin)) * requiredHeight);
             }
             quant = {min: smin, max: smax};
         }
@@ -906,6 +906,7 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
         }
 
         gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
+        gg = new TranslatedGlyph(gg, 0, 0, requiredHeight);
     } else if (gtype === 'HIDDEN') {
         gg = new PaddedGlyph(null, minPos, maxPos);
         noLabel = true;
