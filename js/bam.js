@@ -287,7 +287,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
-    // dlog('mergedChunks = ' + miniJSONify(mergedChunks));
+    // console.log('mergedChunks = ' + miniJSONify(mergedChunks));
 
     return mergedChunks;
 }
@@ -328,6 +328,7 @@ BamFile.prototype.fetch = function(chr, min, max, callback, opts) {
             var c = chunks[index];
             var fetchMin = c.minv.block;
             var fetchMax = c.maxv.block + (1<<16); // *sigh*
+            // console.log('fetching ' + fetchMin + ':' + fetchMax);
             thisB.data.slice(fetchMin, fetchMax - fetchMin).fetch(function(r) {
                 data = unbgzf(r, c.maxv.block - c.minv.block + 1);
                 return tramp();
@@ -357,7 +358,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
         if (blockEnd >= ba.length) {
-            return sink;
+            return false;
         }
 
         var record = new BamRecord();
