@@ -146,6 +146,11 @@ function Browser(opts) {
     if (typeof(opts.uiPrefix) === 'string' && typeof(opts.prefix) !== 'string') {
         this.prefix = opts.uiPrefix;
     }
+    // If the prefix only starts with a single '/' this is relative to the current
+    // site, so we need to prefix the prefix with //{hostname}
+    if (this.prefix.indexOf('//') < 0 && this.prefix.indexOf('/') === 0) {
+        this.prefix = '//'+window.location.hostname+this.prefix;
+    }
     if (this.prefix.indexOf('//') === 0) {
         var proto = window.location.protocol;
         if (proto == 'http:' || proto == 'https:') {
