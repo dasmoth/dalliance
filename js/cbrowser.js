@@ -1692,6 +1692,14 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft)
         throw Error('maximum must be a number (got ' + JSON.stringify(newMax) + ')');
     }
 
+    if (newMin > newMax) {
+        var oldNewMin = newMin;
+        newMin = newMax;
+        newMax = oldNewMin;
+    } else if (newMin === newMax) {
+        newMax += 1;
+    }
+
     if (!callback) {
         callback = function(err) {
             if (err) {
