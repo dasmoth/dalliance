@@ -35,6 +35,10 @@ if (typeof(require) !== 'undefined') {
     var URLFetchable = bin.URLFetchable;
     var BlobFetchable = bin.BlobFetchable;
 
+    var bam = require('./bam');
+    var BAI_MAGIC = bam.BAI_MAGIC;
+
+
     var twoBit = require('./twoBit');
     var makeTwoBit = twoBit.makeTwoBit;
 
@@ -1299,14 +1303,30 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
     if (blob) {
         this.worker.postCommand({command: 'connectBAM', blob: blob, indexBlob: indexBlob}, cnt);
     } else {
-        this.worker.postCommand({
-            command: 'connectBAM', 
-            uri: resolveUrlToPage(uri), 
-            indexUri: resolveUrlToPage(indexUri),
-            credentials: this.bamSource.credentials,
-            indexChunks: this.bamSource.indexChunks},
-          cnt); 
-    }
+        // Need to determine if determine if index file exists on server
+        // create a URLFetchable and fetch a small slice if that returns nothing attempt
+        // to find x.bai
+        var baiF = new URLFetchable(indexUri, {credentials: this.bamSource.credentials});
+        baiF.slice(0, 256).fetch(function(result) {
+            var hasBAI = false;
+            if (result) {
+                var ba = new Uint8Array(result);
+                var magic2 = readInt(ba, 0);
+                hasBAI = (magic2 == BAI_MAGIC);
+            }
+            if (!hasBAI) {
+                indexUri = indexUri.replace('.bam.bai', '.bai');
+                baiF = new URLFetchable(indexUri, {credentials: this.bamSource.credentials});
+            }
+            this.worker.postCommand({
+                command: 'connectBAM', 
+                uri: resolveUrlToPage(uri), 
+                indexUri: resolveUrlToPage(indexUri),
+                credentials: this.bamSource.credentials,
+                indexChunks: this.bamSource.indexChunks},
+                cnt); 
+        }.bind(this))
+     }
 }
 
 RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {

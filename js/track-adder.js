@@ -1088,7 +1088,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (nds.baiBlob) {
             indexF = new BlobFetchable(nds.baiBlob);
         } else {
-            indexF = new URLFetchable(nds.bamURI + '.bai', {credentials: nds.credentials});
+            indexF = new URLFetchable(nds.baiURI || nds.bamURI + '.bai', {credentials: nds.credentials});
         }
         indexF.slice(0, 256).fetch(function(r) {
                 var hasBAI = false;
@@ -1099,6 +1099,11 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
                 if (hasBAI) {
                     return addDasCompletionPage(nds, false, false, true);
+                } else if (!nds.baiURI) { 
+                    // In this case the default x.bam.bai has not been found so attempt to find
+                    // x.bam
+                    nds.baiURI = nds.bamURI.replace('.bam', '.bai');
+                    return completeBAM(nds);
                 } else {
                     return binFormatErrorPage('You have selected a valid BAM file, but a corresponding index (.bai) file was not found.  Please index your BAM (samtools index) and place the BAI file in the same directory');
                 }
