@@ -59,6 +59,8 @@ if (typeof(require) !== 'undefined') {
 
     var style = require('./style');
     var StyleFilterSet = style.StyleFilterSet;
+
+    var lookupEncodeURI = require('./encode').lookupEncodeURI;
 }
 
 var __dalliance_sourceAdapterFactories = {};
@@ -562,7 +564,18 @@ function BWGFeatureSource(bwgSource) {
     this.bwgSource = this.opts = bwgSource;    
     thisB.bwgHolder = new Awaited();
 
-    if (this.opts.preflight) {
+    if (this.opts.transport === 'encode') {
+        var uri = this.opts.uri || this.opts.bwgURI;
+        lookupEncodeURI(uri)
+          .then(function(newURI) {
+            thisB.uri = newURI;
+            thisB.init();
+          })
+          .catch(function(err) {
+            console.log(err);
+            thisB.bwgHolder.provide(null);
+          });
+    } else if (this.opts.preflight) {
         var pfs = bwg_preflights[this.opts.preflight];
         if (!pfs) {
             pfs = new Awaited();
@@ -599,8 +612,10 @@ BWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 BWGFeatureSource.prototype.init = function() {
     var thisB = this;
     var arg;
-    if (this.bwgSource.bwgURI) {
-        arg = new URLFetchable(this.bwgSource.bwgURI, {credentials: this.opts.credentials});
+
+    var uri = this.uri || this.bwgSource.uri || this.bwgSource.bwgURI;
+    if (uri) {
+        arg = new URLFetchable(uri, {credentials: this.opts.credentials});
     } else {
         arg = new BlobFetchable(this.bwgSource.bwgBlob);
     }
@@ -836,18 +851,34 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
 function RemoteBWGFeatureSource(bwgSource, worker) {
     FeatureSourceBase.call(this);
 
+    var thisB = this;
     this.worker = worker;
     this.readiness = 'Connecting';
     this.bwgSource = this.opts = bwgSource;
     this.keyHolder = new Awaited();
-    this.init();
+
+
+    if (this.opts.transport === 'encode') {
+        var uri = this.opts.uri || this.opts.bwgURI;
+        lookupEncodeURI(uri)
+          .then(function(newURI) {
+            thisB.uri = newURI;
+            thisB.init();
+          })
+          .catch(function(err) {
+            console.log(err);
+            thisB.bwgHolder.provide(null);
+          });
+    } else {
+        this.init();
+    }
 }
 
 RemoteBWGFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 RemoteBWGFeatureSource.prototype.init = function() {
     var thisB = this;
-    var uri = this.bwgSource.uri || this.bwgSource.bwgURI;
+    var uri = this.uri || this.bwgSource.uri || this.bwgSource.bwgURI;
     var blob = this.bwgSource.blob || this.bwgSource.bwgBlob;
 
     var cnt = function(key, err) {
