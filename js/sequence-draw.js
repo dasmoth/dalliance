@@ -84,13 +84,13 @@ function drawSeqTier(tier, seq) {
         gc.scale(2, 2);
     }
 
+    gc.translate(1000,0);
     drawSeqTierGC(tier, seq, gc);
 }
 
 function drawSeqTierGC(tier, seq, gc)
 {
     var scale = tier.browser.scale, knownStart = tier.browser.viewStart - (1000/scale)|0, knownEnd = tier.browser.viewEnd + (2000/scale), currentSeqMax = tier.browser.currentSeqMax;
-    gc.translate(1000,0);
 
     var seqTierMax = knownEnd;
     if (currentSeqMax > 0 && currentSeqMax < knownEnd) {
