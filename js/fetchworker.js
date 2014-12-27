@@ -12,6 +12,7 @@
 var bin = require('./bin');
 var bam = require('./bam');
 var bigwig = require('./bigwig');
+var encode = require('./encode');
 
 var connections = {};
 
@@ -54,6 +55,8 @@ self.onmessage = function(event) {
         var bbi;
         if (d.blob) {
             bbi = new bin.BlobFetchable(d.blob);
+        } else if (d.transport == 'encode') {
+            bbi = new encode.EncodeFetchable(d.uri, {credentials: d.credentials});
         } else {
             bbi = new bin.URLFetchable(d.uri, {credentials: d.credentials});
         }
