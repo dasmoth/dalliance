@@ -50,6 +50,8 @@ if (typeof(require) !== 'undefined') {
     var DASSegment = das.DASSegment;
     var DASRegistry = das.DASRegistry;
     var coordsMatch = das.coordsMatch;
+
+    var EncodeFetchable = require('./encode').EncodeFetchable;
 }
 
 Browser.prototype.currentlyActive = function(source) {
@@ -715,7 +717,14 @@ Browser.prototype.showTrackAdder = function(ev) {
                     if (!/^.+:\/\//.exec(curi)) {
                         curi = 'http://' + curi;
                     }
-                    tryAddBin({uri: curi});
+                    var source = {uri: curi};
+                    var lcuri = curi.toLowerCase();
+                    if (lcuri.indexOf("https://www.encodeproject.org/") == 0 &&
+                        lcuri.indexOf("@@download") >= 0) 
+                    {
+                        source.transport = 'encode';
+                    }
+                    tryAddBin(source);
                 }
             } else if (customMode === 'reset') {
                 switchToCustomMode();
@@ -994,6 +1003,9 @@ Browser.prototype.showTrackAdder = function(ev) {
         if (s.mapping && s.mapping != '__default__')
             nds.mapping = s.mapping;
 
+        if (s.transport)
+            nds.transport = s.transport;
+
         if (s.tier_type == 'bwg') {
             if (s.blob)
                 nds.bwgBlob = s.blob;
@@ -1085,11 +1097,13 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     function completeBAM(nds) {
         var indexF;
-        if (nds.baiBlob) {
+        if (nds.baiBlob) 
             indexF = new BlobFetchable(nds.baiBlob);
-        } else {
+        else if (nds.transport == 'encode')
+            indexF = new EncodeFetchable(nds.bamURI + '.bai');
+        else
             indexF = new URLFetchable(nds.bamURI + '.bai', {credentials: nds.credentials});
-        }
+
         indexF.slice(0, 256).fetch(function(r) {
                 var hasBAI = false;
                 if (r) {

@@ -28,6 +28,8 @@ if (typeof(require) !== 'undefined') {
 
     var tbi = require('./tabix');
     var TABIX_MAGIC = tbi.TABIX_MAGIC;
+
+    var EncodeFetchable = require('./encode').EncodeFetchable;
 }
 
 function probeResource(source, listener, retry) {
@@ -38,7 +40,9 @@ function probeResource(source, listener, retry) {
     var fetchable;
     if (source.blob)
         fetchable = new BlobFetchable(source.blob);
-    else 
+    else if (source.transport == 'encode')
+        fetchable = new EncodeFetchable(source.uri);
+    else
         fetchable = new URLFetchable(source.uri, {credentials: source.credentials});
 
     fetchable.slice(0, 1<<16).salted().fetch(function(result, error) {
