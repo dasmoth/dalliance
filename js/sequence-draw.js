@@ -86,6 +86,8 @@ function drawSeqTier(tier, seq) {
 
     gc.translate(1000,0);
     drawSeqTierGC(tier, seq, gc);
+    tier.norigin = tier.browser.viewStart;
+    tier.viewportHolder.style.left = '-1000px';
 }
 
 function drawSeqTierGC(tier, seq, gc)
@@ -140,10 +142,7 @@ function drawSeqTierGC(tier, seq, gc)
 				}
 		    }
 		}
-    } 
-
-    tier.norigin = tier.browser.viewStart;
-    tier.viewportHolder.style.left = '-1000px';
+    }
 }
 
 function svgSeqTier(tier, seq) {
