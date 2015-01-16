@@ -47,7 +47,7 @@ function TabixFeatureSource(source) {
         index = new BlobFetchable(this.source.indexBlob);
     } else {
         data = new URLFetchable(this.source.uri, {credentials: this.source.credentials});
-        index = new URLFetchable(this.source.indexURI || (this.source.uri + '.tbi'), {credentials: this.source.credentials});
+        index = new URLFetchable(this.source.tbiURI || this.source.indexURI || (this.source.uri + '.tbi'), {credentials: this.source.credentials});
     }
     connectTabix(data, index, function(tabix, err) {
         thisB.tabixHolder.provide(tabix);
@@ -60,7 +60,7 @@ function TabixFeatureSource(source) {
                 session.flush();
             }
         });
-        thisB.readiness = null
+        thisB.readiness = null;
         thisB.notifyReadiness();
     });
 }
@@ -69,10 +69,10 @@ TabixFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
 
 TabixFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
     var thisB = this;
-    
+
     thisB.busy++;
     thisB.notifyActivity();
-    
+
     this.tabixHolder.await(function(tabix) {
         tabix.fetch(chr, min, max, function(records, error) {
             thisB.busy--;
