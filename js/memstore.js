@@ -192,7 +192,9 @@ MemStoreFeatureSource.prototype._load = function(callback) {
         }
         r.readAsText(this.source.blob);
     } else {
-        textXHR(this.source.uri, callback, {});
+        if (this.source.credentials)
+            var opts = {credentials : this.source.credentials};
+        textXHR(this.source.uri, callback, opts);
     }
 }
 

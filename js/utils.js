@@ -332,7 +332,7 @@ function saltURL(url) {
 }
 
 function textXHR(url, callback, opts) {
-    if (opts.salt) 
+    if (opts && opts.salt) 
         url = saltURL(url);
 
     var req = new XMLHttpRequest();
