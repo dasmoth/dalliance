@@ -88,7 +88,7 @@ function _getBaiRefLength(uncba, offset) {
 }
 
 
-function makeBam(data, bai, indexChunks, callback) {
+function makeBam(data, bai, indexChunks, callback, attempted) {
     var bam = new BamFile();
     bam.data = data;
     bam.bai = bai;
@@ -180,7 +180,17 @@ function makeBam(data, bai, indexChunks, callback) {
         bam.bai.fetch(function(header) {   // Do we really need to fetch the whole thing? :-(
             var result = parseBai(header);
             if (result !== true) {
-              callback(null, result);
+                if (bam.bai.url && typeof(attempted) === "undefined") {
+                    // Already attempted x.bam.bai not there so now trying x.bai
+                    bam.bai.url = bam.data.url.replace(new RegExp('.bam$'), '.bai');
+                    
+                     // True lets us know we are making a second attempt
+                    makeBam(data, bam.bai, indexChunks, callback, true);
+                }
+                else {
+                    // We've attempted x.bam.bai & x.bai and nothing worked
+                    callback(null, result);
+                }
             } else {
               bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
             }
