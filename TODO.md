@@ -1,20 +1,14 @@
-For 0.13
+For 0.14
 --------
 
-  - [*] Leaping bug fixes.
   - [ ] Replace feature popups with inspector-like interface
-  - [*] Keep labels of large features on-screen (maybe needs to be optional?)
   - [ ] Apply track-edit operations to multiple tracks at once.
   - [ ] Typeahead for search-by-gene-ID
   - [ ] Animate when leaping/toggling.
-  - [*] Overlay function plugin API
   - [ ] Search-by-name (or description) in track-adder.
   - [ ] Support for non-positional annotations (UI hookup for bigtab client)
-  - [*] High-res image export.
-  - [*] Gene translations (thanks to @ymen)
-  - [*] BAM Rendering improvements (thanks to @ymen)
 
-For 0.14
+For 0.15
 --------
 
   - [ ] Feature selection
