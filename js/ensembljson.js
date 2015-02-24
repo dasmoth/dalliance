@@ -22,7 +22,15 @@ if (typeof(require) !== 'undefined') {
 
 function EnsemblFeatureSource(source) {
     this.source = source;
-    this.base = source.uri || 'http://rest.ensembl.org';
+    this.base = source.uri || '//rest.ensembl.org';
+    if (this.base.indexOf('//') === 0) {
+        var proto = window.location.protocol;
+        if (proto == 'http:' || proto == 'https:') {
+            // Protocol-relative URLs okay.
+        } else {
+            this.base = 'http:' + this.base;
+        }
+    }
     this.species = source.species || 'human';
 
     this.activityListeners = [];
