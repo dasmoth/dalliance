@@ -144,8 +144,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
 
-    var lt2 = Math.log10(2);
-    var lt5 = Math.log10(5);
+    var lt2 = Math.log(2) / Math.log(10);
+    var lt5 = Math.log(5) / Math.log(10);
     var roundSliderValue = function(x) {
         var ltx = (x / b.zoomExpt + Math.log(b.zoomBase)) / Math.log(10);
         
