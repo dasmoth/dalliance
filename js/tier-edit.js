@@ -322,9 +322,13 @@ Browser.prototype.openTierPanel = function(tier) {
                     seqMismatchToggle.checked = (seqStyle.__SEQCOLOR === 'mismatch');
                     seqInsertRow.style.display = 'table-row';
                     seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
+                    seqIgnoreQualsRow.style.display = 'table-row';
+                    seqIgnoreQualsToggle.checked = (seqStyle.__disableQuals === true);
+                    console.log(seqStyle.__disableQuals);
                 } else {
                     seqMismatchRow.style.display = 'none';
                     seqInsertRow.style.display = 'none';
+                    seqIgnoreQualsRow.style.display = 'none';
                 }
 
                 if (seqStyle && seqMismatchToggle.checked && !isSimpleQuantitative) {
@@ -361,6 +365,18 @@ Browser.prototype.openTierPanel = function(tier) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
             seqStyle.__INSERTIONS = seqInsertToggle.checked ? 'yes' : 'no';
+            tier.mergeStylesheet(nss);
+        });
+
+        var seqIgnoreQualsToggle = makeElement('input', null, {type: 'checkbox'});
+        var seqIgnoreQualsRow = makeElement('tr',
+            [makeElement('th', 'Reflect base quality as base color transparency'),
+             makeElement('td', seqIgnoreQualsToggle)]);
+        seqIgnoreQualsToggle.addEventListener('change', function(ev) {
+            var nss = copyStylesheet(tier.stylesheet);
+            var seqStyle = getSeqStyle(nss);
+            seqStyle.__disableQuals = seqIgnoreQualsToggle.checked;
+            console.log(seqStyle.__disableQuals);
             tier.mergeStylesheet(nss);
         });
 
@@ -417,7 +433,8 @@ Browser.prototype.openTierPanel = function(tier) {
             bumpRow,
             labelRow,
             seqMismatchRow,
-            seqInsertRow
+            seqInsertRow,
+            seqIgnoreQualsRow
              ]);
 
 
