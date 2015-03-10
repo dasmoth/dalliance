@@ -323,7 +323,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     seqInsertRow.style.display = 'table-row';
                     seqInsertToggle.checked =  isDasBooleanTrue(seqStyle.__INSERTIONS);
                     seqIgnoreQualsRow.style.display = 'table-row';
-                    seqIgnoreQualsToggle.checked = (seqStyle.__disableQuals === true);
+                    seqIgnoreQualsToggle.checked = (seqStyle.__disableQuals === undefined || seqStyle.__disableQuals === false);
                     console.log(seqStyle.__disableQuals);
                 } else {
                     seqMismatchRow.style.display = 'none';
@@ -375,7 +375,7 @@ Browser.prototype.openTierPanel = function(tier) {
         seqIgnoreQualsToggle.addEventListener('change', function(ev) {
             var nss = copyStylesheet(tier.stylesheet);
             var seqStyle = getSeqStyle(nss);
-            seqStyle.__disableQuals = seqIgnoreQualsToggle.checked;
+            seqStyle.__disableQuals = !seqIgnoreQualsToggle.checked;
             console.log(seqStyle.__disableQuals);
             tier.mergeStylesheet(nss);
         });
