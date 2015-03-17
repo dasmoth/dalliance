@@ -1019,6 +1019,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             strandColor = style._minusColor || 'lightskyblue';
         else
             strandColor = style._plusColor || 'lightsalmon';
+
+        if (style.__disableQuals)
+            quals = false;
         
         gg = new SequenceGlyph(
             tier.browser.baseColors, 
