@@ -581,6 +581,9 @@ DasTier.prototype.scheduleRedraw = function() {
         }, 10);
     }
 }
+DasTier.prototype.clearTierListeners = function() {
+	this.listeners = [];
+}
 
 
 DasTier.prototype.addTierListener = function(l) {
@@ -596,6 +599,10 @@ DasTier.prototype.notifyTierListeners = function(change) {
         }
     }
     this.browser.notifyTier();
+}
+
+DasTier.prototype.clearFeaturesLoadedListeners = function() {
+  this.featuresLoadedListeners = [];
 }
 
 DasTier.prototype.addFeaturesLoadedListener = function(handler) {
