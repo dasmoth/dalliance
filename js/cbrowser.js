@@ -1392,8 +1392,14 @@ Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
             }
         }
     }
-            
-    new DASRegistry(this.registry).sources(function(sources) {
+
+    var rurl = this.registry;
+    if (rurl.indexOf('//') == 0) {
+        var proto = window.location.protocol;
+        if (proto != 'https:' && proto != 'http:')
+            rurl = 'http:' + rurl;
+    }
+    new DASRegistry(rurl).sources(function(sources) {
         var availableSources = [];
         for (var s = 0; s < sources.length; ++s) {
             var source = sources[s];
