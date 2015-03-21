@@ -684,7 +684,10 @@ Browser.prototype.realInit2 = function() {
     var ss = this.getSequenceSource();
     if (ss) {
         ss.getSeqInfo(this.chr, function(si) {
-            thisB.currentSeqMax = si.length;
+            if (si)
+                thisB.currentSeqMax = si.length;
+            else
+                thisB.currentSeqMax = -1;
         });
     }
 
@@ -1721,17 +1724,20 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft)
             return callback('Need a sequence source');
         }
 
-        ss.getSeqInfo(newChr, function(si) {
+        var findChr = newChr || this.chr;
+        ss.getSeqInfo(findChr, function(si) {
             if (!si) {
                 var altChr;
-                if (newChr.indexOf('chr') == 0) {
-                    altChr = newChr.substr(3);
+                if (findChr.indexOf('chr') == 0) {
+                    altChr = findChr.substr(3);
                 } else {
-                    altChr = 'chr' + newChr;
+                    altChr = 'chr' + findChr;
                 }
                 ss.getSeqInfo(altChr, function(si2) {
-                    if (!si2) {
+                    if (!si2 && newChr) {
                         return callback("Couldn't find sequence '" + newChr + "'");
+                    } else if (!si2) {
+                        return thisB._setLocation(null, newMin, newMax, null, callback, soft);
                     } else {
                         return thisB._setLocation(altChr, newMin, newMax, si2, callback, soft);
                     }
@@ -1760,11 +1766,14 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
     var newWidth = Math.max(10, newMax-newMin+1);
 
     if (!soft) {
+        var csm = this.currentSeqMax;
+        if (csm <= 0)
+            csm = 1000000000000;
         if (newMin < 1) {
             newMin = 1; newMax = newMin + newWidth - 1;
         }
-        if (newMax > this.currentSeqMax) {
-            newMax = this.currentSeqMax;
+        if (newMax > csm) {
+            newMax = csm;
             newMin = Math.max(1, newMax - newWidth + 1);
         }
     }
