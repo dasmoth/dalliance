@@ -69,7 +69,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var locStatusField = makeElement('p', '', {className: 'loc-status'});
 
     var zoomInBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-plus'})], {className: 'btn'});
-    var zoomSlider = new makeZoomSlider();
+    var zoomSlider = new makeZoomSlider({width: b.zoomSliderWidth});
     b.makeTooltip(zoomSlider, "Highlighted button shows current zoom level, gray button shows inactive zoom level (click or tap SPACE to toggle).")
 
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
@@ -199,9 +199,13 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         var zrange = zmax - zmin;
 
         
+        var numSliderTicks = 4;
+        if (b.zoomSliderWidth && b.zoomSliderWidth < 150)
+            numSliderTicks = 3;
         markSlider(roundSliderValue(zmin));
-        markSlider(roundSliderValue(zmin + (1.0*zrange/3.0)));
-        markSlider(roundSliderValue(zmin + (2.0*zrange/3.0)));
+        for (var sti = 1; sti < numSliderTicks - 1; ++sti) {
+            markSlider(roundSliderValue(zmin + (1.0 * sti * zrange / (numSliderTicks -1))));
+        }
         markSlider(roundSliderValue(zmax));
 
         if (b.storeStatus) {

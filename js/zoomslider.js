@@ -15,15 +15,17 @@ if (typeof(require) !== 'undefined') {
     var makeElement = utils.makeElement;
 }
 
-function makeZoomSlider() {
-    var track = makeElement('hr', null, {className: 'slider-track'});
-    var thumb = makeElement('hr', null, {className: 'slider-thumb active'});
-    var thumb2 = makeElement('hr', null, {className: 'slider-thumb'});
-    var slider = makeElement('div', [track, thumb, thumb2], {className: 'slider'});
-    var minPos = 0, maxPos = 200;
+function makeZoomSlider(opts) {
+    opts = opts || {};
+    
+    var minPos = 0, maxPos = opts.width || 200;
     var min = 0, max = 200;
     var pos = 50, pos2 = 100;
     var labels = [];
+    var track = makeElement('hr', null, {className: 'slider-track'}, {width: '' + (maxPos|0) + 'px'});
+    var thumb = makeElement('hr', null, {className: 'slider-thumb active'});
+    var thumb2 = makeElement('hr', null, {className: 'slider-thumb'});
+    var slider = makeElement('div', [track, thumb, thumb2], {className: 'slider'},  {width: '' + ((maxPos|0) + 10) + 'px'});
 
     slider.removeLabels = function() {
         for (var li = 0; li < labels.length; ++li) {
