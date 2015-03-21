@@ -292,11 +292,15 @@ Browser.prototype.realInit = function() {
     }, function(v) {
         console.log('Failed to boot workers', v);
     }).then(function() {
-        if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
+        if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
+            thisB.tierHolder.getBoundingClientRect().width > 0)
+        {
             setTimeout(function() {thisB.realInit2()}, 1);
         } else {
             var pollInterval = setInterval(function() {
-                if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none') {
+                if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
+                    thisB.tierHolder.getBoundingClientRect().width > 0)
+                {
                     clearInterval(pollInterval);
                     thisB.realInit2();
                 } 
