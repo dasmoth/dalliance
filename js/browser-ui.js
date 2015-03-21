@@ -72,7 +72,6 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var zoomSlider = new makeZoomSlider();
     b.makeTooltip(zoomSlider, "Highlighted button shows current zoom level, gray button shows inactive zoom level (click or tap SPACE to toggle).")
 
-
     var zoomOutBtn = makeElement('a', [makeElement('i', null, {className: 'fa fa-search-minus'})], {className: 'btn'});
 
     var clearHighlightsButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-eraser'})], {className: 'btn'});
@@ -183,6 +182,16 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             zoomSlider.value2 = zoom.alternate;
             zoomSlider.active = 1;
         }
+
+        if (zoom.current == zoom.min)
+            zoomInBtn.classList.add('disabled');
+        else
+            zoomInBtn.classList.remove('disabled');
+
+        if (zoom.current == zoom.max)
+            zoomOutBtn.classList.add('disabled');
+        else
+            zoomOutBtn.classList.remove('disabled');
 
         zoomSlider.removeLabels();
         var zmin = zoom.min;
