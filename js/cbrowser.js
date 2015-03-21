@@ -103,13 +103,6 @@ function Browser(opts) {
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 20;
     this.noDefaultLabels = false;
-    this.baseColors = {
-        A: 'green', 
-        C: 'blue', 
-        G: 'orange', 
-        T: 'red',
-        '-' : 'hotpink' // deletion
-    };
 
     // Registry
 
@@ -132,6 +125,19 @@ function Browser(opts) {
     this.assemblyNameUcsc = true;
 
     this.initListeners = [];
+
+    if (opts.baseColors) {
+        this.baseColors = opts.baseColors
+    } else {
+        this.baseColors = {
+            A: 'green',
+            C: 'blue',
+            G: 'orange',
+            T: 'red',
+            '-' : 'hotpink', // deletion
+            'I' : 'red' // insertion
+        };
+    }
 
     if (opts.viewStart !== undefined && typeof(opts.viewStart) !== 'number') {
         throw Error('viewStart must be an integer');
