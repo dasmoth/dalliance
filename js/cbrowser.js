@@ -1137,16 +1137,7 @@ Browser.prototype.realMakeTier = function(source, config) {
     this.updateHeight();
     tier.updateLabel();
 
-    if (tier.featureSource && tier.featureSource.addActivityListener) {
-        tier.featureSource.addActivityListener(function(busy) {
-            if (busy > 0) {
-                tier.loaderButton.style.display = 'inline-block';
-            } else {
-                tier.loaderButton.style.display = 'none';
-            }
-            thisB.pingActivity();
-        });
-    }
+
 
     this.withPreservedSelection(thisB._ensureTiersGrouped);
     tier._updateFromConfig();
@@ -1660,6 +1651,7 @@ Browser.prototype.removeTier = function(conf, force) {
         throw "Couldn't find requested tier";
     }
 
+    var targetTier = this.tiers[target];
     this.tiers.splice(target, 1);
 
     var nst = [];
@@ -1673,6 +1665,11 @@ Browser.prototype.removeTier = function(conf, force) {
     }
     this.selectedTiers = nst;
     this.markSelectedTiers();
+
+    targetTier.destroy();
+    if (this.knownSpace) {
+        this.knownSpace.featureCache[targetTier] = null;
+    }
 
     this.reorderTiers();
     this.notifyTier();
