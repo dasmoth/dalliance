@@ -218,6 +218,11 @@ CachingFeatureSource.prototype.addReadinessListener = function(listener) {
         listener(null);
 }
 
+CachingFeatureSource.prototype.removeReadinessListener = function(listener) {
+    if (this.source.removeReadinessListener)
+        return this.source.removeReadinessListener(listener);
+}
+
 CachingFeatureSource.prototype.search = function(query, callback) {
     if (this.source.search)
         return this.source.search(query, callback);
@@ -239,6 +244,12 @@ CachingFeatureSource.prototype.getScales = function() {
 CachingFeatureSource.prototype.addActivityListener = function(l) {
     if (this.source.addActivityListener) {
         this.source.addActivityListener(l);
+    }
+}
+
+CachingFeatureSource.prototype.removeActivityListener = function(l) {
+    if (this.source.removeActivityListener) {
+        this.source.removeActivityListener(l);
     }
 }
 
@@ -321,6 +332,13 @@ FeatureSourceBase.prototype.addReadinessListener = function(listener) {
     listener(this.readiness);
 }
 
+FeatureSourceBase.prototype.removeReadinessListener = function(listener) {
+    var idx = arrayIndexOf(this.readinessListeners, listener);
+    if (idx >= 0) {
+        this.readinessListeners.splice(idx, 1);
+    }
+}
+
 FeatureSourceBase.prototype.notifyReadiness = function() {
     for (var li = 0; li < this.readinessListeners.length; ++li) {
         try {
@@ -333,6 +351,13 @@ FeatureSourceBase.prototype.notifyReadiness = function() {
 
 FeatureSourceBase.prototype.addActivityListener = function(listener) {
     this.activityListeners.push(listener);
+}
+
+FeatureSourceBase.prototype.removeActivityListener = function(listener) {
+    var idx = arrayIndexOf(this.activityListeners, listener);
+    if (idx >= 0) {
+        this.activityListeners.splice(idx, 1);
+    }
 }
 
 FeatureSourceBase.prototype.notifyActivity = function() {

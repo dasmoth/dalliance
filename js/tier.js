@@ -128,13 +128,35 @@ function DasTier(browser, source, config, background)
     }
 
     if (this.featureSource && this.featureSource.addReadinessListener) {
-        this.featureSource.addReadinessListener(function(ready) {
+        this.readinessListener = function(ready) {
             thisB.notify(ready, -1);
-        });
+        };
+        this.featureSource.addReadinessListener(this.readinessListener);
+    }
+
+    if (this.featureSource && this.featureSource.addActivityListener) {
+        this.activityListener = function(busy) {
+            if (busy > 0) {
+                thisB.loaderButton.style.display = 'inline-block';
+            } else {
+                thisB.loaderButton.style.display = 'none';
+            }
+            thisB.browser.pingActivity();
+        };
+        this.featureSource.addActivityListener(this.activityListener);
     }
 
     this.listeners = [];
     this.featuresLoadedListeners = [];
+}
+
+DasTier.prototype.destroy = function() {
+    if (this.featureSource.removeReadinessListener) {
+        this.featureSource.removeReadinessListener(this.readinessListener);
+    }
+    if (this.featureSource.removeActivityListener) {
+        this.featureSource.removeActivityListener(this.activityListener);
+    }
 }
 
 DasTier.prototype.setBackground = function(b) {
