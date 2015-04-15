@@ -189,6 +189,10 @@ Browser.prototype.resolveURL = function(url) {
     return url.replace('$$', this.prefix);
 }
 
+Browser.prototype.destroy = function() {
+    window.removeEventListener('resize', this.resizeListener, false);
+}
+
 Browser.prototype.realInit = function() {
     var self = this;
 
@@ -263,9 +267,10 @@ Browser.prototype.realInit = function() {
     }
     this.browserHolder.appendChild(this.bhtmlRoot);
     
-    window.addEventListener('resize', function(ev) {
+    this.resizeListener = function(ev) {
         thisB.resizeViewer();
-    }, false);
+    };
+    window.addEventListener('resize', this.resizeListener, false);
     this.ruler = makeElement('div', null, {className: 'guideline'})
     this.ruler2 = makeElement('div', null, {className: 'single-base-guideline'});
     this.tierHolderHolder.appendChild(this.ruler);
