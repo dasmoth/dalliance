@@ -1680,6 +1680,21 @@ Browser.prototype.removeTier = function(conf, force) {
     this.notifyTier();
 }
 
+Browser.prototype.removeAllTiers = function() {
+	var thisB = this;
+  this.selectedTiers = [];
+  this.markSelectedTiers();
+  this.tiers.forEach(function (targetTier) {
+	  targetTier.destroy();
+	  if (thisB.knownSpace) {
+	      thisB.knownSpace.featureCache[targetTier] = null;
+	  }
+  });
+  this.tiers.length = 0;
+  this.reorderTiers();
+  this.notifyTier();
+}
+
 Browser.prototype.getSequenceSource = function() {
     if (this._sequenceSource === undefined)
         this._sequenceSource = this._getSequenceSource();
