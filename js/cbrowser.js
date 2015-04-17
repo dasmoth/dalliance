@@ -1681,7 +1681,7 @@ Browser.prototype.removeTier = function(conf, force) {
 }
 
 Browser.prototype.removeAllTiers = function() {
-	var thisB = this;
+  var thisB = this;
   this.selectedTiers = [];
   this.markSelectedTiers();
   this.tiers.forEach(function (targetTier) {
