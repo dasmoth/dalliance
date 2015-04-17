@@ -258,6 +258,11 @@ CachingFeatureSource.prototype.addChangeListener = function(l) {
         this.source.addChangeListener(l);
 }
 
+CachingFeatureSource.prototype.removeChangeListener = function(l) {
+    if (this.source.removeChangeListener)
+        this.source.removeChangeListener(l);
+}
+
 CachingFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
     this.source.findNextFeature(chr, pos, dir, callback);
 }
@@ -399,6 +404,13 @@ function DASFeatureSource(dasSource) {
 DASFeatureSource.prototype.addActivityListener = function(listener) {
     this.activityListeners.push(listener);
 }
+
+DASFeatureSource.prototype.removeActivityListener = function(listener) {
+    var idx = arrayIndexOf(this.activityListeners, listener);
+    if (idx >= 0)
+        this.activityListeners.splice(idx, 1);
+}
+
 
 DASFeatureSource.prototype.notifyActivity = function() {
     for (var li = 0; li < this.activityListeners.length; ++li) {
@@ -1425,6 +1437,12 @@ function MappedFeatureSource(source, mapping) {
 
 MappedFeatureSource.prototype.addActivityListener = function(listener) {
     this.activityListeners.push(listener);
+}
+
+MappedFeatureSource.prototype.removeActivityListener = function(listener) {
+    var idx = arrayIndexOf(this.activityListeners, listener);
+    if (idx >= 0)
+        this.activityListeners.splice(idx, 0);
 }
 
 MappedFeatureSource.prototype.notifyActivity = function() {

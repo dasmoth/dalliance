@@ -15,6 +15,7 @@ if (typeof(require) !== 'undefined') {
     var shallowCopy = utils.shallowCopy;
     var pushnew = utils.pushnew;
     var miniJSONify = utils.miniJSONify;
+    var arrayIndexOf = utils.arrayIndexOf;
 
     var das = require('./das');
     var DASStylesheet = das.DASStylesheet;
@@ -612,6 +613,13 @@ DasTier.prototype.addTierListener = function(l) {
     this.listeners.push(l);
 }
 
+DasTier.prototype.removeTierListener = function(l) {
+    var idx = arrayIndexOf(this.listeners, l);
+    if (idx >= 0) {
+        this.listeners.splice(idx, 1);
+    }
+}
+
 DasTier.prototype.notifyTierListeners = function(change) {
     for (var li = 0; li < this.listeners.length; ++li) {
         try {
@@ -630,6 +638,14 @@ DasTier.prototype.clearFeaturesLoadedListeners = function() {
 DasTier.prototype.addFeaturesLoadedListener = function(handler) {
     this.featuresLoadedListeners.push(handler);
 }
+
+DasTier.prototype.removeFeaturesLoadedListener = function(handler) {
+    var idx = arrayIndexOf(this.featuresLoadedListeners, handler);
+    if (idx >= 0) {
+        this.featuresLoadedListeners.splice(idx, 1);
+    }
+}
+
 
 DasTier.prototype.notifyFeaturesLoaded = function() {
     for (var li = 0; li < this.featuresLoadedListeners.length; ++li) {
