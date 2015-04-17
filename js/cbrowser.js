@@ -181,7 +181,11 @@ function Browser(opts) {
     if (document.readyState === 'complete') {
         thisB.realInit();
     } else {
-        window.addEventListener('load', function(ev) {thisB.realInit();}, false);
+        var loadListener = function(ev) {
+            window.removeEventListener('load', loadListener, false);
+            thisB.realInit();
+        }
+        window.addEventListener('load', loadListener, false);
     }
 }
 
