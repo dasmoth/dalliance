@@ -181,7 +181,11 @@ function Browser(opts) {
     if (document.readyState === 'complete') {
         thisB.realInit();
     } else {
-        window.addEventListener('load', function(ev) {thisB.realInit();}, false);
+        var loadListener = function(ev) {
+            window.removeEventListener('load', loadListener, false);
+            thisB.realInit();
+        }
+        window.addEventListener('load', loadListener, false);
     }
 }
 
@@ -1890,6 +1894,13 @@ Browser.prototype.addFeatureListener = function(handler, opts) {
     this.featureListeners.push(handler);
 }
 
+Browser.prototype.removeFeatureListener = function(handler, opts) {
+    var idx = arrayIndexOf(this.featureListeners, handler);
+    if (idx >= 0) {
+        this.featureListeners.splice(idx, 1);
+    }
+}
+
 Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
   for (var fli = 0; fli < this.featureListeners.length; ++fli) {
       try {
@@ -1906,6 +1917,13 @@ Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     this.featureHoverListeners.push(handler);
 }
 
+Browser.prototype.removeFeatureHoverListener = function(handler, opts) {
+    var idx = arrayIndexOf(this.featureHoverListeners, handler);
+    if (idx >= 0) {
+        this.featureHoverListeners.splice(idx, 1);
+    }
+}
+
 Browser.prototype.notifyFeatureHover = function(ev, feature, hit, tier) {
     for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
         try {
@@ -1919,6 +1937,13 @@ Browser.prototype.notifyFeatureHover = function(ev, feature, hit, tier) {
 Browser.prototype.addViewListener = function(handler, opts) {
     opts = opts || {};
     this.viewListeners.push(handler);
+}
+
+Browser.prototype.removeViewListener = function(handler, opts) {
+    var idx = arrayIndexOf(this.viewListeners, handler);
+    if (idx >= 0) {
+        this.viewListeners.splice(idx, 1);
+    }
 }
 
 Browser.prototype.notifyLocation = function() {
@@ -1951,6 +1976,13 @@ Browser.prototype.addTierListener = function(handler) {
     this.tierListeners.push(handler);
 }
 
+Browser.prototype.removeTierListener = function(handler) {
+    var idx = arrayIndexOf(this.tierListeners, handler);
+    if (idx >= 0) {
+        this.tierListeners.splice(idx, 1);
+    }
+}
+
 Browser.prototype.notifyTier = function() {
     for (var tli = 0; tli < this.tierListeners.length; ++tli) {
         try {
@@ -1963,6 +1995,13 @@ Browser.prototype.notifyTier = function() {
 
 Browser.prototype.addRegionSelectListener = function(handler) {
     this.regionSelectListeners.push(handler);
+}
+
+Browser.prototype.removeRegionSelectListener = function(handler) {
+    var idx = arrayIndexOf(this.regionSelectListeners, handler);
+    if (idx >= 0) {
+        this.regionSelectListeners.splice(idx, 1);
+    }
 }
 
 Browser.prototype.notifyRegionSelect = function(chr, min, max) {
@@ -2091,8 +2130,15 @@ Browser.prototype.markSelectedTiers = function() {
     }
 }
 
-Browser.prototype.addTierSelectionListener = function(f) {
-    this.tierSelectionListeners.push(f);
+Browser.prototype.addTierSelectionListener = function(handler) {
+    this.tierSelectionListeners.push(handler);
+}
+
+Browser.prototype.removeTierSelectionListener = function(handler) {
+    var idx = arrayIndexOf(this.tierSelectionListeners, handler);
+    if (idx >= 0) {
+        this.tierSelectionListeners.splice(idx, 1);
+    }
 }
 
 Browser.prototype.notifyTierSelection = function() {
@@ -2107,6 +2153,13 @@ Browser.prototype.notifyTierSelection = function() {
 
 Browser.prototype.addTierSelectionWrapListener = function(f) {
     this.tierSelectionWrapListeners.push(f);
+}
+
+Browser.prototype.removeTierSelectionWrapListener = function(handler) {
+    var idx = arrayIndexOf(this.tierSelectionWrapListeners, handler);
+    if (idx >= 0) {
+        this.tierSelectionWrapListeners.splice(idx, 1);
+    }
 }
 
 Browser.prototype.notifyTierSelectionWrap = function(i) {

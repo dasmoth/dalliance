@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
+    var arrayIndexOf = utils.arrayIndexOf;
 }
 
 function OverlayFeatureSource(sources, opts) {
@@ -68,6 +69,13 @@ OverlayFeatureSource.prototype.addReadinessListener = function(l) {
     this.notifyReadinessListener(l);
 }
 
+OverlayFeatureSource.prototype.removeReadinessListener = function(l) {
+    var idx = arrayIndexOf(this.readinessListeners, l);
+    if (idx >= 0) {
+        this.readinessListeners.splice(idx, 1);
+    }
+}
+
 OverlayFeatureSource.prototype.notifyReadiness = function() {
     for (var i = 0; i < this.readinessListeners.length; ++i) {
         this.notifyReadinessListener(this.readinessListeners[i]);
@@ -92,6 +100,13 @@ OverlayFeatureSource.prototype.addActivityListener = function(l) {
     this.activityListeners.push(l);
 }
 
+OverlayFeatureSource.prototype.removeActivityListener = function(l) {
+    var idx = arrayIndexOf(this.activityListeners, l);
+    if (idx >= 0) {
+        this.activityListeners.splice(idx, 1);
+    }
+}
+
 OverlayFeatureSource.prototype.notifyActivity = function() {
     var busy = 0;
     for (var i = 0; i < this.business.length; ++i) {
@@ -109,6 +124,13 @@ OverlayFeatureSource.prototype.notifyActivity = function() {
 
 OverlayFeatureSource.prototype.addChangeListener = function(listener) {
     this.changeListeners.push(listener);
+}
+
+OverlayFeatureSource.prototype.removeChangeListener = function(l) {
+    var idx = arrayIndexOf(this.changeListeners, l);
+    if (idx >= 0) {
+        this.changeListeners.splice(idx, 1);
+    }
 }
 
 OverlayFeatureSource.prototype.notifyChange = function() {

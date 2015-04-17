@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var sa = require('./sourceadapters');
     var dalliance_registerSourceAdapterFactory = sa.registerSourceAdapterFactory;
+    var FeatureSourceBase = sa.FeatureSourceBase;
 
     var das = require('./das');
     var DASStylesheet = das.DASStylesheet;
@@ -20,7 +21,10 @@ if (typeof(require) !== 'undefined') {
     var DASGroup = das.DASGroup;
 }
 
+
+
 function EnsemblFeatureSource(source) {
+    FeatureSourceBase.call(this);
     this.source = source;
     this.base = source.uri || '//rest.ensembl.org';
     if (this.base.indexOf('//') === 0) {
@@ -33,9 +37,6 @@ function EnsemblFeatureSource(source) {
     }
     this.species = source.species || 'human';
 
-    this.activityListeners = [];
-    this.busy = 0;
-
     if (typeof source.type === 'string') {
         this.type = [source.type];
     } else {
@@ -43,20 +44,8 @@ function EnsemblFeatureSource(source) {
     }
 }
 
-EnsemblFeatureSource.prototype.addActivityListener = function(listener) {
-    this.activityListeners.push(listener);
-}
-
-EnsemblFeatureSource.prototype.notifyActivity = function() {
-    for (var li = 0; li < this.activityListeners.length; ++li) {
-        try {
-            this.activityListeners[li](this.busy);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-}
-
+EnsemblFeatureSource.prototype = Object.create(FeatureSourceBase.prototype);
+EnsemblFeatureSource.prototype.constructor = EnsemblFeatureSource;
 
 EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();

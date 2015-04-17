@@ -62,6 +62,19 @@ var b = new Browser({
                         desc: 'Repeat annotation from UCSC', 
                         bwgURI: 'http://www.biodalliance.org/datasets/GRCh38/repeats.bb',
                         stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats2.xml'}
+
+                      ,{name: 'SNPs',
+                        tier_type: 'ensembl',
+                        species:'human',
+                        type: 'variation',
+                        disabled: true,
+                        featureInfoPlugin: function(f, info) {
+                          if (f.id) {
+                            info.add('SNP', makeElement('a', f.id, {href: 'http://www.ensembl.org/Homo_sapiens/Variation/Summary?v=' + f.id, target: '_newtab'}));
+                          }
+                        }
+                       }
+
     ],
 
     prefix: '../',
