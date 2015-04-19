@@ -12,7 +12,9 @@
 if (typeof(require) !== 'undefined') {
     var browser = require('./cbrowser');
     var Browser = browser.Browser;
-    var sourcesAreEqual = browser.sourcesAreEqual;
+
+    var sc = require('./sourcecompare');
+    var sourcesAreEqual = sc.sourcesAreEqual;
 
     var utils = require('./utils');
     var makeElement = utils.makeElement;

@@ -17,6 +17,7 @@ if (typeof(require) !== 'undefined') {
     var removeChildren = utils.removeChildren;
     var miniJSONify = utils.miniJSONify;
     var shallowCopy = utils.shallowCopy;
+    var textXHR = utils.textXHR;
 
     var tier = require('./tier');
     var DasTier = tier.DasTier;
@@ -36,6 +37,12 @@ if (typeof(require) !== 'undefined') {
     var Chainset = require('./chainset').Chainset;
 
     var Promise = require('es6-promise').Promise;
+
+    var sourcecompare = require('./sourcecompare');
+    var sourcesAreEqual = sourcecompare.sourcesAreEqual;
+    var sourcesAreEqualModuloStyle = sourcecompare.sourcesAreEqualModuloStyle;
+    var sourceDataURI = sourcecompare.sourceDataURI;
+    var sourceStyleURI = sourcecompare.sourceStyleURI;
 }
 
 function Region(chr, min, max) {
@@ -1565,82 +1572,6 @@ Browser.prototype.addTier = function(conf) {
     return tier;
 }
 
-function sourceDataURI(conf) {
-    if (conf.uri) {
-        return conf.uri;
-    } else if (conf.blob) {
-        return 'file:' + conf.blob.name;
-    } else if (conf.bwgBlob) {
-        return 'file:' + conf.bwgBlob.name;
-    } else if (conf.bamBlob) {
-        return 'file:' + conf.bamBlob.name;
-    } else if (conf.twoBitBlob) {
-        return 'file:' + conf.twoBitBlob.name;
-    }
-
-    return conf.bwgURI || conf.bamURI || conf.jbURI || conf.twoBitURI || 'http://www.biodalliance.org/magic/no_uri';
-}
-
-function sourceStyleURI(conf) {
-    if (conf.stylesheet_uri)
-        return conf.stylesheet_uri;
-    else if (conf.tier_type == 'sequence' || conf.twoBitURI || conf.twoBitBlob)
-        return 'http://www.biodalliance.org/magic/sequence'
-    else
-        return sourceDataURI(conf);
-}
-
-function sourcesAreEqualModuloStyle(a, b) {
-    if (sourceDataURI(a) != sourceDataURI(b))
-        return false;
-
-    if (a.mapping != b.mapping)
-        return false;
-
-    if (a.tier_type != b.tier_type)
-        return false;
-
-    if (a.overlay) {
-        if (!b.overlay || b.overlay.length != a.overlay.length)
-            return false;
-        for (var oi = 0; oi < a.overlay.length; ++oi) {
-            if (!sourcesAreEqualModuloStyle(a.overlay[oi], b.overlay[oi]))
-                return false;
-        }
-    } else {
-        if (b.overlay)
-            return false;
-    }
-
-    return true;
-}
-
-function sourcesAreEqual(a, b) {
-    if (sourceDataURI(a) != sourceDataURI(b) ||
-        sourceStyleURI(a) != sourceStyleURI(b))
-        return false;
-
-    if (a.mapping != b.mapping)
-        return false;
-
-    if (a.tier_type != b.tier_type)
-        return false;
-
-    if (a.overlay) {
-        if (!b.overlay || b.overlay.length != a.overlay.length)
-            return false;
-        for (var oi = 0; oi < a.overlay.length; ++oi) {
-            if (!sourcesAreEqual(a.overlay[oi], b.overlay[oi]))
-                return false;
-        }
-    } else {
-        if (b.overlay)
-            return false;
-    }
-
-    return true;
-}
-
 Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
 
@@ -2433,6 +2364,40 @@ Browser.prototype.makeLoader = function(size) {
     }
 }
 
+Browser.prototype.canFetchPlainHTTP = function() {
+    if (!this._plainHTTPPromise) {
+        var worker = this.getWorker();
+        if (worker) {
+            this._plainHTTPPromise = new Promise(function(resolve, reject) {
+                worker.postCommand(
+                    {command: 'textxhr',
+                     uri: 'http://www.biodalliance.org/http-canary.txt'},
+                    function(result, err) {
+                        if (result) {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                });
+        } else {
+           this._plainHTTPPromise = new Promise(function(resolve, reject) {
+                textXHR(
+                    'http://www.biodalliance.org/http-canary.txt', 
+                    function(result, err) {
+                        if (result) {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    }
+                );
+            });
+        }
+    }
+    return this._plainHTTPPromise;
+}
+
 Browser.prototype.getWorker = function() {
     if (!this.useFetchWorkers || !this.fetchWorkers || this.fetchWorkers.length==0)
         return null;
@@ -2498,9 +2463,7 @@ FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
 
 if (typeof(module) !== 'undefined') {
     module.exports = {
-        Browser: Browser,
-        sourcesAreEqual: sourcesAreEqual,
-        sourceDataURI: sourceDataURI
+        Browser: Browser
     };
 
     // Required because they add stuff to Browser.prototype

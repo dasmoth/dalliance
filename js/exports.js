@@ -12,9 +12,10 @@ var chainset = require('./chainset');
 var sa = require('./sourceadapters');
 var utils = require('./utils');
 var das = require('./das');
+var sc = require('./sourcecompare');
 
 window.Browser = browser.Browser;
-window.sourcesAreEqual = browser.sourcesAreEqual;
+window.sourcesAreEqual = sc.sourcesAreEqual;
 window.Chainset = chainset.Chainset;    // Pre-0.12 configurations need this.
 
 // Useful for info plugins.  Should be reconsidered in the future.

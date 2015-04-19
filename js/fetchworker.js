@@ -13,6 +13,7 @@ var bin = require('./bin');
 var bam = require('./bam');
 var bigwig = require('./bigwig');
 var encode = require('./encode');
+var utils = require('./utils');
 
 var connections = {};
 
@@ -69,6 +70,14 @@ self.onmessage = function(event) {
                 postMessage({tag: tag, error: err || "Couldn't fetch BBI"});
             }
         }, d.uri);
+    } else if (command === 'textxhr') {
+        utils.textXHR(d.uri, function(resp, err) {
+            if (resp) {
+                postMessage({tag: tag, result: resp});
+            } else {
+                postMessage({tag: tag, err: err || "Couldn't fetch resource"});
+            }
+        });
     } else if (command === 'fetch') {
         var con = connections[event.data.connection];
         if (!con) {

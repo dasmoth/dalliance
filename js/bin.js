@@ -109,35 +109,39 @@ var seed=0;
 var isSafari = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
 
 URLFetchable.prototype.fetchAsText = function(callback) {
-    var req = new XMLHttpRequest();
-    var length;
-    var url = this.url;
-    if ((isSafari || this.opts.salt) && url.indexOf('?') < 0) {
-        url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
-    }
-    req.open('GET', url, true);
-
-    if (this.end) {
-        if (this.end - this.start > 100000000) {
-            throw 'Monster fetch!';
+    try {
+        var req = new XMLHttpRequest();
+        var length;
+        var url = this.url;
+        if ((isSafari || this.opts.salt) && url.indexOf('?') < 0) {
+            url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
         }
-        req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
-        length = this.end - this.start + 1;
-    }
+        req.open('GET', url, true);
 
-    req.onreadystatechange = function() {
-        if (req.readyState == 4) {
-            if (req.status == 200 || req.status == 206) {
-                return callback(req.responseText);
-            } else {
-                return callback(null);
+        if (this.end) {
+            if (this.end - this.start > 100000000) {
+                throw 'Monster fetch!';
             }
+            req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
+            length = this.end - this.start + 1;
         }
-    };
-    if (this.opts.credentials) {
-        req.withCredentials = true;
+
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
+                if (req.status == 200 || req.status == 206) {
+                    return callback(req.responseText);
+                } else {
+                    return callback(null);
+                }
+            }
+        };
+        if (this.opts.credentials) {
+            req.withCredentials = true;
+        }
+        req.send('');
+    } catch (e) {
+        return callback(null);
     }
-    req.send('');
 }
 
 URLFetchable.prototype.salted = function() {
@@ -154,51 +158,55 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         return callback(null);
     }
 
-    var req = new XMLHttpRequest();
-    var length;
-    var url = this.url;
-    if ((isSafari || this.opts.salt) && url.indexOf('?') < 0) {
-        url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
-    }
-    req.open('GET', url, true);
-    req.overrideMimeType('text/plain; charset=x-user-defined');
-    if (this.end) {
-        if (this.end - this.start > 100000000) {
-            throw 'Monster fetch!';
+    try {
+        var req = new XMLHttpRequest();
+        var length;
+        var url = this.url;
+        if ((isSafari || this.opts.salt) && url.indexOf('?') < 0) {
+            url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
         }
-        req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
-        length = this.end - this.start + 1;
-    }
-    req.responseType = 'arraybuffer';
-    req.onreadystatechange = function() {
-        if (req.readyState == 4) {
-            if (req.status == 200 || req.status == 206) {
-                if (req.response) {
-                    var bl = req.response.byteLength;
-                    if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
-                        return thisB.fetch(callback, attempt + 1, bl);
-                    } else {
-                        return callback(req.response);
-                    }
-                } else if (req.mozResponseArrayBuffer) {
-                    return callback(req.mozResponseArrayBuffer);
-                } else {
-                    var r = req.responseText;
-                    if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
-                        return thisB.fetch(callback, attempt + 1, r.length);
-                    } else {
-                        return callback(bstringToBuffer(req.responseText));
-                    }
-                }
-            } else {
-                return thisB.fetch(callback, attempt + 1);
+        req.open('GET', url, true);
+        req.overrideMimeType('text/plain; charset=x-user-defined');
+        if (this.end) {
+            if (this.end - this.start > 100000000) {
+                throw 'Monster fetch!';
             }
+            req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
+            length = this.end - this.start + 1;
         }
-    };
-    if (this.opts.credentials) {
-        req.withCredentials = true;
+        req.responseType = 'arraybuffer';
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
+                if (req.status == 200 || req.status == 206) {
+                    if (req.response) {
+                        var bl = req.response.byteLength;
+                        if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
+                            return thisB.fetch(callback, attempt + 1, bl);
+                        } else {
+                            return callback(req.response);
+                        }
+                    } else if (req.mozResponseArrayBuffer) {
+                        return callback(req.mozResponseArrayBuffer);
+                    } else {
+                        var r = req.responseText;
+                        if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
+                            return thisB.fetch(callback, attempt + 1, r.length);
+                        } else {
+                            return callback(bstringToBuffer(req.responseText));
+                        }
+                    }
+                } else {
+                    return thisB.fetch(callback, attempt + 1);
+                }
+            }
+        };
+        if (this.opts.credentials) {
+            req.withCredentials = true;
+        }
+        req.send('');
+    } catch (e) {
+        return callback(null);
     }
-    req.send('');
 }
 
 function bstringToBuffer(result) {

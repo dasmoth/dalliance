@@ -335,24 +335,28 @@ function textXHR(url, callback, opts) {
     if (opts && opts.salt) 
         url = saltURL(url);
 
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-    	if (req.readyState == 4) {
-    	    if (req.status >= 300) {
+    try {
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function() {
+    	    if (req.readyState == 4) {
+    	        if (req.status < 200 || req.status >= 300) {
     		    callback(null, 'Error code ' + req.status);
-    	    } else {
+    	        } else {
     		    callback(req.responseText);
+    	        }
     	    }
-    	}
-    };
-    
-    req.open('GET', url, true);
-    req.responseType = 'text';
+        };
+        
+        req.open('GET', url, true);
+        req.responseType = 'text';
 
-    if (opts && opts.credentials) {
-        req.withCredentials = true;
+        if (opts && opts.credentials) {
+            req.withCredentials = true;
+        }
+        req.send('');
+    } catch (e) {
+        callback(null, 'Exception ' + e);
     }
-    req.send('');
 }
 
 function relativeURL(base, rel) {
