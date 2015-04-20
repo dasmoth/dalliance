@@ -365,7 +365,7 @@
   border-radius: 4px;
   display: inline-block;
   transition: opacity 0.6s ease-in-out;
-  pointer-events: none;
+  pointer-events: visible;
 }
 
 *.dalliance .notifier-holder {

@@ -12,6 +12,7 @@
 if (typeof(require) !== 'undefined') {
     var utils = require('./utils');
     var makeElement = utils.makeElement;
+    var removeChildren = utils.removeChildren;
     var shallowCopy = utils.shallowCopy;
     var pushnew = utils.pushnew;
     var miniJSONify = utils.miniJSONify;
@@ -27,6 +28,9 @@ if (typeof(require) !== 'undefined') {
     var style = require('./style');
     var StyleFilter = style.StyleFilter;
     var StyleFilterSet = style.StyleFilterSet;
+
+    var sc = require('./sourcecompare');
+    var sourceDataURI = sc.sourceDataURI;
 }
 
 var __tier_idSeed = 0;
@@ -429,9 +433,22 @@ DasTier.prototype.drawOverlay = function() {
 
 
 DasTier.prototype.updateStatus = function(status) {
+    var self = this;
     if (status) {
         this.status = status;
         this._notifierToStatus();
+        var sd = sourceDataURI(this.dasSource);
+        if (window.location.protocol === 'https:' && sourceDataURI(this.dasSource).indexOf('http:') == 0 && !this.checkedHTTP) {
+            this.checkedHTTP = true;
+            this.browser.canFetchPlainHTTP().then(
+                function(can) {
+                    if (!can) {
+                        self.warnHTTP = true;
+                        self._notifierToStatus();
+                    }
+                }
+            );
+        }
     } else {
         if (this.status) {
             this.status = null
@@ -462,8 +479,19 @@ DasTier.prototype.notify = function(message, timeout) {
     }
 }
 
-DasTier.prototype._notifierOn = function(message) {
-    this.notifier.textContent = message;
+DasTier.prototype._notifierOn = function(message, warnHTTP) {
+    removeChildren(this.notifier);
+    if (warnHTTP) {
+        this.notifier.appendChild(
+            makeElement(
+                'span',
+                [makeElement('a', '[HTTP Warning] ', {href: "//www.biodalliance.org/https.html", target: "_blank"}),
+                 message]
+            )
+        );
+    } else {
+        this.notifier.textContent = message;
+    }
     this.notifier.style.opacity = 0.8;
 }
 
@@ -473,7 +501,7 @@ DasTier.prototype._notifierOff = function() {
 
 DasTier.prototype._notifierToStatus = function() {
     if (this.status) {
-        this._notifierOn(this.status)
+        this._notifierOn(this.status, this.warnHTTP)
     } else {
         this._notifierOff();
     }

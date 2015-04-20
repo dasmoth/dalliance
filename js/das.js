@@ -23,8 +23,6 @@ var dasLibErrorHandler = function(errMsg) {
 }
 var dasLibRequestQueue = new Array();
 
-
-
 function DASSegment(name, start, end, description) {
     this.name = name;
     this.start = start;
@@ -755,26 +753,43 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
         req.open("get", url);
         req.send('');
     } else {
-        var reqStart = Date.now();
-        var req = new XMLHttpRequest();
+        try {
+            var req = new XMLHttpRequest();
+            var timeout = window.setTimeout(
+                function() {
+                    console.log('timing out '  + url);
+                    req.abort();
+                    handler(null, req);
+                },
+                5000
+            );
 
-        req.onreadystatechange = function() {
-            if (req.readyState == 4) {
-              if (req.status >= 200 || req.status == 0) {
-                  handler(req.responseXML, req);
-              }
+            req.timeout = 5000;
+            req.ontimeout = function() {
+                console.log('timeout on ' + url);
+            };
+
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    window.clearTimeout(timeout);
+                    if (req.status >= 200 || req.status == 0) {
+                        handler(req.responseXML, req);
+                    }
+                }
+            };
+            req.open("get", url, true);
+            if (credentials) {
+                req.withCredentials = true;
             }
-        };
-        req.open("get", url, true);
-        if (credentials) {
-            req.withCredentials = true;
+            if (custAuth) {
+                req.setRequestHeader('X-DAS-Authorisation', custAuth);
+            }
+            req.overrideMimeType('text/xml');
+            req.setRequestHeader('Accept', 'application/xml,*/*');
+            req.send('');
+        } catch (e) {
+            handler(null, req, e);
         }
-        if (custAuth) {
-            req.setRequestHeader('X-DAS-Authorisation', custAuth);
-        }
-        req.overrideMimeType('text/xml');
-        req.setRequestHeader('Accept', 'application/xml,*/*');
-        req.send('');
     }
 }
 

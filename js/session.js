@@ -12,8 +12,10 @@
 if (typeof(require) != 'undefined') {
     var browser = require('./cbrowser');
     var Browser = browser.Browser;
-    var sourceDataURI = browser.sourceDataURI;
-    var sourcesAreEqual = browser.sourcesAreEqual;
+
+    var sc = require('./sourcecompare');
+    var sourceDataURI = sc.sourceDataURI;
+    var sourcesAreEqual = sc.sourcesAreEqual;
 
     var VERSION = require('./version');
 
