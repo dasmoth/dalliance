@@ -37,6 +37,9 @@ function tileSizeForScale(scale, min)
     if (!min) {
         min = MIN_TILE;
     }
+    if (scale < 0) {
+      scale = -scale;
+    }
 
     function ts(p) {
         return steps[p % steps.length] * Math.pow(10, (p / steps.length)|0);
