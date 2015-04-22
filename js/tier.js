@@ -265,7 +265,10 @@ DasTier.prototype.setFeatures = function(chr, coverage, scale, features, sequenc
     this.currentSequence = sequence;    
     this.knownChr = chr;
     this.knownCoverage = coverage;
-    this.notifyFeaturesLoaded();
+    // only notify features loaded, if they are valid
+    if (features) {
+        this.notifyFeaturesLoaded();
+    }
 }
 
 DasTier.prototype.draw = function() {
