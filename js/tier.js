@@ -260,20 +260,12 @@ DasTier.prototype.needsSequence = function(scale ) {
     return false;
 }
 
-DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequence) {
+DasTier.prototype.setFeatures = function(chr, coverage, scale, features, sequence) {
     this.currentFeatures = features;
-    this.currentSequence = sequence;
-    this.notifyFeaturesLoaded();
-    
+    this.currentSequence = sequence;    
     this.knownChr = chr;
     this.knownCoverage = coverage;
-
-    if (this.status) {
-        this.status = null;
-        this._notifierToStatus();
-    }
-
-    this.draw();
+    this.notifyFeaturesLoaded();
 }
 
 DasTier.prototype.draw = function() {
