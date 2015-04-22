@@ -152,6 +152,9 @@ function Browser(opts) {
     if (opts.viewEnd !== undefined && typeof(opts.viewEnd) !== 'number') {
         throw Error('viewEnd must be an integer');
     }
+    if (opts.offscreenInitWidth !== undefined && typeof(opts.offscreenInitWidth) !== 'number') {
+        throw Error('offscreenInitWidth must be an integer');
+    }
 
     for (var k in opts) {
         this[k] = opts[k];
@@ -314,8 +317,8 @@ Browser.prototype.realInit = function() {
     }, function(v) {
         console.log('Failed to boot workers', v);
     }).then(function() {
-        if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
-            thisB.tierHolder.getBoundingClientRect().width > 0)
+        if (self.offscreenInitWidth || (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
+            thisB.tierHolder.getBoundingClientRect().width > 0))
         {
             setTimeout(function() {thisB.realInit2()}, 1);
         } else {
@@ -338,7 +341,7 @@ Browser.prototype.realInit2 = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
 
-    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | self.offscreenInitWidth | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
