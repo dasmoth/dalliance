@@ -700,10 +700,9 @@ Browser.prototype.realInit2 = function() {
     thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
     thisB.reorderTiers();
-    thisB.refresh();
-    thisB.setSelectedTier(1);
-
-    thisB.positionRuler();
+    thisB.setLocation(this.chr, this.viewStart, this.viewEnd, function () {
+        thisB.setSelectedTier(1);
+    });
 
 
     var ss = this.getSequenceSource();
@@ -1758,7 +1757,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
 
     this.viewStart = newMin;
     this.viewEnd = newMax;
-    var newScale = Math.max(this.featurePanelWidth, 50) / (this.viewEnd - this.viewStart);
+    var newScale = Math.max(this.featurePanelWidth || this.offscreenInitWidth, 50) / (this.viewEnd - this.viewStart);
     var oldScale = this.scale;
     var scaleChanged = (Math.abs(newScale - oldScale)) > 0.000001;
     this.scale = newScale;
