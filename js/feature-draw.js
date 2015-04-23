@@ -15,8 +15,6 @@ if (typeof(require) !== 'undefined') {
     var tier = require('./tier');
     var DasTier = tier.DasTier;
 
-    var sortFeatures = require('./features').sortFeatures;
-
     var g = require('./glyphs');
     var BoxGlyph = g.BoxGlyph;
     var GroupGlyph = g.GroupGlyph;
@@ -111,7 +109,6 @@ function drawFeatureTier(tier)
 {
     var start = Date.now()|0;
     GLOBAL_GC = tier.viewport.getContext('2d'); // Should only be used for metrics.
-    sortFeatures(tier);
     if (typeof(tier.dasSource.padding) === 'number')
         tier.padding = tier.dasSource.padding;
     else
