@@ -100,9 +100,9 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
     }
 }
 
-KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
+KnownSpace.prototype.retrieveFeatures = function(chr, min, max, scale, tierCallback) {
     if (scale != scale) {
-        throw "viewFeatures called with silly scale";
+        throw "retrieveFeatures called with silly scale";
     }
 
     if (chr != this.chr) {
@@ -124,7 +124,7 @@ KnownSpace.prototype.viewFeatures = function(chr, min, max, scale) {
     this.seqWasFetched = false;
     this.viewCount++;
     
-    this.startFetchesForTiers(this.tierMap);
+    this.startFetchesForTiers(this.tierMap, tierCallback);
     this.pool.notifyRequestsIssued();
 }
     
@@ -161,16 +161,16 @@ function filterFeatures(features, min, max) {
     return ff;
 }
 
-KnownSpace.prototype.invalidate = function(tier) {
+KnownSpace.prototype.invalidate = function(tier, defaultTierRenderer) {
     if (!this.pool) {
         return;
     }
 
     this.featureCache[tier] = null;
-    this.startFetchesForTiers([tier]);
+    this.startFetchesForTiers([tier], defaultTierRenderer);
 }
 
-KnownSpace.prototype.startFetchesForTiers = function(tiers) {
+KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
     var thisB = this;
 
     var awaitedSeq = this.awaitedSeq;
@@ -180,19 +180,18 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
 
     for (var t = 0; t < tiers.length; ++t) {
         try {
-            if (this.startFetchesFor(tiers[t], awaitedSeq)) {
+            if (this.startFetchesFor(tiers[t], awaitedSeq, tierCallback)) {
                 needSeq = true;
             }
         } catch (ex) {
             var tier = tiers[t];
+
             tier.currentFeatures = [];
             tier.currentSequence = null;
-            tier.draw();
-            tier.updateHeight();
-            tier.updateStatus(ex);
             console.log('Error fetching tier source');
             console.log(ex);
             gex = ex;
+            tierCallback(ex, tier);
         }
     }
 
@@ -233,7 +232,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
         throw gex;
 }
 
-KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
+KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq, tierCallback) {
     var thisB = this;
 
     var viewID = this.viewCount;
@@ -256,7 +255,7 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
             cachedFeatures = filterFeatures(cachedFeatures, min, max);
         }
         
-        thisB.provision(tier, baton.chr, intersection(baton.coverage, new Range(min, max)), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, baton.chr, intersection(baton.coverage, new Range(min, max)), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null, tierCallback);
 
         var availableScales = source.getScales();
         if (baton.scale <= this.scale || !availableScales) {
@@ -285,20 +284,16 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
         }
 
 	    thisB.latestViews[tier] = viewID;
-        thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
+        thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null, tierCallback);
     }, styleFilters);
     return needsSeq;
 }
 
-KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq) {
+KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq, tierCallback) {
     if (status) {
-        tier.currentFeatures = [];
-        tier.currentSequence = null;
-        tier.draw();
-        tier.updateHeight();
-    }
-    tier.updateStatus(status);
-   
+        tier.setFeatures(chr, coverage, actualScale, [], null);
+
+    }   
     if (!status) {
         var mayDownsample = false;
         var needBaseComposition = false;
@@ -332,12 +327,13 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
                 if (needBaseComposition) {
                     features = getBaseCoverage(features, seq, tier.browser.baseColors);
                 }
-                tier.viewFeatures(chr, coverage, actualScale, features, seq);
+                tier.setFeatures(chr, coverage, actualScale, features, seq);
             });
         } else {
-            tier.viewFeatures(chr, coverage, actualScale, features);
+            tier.setFeatures(chr, coverage, actualScale, features);
         }
     }
+    tierCallback(status, tier);
 }
 
 if (typeof(module) !== 'undefined') {

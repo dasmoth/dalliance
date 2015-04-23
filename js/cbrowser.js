@@ -1219,7 +1219,7 @@ Browser.prototype.withPreservedSelection = function(f) {
 
 Browser.prototype.refreshTier = function(tier) {
     if (this.knownSpace) {
-        this.knownSpace.invalidate(tier);
+        this.knownSpace.invalidate(tier, defaultTierRenderer);
     }
 }
 
@@ -1326,6 +1326,19 @@ Browser.prototype.arrangeTiers = function() {
 }
 
 Browser.prototype.refresh = function() {
+
+    this.retrieveTierData(defaultTierRenderer);
+    this.drawOverlays();
+    this.positionRuler();
+
+};
+
+var defaultTierRenderer = function(status, tier) {
+    tier.draw();
+    tier.updateStatus(status);
+}
+
+Browser.prototype.retrieveTierData = function(tierRendererCallback) {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
     var minExtraW = (100.0/this.scale)|0;
@@ -1366,9 +1379,7 @@ Browser.prototype.refresh = function() {
         this.drawnEnd = outerDrawnEnd;
     }
     
-    this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
-    this.drawOverlays();
-    this.positionRuler();
+    this.knownSpace.retrieveFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes, tierRendererCallback);
 }
 
 function setSources(msh, availableSources, maybeMapping) {
@@ -1619,18 +1630,18 @@ Browser.prototype.removeTier = function(conf, force) {
 }
 
 Browser.prototype.removeAllTiers = function() {
-  var thisB = this;
-  this.selectedTiers = [];
-  this.markSelectedTiers();
-  this.tiers.forEach(function (targetTier) {
-	  targetTier.destroy();
-	  if (thisB.knownSpace) {
-	      thisB.knownSpace.featureCache[targetTier] = null;
-	  }
-  });
-  this.tiers.length = 0;
-  this.reorderTiers();
-  this.notifyTier();
+	var thisB = this;
+    this.selectedTiers = [];
+    this.markSelectedTiers();
+    this.tiers.forEach(function (targetTier) {
+        targetTier.destroy();
+        if (thisB.knownSpace) {
+            thisB.knownSpace.featureCache[targetTier] = null;
+        }
+    });
+    this.tiers.length = 0;
+    this.reorderTiers();
+    this.notifyTier();
 }
 
 Browser.prototype.getSequenceSource = function() {
