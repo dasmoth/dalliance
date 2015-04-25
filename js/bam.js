@@ -192,9 +192,9 @@ function makeBam(data, bai, indexChunks, callback, attempted) {
                     callback(null, result);
                 }
             } else {
-              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
+              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader, {timeout: 5000});
             }
-        });
+        }, {timeout: 5000});   // Timeout on first request to catch Chrome mixed-content error.
     } else {
         var chunks = bam.indexChunks.chunks;
         bam.indices = []

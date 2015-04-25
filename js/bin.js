@@ -150,15 +150,29 @@ URLFetchable.prototype.salted = function() {
     return new URLFetchable(this.url, this.start, this.end, o);
 }
 
-URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
+URLFetchable.prototype.fetch = function(callback, opts) {
     var thisB = this;
-
-    attempt = attempt || 1;
+ 
+    opts = opts || {};
+    var attempt = opts.attempt || 1;
+    var truncatedLength = opts.truncatedLength;
     if (attempt > 3) {
         return callback(null);
     }
 
     try {
+        var timeout;
+        if (opts.timeout) {
+            timeout = window.setTimeout(
+                function() {
+                    console.log('timing out ' + url);
+                    req.abort();
+                    return callback(null, 'Timeout');
+                },
+                opts.timeout
+            );
+        }
+
         var req = new XMLHttpRequest();
         var length;
         var url = this.url;
@@ -177,6 +191,8 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         req.responseType = 'arraybuffer';
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
+                if (timeout)
+                    window.clearTimeout(timeout);
                 if (req.status == 200 || req.status == 206) {
                     if (req.response) {
                         var bl = req.response.byteLength;

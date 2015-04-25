@@ -2390,7 +2390,8 @@ Browser.prototype.canFetchPlainHTTP = function() {
                         } else {
                             resolve(false);
                         }
-                    }
+                    },
+                    {timeout: 2000}
                 );
             });
         }
