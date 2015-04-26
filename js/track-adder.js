@@ -1049,8 +1049,27 @@ Browser.prototype.showTrackAdder = function(ev) {
         probeResource(source, function(source, err) {
             if (err) {
                 removeChildren(stabHolder);
-                stabHolder.appendChild(makeElement('h2', "Couldn't access custom data"));
-                stabHolder.appendChild(makeElement('p', '' + err));
+                var tabError = makeElement('div');
+                tabError.appendChild(makeElement('h2', "Couldn't access custom data"));
+                tabError.appendChild(makeElement('p', '' + err));
+                stabHolder.appendChild(tabError);
+                console.log(source);
+                if (window.location.protocol === 'https:' && source.uri.indexOf('http:') == 0) {
+                    thisB.canFetchPlainHTTP().then(
+                        function(can) {
+                            if (!can) {
+                                tabError.appendChild(
+                                    makeElement('p', [
+                                        makeElement('strong', 'HTTP warning: '),
+                                        'you may not be able to access HTTP resources from an instance of Biodalliance which you are accessing via HTTPS.',
+                                        makeElement('a', '[More info]', {href: thisB.httpWarningURL, target: "_blank"})
+                                      ]
+                                   )
+                                );
+                            }
+                        }
+                    );
+                }
                 customMode = 'reset-bin';
             } else {
                 var nds = makeSourceConfig(source);
