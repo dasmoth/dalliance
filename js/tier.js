@@ -31,6 +31,8 @@ if (typeof(require) !== 'undefined') {
 
     var sc = require('./sourcecompare');
     var sourceDataURI = sc.sourceDataURI;
+
+    var sortFeatures = require('./features').sortFeatures;
 }
 
 var __tier_idSeed = 0;
@@ -265,8 +267,11 @@ DasTier.prototype.setFeatures = function(chr, coverage, scale, features, sequenc
     this.currentSequence = sequence;    
     this.knownChr = chr;
     this.knownCoverage = coverage;
+    
+
     // only notify features loaded, if they are valid
     if (features) {
+        sortFeatures(this);
         this.notifyFeaturesLoaded();
     }
 }
