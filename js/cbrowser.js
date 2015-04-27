@@ -1326,7 +1326,7 @@ Browser.prototype.arrangeTiers = function() {
 
 Browser.prototype.refresh = function() {
 
-    this.retrieveTierData(defaultTierRenderer);
+    this.retrieveTierData(this.tiers, defaultTierRenderer);
     this.drawOverlays();
     this.positionRuler();
 
@@ -1337,7 +1337,7 @@ var defaultTierRenderer = function(status, tier) {
     tier.updateStatus(status);
 }
 
-Browser.prototype.retrieveTierData = function(tierRendererCallback) {
+Browser.prototype.retrieveTierData = function(tiers, tierRendererCallback) {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
     var minExtraW = (100.0/this.scale)|0;
@@ -1347,12 +1347,12 @@ Browser.prototype.retrieveTierData = function(tierRendererCallback) {
     var oh = newOrigin - this.origin;
     this.origin = newOrigin;
     this.scaleAtLastRedraw = this.scale;
-    for (var t = 0; t < this.tiers.length; ++t) {
+    for (var t = 0; t < tiers.length; ++t) {
         var od = oh;
-        if (this.tiers[t].originHaxx) {
-            od += this.tiers[t].originHaxx;
+        if (tiers[t].originHaxx) {
+            od += tiers[t].originHaxx;
         }
-        this.tiers[t].originHaxx = od;
+        tiers[t].originHaxx = od;
     }
 
     var scaledQuantRes = this.targetQuantRes / this.scale;
@@ -1366,6 +1366,7 @@ Browser.prototype.retrieveTierData = function(tierRendererCallback) {
         var ss = this.getSequenceSource();
         if (this.knownSpace)
             this.knownSpace.cancel();
+        // known space is created based on the entire tier list, for future caching purposes, even if only a subset of the tiers are needed to be rendered now.
         this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
     
@@ -1377,8 +1378,8 @@ Browser.prototype.retrieveTierData = function(tierRendererCallback) {
         this.drawnStart = outerDrawnStart;
         this.drawnEnd = outerDrawnEnd;
     }
-    
-    this.knownSpace.retrieveFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes, tierRendererCallback);
+    // send in the subset of tiers to retrieve.
+    this.knownSpace.retrieveFeatures(tiers, this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes, tierRendererCallback);
 }
 
 function setSources(msh, availableSources, maybeMapping) {
