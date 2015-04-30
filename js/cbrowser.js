@@ -1646,7 +1646,7 @@ Browser.prototype.removeAllTiers = function() {
     });
     this.tiers.length = 0;
     this.reorderTiers();
-    this.notifyTier();
+    this.notifyTier("removedAll", null);
 }
 
 Browser.prototype.getSequenceSource = function() {
@@ -1933,10 +1933,10 @@ Browser.prototype.removeTierListener = function(handler) {
     }
 }
 
-Browser.prototype.notifyTier = function() {
+Browser.prototype.notifyTier = function(status, tier) {
     for (var tli = 0; tli < this.tierListeners.length; ++tli) {
         try {
-            this.tierListeners[tli]();
+            this.tierListeners[tli](status, tier);
         } catch (ex) {
             console.log(ex.stack);
         }
