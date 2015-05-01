@@ -485,7 +485,7 @@ DasTier.prototype._notifierOn = function(message, warnHTTP) {
         this.notifier.appendChild(
             makeElement(
                 'span',
-                [makeElement('a', '[HTTP Warning] ', {href: "//www.biodalliance.org/https.html", target: "_blank"}),
+                [makeElement('a', '[HTTP Warning] ', {href: this.browser.httpWarningURL, target: "_blank"}),
                  message]
             )
         );

@@ -131,6 +131,11 @@ function Browser(opts) {
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
 
+    // HTTP warning support
+
+    this.httpCanaryURL = 'http://www.biodalliance.org/http-canary.txt';
+    this.httpWarningURL = '//www.biodalliance.org/https.html';
+
     this.initListeners = [];
 
     if (opts.baseColors) {
@@ -2098,6 +2103,7 @@ Browser.prototype.notifyTierSelection = function() {
             console.log(ex.stack);
         }
     }
+
 }
 
 Browser.prototype.addTierSelectionWrapListener = function(f) {
@@ -2383,13 +2389,14 @@ Browser.prototype.makeLoader = function(size) {
 }
 
 Browser.prototype.canFetchPlainHTTP = function() {
+    var self = this;
     if (!this._plainHTTPPromise) {
         var worker = this.getWorker();
         if (worker) {
             this._plainHTTPPromise = new Promise(function(resolve, reject) {
                 worker.postCommand(
                     {command: 'textxhr',
-                     uri: 'http://www.biodalliance.org/http-canary.txt'},
+                     uri: self.httpCanaryURL},
                     function(result, err) {
                         if (result) {
                             resolve(true);
@@ -2401,14 +2408,15 @@ Browser.prototype.canFetchPlainHTTP = function() {
         } else {
            this._plainHTTPPromise = new Promise(function(resolve, reject) {
                 textXHR(
-                    'http://www.biodalliance.org/http-canary.txt', 
+                    self.httpCanaryURL,
                     function(result, err) {
                         if (result) {
                             resolve(true);
                         } else {
                             resolve(false);
                         }
-                    }
+                    },
+                    {timeout: 2000}
                 );
             });
         }

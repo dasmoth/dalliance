@@ -336,9 +336,23 @@ function textXHR(url, callback, opts) {
         url = saltURL(url);
 
     try {
+        var timeout;
+        if (opts.timeout) {
+            timeout = window.setTimeout(
+                function() {
+                    console.log('timing out ' + url);
+                    req.abort();
+                    return callback(null, 'Timeout');
+                },
+                opts.timeout
+            );
+        }
+
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
     	    if (req.readyState == 4) {
+                if (timeout)
+                    window.clearTimeout(timeout);
     	        if (req.status < 200 || req.status >= 300) {
     		    callback(null, 'Error code ' + req.status);
     	        } else {

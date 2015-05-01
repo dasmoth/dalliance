@@ -799,7 +799,8 @@ function makeBwg(data, callback, name) {
                 return callback(bwg);
             });
         });
-    });
+    }, {timeout: 5000});    // Potential timeout on first request to catch mixed-content errors on
+                            // Chromium.
 }
 
 
