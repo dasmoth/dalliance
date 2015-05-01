@@ -167,7 +167,11 @@ function Browser(opts) {
     // If the prefix only starts with a single '/' this is relative to the current
     // site, so we need to prefix the prefix with //{hostname}
     if (this.prefix.indexOf('//') < 0 && this.prefix.indexOf('/') === 0) {
-        this.prefix = '//'+window.location.hostname+this.prefix;
+        var location = window.location.hostname;
+        if (window.location.port) {
+            location += ':' + window.location.port
+        };
+        this.prefix = '//' + location + this.prefix;
     }
     if (this.prefix.indexOf('//') === 0) {
         var proto = window.location.protocol;
