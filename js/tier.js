@@ -32,6 +32,8 @@ if (typeof(require) !== 'undefined') {
     var sc = require('./sourcecompare');
     var sourceDataURI = sc.sourceDataURI;
 
+    var Promise = require('es6-promise').Promise;
+
     var sortFeatures = require('./features').sortFeatures;
 }
 
@@ -183,35 +185,36 @@ DasTier.prototype.addFeatureInfoPlugin = function(p) {
 
 DasTier.prototype.init = function() {
     var tier = this;
-
-    if (tier.dasSource.style) {
-        this.setStylesheet({styles: tier.dasSource.style});
-        this.browser.refreshTier(this);
-    } else {
-        tier.status = 'Fetching stylesheet';
-        tier.fetchStylesheet(function(ss, err) {
-            if (err || !ss) {
-                tier.error = 'No stylesheet';
-                var ss = new DASStylesheet();
-                var defStyle = new DASStyle();
-                defStyle.glyph = 'BOX';
-                defStyle.BGCOLOR = 'blue';
-                defStyle.FGCOLOR = 'black';
-                ss.pushStyle({type: 'default'}, null, defStyle);
-                tier.setStylesheet(ss);
-                tier.browser.refreshTier(tier);
-            } else {
-                tier.setStylesheet(ss);
-                if (ss.geneHint) {
-                    tier.dasSource.collapseSuperGroups = true;
-                    tier.bumped = false;
-                    tier.updateLabel();
+    return new Promise(function (resolve, reject) {
+        
+        if (tier.dasSource.style) {
+            tier.setStylesheet({styles: tier.dasSource.style});
+            resolve(tier);
+        } else {
+            tier.status = 'Fetching stylesheet';
+            tier.fetchStylesheet(function(ss, err) {
+                if (err || !ss) {
+                    tier.error = 'No stylesheet';
+                    var ss = new DASStylesheet();
+                    var defStyle = new DASStyle();
+                    defStyle.glyph = 'BOX';
+                    defStyle.BGCOLOR = 'blue';
+                    defStyle.FGCOLOR = 'black';
+                    ss.pushStyle({type: 'default'}, null, defStyle);
+                    tier.setStylesheet(ss);
+                } else {
+                    tier.setStylesheet(ss);
+                    if (ss.geneHint) {
+                        tier.dasSource.collapseSuperGroups = true;
+                        tier.bumped = false;
+                        tier.updateLabel();
+                    }
+                    tier._updateFromConfig();
                 }
-                tier._updateFromConfig();
-                tier.browser.refreshTier(tier);
-            }
-        });
-    }
+                resolve(tier);
+            });
+        }
+    });
 }
 
 DasTier.prototype.setStylesheet = function(ss) {

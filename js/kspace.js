@@ -161,13 +161,13 @@ function filterFeatures(features, min, max) {
     return ff;
 }
 
-KnownSpace.prototype.invalidate = function(tier, defaultTierRenderer) {
+KnownSpace.prototype.invalidate = function(tier, tierCallback) {
     if (!this.pool) {
         return;
     }
 
     this.featureCache[tier] = null;
-    this.startFetchesForTiers([tier], defaultTierRenderer);
+    this.startFetchesForTiers([tier], tierCallback);
 }
 
 KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {

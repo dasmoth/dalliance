@@ -511,7 +511,7 @@ Browser.prototype.realInit2 = function() {
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
-                thisB.notifyTier();
+                thisB.notifyTier("selected", st);
             } else {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
@@ -590,7 +590,7 @@ Browser.prototype.realInit2 = function() {
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
-                thisB.notifyTier();
+                thisB.notifyTier("selected", st);
             } else {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
@@ -1146,7 +1146,7 @@ Browser.prototype.realMakeTier = function(source, config) {
                     break;
                 }
             }
-            thisB.notifyTier();
+            thisB.notifyTier("reordered", tier);
         }
     };
 
@@ -1159,18 +1159,18 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
-    tier.init(); // fetches stylesheet
-    tier.currentlyHeight = 50;
-    this.updateHeight();
-    tier.updateLabel();
+ // fetches stylesheet
+    return tier.init().then(function (updatedTier) {
+        updatedTier.currentlyHeight = 50;
+        thisB.updateHeight();
+        updatedTier.updateLabel();
 
+        thisB.withPreservedSelection(thisB._ensureTiersGrouped);
+        updatedTier._updateFromConfig();
+        thisB.reorderTiers();
 
-
-    this.withPreservedSelection(thisB._ensureTiersGrouped);
-    tier._updateFromConfig();
-    this.reorderTiers();
-
-    return tier;
+        return updatedTier;
+    });
 }
 
 Browser.prototype.reorderTiers = function() {
@@ -1225,9 +1225,10 @@ Browser.prototype.withPreservedSelection = function(f) {
     }
 }
 
-Browser.prototype.refreshTier = function(tier) {
+Browser.prototype.refreshTier = function(tier, tierCallback) {
+    tierCallback = tierCallback || defaultTierRenderer;
     if (this.knownSpace) {
-        this.knownSpace.invalidate(tier, defaultTierRenderer);
+        this.knownSpace.invalidate(tier, tierCallback);
     }
 }
 
@@ -1585,15 +1586,19 @@ Browser.prototype.setFullScreenHeight = function() {
 }
 
 Browser.prototype.addTier = function(conf) {
+    var thisB = this;
     conf = shallowCopy(conf);
     conf.disabled = false;
-    
-    var tier = this.makeTier(conf);
-    this.markSelectedTiers();
-    this.positionRuler();
-    this.notifyTier();
-    return tier;
-}
+
+    return this.makeTier(conf).then(function (tier) {
+        thisB.refreshTier(tier);
+        thisB.markSelectedTiers();
+        thisB.positionRuler();
+        thisB.notifyTier("added", tier);
+        return tier;
+    })
+};
+
 
 Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
@@ -1635,7 +1640,7 @@ Browser.prototype.removeTier = function(conf, force) {
     }
 
     this.reorderTiers();
-    this.notifyTier();
+    this.notifyTier("removed", targetTier);
 }
 
 Browser.prototype.removeAllTiers = function() {
@@ -1650,7 +1655,7 @@ Browser.prototype.removeAllTiers = function() {
     });
     this.tiers.length = 0;
     this.reorderTiers();
-    this.notifyTier();
+    this.notifyTier("removedAll", null);
 }
 
 Browser.prototype.getSequenceSource = function() {
@@ -1937,10 +1942,10 @@ Browser.prototype.removeTierListener = function(handler) {
     }
 }
 
-Browser.prototype.notifyTier = function() {
+Browser.prototype.notifyTier = function(status, tier) {
     for (var tli = 0; tli < this.tierListeners.length; ++tli) {
         try {
-            this.tierListeners[tli]();
+            this.tierListeners[tli](status, tier);
         } catch (ex) {
             console.log(ex.stack);
         }
