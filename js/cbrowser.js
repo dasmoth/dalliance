@@ -702,7 +702,9 @@ Browser.prototype.realInit2 = function() {
         }
 
         if (!source.disabled) {
-            this.makeTier(source, config);
+            this.makeTier(source, config).then(function(tier) {
+                thisB.refreshTier(tier);
+            });
         }
     }
 
