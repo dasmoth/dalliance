@@ -71,7 +71,7 @@ function Browser(opts) {
     this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
-    this.registry = '//www.dasregistry.org/das/sources';
+
     this.chains = {};
 
     this.pageName = 'svgHolder'
@@ -116,6 +116,11 @@ function Browser(opts) {
     this.availableSources = new Observed();
     this.defaultSources = [];
     this.mappableSources = {};
+
+    // Central DAS Registry no longer available 2015-05
+
+    this.registry = null; // '//www.dasregistry.org/das/sources';
+    this.noRegistryTabs = true;
 
     this.hubs = [];
     this.hubObjects = [];
@@ -1404,6 +1409,9 @@ function setSources(msh, availableSources, maybeMapping) {
 }
 
 Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
+    if (!this.registry)
+        return;
+
     var thisB = this;
     var coords, msh;
     if (maybeMapping) {
