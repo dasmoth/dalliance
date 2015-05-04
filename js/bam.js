@@ -426,7 +426,8 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
             for (var j = 0; j < seqBytes; ++j) {
                 var sb = ba[p + j];
                 seq += SEQRET_DECODER[(sb & 0xf0) >> 4];
-                seq += SEQRET_DECODER[(sb & 0x0f)];
+                if (seq.length < lseq)
+                    seq += SEQRET_DECODER[(sb & 0x0f)];
             }
             p += seqBytes;
             record.seq = seq;
