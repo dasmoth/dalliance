@@ -355,7 +355,7 @@ Browser.prototype.realInit2 = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
 
-    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | self.offscreenInitWidth | 0;
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | thisB.offscreenInitWidth | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
@@ -716,9 +716,6 @@ Browser.prototype.realInit2 = function() {
     thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
     thisB.reorderTiers();
-    thisB.setLocation(this.chr, this.viewStart, this.viewEnd, function () {
-        thisB.setSelectedTier(1);
-    });
 
 
     var ss = this.getSequenceSource();
@@ -773,14 +770,17 @@ Browser.prototype.realInit2 = function() {
         this.storeStatus();
     }
 
-    // Ping any init listeners.
-    for (var ii = 0; ii < this.initListeners.length; ++ii) {
-        try {
-            this.initListeners[ii].call(this);
-        } catch (e) {
-            console.log(e);
+    thisB.setLocation(this.chr, this.viewStart, this.viewEnd, function () {
+        thisB.setSelectedTier(1);
+        // Ping any init listeners.
+        for (var ii = 0; ii < thisB.initListeners.length; ++ii) {
+            try {
+                thisB.initListeners[ii].call(thisB);
+            } catch (e) {
+                console.log(e);
+            }
         }
-    }
+    });
 }
 
 // 
