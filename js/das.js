@@ -755,7 +755,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
     } else {
         try {
             var req = new XMLHttpRequest();
-            var timeout = window.setTimeout(
+            var timeout = setTimeout(
                 function() {
                     console.log('timing out '  + url);
                     req.abort();
@@ -771,7 +771,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
 
             req.onreadystatechange = function() {
                 if (req.readyState == 4) {
-                    window.clearTimeout(timeout);
+                    clearTimeout(timeout);
                     if (req.status >= 200 || req.status == 0) {
                         handler(req.responseXML, req);
                     }

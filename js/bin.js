@@ -162,8 +162,8 @@ URLFetchable.prototype.fetch = function(callback, opts) {
 
     try {
         var timeout;
-        if (opts.timeout) {
-            timeout = window.setTimeout(
+        if (opts.timeout && !this.opts.credentials) {
+            timeout = setTimeout(
                 function() {
                     console.log('timing out ' + url);
                     req.abort();
@@ -192,12 +192,12 @@ URLFetchable.prototype.fetch = function(callback, opts) {
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
                 if (timeout)
-                    window.clearTimeout(timeout);
+                    clearTimeout(timeout);
                 if (req.status == 200 || req.status == 206) {
                     if (req.response) {
                         var bl = req.response.byteLength;
                         if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
-                            return thisB.fetch(callback, attempt + 1, bl);
+                            return thisB.fetch(callback, {attempt: attempt + 1, truncatedLength: bl});
                         } else {
                             return callback(req.response);
                         }
@@ -206,13 +206,13 @@ URLFetchable.prototype.fetch = function(callback, opts) {
                     } else {
                         var r = req.responseText;
                         if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
-                            return thisB.fetch(callback, attempt + 1, r.length);
+                            return thisB.fetch(callback, {attempt: attempt + 1, truncatedLength: r.length});
                         } else {
                             return callback(bstringToBuffer(req.responseText));
                         }
                     }
                 } else {
-                    return thisB.fetch(callback, attempt + 1);
+                    return thisB.fetch(callback, {attempt: attempt + 1});
                 }
             }
         };
