@@ -162,7 +162,7 @@ URLFetchable.prototype.fetch = function(callback, opts) {
 
     try {
         var timeout;
-        if (opts.timeout) {
+        if (opts.timeout && !this.opts.credentials) {
             timeout = setTimeout(
                 function() {
                     console.log('timing out ' + url);
