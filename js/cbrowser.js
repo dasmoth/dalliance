@@ -2453,7 +2453,7 @@ function makeFetchWorker(browser) {
             wurl = 'http:' + wurl;
     }
 
-    var wscript = 'importScripts("' + wurl + '");';
+    var wscript = 'importScripts("' + wurl + '?version=' + VERSION + '");';
     var wblob = new Blob([wscript], {type: 'application/javascript'});
 
 

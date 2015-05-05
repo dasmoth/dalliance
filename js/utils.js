@@ -338,7 +338,7 @@ function textXHR(url, callback, opts) {
     try {
         var timeout;
         if (opts.timeout) {
-            timeout = window.setTimeout(
+            timeout = setTimeout(
                 function() {
                     console.log('timing out ' + url);
                     req.abort();
@@ -352,7 +352,7 @@ function textXHR(url, callback, opts) {
         req.onreadystatechange = function() {
     	    if (req.readyState == 4) {
                 if (timeout)
-                    window.clearTimeout(timeout);
+                    clearTimeout(timeout);
     	        if (req.status < 200 || req.status >= 300) {
     		    callback(null, 'Error code ' + req.status);
     	        } else {
