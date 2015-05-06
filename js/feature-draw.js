@@ -1041,7 +1041,8 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
             refSeq, 
             style.__SEQCOLOR, 
             quals,
-            !isDasBooleanTrue(style.__CLEARBG)
+            !isDasBooleanTrue(style.__CLEARBG),
+            tier.scaleVertical
         );
         if (insertionLabels)
             gg = new TranslatedGlyph(gg, 0, 7);
