@@ -151,7 +151,8 @@ Browser.prototype.createSources = function(config) {
     }
 
     if (config.mapping) {
-        fs = new MappedFeatureSource(fs, this.chains[config.mapping]);
+        var chain = this.chains[config.mapping];
+        fs = new MappedFeatureSource(fs, chain);
     }
 
     if (config.name && fs && !fs.name) {
@@ -1567,7 +1568,7 @@ MappedFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool
                     var m2 = thisB.mapping.mapPoint(seg.name, seg.end);
 
                     if (m1 && m2) {
-                        var segDestCoverage = new Range(m1.pos, m2.pos);
+                        var segDestCoverage = new Range(Math.min(m1.pos, m2.pos), Math.max(m1.pos, m2.pos));
                         if (mappedLoc)
                             mappedLoc = union(mappedLoc, segDestCoverage);
                         else

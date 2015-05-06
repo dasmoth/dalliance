@@ -54,6 +54,8 @@ function Chainset(conf, srcTag, destTag, coords) {
         this.chainFetcher = new BBIChainFetcher(this.uri, this.credentials);
     } else if (this.type == 'alias') {
         this.chainFetcher = new AliasChainFetcher(conf);
+    } else if (this.type == 'flip') {
+        this.chainFetcher = new FlipChainFetcher(conf);
     } else {
         this.chainFetcher = new DASChainFetcher(this.uri, this.srcTag, this.destTag);
     }
@@ -516,4 +518,51 @@ if (typeof(module) !== 'undefined') {
     module.exports = {
         Chainset: Chainset
     };
+}
+
+function FlipChainFetcher(conf) {
+    console.log('fcf', conf);
+    this.browser = conf.browser;
+}
+
+FlipChainFetcher.prototype.fetchChains = function(chr, min, max) {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+        var ss = self.browser.getSequenceSource();
+        ss.getSeqInfo(chr, function(si) {
+            if (!si) {
+                var altChr;
+                if (chr.indexOf('chr') == 0) {
+                    altChr = chr.substr(3);
+                } else {
+                    altChr = 'chr' + chr;
+                }
+                ss.getSeqInfo(altChr, function(si2) {
+                    if (!si2) {
+                        reject("Can't find " + chr);
+                    } else {
+                        resolve(self.makeChain(altChr, si2.length));
+                    }
+                });
+            } else {
+                resolve(self.makeChain(chr, si.length));
+            }
+        });
+    });
+}
+
+FlipChainFetcher.prototype.makeChain = function(chr, length) {
+    return [
+        {
+                srcChr:         chr,
+                srcMin:         1,
+                srcMax:         length,
+                srcOri:         '+',
+                destChr:        chr,
+                destMin:        1,
+                destMax:        length,
+                destOri:        '-',
+                blocks: [[1, 1, length]]
+         }   
+    ];
 }

@@ -293,6 +293,8 @@ Browser.prototype.realInit = function() {
         if (cc instanceof Chainset) {
             console.log('WARNING: Should no longer use "new Chainset" in Biodalliance configurations.');
         }
+        if (cc.type == 'flip')
+            cc.browser = this;
         this.chains[k] = new Chainset(cc);
     }
 
