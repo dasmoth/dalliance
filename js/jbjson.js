@@ -49,7 +49,7 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 		    var j = jf[fi];
 		    
 		    var f = new DASFeature();
-		    f.segment = segment;
+		    f.segment = segment.name;
 		    f.min = (j['start'] | 0) + 1;
 		    f.max = j['end'] | 0;
 		    if (j.name) {
