@@ -113,6 +113,11 @@ function drawFeatureTier(tier)
         tier.padding = tier.dasSource.padding;
     else
         tier.padding = MIN_PADDING;
+    
+    if (typeof(tier.dasSource.scaleVertical) === 'boolean')
+        tier.scaleVertical = tier.dasSource.scaleVertical;
+    else
+        tier.scaleVertical = false;
 
     var glyphs = [];
     var specials = false;
@@ -486,8 +491,14 @@ DasTier.prototype.paintToContext = function(gc, oc, offset) {
                 }
             }
         }
-        gc.translate(0, subtiers[s].height + this.padding);
-        oc.translate(0, subtiers[s].height + this.padding);
+        if (this.scaleVertical) {
+            var scale = this.browser.scale;
+            gc.translate(0, scale + this.padding);
+            oc.translate(0, scale + this.padding);
+        } else {
+            gc.translate(0, subtiers[s].height + this.padding);
+            oc.translate(0, subtiers[s].height + this.padding);
+        }
     }
     gc.restore();
 
