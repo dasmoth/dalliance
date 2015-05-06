@@ -159,7 +159,7 @@ function probeResource(source, listener, retry) {
 
             return listener(source, "Unsupported format");
         }
-    });
+    }, {timeout: 1500});  // Timeout to catch mixed-origin case on Chromium.
 }
 
 function finishProbeBedWig(source, maybeType) {

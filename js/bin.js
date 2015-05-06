@@ -150,15 +150,29 @@ URLFetchable.prototype.salted = function() {
     return new URLFetchable(this.url, this.start, this.end, o);
 }
 
-URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
+URLFetchable.prototype.fetch = function(callback, opts) {
     var thisB = this;
-
-    attempt = attempt || 1;
+ 
+    opts = opts || {};
+    var attempt = opts.attempt || 1;
+    var truncatedLength = opts.truncatedLength;
     if (attempt > 3) {
         return callback(null);
     }
 
     try {
+        var timeout;
+        if (opts.timeout && !this.opts.credentials) {
+            timeout = setTimeout(
+                function() {
+                    console.log('timing out ' + url);
+                    req.abort();
+                    return callback(null, 'Timeout');
+                },
+                opts.timeout
+            );
+        }
+
         var req = new XMLHttpRequest();
         var length;
         var url = this.url;
@@ -177,11 +191,13 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         req.responseType = 'arraybuffer';
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
+                if (timeout)
+                    clearTimeout(timeout);
                 if (req.status == 200 || req.status == 206) {
                     if (req.response) {
                         var bl = req.response.byteLength;
                         if (length && length != bl && (!truncatedLength || bl != truncatedLength)) {
-                            return thisB.fetch(callback, attempt + 1, bl);
+                            return thisB.fetch(callback, {attempt: attempt + 1, truncatedLength: bl});
                         } else {
                             return callback(req.response);
                         }
@@ -190,13 +206,13 @@ URLFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
                     } else {
                         var r = req.responseText;
                         if (length && length != r.length && (!truncatedLength || r.length != truncatedLength)) {
-                            return thisB.fetch(callback, attempt + 1, r.length);
+                            return thisB.fetch(callback, {attempt: attempt + 1, truncatedLength: r.length});
                         } else {
                             return callback(bstringToBuffer(req.responseText));
                         }
                     }
                 } else {
-                    return thisB.fetch(callback, attempt + 1);
+                    return thisB.fetch(callback, {attempt: attempt + 1});
                 }
             }
         };

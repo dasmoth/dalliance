@@ -121,7 +121,7 @@ function connectTabix(data, tbi, callback) {
         tabix.headerMax = minBlockIndex;
 
         callback(tabix);
-    });
+    }, {timeout: 5000});
 }
 
 // Copy-paste from BamFile

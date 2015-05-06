@@ -71,7 +71,7 @@ function Browser(opts) {
     this.tierSelectionWrapListeners = [];
 
     this.cookieKey = 'browser';
-    this.registry = '//www.dasregistry.org/das/sources';
+
     this.chains = {};
 
     this.pageName = 'svgHolder'
@@ -117,6 +117,11 @@ function Browser(opts) {
     this.defaultSources = [];
     this.mappableSources = {};
 
+    // Central DAS Registry no longer available 2015-05
+
+    this.registry = null; // '//www.dasregistry.org/das/sources';
+    this.noRegistryTabs = true;
+
     this.hubs = [];
     this.hubObjects = [];
 
@@ -130,6 +135,11 @@ function Browser(opts) {
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
+
+    // HTTP warning support
+
+    this.httpCanaryURL = 'http://www.biodalliance.org/http-canary.txt';
+    this.httpWarningURL = '//www.biodalliance.org/https.html';
 
     this.initListeners = [];
 
@@ -152,6 +162,9 @@ function Browser(opts) {
     if (opts.viewEnd !== undefined && typeof(opts.viewEnd) !== 'number') {
         throw Error('viewEnd must be an integer');
     }
+    if (opts.offscreenInitWidth !== undefined && typeof(opts.offscreenInitWidth) !== 'number') {
+        throw Error('offscreenInitWidth must be an integer');
+    }
 
     for (var k in opts) {
         this[k] = opts[k];
@@ -162,7 +175,11 @@ function Browser(opts) {
     // If the prefix only starts with a single '/' this is relative to the current
     // site, so we need to prefix the prefix with //{hostname}
     if (this.prefix.indexOf('//') < 0 && this.prefix.indexOf('/') === 0) {
-        this.prefix = '//'+window.location.hostname+this.prefix;
+        var location = window.location.hostname;
+        if (window.location.port) {
+            location += ':' + window.location.port
+        };
+        this.prefix = '//' + location + this.prefix;
     }
     if (this.prefix.indexOf('//') === 0) {
         var proto = window.location.protocol;
@@ -316,8 +333,8 @@ Browser.prototype.realInit = function() {
     }, function(v) {
         console.log('Failed to boot workers', v);
     }).then(function() {
-        if (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
-            thisB.tierHolder.getBoundingClientRect().width > 0)
+        if (self.offscreenInitWidth || (window.getComputedStyle(thisB.browserHolderHolder).display != 'none' &&
+            thisB.tierHolder.getBoundingClientRect().width > 0))
         {
             setTimeout(function() {thisB.realInit2()}, 1);
         } else {
@@ -340,7 +357,7 @@ Browser.prototype.realInit2 = function() {
     removeChildren(this.tierHolder);
     removeChildren(this.pinnedTierHolder);
 
-    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | 0;
+    this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | thisB.offscreenInitWidth | 0;
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
@@ -501,7 +518,7 @@ Browser.prototype.realInit2 = function() {
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
-                thisB.notifyTier();
+                thisB.notifyTier("selected", st);
             } else {
                 var st = thisB.getSelectedTier();
                 if (st > 0) {
@@ -580,7 +597,7 @@ Browser.prototype.realInit2 = function() {
                 thisB.markSelectedTiers();
                 thisB.notifyTierSelection();
                 thisB.reorderTiers();
-                thisB.notifyTier();
+                thisB.notifyTier("selected", st);
             } else {
                 var st = thisB.getSelectedTier();
                 if (st < thisB.tiers.length -1) {
@@ -692,17 +709,15 @@ Browser.prototype.realInit2 = function() {
         }
 
         if (!source.disabled) {
-            this.makeTier(source, config);
+            this.makeTier(source, config).then(function(tier) {
+                thisB.refreshTier(tier);
+            });
         }
     }
 
     thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
     thisB.reorderTiers();
-    thisB.refresh();
-    thisB.setSelectedTier(1);
-
-    thisB.positionRuler();
 
 
     var ss = this.getSequenceSource();
@@ -757,14 +772,17 @@ Browser.prototype.realInit2 = function() {
         this.storeStatus();
     }
 
-    // Ping any init listeners.
-    for (var ii = 0; ii < this.initListeners.length; ++ii) {
-        try {
-            this.initListeners[ii].call(this);
-        } catch (e) {
-            console.log(e);
+    thisB.setLocation(this.chr, this.viewStart, this.viewEnd, function () {
+        thisB.setSelectedTier(1);
+        // Ping any init listeners.
+        for (var ii = 0; ii < thisB.initListeners.length; ++ii) {
+            try {
+                thisB.initListeners[ii].call(thisB);
+            } catch (e) {
+                console.log(e);
+            }
         }
-    }
+    });
 }
 
 // 
@@ -1137,7 +1155,7 @@ Browser.prototype.realMakeTier = function(source, config) {
                     break;
                 }
             }
-            thisB.notifyTier();
+            thisB.notifyTier("reordered", tier);
         }
     };
 
@@ -1150,18 +1168,18 @@ Browser.prototype.realMakeTier = function(source, config) {
 
     this.tiers.push(tier);  // NB this currently tells any extant knownSpace about the new tier.
     
-    tier.init(); // fetches stylesheet
-    tier.currentlyHeight = 50;
-    this.updateHeight();
-    tier.updateLabel();
+ // fetches stylesheet
+    return tier.init().then(function (updatedTier) {
+        updatedTier.currentlyHeight = 50;
+        thisB.updateHeight();
+        updatedTier.updateLabel();
 
+        thisB.withPreservedSelection(thisB._ensureTiersGrouped);
+        updatedTier._updateFromConfig();
+        thisB.reorderTiers();
 
-
-    this.withPreservedSelection(thisB._ensureTiersGrouped);
-    tier._updateFromConfig();
-    this.reorderTiers();
-
-    return tier;
+        return updatedTier;
+    });
 }
 
 Browser.prototype.reorderTiers = function() {
@@ -1216,9 +1234,10 @@ Browser.prototype.withPreservedSelection = function(f) {
     }
 }
 
-Browser.prototype.refreshTier = function(tier) {
+Browser.prototype.refreshTier = function(tier, tierCallback) {
+    tierCallback = tierCallback || defaultTierRenderer;
     if (this.knownSpace) {
-        this.knownSpace.invalidate(tier);
+        this.knownSpace.invalidate(tier, tierCallback);
     }
 }
 
@@ -1325,6 +1344,19 @@ Browser.prototype.arrangeTiers = function() {
 }
 
 Browser.prototype.refresh = function() {
+
+    this.retrieveTierData(this.tiers, defaultTierRenderer);
+    this.drawOverlays();
+    this.positionRuler();
+
+};
+
+var defaultTierRenderer = function(status, tier) {
+    tier.draw();
+    tier.updateStatus(status);
+}
+
+Browser.prototype.retrieveTierData = function(tiers, tierRendererCallback) {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
     var minExtraW = (100.0/this.scale)|0;
@@ -1334,12 +1366,12 @@ Browser.prototype.refresh = function() {
     var oh = newOrigin - this.origin;
     this.origin = newOrigin;
     this.scaleAtLastRedraw = this.scale;
-    for (var t = 0; t < this.tiers.length; ++t) {
+    for (var t = 0; t < tiers.length; ++t) {
         var od = oh;
-        if (this.tiers[t].originHaxx) {
-            od += this.tiers[t].originHaxx;
+        if (tiers[t].originHaxx) {
+            od += tiers[t].originHaxx;
         }
-        this.tiers[t].originHaxx = od;
+        tiers[t].originHaxx = od;
     }
 
     var scaledQuantRes = this.targetQuantRes / this.scale;
@@ -1353,6 +1385,7 @@ Browser.prototype.refresh = function() {
         var ss = this.getSequenceSource();
         if (this.knownSpace)
             this.knownSpace.cancel();
+        // known space is created based on the entire tier list, for future caching purposes, even if only a subset of the tiers are needed to be rendered now.
         this.knownSpace = new KnownSpace(this.tiers, this.chr, outerDrawnStart, outerDrawnEnd, scaledQuantRes, ss);
     }
     
@@ -1364,10 +1397,8 @@ Browser.prototype.refresh = function() {
         this.drawnStart = outerDrawnStart;
         this.drawnEnd = outerDrawnEnd;
     }
-    
-    this.knownSpace.viewFeatures(this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes);
-    this.drawOverlays();
-    this.positionRuler();
+    // send in the subset of tiers to retrieve.
+    this.knownSpace.retrieveFeatures(tiers, this.chr, this.drawnStart, this.drawnEnd, scaledQuantRes, tierRendererCallback);
 }
 
 function setSources(msh, availableSources, maybeMapping) {
@@ -1380,6 +1411,9 @@ function setSources(msh, availableSources, maybeMapping) {
 }
 
 Browser.prototype.queryRegistry = function(maybeMapping, tryCache) {
+    if (!this.registry)
+        return;
+
     var thisB = this;
     var coords, msh;
     if (maybeMapping) {
@@ -1564,15 +1598,19 @@ Browser.prototype.setFullScreenHeight = function() {
 }
 
 Browser.prototype.addTier = function(conf) {
+    var thisB = this;
     conf = shallowCopy(conf);
     conf.disabled = false;
-    
-    var tier = this.makeTier(conf);
-    this.markSelectedTiers();
-    this.positionRuler();
-    this.notifyTier();
-    return tier;
-}
+
+    return this.makeTier(conf).then(function (tier) {
+        thisB.refreshTier(tier);
+        thisB.markSelectedTiers();
+        thisB.positionRuler();
+        thisB.notifyTier("added", tier);
+        return tier;
+    })
+};
+
 
 Browser.prototype.removeTier = function(conf, force) {
     var target = -1;
@@ -1614,22 +1652,22 @@ Browser.prototype.removeTier = function(conf, force) {
     }
 
     this.reorderTiers();
-    this.notifyTier();
+    this.notifyTier("removed", targetTier);
 }
 
 Browser.prototype.removeAllTiers = function() {
-  var thisB = this;
-  this.selectedTiers = [];
-  this.markSelectedTiers();
-  this.tiers.forEach(function (targetTier) {
-	  targetTier.destroy();
-	  if (thisB.knownSpace) {
-	      thisB.knownSpace.featureCache[targetTier] = null;
-	  }
-  });
-  this.tiers.length = 0;
-  this.reorderTiers();
-  this.notifyTier();
+	var thisB = this;
+    this.selectedTiers = [];
+    this.markSelectedTiers();
+    this.tiers.forEach(function (targetTier) {
+        targetTier.destroy();
+        if (thisB.knownSpace) {
+            thisB.knownSpace.featureCache[targetTier] = null;
+        }
+    });
+    this.tiers.length = 0;
+    this.reorderTiers();
+    this.notifyTier("removedAll", null);
 }
 
 Browser.prototype.getSequenceSource = function() {
@@ -1746,7 +1784,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
 
     this.viewStart = newMin;
     this.viewEnd = newMax;
-    var newScale = Math.max(this.featurePanelWidth, 50) / (this.viewEnd - this.viewStart);
+    var newScale = Math.max(this.featurePanelWidth || this.offscreenInitWidth, 50) / (this.viewEnd - this.viewStart);
     var oldScale = this.scale;
     var scaleChanged = (Math.abs(newScale - oldScale)) > 0.000001;
     this.scale = newScale;
@@ -1916,10 +1954,10 @@ Browser.prototype.removeTierListener = function(handler) {
     }
 }
 
-Browser.prototype.notifyTier = function() {
+Browser.prototype.notifyTier = function(status, tier) {
     for (var tli = 0; tli < this.tierListeners.length; ++tli) {
         try {
-            this.tierListeners[tli]();
+            this.tierListeners[tli](status, tier);
         } catch (ex) {
             console.log(ex.stack);
         }
@@ -2082,6 +2120,7 @@ Browser.prototype.notifyTierSelection = function() {
             console.log(ex.stack);
         }
     }
+
 }
 
 Browser.prototype.addTierSelectionWrapListener = function(f) {
@@ -2367,13 +2406,14 @@ Browser.prototype.makeLoader = function(size) {
 }
 
 Browser.prototype.canFetchPlainHTTP = function() {
+    var self = this;
     if (!this._plainHTTPPromise) {
         var worker = this.getWorker();
         if (worker) {
             this._plainHTTPPromise = new Promise(function(resolve, reject) {
                 worker.postCommand(
                     {command: 'textxhr',
-                     uri: 'http://www.biodalliance.org/http-canary.txt'},
+                     uri: self.httpCanaryURL},
                     function(result, err) {
                         if (result) {
                             resolve(true);
@@ -2385,14 +2425,15 @@ Browser.prototype.canFetchPlainHTTP = function() {
         } else {
            this._plainHTTPPromise = new Promise(function(resolve, reject) {
                 textXHR(
-                    'http://www.biodalliance.org/http-canary.txt', 
+                    self.httpCanaryURL,
                     function(result, err) {
                         if (result) {
                             resolve(true);
                         } else {
                             resolve(false);
                         }
-                    }
+                    },
+                    {timeout: 2000}
                 );
             });
         }
@@ -2435,7 +2476,7 @@ function makeFetchWorker(browser) {
             wurl = 'http:' + wurl;
     }
 
-    var wscript = 'importScripts("' + wurl + '");';
+    var wscript = 'importScripts("' + wurl + '?version=' + VERSION + '");';
     var wblob = new Blob([wscript], {type: 'application/javascript'});
 
 

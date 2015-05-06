@@ -31,6 +31,10 @@ if (typeof(require) !== 'undefined') {
 
     var sc = require('./sourcecompare');
     var sourceDataURI = sc.sourceDataURI;
+
+    var Promise = require('es6-promise').Promise;
+
+    var sortFeatures = require('./features').sortFeatures;
 }
 
 var __tier_idSeed = 0;
@@ -181,35 +185,36 @@ DasTier.prototype.addFeatureInfoPlugin = function(p) {
 
 DasTier.prototype.init = function() {
     var tier = this;
-
-    if (tier.dasSource.style) {
-        this.setStylesheet({styles: tier.dasSource.style});
-        this.browser.refreshTier(this);
-    } else {
-        tier.status = 'Fetching stylesheet';
-        tier.fetchStylesheet(function(ss, err) {
-            if (err || !ss) {
-                tier.error = 'No stylesheet';
-                var ss = new DASStylesheet();
-                var defStyle = new DASStyle();
-                defStyle.glyph = 'BOX';
-                defStyle.BGCOLOR = 'blue';
-                defStyle.FGCOLOR = 'black';
-                ss.pushStyle({type: 'default'}, null, defStyle);
-                tier.setStylesheet(ss);
-                tier.browser.refreshTier(tier);
-            } else {
-                tier.setStylesheet(ss);
-                if (ss.geneHint) {
-                    tier.dasSource.collapseSuperGroups = true;
-                    tier.bumped = false;
-                    tier.updateLabel();
+    return new Promise(function (resolve, reject) {
+        
+        if (tier.dasSource.style) {
+            tier.setStylesheet({styles: tier.dasSource.style});
+            resolve(tier);
+        } else {
+            tier.status = 'Fetching stylesheet';
+            tier.fetchStylesheet(function(ss, err) {
+                if (err || !ss) {
+                    tier.error = 'No stylesheet';
+                    var ss = new DASStylesheet();
+                    var defStyle = new DASStyle();
+                    defStyle.glyph = 'BOX';
+                    defStyle.BGCOLOR = 'blue';
+                    defStyle.FGCOLOR = 'black';
+                    ss.pushStyle({type: 'default'}, null, defStyle);
+                    tier.setStylesheet(ss);
+                } else {
+                    tier.setStylesheet(ss);
+                    if (ss.geneHint) {
+                        tier.dasSource.collapseSuperGroups = true;
+                        tier.bumped = false;
+                        tier.updateLabel();
+                    }
+                    tier._updateFromConfig();
                 }
-                tier._updateFromConfig();
-                tier.browser.refreshTier(tier);
-            }
-        });
-    }
+                resolve(tier);
+            });
+        }
+    });
 }
 
 DasTier.prototype.setStylesheet = function(ss) {
@@ -260,20 +265,18 @@ DasTier.prototype.needsSequence = function(scale ) {
     return false;
 }
 
-DasTier.prototype.viewFeatures = function(chr, coverage, scale, features, sequence) {
+DasTier.prototype.setFeatures = function(chr, coverage, scale, features, sequence) {
     this.currentFeatures = features;
-    this.currentSequence = sequence;
-    this.notifyFeaturesLoaded();
-    
+    this.currentSequence = sequence;    
     this.knownChr = chr;
     this.knownCoverage = coverage;
+    
 
-    if (this.status) {
-        this.status = null;
-        this._notifierToStatus();
+    // only notify features loaded, if they are valid
+    if (features) {
+        sortFeatures(this);
+        this.notifyFeaturesLoaded();
     }
-
-    this.draw();
 }
 
 DasTier.prototype.draw = function() {
@@ -485,7 +488,7 @@ DasTier.prototype._notifierOn = function(message, warnHTTP) {
         this.notifier.appendChild(
             makeElement(
                 'span',
-                [makeElement('a', '[HTTP Warning] ', {href: "//www.biodalliance.org/https.html", target: "_blank"}),
+                [makeElement('a', '[HTTP Warning] ', {href: this.browser.httpWarningURL, target: "_blank"}),
                  message]
             )
         );
