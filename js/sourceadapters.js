@@ -1624,6 +1624,26 @@ JBrowseFeatureSource.prototype.getScales = function() {
 
 JBrowseFeatureSource.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();
+    
+    var cdsStyle = new DASStyle();
+    cdsStyle.glyph = 'BOX';
+    cdsStyle.FGCOLOR = 'black';
+    cdsStyle.BGCOLOR = 'red'
+    cdsStyle.HEIGHT = 10;
+    cdsStyle.BUMP = true;
+    cdsStyle.ZINDEX = 20;
+    stylesheet.pushStyle({type: 'translation'}, null, cdsStyle);
+    
+    var tsStyle = new DASStyle();
+    tsStyle.glyph = 'BOX';
+    tsStyle.FGCOLOR = 'black';
+    tsStyle.BGCOLOR = 'white';
+    tsStyle.HEIGHT = 10;
+    tsStyle.ZINDEX = 10;
+    tsStyle.BUMP = true;
+    tsStyle.LABEL = true;
+    stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
+
     var wigStyle = new DASStyle();
     wigStyle.glyph = 'BOX';
     wigStyle.FGCOLOR = 'black';
