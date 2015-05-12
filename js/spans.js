@@ -47,8 +47,7 @@ Range.prototype.toString = function() {
 }
 
 function _Compound(ranges) {
-    this._ranges = ranges;
-    // assert sorted?
+    this._ranges = ranges.sort(_rangeOrder);
 }
 
 _Compound.prototype.min = function() {
@@ -59,14 +58,63 @@ _Compound.prototype.max = function() {
     return this._ranges[this._ranges.length - 1].max();
 }
 
-_Compound.prototype.contains = function(pos) {
-    // FIXME implement bsearch if we use this much.
-    for (var s = 0; s < this._ranges.length; ++s) {
-        if (this._ranges[s].contains(pos)) {
-            return true;
+// returns the index of the first range that is not less than pos
+_Compound.prototype.lower_bound = function(pos) {
+    // first check if pos is out of range
+    var r = this.ranges();
+    if (pos > this.max()) return r.length;
+    if (pos < this.min()) return 0;
+    // do a binary search
+    var a=0, b=r.length - 1;
+    while (a <= b) {
+        var m = Math.floor((a+b)/2);
+        if (pos > r[m]._max) {
+            a = m+1;
+        }
+        else if (pos < r[m]._min) {
+            b = m-1;
+        }
+        else {
+            return m;
         }
     }
+    return a;
+}
+
+_Compound.prototype.contains = function(pos) {
+    var lb = this.lower_bound(pos);
+    if (lb < this._ranges.length && this._ranges[lb].contains(pos)) {
+        return true;
+    }
     return false;
+}
+
+_Compound.prototype.insertRange = function(range) {
+    var lb = this.lower_bound(range._min);
+    if (lb === this._ranges.length) { // range follows this
+        this._ranges.push(range);
+        return;
+    }
+    
+    var r = this.ranges();
+    if (range._max < r[lb]._min) { // range preceeds lb
+        this._ranges.splice(lb,0,range);
+        return;
+    }
+
+    // range overlaps lb (at least)
+    if (r[lb]._min < range._min) range._min = r[lb]._min;
+    var ub = lb+1;
+    while (ub < r.length && r[ub]._min <= range._max) {
+        ub++;
+    }
+    ub--;
+    // ub is the upper bound of the new range
+    if (r[ub]._max > range._max) range._max = r[ub]._max;
+    
+    // splice range into this._ranges
+    this._ranges.splice(lb,ub-lb+1,range);
+    return;
 }
 
 _Compound.prototype.isContiguous = function() {
@@ -94,44 +142,16 @@ _Compound.prototype.toString = function() {
 }
 
 function union(s0, s1) {
-    if (! (s0 instanceof Array)) {
-        s0 = [s0];
-        if (s1)
-            s0.push(s1);
+    if (! (s0 instanceof _Compound)) {
+        if (! (s0 instanceof Array))
+            s0 = [s0];
+        s0 = new _Compound(s0);
     }
+    
+    if (s1)
+        s0.insertRange(s1);
 
-    if (s0.length == 0)
-        return null;
-    else if (s0.length == 1)
-        return s0[0];
-
-    var ranges = [];
-    for (var si = 0; si < s0.length; ++si)
-        s0[si]._pushRanges(ranges);
-    ranges = ranges.sort(_rangeOrder);
-
-    var oranges = [];
-    var current = ranges[0];
-    current = new Range(current._min, current._max);  // Copy now so we don't have to later.
-
-    for (var i = 1; i < ranges.length; ++i) {
-        var nxt = ranges[i];
-        if (nxt._min > (current._max + 1)) {
-            oranges.push(current);
-            current = new Range(nxt._min, nxt._max);
-        } else {
-            if (nxt._max > current._max) {
-                current._max = nxt._max;
-            }
-        }
-    }
-    oranges.push(current);
-
-    if (oranges.length == 1) {
-        return oranges[0];
-    } else {
-        return new _Compound(oranges);
-    }
+    return s0;
 }
 
 function intersection(s0, s1) {
