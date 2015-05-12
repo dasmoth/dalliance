@@ -47,7 +47,25 @@ Range.prototype.toString = function() {
 }
 
 function _Compound(ranges) {
-    this._ranges = ranges.sort(_rangeOrder);
+    // given: a set of unsorted possibly overlapping ranges
+    // sort the input ranges
+    var sorted = ranges.sort(_rangeOrder);
+    // merge overlaps between adjacent ranges
+    var merged = [];
+    var current = sorted.shift();
+    sorted.forEach(function(range) {
+        if (range._min <= current._max) {
+            if (range._max > current._max) {
+                current._max = range._max;
+            }
+        }
+        else {
+            merged.push(current);
+            current = range;
+        }
+    });
+    merged.push(current);
+    this._ranges = merged;
 }
 
 _Compound.prototype.min = function() {
