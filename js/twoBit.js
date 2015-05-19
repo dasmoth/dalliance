@@ -22,6 +22,7 @@ if (typeof(require) !== 'undefined') {
 
 var TWOBIT_MAGIC = 0x1a412743;
 var TWOBIT_MAGIC_BE = 0x4327411a;
+var HEADER_BLOCK_SIZE = 12500;
 
 function TwoBitFile() {
 }
@@ -29,8 +30,9 @@ function TwoBitFile() {
 function makeTwoBit(fetchable, cnt) {
     var tb = new TwoBitFile();
     tb.data = fetchable;
-    var headerBlockSize = 12500;
-
+    var headerBlockSize = HEADER_BLOCK_SIZE;
+    var headerBlocksFetched=0;
+    
     tb.data.slice(0, headerBlockSize).fetch(function(r) {
         if (!r) {
             return cnt(null, "Couldn't access data");
@@ -60,6 +62,8 @@ function makeTwoBit(fetchable, cnt) {
             while (i < tb.seqCount) {
                 var ns = ba[p];
                 if (p + ns + 6 >= ba.length) {
+                    headerBlocksFetched += headerBlockSize;
+                    headerBlockSize = Math.max(HEADER_BLOCK_SIZE,Math.floor(headerBlocksFetched*tb.seqCount/i));
                     return tb.data.slice(o + p, headerBlockSize).fetch(function (r) {
                         o += p;
                         p = 0;
