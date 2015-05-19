@@ -292,9 +292,8 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq, tierCallback) 
 KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq, tierCallback) {
     if (status) {
         tier.setFeatures(chr, coverage, actualScale, [], null);
-
-    }   
-    if (!status) {
+        tierCallback(status, tier);
+    } else {
         var mayDownsample = false;
         var needBaseComposition = false;
         var src = tier.getSource();
@@ -328,12 +327,13 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
                     features = getBaseCoverage(features, seq, tier.browser.baseColors);
                 }
                 tier.setFeatures(chr, coverage, actualScale, features, seq);
+                tierCallback(status, tier);
             });
         } else {
             tier.setFeatures(chr, coverage, actualScale, features);
+            tierCallback(status, tier);
         }
     }
-    tierCallback(status, tier);
 }
 
 if (typeof(module) !== 'undefined') {
