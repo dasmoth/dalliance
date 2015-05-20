@@ -107,6 +107,8 @@ Browser.prototype.createSources = function(config) {
     if (config.tier_type == 'sequence' || config.twoBitURI || config.twoBitBlob) {
         if (config.twoBitURI || config.twoBitBlob) {
             ss = new TwoBitSequenceSource(config);
+        } else if (config.ensemblURI) {
+            ss = new EnsemblSequenceSource(config);
         } else {
             ss = new DASSequenceSource(config);
         }
@@ -585,6 +587,58 @@ TwoBitSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
             cnt();
         }
     });
+}
+
+function EnsemblSequenceSource(source) {
+  this.source = source;
+  // http://data.gramene.org/ensembl/info/assembly/triticum_aestivum/2B?content-type=application/json
+  // http://data.gramene.org/ensembl/sequence/region/triticum_aestivum/2B:8001..18000:1?content-type=application/json
+}
+
+EnsemblSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
+  var url = this.source.ensemblURI + '/sequence/region/' + this.source.species + '/'
+    + chr + ':' + min + '..' + max + ':1?content-type=application/json';
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+  	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+        var err = 'Error code ' + req.status;
+        try {
+          var jr = JSON.parse(req.response);
+          if (jr.error) {
+            err = jr.error;
+          }
+        } catch (ex) {};
+
+		    callback(err, null);
+	    } else {
+    		var jr = JSON.parse(req.response);
+        var sequence = new DASSequence(chr, min, max, 'DNA', jr.seq);
+        return callback(null, sequence);
+      }
+    }
+  }
+  req.open('GET', url, true);
+  req.responseType = 'text';
+  req.send('');
+}
+
+EnsemblSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
+  var url = this.source.ensemblURI + '/info/assembly/' + this.source.species + '/' + chr + '?content-type=application/json';
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+	  if (req.readyState == 4) {
+      if (req.status >= 300) {
+	      cnt();
+      } else {
+  		  var jr = JSON.parse(req.response);
+        cnt(jr);
+      }
+    }
+  }
+  req.open('GET', url, true);
+  req.responseType = 'text';
+  req.send('');
 }
 
 DASFeatureSource.prototype.getScales = function() {
@@ -1685,6 +1739,7 @@ if (typeof(module) !== 'undefined') {
         FeatureSourceBase: FeatureSourceBase,
 
         TwoBitSequenceSource: TwoBitSequenceSource,
+        EnsemblSequenceSource: EnsemblSequenceSource,
         DASSequenceSource: DASSequenceSource,
         MappedFeatureSource: MappedFeatureSource,
         CachingFeatureSource: CachingFeatureSource,
