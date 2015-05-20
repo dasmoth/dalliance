@@ -1686,6 +1686,8 @@ Browser.prototype._getSequenceSource = function() {
         if (s.provides_entrypoints || s.tier_type == 'sequence' || s.twoBitURI || s.twoBitBlob) {
             if (s.twoBitURI || s.twoBitBlob) {
                 return new TwoBitSequenceSource(s);
+            } else if (s.ensemblURI) {
+                return new EnsemblSequenceSource(s);
             } else {
                 return new DASSequenceSource(s);
             }
@@ -2517,6 +2519,7 @@ if (typeof(module) !== 'undefined') {
 
     var sa = require('./sourceadapters');
     var TwoBitSequenceSource = sa.TwoBitSequenceSource;
+    var EnsemblSequenceSource = sa.EnsemblSequenceSource;
     var DASSequenceSource = sa.DASSequenceSource;
 
     var KnownSpace = require('./kspace').KnownSpace;
