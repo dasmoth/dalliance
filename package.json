@@ -3,6 +3,7 @@
   "version": "0.13.90-alpha",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
+  "main": "index.js",
   "license": "BSD-2-Clause",
   "repository": {
     "type": "git",
