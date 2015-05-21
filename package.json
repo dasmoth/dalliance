@@ -3,6 +3,7 @@
   "version": "0.13.0",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:dasmoth/dalliance.git"
