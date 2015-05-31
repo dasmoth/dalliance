@@ -835,7 +835,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
             wigStyle.BUMP = true;
             wigStyle.LABEL = true;
             wigStyle.ZINDEX = 20;
-            stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+            stylesheet.pushStyle({type: 'bigbed'}, null, wigStyle);
 	    
             wigStyle.glyph = 'BOX';
             wigStyle.FGCOLOR = 'black';
@@ -1097,7 +1097,7 @@ RemoteBWGFeatureSource.prototype.getStyleSheet = function(callback) {
             wigStyle.BUMP = true;
             wigStyle.LABEL = true;
             wigStyle.ZINDEX = 20;
-            stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+            stylesheet.pushStyle({type: 'bigbed'}, null, wigStyle);
         
             wigStyle.glyph = 'BOX';
             wigStyle.FGCOLOR = 'black';
