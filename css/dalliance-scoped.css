@@ -29,7 +29,7 @@
   display: -webkit-inline-flex;
   flex-direction: column;
   -webkit-flex-direction: column;
-  max-height: 500px;
+  max-height: 1000px;
   width: 100%;
   outline: none;
 }
