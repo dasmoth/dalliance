@@ -89,6 +89,17 @@ function _getBaiRefLength(uncba, offset) {
 
 
 function makeBam(data, bai, indexChunks, callback, attempted) {
+    // Do an initial probe on the BAM file to catch any mixed-content errors.
+    data.slice(0, 10).fetch(function(header) {
+        if (header) {
+            return makeBam2(data, bai, indexChunks, callback, attempted);
+        } else {
+            return callback(null, "Couldn't access BAM.");
+        }
+    }, {timeout: 5000});
+}
+
+function makeBam2(data, bai, indexChunks, callback, attempted) {
     var bam = new BamFile();
     bam.data = data;
     bam.bai = bai;
@@ -185,16 +196,16 @@ function makeBam(data, bai, indexChunks, callback, attempted) {
                     bam.bai.url = bam.data.url.replace(new RegExp('.bam$'), '.bai');
                     
                      // True lets us know we are making a second attempt
-                    makeBam(data, bam.bai, indexChunks, callback, true);
+                    makeBam2(data, bam.bai, indexChunks, callback, true);
                 }
                 else {
                     // We've attempted x.bam.bai & x.bai and nothing worked
                     callback(null, result);
                 }
             } else {
-              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader, {timeout: 5000});
+              bam.data.slice(0, minBlockIndex).fetch(parseBamHeader);
             }
-        }, {timeout: 5000});   // Timeout on first request to catch Chrome mixed-content error.
+        });   // Timeout on first request to catch Chrome mixed-content error.
     } else {
         var chunks = bam.indexChunks.chunks;
         bam.indices = []
