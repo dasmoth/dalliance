@@ -275,7 +275,7 @@ BigWigView.prototype.fetchFeatures = function(filter, blocksToFetch, callback) {
             f.segment = thisB.bwg.idsToChroms[chr];
             f.min = fmin;
             f.max = fmax;
-            f.type = 'bigwig';
+            f.type = thisB.bwg.type;
             
             for (var k in opts) {
                 f[k] = opts[k];
