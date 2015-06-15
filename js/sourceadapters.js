@@ -724,7 +724,7 @@ BWGFeatureSource.prototype.init = function() {
 }
 
 BWGFeatureSource.prototype.capabilities = function() {
-    var caps = {leap: true};
+    var caps = {leap: true, mayDownsample: true};
     if (this.bwgHolder.res && this.bwgHolder.res.type == 'bigwig')
         caps.quantLeap = true;
     if (this.extraIndices && this.extraIndices.length > 0) {
@@ -984,7 +984,7 @@ RemoteBWGFeatureSource.prototype.init = function() {
 }
 
 RemoteBWGFeatureSource.prototype.capabilities = function() {
-    var caps = {leap: true};
+    var caps = {leap: true, mayDownsample: true};
 
     if (this.meta && this.meta.type == 'bigwig')
         caps.quantLeap = true;
@@ -1302,7 +1302,13 @@ BAMFeatureSource.prototype.init = function() {
     });
 }
 
+BAMFeatureSource.prototype.capabilities = function() {
+    var caps = {mayDownsample: true};
+    return caps;
+}
+
 BAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+
     var light = types && (types.length == 1) && (types[0] == 'density');
 
     var thisB = this;
@@ -1413,6 +1419,11 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
             indexChunks: this.bamSource.indexChunks},
           cnt); 
     }
+}
+
+RemoteBAMFeatureSource.prototype.capabilities = function() {
+    var caps = {mayDownsample: true};
+    return caps;
 }
 
 RemoteBAMFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
