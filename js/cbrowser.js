@@ -2233,6 +2233,7 @@ Browser.prototype.updateHeight = function() {
     this.ruler.style.height = '' + tierTotal + 'px';
     this.ruler2.style.height = '' + tierTotal + 'px';
     this.browserHolder.style.display = 'block';
+    this.browserHolder.style.display = '-webkit-flex';
     this.browserHolder.style.display = 'flex';
     // this.svgHolder.style.maxHeight = '' + Math.max(tierTotal, 500) + 'px';
 }
