@@ -23,9 +23,19 @@ if (typeof(require) !== 'undefined') {
 
     var color = require('./color');
     var dasColourForName = color.dasColourForName;
+
+    var sourceDataURI = require('./sourcecompare').sourceDataURI;
 }
 
-var __dalliance_smallGlyphs = {DOT: true, EX: true, STAR: true, SQUARE: true, CROSS: true, TRIANGLE: true, PLIMSOLL: true}
+var __dalliance_smallGlyphs = {
+    DOT: true, 
+    EX: true, 
+    STAR: true, 
+    SQUARE: true, 
+    CROSS: true, 
+    TRIANGLE: true, 
+    PLIMSOLL: true
+};
 
 Browser.prototype.openTierPanel = function(tier) {
     var b = this;
@@ -33,6 +43,8 @@ Browser.prototype.openTierPanel = function(tier) {
     if (this.uiMode === 'tier' && this.manipulatingTier === tier) {
         this.hideToolPanel();
         this.setUiMode('none');
+    } else if (!tier) {
+        return;
     } else {
         var setStyleColors = function(style) {
             if (style.BGGRAD)
@@ -82,14 +94,40 @@ Browser.prototype.openTierPanel = function(tier) {
         this.manipulatingTier = tier;
 
         var tierForm = makeElement('div', null, {className: 'tier-edit'});
+
+        var aboutBanner = makeElement('div', "About '" + (tier.config.Name || tier.dasSource.name) + "'", null,
+                {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center'});
+        tierForm.appendChild(aboutBanner);
+
+        var about = makeElement('div', 
+            [makeElement('p', tier.dasSource.desc)]
+        );
+        var aboutNotes = [];
+        var sduri = sourceDataURI(tier.dasSource);
+        if (sduri &&
+            (sduri.indexOf('http://') == 0 ||
+             sduri.indexOf('https://') == 0 ||
+             sduri.indexOf('//') == 0) &&
+            sduri !== 'https://www.biodalliance.org/magic/no_uri')
+        {
+            aboutNotes.push(makeElement('li', makeElement('a', '(Download data)', {href: sduri})));
+        }
+
         if (tier.dasSource.mapping) {
             var coords = this.chains[tier.dasSource.mapping].coords;
-            tierForm.appendChild(makeElement('div', 'Mapped from ' + coords.auth + coords.version , null, 
-                {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center'}));
+            aboutNotes.push(makeElement('li',  'Mapped from ' + coords.auth + coords.version));
         }
-        var semanticBanner = makeElement('div', 'Editing styles for current zoom level', null,
-                {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center', display: 'none'});
-        tierForm.appendChild(semanticBanner);
+
+        if (aboutNotes.length > 0) {
+            about.appendChild(makeElement('ul', aboutNotes));
+        }
+        
+        tierForm.appendChild(about);
+
+        var semanticBanner = makeElement('span', ' (styles for current zoom level)', null, {display: 'none'});
+        var editBanner = makeElement('div', ['Edit', semanticBanner], null,
+              {background: 'gray', paddingBottom: '5px', marginBottom: '5px', textAlign: 'center'});
+        tierForm.appendChild(editBanner);
 
         var tierNameField = makeElement('input', null, {type: 'text'});
         var tierPinnedToggle = makeElement('input', null, {type: 'checkbox', disabled: this.disablePinning});
@@ -216,7 +254,7 @@ Browser.prototype.openTierPanel = function(tier) {
                     return;
                 }
 
-                semanticBanner.style.display = (activeStyleCount == tier.stylesheet.styles.length) ? 'none' : 'block';
+                semanticBanner.style.display = (activeStyleCount == tier.stylesheet.styles.length) ? 'none' : 'inline';
 
                 isSimpleQuantitative = isQuantitative && activeStyleCount == 1;
                 var isGradient = s.COLOR2 || s.BGGRAD;
