@@ -753,6 +753,8 @@ Browser.prototype.realInit2 = function() {
                         if (tdb) {
                             if (hc.mapping) 
                                 tdb.mapping = hc.mapping;
+                            if (hc.label)
+                                tdb.hub.altLabel = hc.label
                             thisB.hubObjects.push(tdb);
                         }
                     }
