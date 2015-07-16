@@ -1,0 +1,31 @@
+{
+  "name": "dalliance",
+  "version": "0.13.0",
+  "homepage": "http://biodalliance.org",
+  "authors": [
+    "thomas.a.down@gmail.com"
+  ],
+  "description": "Interactive web-based genome browser",
+  "main": ["build/dalliance-all.js",
+           "build/worker-all.js",
+           "img",
+           "css",
+           "fonts"
+           ],
+  "keywords": [
+    "genome",
+    "browser",
+    "html5"
+  ],
+  "license": "Unknown",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dasmoth/dalliance.git"
+  }
+}
