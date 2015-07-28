@@ -18,6 +18,8 @@ if (typeof(require) !== 'undefined') {
     var DASStyle = das.DASStyle;
     var DASFeature = das.DASFeature;
     var DASGroup = das.DASGroup;
+
+    var revalidator = require('revalidator');
 }
 
 function VCFParser() {
@@ -105,6 +107,68 @@ VCFParseSession.prototype.parse = function(line) {
 }
 
 VCFParseSession.prototype.flush = function() {};
+
+VCFParseSession.prototype.schema = {
+  properties: {
+    segment: {
+      description: 'the name of the region containing the variation',
+      type: 'string',
+      required: true
+    },
+    min: {
+      description: 'the start position',
+      type: 'integer',
+      minimum: 1,
+      required: true
+    },
+    max: {
+      description: 'the end position',
+      type: 'integer',
+      required: true
+    },
+    id: {
+      description: 'identifier of variant',
+      type: 'string',
+      required: true
+    },
+    refAllele: {
+      description: 'reference allele',
+      type: 'string',
+      required: true
+    },
+    altAlleles: {
+      description: 'list of alternate alleles',
+      type: 'array',
+      items: { type: 'string' },
+      required: true
+    },
+    info: {
+      description: 'info',
+      type: 'object',
+      required: true
+    },
+    type: {
+      description: 'type of variation',
+      type: 'string',
+      enum: ['insertion','deletion','substitution'],
+      required: true
+    },
+    insertion: {
+      description: 'the actual insertion',
+      type: 'string'
+    }
+  }
+};
+
+VCFParseSession.prototype.validate = function(f) {
+  // use revalidator.validate to check if feature f is valid
+  var check = revalidator.validate(f, this.schema);
+  if (check.valid) {
+    this.sink(f);
+  } else {
+    console.log(check.errors);
+  }
+}
 
 VCFParser.prototype.getStyleSheet = function(callback) {
     var stylesheet = new DASStylesheet();

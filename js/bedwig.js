@@ -26,6 +26,8 @@ if (typeof(require) !== 'undefined') {
 
     var utils = require('./utils');
     var shallowCopy = utils.shallowCopy;
+    
+    var revalidator = require('revalidator');
 }
 
 
@@ -162,6 +164,87 @@ BedParseSession.prototype.parse = function(line) {
 
 BedParseSession.prototype.flush = function() {};
 
+BedParseSession.prototype.schema = {
+  properties: {
+    segment: {
+      description: 'the name of the region containing the feature',
+      type: 'string',
+      required: true
+    },
+    min: {
+      description: 'the start position of the feature (0-based)',
+      type: 'integer',
+      minimum: 1,
+      required: true
+    },
+    max: {
+      description: 'the end position of the feature (1-based)',
+      type: 'integer',
+      required: true
+    },
+    label: {
+      description: 'the label for a feature',
+      type: 'string'
+    },
+    score: {
+      description: 'score of a feature',
+      type: 'float'
+    },
+    orientation: {
+      description: 'strand of feature',
+      type: 'string',
+      enum: ['+','-','.']
+    },
+    itemRGB: {
+      description: 'rgb color to draw feature',
+      type: 'string',
+      pattern: '^rgb\([0-9]+,[0-9]+,[0-9]+)$'
+    },
+    type: {
+      description: 'type of feature',
+      type: 'string',
+      enum: ['transcript','translation']
+    },
+    readingFrame: {
+      description: 'open reading frame at the start of the interval',
+      type: 'integer',
+      minimum: 0,
+      maximum: 2
+    },
+    groups: {
+      description: 'list of groups that a feature belongs to',
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            required: true
+          },
+          label: {
+            type: 'string',
+            required: true
+          },
+          type: {
+            type: 'string',
+            required: true
+          }
+        }
+      }
+    }
+  }
+};
+
+BedParseSession.prototype.validate = function(f) {
+  // use revalidator.validate to check if feature f is valid
+  var check = revalidator.validate(f, this.schema);
+  if (check.valid) {
+    this.sink(f);
+  } else {
+    console.log(check.errors);
+  }
+}
+
 function WigParseSession(parser, sink) {
     this.parser = parser;
     this.sink = sink;
@@ -233,6 +316,42 @@ WigParseSession.prototype.parse = function(line) {
 }
 
 WigParseSession.prototype.flush = function() {};
+
+WigParseSession.prototype.schema = {
+  properties: {
+    segment: {
+      description: 'the name of the region containing the feature',
+      type: 'string',
+      required: true
+    },
+    min: {
+      description: 'the start position of the feature',
+      type: 'integer',
+      minimum: 1,
+      required: true
+    },
+    max: {
+      description: 'the end position of the feature',
+      type: 'integer',
+      required: true
+    },
+    score: {
+      description: 'score of a feature',
+      type: 'float',
+      required: true
+    }
+  }
+};
+
+WigParseSession.prototype.validate = function(f) {
+  // use revalidator.validate to check if feature f is valid
+  var check = revalidator.validate(f, this.schema);
+  if (check.valid) {
+    this.sink(f);
+  } else {
+    console.log(check.errors);
+  }
+}
 
 BedWigParser.prototype.getStyleSheet = function(callback) {
     var thisB = this;

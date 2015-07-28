@@ -151,6 +151,7 @@ function MemStoreFeatureSource(source) {
     this.source = source;
     FeatureSourceBase.call(this);
     this.storeHolder = new Awaited();
+
     this.parser = dalliance_makeParser(source.payload);
     if (!this.parser) {
         throw "Unsupported memstore payload: " + source.payload;
@@ -164,17 +165,24 @@ function MemStoreFeatureSource(source) {
         } else {
             var store = new MemStore();
             var features = [];
-            var lines = resp.split('\n');
-
             var session = thisB.parser.createSession(function(f) {features.push(f)});
-            for (var li = 0; li < lines.length; ++li) {
-                var line = lines[li];
-                if (line.length > 0) {
-                    session.parse(line);
-                }
-            }
-            session.flush();
 
+            if (err === 'already parsed') {
+                resp.forEach(function(feat) {
+                  session.validate(feat);
+                });
+            }
+            else {
+                var lines = resp.split('\n');
+
+                for (var li = 0; li < lines.length; ++li) {
+                    var line = lines[li];
+                    if (line.length > 0) {
+                        session.parse(line);
+                    }
+                }
+                session.flush();
+            }
             store.addFeatures(features);
 
             thisB.storeHolder.provide(store);
@@ -191,6 +199,8 @@ MemStoreFeatureSource.prototype._load = function(callback) {
             return callback(r.result, r.error);
         }
         r.readAsText(this.source.blob);
+    } else if (this.source.features) {
+      return callback(this.source.features, 'already parsed');
     } else {
         if (this.source.credentials)
             var opts = {credentials : this.source.credentials};

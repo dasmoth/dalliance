@@ -23,6 +23,7 @@
     "gulp-rename": "~1.2.0",
     "watchify": "~0.8.3",
     "karma-bro": "~0.2.2",
-    "closure-compiler": "~0.2.6"
+    "closure-compiler": "~0.2.6",
+    "revalidator": "~0.3.1"
   }
 }
