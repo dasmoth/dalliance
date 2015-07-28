@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "jszlib": "dasmoth/jszlib",
-    "es6-promise": "~0.1.1"
+    "es6-promise": "~0.1.1",
+    "revalidator": "~0.3.1"
   },
   "devDependencies": {
     "gulp-concat": "~2.2.0",
@@ -23,7 +24,6 @@
     "gulp-rename": "~1.2.0",
     "watchify": "~0.8.3",
     "karma-bro": "~0.2.2",
-    "closure-compiler": "~0.2.6",
-    "revalidator": "~0.3.1"
+    "closure-compiler": "~0.2.6"
   }
 }
