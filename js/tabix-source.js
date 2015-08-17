@@ -46,8 +46,9 @@ function TabixFeatureSource(source) {
         data = new BlobFetchable(this.source.blob);
         index = new BlobFetchable(this.source.indexBlob);
     } else {
-        data = new URLFetchable(this.source.uri, {credentials: this.source.credentials});
-        index = new URLFetchable(this.source.indexURI || (this.source.uri + '.tbi'), {credentials: this.source.credentials});
+        data = new URLFetchable(this.source.uri, {credentials: this.source.credentials, resolver: this.source.resolver});
+        index = new URLFetchable(this.source.indexURI || (this.source.uri + '.tbi'), 
+                                 {credentials: this.source.credentials, resolver: this.source.resolver});
     }
     connectTabix(data, index, function(tabix, err) {
         thisB.tabixHolder.provide(tabix);

@@ -546,7 +546,7 @@ function TwoBitSequenceSource(source) {
     this.twoBit = new Awaited();
     var data;
     if (source.twoBitURI) {
-        data = new URLFetchable(source.twoBitURI);
+        data = new URLFetchable(source.twoBitURI, {credentials: source.credentials, resolver: this.resolver});
     } else if (source.twoBitBlob) {
         data = new BlobFetchable(source.twoBitBlob);
     } else {
@@ -698,7 +698,7 @@ BWGFeatureSource.prototype.init = function() {
         if (this.bwgSource.transport === 'encode') {
             arg = new EncodeFetchable(uri, {credentials: this.opts.credentials});
         } else {
-            arg = new URLFetchable(uri, {credentials: this.opts.credentials});
+            arg = new URLFetchable(uri, {credentials: this.opts.credentials, resolver: this.opts.resolver});
         }
     } else {
         arg = new BlobFetchable(this.bwgSource.bwgBlob);
@@ -1286,8 +1286,9 @@ BAMFeatureSource.prototype.init = function() {
         bamF = new BlobFetchable(this.bamSource.bamBlob);
         baiF = new BlobFetchable(this.bamSource.baiBlob);
     } else {
-        bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials});
-        baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
+        bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials, resolver: this.opts.resolver});
+        baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), 
+                                {credentials: this.opts.credentials, resolver: this.opts.resolver});
     }
     makeBam(bamF, baiF, null, function(bam, err) {
         thisB.readiness = null;
