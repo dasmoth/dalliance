@@ -120,13 +120,13 @@ Browser.prototype.createSources = function(config) {
     } else if (config.bwgURI || config.bwgBlob) {
         var worker = this.getWorker();
         if (worker)
-            fs = new RemoteBWGFeatureSource(config, worker);
+            fs = new RemoteBWGFeatureSource(config, worker, this);
         else
             fs = new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         var worker = this.getWorker();
         if (worker)
-            fs = new RemoteBAMFeatureSource(config, worker);
+            fs = new RemoteBAMFeatureSource(config, worker, this);
         else
             fs = new BAMFeatureSource(config);
     } else if (config.jbURI) {
@@ -932,7 +932,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
     });
 }
 
-function RemoteBWGFeatureSource(bwgSource, worker) {
+function RemoteBWGFeatureSource(bwgSource, worker, browser) {
     FeatureSourceBase.call(this);
 
     var thisB = this;
@@ -940,6 +940,10 @@ function RemoteBWGFeatureSource(bwgSource, worker) {
     this.readiness = 'Connecting';
     this.bwgSource = this.opts = bwgSource;
     this.keyHolder = new Awaited();
+
+    if (bwgSource.resolver) {
+        this.resolverKey = browser.registerResolver(bwgSource.resolver);
+    }
 
     this.init();
 }
@@ -977,6 +981,7 @@ RemoteBWGFeatureSource.prototype.init = function() {
         this.worker.postCommand({
             command: 'connectBBI', 
             uri: resolveUrlToPage(uri), 
+            resolver: this.resolverKey,
             transport: this.bwgSource.transport,
             credentials: this.bwgSource.credentials}, 
           cnt); 
@@ -1379,6 +1384,10 @@ function RemoteBAMFeatureSource(bamSource, worker) {
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight, bamGroup: bamSource.bamGroup};
     this.keyHolder = new Awaited();
     
+    if (bwgSource.resolver) {
+        this.resolverKey = browser.registerResolver(bwgSource.resolver);
+    }
+
     this.init();
 }
 
@@ -1409,6 +1418,7 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
         this.worker.postCommand({
             command: 'connectBAM', 
             uri: resolveUrlToPage(uri), 
+            resolver: this.resolverKey,
             indexUri: resolveUrlToPage(indexUri),
             credentials: this.bamSource.credentials,
             indexChunks: this.bamSource.indexChunks},

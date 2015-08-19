@@ -175,7 +175,6 @@ URLFetchable.prototype.fetch = function(callback, opts) {
     }
 
     this.getURL().then(function(url) {
-        console.log('got ' + url);
         try {
             var timeout;
             if (opts.timeout && !thisB.opts.credentials) {

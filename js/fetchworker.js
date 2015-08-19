@@ -16,6 +16,7 @@ var encode = require('./encode');
 var utils = require('./utils');
 
 var connections = {};
+var resolveResolvers = {};
 
 var idSeed = 0;
 
@@ -30,16 +31,24 @@ self.onmessage = function(event) {
     var command = event.data.command;
     var tag = event.data.tag;
 
-    if (command === 'connectBAM') {
+    if (!command) {
+        var rr = resolveResolvers[tag];
+        if (rr) {
+            rr(event.data.url);
+        }
+    } else if (command === 'connectBAM') {
         var id = newID();
-
+        var resolver;
+        if (d.resolver) {
+            resolver = proxyResolver(d.resolver);
+        }
         var bamF, baiF, indexChunks;
         if (d.blob) {
             bamF = new bin.BlobFetchable(d.blob);
             baiF = new bin.BlobFetchable(d.indexBlob);
         } else {
-            bamF = new bin.URLFetchable(d.uri, {credentials: d.credentials});
-            baiF = new bin.URLFetchable(d.indexUri, {credentials: d.credentials});
+            bamF = new bin.URLFetchable(d.uri, {credentials: d.credentials, resolver: resolver});
+            baiF = new bin.URLFetchable(d.indexUri, {credentials: d.credentials, resolver: resolver});
             indexChunks = d.indexChunks;
         }
 
@@ -53,13 +62,17 @@ self.onmessage = function(event) {
         });
     } else if (command === 'connectBBI') {
         var id = newID();
+        var resolver;
+        if (d.resolver) {
+            resolver = proxyResolver(d.resolver);
+        }
         var bbi;
         if (d.blob) {
             bbi = new bin.BlobFetchable(d.blob);
         } else if (d.transport == 'encode') {
             bbi = new encode.EncodeFetchable(d.uri, {credentials: d.credentials});
         } else {
-            bbi = new bin.URLFetchable(d.uri, {credentials: d.credentials});
+            bbi = new bin.URLFetchable(d.uri, {credentials: d.credentials, resolver: resolver});
         }
 
         bigwig.makeBwg(bbi, function(bwg, err) {
@@ -197,4 +210,17 @@ BBIWorkerFetcher.prototype.search = function(tag, query, index) {
     is.lookup(query, function(result, err) {
         postMessage({tag: tag, result: result, error: err});
     });
+}
+
+function proxyResolver(tag) {
+    return function(url) {
+        var lid = newID();
+        return new Promise(function (resolve, reject) {
+            resolveResolvers[lid] = resolve;
+            postMessage({tag: lid,
+                         cmd: 'resolve',
+                         resolver: tag,
+                         url: url});
+        });
+    }
 }
