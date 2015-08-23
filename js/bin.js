@@ -15,6 +15,8 @@ if (typeof(require) !== 'undefined') {
 
     var sha1 = require('./sha1');
     var b64_sha1 = sha1.b64_sha1;
+
+    var Promise = require('es6-promise').Promise;
 }
 
 function BlobFetchable(b) {

@@ -15,6 +15,8 @@ var bigwig = require('./bigwig');
 var encode = require('./encode');
 var utils = require('./utils');
 
+var Promise = require('es6-promise').Promise;
+
 var connections = {};
 var resolveResolvers = {};
 

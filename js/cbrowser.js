@@ -56,7 +56,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.prefix = '//www.biodalliance.org/release-0.13/';
+    this.prefix = '//www.biodalliance.org/release-0.14/';
 
     this.sources = [];
     this.tiers = [];
