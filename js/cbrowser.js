@@ -2487,6 +2487,10 @@ function FetchWorker(browser, worker) {
                     });
                 }).catch(function(err){
                     console.log(err);
+                    thisB.worker.postMessage({
+                        tag: data.tag,
+                        err: err.toString()
+                    });
                 });
             } else {
                 console.log('No resolver ' + data.resolver);

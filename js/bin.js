@@ -237,6 +237,9 @@ URLFetchable.prototype.fetch = function(callback, opts) {
         } catch (e) {
             return callback(null);
         }
+    }).catch(function(err) {
+        console.log(err);
+        return callback(null, err);
     });
 }
                        

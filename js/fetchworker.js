@@ -34,7 +34,13 @@ self.onmessage = function(event) {
     if (!command) {
         var rr = resolveResolvers[tag];
         if (rr) {
-            rr(event.data.url);
+            if (d.err) {
+                rr.reject(d.err);
+            } else {
+                rr.resolve(d.url);
+            }
+                
+            delete resolveResolvers[tag];
         }
     } else if (command === 'connectBAM') {
         var id = newID();
@@ -216,7 +222,7 @@ function proxyResolver(tag) {
     return function(url) {
         var lid = newID();
         return new Promise(function (resolve, reject) {
-            resolveResolvers[lid] = resolve;
+            resolveResolvers[lid] = {resolve: resolve, reject: reject};
             postMessage({tag: lid,
                          cmd: 'resolve',
                          resolver: tag,
