@@ -14,7 +14,7 @@
 
 .track-label {
   font-size: 10pt;
-  position: absolute;
+  position: relative;
   z-index: 999;
   background: rgba(220, 220, 220, 0.8);
   padding: 3px;
