@@ -53,11 +53,8 @@ function DASSource(a1, a2) {
         options = a1 || {};
     }
     for (var k in options) {
-        if (typeof(options[k]) != 'function') {
-            this[k] = options[k];
-        }
+        this[k] = options[k];
     }
-
 
     if (!this.coords) {
         this.coords = [];
@@ -69,6 +66,20 @@ function DASSource(a1, a2) {
     this.dasBaseURI = this.uri;
     if (this.dasBaseURI && this.dasBaseURI.substr(this.uri.length - 1) != '/') {
         this.dasBaseURI = this.dasBaseURI + '/';
+    }
+}
+
+DASSource.prototype.getURI = function(uri) {
+    if (this.resolver) {
+        return this.resolver(uri).then(function (urlOrObj) {
+            if (typeof urlOrObj === 'string') {
+                return urlOrObj;
+            } else {
+                return urlOrObj.url;
+            }
+        });
+    } else {
+        return Promise.resolve(uri);
     }
 }
 
@@ -464,32 +475,10 @@ DASSource.prototype.alignments = function(segment, options, callback) {
 
 
 function DASStylesheet() {
-/*
-    this.highZoomStyles = new Object();
-    this.mediumZoomStyles = new Object();
-    this.lowZoomStyles = new Object();
-*/
-
     this.styles = [];
 }
 
 DASStylesheet.prototype.pushStyle = function(filters, zoom, style) {
-    /*
-
-    if (!zoom) {
-        this.highZoomStyles[type] = style;
-        this.mediumZoomStyles[type] = style;
-        this.lowZoomStyles[type] = style;
-    } else if (zoom == 'high') {
-        this.highZoomStyles[type] = style;
-    } else if (zoom == 'medium') {
-        this.mediumZoomStyles[type] = style;
-    } else if (zoom == 'low') {
-        this.lowZoomStyles[type] = style;
-    }
-
-    */
-
     if (!filters) {
         filters = {type: 'default'};
     }
@@ -512,7 +501,6 @@ function parseGradient(grad) {
         steps = 50;
     }
 
-
     var stops = [];
     var colors = [];
     var se = grad.getElementsByTagName('STOP');
@@ -534,47 +522,51 @@ DASSource.prototype.stylesheet = function(successCB, failureCB) {
         dasURI = this.dasBaseURI + 'stylesheet';
     }
 
-    doCrossDomainRequest(dasURI, function(responseXML) {
-        if (!responseXML) {
-            if (failureCB) {
-                failureCB();
-            } 
-            return;
-        }
-        var stylesheet = new DASStylesheet();
-        var typeXMLs = responseXML.getElementsByTagName('TYPE');
-        for (var i = 0; i < typeXMLs.length; ++i) {
-            var typeStyle = typeXMLs[i];
-            
-            var filter = {};
-            filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
-            filter.label = typeStyle.getAttribute('label');
-            filter.method = typeStyle.getAttribute('method');
-            var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
-            for (var gi = 0; gi < glyphXMLs.length; ++gi) {
-                var glyphXML = glyphXMLs[gi];
-                var zoom = glyphXML.getAttribute('zoom');
-                var glyph = childElementOf(glyphXML);
-                var style = new DASStyle();
-                style.glyph = glyph.localName;
-                var child = glyph.firstChild;
-        
-                while (child) {
-                    if (child.nodeType == Node.ELEMENT_NODE) {
-                        // alert(child.localName);
-                        if (child.localName == 'BGGRAD') {
-                            style[child.localName] = parseGradient(child);
-                        } else {      
-                            style[child.localName] = child.firstChild.nodeValue;
-                        }
-                    }
-                    child = child.nextSibling;
-                }
-                stylesheet.pushStyle(filter, zoom, style);
+    this.getURI(dasURI).then(function(dasURI) {
+        doCrossDomainRequest(dasURI, function(responseXML) {
+            if (!responseXML) {
+                if (failureCB) {
+                    failureCB();
+                } 
+                return;
             }
-        }
-        successCB(stylesheet);
-    }, creds);
+            var stylesheet = new DASStylesheet();
+            var typeXMLs = responseXML.getElementsByTagName('TYPE');
+            for (var i = 0; i < typeXMLs.length; ++i) {
+                var typeStyle = typeXMLs[i];
+            
+                var filter = {};
+                filter.type = typeStyle.getAttribute('id'); // Am I right in thinking that this makes DASSTYLE XML invalid?  Ugh.
+                filter.label = typeStyle.getAttribute('label');
+                filter.method = typeStyle.getAttribute('method');
+                var glyphXMLs = typeStyle.getElementsByTagName('GLYPH');
+                for (var gi = 0; gi < glyphXMLs.length; ++gi) {
+                    var glyphXML = glyphXMLs[gi];
+                    var zoom = glyphXML.getAttribute('zoom');
+                    var glyph = childElementOf(glyphXML);
+                    var style = new DASStyle();
+                    style.glyph = glyph.localName;
+                    var child = glyph.firstChild;
+                    
+                    while (child) {
+                        if (child.nodeType == Node.ELEMENT_NODE) {
+                            if (child.localName == 'BGGRAD') {
+                                style[child.localName] = parseGradient(child);
+                            } else {      
+                                style[child.localName] = child.firstChild.nodeValue;
+                            }
+                        }
+                        child = child.nextSibling;
+                    }
+                    stylesheet.pushStyle(filter, zoom, style);
+                }
+            }
+            successCB(stylesheet);
+        }, creds);
+    }).catch(function(err) {
+        console.log(err);
+        failureCB();
+    });
 }
 
 //
