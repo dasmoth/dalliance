@@ -546,7 +546,7 @@ function TwoBitSequenceSource(source) {
     this.twoBit = new Awaited();
     var data;
     if (source.twoBitURI) {
-        data = new URLFetchable(source.twoBitURI, {credentials: source.credentials, resolver: this.resolver});
+        data = new URLFetchable(source.twoBitURI, {credentials: source.credentials, resolver: source.resolver});
     } else if (source.twoBitBlob) {
         data = new BlobFetchable(source.twoBitBlob);
     } else {
