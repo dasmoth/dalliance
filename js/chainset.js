@@ -414,13 +414,15 @@ function BBIChainFetcher(uri, credentials) {
     this.credentials = credentials;
 
     this.bwg = new Promise(function(resolve, reject) {
-        makeBwg(new URLFetchable(self.uri, {credentials: self.credentials}), function(bwg, err) {
+        makeBwg(new URLFetchable(self.uri, {credentials: self.credentials, 
+                                            resolver: self.resolver}), 
+          function(bwg, err) {
             if (bwg) {
                 resolve(bwg);
             } else {
                 reject(err);
             }
-        });
+          });
     });
 
     this.bwg.then(function(bwg, err) {

@@ -124,13 +124,13 @@ Browser.prototype.createSources = function(config) {
     } else if (config.bwgURI || config.bwgBlob) {
         var worker = this.getWorker();
         if (worker)
-            fs = new RemoteBWGFeatureSource(config, worker);
+            fs = new RemoteBWGFeatureSource(config, worker, this);
         else
             fs = new BWGFeatureSource(config);
     } else if (config.bamURI || config.bamBlob) {
         var worker = this.getWorker();
         if (worker)
-            fs = new RemoteBAMFeatureSource(config, worker);
+            fs = new RemoteBAMFeatureSource(config, worker, this);
         else
             fs = new BAMFeatureSource(config);
     } else if (config.jbURI) {
@@ -550,7 +550,7 @@ function TwoBitSequenceSource(source) {
     this.twoBit = new Awaited();
     var data;
     if (source.twoBitURI) {
-        data = new URLFetchable(source.twoBitURI);
+        data = new URLFetchable(source.twoBitURI, {credentials: source.credentials, resolver: source.resolver});
     } else if (source.twoBitBlob) {
         data = new BlobFetchable(source.twoBitBlob);
     } else {
@@ -749,7 +749,7 @@ BWGFeatureSource.prototype.init = function() {
         if (this.bwgSource.transport === 'encode') {
             arg = new EncodeFetchable(uri, {credentials: this.opts.credentials});
         } else {
-            arg = new URLFetchable(uri, {credentials: this.opts.credentials});
+            arg = new URLFetchable(uri, {credentials: this.opts.credentials, resolver: this.opts.resolver});
         }
     } else {
         arg = new BlobFetchable(this.bwgSource.bwgBlob);
@@ -983,7 +983,7 @@ BWGFeatureSource.prototype.getStyleSheet = function(callback) {
     });
 }
 
-function RemoteBWGFeatureSource(bwgSource, worker) {
+function RemoteBWGFeatureSource(bwgSource, worker, browser) {
     FeatureSourceBase.call(this);
 
     var thisB = this;
@@ -991,6 +991,10 @@ function RemoteBWGFeatureSource(bwgSource, worker) {
     this.readiness = 'Connecting';
     this.bwgSource = this.opts = bwgSource;
     this.keyHolder = new Awaited();
+
+    if (bwgSource.resolver) {
+        this.resolverKey = browser.registerResolver(bwgSource.resolver);
+    }
 
     this.init();
 }
@@ -1028,6 +1032,7 @@ RemoteBWGFeatureSource.prototype.init = function() {
         this.worker.postCommand({
             command: 'connectBBI', 
             uri: resolveUrlToPage(uri), 
+            resolver: this.resolverKey,
             transport: this.bwgSource.transport,
             credentials: this.bwgSource.credentials}, 
           cnt); 
@@ -1337,8 +1342,9 @@ BAMFeatureSource.prototype.init = function() {
         bamF = new BlobFetchable(this.bamSource.bamBlob);
         baiF = new BlobFetchable(this.bamSource.baiBlob);
     } else {
-        bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials});
-        baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), {credentials: this.opts.credentials});
+        bamF = new URLFetchable(this.bamSource.bamURI, {credentials: this.opts.credentials, resolver: this.opts.resolver});
+        baiF = new URLFetchable(this.bamSource.baiURI || (this.bamSource.bamURI + '.bai'), 
+                                {credentials: this.opts.credentials, resolver: this.opts.resolver});
     }
     makeBam(bamF, baiF, null, function(bam, err) {
         thisB.readiness = null;
@@ -1429,6 +1435,10 @@ function RemoteBAMFeatureSource(bamSource, worker) {
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight, bamGroup: bamSource.bamGroup};
     this.keyHolder = new Awaited();
     
+    if (bwgSource.resolver) {
+        this.resolverKey = browser.registerResolver(bwgSource.resolver);
+    }
+
     this.init();
 }
 
@@ -1459,6 +1469,7 @@ RemoteBAMFeatureSource.prototype.init = function() {    var thisB = this;
         this.worker.postCommand({
             command: 'connectBAM', 
             uri: resolveUrlToPage(uri), 
+            resolver: this.resolverKey,
             indexUri: resolveUrlToPage(indexUri),
             credentials: this.bamSource.credentials,
             indexChunks: this.bamSource.indexChunks},

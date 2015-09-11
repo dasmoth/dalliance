@@ -56,7 +56,7 @@ function Browser(opts) {
         opts = {};
     }
 
-    this.prefix = '//www.biodalliance.org/release-0.13/';
+    this.prefix = '//www.biodalliance.org/release-0.14/';
 
     this.sources = [];
     this.tiers = [];
@@ -132,6 +132,8 @@ function Browser(opts) {
     this.useFetchWorkers = true;
     this.maxWorkers = 2;
     this.workerPath = '$$worker-all.js';
+    this.resolvers = {};
+    this.resolverSeed = 1;
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
@@ -2478,6 +2480,12 @@ Browser.prototype.getWorker = function() {
     return this.fetchWorkers[this.nextWorker++];
 }
 
+Browser.prototype.registerResolver = function(resolver) {
+    var id = 'res' + (++this.resolverSeed);
+    this.resolvers[id] = resolver;
+    return id;
+}
+
 function FetchWorker(browser, worker) {
     var thisB = this;
     this.tagSeed = 0;
@@ -2486,10 +2494,34 @@ function FetchWorker(browser, worker) {
     this.worker = worker;
 
     this.worker.onmessage = function(ev) {
-        var cb = thisB.callbacks[ev.data.tag];
-        if (cb) {
-            cb(ev.data.result, ev.data.error);
-            delete thisB.callbacks[ev.data.tag];
+        var data = ev.data;
+
+        if (!data.cmd) {
+            var cb = thisB.callbacks[data.tag];
+            if (cb) {
+                cb(data.result, data.error);
+                delete thisB.callbacks[data.tag];
+            }
+        } else if (data.cmd == 'resolve') {
+            var resolver = thisB.browser.resolvers[data.resolver];
+            if (resolver) {
+                resolver(data.url).then(function(url) {
+                    thisB.worker.postMessage({
+                        tag: data.tag,
+                        url: url
+                    });
+                }).catch(function(err){
+                    console.log(err);
+                    thisB.worker.postMessage({
+                        tag: data.tag,
+                        err: err.toString()
+                    });
+                });
+            } else {
+                console.log('No resolver ' + data.resolver);
+            }
+        } else {
+            console.log('Bad worker callback ' + data.cmd);
         }
     };
 }

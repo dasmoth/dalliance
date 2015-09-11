@@ -110,7 +110,19 @@ Browser.prototype.search = function(g, statusCallback) {
                         if (tier.trix) {
                             doTrixSearch(tier, tier.trix);
                         } else {
-                            connectTrix(new URLFetchable(tier.dasSource.trixURI), new URLFetchable(tier.dasSource.trixURI + 'x'), function(trix) {
+                            var ix = new URLFetchable(
+                                tier.dasSource.trixURI,
+                                {credentials: tier.dasSource.credentials,
+                                 resolver: tier.dasSource.resolver}
+                            );
+
+                            var ixx = new URLFetchable(
+                                tier.dasSource.trixxURI || (tier.dasSource.trixURI + 'x'),
+                                {credentials: tier.dasSource.credentials,
+                                 resolver: tier.dasSource.resolver}
+                            );
+
+                            connectTrix(ix, ixx, function(trix) {
                                 tier.trix = trix;
                                 doTrixSearch(tier, trix);
                             });
