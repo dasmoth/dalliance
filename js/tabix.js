@@ -147,8 +147,8 @@ TabixFile.prototype.blocksForRange = function(refId, min, max) {
         p += 8;
         if (intBins[bin]) {
             for (var c = 0; c < nchnk; ++c) {
-                var cs = readVob(index, p);
-                var ce = readVob(index, p + 8);
+                var cs = readVob(index, p, true);
+                var ce = readVob(index, p + 8, true);
                 (bin < 4681 ? otherChunks : leafChunks).push(new Chunk(cs, ce));
                 p += 16;
             }
