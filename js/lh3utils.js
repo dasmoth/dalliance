@@ -22,10 +22,10 @@ Vob.prototype.toString = function() {
     return '' + this.block + ':' + this.offset;
 }
 
-function readVob(ba, offset) {
+function readVob(ba, offset, allowZero) {
     var block = ((ba[offset+6] & 0xff) * 0x100000000) + ((ba[offset+5] & 0xff) * 0x1000000) + ((ba[offset+4] & 0xff) * 0x10000) + ((ba[offset+3] & 0xff) * 0x100) + ((ba[offset+2] & 0xff));
     var bint = (ba[offset+1] << 8) | (ba[offset]);
-    if (block == 0 && bint == 0) {
+    if (block == 0 && bint == 0 && !allowZero) {
         return null;  // Should only happen in the linear index?
     } else {
         return new Vob(block, bint);
