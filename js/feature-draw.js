@@ -356,7 +356,7 @@ function drawFeatureTier(tier)
     tier.subtiers = bumpedSTs;
     tier.glyphCacheOrigin = tier.browser.viewStart;
 
-    if (subtiersExceeded)
+    if (subtiersExceeded && !tier.browser.noBumpWarning)
         tier.updateStatus('Bumping limit exceeded, use the track editor to see more features');
     else
         tier.updateStatus();
