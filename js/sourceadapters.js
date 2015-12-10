@@ -1384,8 +1384,8 @@ function RemoteBAMFeatureSource(bamSource, worker) {
     this.opts = {credentials: bamSource.credentials, preflight: bamSource.preflight, bamGroup: bamSource.bamGroup};
     this.keyHolder = new Awaited();
     
-    if (bwgSource.resolver) {
-        this.resolverKey = browser.registerResolver(bwgSource.resolver);
+    if (bamSource.resolver) {
+        this.resolverKey = browser.registerResolver(bamSource.resolver);
     }
 
     this.init();
