@@ -4129,6 +4129,14 @@
 *.dalliance .label-inverse[href], *.dalliance .badge-inverse[href] {
   background-color: #1a1a1a;
 }
+
+*.dalliance .btn {
+  -moz-user-select: none; 
+  -khtml-user-select: none; 
+  -webkit-user-select: none; 
+  -o-user-select: none; 
+}
+
 *.dalliance .btn .label, *.dalliance .btn .badge {
   position: relative;
   top: -1px;
