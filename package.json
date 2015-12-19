@@ -1,27 +1,29 @@
 {
   "name": "dalliance",
-  "version": "0.13.0",
+  "version": "0.13.8",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
+  "license": "BSD-2-Clause",
   "repository": {
     "type": "git",
     "url": "git@github.com:dasmoth/dalliance.git"
   },
   "dependencies": {
     "jszlib": "dasmoth/jszlib",
-    "es6-promise": "~0.1.1"
+    "es6-promise": "~3.0.2"
   },
   "devDependencies": {
-    "gulp-concat": "~2.2.0",
-    "gulp": "~3.6.2",
-    "gulp-closure-compiler": "~0.2.3",
-    "gulp-browserify": "~0.5.0",
+    "gulp": "~3.9.0",
+    "vinyl-source-stream": "1.1.0",
+    "vinyl-buffer": "1.0.0",  
+    "browserify": "12.0.1",
     "karma": "~0.12.1",
     "karma-chrome-launcher": "~0.1.2",
     "karma-jasmine": "~0.1.5",
     "gulp-rename": "~1.2.0",
-    "watchify": "~0.8.3",
+    "watchify": "~3.6.1",
     "karma-bro": "~0.2.2",
-    "closure-compiler": "~0.2.6"
+    "gulp-sourcemaps": "1.6.0",
+    "gulp-uglify": "1.5.1"
   }
 }
