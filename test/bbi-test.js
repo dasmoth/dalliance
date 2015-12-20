@@ -7,99 +7,50 @@
 // bbi-test.js
 //
 
+"use strict";
+
 var bbi = require('../js/bigwig');
 var bin = require('../js/bin');
 
 describe('bigbed files', function() {
     var bbURI = 'http://www.biodalliance.org/datasets/tests/test-leap.bb';
-    // var bbURI = 'http://local.biodalliance.org/dalliance/test-leap.bb';
 
-    it('can be created by connecting to a URI', function() {
-        var cb, err;
-        runs(function() {
-             bbi.makeBwg(new bin.URLFetchable(bbURI),
-                function(_bb, _err) {
-                    bb = _bb;
-                    err = _err;
-                    cb = true;
+    var bb;
+    it('can be created by connecting to a URI', function(done) {
+        bbi.makeBwg(new bin.URLFetchable(bbURI),
+                    function(_bb, err) {
+                        bb = _bb;
+                        expect(err).toBeFalsy();
+                        expect(bb).not.toBeNull();
+                        done();
                 });
-       });
-
-        waitsFor(function() {
-            return cb;
-        }, "The callback should be invoked");
-
-        runs(function() {
-            expect(err).toBeFalsy();
-            expect(bb).not.toBeNull();
-        });
+        
     });
 
-    it('can retrieve features from a genomic interval', function() {
-        var features, err, flag;
-
-        runs(function() {
-            bb.readWigData('chr1', 1, 100000000, function(_f, _e) {
-                flag = true;
-                features = _f;
-                err = _e;
-            });
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after feature fetch');
-
-        runs(function() {
+    it('can retrieve features from a genomic interval', function(done) {
+        bb.readWigData('chr1', 1, 100000000, function(features, err) {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
             expect(features.length > 0).toBeTruthy();
+            done();
         });
     });
 
-    it('can retrieve features by adjacency', function() {
-        var features, err, flag;
-
-        runs(function() {
-            bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, -1, function(_f, _e) {
-                flag = true;
-                features = _f;
-                err = _e;
-            });
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after feature fetch');
-
-        runs(function() {
+    it('can retrieve features by adjacency', function(done) {
+        bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, -1, function(features, err) {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
-            console.log(features);
             expect(features.length).toBe(1);
+            done();
         });
     });
 
-    it('returns features from the next chromosome if there are no adjacent features on this chromosome', function() {
-        var features, err, flag;
-
-        runs(function() {
-            bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, 1, function(_f, _e) {
-                flag = true;
-                features = _f;
-                err = _e;
-            });
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after feature fetch');
-
-        runs(function() {
+    it('returns features from the next chromosome if there are no adjacent features on this chromosome', function(done) {
+        bb.getUnzoomedView().getFirstAdjacent('chr1', 100000000, 1, function(features, err) {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
-            console.log(features);
             expect(features.length).toBe(1);
+            done();
         });
     });
 
@@ -135,25 +86,15 @@ describe('BBI objects', function() {
 
     var bb;
 
-    it('can be created by connecting to a URI', function() {
+    it('can be created by connecting to a URI', function(done) {
         var cb, err;
-        runs(function() {
-           bbi.makeBwg(new bin.URLFetchable(ensGeneURI),
-                function(_bb, _err) {
-                    bb = _bb;
-                    err = _err;
-                    cb = true;
-                });
-       });
-
-        waitsFor(function() {
-            return cb;
-        }, "The callback should be invoked");
-
-        runs(function() {
-            expect(err).toBeFalsy();
-            expect(bb).not.toBeNull();
-        });
+        bbi.makeBwg(new bin.URLFetchable(ensGeneURI),
+                    function(_bb, err) {
+                        bb = _bb;
+                        expect(err).toBeFalsy();
+                        expect(bb).not.toBeNull();
+                        done();
+                    });
     });
 
     describe('have a chromToIDs map', function() {
@@ -172,58 +113,29 @@ describe('BBI objects', function() {
         });
     });
 
-    it('can retrieve features from a genomic interval', function() {
-        var features, err, flag;
-
-        runs(function() {
-            bb.readWigData('chr2', 1000000, 1010000, function(_f, _e) {
-                flag = true;
-                features = _f;
-                err = _e;
-            });
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after feature fetch');
-
-        runs(function() {
+    it('can retrieve features from a genomic interval', function(done) {
+        bb.readWigData('chr2', 1000000, 1010000, function(features, err) {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
             expect(features.length > 0).toBeTruthy();
+            done();
         });
     });
 
-    it('can retrieve features via extra indices', function() {
-        var index, features, err, flag, flag2;
-
-        runs(function() {
-            bb.getExtraIndices(function(ei) {
-                index = ei[0];
-                flag = true;
-            })
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after extra-index request');
-
-        runs(function() {
-            index.lookup('AT5G57360.2', function(_f, _e) {
-                features = _f;
-                err = _e;
-                flag2 = true;
-            });
-        });
-
-        waitsFor(function() {
-            return flag2;
-        }, 'Expects callback after extra-index lookup');
-
-        runs(function() {
-            expect(err).toBeFalsy();
-            expect(features).toBeTruthy();
-            expect(features.length > 0).toBeTruthy();
+    it('can retrieve features via extra indices', function(done) {
+        bb.getExtraIndices(function(ei) {
+            var index = ei[0];
+            expect(index).toBeTruthy();
+            if (!index) {
+                done();
+            } else {
+                index.lookup('AT5G57360.2', function(features, err) {
+                    expect(err).toBeFalsy();
+                    expect(features).toBeTruthy();
+                    expect(features.length > 0).toBeTruthy();
+                    done();
+                });
+            }
         });
     });
 });
