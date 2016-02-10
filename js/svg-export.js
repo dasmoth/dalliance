@@ -26,6 +26,7 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+    var formatLongInt = nf.formatLongInt;
 }
 
 
@@ -45,19 +46,33 @@ Browser.prototype.makeSVG = function(opts) {
 
     var margin = 200;
 
-    var dallianceAnchor = makeElementNS(NS_SVG, 'a',
-       makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-           x: (b.featurePanelWidth + margin + 20)/2,
-           y: 30,
-           strokeWidth: 0,
-           fontSize: '12pt',
-	       textAnchor: 'middle',
-	       fill: 'blue'
-       }));
-    dallianceAnchor.setAttribute('xmlns:xlink', NS_XLINK);
-    dallianceAnchor.setAttribute('xlink:href', 'http://www.biodalliance.org/');
+    if (opts.banner) {
+      var dallianceAnchor = makeElementNS(NS_SVG, 'a',
+         makeElementNS(NS_SVG, 'text', 'Graphics from Biodalliance ' + VERSION, {
+             x: (b.featurePanelWidth + margin) - 100,
+             y: 35,
+             strokeWidth: 0,
+             fontSize: '12pt',
+	     textAnchor: 'end',
+	     fill: 'blue'
+         }));
+      dallianceAnchor.setAttribute('xmlns:xlink', NS_XLINK);
+      dallianceAnchor.setAttribute('xlink:href', 'http://www.biodalliance.org/');
+
+      saveRoot.appendChild(dallianceAnchor);
+    }
   
-    saveRoot.appendChild(dallianceAnchor);
+    if (opts.region) {
+        saveRoot.appendChild(
+            makeElementNS(NS_SVG, 'text', this.chr + ':' + formatLongInt(this.viewStart) + '..' + formatLongInt(this.viewEnd), {
+                x: margin + 100,
+                y: 35,
+                strokeWidth: 0,
+                fontSize: '12pt',
+                textAnchor: 'start'
+            })
+        );
+    }
     
     var clipRect = makeElementNS(NS_SVG, 'rect', null, {
     	x: margin,

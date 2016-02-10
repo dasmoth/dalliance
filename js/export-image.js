@@ -18,6 +18,9 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+    var formatLongInt = nf.formatLongInt;
+
+    var VERSION = require('./version');
 
     var drawSeqTierGC = require('./sequence-draw').drawSeqTierGC;
 }
@@ -31,7 +34,11 @@ Browser.prototype.exportImage = function(opts) {
 
     var fpw = this.featurePanelWidth;
     var padding = 3;
-    var totHeight = 0;
+    var ypos = 0;
+    if (opts.banner || opts.region) {
+        ypos = 40;
+    }
+    var totHeight = ypos;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (ti > 0)
             totHeight += padding;
@@ -42,7 +49,6 @@ Browser.prototype.exportImage = function(opts) {
     var mult = opts.resolutionMultiplier || 1.0;
     var margin = 200;
 
-
     var cw = ((fpw + margin) * mult)|0;
     var ch = (totHeight * mult)|0;
     var c = makeElement('canvas', null, {width: cw, height: ch});
@@ -51,8 +57,27 @@ Browser.prototype.exportImage = function(opts) {
     g.fillRect(0, 0, cw, ch);
 
     g.scale(mult, mult);
+
+    if (opts.region) {
+        g.save();
+        g.fillStyle = 'black';
+        g.font = '12pt sans-serif';
+        g.fillText(
+            this.chr + ':' + formatLongInt(this.viewStart) + '..' + formatLongInt(this.viewEnd),
+            margin + 100,
+            28
+        );
+        g.restore();
+    }
+
+    if (opts.banner) {
+        g.save();
+        g.fillStyle = 'black';
+        g.font = '12pt sans-serif';
+        fillTextRightJustified(g, 'Graphics from Biodalliance ' + VERSION, margin + fpw - 100, 28);
+        g.restore();
+    }
     
-    var ypos = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var offset = ((tier.glyphCacheOrigin - this.viewStart)*this.scale);

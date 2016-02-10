@@ -80,9 +80,16 @@ Browser.prototype.search = function(g, statusCallback) {
             } else {
                 foundLatch = true;
                 thisB.highlightRegion(nchr, min, max);
-            
+
+                var mid = ((max+min)/2)|0
                 var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-                thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
+                //thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
+                thisB.setLocation(
+                    nchr,
+                    Math.min(min - padding, mid - 250000),
+                    Math.max(max + padding, mid + 250000),
+                    statusCallback
+                );
             }
         }
 

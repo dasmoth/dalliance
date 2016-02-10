@@ -489,6 +489,17 @@ DasTier.prototype.paintToContext = function(gc, oc, offset) {
                 }
             }
         }
+	if (quant && quant.min < 0 && quant.max > 0 && this.dasSource.zeroLine) {
+	    var ry = subtiers[0].height * (quant.max / (quant.max - quant.min))
+	    gc.save();
+	    gc.strokeStyle = this.dasSource.zeroLine;
+	    gc.lineWidth = 0.5;
+	    gc.beginPath();
+	    gc.moveTo(-1000, ry);
+	    gc.lineTo(fpw + 1000, ry);
+	    gc.stroke();
+	    gc.restore();
+	}
         gc.translate(0, subtiers[s].height + this.padding);
         oc.translate(0, subtiers[s].height + this.padding);
     }
@@ -821,8 +832,9 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
                     height = Math.max(1, (relScore - relOrigin) * requiredHeight);
                     y = y + ((1.0 - relOrigin) * requiredHeight) - height;
                 } else {
-                    height = Math.max(1, (relScore - relOrigin) * requiredHeight);
-                    y = y + ((1.0 - relOrigin) * requiredHeight);
+		    console.log('relScore=' + relScore + '; origin=' + relOrigin);
+                    height = (relScore - relOrigin) * requiredHeight;
+                    y = y + ((1.0 - relOrigin) * requiredHeight) - height;
                 }
                 
                 quant = {min: smin, max: smax};
