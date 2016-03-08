@@ -58,6 +58,7 @@ Browser.prototype.openExportPanel = function() {
             b.storeStatus();
         }, false);
         var exportScale = makeElement('input', null, {type: 'text', value: '1.0'});
+        var exportWidth = makeElement('input', null, {type: 'text', value: '800'});
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
@@ -69,7 +70,8 @@ Browser.prototype.openExportPanel = function() {
                 blobURL = URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
                                                          banner: b.exportBanner,
                                                          region: b.exportRegion,
-                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'}));
+                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
+                                                         width: parseInt(exportWidth.value) || 800}));
                 note = 'SVG';
                 type = 'image/svg';
                 name = 'dalliance-view.svg';
@@ -84,7 +86,8 @@ Browser.prototype.openExportPanel = function() {
                                          banner: b.exportBanner,
                                          region: b.exportRegion,
                                          ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
-                                         resolutionMultiplier: mult});
+                                         resolutionMultiplier: mult,
+                                         width: parseInt(exportWidth.value) || 800});
                 note = 'Image';
                 type = 'image/png';
                 name = 'dalliance-view.png';
@@ -146,6 +149,9 @@ Browser.prototype.openExportPanel = function() {
         var eotScale = makeElement('tr',
             [makeElement('th', 'Scale multiplier', {}, {textAlign: 'right'}),
              makeElement('td', exportScale)]);
+        var eotWidth = makeElement('tr',
+            [makeElement('th', 'Width (logical px)', {}, {textAlign: 'right'}),
+             makeElement('td', exportWidth)]);
         var eotRegion = makeElement('tr',
             [makeElement('th', 'Label with genomic coordinates', {}, {textAlign: 'right'}),
              makeElement('td', exportRegionToggle)]);
@@ -156,6 +162,7 @@ Browser.prototype.openExportPanel = function() {
         var exportOptsTable = makeElement('table',
             [eotHighlights,
              eotGuideline,
+             eotWidth,
              eotScale,
              eotRegion], null, {width: '500px'});
         var setupEOT = function() {
@@ -163,6 +170,7 @@ Browser.prototype.openExportPanel = function() {
             eotHighlights.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotGuideline.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotScale.style.display = (es == 'png') ? 'table-row' : 'none';
+            eotWidth.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotRegion.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotBanner.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
         }

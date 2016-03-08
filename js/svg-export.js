@@ -27,6 +27,8 @@ if (typeof(require) !== 'undefined') {
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
     var formatLongInt = nf.formatLongInt;
+
+    var drawFeatureTier = require('./feature-draw').drawFeatureTier;
 }
 
 
@@ -34,6 +36,12 @@ Browser.prototype.makeSVG = function(opts) {
     opts = opts || {};
     var minTierHeight = opts.minTierHeight || 20;
     var padding = 3;
+    var fpw = opts.width || this.featurePanelWidth;
+
+    var backupFPW = this.featurePanelWidth;
+    var backupScale = this.scale;
+    this.featurePanelWidth = fpw;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
 
     var b = this;
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
@@ -88,7 +96,12 @@ Browser.prototype.makeSVG = function(opts) {
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
-    	var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
+        tier.backupSubtiers = tier.subtiers;
+        tier.backupOriginHaxx = tier.originHaxx;
+        tier.backupLayoutHeight = tier.layoutHeight;
+        drawFeatureTier(tier, tier.sequenceSource ? tier.currentSequence : null)
+
+        var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
     	var tierLabels = makeElementNS(NS_SVG, 'g');
     	var tierTopPos = pos;
 
@@ -174,6 +187,10 @@ Browser.prototype.makeSVG = function(opts) {
     	
     	tierBackground.setAttribute('height', pos - tierTopPos);
     	tierHolder.appendChild(makeElementNS(NS_SVG, 'g', [tierSVG, tierLabels]));
+
+        tier.subtiers = tier.backupSubtiers;
+        tier.originHaxx = tier.backupOriginHaxx;
+        tier.layoutHeight = tier.backupLayoutHeight;
     }
 
     if (opts.highlights) {
@@ -207,6 +224,10 @@ Browser.prototype.makeSVG = function(opts) {
     saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
     saveDoc.documentElement.setAttribute('height', pos + 50);
 
+    
+    this.featurePanelWidth = backupFPW;
+    this.scale = backupScale;
+    
     var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)], {type: 'image/svg+xml'});
     return svgBlob;
 }
