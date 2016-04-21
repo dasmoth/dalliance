@@ -596,31 +596,32 @@ function EnsemblSequenceSource(source) {
 }
 
 EnsemblSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
-  var url = this.source.ensemblURI + '/sequence/region/' + this.source.species + '/' +
-            chr + ':' + min + '..' + max + ':1?content-type=application/json';
-  var req = new XMLHttpRequest();
-  req.onreadystatechange = function() {
-    if (req.readyState == 4) {
-        if (req.status >= 300) {
-        var err = 'Error code ' + req.status;
-        try {
-          var jr = JSON.parse(req.response);
-          if (jr.error) {
-            err = jr.error;
-          }
-        } catch (ex) {};
-
-            callback(err, null);
-        } else {
-            var jr = JSON.parse(req.response);
-        var sequence = new DASSequence(chr, min, max, 'DNA', jr.seq);
-        return callback(null, sequence);
-      }
-    }
-  };
-  req.open('GET', url, true);
-  req.responseType = 'text';
-  req.send('');
+    var url = this.source.ensemblURI + '/sequence/region/' + this.source.species + '/' +
+              chr + ':' + min + '..' + max + ':1?content-type=application/json';
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+        if (req.readyState == 4) {
+            var jr;
+            if (req.status >= 300) {
+                var err = 'Error code ' + req.status;
+                try {
+                    jr = JSON.parse(req.response);
+                    if (jr.error) {
+                        err = jr.error;
+                    }
+                } finally {
+                    callback(err, null);
+                }
+            } else {
+                jr = JSON.parse(req.response);
+                var sequence = new DASSequence(chr, min, max, 'DNA', jr.seq);
+                return callback(null, sequence);
+            }
+        }
+    };
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send('');
 };
 
 EnsemblSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
