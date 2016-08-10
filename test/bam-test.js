@@ -80,3 +80,28 @@ describe('BAM files', function() {
                 });
     }); */
 });
+
+describe('Tiny BAM files', function() {
+    var bamURI = 'http://www.biodalliance.org/datasets/tiny.bam';
+    var bam;
+
+    it('can be created by connecting to a URI', function(done) {
+        makeBam(new URLFetchable(bamURI), new URLFetchable(bamURI + '.bai'), null,
+                function(_bam, _err) {
+                    bam = _bam;
+                    err = _err;
+                    expect(err).toBeFalsy();
+                    expect(bam).not.toBeNull();
+                    done();
+                });
+    });
+
+    it('can retrieve reads from a genomic interval', function(done) {
+        bam.fetch('22', 30000000, 30010000, function(features, err) {
+            expect(err).toBeFalsy();
+            expect(features).toBeTruthy();
+            expect(features.length == 2).toBeTruthy();
+            done();
+        });
+    });
+});

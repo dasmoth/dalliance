@@ -379,7 +379,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
     while (true) {
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
-        if (blockEnd >= ba.length) {
+        if (blockEnd > ba.length) {
             return false;
         }
 
