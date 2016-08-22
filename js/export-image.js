@@ -103,7 +103,7 @@ Browser.prototype.exportImage = function(opts) {
         g.restore();
     }
 
-    g.font = '10pt sans-serif';
+    g.font = '10px sans-serif';
     
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
