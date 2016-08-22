@@ -32,8 +32,11 @@ function parseLocCardinal(n, m) {
     }
 }
 
-Browser.prototype.search = function(g, statusCallback) {
+Browser.prototype.search = function(g, statusCallback, opts) {
     var thisB = this;
+    opts = opts || {};
+    var srPadding = opts.padding || this.defaultSearchRegionPadding;
+    
     var m = REGION_PATTERN.exec(g);
 
     if (m) {
@@ -82,14 +85,8 @@ Browser.prototype.search = function(g, statusCallback) {
                 thisB.highlightRegion(nchr, min, max);
 
                 var mid = ((max+min)/2)|0
-                var padding = Math.max(2500, (0.3 * (max - min + 1))|0);
-                //thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
-                thisB.setLocation(
-                    nchr,
-                    Math.min(min - padding, mid - 250000),
-                    Math.max(max + padding, mid + 250000),
-                    statusCallback
-                );
+                var padding = Math.max(srPadding, (0.3 * (max - min + 1))|0);
+                thisB.setLocation(nchr, min - padding, max + padding, statusCallback);
             }
         }
 

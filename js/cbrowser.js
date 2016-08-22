@@ -138,6 +138,8 @@ function Browser(opts) {
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
 
+    this.defaultSearchRegionPadding = 10000;
+
     // HTTP warning support
 
     this.httpCanaryURL = 'http://www.biodalliance.org/http-canary.txt';
