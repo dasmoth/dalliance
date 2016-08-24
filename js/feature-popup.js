@@ -85,7 +85,7 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     table.style.margin = '0px';
 
     var idx = 0;
-    if (feature.method) {
+    if (feature.method && !tier.dasSource.suppressMethod) {
         var row = makeElement('tr', [
             makeElement('th', 'Method'),
             makeElement('td', feature.method)
@@ -108,7 +108,8 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         ++idx;
     }
     if (feature.score !== undefined && feature.score !== null && feature.score != '-'
-        && !feature.suppressScore) {
+        && !feature.suppressScore && !tier.dasSource.suppressScore
+    ) {
         var row = makeElement('tr', [
             makeElement('th', 'Score'),
             makeElement('td', '' + feature.score)

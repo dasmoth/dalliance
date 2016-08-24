@@ -337,7 +337,7 @@ function textXHR(url, callback, opts) {
 
     try {
         var timeout;
-        if (opts.timeout) {
+        if (opts && opts.timeout) {
             timeout = setTimeout(
                 function() {
                     console.log('timing out ' + url);

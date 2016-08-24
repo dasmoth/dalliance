@@ -749,10 +749,11 @@ BWGFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
         if (thisB.opts.clientBin) {
             wantDensity = false;
         }
+        var scaleFactor = thisB.opts.scaleFactor || 1.0;
         if (bwg.type == 'bigwig' || wantDensity || (typeof thisB.opts.forceReduction !== 'undefined')) {
             var zoom = -1;
             for (var z = 0; z < bwg.zoomLevels.length; ++z) {
-                if (bwg.zoomLevels[z].reduction <= scale) {
+                if (bwg.zoomLevels[z].reduction <= (scale * scaleFactor)) {
                     zoom = z;
                 } else {
                     break;

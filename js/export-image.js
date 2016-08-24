@@ -18,8 +18,12 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+    var formatLongInt = nf.formatLongInt;
+
+    var VERSION = require('./version');
 
     var drawSeqTierGC = require('./sequence-draw').drawSeqTierGC;
+    var drawFeatureTier = require('./feature-draw').drawFeatureTier;
 }
 
 function fillTextRightJustified(g, text, x, y) {
@@ -29,19 +33,46 @@ function fillTextRightJustified(g, text, x, y) {
 Browser.prototype.exportImage = function(opts) {
     opts = opts || {};
 
-    var fpw = this.featurePanelWidth;
+    var fpw = opts.width || this.featurePanelWidth;
     var padding = 3;
-    var totHeight = 0;
+    var ypos = 0;
+    if (opts.banner || opts.region) {
+        ypos = 40;
+    }
+
+    var backupFPW = this.featurePanelWidth;
+    var backupScale = this.scale;
+    this.featurePanelWidth = fpw;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
+    
+    var totHeight = ypos;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         if (ti > 0)
             totHeight += padding;
         var tier = this.tiers[ti];
+
+        tier.backupSubtiers = tier.subtiers;
+        tier.backupOriginHaxx = tier.originHaxx;
+        tier.backupLayoutHeight = tier.layoutHeight;
+
+        if (tier.subtiers) {
+            drawFeatureTier(tier, tier.sequenceSource ? tier.currentSequence : null)
+
+            if (tier.subtiers) {
+                var lh = tier.padding;
+                for (var s = 0; s < tier.subtiers.length; ++s) {
+                    lh = lh + tier.subtiers[s].height + tier.padding;
+                }
+                lh += 6
+                tier.layoutHeight = Math.max(lh, this.minTierHeight);
+            }
+        }
+
         if (tier.layoutHeight !== undefined)
-            totHeight += tier.layoutHeight;
+                totHeight += tier.layoutHeight;
     }
     var mult = opts.resolutionMultiplier || 1.0;
     var margin = 200;
-
 
     var cw = ((fpw + margin) * mult)|0;
     var ch = (totHeight * mult)|0;
@@ -51,8 +82,29 @@ Browser.prototype.exportImage = function(opts) {
     g.fillRect(0, 0, cw, ch);
 
     g.scale(mult, mult);
+
+    if (opts.region) {
+        g.save();
+        g.fillStyle = 'black';
+        g.font = '12pt sans-serif';
+        g.fillText(
+            this.chr + ':' + formatLongInt(this.viewStart) + '..' + formatLongInt(this.viewEnd),
+            margin + 100,
+            28
+        );
+        g.restore();
+    }
+
+    if (opts.banner) {
+        g.save();
+        g.fillStyle = 'black';
+        g.font = '12pt sans-serif';
+        fillTextRightJustified(g, 'Graphics from Biodalliance ' + VERSION, margin + fpw - 100, 28);
+        g.restore();
+    }
+
+    g.font = '10px sans-serif';
     
-    var ypos = 0;
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
         var offset = ((tier.glyphCacheOrigin - this.viewStart)*this.scale);
@@ -75,6 +127,7 @@ Browser.prototype.exportImage = function(opts) {
         g.translate(offset, 0);
         if (tier.subtiers) {
             tier.paintToContext(g, oc, offset + 1000);
+            
         } else {
             drawSeqTierGC(tier, tier.currentSequence, g);
         }
@@ -137,11 +190,15 @@ Browser.prototype.exportImage = function(opts) {
             labelName = tier.dasSource.name;
         var labelWidth = g.measureText(labelName).width;
         g.fillStyle = 'black';
-        g.fillText(labelName, margin - (hasQuant ? 22 : 12) - labelWidth, (tier.layoutHeight + 6) / 2);
+        g.fillText(labelName, margin - (hasQuant ? 28 : 12) - labelWidth, (tier.layoutHeight + 3) / 2);
 
         g.restore(); // 0
 
         ypos += tier.layoutHeight + padding;
+
+        tier.subtiers = tier.backupSubtiers;
+        tier.originHaxx = tier.backupOriginHaxx;
+        tier.layoutHeight = tier.backupLayoutHeight;
     }
 
     if (opts.highlights) {
@@ -189,6 +246,9 @@ Browser.prototype.exportImage = function(opts) {
         g.lineTo(rulerPos, ypos);
         g.stroke();
     }
+
+    this.featurePanelWidth = backupFPW;
+    this.scale = backupScale;
 
     return c.toDataURL('image/png');
 }

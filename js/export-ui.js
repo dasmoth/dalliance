@@ -47,7 +47,18 @@ Browser.prototype.openExportPanel = function() {
             b.exportRuler = exportRulerToggle.checked;
             b.storeStatus();
         }, false);
+        var exportRegionToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportRegion});
+        exportRegionToggle.addEventListener('change', function(ev) {
+            b.exportRegion = exportRegionToggle.checked;
+            b.storeStatus();
+        }, false);
+        var exportBannerToggle = makeElement('input', null, {type: 'checkbox', checked: this.exportBanner});
+        exportBannerToggle.addEventListener('change', function(ev) {
+            b.exportBanner = exportBannerToggle.checked;
+            b.storeStatus();
+        }, false);
         var exportScale = makeElement('input', null, {type: 'text', value: '1.0'});
+        var exportWidth = makeElement('input', null, {type: 'text', value: '800'});
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
         exportButton.addEventListener('click', function(ev) {
@@ -57,7 +68,10 @@ Browser.prototype.openExportPanel = function() {
             var note, type, name;
             if (exportSelect.value === 'svg') {
                 blobURL = URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
-                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none'}));
+                                                         banner: b.exportBanner,
+                                                         region: b.exportRegion,
+                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
+                                                         width: parseInt(exportWidth.value) || 800}));
                 note = 'SVG';
                 type = 'image/svg';
                 name = 'dalliance-view.svg';
@@ -69,8 +83,11 @@ Browser.prototype.openExportPanel = function() {
                 }
 
                 blobURL = b.exportImage({highlights: exportHighlightsToggle.checked,
+                                         banner: b.exportBanner,
+                                         region: b.exportRegion,
                                          ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
-                                         resolutionMultiplier: mult});
+                                         resolutionMultiplier: mult,
+                                         width: parseInt(exportWidth.value) || 800});
                 note = 'Image';
                 type = 'image/png';
                 name = 'dalliance-view.png';
@@ -124,24 +141,38 @@ Browser.prototype.openExportPanel = function() {
         var exportContent = makeElement('p', '');
 
         var eotHighlights = makeElement('tr',
-                [makeElement('th', 'Include highlights', {}, {width: '200px', textAlign: 'right'}),
+                [makeElement('th', 'Include highlights', {}, {width: '400px', textAlign: 'right'}),
                  makeElement('td', exportHighlightsToggle)]);
         var eotGuideline = makeElement('tr',
-                [makeElement('th', 'Include vertical guideline'),
+                [makeElement('th', 'Include vertical guideline', {}, {textAlign: 'right'}),
                  makeElement('td', exportRulerToggle)]);
         var eotScale = makeElement('tr',
-            [makeElement('th', 'Scale multiplier'),
+            [makeElement('th', 'Scale multiplier', {}, {textAlign: 'right'}),
              makeElement('td', exportScale)]);
+        var eotWidth = makeElement('tr',
+            [makeElement('th', 'Width (logical px)', {}, {textAlign: 'right'}),
+             makeElement('td', exportWidth)]);
+        var eotRegion = makeElement('tr',
+            [makeElement('th', 'Label with genomic coordinates', {}, {textAlign: 'right'}),
+             makeElement('td', exportRegionToggle)]);
+        var eotBanner = makeElement('tr',
+            [makeElement('th', 'Include banner', {}, {textAlign: 'right'}),
+             makeElement('td', exportBannerToggle)]);
 
         var exportOptsTable = makeElement('table',
             [eotHighlights,
              eotGuideline,
-             eotScale]);
+             eotWidth,
+             eotScale,
+             eotRegion], null, {width: '500px'});
         var setupEOT = function() {
             var es = exportSelect.value;
             eotHighlights.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotGuideline.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
             eotScale.style.display = (es == 'png') ? 'table-row' : 'none';
+            eotWidth.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
+            eotRegion.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
+            eotBanner.style.display = (es == 'svg' || es == 'png') ? 'table-row' : 'none';
         }
         setupEOT();
 

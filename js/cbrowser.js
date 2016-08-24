@@ -102,6 +102,8 @@ function Browser(opts) {
     this.defaultHighlightAlpha = 0.3;
     this.exportHighlights = true;
     this.exportRuler = true;
+    this.exportBanner = true;
+    this.exportRegion = true;
     this.singleBaseHighlight = true;
     
     // Visual config.
@@ -137,6 +139,8 @@ function Browser(opts) {
 
     this.assemblyNamePrimary = true;
     this.assemblyNameUcsc = true;
+
+    this.defaultSearchRegionPadding = 10000;
 
     // HTTP warning support
 
