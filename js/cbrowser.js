@@ -304,7 +304,7 @@ Browser.prototype.realInit = function() {
     this.resizeListener = function(ev) {
         thisB.resizeViewer();
     };
-    window.addEventListener('resize', this.resizeListener, false);
+    
     this.ruler = makeElement('div', null, {className: 'guideline'})
     this.ruler2 = makeElement('div', null, {className: 'single-base-guideline'});
     this.tierHolderHolder.appendChild(this.ruler);
@@ -362,6 +362,8 @@ Browser.prototype.realInit2 = function() {
     removeChildren(this.pinnedTierHolder);
 
     this.featurePanelWidth = this.tierHolder.getBoundingClientRect().width | thisB.offscreenInitWidth | 0;
+    window.addEventListener('resize', this.resizeListener, false);
+    
     this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
     if (!this.zoomMax) {
         this.zoomMax = this.zoomExpt * Math.log(this.maxViewWidth / this.zoomBase);
