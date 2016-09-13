@@ -125,6 +125,7 @@ function drawFeatureTier(tier)
     // group by style
     var gbsFeatures = {};
     var gbsStyles = {};
+    var stackedFeatures = [];
 
     for (var uft in tier.ungroupedFeatures) {
         var ufl = tier.ungroupedFeatures[uft];
@@ -142,6 +143,8 @@ function drawFeatureTier(tier)
             if (style.glyph == 'LINEPLOT') {
                 pusho(gbsFeatures, style.id, f);
                 gbsStyles[style.id] = style;
+            } if (style.glyph == 'STACKED') {
+                stackedFeatures.push(f);
             } else {
                 var g = glyphForFeature(f, 0, style, tier);
                 if (g)
@@ -157,6 +160,11 @@ function drawFeatureTier(tier)
             glyphs.push(makeLineGlyph(gf, style, tier));
             specials = true;
         }
+    }
+
+    if (stackedFeatures.length > 0) {
+        glyphs = glyphs.concat(makeStackedBars(stackedFeatures, tier));
+        specials = true;
     }
 
     // Merge supergroups    
@@ -1119,6 +1127,101 @@ function glyphForFeature(feature, y, style, tier, forceHeight, noLabel)
     }
 
     return gg;
+}
+
+function makeStackedBars(features, tier) {
+    var glyphs = [];
+    
+    var posStacks = [],
+        negStacks = [];
+    
+    var scale = tier.browser.scale, origin = tier.browser.viewStart;
+    for (var fi = 0; fi < features.length; ++fi) {
+        var feature = features[fi];
+        var style = tier.styleForFeature(feature);
+        var score = feature.score * 1.0;
+
+        var height = tier.forceHeight || style.HEIGHT || forceHeight || 12;
+        var requiredHeight = height = 1.0 * height;
+
+        
+        var min = feature.min;
+        var max = feature.max;
+
+        var minPos = (min - origin) * scale;
+        var rawMaxPos = ((max - origin + 1) * scale);
+        var maxPos = Math.max(rawMaxPos, minPos + 1);
+
+        // This should somewhat match the 'HISTOGRAM' path.
+        
+        var smin = tier.quantMin(style);
+        var smax = tier.quantMax(style);
+
+        if (!smax) {
+            if (smin < 0) {
+                smax = 0;
+            } else {
+                smax = 10;
+            }
+        } else {
+            smax = smax * 1.0;
+        }
+        
+        if (!smin) {
+            smin = 0;
+        } else {
+            smin = smin * 1.0;
+        }
+
+        var stackOrigin;
+        if (score >= 0) {
+            stackOrigin = posStacks[min] || 0;
+            posStacks[min] = stackOrigin + score;
+        } else {
+            stackOrigin = negStacks[min] || 0;
+            negStacks[min] = stackOrigin + score;
+        }
+
+        if (stackOrigin > smax || stackOrigin < smin) {
+            // Stack has extended outside of range.
+            continue;
+        }
+
+        if (stackOrigin + score < smin) {
+            score = smin - stackOrigin;
+        }
+        if (stackOrigin + score > smax) {
+            score = smax - stackOrigin;
+        }
+        
+        var relScoreEnd = (score + stackOrigin - smin) / (smax - smin);
+        var relScoreStart = (stackOrigin - smin) / (smax - smin)
+        var relOrigin = (-1.0 * smin) / (smax - smin);
+        var relScoreMax = Math.max(relScoreStart, relScoreEnd);
+        var relScoreMin = Math.min(relScoreStart, relScoreEnd);
+
+        height = (relScoreMax - relScoreMin) * requiredHeight;
+        var y = (1.0 - relScoreMax) * requiredHeight;
+
+        var stroke = style.FGCOLOR || null;
+        var fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
+        var alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
+
+        var gg = new BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
+        var gg = new TranslatedGlyph(gg, 0, 0, requiredHeight);
+        gg.feature = feature;
+        gg.quant = {
+            min: smin, max: smax
+        };
+        if (style.ZINDEX) {
+            gg.zindex = style.ZINDEX | 0;
+        }
+        glyphs.push(gg);
+        
+    }
+    return glyphs;
 }
 
 DasTier.prototype.styleForFeature = function(f) {
