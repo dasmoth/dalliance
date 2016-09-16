@@ -94,6 +94,9 @@ function Browser(opts) {
     this.maxViewWidth = 500000;
     this.defaultSubtierMax = 100;
 
+    this.highZoomThreshold = 0.2;
+    this.mediumZoomThreshold = 0.01
+
     // Options.
     
     this.reverseScrolling = false;
@@ -2245,9 +2248,9 @@ Browser.prototype.featureDoubleClick = function(hit, rx, ry) {
 
 Browser.prototype.zoomForScale = function(scale) {
     var ssScale;
-    if (scale > 0.2) {
+    if (scale > this.highZoomThreshold) {
         ssScale = 'high';
-    } else if (scale > 0.01) {
+    } else if (scale > this.mediumZoomThreshold) {
         ssScale = 'medium';
     } else  {
         ssScale = 'low';
