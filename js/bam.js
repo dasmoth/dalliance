@@ -411,17 +411,19 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
         if (opts.light)
             record.seqLength = lseq;
 
-        if (!opts.light) {
-            if (nextRef >= 0) {
-                record.nextSegment = this.indexToChr[nextRef];
-                record.nextPos = nextPos;
-            }
-
+        if (!opts.light || opts.includeName) {
             var readName = '';
             for (var j = 0; j < nl-1; ++j) {
                 readName += String.fromCharCode(ba[offset + 36 + j]);
             }
             record.readName = readName;
+        }
+        
+        if (!opts.light) {
+            if (nextRef >= 0) {
+                record.nextSegment = this.indexToChr[nextRef];
+                record.nextPos = nextPos;
+            }
         
             var p = offset + 36 + nl;
 
