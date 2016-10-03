@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+
+        <style>
+        </style>
+
+        <title>BioDalliance Renderer Test</title>
+        <script language="javascript" src="../build/dalliance-all.js"></script>
+
+        <script language="javascript">
+
+         var b = new Browser({
+             chr:        '11',
+             defaultStart: 10000000,
+             defaultEnd: 30000000,
+             viewStart:  10000000,
+             viewEnd:    30000000,
+             cookieKey:  'mouse38',
+
+             coordSystem: {
+                 speciesName: 'Mouse',
+                 taxon: 10090,
+                 auth: 'GRCm',
+                 version: 38,
+                 ucscName: 'mm10'
+             },
+
+
+             chains: {
+                 mm9ToMm10: new Chainset('http://www.derkholm.net:8080/das/mm9ToMm10/', 'NCBIM37', 'GRCm38',
+                                         {
+                                             speciesName: 'Mouse',
+                                             taxon: 10090,
+                                             auth: 'NCBIM',
+                                             version: 37,
+                                             ucscName: 'mm9'
+                                         })
+             },
+
+
+             sources:      [{name: 'Genome',
+                             twoBitURI:  'http://www.biodalliance.org/datasets/GRCm38/mm10.2bit',
+                             desc: 'Mouse reference genome build GRCm38',
+                             tier_type: 'sequence',
+                             provides_entrypoints: true}
+
+                           ,{name: 'Histogram',
+                             desc: 'Test histogram',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [
+                                 {
+                                 min: 11000000,
+                                 max: 12000000,
+                                 score: 5,
+                                 orientation: '-',
+                                 seq:  "GTCAGCTGCAGCAGTAGCGAAGACT",
+                                 quals: "++**//++aab021!!gfOF0//!!",
+                                 cigar: "5M5I5M5D5S"
+                             },
+                                 {
+                                 min: 12000000,
+                                 max: 13000000,
+                                 score: 2,
+                                 seq:  "GTCAGCTGCAGCAGTAGCGAAGACT",
+                                 quals: "++**//++aab021!!gfOF0//!!",
+                                 orientation: ',',
+                                 cigar: "5M5I5M5D5S"
+                             },
+                                 {
+                                 min: 13000000,
+                                 max: 15000000,
+                                 score: 4,
+                                 seq:  "GTCAGCTGCAGCAGTAGCGAAGACT",
+                                 quals: "++**//++aab021!!gfOF0//!!",
+                                 orientation: '-',
+                                 cigar: "5M5I5M5D5S"
+                             },
+                                 {
+                                 min: 15000000,
+                                 max: 16000000,
+                                 score: 3,
+                                 seq:  "GTCAGCTGCAGCAGTAGCGAAGACT",
+                                 quals: "++**//++aab021!!gfOF0//!!",
+                                 orientation: '.',
+                                 cigar: "5M5I5M5D5S"
+                             },
+                                 {
+                                 min: 16000000,
+                                 max: 18000000,
+                                 score: 1,
+                                 seq:  "GTCAGCTGCAGCAGTAGCGAAGACT",
+                                 quals: "++**//++aab021!!gfOF0//!!",
+                                 orientation: '-',
+                                 cigar: "5M5I5M5D5S"
+                             }
+                             ],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'HISTOGRAM',
+                                     MIN: 1,
+                                     MAX: 6,
+                                     STEPS: 6,
+                                     HEIGHT: '30',
+                                     COLOR1: 'red',
+                                     COLOR2: 'green',
+                                     COLOR3: 'blue',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             trixURI: 'http://www.biodalliance.org/datasets/GRCm38/gencodeM2.ix',
+                           }
+
+                           ,{name: 'Genes, CROSS glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'CROSS',
+                                     HEIGHT: '12',
+                                     FGCOLOR: 'red',
+                                     COLOR_BY_SCORE2: 'yes',
+                                     COLOR1: 'red',
+                                     COLOR2: 'green',
+                                     COLOR3: 'blue',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             trixURI: 'http://www.biodalliance.org/datasets/GRCm38/gencodeM2.ix',
+                           }
+
+                           ,{name: 'Genes, CROSS, SCATTER glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'CROSS',
+                                     HEIGHT: '13',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                     SCATTER: 'yes'
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, BOX glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'BOX',
+                                     HEIGHT: '14',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'no',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, HIDDEN glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'HIDDEN',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, POINT glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'POINT',
+                                     HEIGHT: '15',
+                                     COLOR1: 'green',
+                                     COLOR2: 'green',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, ARROW glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'ARROW',
+                                     PARALLEL: 'yes',
+                                     SOUTHWEST: 'yes',
+                                     NORTHEAST: 'yes',
+                                     HEIGHT: '16',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 },
+                             }],
+                             }
+
+                           ,{name: 'Genes, ANCHORED ARROW glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'ANCHORED_ARROW',
+                                     PARALLEL: 'yes',
+                                     SOUTHWEST: 'yes',
+                                     NORTHEAST: 'yes',
+                                     HEIGHT: '17',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+
+                           ,{name: 'Genes, LINEPLOT glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'LINEPLOT',
+                                     HEIGHT: '30',
+                                     MAX: '5',
+                                     MIN: '0',
+                                     STEPS: '10',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+
+                           ,{name: 'Genes, LINE glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'LINE',
+                                     HEIGHT: '18',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, PRIMERS glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'PRIMERS',
+                                     HEIGHT: '19',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, SPAN glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'SPAN',
+                                     HEIGHT: '20',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, TEXT glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'TEXT',
+                                     FONT: 'courier',
+                                     FONTSIZE: '10',
+                                     STRING: 'test',
+                                     STYLE: 'bold',
+                                     HEIGHT: '9',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, TOOMANY glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 score: 5
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: 'TOOMANY',
+                                     LINEWIDTH: '30',
+                                     HEIGHT: '20',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }
+
+                           ,{name: 'Genes, __SEQUENCE glyph',
+                             desc: 'Gene structures from GENCODE M2',
+                             collapseSuperGroups: true,
+                             tier_type: 'test-source',
+                             features: [{
+                                 min: 11000000,
+                                 max: 18000000,
+                                 orientation: '-',
+                                 score: 5,
+                                 cigar: "3M1I3M1D5S"
+                             }],
+                             style: [{
+                                 type: 'default',
+                                 style: {
+                                     glyph: '__SEQUENCE',
+                                     HEIGHT: '21',
+                                     FGCOLOR: 'red',
+                                     BGCOLOR: 'red',
+                                     BUMP: 'yes',
+                                     LABEL: 'no',
+                                 }
+                             }],
+                             }],
+
+             uiPrefix: '../',
+
+             fullScreen: true,
+
+             renderer: 'test'
+
+
+         });
+
+         b.reset();
+        </script>
+    </head>
+
+    <body>
+        <div id='svgHolder'>Failed to load the Biodalliance genome browser.  Have you run "gulp"?</div>
+    </body>
+</html>
