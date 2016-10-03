@@ -269,11 +269,13 @@ function LineGraphGlyph(points, color, height) {
 }
 
 LineGraphGlyph.prototype.min = function() {
-    return this.points[0];
+    return this.points[0].x;
+    // return this.points[0];
 };
 
 LineGraphGlyph.prototype.max = function() {
-    return this.points[this.points.length - 2];
+    return this.points[this.points.length - 1].x;
+    // return this.points[this.points.length - 2];
 };
 
 LineGraphGlyph.prototype.height = function() {
@@ -285,15 +287,12 @@ LineGraphGlyph.prototype.draw = function(g) {
     g.strokeStyle = this.color;
     g.lineWidth = 2;
     g.beginPath();
-    for (var i = 0; i < this.points.length; i += 2) {
-        var x = this.points[i];
-        var y = this.points[i + 1];
-        if (i == 0) {
-            g.moveTo(x, y);
-        } else {
-            g.lineTo(x, y);
-        }
-    }
+    this.points.forEach(function(p, i) {
+        if (i === 0)
+            g.moveTo(p.x, p.y);
+        else
+            g.lineTo(p.x, p.y);
+    });
     g.stroke();
     g.restore();
 }
@@ -1403,8 +1402,10 @@ PointGlyph.prototype.toSVG = function() {
 }
 
 
-function GridGlyph(height) {
+function GridGlyph(height, yOffset, spacing) {
     this._height = height || 50;
+    this.yOffset = yOffset || 0;
+    this.spacing = spacing || 10;
 }
 
 GridGlyph.prototype.notSelectable = true;
@@ -1427,7 +1428,8 @@ GridGlyph.prototype.draw = function(g) {
     g.lineWidth = 0.1;
 
     g.beginPath();
-    for (var y = 0; y <= this._height; y += 10) {
+    for (var y = this.yOffset; y <= this._height+this.yOffset; y += this.spacing) {
+    // for (var y = 0; y <= this._height; y += 10) {
         g.moveTo(-5000, y);
         g.lineTo(5000, y);
     }
