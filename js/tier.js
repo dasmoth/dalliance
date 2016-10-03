@@ -279,17 +279,9 @@ DasTier.prototype.setFeatures = function(chr, coverage, scale, features, sequenc
     }
 }
 
+
 DasTier.prototype.draw = function() {
-    var features = this.currentFeatures;
-    var seq = this.currentSequence;
-    if (this.sequenceSource) {
-        drawSeqTier(this, seq); 
-    } else {
-        drawFeatureTier(this);
-    }
-    this.paint();
-    this.originHaxx = 0;
-    this.browser.arrangeTiers();
+    console.log("Use browser.getTierRenderer(tier).drawTier(tier)");
 }
 
 DasTier.prototype.findNextFeature = function(chr, pos, dir, fedge, callback) {
@@ -630,7 +622,8 @@ DasTier.prototype.scheduleRedraw = function() {
 
     if (!this.redrawTimeout) {
         this.redrawTimeout = setTimeout(function() {
-            tier.draw();
+            var renderer = tier.browser.getTierRenderer(tier);
+            renderer.drawTier(tier);
             tier.redrawTimeout = null;
         }, 10);
     }
