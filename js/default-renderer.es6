@@ -155,7 +155,7 @@ function glyphForFeature(canvas, feature, y, style, tier, forceHeight, noLabel) 
     let label = feature.label || feature.id;
 
     // Hide glyphs that are smaller than a pixel in width.
-    if ((max - min) * scale < 1) return null;
+    if (tier.dasSource.hideSubpixelGlyphs && (max - min) * scale < 1) return null;
 
     let minPos = (min - origin) * scale;
     let rawMaxPos = ((max - origin + 1) * scale);
@@ -449,7 +449,7 @@ function prepareSubtiers(tier, canvas, y=0, grid=true) {
                     group.links = tier.groups[sgGroup[0]].links;
                 }
 
-                delete tier.groupedFeatures[sgGroup[g]];
+                delete tier.groupedFeatures[sgGroup[i]];
 
             });
 
