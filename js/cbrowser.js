@@ -50,6 +50,7 @@ if (typeof(require) !== 'undefined') {
     var MultiRenderer = require('./multi-renderer.es6');
     var SubRenderer = require('./sub-renderer.es6');
 
+    var TestRenderer = require('./test-renderer.es6');
     var DummyRenderer = require('./dummy-renderer.es6');
 }
 
@@ -70,6 +71,7 @@ function Browser(opts) {
           'multi': MultiRenderer,
           'sub': SubRenderer,
           'old': OldRenderer,
+          'test': TestRenderer
         };
 
     this.defaultRenderer = opts.renderer || DefaultRenderer;

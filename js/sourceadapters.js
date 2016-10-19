@@ -1774,4 +1774,5 @@ if (typeof(module) !== 'undefined') {
     require('./memstore');
     require('./bedwig');
     require('./vcf');
+    require('./test-source.es6');
 }
