@@ -15,7 +15,6 @@
             "never"
         ],
         "array-callback-return": "off",
-        "arrow-body-style": "error",
         "arrow-parens": [
             "error",
             "as-needed"
@@ -57,10 +56,7 @@
             "error",
             "never"
         ],
-        "func-style": [
-            "error",
-            "declaration"
-        ],
+        "func-style": "off",
         "generator-star-spacing": "error",
         "global-require": "error",
         "guard-for-in": "off",
@@ -106,8 +102,8 @@
         ],
         "no-caller": "error",
         "no-catch-shadow": "error",
-        "no-confusing-arrow": "error",
         "no-continue": "off",
+        "no-console": "off",
         "no-div-regex": "error",
         "no-duplicate-imports": "error",
         "no-else-return": "off",
@@ -196,7 +192,6 @@
                 "allowMultiplePropertiesPerLine": true
             }
         ],
-        "object-shorthand": "error",
         "one-var": "off",
         "one-var-declaration-per-line": "off",
         "operator-assignment": "off",

@@ -38,7 +38,5 @@ class TestSource extends FeatureSourceBase {
 
 
 registerSourceAdapterFactory('test-source', source => {
-    return {
-        features: new TestSource(source)
-    };
+    return { features: new TestSource(source) };
 });

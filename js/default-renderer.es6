@@ -1063,7 +1063,6 @@ function makeLinePlot(features, style, tier, yshift) {
     }
 
     let yscale = ((1.0 * height) / (max - min));
-    let width = style.LINEWIDTH || 1;
     let color = style.FGCOLOR || style.COLOR1 || 'black';
 
     let prevSign = 1;
@@ -1084,10 +1083,12 @@ function makeLinePlot(features, style, tier, yshift) {
             curSign = f.score < 0 ? -1 : 1;
 
             if (curSign !== prevSign) {
-                glyphSequences.push({points: curGlyphPoints,
-                                     color: prevSign === 1 ?
-                                       style.POSCOLOR
-                                     : style.NEGCOLOR});
+                glyphSequences.push({
+                    points: curGlyphPoints,
+                    color: prevSign === 1 ?
+                        style.POSCOLOR
+                        : style.NEGCOLOR
+                });
                 curGlyphPoints = [];
                 // Need to add the previous point to this sequence,
                 // otherwise there is a gap in the resulting plot
@@ -1108,8 +1109,10 @@ function makeLinePlot(features, style, tier, yshift) {
     if (isDasBooleanTrue(style.ADDITIVE)) {
         color = curSign === 1 ? style.POSCOLOR : style.NEGCOLOR;
     }
-    glyphSequences.push({points: curGlyphPoints,
-                         color: color});
+    glyphSequences.push({
+        points: curGlyphPoints,
+        color: color
+    });
 
 
     let lggs = glyphSequences.map(gs => {
