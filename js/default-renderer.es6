@@ -987,8 +987,12 @@ function sequenceGlyph(canvas, tier, feature, style, forceHeight) {
                 seq += "-".repeat(co.cnt);
                 quals += "Z".repeat(co.cnt);
             } else if (co.op === 'I') {
+
                 let inseq = rawseq.substr(cursor, co.cnt);
-                let ig = new Glyphs.TriangleGlyph(minPos + (seq.length*scale), 5, 'S', 5, tier.browser.baseColors['I']);
+                let ig = new Glyphs.TranslatedGlyph(
+                    new Glyphs.TriangleGlyph(minPos + (seq.length*scale), 6, 'S', 5, tier.browser.baseColors['I']),
+                    0, -2, 0
+                );
                 if (insertionLabels)
                     ig = new Glyphs.LabelledGlyph(canvas, ig, inseq, false, 'center', 'above', '7px sans-serif');
                 ig.feature = {label: 'Insertion: ' + inseq, type: 'insertion', method: 'insertion'};

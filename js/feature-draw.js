@@ -143,7 +143,7 @@ function drawFeatureTier(tier)
             if (style.glyph == 'LINEPLOT') {
                 pusho(gbsFeatures, style.id, f);
                 gbsStyles[style.id] = style;
-            } if (style.glyph == 'STACKED') {
+            } else if (style.glyph == 'STACKED') {
                 stackedFeatures.push(f);
             } else {
                 var g = glyphForFeature(f, 0, style, tier);
