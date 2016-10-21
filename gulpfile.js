@@ -19,7 +19,7 @@ gulp.task('build-worker', function() {
         nobuiltins: true
     })
         .transform("babelify", {presets: ["es2015"],
-                                extensions: ".es6"})
+                                extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('worker-all.js'))
         .pipe(buffer())
@@ -36,7 +36,7 @@ gulp.task('build-main', function() {
         nobuiltins: true
     })
         .transform("babelify", {presets: ["es2015"],
-                                extensions: ".es6"})
+                                extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('dalliance-all.js'))
         .pipe(buffer())
@@ -51,7 +51,7 @@ gulp.task('compile-worker', function() {
         nobuiltins: true
     })
         .transform("babelify", {presets: ["es2015"],
-                                extensions: ".es6"})
+                                extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('worker-all.js'))
         .pipe(buffer())
@@ -68,7 +68,7 @@ gulp.task('compile-main', function() {
         nobuiltins: true
     })
         .transform("babelify", {presets: ["es2015"],
-                                extensions: ".es6"})
+                                extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('dalliance-all.js'))
         .pipe(buffer())

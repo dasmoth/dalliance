@@ -480,7 +480,7 @@ DASFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, c
     );
 };
 
-DASFeatureSource.prototype.findNextFeature = this.sourceFindNextFeature = function(chr, pos, dir, callback) {
+DASFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
     if (this.dasSource.capabilities && arrayIndexOf(this.dasSource.capabilities, 'das1:adjacent-feature') >= 0) {
         var thisB = this;
         if (this.dasAdjLock) {

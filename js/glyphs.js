@@ -1142,8 +1142,6 @@ AminoAcidGlyph.prototype.toSVG = function() {
     return g;
 };
 
-(function(scope) {
-
 var isRetina = window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
 var altPattern = new RegExp('^[ACGT-]$');
@@ -1314,10 +1312,6 @@ SequenceGlyph.prototype.toSVG = function() {
 
     return g;
 }
-
-scope.SequenceGlyph = SequenceGlyph;
-
-}(this));
 
 function TranslatedGlyph(glyph, x, y, height) {
     this.glyph = glyph;
@@ -1592,7 +1586,7 @@ if (typeof(module) !== 'undefined') {
         ArrowGlyph: ArrowGlyph,
         TooManyGlyph: TooManyGlyph,
         TextGlyph: TextGlyph,
-        SequenceGlyph: this.SequenceGlyph,
+        SequenceGlyph: SequenceGlyph,
         AminoAcidGlyph: AminoAcidGlyph,
         TranslatedGlyph: TranslatedGlyph,
         GridGlyph: GridGlyph,
