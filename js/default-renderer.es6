@@ -231,8 +231,12 @@ function glyphForFeature(canvas, feature, y, style, tier, forceHeight, noLabel) 
         glyph = sequenceGlyph(canvas, tier, feature, style, forceHeight);
 
     } else if (glyphType === '__INSERTION') {
-        let ig = new Glyphs.TriangleGlyph(minPos, 5, 'S', 5, tier.browser.baseColors['I']);
-        glyph = new Glyphs.LabelledGlyph(canvas, ig, feature.insertion || feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
+        let insertionLabels = true;
+        if (style.__INSERTIONS !== undefined)
+            insertionLabels = isDasBooleanNotFalse(style.__INSERTIONS)
+        glyph = new Glyphs.TriangleGlyph(minPos, 5, 'S', 5, tier.browser.baseColors['I']);
+        if (insertionLabels)
+            glyph = new Glyphs.LabelledGlyph(canvas, glyph, feature.insertion || feature.altAlleles[0], false, 'center', 'above', '7px sans-serif');
 
         if ((maxPos - minPos) > 1) {
             let stroke = style.FGCOLOR || 'red';
@@ -299,6 +303,7 @@ function groupFeatures(tier, canvas, y) {
     let glyphs = [];
     let gbsFeatures = {};
     let gbsStyles = {};
+    let stackedFeatures = [];
 
     R.map(features => {
         features.forEach(feature => {
@@ -310,6 +315,8 @@ function groupFeatures(tier, canvas, y) {
             if (style.glyph === 'LINEPLOT') {
                 pusho(gbsFeatures, style.id, feature);
                 gbsStyles[style.id] = style;
+            } else if (style.glyph === 'STACKED') {
+                stackedFeatures.push(feature);
             } else {
                 let glyph = glyphForFeature(canvas, feature, y, style, tier);
                 if (glyph)
@@ -318,6 +325,10 @@ function groupFeatures(tier, canvas, y) {
         });
     }, tier.ungroupedFeatures);
 
+    if (stackedFeatures.length > 0) {
+        glyphs = glyphs.concat(makeStackedBars(stackedFeatures, tier));
+    }
+    
     for (let gbs in gbsFeatures) {
         let gf = gbsFeatures[gbs];
         let style = gbsStyles[gbs];
@@ -987,7 +998,6 @@ function sequenceGlyph(canvas, tier, feature, style, forceHeight) {
                 seq += "-".repeat(co.cnt);
                 quals += "Z".repeat(co.cnt);
             } else if (co.op === 'I') {
-
                 let inseq = rawseq.substr(cursor, co.cnt);
                 let ig = new Glyphs.TranslatedGlyph(
                     new Glyphs.TriangleGlyph(minPos + (seq.length*scale), 6, 'S', 5, tier.browser.baseColors['I']),
@@ -1130,6 +1140,99 @@ function makeLinePlot(features, style, tier, yshift) {
     });
 
     return lggs;
+}
+
+function makeStackedBars(features, tier) {
+    let glyphs = [];
+
+    let posStacks = [],
+        negStacks = [];
+
+    const scale = tier.browser.scale, origin = tier.browser.viewStart;
+    for (var fi = 0; fi < features.length; ++fi) {
+        const feature = features[fi];
+        const style = tier.styleForFeature(feature);
+        let score = feature.score * 1.0;
+
+        let height = tier.forceHeight || style.HEIGHT || 12;
+        const requiredHeight = height = 1.0 * height;
+
+        const min = feature.min;
+        const max = feature.max;
+
+        const minPos = (min - origin) * scale;
+        const rawMaxPos = ((max - origin + 1) * scale);
+        const maxPos = Math.max(rawMaxPos, minPos + 1);
+
+        // This should somewhat match the 'HISTOGRAM' path.
+
+        var smin = tier.quantMin(style);
+        var smax = tier.quantMax(style);
+
+        if (!smax) {
+            if (smin < 0) {
+                smax = 0;
+            } else {
+                smax = 10;
+            }
+        } else {
+            smax = smax * 1.0;
+        }
+
+        if (!smin) {
+            smin = 0;
+        } else {
+            smin = smin * 1.0;
+        }
+
+        var stackOrigin;
+        if (score >= 0) {
+            stackOrigin = posStacks[min] || 0;
+            posStacks[min] = stackOrigin + score;
+        } else {
+            stackOrigin = negStacks[min] || 0;
+            negStacks[min] = stackOrigin + score;
+        }
+
+        if (stackOrigin > smax || stackOrigin < smin) {
+            // Stack has extended outside of range.
+            continue;
+        }
+
+        if (stackOrigin + score < smin) {
+            score = smin - stackOrigin;
+        }
+        if (stackOrigin + score > smax) {
+            score = smax - stackOrigin;
+        }
+
+        var relScoreEnd = (score + stackOrigin - smin) / (smax - smin);
+        var relScoreStart = (stackOrigin - smin) / (smax - smin)
+        var relScoreMax = Math.max(relScoreStart, relScoreEnd);
+        var relScoreMin = Math.min(relScoreStart, relScoreEnd);
+
+        height = (relScoreMax - relScoreMin) * requiredHeight;
+        var y = (1.0 - relScoreMax) * requiredHeight;
+
+        let stroke = style.FGCOLOR || null;
+        let fill = style.BGCOLOR || style.COLOR1 || 'green';
+        if (style.BGITEM && feature.itemRgb)
+            fill = feature.itemRgb;
+        const alpha = style.ALPHA ? (1.0 * style.ALPHA) : null;
+
+        let gg = new Glyphs.BoxGlyph(minPos, y, (maxPos - minPos), height, fill, stroke, alpha);
+        gg = new Glyphs.TranslatedGlyph(gg, 0, 0, requiredHeight);
+        gg.feature = feature;
+        gg.quant = {
+            min: smin, max: smax
+        };
+        if (style.ZINDEX) {
+            gg.zindex = style.ZINDEX | 0;
+        }
+        glyphs.push(gg);
+
+    }
+    return glyphs;
 }
 
 // height is subtier height
