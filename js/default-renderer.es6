@@ -46,9 +46,6 @@ function renderTier(status, tier) {
 function drawTier(tier) {
     let canvas = tier.viewport.getContext("2d");
     let retina = tier.browser.retina && window.devicePixelRatio > 1;
-    if (retina) {
-        canvas.scale(2, 2);
-    }
 
     if (tier.sequenceSource) {
         let sequence = tier.currentSequence;
@@ -62,8 +59,9 @@ function drawTier(tier) {
     if (tier.subtiers) {
         let vOffset = R.defaultTo(0, tier.dasSource.vOffset);
 
-        prepareViewport(tier, canvas, retina, true, vOffset);
+        prepareViewport(tier, canvas, retina, true, vOffset);   // NB calls canvas.save
         paint(tier, canvas, vOffset);
+        canvas.restore();
     }
 
     tier.drawOverlay();
@@ -583,10 +581,6 @@ function drawUnmapped(tier, canvas, padding) {
 
 function clearViewport(canvas, width, height, retina = false) {
     canvas.clearRect(0, 0, width, height);
-    canvas.save();
-    if (retina) {
-        canvas.scale(2, 2);
-    }
 }
 
 // Make the viewport & canvas the correct size for the tier
@@ -624,6 +618,11 @@ function prepareViewport(tier, canvas, retina, clear=true, vOffset=0) {
 
     tier.updateHeight();
     tier.norigin = tier.browser.viewStart;
+
+    canvas.save();
+    if (retina) {
+        canvas.scale(2, 2);
+    }
 
     if (clear) {
         clearViewport(canvas, fpw, canvasHeight);
