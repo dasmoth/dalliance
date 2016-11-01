@@ -622,6 +622,8 @@ DasTier.prototype.scheduleRedraw = function() {
 
     if (!this.redrawTimeout) {
         this.redrawTimeout = setTimeout(function() {
+            sortFeatures(tier);   // Some render actions mutate the results of this,
+                                  // => need to re-run before refreshing.
             var renderer = tier.browser.getTierRenderer(tier);
             renderer.drawTier(tier);
             tier.redrawTimeout = null;
