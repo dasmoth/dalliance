@@ -579,7 +579,7 @@ function drawUnmapped(tier, canvas, padding) {
     }
 }
 
-function clearViewport(canvas, width, height, retina = false) {
+function clearViewport(canvas, width, height) {
     canvas.clearRect(0, 0, width, height);
 }
 
