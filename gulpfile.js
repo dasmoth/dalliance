@@ -7,10 +7,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var babel = require('gulp-babel');
 var babelify = require('babelify');
-
 var eslint = require('gulp-eslint');
-
-
+var addsrc = require('gulp-add-src');
+var concat = require('gulp-concat');
 
 gulp.task('build-worker', function() {
     browserify({
@@ -31,15 +30,18 @@ gulp.task('build-worker', function() {
 
 gulp.task('build-main', function() {
     browserify({
-        entries: 'js/exports.js',
+        entries: 'js/exports-standalone.js',
         debug: true,
-        nobuiltins: true
+        nobuiltins: true,
+        standalone: 'biodalliance'
     })
         .transform("babelify", {presets: ["es2015"],
                                 extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('dalliance-all.js'))
         .pipe(buffer())
+        .pipe(addsrc.append('shim13.js'))
+        .pipe(concat('dalliance-all.js'))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('build/'));
 });
@@ -63,15 +65,18 @@ gulp.task('compile-worker', function() {
 
 gulp.task('compile-main', function() {
     browserify({
-        entries: 'js/exports.js',
+        entries: 'js/exports-standalone.js',
         debug: true,
-        nobuiltins: true
+        nobuiltins: true,
+        standalone: 'biodalliance'
     })
         .transform("babelify", {presets: ["es2015"],
                                 extensions: [".js", ".es6"]})
         .bundle()
         .pipe(source('dalliance-all.js'))
         .pipe(buffer())
+        .pipe(addsrc.append('shim13.js'))
+        .pipe(concat('dalliance-all.js'))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
