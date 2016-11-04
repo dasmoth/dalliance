@@ -5,7 +5,7 @@ import { drawFeatureTier as oldDrawFeatureTier } from "./feature-draw.js";
 
 import { shallowCopy } from "./utils.js";
 
-import * as DefaultRenderer from "./default-renderer.es6";
+import * as DefaultRenderer from "./default-renderer";
 
 export { renderTier, drawTier };
 

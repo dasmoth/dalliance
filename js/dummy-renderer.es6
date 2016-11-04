@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 "use strict";
 
-import * as DefaultRenderer from "./default-renderer.es6";
+import * as DefaultRenderer from "./default-renderer";
 
 export { renderTier, drawTier };
 

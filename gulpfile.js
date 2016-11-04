@@ -15,6 +15,7 @@ var eslint = require('gulp-eslint');
 gulp.task('build-worker', function() {
     browserify({
         entries: 'js/fetchworker.js',
+        extensions: ['.js', '.es6'],
         debug: true,
         nobuiltins: true
     })
@@ -32,6 +33,7 @@ gulp.task('build-worker', function() {
 gulp.task('build-main', function() {
     browserify({
         entries: 'js/exports.js',
+        extensions: ['.js', '.es6'],
         debug: true,
         nobuiltins: true
     })
@@ -47,6 +49,7 @@ gulp.task('build-main', function() {
 gulp.task('compile-worker', function() {
     browserify({
         entries: 'js/fetchworker.js',
+        extensions: ['.js', '.es6'],
         debug: true,
         nobuiltins: true
     })
@@ -64,6 +67,7 @@ gulp.task('compile-worker', function() {
 gulp.task('compile-main', function() {
     browserify({
         entries: 'js/exports.js',
+        extensions: ['.js', '.es6'],
         debug: true,
         nobuiltins: true
     })

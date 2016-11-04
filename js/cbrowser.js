@@ -44,14 +44,14 @@ if (typeof(require) !== 'undefined') {
     var sourceDataURI = sourcecompare.sourceDataURI;
     var sourceStyleURI = sourcecompare.sourceStyleURI;
 
-    var DefaultRenderer = require('./default-renderer.es6');
-    var OldRenderer = require('./old-renderer.js');
+    var DefaultRenderer = require('./default-renderer');
+    var OldRenderer = require('./old-renderer');
 
-    var MultiRenderer = require('./multi-renderer.es6');
-    var SubRenderer = require('./sub-renderer.es6');
+    var MultiRenderer = require('./multi-renderer');
+    var SubRenderer = require('./sub-renderer');
 
-    var TestRenderer = require('./test-renderer.es6');
-    var DummyRenderer = require('./dummy-renderer.es6');
+    var TestRenderer = require('./test-renderer');
+    var DummyRenderer = require('./dummy-renderer');
 }
 
 function Region(chr, min, max) {

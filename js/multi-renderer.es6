@@ -5,7 +5,7 @@ import { drawSeqTier } from "./sequence-draw.js";
 
 import { GridGlyph } from "./glyphs.js";
 
-import * as DefaultRenderer from "./default-renderer.es6";
+import * as DefaultRenderer from "./default-renderer";
 
 import * as R from "ramda";
 
