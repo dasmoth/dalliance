@@ -1,6 +1,6 @@
 {
   "name": "dalliance",
-  "version": "0.13.8",
+  "version": "0.13.99-alpha",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
   "license": "BSD-2-Clause",
@@ -37,5 +37,7 @@
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
     "watchify": "~3.6.1"
-  }
+  },
+  "files": ["css", "fonts", "help", "img", "build"],
+  "main": "build/dalliance-all.js"
 }
