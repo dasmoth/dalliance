@@ -3,7 +3,6 @@
   "version": "0.13.90-alpha",
   "description": "Fast, embeddable genome visualization",
   "homepage": "https://www.biodalliance.org/",
-  "main": "index.js",
   "license": "BSD-2-Clause",
   "repository": {
     "type": "git",
@@ -38,6 +37,7 @@
     "watchify": "~3.6.1"
   },
   "files": ["lib", "css", "fonts", "help", "img", "build/worker-all.js"],
+  "main": "lib/module-exports.js",
   "scripts": {
     "compile": "babel js -d lib && gulp compile-worker"
   }
