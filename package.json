@@ -38,7 +38,6 @@
     "watchify": "~3.6.1"
   },
   "files": ["lib", "css", "fonts", "help", "img", "build/worker-all.js"],
-  "main": "lib/module-exports.js",
   "scripts": {
     "compile": "babel js -d lib && gulp compile-worker"
   }
