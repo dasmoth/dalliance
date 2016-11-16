@@ -249,6 +249,11 @@ Browser.prototype.resolveURL = function(url) {
 
 Browser.prototype.destroy = function() {
     window.removeEventListener('resize', this.resizeListener, false);
+    if (this.fetchWorkers) {
+        for (const worker of this.fetchWorkers) {
+            worker.terminate();
+        }
+    }
 }
 
 Browser.prototype.realInit = function() {
@@ -2604,6 +2609,10 @@ FetchWorker.prototype.postCommand = function(cmd, callback, transfer) {
     cmd.tag = tag;
     this.callbacks[tag] = callback;
     this.worker.postMessage(cmd, transfer);
+}
+
+FetchWorker.prototype.terminate = function() {
+    this.worker.terminate();
 }
 
 if (typeof(module) !== 'undefined') {
