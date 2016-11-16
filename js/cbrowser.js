@@ -198,6 +198,7 @@ function Browser(opts) {
     for (var k in opts) {
         this[k] = opts[k];
     }
+    
     if (typeof(opts.uiPrefix) === 'string' && typeof(opts.prefix) !== 'string') {
         this.prefix = opts.uiPrefix;
     }
@@ -252,6 +253,7 @@ Browser.prototype.destroy = function() {
 
 Browser.prototype.realInit = function() {
     var self = this;
+    var thisB = this;
 
     if (this.wasInitialized) {
         console.log('Attemping to call realInit on an already-initialized Dalliance instance');
@@ -280,9 +282,20 @@ Browser.prototype.realInit = function() {
         this.statusRestored = this.restoreStatus();
     }
 
-    var helpPopup;
-    var thisB = this;
-    this.browserHolderHolder = document.getElementById(this.pageName);
+    if (this.injectionPoint && this.injectionPoint instanceof Element) {
+        this.browserHolderHolder = this.injectionPoint;
+    } else if (this.injectionPoint) {
+        this.browserHolderHolder = document.getElementById(this.injectionPoint);
+        if (!this.browserHolderHolder) {
+            throw Error('injectionPoint must point to a valid DOM element of element ID');
+        }
+    } else {
+        this.browserHolderHolder = document.getElementById(this.pageName);
+        if (!this.browserHolderHolder) {
+            throw Error('pageName must be a valid element ID (or use the injectionPoint option instead)');
+        }
+    }
+    
     this.browserHolderHolder.classList.add('dalliance-injection-point');
     this.browserHolder = makeElement('div', null, {className: 'dalliance dalliance-root', tabIndex: -1});
     if (this.maxHeight) {
