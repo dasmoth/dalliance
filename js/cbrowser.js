@@ -267,10 +267,12 @@ Browser.prototype.realInit = function() {
 
     this.wasInitialized = true;
 
-    var ua = navigator.userAgent || 'dummy';
-    if (ua.indexOf('Trident') >= 0 && ua.indexOf('rv:11') >= 0) {
-        // console.log('Detected IE11, disabling tier pinning.');
-        this.disablePinning = true;
+    if (typeof(navigator) !== 'undefined') {
+        var ua = navigator.userAgent || 'dummy';
+        if (ua.indexOf('Trident') >= 0 && ua.indexOf('rv:11') >= 0) {
+            // console.log('Detected IE11, disabling tier pinning.');
+            this.disablePinning = true;
+        }
     }
 
     this.defaultChr = this.chr;

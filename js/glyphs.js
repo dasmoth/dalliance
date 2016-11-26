@@ -1142,7 +1142,7 @@ AminoAcidGlyph.prototype.toSVG = function() {
     return g;
 };
 
-var isRetina = window.devicePixelRatio > 1;
+var isRetina = typeof(window) !== 'undefined' && window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
 var altPattern = new RegExp('^[ACGT-]$');
 var isCloseUp = function(scale) {

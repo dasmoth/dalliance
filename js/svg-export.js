@@ -227,7 +227,19 @@ Browser.prototype.makeSVG = function(opts) {
     
     this.featurePanelWidth = backupFPW;
     this.scale = backupScale;
-    
-    var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)], {type: 'image/svg+xml'});
-    return svgBlob;
+
+    let svg;
+    if (typeof(XMLSerializer) !== 'undefined') {
+        svg = new XMLSerializer().serializeToString(saveDoc);
+    } else {
+        const root = saveDoc.documentElement;
+        root.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg = root.outerHTML;
+    }
+
+    if (opts.output && opts.output === 'string') {
+        return svg;
+    } else {
+        return new Blob([svg], {type: 'image/svg+xml'});
+    }
 }

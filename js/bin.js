@@ -108,7 +108,9 @@ URLFetchable.prototype.slice = function(s, l) {
 }
 
 var seed=0;
-var isSafari = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
+var isSafari = typeof(navigator) !== 'undefined' &&
+    navigator.userAgent.indexOf('Safari') >= 0 &&
+    navigator.userAgent.indexOf('Chrome') < 0 ;
 
 URLFetchable.prototype.fetchAsText = function(callback) {
     var thisB = this;
