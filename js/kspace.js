@@ -194,6 +194,7 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers) {
             gex = ex;
             console.log(ex.stack);
             tierRenderer.renderTier(ex, tier);
+            tier.wasRendered();
         }
     }
 
@@ -310,6 +311,7 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
             console.log(e.stack)
         }
         tierRenderer.renderTier(status, tier);
+        tier.wasRendered();
     } else {
         var mayDownsample = false;
         var needBaseComposition = false;
@@ -354,10 +356,12 @@ KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, want
                 }
                 tier.setFeatures(chr, coverage, actualScale, features, seq);
                 tierRenderer.renderTier(status, tier);
+                tier.wasRendered()
             });
         } else {
             tier.setFeatures(chr, coverage, actualScale, features);
             tierRenderer.renderTier(status, tier);
+            tier.wasRendered();
         }
     }
 }

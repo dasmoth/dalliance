@@ -765,6 +765,11 @@ Browser.prototype.realInit2 = function() {
         }
     }
 
+    if (this.onFirstRender) {
+        Promise.all(this.tiers.map(t => t.firstRenderPromise))
+            .then(() => this.onFirstRender())
+    }
+
     thisB._ensureTiersGrouped();
     thisB.arrangeTiers();
     thisB.reorderTiers();

@@ -157,6 +157,7 @@ function DasTier(browser, source, config, background)
 
     this.listeners = [];
     this.featuresLoadedListeners = [];
+    this.firstRenderPromise = new Promise((resolve, reject) => this._resolveFirstRenderPromise = resolve);
 }
 
 DasTier.prototype.destroy = function() {
@@ -672,7 +673,6 @@ DasTier.prototype.removeFeaturesLoadedListener = function(handler) {
     }
 }
 
-
 DasTier.prototype.notifyFeaturesLoaded = function() {
     for (var li = 0; li < this.featuresLoadedListeners.length; ++li) {
         try {
@@ -681,6 +681,10 @@ DasTier.prototype.notifyFeaturesLoaded = function() {
             console.log(e);
         }
     }
+}
+
+DasTier.prototype.wasRendered = function() {
+    this._resolveFirstRenderPromise();
 }
 
 if (typeof(module) !== 'undefined') {
