@@ -144,7 +144,7 @@ URLFetchable.prototype.fetchAsText = function(callback) {
             if (thisB.opts.credentials) {
                 req.withCredentials = true;
             }
-            req.send('');
+            req.send();
         } catch (e) {
             return callback(null);
         }
@@ -243,7 +243,7 @@ URLFetchable.prototype.fetch = function(callback, opts) {
             if (thisB.opts.credentials) {
                 req.withCredentials = true;
             }
-            req.send('');
+            req.send();
         } catch (e) {
             return callback(null);
         }

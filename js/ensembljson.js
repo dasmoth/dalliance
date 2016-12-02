@@ -263,7 +263,7 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 
     req.open('GET', url, true);
     req.responseType = 'text';
-    req.send('');
+    req.send();
 }
 
 EnsemblFeatureSource.prototype.capabilities = function() {
@@ -310,7 +310,7 @@ EnsemblFeatureSource.prototype.search = function(query, callback) {
 
     req.open('GET', url, true);
     req.responseType = 'text';
-    req.send('');
+    req.send();
 }
 
 dalliance_registerSourceAdapterFactory('ensembl', function(source) {

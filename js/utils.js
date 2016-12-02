@@ -367,7 +367,7 @@ function textXHR(url, callback, opts) {
         if (opts && opts.credentials) {
             req.withCredentials = true;
         }
-        req.send('');
+        req.send();
     } catch (e) {
         callback(null, 'Exception ' + e);
     }

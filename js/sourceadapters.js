@@ -621,7 +621,7 @@ EnsemblSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) 
     };
     req.open('GET', url, true);
     req.responseType = 'text';
-    req.send('');
+    req.send();
 };
 
 EnsemblSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
@@ -639,7 +639,7 @@ EnsemblSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
   };
   req.open('GET', url, true);
   req.responseType = 'text';
-  req.send('');
+  req.send();
 };
 
 DASFeatureSource.prototype.getScales = function() {
@@ -676,7 +676,7 @@ function BWGFeatureSource(bwgSource) {
             if (this.opts.credentials) {
                 req.withCredentials = true;
             }
-            req.send('');
+            req.send();
         }
         pfs.await(function(status) {
             if (status === 'success') {
@@ -1272,7 +1272,7 @@ function BAMFeatureSource(bamSource) {
             if (this.opts.credentials) {
                 req.withCredentials = 'true';
             }
-            req.send('');
+            req.send();
         }
         pfs.await(function(status) {
             if (status === 'success') {

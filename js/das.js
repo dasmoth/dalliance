@@ -743,7 +743,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
             handler(dom);
         }
         req.open("get", url);
-        req.send('');
+        req.send();
     } else {
         try {
             var req = new XMLHttpRequest();
@@ -780,7 +780,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
             }
             req.overrideMimeType('text/xml');
             req.setRequestHeader('Accept', 'application/xml,*/*');
-            req.send('');
+            req.send();
         } catch (e) {
             handler(null, req, e);
         }
