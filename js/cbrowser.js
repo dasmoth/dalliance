@@ -95,8 +95,6 @@ function Browser(opts) {
     this.chains = {};
 
     this.pageName = 'svgHolder'
-    this.maxExtra = 2.5;
-    this.minExtra = 0.5;
     this.zoomFactor = 1.0;
     this.maxPixelsPerBase = 10;
     this.origin = 0;
@@ -117,6 +115,9 @@ function Browser(opts) {
     this.highZoomThreshold = 0.2;
     this.mediumZoomThreshold = 0.01
 
+    this.minExtraWidth = 100.0;
+    this.maxExtraWidth = 1000.0;
+    
     // Options.
 
     this.reverseScrolling = false;
@@ -1418,7 +1419,6 @@ Browser.prototype.refresh = function() {
     this.retrieveTierData(this.tiers);
     this.drawOverlays();
     this.positionRuler();
-
 };
 
 var defaultTierRenderer = function(status, tier) {
@@ -1428,8 +1428,8 @@ var defaultTierRenderer = function(status, tier) {
 Browser.prototype.retrieveTierData = function(tiers) {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
-    var minExtraW = (100.0/this.scale)|0;
-    var maxExtraW = (1000.0/this.scale)|0;
+    var minExtraW = (this.minExtraWidth / this.scale)|0;
+    var maxExtraW = (this.maxExtraWidth / this.scale)|0;
 
     var newOrigin = (this.viewStart + this.viewEnd) / 2;
     var oh = newOrigin - this.origin;
@@ -1615,8 +1615,8 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     }
 
     var width = ((this.viewEnd - this.viewStart)|0) + 1;
-    var minExtraW = (100.0/this.scale)|0;
-    var maxExtraW = (1000.0/this.scale)|0;
+    var minExtraW = (this.minExtraWidth / this.scale)|0;
+    var maxExtraW = (this.maxExtraWidth / this.scale)|0;
 
     if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
         this.refresh();
