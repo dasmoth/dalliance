@@ -45,7 +45,6 @@ if (typeof(require) !== 'undefined') {
     var sourceStyleURI = sourcecompare.sourceStyleURI;
 
     var DefaultRenderer = require('./default-renderer');
-    var OldRenderer = require('./old-renderer');
 
     var MultiRenderer = require('./multi-renderer');
     var SubRenderer = require('./sub-renderer');
@@ -68,8 +67,7 @@ function Browser(opts) {
         { 'default': DefaultRenderer,
           'dummy': DummyRenderer,
           'multi': MultiRenderer,
-          'sub': SubRenderer,
-          'old': OldRenderer
+          'sub': SubRenderer
         };
 
     this.defaultRenderer = opts.renderer || DefaultRenderer;
