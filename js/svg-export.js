@@ -27,8 +27,6 @@ if (typeof(require) !== 'undefined') {
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
     var formatLongInt = nf.formatLongInt;
-
-    var drawFeatureTier = require('./feature-draw').drawFeatureTier;
 }
 
 
@@ -99,7 +97,11 @@ Browser.prototype.makeSVG = function(opts) {
         tier.backupSubtiers = tier.subtiers;
         tier.backupOriginHaxx = tier.originHaxx;
         tier.backupLayoutHeight = tier.layoutHeight;
-        drawFeatureTier(tier, tier.sequenceSource ? tier.currentSequence : null)
+
+        const renderer = b.getTierRenderer(tier);
+        if (renderer && renderer.prepareSubtiers) {
+            renderer.prepareSubtiers(tier, tier.viewport.getContext('2d'));
+        }
 
         var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
     	var tierLabels = makeElementNS(NS_SVG, 'g');

@@ -23,7 +23,6 @@ if (typeof(require) !== 'undefined') {
     var VERSION = require('./version');
 
     var drawSeqTierGC = require('./sequence-draw').drawSeqTierGC;
-    var drawFeatureTier = require('./feature-draw').drawFeatureTier;
 }
 
 function fillTextRightJustified(g, text, x, y) {
@@ -56,7 +55,10 @@ Browser.prototype.exportImage = function(opts) {
         tier.backupLayoutHeight = tier.layoutHeight;
 
         if (tier.subtiers) {
-            drawFeatureTier(tier, tier.sequenceSource ? tier.currentSequence : null)
+            const renderer = this.getTierRenderer(tier);
+            if (renderer && renderer.prepareSubtiers) {
+                renderer.prepareSubtiers(tier, tier.viewport.getContext('2d'));
+            }
 
             if (tier.subtiers) {
                 var lh = tier.padding;
