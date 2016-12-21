@@ -768,6 +768,7 @@ Browser.prototype.realInit2 = function() {
     if (this.onFirstRender) {
         Promise.all(this.tiers.map(t => t.firstRenderPromise))
             .then(() => this.onFirstRender())
+            .catch((err) => console.log(err));
     }
 
     thisB._ensureTiersGrouped();
