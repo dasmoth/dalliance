@@ -694,8 +694,4 @@ if (typeof(module) !== 'undefined') {
 
     // Imported for side effects
     var fd = require('./feature-draw');
-    var drawFeatureTier = fd.drawFeatureTier;
-    var sd = require('./sequence-draw');
-    var drawSeqTier = sd.drawSeqTier;
-    // require('./sourceadapters');  /* Done in cbrowser instead */
 }
