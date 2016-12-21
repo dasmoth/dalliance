@@ -299,9 +299,9 @@ LineGraphGlyph.prototype.draw = function(g) {
 
 LineGraphGlyph.prototype.toSVG = function() {
     var p = new SVGPath();
-    for (var i = 0; i < this.points.length; i += 2) {
-        var x = this.points[i];
-        var y = this.points[i + 1];
+    for (let i = 0; i < this.points.length; ++i) {
+        var x = this.points[i].x;
+        var y = this.points[i].y;
         if (i == 0) {
             p.moveTo(x, y);
         } else {
