@@ -8,58 +8,12 @@
 "use strict";
 
 if (typeof(require) !== 'undefined') {
-    var utils = require('./utils');
-    var shallowCopy = utils.shallowCopy;
-    var pusho = utils.pusho;
-
     var tier = require('./tier');
     var DasTier = tier.DasTier;
-
-    var g = require('./glyphs');
-    var BoxGlyph = g.BoxGlyph;
-    var GroupGlyph = g.GroupGlyph;
-    var LineGraphGlyph = g.LineGraphGlyph;
-    var LabelledGlyph = g.LabelledGlyph;
-    var CrossGlyph = g.CrossGlyph;
-    var ExGlyph = g.ExGlyph;
-    var TriangleGlyph = g.TriangleGlyph;
-    var DotGlyph = g.DotGlyph;
-    var PaddedGlyph = g.PaddedGlyph;
-    var AArrowGlyph = g.AArrowGlyph;
-    var SpanGlyph = g.SpanGlyph;
-    var LineGlyph = g.LineGlyph;
-    var PrimersGlyph = g.PrimersGlyph;
-    var ArrowGlyph = g.ArrowGlyph;
-    var TooManyGlyph = g.TooManyGlyph;
-    var TextGlyph = g.TextGlyph;
-    var SequenceGlyph = g.SequenceGlyph;
-    var AminoAcidGlyph = g.AminoAcidGlyph;
-    var TranslatedGlyph = g.TranslatedGlyph;
-    var PointGlyph = g.PointGlyph;
-    var GridGlyph = g.GridGlyph;
-    var StarGlyph = g.StarGlyph;
-    var PlimsollGlyph = g.PlimsollGlyph;
-    var OverlayLabelCanvas = g.OverlayLabelCanvas;
-
-    var color = require('./color');
-    var makeGradient = color.makeGradient;
-
-    var spans = require('./spans');
-    var Range = spans.Range;
-    var union = spans.union;
-
-    var das = require('./das');
-    var DASFeature = das.DASFeature;
-    var isDasBooleanTrue = das.isDasBooleanTrue;
-    var isDasBooleanNotFalse = das.isDasBooleanNotFalse;
-
-    var parseCigar = require('./cigar').parseCigar;
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
 }
-
-var MIN_PADDING = 3;
 
 function SubTier() {
     this.glyphs = [];
