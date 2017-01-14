@@ -78,6 +78,9 @@ function Browser(opts) {
     this.tiers = [];
     this.tierGroups = {};
 
+    this.searchOnlySources = [];
+    this.searchOnlySourceHolders = [];
+
     this.featureListeners = [];
     this.featureHoverListeners = [];
     this.viewListeners = [];
@@ -758,6 +761,19 @@ Browser.prototype.realInit2 = function() {
             this.makeTier(source, config).then(function(tier) {
                 thisB.refreshTier(tier);
             });
+        }
+    }
+
+    for (const source of this.searchOnlySources) {
+        if (!source.disabled) {
+            const {features} = this.createSources(source);
+
+            if (features) {
+                this.searchOnlySourceHolders.push({
+                    dasSource: source,
+                    featureSource: features
+                });
+            }
         }
     }
 

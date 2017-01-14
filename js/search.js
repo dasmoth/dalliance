@@ -106,7 +106,13 @@ Browser.prototype.search = function(g, statusCallback, opts) {
             return this.doDasSearch(thisB.searchEndpoint, g, searchCallback);
         }
 
-        for (var ti = 0; ti < this.tiers.length; ++ti) {
+
+        const searchSources = [
+            ...(this.searchOnlySourceHolders || []),
+            ...this.tiers
+        ];
+
+        for (var ti = 0; ti < searchSources.length; ++ti) {
             (function(tier) {
                 if (thisB.sourceAdapterIsCapable(tier.featureSource, 'search')) {
                     if (tier.dasSource.trixURI) {
@@ -139,7 +145,7 @@ Browser.prototype.search = function(g, statusCallback, opts) {
                     ++searchCount;
                     thisB.doDasSearch(tier.dasSource, g, searchCallback);
                 }
-            })(this.tiers[ti]);
+            })(searchSources[ti]);
         }
     }
 }
