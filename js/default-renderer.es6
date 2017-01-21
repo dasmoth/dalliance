@@ -175,9 +175,11 @@ function glyphForFeature(canvas, feature, y, style, tier, forceHeight, noLabel) 
         glyphType === 'SQUARE' ||
         glyphType === 'STAR' ||
         glyphType === 'PLIMSOLL') {
-        [glyph, quant] = featureToCrossLikeGlyph(canvas, tier, feature, y,
+        const glyphHolder = featureToCrossLikeGlyph(canvas, tier, feature, y,
                                                  glyphType, style, forceHeight, noLabel);
-
+        if (glyphHolder) {                                                 
+            [glyph, quant] = glyphHolder;
+        }
     } else if (glyphType === 'HISTOGRAM' || glyphType === 'GRADIENT' && score !== 'undefined') {
         [glyph, quant] = featureToGradientLikeGlyph(canvas, tier, feature, y, glyphType, style, forceHeight);
 
@@ -271,6 +273,9 @@ function glyphForFeature(canvas, feature, y, style, tier, forceHeight, noLabel) 
         }
     }
 
+    if (!glyph)
+        return;
+    
     if ((isDasBooleanTrue(style.LABEL) || feature.forceLabel) &&
         label && !noLabel) {
         glyph = new Glyphs.LabelledGlyph(canvas, glyph, label, false);
