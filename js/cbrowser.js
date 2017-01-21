@@ -147,6 +147,8 @@ function Browser(opts) {
     this.registry = null; // '//www.dasregistry.org/das/sources';
     this.noRegistryTabs = true;
 
+    this.defaultTrackAdderTab = null;
+
     this.hubs = [];
     this.hubObjects = [];
 

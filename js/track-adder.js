@@ -257,15 +257,15 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
             addModeButtons.push(defButton);
 
-            if (!firstDefButton) {
+            if (!firstDefButton || thisB.defaultTrackAdderTab && thisB.defaultTrackAdderTab == g) {
                 firstDefButton = defButton;
                 firstDefSources = ds;
             }
         })(g, groupedDefaults[g]);
     }   
-    var custButton = this.makeButton('DAS', 'Add arbitrary DAS data');
+    var custButton = this.makeButton('DAS', 'Add data using the DAS protocol');
     addModeButtons.push(custButton);
-    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
+    var binButton = this.makeButton('Files', 'Add data from files on disk or the web');
     addModeButtons.push(binButton);
 
 
