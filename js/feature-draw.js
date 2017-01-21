@@ -266,7 +266,8 @@ DasTier.prototype.quantMin = function(style) {
     } else if (typeof(this.forceMin) === 'number') {
         return this.forceMin;
     } else {
-        return style.MIN || this.currentFeaturesMinScore || 0;
+        const softMin = typeof(style.SOFTMIN) !== 'undefined' ? style.SOFTMIN : Number.MAX_VALUE;
+        return style.MIN || Math.min(softMin, this.currentFeaturesMinScore || 0);
     }
 }
 
@@ -276,7 +277,8 @@ DasTier.prototype.quantMax = function(style) {
     } else if (typeof(this.forceMax) === 'number') {
         return this.forceMax;
     } else {
-        return style.MAX || this.currentFeaturesMaxScore || 0;
+        const softMax = typeof(style.SOFTMAX) !== 'undefined' ? style.SOFTMAX : Number.MIN_VALUE;
+        return style.MAX || Math.max(softMax, this.currentFeaturesMaxScore || 0);
     }
 }
 
