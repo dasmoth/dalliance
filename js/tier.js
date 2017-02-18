@@ -256,11 +256,20 @@ DasTier.prototype.getActiveStyleFilters = function(scale) {
     }
 }
 
-DasTier.prototype.needsSequence = function(scale ) {
+DasTier.prototype.needsSequence = function(scale) {
+    var sourceConfigNeedsSeq = function(s) {
+        if (s.bamURI || s.bamBlob || s.bwgURI || s.bwgBlob) {
+            return true;
+        } else if (s.overlay) {
+            return s.overlay.some(sourceConfigNeedsSeq);
+        } else {
+            return false;
+        }
+    }
+
     if (this.sequenceSource && scale < 5) {
         return true;
-    } else if ((this.dasSource.bamURI || this.dasSource.bamBlob || this.dasSource.bwgURI || this.dasSource.bwgBlob)
-                 && scale < 20) {
+    } else if (sourceConfigNeedsSeq(this.dasSource) && scale < 20) {
         return true
     }
     return false;
