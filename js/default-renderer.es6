@@ -1027,7 +1027,9 @@ function sequenceGlyph(canvas, tier, feature, style, forceHeight) {
          style.__SEQCOLOR === 'mismatch-all')) {
         let mismatchSeq = [];
         let match = feature.orientation === '-' ? ',' : '.';
-        seq.forEach((_, i) => mismatchSeq.push(seq[i] == refSeq[i] ? match : seq[i]));
+        for (let i = 0; i < seq.length; ++i) {
+            mismatchSeq.push(seq[i] == refSeq[i] ? match : seq[i]);
+        }
         seq = mismatchSeq.join('');
     }
 
