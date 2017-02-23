@@ -128,6 +128,8 @@ function glyphsForGroup(canvas, features, y, groupElement, tier) {
         labelText = groupElement.label || label;
     }
 
+    glyphs.sort((g1, g2) => (g1.zindex || 0) - (g2.zindex || 0));
+
     let groupGlyph = new Glyphs.GroupGlyph(glyphs, connector);
     if (labelText) {
         if (strand === '+') {
