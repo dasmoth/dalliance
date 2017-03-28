@@ -132,7 +132,7 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
     
     req.open('GET', url, true);
     req.responseType = 'text';
-    req.send('');
+    req.send();
 }
 
 if (typeof(module) !== 'undefined') {

@@ -7,6 +7,8 @@
 // tabix-test.js
 //
 
+"use strict";
+
 var connectTabix = require('../js/tabix').connectTabix;
 var URLFetchable = require('../js/bin').URLFetchable;
 
@@ -15,46 +17,23 @@ describe('Tabix files', function() {
     var tbiURI = 'http://www.biodalliance.org/datasets/tests/PG0000566-BLD.snps.vcf.gz.tbi'
     var tabix;
 
-    it('can be created by connecting to a URI', function() {
+    it('can be created by connecting to a URI', function(done) {
         var cb, err;
-        runs(function() {
-             connectTabix(new URLFetchable(vcfURI), new URLFetchable(tbiURI),
-                function(_tabix, _err) {
-                    tabix = _tabix;
-                    err = _err;
-                    cb = true;
-                });
-       });
-
-        waitsFor(function() {
-            return cb;
-        }, "The callback should be invoked");
-
-        runs(function() {
-            expect(err).toBeFalsy();
-            expect(tabix).not.toBeNull();
-        });
+        connectTabix(new URLFetchable(vcfURI), new URLFetchable(tbiURI),
+                     function(_tabix, err) {
+                         tabix = _tabix;
+                         expect(err).toBeFalsy();
+                         expect(tabix).not.toBeNull();
+                         done();
+                     });
     });
 
-    it('can retrieve records from a genomic interval', function() {
-        var features, err, flag;
-
-        runs(function() {
-            tabix.fetch('22', 30000000, 30010000, function(_f, _e) {
-                flag = true;
-                features = _f;
-                err = _e;
-            });
-        });
-
-        waitsFor(function() {
-            return flag;
-        }, 'Expects callback after feature fetch');
-
-        runs(function() {
+    it('can retrieve records from a genomic interval', function(done) {
+        tabix.fetch('22', 30000000, 30010000, function(features, err) {
             expect(err).toBeFalsy();
             expect(features).toBeTruthy();
             expect(features.length).toBe(6);
+            done();
         });
     });
 });

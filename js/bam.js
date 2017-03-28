@@ -249,10 +249,11 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             p +=  (nchnk * 16);
         }
     }
-    // console.log('leafChunks = ' + miniJSONify(leafChunks));
-    // console.log('otherChunks = ' + miniJSONify(otherChunks));
+    // console.log('leafChunks = ' + JSON.stringify(leafChunks));
+    // console.log('otherChunks = ' + JSON.stringify(otherChunks));
 
     var nintv = readInt(index, p);
+    // console.log('nintv=' + nintv);
     var lowest = null;
     var minLin = Math.min(min>>14, nintv - 1), maxLin = Math.min(max>>14, nintv - 1);
     for (var i = minLin; i <= maxLin; ++i) {
@@ -260,22 +261,22 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         if (!lb) {
             continue;
         }
-        if (!lowest || lb.block < lowest.block || lb.offset < lowest.offset) {
+        if (!lowest || lb.block < lowest.block || (lb.block == lowest.block && lb.offset < lowest.offset)) {
             lowest = lb;
         }
     }
     // console.log('Lowest LB = ' + lowest);
-    
+
     var prunedOtherChunks = [];
     if (lowest != null) {
         for (var i = 0; i < otherChunks.length; ++i) {
             var chnk = otherChunks[i];
-            if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
+            if (chnk.maxv.block > lowest.block || (chnk.maxv.block == lowest.block && chnk.maxv.offset >= lowest.offset)) {
                 prunedOtherChunks.push(chnk);
             }
         }
     }
-    // console.log('prunedOtherChunks = ' + miniJSONify(prunedOtherChunks));
+    // console.log('prunedOtherChunks = ' + JSON.stringify(prunedOtherChunks));
     otherChunks = prunedOtherChunks;
 
     var intChunks = [];
@@ -308,7 +309,7 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
         }
         mergedChunks.push(cur);
     }
-    // console.log('mergedChunks = ' + miniJSONify(mergedChunks));
+    // console.log('mergedChunks = ' + JSON.stringify(mergedChunks));
 
     return mergedChunks;
 }
@@ -378,7 +379,7 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
     while (true) {
         var blockSize = readInt(ba, offset);
         var blockEnd = offset + blockSize + 4;
-        if (blockEnd >= ba.length) {
+        if (blockEnd > ba.length) {
             return false;
         }
 
@@ -410,17 +411,19 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId, o
         if (opts.light)
             record.seqLength = lseq;
 
-        if (!opts.light) {
-            if (nextRef >= 0) {
-                record.nextSegment = this.indexToChr[nextRef];
-                record.nextPos = nextPos;
-            }
-
+        if (!opts.light || opts.includeName) {
             var readName = '';
             for (var j = 0; j < nl-1; ++j) {
                 readName += String.fromCharCode(ba[offset + 36 + j]);
             }
             record.readName = readName;
+        }
+        
+        if (!opts.light) {
+            if (nextRef >= 0) {
+                record.nextSegment = this.indexToChr[nextRef];
+                record.nextPos = nextPos;
+            }
         
             var p = offset + 36 + nl;
 

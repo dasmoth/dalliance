@@ -33,7 +33,7 @@ function lookupEncodeURI(uri, json) {
         req.open('GET', uri, true);
         req.setRequestHeader('Accept', 'application/json');
         req.responseType = 'text';
-        req.send('');
+        req.send();
     });
 }
 
@@ -119,7 +119,7 @@ EncodeFetchable.prototype.fetchAsText = function(callback) {
         if (self.opts.credentials) {
             req.withCredentials = true;
         }
-        req.send('');
+        req.send();
     }).catch(function(err) {
         console.log(err);
         return callback(null);
@@ -179,7 +179,7 @@ EncodeFetchable.prototype.fetch = function(callback, attempt, truncatedLength) {
         if (self.opts.credentials) {
             req.withCredentials = true;
         }
-        req.send('');
+        req.send();
     }).catch(function(err) {
         console.log(err);
     });

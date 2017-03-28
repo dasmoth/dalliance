@@ -108,42 +108,50 @@ URLFetchable.prototype.slice = function(s, l) {
 }
 
 var seed=0;
-var isSafari = navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') < 0 ;
+var isSafari = typeof(navigator) !== 'undefined' &&
+    navigator.userAgent.indexOf('Safari') >= 0 &&
+    navigator.userAgent.indexOf('Chrome') < 0 ;
 
 URLFetchable.prototype.fetchAsText = function(callback) {
-    try {
-        var req = new XMLHttpRequest();
-        var length;
-        var url = this.url;
-        if ((isSafari || this.opts.salt) && url.indexOf('?') < 0) {
-            url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
-        }
-        req.open('GET', url, true);
+    var thisB = this;
 
-        if (this.end) {
-            if (this.end - this.start > 100000000) {
-                throw 'Monster fetch!';
+    this.getURL().then(function(url) {
+        try {
+            var req = new XMLHttpRequest();
+            var length;
+            if ((isSafari || thisB.opts.salt) && url.indexOf('?') < 0) {
+                url = url + '?salt=' + b64_sha1('' + Date.now() + ',' + (++seed));
             }
-            req.setRequestHeader('Range', 'bytes=' + this.start + '-' + this.end);
-            length = this.end - this.start + 1;
-        }
-
-        req.onreadystatechange = function() {
-            if (req.readyState == 4) {
-                if (req.status == 200 || req.status == 206) {
-                    return callback(req.responseText);
-                } else {
-                    return callback(null);
+            req.open('GET', url, true);
+            
+            if (thisB.end) {
+                if (thisB.end - thisB.start > 100000000) {
+                    throw 'Monster fetch!';
                 }
+                req.setRequestHeader('Range', 'bytes=' + thisB.start + '-' + thisB.end);
+                length = thisB.end - thisB.start + 1;
             }
-        };
-        if (this.opts.credentials) {
-            req.withCredentials = true;
+
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    if (req.status == 200 || req.status == 206) {
+                        return callback(req.responseText);
+                    } else {
+                        return callback(null);
+                    }
+                }
+            };
+            if (thisB.opts.credentials) {
+                req.withCredentials = true;
+            }
+            req.send();
+        } catch (e) {
+            return callback(null);
         }
-        req.send('');
-    } catch (e) {
-        return callback(null);
-    }
+    }).catch(function(err) {
+        console.log(err);
+        return callback(null, err);
+    });
 }
 
 URLFetchable.prototype.salted = function() {
@@ -235,7 +243,7 @@ URLFetchable.prototype.fetch = function(callback, opts) {
             if (thisB.opts.credentials) {
                 req.withCredentials = true;
             }
-            req.send('');
+            req.send();
         } catch (e) {
             return callback(null);
         }
@@ -259,20 +267,17 @@ function bstringToBuffer(result) {
 
 // Read from Uint8Array
 
-(function(global) {
-    var convertBuffer = new ArrayBuffer(8);
-    var ba = new Uint8Array(convertBuffer);
-    var fa = new Float32Array(convertBuffer);
+var convertBuffer = new ArrayBuffer(8);
+var ba = new Uint8Array(convertBuffer);
+var fa = new Float32Array(convertBuffer);
 
-
-    global.readFloat = function(buf, offset) {
-        ba[0] = buf[offset];
-        ba[1] = buf[offset+1];
-        ba[2] = buf[offset+2];
+function readFloat(buf, offset) {
+    ba[0] = buf[offset];
+    ba[1] = buf[offset+1];
+    ba[2] = buf[offset+2];
         ba[3] = buf[offset+3];
-        return fa[0];
-    };
- }(this));
+    return fa[0];
+}
 
 function readInt64(ba, offset) {
     return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
@@ -306,6 +311,6 @@ if (typeof(module) !== 'undefined') {
         readInt64: readInt64,
         readShort: readShort,
         readByte: readByte,
-        readFloat: this.readFloat
+        readFloat: readFloat
     }
 }

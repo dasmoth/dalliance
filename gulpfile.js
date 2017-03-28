@@ -1,66 +1,85 @@
 var gulp = require('gulp');
-var gconcat = require('gulp-concat');
-var closure = require('gulp-closure-compiler');
-var browserify = require('gulp-browserify');
+var source = require('vinyl-source-stream');
+var browserify = require('browserify');
 var rename = require('gulp-rename');
-// var utils = require('gulp-util');
-// var gif = require('gulp-if');
+var buffer = require('vinyl-buffer');
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+var babel = require('gulp-babel');
+var babelify = require('babelify');
 
-/* Want to gulp-if conditional compile everything, but currently doesn't seem to work */
+var eslint = require('gulp-eslint');
+
+
 
 gulp.task('build-worker', function() {
-  gulp.src('js/fetchworker.js')
-  .pipe(browserify({
-    debug: true,
-    nobuiltins: true
-  }))
-  .pipe(rename('worker-all.js'))
-  .pipe(gulp.dest('build/'));
+    browserify({
+        entries: 'js/fetchworker.js',
+        extensions: ['.js', '.es6'],
+        debug: true,
+        nobuiltins: true
+    })
+        .transform("babelify", {presets: ["es2015"],
+                                extensions: [".js", ".es6"]})
+        .bundle()
+        .pipe(source('worker-all.js'))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('build/'));
 });
 
 
 gulp.task('build-main', function() {
-  gulp.src('js/exports.js')
-  .pipe(browserify({
-    debug: true,
-    nobuiltins: true
-  }))
-  .pipe(rename('dalliance-all.js'))
-  .pipe(gulp.dest('build/'));
+    browserify({
+        entries: 'js/exports.js',
+        extensions: ['.js', '.es6'],
+        debug: true,
+        nobuiltins: true
+    })
+        .transform("babelify", {presets: ["es2015"],
+                                extensions: [".js", ".es6"]})
+        .bundle()
+        .pipe(source('dalliance-all.js'))
+        .pipe(buffer())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('build/'));
 });
 
 gulp.task('compile-worker', function() {
-  gulp.src('js/fetchworker.js')
-  .pipe(browserify({
-    debug: true,
-    nobuiltins: true
-  }))
-  .pipe(rename('worker-all.js'))
-  .pipe(gulp.dest('tmp/'))
-  // .pipe(gif(!isDev, closure()))   // Doesn't work
-  .pipe(closure({compilerPath: 'node_modules/closure-compiler/lib/vendor/compiler.jar', 
-                 fileName: 'worker-all.js',
-                 compilerFlags: {
-                    language_in: 'ECMASCRIPT5'
-                 }}))
-  .pipe(gulp.dest('build/'));
+    browserify({
+        entries: 'js/fetchworker.js',
+        extensions: ['.js', '.es6'],
+        debug: true,
+        nobuiltins: true
+    })
+        .transform("babelify", {presets: ["es2015"],
+                                extensions: [".js", ".es6"]})
+        .bundle()
+        .pipe(source('worker-all.js'))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('build/'));
 });
 
 gulp.task('compile-main', function() {
-  gulp.src('js/exports.js')
-  .pipe(browserify({
-    debug: true,
-    nobuiltins: true
-  }))
-  .pipe(rename('dalliance-all.js'))
-  .pipe(gulp.dest('tmp/'))
-  // .pipe(gif(!isDev, closure()))   // Doesn't work
-  .pipe(closure({compilerPath: 'node_modules/closure-compiler/lib/vendor/compiler.jar', 
-                 fileName: 'dalliance-all.js',
-                 compilerFlags: {
-                    language_in: 'ECMASCRIPT5'
-                 }}))
-  .pipe(gulp.dest('build/'));
+    browserify({
+        entries: 'js/exports.js',
+        extensions: ['.js', '.es6'],
+        debug: true,
+        nobuiltins: true
+    })
+        .transform("babelify", {presets: ["es2015"],
+                                extensions: [".js", ".es6"]})
+        .bundle()
+        .pipe(source('dalliance-all.js'))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('build/'));
 });
 
 gulp.task('watch', function() {
@@ -69,3 +88,10 @@ gulp.task('watch', function() {
 
 gulp.task('default', ['build-main', 'build-worker']);
 gulp.task('compile', ['compile-main', 'compile-worker']);
+
+gulp.task('lint-es6', function() {
+    return gulp.src('js/*.es6')
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failOnError());
+});

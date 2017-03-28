@@ -743,7 +743,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
             handler(dom);
         }
         req.open("get", url);
-        req.send('');
+        req.send();
     } else {
         try {
             var req = new XMLHttpRequest();
@@ -756,7 +756,6 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
                 5000
             );
 
-            req.timeout = 5000;
             req.ontimeout = function() {
                 console.log('timeout on ' + url);
             };
@@ -770,6 +769,9 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
                 }
             };
             req.open("get", url, true);
+            // IE10/11 fix: The timeout property may be set only in the time interval between a call to the open method
+            //              and the first call to the send method.
+            req.timeout = 5000;
             if (credentials) {
                 req.withCredentials = true;
             }
@@ -778,7 +780,7 @@ function doCrossDomainRequest(url, handler, credentials, custAuth) {
             }
             req.overrideMimeType('text/xml');
             req.setRequestHeader('Accept', 'application/xml,*/*');
-            req.send('');
+            req.send();
         } catch (e) {
             handler(null, req, e);
         }

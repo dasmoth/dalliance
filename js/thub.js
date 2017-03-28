@@ -403,13 +403,13 @@ TrackHubTrack.prototype.bigbedStyles = function() {
         
         var plus = shallowCopy(wigStyle);
         plus.BGCOLOR = 'rgb(' + cbsToks[0] + ')';
-        stylesheet.pushStyle({type: 'bigwig', orientation: '+'}, null, plus);
+        stylesheet.pushStyle({type: 'bigbed', orientation: '+'}, null, plus);
 
         var minus = shallowCopy(wigStyle);
         minus.BGCOLOR = 'rgb(' + cbsToks[1] + ')';
-        stylesheet.pushStyle({type: 'bigwig', orientation: '-'}, null, minus);
+        stylesheet.pushStyle({type: 'bigbed', orientation: '-'}, null, minus);
     } else {
-        stylesheet.pushStyle({type: 'bigwig'}, null, wigStyle);
+        stylesheet.pushStyle({type: 'bigbed'}, null, wigStyle);
     }   
     
     var tlStyle = new DASStyle();

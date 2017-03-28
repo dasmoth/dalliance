@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
@@ -37,7 +37,7 @@ if (typeof(require) !== 'undefined') {
 
     var das = require('./das');
     var DASSequence = das.DASSequence;
-    
+
     var Promise = require('es6-promise').Promise;
 }
 
@@ -100,7 +100,7 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
     }
 }
 
-KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale, tierCallback) {
+KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale) {
     if (scale != scale) {
         throw "retrieveFeatures called with silly scale";
     }
@@ -123,11 +123,11 @@ KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale, ti
     this.awaitedSeq = new Awaited();
     this.seqWasFetched = false;
     this.viewCount++;
-    
-    this.startFetchesForTiers(tiers, tierCallback);
+
+    this.startFetchesForTiers(tiers);
     this.pool.notifyRequestsIssued();
 }
-    
+
 function filterFeatures(features, min, max) {
     var ff = [];
     var featuresByGroup = {};
@@ -161,16 +161,16 @@ function filterFeatures(features, min, max) {
     return ff;
 }
 
-KnownSpace.prototype.invalidate = function(tier, tierCallback) {
+KnownSpace.prototype.invalidate = function(tier) {
     if (!this.pool) {
         return;
     }
 
     this.featureCache[tier] = null;
-    this.startFetchesForTiers([tier], tierCallback);
+    this.startFetchesForTiers([tier]);
 }
 
-KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
+KnownSpace.prototype.startFetchesForTiers = function(tiers) {
     var thisB = this;
 
     var awaitedSeq = this.awaitedSeq;
@@ -179,8 +179,9 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
     var gex;
 
     for (var t = 0; t < tiers.length; ++t) {
+        var tierRenderer = tiers[t].browser.getTierRenderer(tiers[t]);
         try {
-            if (this.startFetchesFor(tiers[t], awaitedSeq, tierCallback)) {
+            if (this.startFetchesFor(tiers[t], awaitedSeq)) {
                 needSeq = true;
             }
         } catch (ex) {
@@ -191,7 +192,9 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
             console.log('Error fetching tier source');
             console.log(ex);
             gex = ex;
-            tierCallback(ex, tier);
+            console.log(ex.stack);
+            tierRenderer.renderTier(ex, tier);
+            tier.wasRendered();
         }
     }
 
@@ -205,18 +208,18 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
                 if (this.cs.start == smin && this.cs.end == smax) {
                     cachedSeq = this.cs;
                 } else {
-                    cachedSeq = new DASSequence(this.cs.name, smin, smax, this.cs.alphabet, 
+                    cachedSeq = new DASSequence(this.cs.name, smin, smax, this.cs.alphabet,
                                                 this.cs.seq.substring(smin - this.cs.start, smax + 1 - this.cs.start));
                 }
                 return awaitedSeq.provide(cachedSeq);
             }
         }
-        
+
         this.seqSource.fetch(this.chr, smin, smax, this.pool, function(err, seq) {
             if (seq) {
-                if (!thisB.cs || (smin <= thisB.cs.start && smax >= thisB.cs.end) || 
-                    (smin >= thisB.cs.end) || (smax <= thisB.cs.start) || 
-                    ((smax - smin) > (thisB.cs.end - thisB.cs.start))) 
+                if (!thisB.cs || (smin <= thisB.cs.start && smax >= thisB.cs.end) ||
+                    (smin >= thisB.cs.end) || (smax <= thisB.cs.start) ||
+                    ((smax - smin) > (thisB.cs.end - thisB.cs.start)))
                 {
                     thisB.cs = seq;
                 }
@@ -226,13 +229,13 @@ KnownSpace.prototype.startFetchesForTiers = function(tiers, tierCallback) {
                 awaitedSeq.provide(null);
             }
         });
-    } 
+    }
 
     if (gex)
         throw gex;
 }
 
-KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq, tierCallback) {
+KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq) {
     var thisB = this;
 
     var viewID = this.viewCount;
@@ -254,26 +257,32 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq, tierCallback) 
         if (baton.min < min || baton.max > max) {
             cachedFeatures = filterFeatures(cachedFeatures, min, max);
         }
-        
-        thisB.provision(tier, baton.chr, intersection(baton.coverage, new Range(min, max)), baton.scale, wantedTypes, cachedFeatures, baton.status, needsSeq ? awaitedSeq : null, tierCallback);
+
+        thisB.provision(tier, baton.chr,
+                        intersection(baton.coverage, new Range(min, max)),
+                        baton.scale, wantedTypes,
+                        cachedFeatures, baton.status,
+                        needsSeq ? awaitedSeq : null);
 
         var availableScales = source.getScales();
+
         if (baton.scale <= this.scale || !availableScales) {
             return needsSeq;
-        } else {
         }
     }
 
     if (source.instrument)
         console.log('Starting  fetch ' + viewID + ' (' + min + ', ' + max + ')');
-    source.fetch(chr, min, max, this.scale, wantedTypes, this.pool, function(status, features, scale, coverage) {
-    	if (source.instrument)
-    	    console.log('Finishing fetch ' + viewID);
 
-    	var latestViewID = thisB.latestViews[tier] || -1;
-    	if (thisB.cancelled || latestViewID > viewID) {
-    	    return;
-    	}
+
+    source.fetch(chr, min, max, this.scale, wantedTypes, this.pool, function(status, features, scale, coverage) {
+        if (source.instrument)
+            console.log('Finishing fetch ' + viewID);
+
+        var latestViewID = thisB.latestViews[tier] || -1;
+        if (thisB.cancelled || latestViewID > viewID) {
+            return;
+        }
 
         if (!coverage) {
             coverage = new Range(min, max);
@@ -283,55 +292,76 @@ KnownSpace.prototype.startFetchesFor = function(tier, awaitedSeq, tierCallback) 
             thisB.featureCache[tier] = new KSCacheBaton(chr, min, max, scale, features, status, coverage);
         }
 
-	    thisB.latestViews[tier] = viewID;
-        thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null, tierCallback);
+        thisB.latestViews[tier] = viewID;
+        thisB.provision(tier, chr, coverage, scale, wantedTypes, features, status, needsSeq ? awaitedSeq : null);
     }, styleFilters);
     return needsSeq;
 }
 
-KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq, tierCallback) {
+KnownSpace.prototype.provision = function(tier, chr, coverage, actualScale, wantedTypes, features, status, awaitedSeq) {
+    var tierRenderer = tier.browser.getTierRenderer(tier);
     if (status) {
         tier.setFeatures(chr, coverage, actualScale, [], null);
-        tierCallback(status, tier);
+        if (!features) {
+            var e = new Error(status);
+            status = "Error fetching data: " + status + "; see browser console";
+            console.log("Error fetching data for tier " + tier.dasSource.name + ":");
+            console.log(tier.dasSource);
+            console.log("Stack trace:");
+            console.log(e.stack)
+        }
+        tierRenderer.renderTier(status, tier);
+        tier.wasRendered();
     } else {
         var mayDownsample = false;
         var needBaseComposition = false;
         var src = tier.getSource();
-        while (MappedFeatureSource.prototype.isPrototypeOf(src) || CachingFeatureSource.prototype.isPrototypeOf(src) || OverlayFeatureSource.prototype.isPrototypeOf(src)) {
-	        if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
-		        src = src.sources[0];
-	        } else {
-		        src = src.source;
-	        }
+        while (MappedFeatureSource.prototype.isPrototypeOf(src) ||
+               CachingFeatureSource.prototype.isPrototypeOf(src) ||
+               OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+
+            if (OverlayFeatureSource.prototype.isPrototypeOf(src)) {
+                src = src.sources[0];
+            } else {
+                src = src.source;
+            }
         }
-        if (BWGFeatureSource.prototype.isPrototypeOf(src) || RemoteBWGFeatureSource.prototype.isPrototypeOf(src) || BAMFeatureSource.prototype.isPrototypeOf(src) || RemoteBAMFeatureSource.prototype.isPrototypeOf(src)) {
+        if (BWGFeatureSource.prototype.isPrototypeOf(src) ||
+            RemoteBWGFeatureSource.prototype.isPrototypeOf(src) ||
+            BAMFeatureSource.prototype.isPrototypeOf(src) ||
+            RemoteBAMFeatureSource.prototype.isPrototypeOf(src)) {
+
             mayDownsample = true;
         }
 
-    	if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
+        if (!src.opts || (!src.opts.forceReduction && !src.opts.noDownsample)) {
             if (/* (actualScale < (this.scale/2) && features.length > 200)  || */
-		        (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
+                (mayDownsample && wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('density') >= 0))
             {
-		        features = downsample(features, this.scale);
+                features = downsample(features, this.scale);
             }
-    	}
+        }
 
         if (wantedTypes && wantedTypes.length == 1 && wantedTypes.indexOf('base-coverage') >= 0)
         {
             // Base-composition coverage track
             needBaseComposition = true;
         }
+
+
         if (awaitedSeq) {
             awaitedSeq.await(function(seq) {
                 if (needBaseComposition) {
                     features = getBaseCoverage(features, seq, tier.browser.baseColors);
                 }
                 tier.setFeatures(chr, coverage, actualScale, features, seq);
-                tierCallback(status, tier);
+                tierRenderer.renderTier(status, tier);
+                tier.wasRendered()
             });
         } else {
             tier.setFeatures(chr, coverage, actualScale, features);
-            tierCallback(status, tier);
+            tierRenderer.renderTier(status, tier);
+            tier.wasRendered();
         }
     }
 }

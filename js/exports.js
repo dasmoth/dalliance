@@ -34,3 +34,7 @@ window.DASGroup = das.DASGroup;
 window.DASStylesheet = das.DASStylesheet;
 window.DASStyle = das.DASStyle;
 window.DASSource = das.DASSource;    // Pre-0.8 configurations used this.  Still some around...
+
+var ruler = require("./rulers");
+window.Ruler = ruler.Ruler;
+window.rulerDrawCallback = ruler.rulerDrawCallback;

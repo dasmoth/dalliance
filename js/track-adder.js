@@ -257,15 +257,15 @@ Browser.prototype.showTrackAdder = function(ev) {
             }, false);
             addModeButtons.push(defButton);
 
-            if (!firstDefButton) {
+            if (!firstDefButton || thisB.defaultTrackAdderTab && thisB.defaultTrackAdderTab == g) {
                 firstDefButton = defButton;
                 firstDefSources = ds;
             }
         })(g, groupedDefaults[g]);
     }   
-    var custButton = this.makeButton('DAS', 'Add arbitrary DAS data');
+    var custButton = this.makeButton('DAS', 'Add data using the DAS protocol');
     addModeButtons.push(custButton);
-    var binButton = this.makeButton('Binary', 'Add data in bigwig or bigbed format');
+    var binButton = this.makeButton('Files', 'Add data from files on disk or the web');
     addModeButtons.push(binButton);
 
 
@@ -345,6 +345,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var b = makeElement('input');
                 b.type = 'checkbox';
                 b.dalliance_source = source;
+                b.id = 'sourcecb' + i;
                 if (__mapping) {
                     b.dalliance_mapping = __mapping;
                 }
@@ -363,12 +364,12 @@ Browser.prototype.showTrackAdder = function(ev) {
                 thisB.makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
             }
             r.appendChild(bd);
-            var ld = makeElement('td');
+            var ld = makeElement('label', null, {htmlFor: 'sourcecb' + i});
             ld.appendChild(document.createTextNode(source.name));
             if (source.desc && source.desc.length > 0) {
                 thisB.makeTooltip(ld, source.desc);
             }
-            r.appendChild(ld);
+            r.appendChild(makeElement('td', ld));
             stabBody.appendChild(r);
             ++idx;
         }
@@ -400,6 +401,8 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = false;
         removeChildren(stabHolder);
         
+        let buttonIdSeed = 0;
+
         var ttab = makeElement('div', null, {}, {width: '100%'});
         var sources = [];
         for (var i = 0; i < tracks.length; ++i) {
@@ -525,6 +528,8 @@ Browser.prototype.showTrackAdder = function(ev) {
             
                 group.children.sort(THUB_COMPARE);
                 for (var i = 0; i < group.children.length; ++i) {
+                    const buttonId = 'hb' + (++buttonIdSeed);
+
                     var track = group.children[i];
                     var ds = track.toDallianceSource();
                     if (!ds)
@@ -537,6 +542,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var b = makeElement('input');
                     b.type = 'checkbox';
                     b.dalliance_source = ds;
+                    b.id = buttonId;
                     if (__mapping) {
                         b.dalliance_mapping = __mapping;
                     }
@@ -551,12 +557,12 @@ Browser.prototype.showTrackAdder = function(ev) {
                     });
 
                     r.appendChild(bd);
-                    var ld = makeElement('td');
+                    var ld = makeElement('label', null, {htmlFor: buttonId});
                     ld.appendChild(document.createTextNode(track.shortLabel));
                     if (track.longLabel && track.longLabel.length > 0) {
                         thisB.makeTooltip(ld, track.longLabel);
                     }
-                    r.appendChild(ld);
+                    r.appendChild(makeElement('td', ld));
                     stabBody.appendChild(r);
                     ++idx;
                 }

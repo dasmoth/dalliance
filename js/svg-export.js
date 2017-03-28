@@ -26,6 +26,7 @@ if (typeof(require) !== 'undefined') {
 
     var nf = require('./numformats');
     var formatQuantLabel = nf.formatQuantLabel;
+    var formatLongInt = nf.formatLongInt;
 }
 
 
@@ -33,6 +34,12 @@ Browser.prototype.makeSVG = function(opts) {
     opts = opts || {};
     var minTierHeight = opts.minTierHeight || 20;
     var padding = 3;
+    var fpw = opts.width || this.featurePanelWidth;
+
+    var backupFPW = this.featurePanelWidth;
+    var backupScale = this.scale;
+    this.featurePanelWidth = fpw;
+    this.scale = this.featurePanelWidth / (this.viewEnd - this.viewStart);
 
     var b = this;
     var saveDoc = document.implementation.createDocument(NS_SVG, 'svg', null);
@@ -45,19 +52,33 @@ Browser.prototype.makeSVG = function(opts) {
 
     var margin = 200;
 
-    var dallianceAnchor = makeElementNS(NS_SVG, 'a',
-       makeElementNS(NS_SVG, 'text', 'Graphics from Dalliance ' + VERSION, {
-           x: (b.featurePanelWidth + margin + 20)/2,
-           y: 30,
-           strokeWidth: 0,
-           fontSize: '12pt',
-	       textAnchor: 'middle',
-	       fill: 'blue'
-       }));
-    dallianceAnchor.setAttribute('xmlns:xlink', NS_XLINK);
-    dallianceAnchor.setAttribute('xlink:href', 'http://www.biodalliance.org/');
+    if (opts.banner) {
+      var dallianceAnchor = makeElementNS(NS_SVG, 'a',
+         makeElementNS(NS_SVG, 'text', 'Graphics from Biodalliance ' + VERSION, {
+             x: (b.featurePanelWidth + margin) - 100,
+             y: 35,
+             strokeWidth: 0,
+             fontSize: '12pt',
+	     textAnchor: 'end',
+	     fill: 'blue'
+         }));
+      dallianceAnchor.setAttribute('xmlns:xlink', NS_XLINK);
+      dallianceAnchor.setAttribute('xlink:href', 'http://www.biodalliance.org/');
+
+      saveRoot.appendChild(dallianceAnchor);
+    }
   
-    saveRoot.appendChild(dallianceAnchor);
+    if (opts.region) {
+        saveRoot.appendChild(
+            makeElementNS(NS_SVG, 'text', this.chr + ':' + formatLongInt(this.viewStart) + '..' + formatLongInt(this.viewEnd), {
+                x: margin + 100,
+                y: 35,
+                strokeWidth: 0,
+                fontSize: '12pt',
+                textAnchor: 'start'
+            })
+        );
+    }
     
     var clipRect = makeElementNS(NS_SVG, 'rect', null, {
     	x: margin,
@@ -73,7 +94,16 @@ Browser.prototype.makeSVG = function(opts) {
 
     for (var ti = 0; ti < b.tiers.length; ++ti) {
         var tier = b.tiers[ti];
-    	var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
+        tier.backupSubtiers = tier.subtiers;
+        tier.backupOriginHaxx = tier.originHaxx;
+        tier.backupLayoutHeight = tier.layoutHeight;
+
+        const renderer = b.getTierRenderer(tier);
+        if (renderer && renderer.prepareSubtiers) {
+            renderer.prepareSubtiers(tier, tier.viewport.getContext('2d'));
+        }
+
+        var tierSVG = makeElementNS(NS_SVG, 'g', null, {clipPath: 'url(#featureClip)', clipRule: 'nonzero'});
     	var tierLabels = makeElementNS(NS_SVG, 'g');
     	var tierTopPos = pos;
 
@@ -159,6 +189,10 @@ Browser.prototype.makeSVG = function(opts) {
     	
     	tierBackground.setAttribute('height', pos - tierTopPos);
     	tierHolder.appendChild(makeElementNS(NS_SVG, 'g', [tierSVG, tierLabels]));
+
+        tier.subtiers = tier.backupSubtiers;
+        tier.originHaxx = tier.backupOriginHaxx;
+        tier.layoutHeight = tier.backupLayoutHeight;
     }
 
     if (opts.highlights) {
@@ -192,6 +226,22 @@ Browser.prototype.makeSVG = function(opts) {
     saveDoc.documentElement.setAttribute('width', b.featurePanelWidth + 20 + margin);
     saveDoc.documentElement.setAttribute('height', pos + 50);
 
-    var svgBlob = new Blob([new XMLSerializer().serializeToString(saveDoc)], {type: 'image/svg+xml'});
-    return svgBlob;
+    
+    this.featurePanelWidth = backupFPW;
+    this.scale = backupScale;
+
+    let svg;
+    if (typeof(XMLSerializer) !== 'undefined') {
+        svg = new XMLSerializer().serializeToString(saveDoc);
+    } else {
+        const root = saveDoc.documentElement;
+        root.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg = root.outerHTML;
+    }
+
+    if (opts.output && opts.output === 'string') {
+        return svg;
+    } else {
+        return new Blob([svg], {type: 'image/svg+xml'});
+    }
 }

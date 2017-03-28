@@ -21,8 +21,6 @@ if (typeof(require) !== 'undefined') {
     var DASGroup = das.DASGroup;
 }
 
-
-
 function EnsemblFeatureSource(source) {
     FeatureSourceBase.call(this);
     this.source = source;
@@ -265,7 +263,54 @@ EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, poo
 
     req.open('GET', url, true);
     req.responseType = 'text';
-    req.send('');
+    req.send();
+}
+
+EnsemblFeatureSource.prototype.capabilities = function() {
+    const caps = {};
+    if (this.type && this.type.indexOf('transcript') >= 0) {
+        caps.search = ['gene'];
+    }
+    return caps;
+}
+
+EnsemblFeatureSource.prototype.search = function(query, callback) {
+    const url = `${this.base}/lookup/symbol/${this.species}/${query}?content-type=application/json`;
+    const req = new XMLHttpRequest();
+    req.onreadystatechange = () => {
+        if (req.readyState == 4)
+            if (req.status >= 300 || req.status < 200) {
+                let err = 'Error code ' + req.status;
+                try {
+                    var jr = JSON.parse(req.response);
+                    if (jr.error) {
+                        err = jr.error;
+                    }
+                } catch (ex) {};
+
+                if (req.status == 400)    // E! returns an error if the lookup fails.  Who knows?
+                    return callback([]);
+                else
+                    return callback(null, err);
+            } else {
+                const resp = JSON.parse(req.response);
+                const result = [];
+
+                if (resp && resp.seq_region_name) {
+                    result.push({
+                        segment: resp.seq_region_name,
+                        min: resp.start,
+                        max: resp.end
+                    });
+                }
+                
+                return callback(result);
+            }
+    };
+
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send();
 }
 
 dalliance_registerSourceAdapterFactory('ensembl', function(source) {

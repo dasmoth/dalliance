@@ -1,0 +1,1983 @@
+{
+  "Genome": [],
+  "Histogram": [
+    {
+      "glyphs": [
+        {
+          "_height": 30,
+          "yOffset": 0,
+          "spacing": 10
+        },
+        {
+          "glyph": {
+            "x": 240,
+            "y": 6,
+            "_width": 120.00011999999998,
+            "_height": 24,
+            "fill": "rgb(0,93,161)",
+            "stroke": null,
+            "_alpha": null,
+            "_radius": 0
+          },
+          "_height": 30,
+          "_x": 0,
+          "_y": 0,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 1,
+            "max": 6
+          }
+        },
+        {
+          "glyph": {
+            "x": 360,
+            "y": 24,
+            "_width": 120.00012000000004,
+            "_height": 6,
+            "fill": "rgb(150,104,0)",
+            "stroke": null,
+            "_alpha": null,
+            "_radius": 0
+          },
+          "_height": 30,
+          "_x": 0,
+          "_y": 0,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 1,
+            "max": 6
+          }
+        },
+        {
+          "glyph": {
+            "x": 480,
+            "y": 12,
+            "_width": 240.00012000000004,
+            "_height": 18,
+            "fill": "rgb(0,197,57)",
+            "stroke": null,
+            "_alpha": null,
+            "_radius": 0
+          },
+          "_height": 30,
+          "_x": 0,
+          "_y": 0,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 1,
+            "max": 6
+          }
+        },
+        {
+          "glyph": {
+            "x": 720,
+            "y": 18,
+            "_width": 120.00012000000004,
+            "_height": 12,
+            "fill": "rgb(46,208,0)",
+            "stroke": null,
+            "_alpha": null,
+            "_radius": 0
+          },
+          "_height": 30,
+          "_x": 0,
+          "_y": 0,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 1,
+            "max": 6
+          }
+        },
+        {
+          "glyph": {
+            "x": 840,
+            "y": 30,
+            "_width": 240.00011999999992,
+            "_height": 0,
+            "fill": "rgb(255,0,0)",
+            "stroke": null,
+            "_alpha": null,
+            "_radius": 0
+          },
+          "_height": 30,
+          "_x": 0,
+          "_y": 0,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      ],
+      "height": 30,
+      "quant": {
+        "min": 1,
+        "max": 6
+      }
+    }
+  ],
+  "Genes, CROSS glyph": [
+    {
+      "glyphs": [
+        {
+          "glyphs": [
+            {
+              "x": 240,
+              "y": 0,
+              "_width": 120.00011999999998,
+              "_height": 12,
+              "fill": "red",
+              "_radius": 0
+            },
+            {
+              "_x": 300.00005999999996,
+              "_height": 12,
+              "_stroke": "red"
+            }
+          ],
+          "h": 12,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 240,
+                "_max": 360.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "x": 480,
+              "y": 0,
+              "_width": 240.00012000000004,
+              "_height": 12,
+              "fill": "red",
+              "_radius": 0
+            },
+            {
+              "_x": 600.0000600000001,
+              "_height": 12,
+              "_stroke": "red"
+            }
+          ],
+          "h": 12,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 480,
+                "_max": 720.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "x": 840,
+              "y": 0,
+              "_width": 240.00011999999992,
+              "_height": 12,
+              "fill": "red",
+              "_radius": 0
+            },
+            {
+              "_x": 960.00006,
+              "_height": 12,
+              "_stroke": "red"
+            }
+          ],
+          "h": 12,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 840,
+                "_max": 1080.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 12,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "glyphs": [
+            {
+              "x": 360,
+              "y": 0,
+              "_width": 120.00012000000004,
+              "_height": 12,
+              "fill": "red",
+              "_radius": 0
+            },
+            {
+              "_x": 420.00006,
+              "_height": 12,
+              "_stroke": "red"
+            }
+          ],
+          "h": 12,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 360,
+                "_max": 480.00012000000004
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "x": 720,
+              "y": 0,
+              "_width": 120.00012000000004,
+              "_height": 12,
+              "fill": "red",
+              "_radius": 0
+            },
+            {
+              "_x": 780.0000600000001,
+              "_height": 12,
+              "_stroke": "red"
+            }
+          ],
+          "h": 12,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 720,
+                "_max": 840.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 12,
+      "quant": null
+    }
+  ],
+  "Genes, CROSS, SCATTER glyph": [
+    {
+      "glyphs": [
+        {
+          "_height": 13,
+          "yOffset": 0,
+          "spacing": 10
+        },
+        {
+          "glyph": {
+            "glyphs": [
+              {
+                "x": 240,
+                "y": 0,
+                "_width": 120.00011999999998,
+                "_height": 13,
+                "fill": "red",
+                "_radius": 0
+              },
+              {
+                "_x": 300.00005999999996,
+                "_height": 13,
+                "_stroke": "red"
+              }
+            ],
+            "h": 13,
+            "coverage": {
+              "_ranges": [
+                {
+                  "_min": 240,
+                  "_max": 360.00012
+                }
+              ]
+            }
+          },
+          "_height": 13,
+          "_x": 0,
+          "_y": -6.5,
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "glyph": {
+            "glyphs": [
+              {
+                "x": 480,
+                "y": 0,
+                "_width": 240.00012000000004,
+                "_height": 13,
+                "fill": "red",
+                "_radius": 0
+              },
+              {
+                "_x": 600.0000600000001,
+                "_height": 13,
+                "_stroke": "red"
+              }
+            ],
+            "h": 13,
+            "coverage": {
+              "_ranges": [
+                {
+                  "_min": 480,
+                  "_max": 720.00012
+                }
+              ]
+            }
+          },
+          "_height": 13,
+          "_x": 0,
+          "_y": -3.9000000000000004,
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "glyph": {
+            "glyphs": [
+              {
+                "x": 840,
+                "y": 0,
+                "_width": 240.00011999999992,
+                "_height": 13,
+                "fill": "red",
+                "_radius": 0
+              },
+              {
+                "_x": 960.00006,
+                "_height": 13,
+                "_stroke": "red"
+              }
+            ],
+            "h": 13,
+            "coverage": {
+              "_ranges": [
+                {
+                  "_min": 840,
+                  "_max": 1080.00012
+                }
+              ]
+            }
+          },
+          "_height": 13,
+          "_x": 0,
+          "_y": 3.9000000000000004,
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      ],
+      "height": 13,
+      "quant": {
+        "min": 0,
+        "max": 5
+      }
+    },
+    {
+      "glyphs": [
+        {
+          "_height": 13,
+          "yOffset": 0,
+          "spacing": 10
+        },
+        {
+          "glyph": {
+            "glyphs": [
+              {
+                "x": 360,
+                "y": 0,
+                "_width": 120.00012000000004,
+                "_height": 13,
+                "fill": "red",
+                "_radius": 0
+              },
+              {
+                "_x": 420.00006,
+                "_height": 13,
+                "_stroke": "red"
+              }
+            ],
+            "h": 13,
+            "coverage": {
+              "_ranges": [
+                {
+                  "_min": 360,
+                  "_max": 480.00012000000004
+                }
+              ]
+            }
+          },
+          "_height": 13,
+          "_x": 0,
+          "_y": 1.2999999999999998,
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "glyph": {
+            "glyphs": [
+              {
+                "x": 720,
+                "y": 0,
+                "_width": 120.00012000000004,
+                "_height": 13,
+                "fill": "red",
+                "_radius": 0
+              },
+              {
+                "_x": 780.0000600000001,
+                "_height": 13,
+                "_stroke": "red"
+              }
+            ],
+            "h": 13,
+            "coverage": {
+              "_ranges": [
+                {
+                  "_min": 720,
+                  "_max": 840.00012
+                }
+              ]
+            }
+          },
+          "_height": 13,
+          "_x": 0,
+          "_y": -1.2999999999999998,
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      ],
+      "height": 13,
+      "quant": {
+        "min": 0,
+        "max": 5
+      }
+    }
+  ],
+  "Genes, BOX glyph": [
+    {
+      "glyphs": [
+        {
+          "x": 240,
+          "y": 0,
+          "_width": 120.00011999999998,
+          "_height": 14,
+          "fill": "red",
+          "stroke": "red",
+          "_radius": 0,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "x": 360,
+          "y": 0,
+          "_width": 120.00012000000004,
+          "_height": 14,
+          "fill": "red",
+          "stroke": "red",
+          "_radius": 0,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "x": 480,
+          "y": 0,
+          "_width": 240.00012000000004,
+          "_height": 14,
+          "fill": "red",
+          "stroke": "red",
+          "_radius": 0,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "x": 720,
+          "y": 0,
+          "_width": 120.00012000000004,
+          "_height": 14,
+          "fill": "red",
+          "stroke": "red",
+          "_radius": 0,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "x": 840,
+          "y": 0,
+          "_width": 240.00011999999992,
+          "_height": 14,
+          "fill": "red",
+          "stroke": "red",
+          "_radius": 0,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 14,
+      "quant": null
+    }
+  ],
+  "Genes, HIDDEN glyph": [
+    {
+      "glyphs": [
+        {
+          "glyph": null,
+          "_min": 240,
+          "_max": 360.00012,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyph": null,
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyph": null,
+          "_min": 480,
+          "_max": 720.00012,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyph": null,
+          "_min": 720,
+          "_max": 840.00012,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyph": null,
+          "_min": 840,
+          "_max": 1080.00012,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 1,
+      "quant": null
+    }
+  ],
+  "Genes, POINT glyph": [
+    {
+      "glyphs": [
+        {
+          "_height": 15,
+          "yOffset": 0,
+          "spacing": 10
+        },
+        {
+          "_x": 300.00005999999996,
+          "_y": 0,
+          "_height": "15",
+          "_fill": "rgb(0,255,0)",
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "_x": 420.00006,
+          "_y": 9,
+          "_height": "15",
+          "_fill": "rgb(0,255,0)",
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "_x": 600.0000600000001,
+          "_y": 3,
+          "_height": "15",
+          "_fill": "rgb(0,255,0)",
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "_x": 780.0000600000001,
+          "_y": 6,
+          "_height": "15",
+          "_fill": "rgb(0,255,0)",
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "_x": 960.00006,
+          "_y": 12,
+          "_height": "15",
+          "_fill": "rgb(0,255,0)",
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          },
+          "quant": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      ],
+      "height": 15,
+      "quant": {
+        "min": 0,
+        "max": 5
+      }
+    }
+  ],
+  "Genes, ARROW glyph": [
+    {
+      "glyphs": [
+        {
+          "_stroke": null,
+          "_fill": "red",
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 16,
+          "_color": "red",
+          "_parallel": true,
+          "_sw": true,
+          "_ne": true,
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": null,
+          "_fill": "red",
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 16,
+          "_color": "red",
+          "_parallel": true,
+          "_sw": true,
+          "_ne": true,
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": null,
+          "_fill": "red",
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 16,
+          "_color": "red",
+          "_parallel": true,
+          "_sw": true,
+          "_ne": true,
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 16,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_stroke": null,
+          "_fill": "red",
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 16,
+          "_color": "red",
+          "_parallel": true,
+          "_sw": true,
+          "_ne": true,
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": null,
+          "_fill": "red",
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 16,
+          "_color": "red",
+          "_parallel": true,
+          "_sw": true,
+          "_ne": true,
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 16,
+      "quant": null
+    }
+  ],
+  "Genes, ANCHORED ARROW glyph": [
+    {
+      "glyphs": [
+        {
+          "_stroke": "red",
+          "_fill": "red",
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 17,
+          "_ori": "-",
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": "red",
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 17,
+          "_ori": "-",
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": "red",
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 17,
+          "_ori": "-",
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 17,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_stroke": "red",
+          "_fill": "red",
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 17,
+          "_ori": ",",
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": "red",
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 17,
+          "_ori": ".",
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 17,
+      "quant": null
+    }
+  ],
+  "Genes, LINEPLOT glyph": [
+    {
+      "glyphs": [
+        {
+          "_height": 30,
+          "yOffset": 0,
+          "spacing": 10
+        },
+        {
+          "points": [
+            {
+              "x": 300,
+              "y": 0
+            },
+            {
+              "x": 420,
+              "y": 18
+            },
+            {
+              "x": 600,
+              "y": 6
+            },
+            {
+              "x": 780,
+              "y": 12
+            },
+            {
+              "x": 960,
+              "y": 24
+            }
+          ],
+          "color": "red",
+          "_height": "30",
+          "quant": {
+            "min": "0",
+            "max": "5"
+          }
+        }
+      ],
+      "height": 30,
+      "quant": {
+        "min": "0",
+        "max": "5"
+      }
+    }
+  ],
+  "Genes, LINE glyph": [
+    {
+      "glyphs": [
+        {
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 18,
+          "_style": "solid",
+          "_strand": "-",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 18,
+          "_style": "solid",
+          "_strand": "-",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 18,
+          "_style": "solid",
+          "_strand": "-",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 18,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 18,
+          "_style": "solid",
+          "_strand": ",",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 18,
+          "_style": "solid",
+          "_strand": ".",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 18,
+      "quant": null
+    }
+  ],
+  "Genes, PRIMERS glyph": [
+    {
+      "glyphs": [
+        {
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 19,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 19,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 19,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 19,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 19,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 19,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 19,
+      "quant": null
+    }
+  ],
+  "Genes, SPAN glyph": [
+    {
+      "glyphs": [
+        {
+          "_stroke": "red",
+          "_fill": null,
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 20,
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": null,
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 20,
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": null,
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 20,
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 20,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_stroke": "red",
+          "_fill": null,
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 20,
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_stroke": "red",
+          "_fill": null,
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 20,
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 20,
+      "quant": null
+    }
+  ],
+  "Genes, TEXT glyph": [
+    {
+      "glyphs": [
+        {
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 9,
+          "_fill": "red",
+          "_string": "test",
+          "_textLen": 16.1181640625,
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 9,
+          "_fill": "red",
+          "_string": "test",
+          "_textLen": 16.1181640625,
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 9,
+          "_fill": "red",
+          "_string": "test",
+          "_textLen": 16.1181640625,
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 9,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 9,
+          "_fill": "red",
+          "_string": "test",
+          "_textLen": 16.1181640625,
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 9,
+          "_fill": "red",
+          "_string": "test",
+          "_textLen": 16.1181640625,
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 9,
+      "quant": null
+    }
+  ],
+  "Genes, TOOMANY glyph": [
+    {
+      "glyphs": [
+        {
+          "_min": 240,
+          "_max": 360.00012,
+          "_height": 20,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 480,
+          "_max": 720.00012,
+          "_height": 20,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 840,
+          "_max": 1080.00012,
+          "_height": 20,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 20,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "_min": 360,
+          "_max": 480.00012000000004,
+          "_height": 20,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "_min": 720,
+          "_max": 840.00012,
+          "_height": 20,
+          "_fill": "red",
+          "_stroke": "red",
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 20,
+      "quant": null
+    }
+  ],
+  "Genes, __SEQUENCE glyph": [
+    {
+      "glyphs": [
+        {
+          "glyphs": [
+            {
+              "baseColors": {
+                "A": "green",
+                "C": "blue",
+                "G": "orange",
+                "T": "red",
+                "-": "hotpink",
+                "I": "red"
+              },
+              "_strandColor": "lightskyblue",
+              "_min": 240,
+              "_max": 360.00012,
+              "_height": 21,
+              "_seq": "GTCAGGCAGT-----",
+              "_ref": null,
+              "_quals": "++**/b021!ZZZZZ",
+              "_fillbg": true,
+              "_scaleVertical": false
+            },
+            {
+              "glyph": {
+                "_fill": "red",
+                "_x": 240.0006,
+                "_height": 6,
+                "_dir": "S",
+                "_width": 5
+              },
+              "_height": 0,
+              "_x": 0,
+              "_y": -2,
+              "feature": {
+                "label": "Insertion: CTGCA",
+                "type": "insertion",
+                "method": "insertion"
+              }
+            }
+          ],
+          "h": 21,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 237.0006,
+                "_max": 360.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 11000000,
+            "max": 12000000,
+            "score": 5,
+            "orientation": "-",
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "baseColors": {
+                "A": "green",
+                "C": "blue",
+                "G": "orange",
+                "T": "red",
+                "-": "hotpink",
+                "I": "red"
+              },
+              "_strandColor": "lightskyblue",
+              "_min": 480,
+              "_max": 720.00012,
+              "_height": 21,
+              "_seq": "GTCAGGCAGT-----",
+              "_ref": null,
+              "_quals": "++**/b021!ZZZZZ",
+              "_fillbg": true,
+              "_scaleVertical": false
+            },
+            {
+              "glyph": {
+                "_fill": "red",
+                "_x": 480.0006,
+                "_height": 6,
+                "_dir": "S",
+                "_width": 5
+              },
+              "_height": 0,
+              "_x": 0,
+              "_y": -2,
+              "feature": {
+                "label": "Insertion: CTGCA",
+                "type": "insertion",
+                "method": "insertion"
+              }
+            }
+          ],
+          "h": 21,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 477.0006,
+                "_max": 720.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 13000000,
+            "max": 15000000,
+            "score": 4,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "baseColors": {
+                "A": "green",
+                "C": "blue",
+                "G": "orange",
+                "T": "red",
+                "-": "hotpink",
+                "I": "red"
+              },
+              "_strandColor": "lightskyblue",
+              "_min": 840,
+              "_max": 1080.00012,
+              "_height": 21,
+              "_seq": "GTCAGGCAGT-----",
+              "_ref": null,
+              "_quals": "++**/b021!ZZZZZ",
+              "_fillbg": true,
+              "_scaleVertical": false
+            },
+            {
+              "glyph": {
+                "_fill": "red",
+                "_x": 840.0006,
+                "_height": 6,
+                "_dir": "S",
+                "_width": 5
+              },
+              "_height": 0,
+              "_x": 0,
+              "_y": -2,
+              "feature": {
+                "label": "Insertion: CTGCA",
+                "type": "insertion",
+                "method": "insertion"
+              }
+            }
+          ],
+          "h": 21,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 837.0006,
+                "_max": 1080.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 16000000,
+            "max": 18000000,
+            "score": 1,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": "-",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 21,
+      "quant": null
+    },
+    {
+      "glyphs": [
+        {
+          "glyphs": [
+            {
+              "baseColors": {
+                "A": "green",
+                "C": "blue",
+                "G": "orange",
+                "T": "red",
+                "-": "hotpink",
+                "I": "red"
+              },
+              "_strandColor": "lightsalmon",
+              "_min": 360,
+              "_max": 480.00012000000004,
+              "_height": 21,
+              "_seq": "GTCAGGCAGT-----",
+              "_ref": null,
+              "_quals": "++**/b021!ZZZZZ",
+              "_fillbg": true,
+              "_scaleVertical": false
+            },
+            {
+              "glyph": {
+                "_fill": "red",
+                "_x": 360.0006,
+                "_height": 6,
+                "_dir": "S",
+                "_width": 5
+              },
+              "_height": 0,
+              "_x": 0,
+              "_y": -2,
+              "feature": {
+                "label": "Insertion: CTGCA",
+                "type": "insertion",
+                "method": "insertion"
+              }
+            }
+          ],
+          "h": 21,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 357.0006,
+                "_max": 480.00012000000004
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 12000000,
+            "max": 13000000,
+            "score": 2,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ",",
+            "cigar": "5M5I5M5D5S"
+          }
+        },
+        {
+          "glyphs": [
+            {
+              "baseColors": {
+                "A": "green",
+                "C": "blue",
+                "G": "orange",
+                "T": "red",
+                "-": "hotpink",
+                "I": "red"
+              },
+              "_strandColor": "lightsalmon",
+              "_min": 720,
+              "_max": 840.00012,
+              "_height": 21,
+              "_seq": "GTCAGGCAGT-----",
+              "_ref": null,
+              "_quals": "++**/b021!ZZZZZ",
+              "_fillbg": true,
+              "_scaleVertical": false
+            },
+            {
+              "glyph": {
+                "_fill": "red",
+                "_x": 720.0006,
+                "_height": 6,
+                "_dir": "S",
+                "_width": 5
+              },
+              "_height": 0,
+              "_x": 0,
+              "_y": -2,
+              "feature": {
+                "label": "Insertion: CTGCA",
+                "type": "insertion",
+                "method": "insertion"
+              }
+            }
+          ],
+          "h": 21,
+          "coverage": {
+            "_ranges": [
+              {
+                "_min": 717.0006,
+                "_max": 840.00012
+              }
+            ]
+          },
+          "bump": true,
+          "feature": {
+            "min": 15000000,
+            "max": 16000000,
+            "score": 3,
+            "seq": "GTCAGCTGCAGCAGTAGCGAAGACT",
+            "quals": "++**//++aab021!!gfOF0//!!",
+            "orientation": ".",
+            "cigar": "5M5I5M5D5S"
+          }
+        }
+      ],
+      "height": 21,
+      "quant": null
+    }
+  ]
+}

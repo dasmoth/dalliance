@@ -337,7 +337,7 @@ function textXHR(url, callback, opts) {
 
     try {
         var timeout;
-        if (opts.timeout) {
+        if (opts && opts.timeout) {
             timeout = setTimeout(
                 function() {
                     console.log('timing out ' + url);
@@ -367,7 +367,7 @@ function textXHR(url, callback, opts) {
         if (opts && opts.credentials) {
             req.withCredentials = true;
         }
-        req.send('');
+        req.send();
     } catch (e) {
         callback(null, 'Exception ' + e);
     }

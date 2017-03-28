@@ -159,8 +159,8 @@ function MemStoreFeatureSource(source) {
 
     var thisB = this;
     this._load(function(resp, err) {
-        if (!resp) {
-            thisB.error = err || "No data"
+        if (err) {
+            thisB.error = err;
             thisB.storeHolder.provide(null);
         } else {
             var store = new MemStore();

@@ -269,11 +269,13 @@ function LineGraphGlyph(points, color, height) {
 }
 
 LineGraphGlyph.prototype.min = function() {
-    return this.points[0];
+    return this.points[0].x;
+    // return this.points[0];
 };
 
 LineGraphGlyph.prototype.max = function() {
-    return this.points[this.points.length - 2];
+    return this.points[this.points.length - 1].x;
+    // return this.points[this.points.length - 2];
 };
 
 LineGraphGlyph.prototype.height = function() {
@@ -285,24 +287,21 @@ LineGraphGlyph.prototype.draw = function(g) {
     g.strokeStyle = this.color;
     g.lineWidth = 2;
     g.beginPath();
-    for (var i = 0; i < this.points.length; i += 2) {
-        var x = this.points[i];
-        var y = this.points[i + 1];
-        if (i == 0) {
-            g.moveTo(x, y);
-        } else {
-            g.lineTo(x, y);
-        }
-    }
+    this.points.forEach(function(p, i) {
+        if (i === 0)
+            g.moveTo(p.x, p.y);
+        else
+            g.lineTo(p.x, p.y);
+    });
     g.stroke();
     g.restore();
 }
 
 LineGraphGlyph.prototype.toSVG = function() {
     var p = new SVGPath();
-    for (var i = 0; i < this.points.length; i += 2) {
-        var x = this.points[i];
-        var y = this.points[i + 1];
+    for (let i = 0; i < this.points.length; ++i) {
+        var x = this.points[i].x;
+        var y = this.points[i].y;
         if (i == 0) {
             p.moveTo(x, y);
         } else {
@@ -1143,9 +1142,7 @@ AminoAcidGlyph.prototype.toSVG = function() {
     return g;
 };
 
-(function(scope) {
-
-var isRetina = window.devicePixelRatio > 1;
+var isRetina = typeof(window) !== 'undefined' && window.devicePixelRatio > 1;
 var __dalliance_SequenceGlyphCache = {};
 var altPattern = new RegExp('^[ACGT-]$');
 var isCloseUp = function(scale) {
@@ -1316,10 +1313,6 @@ SequenceGlyph.prototype.toSVG = function() {
     return g;
 }
 
-scope.SequenceGlyph = SequenceGlyph;
-
-}(this));
-
 function TranslatedGlyph(glyph, x, y, height) {
     this.glyph = glyph;
     this._height = height;
@@ -1403,8 +1396,10 @@ PointGlyph.prototype.toSVG = function() {
 }
 
 
-function GridGlyph(height) {
+function GridGlyph(height, yOffset, spacing) {
     this._height = height || 50;
+    this.yOffset = yOffset || 0;
+    this.spacing = spacing || 10;
 }
 
 GridGlyph.prototype.notSelectable = true;
@@ -1427,7 +1422,8 @@ GridGlyph.prototype.draw = function(g) {
     g.lineWidth = 0.1;
 
     g.beginPath();
-    for (var y = 0; y <= this._height; y += 10) {
+    for (var y = this.yOffset; y <= this._height+this.yOffset; y += this.spacing) {
+    // for (var y = 0; y <= this._height; y += 10) {
         g.moveTo(-5000, y);
         g.lineTo(5000, y);
     }
@@ -1590,7 +1586,7 @@ if (typeof(module) !== 'undefined') {
         ArrowGlyph: ArrowGlyph,
         TooManyGlyph: TooManyGlyph,
         TextGlyph: TextGlyph,
-        SequenceGlyph: this.SequenceGlyph,
+        SequenceGlyph: SequenceGlyph,
         AminoAcidGlyph: AminoAcidGlyph,
         TranslatedGlyph: TranslatedGlyph,
         GridGlyph: GridGlyph,
