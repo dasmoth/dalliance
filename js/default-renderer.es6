@@ -376,7 +376,7 @@ function bumpSubtiers(tier, glyphs, grid, gridOffset, gridSpacing) {
 
     let subtiersExceeded = false;
 
-    let unbumpedST = new SubTier();
+    let unbumpedST = new SubTier(true);
     let bumpedSTs = [];
 
     // We want to add each glyph to either the subtier
@@ -403,6 +403,8 @@ function bumpSubtiers(tier, glyphs, grid, gridOffset, gridSpacing) {
         }
     });
 
+    unbumpedST.glyphs.sort((g1, g2) => g1.min() - g2.min());
+    
     if (unbumpedST.glyphs.length > 0) {
         bumpedSTs = [unbumpedST].concat(bumpedSTs);
     }

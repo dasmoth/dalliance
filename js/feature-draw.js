@@ -15,10 +15,11 @@ if (typeof(require) !== 'undefined') {
     var formatQuantLabel = nf.formatQuantLabel;
 }
 
-function SubTier() {
+function SubTier(direct) {
     this.glyphs = [];
     this.height = 0;
     this.quant = null;
+    this.direct = direct;
 }
 
 SubTier.prototype.indexFor = function(glyph) {
@@ -39,8 +40,12 @@ SubTier.prototype.indexFor = function(glyph) {
 }
 
 SubTier.prototype.add = function(glyph) {
-    var ind = this.indexFor(glyph);
-    this.glyphs.splice(ind, 0, glyph);
+    if (this.direct) {
+        this.glyphs.push(glyph);
+    } else {
+        var ind = this.indexFor(glyph);
+        this.glyphs.splice(ind, 0, glyph);
+    }
     this.height = Math.max(this.height, glyph.height());
     if (glyph.quant && this.quant == null) {
         this.quant = glyph.quant;
@@ -48,6 +53,9 @@ SubTier.prototype.add = function(glyph) {
 }
 
 SubTier.prototype.hasSpaceFor = function(glyph) {
+    if (this.direct)
+        throw Error('Probing in direct-addition subtier');
+    
     var ind = this.indexFor(glyph);
     if (ind > 0 && this.glyphs[ind-1].max() >= glyph.min())
         return false;
