@@ -20,6 +20,8 @@ if (typeof(require) !== 'undefined') {
     var formatQuantLabel = nf.formatQuantLabel;
     var formatLongInt = nf.formatLongInt;
 
+    var makeElement = require('./utils').makeElement;
+
     var VERSION = require('./version');
 
     var drawSeqTierGC = require('./sequence-draw').drawSeqTierGC;
