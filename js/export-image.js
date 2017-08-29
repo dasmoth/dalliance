@@ -254,5 +254,9 @@ Browser.prototype.exportImage = function(opts) {
     this.featurePanelWidth = backupFPW;
     this.scale = backupScale;
 
-    return c.toDataURL('image/png');
+    if (opts.blobCallback) {
+        return c.toBlob(opts.blobCallback, 'image/png');
+    } else {
+        return c.toDataURL('image/png');
+    } 
 }

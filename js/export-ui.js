@@ -61,59 +61,8 @@ Browser.prototype.openExportPanel = function() {
         var exportWidth = makeElement('input', null, {type: 'text', value: '800'});
 
         var exportButton = makeElement('button', 'Export', {className: 'btn btn-primary'});
-        exportButton.addEventListener('click', function(ev) {
-            removeChildren(exportContent);
 
-            var blobURL;
-            var note, type, name;
-            if (exportSelect.value === 'svg') {
-                blobURL = URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
-                                                         banner: b.exportBanner,
-                                                         region: b.exportRegion,
-                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
-                                                         width: parseInt(exportWidth.value) || 800}));
-                note = 'SVG';
-                type = 'image/svg';
-                name = 'dalliance-view.svg';
-            } else if (exportSelect.value === 'png') {
-                var mult = parseFloat(exportScale.value);
-                if (mult < 0.1 || mult > 10) {
-                    alert('bad scale ' + mult);
-                    return;
-                }
-
-                blobURL = b.exportImage({highlights: exportHighlightsToggle.checked,
-                                         banner: b.exportBanner,
-                                         region: b.exportRegion,
-                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
-                                         resolutionMultiplier: mult,
-                                         width: parseInt(exportWidth.value) || 800});
-                note = 'Image';
-                type = 'image/png';
-                name = 'dalliance-view.png';
-            } else if (exportSelect.value === 'config') {
-                var config = JSON.stringify(b.exportFullConfig(), null, 2);
-                var blob = new Blob([config], {type: 'text/plain'});
-                blobURL = URL.createObjectURL(blob);
-                note = 'Configuration';
-                type = 'text/plain';
-                name = 'dalliance-config.json';
-            } else if (exportSelect.value === 'sources') {
-                var config = JSON.stringify(b.exportSourceConfig(), null, 2);
-                var blob = new Blob([config], {type: 'text/plain'});
-                blobURL = URL.createObjectURL(blob);
-                note = 'Source array';
-                type = 'text/plain';
-                name = 'dalliance-sources.json';
-            } else if (exportSelect.value === 'page') {
-                var page = b.exportPageTemplate();
-                var type = 'text/html';
-                var blob = new Blob([page], {type: type});
-                blobURL = URL.createObjectURL(blob);
-                note = 'Page template';
-                name = 'dalliance-view.html';
-            }
-
+        var exportDone = function(blobURL, note, type, name) {
             if (blobURL) {
                 var downloadLink = makeElement('a', '[Download]', {
                     href: blobURL,
@@ -129,7 +78,79 @@ Browser.prototype.openExportPanel = function() {
 
                 exportContent.appendChild(makeElement('p', ['' + note + ' created: ', downloadLink, previewLink]));
             }
+        }
+
+        exportButton.addEventListener('click', function(ev) {
+            removeChildren(exportContent);
+
+            var blobURL;
+            if (exportSelect.value === 'svg') {
+                blobURL = URL.createObjectURL(b.makeSVG({highlights: exportHighlightsToggle.checked,
+                                                         banner: b.exportBanner,
+                                                         region: b.exportRegion,
+                                                         ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
+                                                         width: parseInt(exportWidth.value) || 800}));
+                exportDone(
+                    blobURL,
+                    'SVG',
+                    'image/svg',
+                    'dalliance-view.svg'
+                );
+            } else if (exportSelect.value === 'png') {
+                var mult = parseFloat(exportScale.value);
+                if (mult < 0.1 || mult > 10) {
+                    alert('bad scale ' + mult);
+                    return;
+                }
+                
+                b.exportImage({
+                    highlights: exportHighlightsToggle.checked,
+                    banner: b.exportBanner,
+                    region: b.exportRegion,
+                    ruler: exportRulerToggle.checked ? b.rulerLocation : 'none',
+                    resolutionMultiplier: mult,
+                    width: parseInt(exportWidth.value) || 800,
+                    blobCallback: function(blob) {
+                        exportDone(
+                            URL.createObjectURL(blob),
+                            'Image',
+                            'image/png',
+                            'dalliance-view.png'
+                        );
+                    }
+                });
+            } else if (exportSelect.value === 'config') {
+                var config = JSON.stringify(b.exportFullConfig(), null, 2);
+                var blob = new Blob([config], {type: 'text/plain'});
+                exportDone(
+                    URL.createObjectURL(blob),
+                    'Configuration',
+                    'text/plain',
+                    'dalliance-config.json'
+                );
+            } else if (exportSelect.value === 'sources') {
+                var config = JSON.stringify(b.exportSourceConfig(), null, 2);
+                var blob = new Blob([config], {type: 'text/plain'});
+                exportDone(
+                    blobURL = URL.createObjectURL(blob),
+                    'Source array',
+                    'text/plain',
+                    'dalliance-sources.json'
+                );
+            } else if (exportSelect.value === 'page') {
+                var page = b.exportPageTemplate();
+                var type = 'text/html';
+                var blob = new Blob([page], {type: type});
+                exportDone(
+                    URL.createObjectURL(blob),
+                    'Page template',
+                    'text/html',
+                    'dalliance-view.html'
+                );
+            }
         }, false);
+
+            
 
         b.addViewListener(function() {
             removeChildren(exportContent);
