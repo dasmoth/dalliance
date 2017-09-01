@@ -86,8 +86,8 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     var tierEditButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-road'})], {className: 'btn'});
     b.makeTooltip(tierEditButton, 'Configure currently selected track(s) (E)')
 
-    var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-left'})], {className: 'btn ml-3'}, {width: '5px'});
-    var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-right'})], {className: 'btn pull-right mr-3'}, {width: '5px'});
+    var leapLeftButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-left'})], {className: 'btn'}, {width: '5px'});
+    var leapRightButton = makeElement('a', [makeElement('i', null, {className: 'fa fa-angle-right'})], {className: 'btn pull-right'}, {width: '5px'});
 
     var modeButtons = makeElement('div', null, {className: 'btn-group pull-right ml-auto'});
     if (!this.noTrackAdder)
