@@ -14,7 +14,7 @@ var VERSION = {
     MAJOR:  0,
     MINOR:  13,
     MICRO:  7,
-    BRANCH: 'Helix-dev'
+    BRANCH: 'dev'
 };
 
 VERSION.toString = function() {
