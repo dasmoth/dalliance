@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<style>
+</style>
+
+<title>Zaire Ebolavirus :: Dalliance</title>
+<script language="javascript" src="../build/dalliance-all.js"></script>
+
+<script language="javascript">
+
+var b = new Browser({
+      chr:        'ZEBOV',
+      viewStart:  1,
+      viewEnd:    200,
+      cookieKey:  'ZEBOV',
+
+      coordSystem: {
+          speciesName: 'ZN',
+      },
+
+      sources:      [{name: 'Genome',
+                     twoBitURI:  '/Users/olgabot/code/winky/notebooks/ZN_refSeq.2bit',
+                     desc: 'ZN Reference Sequence',
+                     tier_type: 'sequence',
+                     provides_entrypoints: true}],
+        uiPrefix: '../',
+        fullScreen: true
+});
+</script>
+</head>
+
+<body>
+<div id='svgHolder'>Failed to load the Biodalliance genome browser.  Have you run "gulp"?</div>
+</body>
+</html>
