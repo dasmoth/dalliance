@@ -394,8 +394,9 @@ DasTier.prototype.drawOverlay = function() {
     var t = this;
     var b = this.browser;
     var retina = b.retina && window.devicePixelRatio > 1;
+    var height = t.viewport.getBoundingClientRect().height;
     
-    t.overlay.height = t.viewport.height;
+    t.overlay.height = retina ? height * 2 : height;
     t.overlay.width = retina ? b.featurePanelWidth * 2 : b.featurePanelWidth;
 
     var g = t.overlay.getContext('2d');
@@ -432,7 +433,7 @@ DasTier.prototype.drawOverlay = function() {
 
     // t.oorigin = b.viewStart;
     t.overlay.style.width = b.featurePanelWidth;
-    t.overlay.style.height = t.viewport.style.height;
+    t.overlay.style.height = height + 'px';
     t.overlay.style.left = '0px';
 }
 
