@@ -246,11 +246,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     
     var trackAddPopup;
     addTrackBtn.addEventListener('click', function(ev) {
-        if (trackAddPopup && trackAddPopup.displayed) {
-            b.removeAllPopups();
-        } else {
-            trackAddPopup = b.showTrackAdder(ev);
-        }
+        b.showTrackAdder(ev);
     }, false);
     b.makeTooltip(addTrackBtn, 'Add a new track from the registry or an indexed file. (A)');
 

@@ -118,17 +118,6 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         padding: '0px'
     }));
     this.hPopupHolder.appendChild(popup);
-
-    var popupHandle = {
-        node: popup,
-        displayed: true
-    };
-    popup.addEventListener('DOMNodeRemoved', function(ev) {
-        if (ev.target == popup) {
-            popupHandle.displayed = false;
-        }
-    }, false);
-    return popupHandle;
 }
 
 function makeTreeTableSection(title, content, visible) {
