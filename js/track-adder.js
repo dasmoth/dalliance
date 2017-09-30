@@ -361,7 +361,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 });
             } else {
                 bd.appendChild(document.createTextNode('!'));
-                thisB.makeTooltip(bd, makeElement('span', ["This data source isn't accessible because it doesn't support ", makeElement('a', "CORS", {href: 'http://www.w3.org/TR/cors/'}), "."]));
+                thisB.makeTooltip(bd, "This data source isn't accessible because it doesn't support CORS");
             }
             r.appendChild(bd);
             var ld = makeElement('label', null, {htmlFor: 'sourcecb' + i});

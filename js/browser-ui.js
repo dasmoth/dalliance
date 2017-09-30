@@ -315,38 +315,11 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     leapLeftButton.addEventListener('click', function(ev) {
         b.leap(b.reverseKeyScrolling ? -1 : 1, false);
     }, false);
-    b.makeTooltip(leapLeftButton, function(ev) {
-        var st = b.getSelectedTier();
-        var tier;
-        if (st >= 0)
-            tier = b.tiers[st];
-
-        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
-            return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+LEFT)';
-        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
-            return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+LEFT)';
-        } else {
-            return 'Jump left (shift+LEFT)';
-        }
-    });
 
     leapRightButton.addEventListener('click', function(ev) {
         b.leap(b.reverseKeyScrolling ? 1 : -1, false);
     }, false);
-    b.makeTooltip(leapRightButton, function(ev) {
-        var st = b.getSelectedTier();
-        var tier;
-        if (st >= 0)
-            tier = b.tiers[st];
 
-        if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
-            return 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+RIGHT)';
-        } else if (tier && tier.featureSource && b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
-            return 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+RIGHT)';
-        } else {
-            return 'Jump right (shift+RIGHT)';
-        }
-    });
     b.addTierSelectionListener(function() {
         var st = b.getSelectedTier();
         var tier;
@@ -355,10 +328,18 @@ Browser.prototype.initUI = function(holder, genomePanel) {
 
         var canLeap = false;
         if (tier && tier.featureSource) {
-            if (b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number')
+            if (b.sourceAdapterIsCapable(tier.featureSource, 'quantLeap') && typeof(tier.quantLeapThreshold) == 'number') {
                 canLeap = true;
-            else if (b.sourceAdapterIsCapable(tier.featureSource, 'leap'))
+                leapLeftButton.title = 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+LEFT)';
+                leapRightButton.title = 'Jump to the next region with a score above the threshold in the selected track "' + (tier.config.name || tier.dasSource.name) + '"" (ctrl+RIGHT)';
+            } else if (b.sourceAdapterIsCapable(tier.featureSource, 'leap')) {
+                leapLeftButton.title = 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+LEFT)';
+                leapRightButton.title = 'Jump to the next feature in the selected track "' + (tier.config.name || tier.dasSource.name) + '" (ctrl+RIGHT)';
                 canLeap = true;
+            } else {
+                leapLeftButton.title = 'Jump left (shift+LEFT)';
+                leapRightButton.title = 'Jump right (shift+RIGHT)';
+            }
         }
 
         leapLeftButton.firstChild.className = canLeap ? 'fa fa-angle-double-left' : 'fa fa-angle-left';

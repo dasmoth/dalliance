@@ -25,72 +25,7 @@ Browser.prototype.removeAllPopups = function() {
 
 Browser.prototype.makeTooltip = function(ele, text)
 {
-    var isin = false;
-    var thisB = this;
-    var timer = null;
-    var outlistener;
-    outlistener = function(ev) {
-        isin = false;
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
-        ele.removeEventListener('mouseout', outlistener, false);
-    };
-
-    var setup = function(ev) {
-        var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
-        if (!timer) {
-            timer = setTimeout(function() {
-                var ttt;
-                if (typeof(text) === 'function') {
-                    ttt = text();
-                } else {
-                    ttt = text;
-                }
-
-                var popup = makeElement('div',
-                    [makeElement('div', null, {className: 'tooltip-arrow'}),
-                     makeElement('div', ttt, {className: 'tooltip-inner'})], 
-                    {className: 'tooltip bottom in'}, {
-                    display: 'block',
-                    top: '' + (my + 20) + 'px',
-                    left: '' + Math.max(mx - 30, 20) + 'px'
-                });
-                thisB.hPopupHolder.appendChild(popup);
-                var moveHandler;
-                moveHandler = function(ev) {
-                    try {
-                        thisB.hPopupHolder.removeChild(popup);
-                    } catch (e) {
-                        // May have been removed by other code which clears the popup layer.
-                    }
-                    window.removeEventListener('mousemove', moveHandler, false);
-                    if (isin) {
-                        if (ele.offsetParent == null) {
-                        } else {
-                            setup(ev);
-                        }
-                    }
-                }
-                window.addEventListener('mousemove', moveHandler, false);
-                timer = null;
-            }, 1000);
-        }
-    };
-
-    ele.addEventListener('mouseover', function(ev) {
-        isin = true
-        ele.addEventListener('mouseout', outlistener, false);
-        setup(ev);
-    }, false);
-    ele.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
-        isin = false;
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
-    }, false);
+    ele.title = text;
 }
 
 Browser.prototype.popit = function(ev, name, ele, opts)
