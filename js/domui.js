@@ -19,6 +19,18 @@ if (typeof(require) !== 'undefined') {
 }
 
 Browser.prototype.removeAllPopups = function() {
+    for (var pi = 0; pi < this.popups.length; ++pi) {
+        var popup = this.popups[pi];
+        if (popup.onClose) {
+            try {
+                popup.onClose();
+            } catch (ex) {
+                console.log(ex);
+            }
+        }
+        this.hPopupHolder.removeChild(popup.component);
+    }
+    this.popups = [];
     removeChildren(this.hPopupHolder);
     removeChildren(this.popupHolder);
 }
@@ -118,6 +130,11 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         padding: '0px'
     }));
     this.hPopupHolder.appendChild(popup);
+
+    this.popups.push({
+        component: popup,
+        onClose: opts.onClose
+    });
 }
 
 function makeTreeTableSection(title, content, visible) {

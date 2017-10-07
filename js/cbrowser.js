@@ -748,6 +748,7 @@ Browser.prototype.realInit2 = function() {
     this.hPopupHolder.style['font-size'] = '12pt';
     this.hPopupHolder.classList.add('dalliance');
     document.body.appendChild(this.hPopupHolder);
+    this.popups = [];
 
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];

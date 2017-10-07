@@ -41,6 +41,7 @@ function FeatureInfo(hit, feature, group) {
     this.group = group;
     this.title = name;
     this.sections = [];
+    this.closeListeners = [];
 }
 
 FeatureInfo.prototype.setTitle = function(t) {
@@ -52,6 +53,20 @@ FeatureInfo.prototype.add = function(label, info) {
         info = makeElement('span', info);
     }
     this.sections.push({label: label, info: info});
+}
+
+FeatureInfo.prototype.addCloseListener = function(f) {
+    this.closeListeners.push(f);
+}
+
+FeatureInfo.prototype._notifyClose = function() {
+    for (var cli = 0; cli < this.closeListeners.length; ++cli) {
+        try {
+            this.closeListeners[cli]();
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
 }
 
 Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
@@ -157,7 +172,15 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
             makeElement('td', section.info)]));
     }        
 
-    this.popit(ev, featureInfo.title || 'Feature', table, {width: 450});
+    this.popit(
+        ev, 
+        featureInfo.title || 'Feature',
+        table, 
+        {
+            width: 450,
+            onClose: featureInfo._notifyClose.bind(featureInfo)
+        }
+    );
 }
 
 function maybeConcat(a, b) {
