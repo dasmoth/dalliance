@@ -31,8 +31,6 @@ Browser.prototype.removeAllPopups = function() {
         this.hPopupHolder.removeChild(popup.component);
     }
     this.popups = [];
-    removeChildren(this.hPopupHolder);
-    removeChildren(this.popupHolder);
 }
 
 Browser.prototype.makeTooltip = function(ele, text)
