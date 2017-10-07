@@ -129,12 +129,7 @@ function DasTier(browser, source, config, background)
     this.initSources();
 
     var thisB = this;
-    if (this.featureSource && this.featureSource.getDefaultFIPs && !source.noSourceFeatureInfo) {
-        this.featureSource.getDefaultFIPs(function(fip) {
-            if (fip)
-                thisB.addFeatureInfoPlugin(fip);
-        });
-    }
+    
 
     if (this.featureSource && this.featureSource.addReadinessListener) {
         this.readinessListener = function(ready) {
@@ -157,10 +152,26 @@ function DasTier(browser, source, config, background)
 
     this.listeners = [];
     this.featuresLoadedListeners = [];
+    this.destroyListeners = [];
     this.firstRenderPromise = new Promise((resolve, reject) => this._resolveFirstRenderPromise = resolve);
+
+    if (this.featureSource && this.featureSource.getDefaultFIPs && !source.noSourceFeatureInfo) {
+        this.featureSource.getDefaultFIPs(function(fip) {
+            if (fip)
+                thisB.addFeatureInfoPlugin(fip);
+        }, this);
+    }
 }
 
 DasTier.prototype.destroy = function() {
+    for (const handler of this.destroyListeners) {
+        try {
+            handler(this);
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
+
     if (this.featureSource.removeReadinessListener) {
         this.featureSource.removeReadinessListener(this.readinessListener);
     }
@@ -182,6 +193,14 @@ DasTier.prototype.addFeatureInfoPlugin = function(p) {
     if (!this.featureInfoPlugins) 
         this.featureInfoPlugins = [];
     this.featureInfoPlugins.push(p);
+}
+
+DasTier.prototype.addDescriptionContent = function(content) {
+    if (typeof(content) === 'string') {
+        content = makeElement('div', content);
+    }
+
+    this.infoElement.appendChild(content);
 }
 
 DasTier.prototype.init = function() {
@@ -680,6 +699,17 @@ DasTier.prototype.removeFeaturesLoadedListener = function(handler) {
     var idx = arrayIndexOf(this.featuresLoadedListeners, handler);
     if (idx >= 0) {
         this.featuresLoadedListeners.splice(idx, 1);
+    }
+}
+
+DasTier.prototype.addDestroyListener = function(handler) {
+    this.destroyListeners.push(handler);
+}
+
+DasTier.prototype.removeDestroyListener = function(handler) {
+    var idx = arrayIndexOf(this.destroyListeners, handler);
+    if (idx >= 0) {
+        this.destroyListeners.splice(idx, 1);
     }
 }
 

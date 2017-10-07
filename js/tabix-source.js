@@ -96,9 +96,9 @@ TabixFeatureSource.prototype.getStyleSheet = function(callback) {
         this.parser.getStyleSheet(callback)
 }
 
-TabixFeatureSource.prototype.getDefaultFIPs = function(callback) {
+TabixFeatureSource.prototype.getDefaultFIPs = function(callback, tier) {
     if (this.parser && this.parser.getDefaultFIPs)
-        this.parser.getDefaultFIPs(callback);
+        this.parser.getDefaultFIPs(callback, tier);
 }
 
 

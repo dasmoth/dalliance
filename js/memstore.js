@@ -215,9 +215,9 @@ MemStoreFeatureSource.prototype.getStyleSheet = function(callback) {
         this.parser.getStyleSheet(callback)
 }
 
-MemStoreFeatureSource.prototype.getDefaultFIPs = function(callback) {
+MemStoreFeatureSource.prototype.getDefaultFIPs = function(callback, tier) {
     if (this.parser && this.parser.getDefaultFIPs)
-        this.parser.getDefaultFIPs(callback);
+        this.parser.getDefaultFIPs(callback, tier);
 }
 
 MemStoreFeatureSource.prototype.getScales = function() {

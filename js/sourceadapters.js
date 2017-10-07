@@ -230,9 +230,9 @@ CachingFeatureSource.prototype.search = function(query, callback) {
         return this.source.search(query, callback);
 };
 
-CachingFeatureSource.prototype.getDefaultFIPs = function(callback) {
+CachingFeatureSource.prototype.getDefaultFIPs = function(callback, tier) {
     if (this.source.getDefaultFIPs)
-        return this.source.getDefaultFIPs(callback); 
+        return this.source.getDefaultFIPs(callback, tier); 
 };
 
 CachingFeatureSource.prototype.getStyleSheet = function(callback) {
@@ -1530,9 +1530,9 @@ MappedFeatureSource.prototype.getScales = function() {
     return this.source.getScales();
 };
 
-MappedFeatureSource.prototype.getDefaultFIPs = function(callback) {
+MappedFeatureSource.prototype.getDefaultFIPs = function(callback, tier) {
     if (this.source.getDefaultFIPs)
-        return this.source.getDefaultFIPs(callback);
+        return this.source.getDefaultFIPs(callback, tier);
 };
 
 MappedFeatureSource.prototype.simplifySegments = function(segs, minGap) {
