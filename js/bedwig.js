@@ -87,77 +87,82 @@ BedParseSession.prototype.parse = function(line) {
         var blockSizes = toks[10].split(',').map(function(x) {return parseInt(x)});
         var blockStarts = toks[11].split(',').map(function(x) {return parseInt(x)});
 
-        f.type = 'transcript'
-        var grp = new DASGroup();
-        grp.id = toks[3];
-        grp.type = 'transcript'
-        grp.notes = [];
-        f.groups = [grp];
-
-        if (toks.length > 12) {
-            var geneId = toks[12];
-            var geneName = geneId;
-            if (toks.length > 13) {
-                geneName = toks[13];
-            }
-            var gg = new DASGroup();
-            gg.id = geneId;
-            gg.label = geneName;
-            gg.type = 'gene';
-            f.groups.push(gg);
-        }  
-
-        var spans = null;
-        for (var b = 0; b < blockCount; ++b) {
+        // Only handle "block" data if things look reasonably sane.
+        if (blockSizes.length == blockStarts.length && blockSizes.length == blockCount) {
+            f.type = 'transcript'
+            var grp = new DASGroup();
+            grp.id = toks[3];
+            grp.type = 'transcript'
+            grp.notes = [];
+            f.groups = [grp];
+            
+            if (toks.length > 12) {
+                var geneId = toks[12];
+                var geneName = geneId;
+                if (toks.length > 13) {
+                    geneName = toks[13];
+                }
+                var gg = new DASGroup();
+                gg.id = geneId;
+                gg.label = geneName;
+                gg.type = 'gene';
+                f.groups.push(gg);
+            }  
+            
+            var spans = null;
+            for (var b = 0; b < blockCount; ++b) {
             var bmin = blockStarts[b] + start;
-            var bmax = bmin + blockSizes[b];
-            var span = new Range(bmin, bmax);
-            if (spans) {
-                spans = union(spans, span);
-            } else {
-                spans = span;
-            }
-        }
-                    
-        var tsList = spans.ranges();
-        for (var s = 0; s < tsList.length; ++s) {
-            var ts = tsList[s];
-            var bf = shallowCopy(f);
-            bf.min = ts.min();
-            bf.max = ts.max();
-            this.sink(bf);
-        }
-
-        if (thickEnd > thickStart) {
-            var codingRegion = (f.orientation == '+') ? 
-                new Range(thickStart, thickEnd + 3) : 
-                new Range(thickStart - 3, thickEnd);
-                // +/- 3 to account for stop codon
-
-            var tl = intersection(spans, codingRegion);
-            if (tl) {
-                f.type = 'translation';
-                var tlList = tl.ranges();
-                var readingFrame = 0;
-                for (var s = 0; s < tlList.length; ++s) {
-                    // Record reading frame for every exon
-                    var index = s;
-                    if (f.orientation == '-')
-                        index = tlList.length - s - 1;
-                    var ts = tlList[index];
-                    var bf = shallowCopy(f);
-                    bf.min = ts.min();
-                    bf.max = ts.max();
-                    f.readframe = readingFrame;
-                    var length = ts.max() - ts.min();
-                    readingFrame = (readingFrame + length) % 3;
-                    this.sink(bf);
+                var bmax = bmin + blockSizes[b];
+                var span = new Range(bmin, bmax);
+                if (spans) {
+                    spans = union(spans, span);
+                } else {
+                    spans = span;
                 }
             }
+                    
+            var tsList = spans.ranges();
+            for (var s = 0; s < tsList.length; ++s) {
+                var ts = tsList[s];
+                var bf = shallowCopy(f);
+                bf.min = ts.min();
+                bf.max = ts.max();
+                this.sink(bf);
+            }
+
+            if (thickEnd > thickStart) {
+                var codingRegion = (f.orientation == '+') ? 
+                    new Range(thickStart, thickEnd + 3) : 
+                    new Range(thickStart - 3, thickEnd);
+                // +/- 3 to account for stop codon
+                
+                var tl = intersection(spans, codingRegion);
+                if (tl) {
+                    f.type = 'translation';
+                    var tlList = tl.ranges();
+                    var readingFrame = 0;
+                    for (var s = 0; s < tlList.length; ++s) {
+                        // Record reading frame for every exon
+                        var index = s;
+                        if (f.orientation == '-')
+                            index = tlList.length - s - 1;
+                        var ts = tlList[index];
+                        var bf = shallowCopy(f);
+                        bf.min = ts.min();
+                        bf.max = ts.max();
+                        f.readframe = readingFrame;
+                        var length = ts.max() - ts.min();
+                        readingFrame = (readingFrame + length) % 3;
+                        this.sink(bf);
+                    }
+                }
+            }
+
+            return;
         }
-    } else {
-        this.sink(f);
     }
+
+    this.sink(f);
 }
 
 BedParseSession.prototype.flush = function() {};
