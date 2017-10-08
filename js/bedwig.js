@@ -41,7 +41,7 @@ BedWigParser.prototype.createSession = function(sink) {
 }
 
 var __KV_REGEXP=/([^=]+)=(.+)/;
-var __SPACE_REGEXP=/\s/;
+var __SPACE_REGEXP=/\s+/;
 var BED_COLOR_REGEXP = new RegExp("^[0-9]+,[0-9]+,[0-9]+");
 
 function BedParseSession(parser, sink) {

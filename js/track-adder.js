@@ -1275,6 +1275,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         probeResource(ns, function(source, err) {
             if (err) {
                 source.error = err;
+                console.log(err);
             }
 
             var usedIndices = [];
