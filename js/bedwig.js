@@ -112,7 +112,7 @@ BedParseSession.prototype.parse = function(line) {
             var spans = null;
             for (var b = 0; b < blockCount; ++b) {
             var bmin = blockStarts[b] + start;
-                var bmax = bmin + blockSizes[b];
+                var bmax = bmin + blockSizes[b] - 1;
                 var span = new Range(bmin, bmax);
                 if (spans) {
                     spans = union(spans, span);
