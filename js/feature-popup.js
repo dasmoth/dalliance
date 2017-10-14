@@ -77,13 +77,20 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
     var featureInfo = new FeatureInfo(hit, feature, group);
     featureInfo.tier = tier;
     var fips = this.featureInfoPlugins || [];
+    var inhibitPopup = false;
+
     for (var fipi = 0; fipi < fips.length; ++fipi) {
         try {
-            fips[fipi](feature, featureInfo);
+            inhibitPopup = fips[fipi](feature, featureInfo);
         } catch (e) {
             console.log(e.stack || e);
         }
     }
+
+    if(inhibitPopup) {
+      return
+    }
+
     fips = tier.featureInfoPlugins || [];
     for (fipi = 0; fipi < fips.length; ++fipi) {
         try {
