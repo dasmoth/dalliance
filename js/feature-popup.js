@@ -42,6 +42,7 @@ function FeatureInfo(hit, feature, group) {
     this.title = name;
     this.sections = [];
     this.closeListeners = [];
+    this._inhibitPopup = false;
 }
 
 FeatureInfo.prototype.setTitle = function(t) {
@@ -53,6 +54,10 @@ FeatureInfo.prototype.add = function(label, info) {
         info = makeElement('span', info);
     }
     this.sections.push({label: label, info: info});
+}
+
+FeatureInfo.prototype.inhibitPopup = function() {
+    this._inhibitPopup = true;
 }
 
 FeatureInfo.prototype.addCloseListener = function(f) {
@@ -91,6 +96,12 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         } catch (e) {
             console.log(e.stack || e);
         }
+    }
+
+    if (featureInfo._inhibitPopup) {
+        // This is effectively an "instant close", so notify any FIPs that care.
+        featureInfo._notifyClose();
+        return;
     }
 
     this.removeAllPopups();
@@ -170,7 +181,7 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         table.appendChild(makeElement('tr', [
             makeElement('th', section.label),
             makeElement('td', section.info)]));
-    }        
+    }
 
     this.popit(
         ev, 
