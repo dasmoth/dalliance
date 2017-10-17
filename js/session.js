@@ -216,6 +216,10 @@ Browser.prototype.restoreStatus = function() {
                             source[k] = oldSource[k];
                         }
                     }
+
+                    if (typeof(oldSource.renderer) === 'object' && oldSource.renderer.renderTier) {
+                        source.renderer = oldSource.renderer;
+                    }
                 }
             }
         }
