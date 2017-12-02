@@ -13,6 +13,8 @@ if (typeof(require) !== 'undefined') {
     var bin = require('./bin');
     var readInt = bin.readInt;
     var readIntBE = bin.readIntBE;
+    var readInt64BE = bin.readInt64BE,
+        readInt64LE = bin.readInt64LE;
 
     var spans = require('./spans');
     var Range = spans.Range;
@@ -41,15 +43,17 @@ function makeTwoBit(fetchable, cnt) {
         var magic = readInt(ba, 0);
         if (magic == TWOBIT_MAGIC) {
             tb.readInt = readInt;
+            tb.readInt64 = readInt64LE;
         } else if (magic == TWOBIT_MAGIC_BE) {
             tb.readInt = readIntBE;
+            tb.readInt64 = readInt64BE;
         } else {
             return cnt(null, "Not a .2bit file, magic=0x" + magic.toString(16));
         }
 
-        var version = tb.readInt(ba, 4);
-        if (version != 0) {
-            return cnt(null, 'Unsupported version ' + version);
+        tb.version = tb.readInt(ba, 4);
+        if (tb.version < 0 || tb.version > 1) {
+            return cnt(null, 'Unsupported version ' + tb.version);
         }
 
         tb.seqCount = tb.readInt(ba, 8);
@@ -61,7 +65,7 @@ function makeTwoBit(fetchable, cnt) {
         var parseSeqInfo = function() {
             while (i < tb.seqCount) {
                 var ns = ba[p];
-                if (p + ns + 6 >= ba.length) {
+                if (p + ns + 2 + (tb.version == 0 ? 4 : 8) >= ba.length) {
                     headerBlocksFetched += headerBlockSize;
                     headerBlockSize = Math.max(HEADER_BLOCK_SIZE,Math.floor(headerBlocksFetched*tb.seqCount/i));
                     return tb.data.slice(o + p, headerBlockSize).fetch(function (r) {
@@ -76,8 +80,13 @@ function makeTwoBit(fetchable, cnt) {
                     for (var j = 1; j <= ns; ++j) {
                         name += String.fromCharCode(ba[p++]);
                     }
-                    var offset = tb.readInt(ba, p);
-                    p += 4;
+                    if (tb.version == 0) {
+                        var offset = tb.readInt(ba, p);
+                        p += 4;
+                    } else {
+                        var offset = tb.readInt64(ba, p);
+                        p += 8;
+                    }
                     tb.seqDict[name] = new TwoBitSeq(tb, offset);
                     ++i;
                 }

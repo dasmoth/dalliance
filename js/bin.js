@@ -275,12 +275,26 @@ function readFloat(buf, offset) {
     ba[0] = buf[offset];
     ba[1] = buf[offset+1];
     ba[2] = buf[offset+2];
-        ba[3] = buf[offset+3];
+    ba[3] = buf[offset+3];
     return fa[0];
 }
 
 function readInt64(ba, offset) {
     return (ba[offset + 7] << 24) | (ba[offset + 6] << 16) | (ba[offset + 5] << 8) | (ba[offset + 4]);
+}
+
+const M1 = 256,
+      M2 = M1 * 256,
+      M3 = M2 * 256,
+      M4 = M3 * 256,
+      M5 = M4 * 256;
+
+function readInt64LE(ba, offset) {
+    return (ba[offset]) + (ba[offset + 1] * M1) + (ba[offset + 2] * M2) + (ba[offset + 3] * M3) + (ba[offset + 4] * M4) + (ba[offset + 5] * M5);
+}
+
+function readInt64BE(ba, offset) {
+    return (ba[offset + 7]) + (ba[offset + 6] * M1) + (ba[offset + 5] * M2) + (ba[offset + 4] * M3) + (ba[offset + 3] * M4) + (ba[offset + 2] * M5);
 }
 
 function readInt(ba, offset) {
@@ -309,6 +323,8 @@ if (typeof(module) !== 'undefined') {
         readInt: readInt,
         readIntBE: readIntBE,
         readInt64: readInt64,
+        readInt64LE: readInt64LE,
+        readInt64BE: readInt64BE,
         readShort: readShort,
         readByte: readByte,
         readFloat: readFloat
