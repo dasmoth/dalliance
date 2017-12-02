@@ -7,6 +7,7 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '',
 
+    plugins: ['karma-chrome-launcher', 'karma-browserify', 'karma-jasmine'],
 
     // frameworks to use
     frameworks: ['browserify', 'jasmine'],
