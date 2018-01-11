@@ -92,34 +92,35 @@ Browser.prototype.popit = function(ev, name, ele, opts)
         }, false);
         var tbar = makeElement('h4', [makeElement('span', name, null, {maxWidth: '200px'}), closeButton], {/*className: 'popover-title' */}, {paddingLeft: '10px', paddingRight: '10px'});
 
-        var dragOX, dragOY;
-        var moveHandler, upHandler;
-        moveHandler = function(ev) {
-            ev.stopPropagation(); ev.preventDefault();
-            left = left + (ev.clientX - dragOX);
-            if (left < 8) {
-                left = 8;
-            } if (left > (winWidth - width - 32)) {
-                left = (winWidth - width - 26);
+        if ( !opts.disableDrag ) {
+            var dragOX, dragOY;
+            var moveHandler, upHandler;
+            moveHandler = function(ev) {
+                ev.stopPropagation(); ev.preventDefault();
+                left = left + (ev.clientX - dragOX);
+                if (left < 8) {
+                    left = 8;
+                } if (left > (winWidth - width - 32)) {
+                    left = (winWidth - width - 26);
+                }
+                top = top + (ev.clientY - dragOY);
+                top = Math.max(10, top);
+                popup.style.top = '' + top + 'px';
+                popup.style.left = '' + Math.min(left, (winWidth - width - 10)) + 'px';
+                dragOX = ev.clientX; dragOY = ev.clientY;
             }
-            top = top + (ev.clientY - dragOY);
-            top = Math.max(10, top);
-            popup.style.top = '' + top + 'px';
-            popup.style.left = '' + Math.min(left, (winWidth - width - 10)) + 'px';
-            dragOX = ev.clientX; dragOY = ev.clientY;
+            upHandler = function(ev) {
+                ev.stopPropagation(); ev.preventDefault();
+                window.removeEventListener('mousemove', moveHandler, false);
+                window.removeEventListener('mouseup', upHandler, false);
+            }
+            tbar.addEventListener('mousedown', function(ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                dragOX = ev.clientX; dragOY = ev.clientY;
+                window.addEventListener('mousemove', moveHandler, false);
+                window.addEventListener('mouseup', upHandler, false);
+            }, false);
         }
-        upHandler = function(ev) {
-            ev.stopPropagation(); ev.preventDefault();
-            window.removeEventListener('mousemove', moveHandler, false);
-            window.removeEventListener('mouseup', upHandler, false);
-        }
-        tbar.addEventListener('mousedown', function(ev) {
-            ev.preventDefault(); ev.stopPropagation();
-            dragOX = ev.clientX; dragOY = ev.clientY;
-            window.addEventListener('mousemove', moveHandler, false);
-            window.addEventListener('mouseup', upHandler, false);
-        }, false);
-
 
         popup.appendChild(tbar);
     }
