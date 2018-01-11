@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -41,9 +41,9 @@ Browser.prototype.makeTooltip = function(ele, text)
 Browser.prototype.popit = function(ev, name, ele, opts)
 {
     var thisB = this;
-    if (!opts) 
+    if (!opts)
         opts = {};
-    if (!ev) 
+    if (!ev)
         ev = {};
 
     var width = opts.width || 200;
@@ -119,7 +119,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
             window.addEventListener('mousemove', moveHandler, false);
             window.addEventListener('mouseup', upHandler, false);
         }, false);
-                              
+
 
         popup.appendChild(tbar);
     }
