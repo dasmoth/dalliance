@@ -74,7 +74,12 @@ FeatureInfo.prototype._notifyClose = function() {
     }
 }
 
-Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
+Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier, opts) {
+    if (!opts) {
+        opts = {};
+    }
+
+
     var hi = hit.length;
     var feature = --hi >= 0 ? hit[hi] : {};
     var group = --hi >= 0 ? hit[hi] : {};
@@ -189,7 +194,8 @@ Browser.prototype.featurePopup = function(ev, __ignored_feature, hit, tier) {
         table,
         {
             width: 450,
-            onClose: featureInfo._notifyClose.bind(featureInfo)
+            onClose: featureInfo._notifyClose.bind(featureInfo),
+            disableDrag: opts.disableDrag
         }
     );
 }
