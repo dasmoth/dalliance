@@ -116,7 +116,7 @@ function Browser(opts) {
 
     this.minExtraWidth = 100.0;
     this.maxExtraWidth = 1000.0;
-    
+
     // Options.
 
     this.reverseScrolling = false;
@@ -135,6 +135,7 @@ function Browser(opts) {
     this.tierBackgroundColors = ["rgb(245,245,245)", 'white'];
     this.minTierHeight = 20;
     this.noDefaultLabels = false;
+    this.disableFeaturePopupDrag = opts.disableFeaturePopupDrag;
 
     // Registry
 
@@ -200,7 +201,7 @@ function Browser(opts) {
     for (var k in opts) {
         this[k] = opts[k];
     }
-    
+
     if (typeof(opts.uiPrefix) === 'string' && typeof(opts.prefix) !== 'string') {
         this.prefix = opts.uiPrefix;
     }
@@ -304,7 +305,7 @@ Browser.prototype.realInit = function() {
             throw Error('pageName must be a valid element ID (or use the injectionPoint option instead)');
         }
     }
-    
+
     this.browserHolderHolder.classList.add('dalliance-injection-point');
     this.browserHolder = makeElement('div', null, {className: 'dalliance dalliance-root', tabIndex: -1});
     if (this.maxHeight) {
