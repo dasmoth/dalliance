@@ -76,7 +76,27 @@ Browser.prototype.exportImage = function(opts) {
                 totHeight += tier.layoutHeight;
     }
     var mult = opts.resolutionMultiplier || 1.0;
+    var font = '10px sans-serif';
     var margin = 200;
+
+    {
+        var tmpCanvas = makeElement('canvas', null, 1, 1);
+        var tmpG = tmpCanvas.getContext('2d');
+        tmpG.font = font;
+        for (var ti = 0; ti < this.tiers.length; ++ti) {
+            var tier = this.tiers[ti];
+            var labelName;
+            if (typeof tier.config.name === 'string')
+                labelName = tier.config.name;
+            else
+                labelName = tier.dasSource.name;
+            var labelWidth = tmpG.measureText(labelName).width;
+            labelWidth += 32;
+            if (labelWidth > margin)
+                margin = labelWidth;
+        }
+    }
+    
 
     var cw = ((fpw + margin) * mult)|0;
     var ch = (totHeight * mult)|0;
@@ -107,7 +127,7 @@ Browser.prototype.exportImage = function(opts) {
         g.restore();
     }
 
-    g.font = '10px sans-serif';
+    g.font = font;
     
     for (var ti = 0; ti < this.tiers.length; ++ti) {
         var tier = this.tiers[ti];
