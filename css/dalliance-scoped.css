@@ -454,3 +454,7 @@
   text-align: center;
   margin-left: -21px;
 }
+
+.dalliance .popover-content td span {
+    word-break: break-word;
+}
