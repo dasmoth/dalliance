@@ -1015,8 +1015,14 @@ Browser.prototype.realMakeTier = function(source, config) {
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
                 if (hit && hit.length > 0) {
+                    // flag, that there is something hovered on this tier
+                    tier.hovered = true;
                     thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit, tier);
+                } else if(tier.hovered) {
+                    tier.hovered = false;
+                    thisB.notifyFeatureHover(ev, undefined, undefined, tier);
                 }
+
             }, 1000);
         }
     });
