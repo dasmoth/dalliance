@@ -91,7 +91,17 @@ function pushnew(l, o)
     l.push(o);
 }
 
+function arrayEquals(a, b) {
+    if (!a || !b || a.length !== b.length)
+        return false;
 
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i])
+            return false;
+    }
+
+    return true;
+}
 
 function arrayIndexOf(a, x) {
     if (!a) {
@@ -479,6 +489,7 @@ if (typeof(module) !== 'undefined') {
         pushnew: pushnew,
         pushnewo: pushnewo,
         arrayIndexOf: arrayIndexOf,
+        arrayEquals: arrayEquals,
         pick: pick,
 
         makeElement: makeElement,

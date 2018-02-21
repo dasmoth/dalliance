@@ -18,6 +18,7 @@ if (typeof(require) !== 'undefined') {
     var miniJSONify = utils.miniJSONify;
     var shallowCopy = utils.shallowCopy;
     var textXHR = utils.textXHR;
+    var arrayEquals = utils.arrayEquals;
 
     var tier = require('./tier');
     var DasTier = tier.DasTier;
@@ -1012,15 +1013,24 @@ Browser.prototype.realMakeTier = function(source, config) {
             //    dragMoveOrigin = rx;
             // }
         } else {
+            if (hit !== thisB._overFeatures && !arrayEquals(hit, thisB._overFeatures)) {
+                thisB._overFeatures = hit;
+                if (hit && hit.length > 0) {
+                    thisB.notifyImmediateFeatureHover(ev, hit[hit.length - 1], hit, tier);
+                } else {
+                    thisB.notifyImmediateFeatureHover(ev, undefined, undefined, tier);
+                }
+            }
+
             hoverTimeout = setTimeout(function() {
                 var hit = featureLookup(rx, ry);
                 if (hit && hit.length > 0) {
                     // flag, that there is something hovered on this tier
                     tier.hovered = true;
-                    thisB.notifyFeatureHover(ev, hit[hit.length - 1], hit, tier);
+                    thisB.notifyDeferredFeatureHover(ev, hit[hit.length - 1], hit, tier);
                 } else if(tier.hovered) {
                     tier.hovered = false;
-                    thisB.notifyFeatureHover(ev, undefined, undefined, tier);
+                    thisB.notifyDeferredFeatureHover(ev, undefined, undefined, tier);
                 }
 
             }, 1000);
@@ -1991,22 +2001,38 @@ Browser.prototype.notifyFeature = function(ev, feature, hit, tier) {
 
 Browser.prototype.addFeatureHoverListener = function(handler, opts) {
     opts = opts || {};
-    this.featureHoverListeners.push(handler);
+    this.featureHoverListeners.push(Object.assign({handler: handler}, opts));
 }
 
 Browser.prototype.removeFeatureHoverListener = function(handler, opts) {
-    var idx = arrayIndexOf(this.featureHoverListeners, handler);
-    if (idx >= 0) {
-        this.featureHoverListeners.splice(idx, 1);
+    for (var i = 0; i < this.featureHoverListeners.length; ++i) {
+        if (this.featureHoverListeners[i].handler == handler) {
+            this.featureHoverListeners.splice(idx, 1);
+            return;
+        }
     }
 }
 
-Browser.prototype.notifyFeatureHover = function(ev, feature, hit, tier) {
+Browser.prototype.notifyImmediateFeatureHover = function(ev, feature, hit, tier) {
     for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
-        try {
-            this.featureHoverListeners[fli](ev, feature, hit, tier);
-        } catch (ex) {
-            console.log(ex.stack);
+        if (this.featureHoverListeners[fli].immediate) {
+            try {
+                this.featureHoverListeners[fli].handler(ev, feature, hit, tier);
+            } catch (ex) {
+                console.log(ex.stack);
+            }
+        }
+    }
+}
+
+Browser.prototype.notifyDeferredFeatureHover = function(ev, feature, hit, tier) {
+    for (var fli = 0; fli < this.featureHoverListeners.length; ++fli) {
+        if (!this.featureHoverListeners[fli].immediate) {
+            try {
+                this.featureHoverListeners[fli].handler(ev, feature, hit, tier);
+            } catch (ex) {
+                console.log(ex.stack);
+            }
         }
     }
 }
