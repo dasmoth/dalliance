@@ -902,7 +902,7 @@ Browser.prototype.touchMoveHandler = function(ev) {
             this.scale = this.zoomInitialScale * (sep/this.zoomInitialSep);
             this.viewStart = scp - (cp/this.scale)|0;
             for (var i = 0; i < this.tiers.length; ++i) {
-                tiers[i].getRenderer().drawTier(tiers[i]);
+                this.getTierRenderer(tiers[i]).drawTier(tiers[i]);
             }
         }
         this.zoomLastSep = sep;
@@ -940,27 +940,9 @@ Browser.prototype.realMakeTier = function(source, config) {
     var hoverTimeout;
 
     var featureLookup = function(rx, ry) {
-        var st = tier.subtiers;
-        if (!st) {
-            return;
-        }
-
-        var sti = 0;
-        ry -= tier.padding;;
-        while (sti < st.length && ry > st[sti].height && sti < (st.length - 1)) {
-            ry = ry - st[sti].height - tier.padding;
-            ++sti;
-        }
-        if (sti >= st.length) {
-            return;
-        }
-
-        var glyphs = st[sti].glyphs;
-        var viewCenter = (thisB.viewStart + thisB.viewEnd)/2;
-        var offset = (tier.glyphCacheOrigin - thisB.viewStart)*thisB.scale;
-        rx -= offset;
-
-        return glyphLookup(glyphs, rx, ry);
+        const renderer = thisB.getTierRenderer(tier);
+        if (renderer.featureLookup)
+            return renderer.featureLookup(tier, rx, ry);
     }
 
     var dragMoveHandler = function(ev) {
@@ -2481,35 +2463,6 @@ Browser.prototype.leap = function(dir, fedge) {
     } else {
         this.move(100*dir);
     }
-}
-
-function glyphLookup(glyphs, rx, ry, matches) {
-    matches = matches || [];
-
-    for (var gi = glyphs.length - 1; gi >= 0; --gi) {
-        var g = glyphs[gi];
-        if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
-            if (g.minY) {
-                if (ry < g.minY() || ry > g.maxY())
-                    continue;
-            }
-
-            if (g.feature) {
-                matches.push(g.feature);
-            } else if (g.group) {
-                matches.push(g.group);
-            }
-
-            if (g.glyphs) {
-                return glyphLookup(g.glyphs, rx, ry, matches);
-            } else if (g.glyph) {
-                return glyphLookup([g.glyph], rx, ry, matches);
-            } else {
-                return matches;
-            }
-        }
-    }
-    return matches;
 }
 
 Browser.prototype.nameForCoordSystem = function(cs) {

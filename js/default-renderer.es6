@@ -35,7 +35,8 @@ export { renderTier,
          drawUnmapped,
          clearViewport,
          createQuantOverlay,
-         paintQuant
+         paintQuant,
+         featureLookup
        };
 
 function renderTier(status, tier) {
@@ -1333,4 +1334,57 @@ function paintQuant(canvas, tier, quant, tics) {
     }
 
     canvas.restore();
+}
+
+function featureLookup(tier, rx, ry) {
+    var st = tier.subtiers;
+    if (!st) {           
+        return;
+    }
+
+    var sti = 0;
+    ry -= tier.padding;
+    while (sti < st.length && ry > st[sti].height && sti < (st.length - 1)) {
+        ry = ry - st[sti].height - tier.padding;
+        ++sti;
+    }
+    if (sti >= st.length) {
+        return;
+    }
+    
+    var glyphs = st[sti].glyphs;
+    var viewCenter = (tier.browser.viewStart + tier.browser.viewEnd)/2;
+    var offset = (tier.glyphCacheOrigin - tier.browser.viewStart)*tier.browser.scale;
+    rx -= offset;
+
+    return glyphLookup(glyphs, rx, ry);
+}
+
+function glyphLookup(glyphs, rx, ry, matches) {
+    matches = matches || [];
+
+    for (var gi = glyphs.length - 1; gi >= 0; --gi) {
+        var g = glyphs[gi];
+        if (!g.notSelectable && g.min() <= rx && g.max() >= rx) {
+            if (g.minY) {
+                if (ry < g.minY() || ry > g.maxY())
+                    continue;
+            }
+
+            if (g.feature) {
+                matches.push(g.feature);
+            } else if (g.group) {
+                matches.push(g.group);
+            }
+
+            if (g.glyphs) {
+                return glyphLookup(g.glyphs, rx, ry, matches);
+            } else if (g.glyph) {
+                return glyphLookup([g.glyph], rx, ry, matches);
+            } else {
+                return matches;
+            }
+        }
+    }
+    return matches;
 }
