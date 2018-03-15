@@ -100,7 +100,7 @@ KnownSpace.prototype.bestCacheOverlapping = function(chr, min, max) {
     }
 }
 
-KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale) {
+KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale, noStartFetches) {
     if (scale != scale) {
         throw "retrieveFeatures called with silly scale";
     }
@@ -124,7 +124,9 @@ KnownSpace.prototype.retrieveFeatures = function(tiers, chr, min, max, scale) {
     this.seqWasFetched = false;
     this.viewCount++;
 
-    this.startFetchesForTiers(tiers);
+    if (!noStartFetches) {
+        this.startFetchesForTiers(tiers);
+    }
     this.pool.notifyRequestsIssued();
 }
 

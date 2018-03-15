@@ -752,6 +752,7 @@ Browser.prototype.realInit2 = function() {
     document.body.appendChild(this.hPopupHolder);
     this.popups = [];
 
+    var tierCreationPromises = [];
     for (var t = 0; t < this.sources.length; ++t) {
         var source = this.sources[t];
         if (!source)
@@ -763,9 +764,7 @@ Browser.prototype.realInit2 = function() {
         }
 
         if (!source.disabled) {
-            this.makeTier(source, config).then(function(tier) {
-                thisB.refreshTier(tier);
-            });
+            tierCreationPromises.push(this.makeTier(source, config));
         }
     }
 
@@ -848,7 +847,11 @@ Browser.prototype.realInit2 = function() {
     }
 
     thisB.setLocation(this.chr, this.viewStart, this.viewEnd, function () {
+        tierCreationPromises.forEach((p) => p.then((t) => {
+            thisB.refreshTier(t, null, true)
+        }));
         thisB.setSelectedTier(1);
+        
         // Ping any init listeners.
         for (var ii = 0; ii < thisB.initListeners.length; ++ii) {
             try {
@@ -857,7 +860,7 @@ Browser.prototype.realInit2 = function() {
                 console.log(e);
             }
         }
-    });
+    }, false, true);
 }
 
 //
@@ -1309,14 +1312,19 @@ Browser.prototype.withPreservedSelection = function(f) {
     }
 }
 
-Browser.prototype.refreshTier = function(tier, tierCallback) {
+Browser.prototype.refreshTier = function(tier, tierCallback, noInvalidate) {
     var renderer = this.getTierRenderer(tier);
     if (tier.dasSource.renderer === 'multi') {
         renderer.drawTier(tier);
     } else {
         var renderCallback = tierCallback || renderer.renderTier;
         if (this.knownSpace) {
-            this.knownSpace.invalidate(tier, renderCallback);
+            if (noInvalidate) {
+                if (this.knownSpace.pool)
+                    this.knownSpace.startFetchesForTiers([tier]);
+            } else {
+                this.knownSpace.invalidate(tier, renderCallback);
+            }
         }
     }
 }
@@ -1435,8 +1443,8 @@ Browser.prototype.arrangeTiers = function() {
     }
 }
 
-Browser.prototype.refresh = function() {
-    this.retrieveTierData(this.tiers);
+Browser.prototype.refresh = function(noStartFetches) {
+    this.retrieveTierData(this.tiers, noStartFetches);
     this.drawOverlays();
     this.positionRuler();
 };
@@ -1445,7 +1453,7 @@ var defaultTierRenderer = function(status, tier) {
     console.log("DEPRECATED!");
 }
 
-Browser.prototype.retrieveTierData = function(tiers) {
+Browser.prototype.retrieveTierData = function(tiers, noStartFetches) {
     this.notifyLocation();
     var width = (this.viewEnd - this.viewStart) + 1;
     var minExtraW = (this.minExtraWidth / this.scale)|0;
@@ -1491,7 +1499,8 @@ Browser.prototype.retrieveTierData = function(tiers) {
                                      this.chr,
                                      this.drawnStart,
                                      this.drawnEnd,
-                                     scaledQuantRes);
+                                     scaledQuantRes,
+                                     noStartFetches);
 }
 
 function setSources(msh, availableSources, maybeMapping) {
@@ -1630,7 +1639,7 @@ Browser.prototype.zoom = function(factor) {
 
 Browser.prototype.spaceCheck = function(dontRefresh) {
     if (!this.knownSpace || this.knownSpace.chr !== this.chr) {
-        this.refresh();
+        this.refresh(dontRefresh);
         return;
     }
 
@@ -1639,7 +1648,7 @@ Browser.prototype.spaceCheck = function(dontRefresh) {
     var maxExtraW = (this.maxExtraWidth / this.scale)|0;
 
     if ((this.drawnStart|0) > Math.max(1, ((this.viewStart|0) - minExtraW)|0)  || (this.drawnEnd|0) < Math.min((this.viewEnd|0) + minExtraW, ((this.currentSeqMax|0) > 0 ? (this.currentSeqMax|0) : 1000000000)))  {
-        this.refresh();
+        this.refresh(dontRefresh);
     }
 }
 
@@ -1790,7 +1799,7 @@ Browser.prototype._getSequenceSource = function() {
     }
 }
 
-Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft) {
+Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft, noRefresh) {
     if (typeof(newMin) !== 'number') {
         throw Error('minimum must be a number (got ' + JSON.stringify(newMin) + ')');
     }
@@ -1816,7 +1825,7 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft)
     var thisB = this;
 
     if ((!newChr || newChr == this.chr) && this.currentSeqMax > 0) {
-        return this._setLocation(null, newMin, newMax, null, callback, soft);
+        return this._setLocation(null, newMin, newMax, null, callback, soft, noRefresh);
     } else {
         var ss = this.getSequenceSource();
         if (!ss) {
@@ -1836,19 +1845,19 @@ Browser.prototype.setLocation = function(newChr, newMin, newMax, callback, soft)
                     if (!si2 && newChr) {
                         return callback("Couldn't find sequence '" + newChr + "'");
                     } else if (!si2) {
-                        return thisB._setLocation(null, newMin, newMax, null, callback, soft);
+                        return thisB._setLocation(null, newMin, newMax, null, callback, soft, noRefresh);
                     } else {
-                        return thisB._setLocation(altChr, newMin, newMax, si2, callback, soft);
+                        return thisB._setLocation(altChr, newMin, newMax, si2, callback, soft, noRefresh);
                     }
                 });
             } else {
-                return thisB._setLocation(newChr, newMin, newMax, si, callback, soft);
+                return thisB._setLocation(newChr, newMin, newMax, si, callback, soft, noRefresh);
             }
         });
     }
 }
 
-Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback, soft) {
+Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, callback, soft, noRefresh) {
     var chrChanged = false;
     if (newChr) {
         if (newChr.indexOf('chr') == 0)
@@ -1894,10 +1903,8 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
             this.tiers[i].overlay.style.left = '5000px';
         }
 
-        this.refresh();
-        // var self = this;
-        // this.tiers.forEach(function(tier) {self.refreshTier(tier);});
-        // this.refreshTier
+        if (!noRefresh)
+            this.refresh(noRefresh);
 
         if (this.savedZoom) {
             newZS -= this.zoomMin;
@@ -1924,7 +1931,7 @@ Browser.prototype._setLocation = function(newChr, newMin, newMax, newChrInfo, ca
 
     this.notifyLocation();
 
-    this.spaceCheck();
+    this.spaceCheck(noRefresh);
     if (this.instrumentActivity)
         this.activityStartTime = Date.now()|0;
     return callback();
