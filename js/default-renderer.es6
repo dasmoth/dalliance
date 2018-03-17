@@ -796,6 +796,7 @@ function featureToCrossLikeGlyph(canvas, tier, feature, y, glyphType, style, for
         let [smin, smax] = getScoreMinMax(tier, style);
 
         let [relScore, relOrigin] = relScoreOrigin(score, smin, smax);
+        // console.log(score, relScore, relOrigin);
 
         if (relScore < 0.0 || relScore > 1.0) {
             // Glyph is out of bounds.
@@ -803,12 +804,7 @@ function featureToCrossLikeGlyph(canvas, tier, feature, y, glyphType, style, for
 
             return null;
         } else {
-            let originShift = x => (x - relOrigin) * requiredHeight;
-            height = Math.max(1, originShift(relScore));
-            y = y + originShift(1);
-
-            if (relScore >= relOrigin)
-                y = y - height;
+            y = (1.0 - relScore) * requiredHeight;
 
             quant = {min: smin, max: smax};
 
