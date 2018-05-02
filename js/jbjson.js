@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
@@ -38,7 +38,7 @@ function jbori(strand) {
 JBrowseStore.prototype.features = function(segment, opts, callback) {
     opts = opts || {};
 
-    url = this.base + '/features/' + segment.name;
+    var url = this.base + '/features/' + segment.name;
 
     var filters = [];
     if (this.query) {
@@ -60,9 +60,10 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 	    } else {
 		var jf = JSON.parse(req.response)['features'];
 		var features = [];
-		for (fi = 0; fi < jf.length; ++fi) {
+		var fi = 0
+		for (; fi < jf.length; ++fi) {
 		    var j = jf[fi];
-		    
+
 		    var f = new DASFeature();
 		    f.segment = segment.name;
 		    f.min = (j['start'] | 0) + 1;
@@ -93,7 +94,7 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
                             if (sj.type === 'CDS')
                                 cds.push(sf);
                         }
-                        
+
                         if (cds.length > 0) {
                             spans = union(blocks);
                             var txGroup = shallowCopy(f);
@@ -127,9 +128,9 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 		callback(features);
 	    }
 	}
-	
+
     };
-    
+
     req.open('GET', url, true);
     req.responseType = 'text';
     req.send('');
