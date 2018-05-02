@@ -42,38 +42,38 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 
     var filters = [];
     if (this.query) {
-	   filters.push(this.query);
+       filters.push(this.query);
     }
     if (segment.isBounded) {
-    	filters.push('start=' + segment.start);
-    	filters.push('end=' + segment.end);
+        filters.push('start=' + segment.start);
+        filters.push('end=' + segment.end);
     }
     if (filters.length > 0) {
-	    url = url + '?' + filters.join('&');
+        url = url + '?' + filters.join('&');
     }
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-	if (req.readyState == 4) {
-	    if (req.status >= 300) {
-		    callback(null, 'Error code ' + req.status);
-	    } else {
-		var jf = JSON.parse(req.response)['features'];
-		var features = [];
-		var fi = 0
-		for (; fi < jf.length; ++fi) {
-		    var j = jf[fi];
+    if (req.readyState == 4) {
+        if (req.status >= 300) {
+            callback(null, 'Error code ' + req.status);
+        } else {
+        var jf = JSON.parse(req.response)['features'];
+        var features = [];
+        var fi = 0
+        for (; fi < jf.length; ++fi) {
+            var j = jf[fi];
 
-		    var f = new DASFeature();
-		    f.segment = segment.name;
-		    f.min = (j['start'] | 0) + 1;
-		    f.max = j['end'] | 0;
-		    if (j.name) {
-			f.label = j.name;
-		    }
+            var f = new DASFeature();
+            f.segment = segment.name;
+            f.min = (j['start'] | 0) + 1;
+            f.max = j['end'] | 0;
+            if (j.name) {
+                f.label = j.name;
+            }
                     if (j.strand)
                         f.orientation = jbori(j.strand);
-		    f.type = j.type || 'unknown';
+            f.type = j.type || 'unknown';
 
                     if (j.subfeatures && j.subfeatures.length > 0) {
                         f.id = j.uniqueID;
@@ -122,12 +122,12 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
                             });
                         }
                     } else {
-		        features.push(f);
+                features.push(f);
                     }
-		}
-		callback(features);
-	    }
-	}
+        }
+        callback(features);
+        }
+    }
 
     };
 
