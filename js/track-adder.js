@@ -520,7 +520,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     mbody.appendChild(row);
                 }
                 matrix.appendChild(mbody);
-                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, thisB.noDefaultHubGroupShow ? false : gi==0 ));
             } else {
                 var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
                 var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'});
