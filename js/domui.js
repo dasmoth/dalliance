@@ -138,12 +138,6 @@ Browser.prototype.popit = function(ev, name, ele, opts)
 
 function makeTreeTableSection(title, content, visible) {
 
-    var showHide = function(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        visible = !visible;
-        update();
-    };
-
     var ttButton = makeElement('i');
     function update() {
         if (visible) {
@@ -155,6 +149,12 @@ function makeTreeTableSection(title, content, visible) {
         }
     }
     update();
+
+    var showHide = function(ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        visible = !visible;
+        update();
+    };
 
     ttButton.addEventListener('click', showHide, false);
 
