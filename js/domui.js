@@ -137,6 +137,7 @@ Browser.prototype.popit = function(ev, name, ele, opts)
 }
 
 function makeTreeTableSection(title, content, visible) {
+
     var ttButton = makeElement('i');
     function update() {
         if (visible) {
@@ -149,13 +150,17 @@ function makeTreeTableSection(title, content, visible) {
     }
     update();
 
-    ttButton.addEventListener('click', function(ev) {
+    var showHide = function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         visible = !visible;
         update();
-    }, false);
+    };
+
+    ttButton.addEventListener('click', showHide, false);
 
     var heading = makeElement('h6', [ttButton, ' ', title], {}, {display: 'block', background: 'gray', color: 'white', width: '100%', padding: '5px 2px', margin: '0px'});
+    heading.addEventListener('click', showHide, false);
+
     return makeElement('div', [heading, content], {});
 }
 
