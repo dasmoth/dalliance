@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
@@ -101,7 +101,7 @@ Browser.prototype.showTrackAdder = function(ev) {
     if (!this.noRegistryTabs) {
         var regButton = this.makeButton('Registry', 'Browse compatible datasources from the DAS registry');
         addModeButtons.push(regButton);
-        
+
         for (var m in this.mappableSources) {
             var mf  = function(mm) {
                 var mapButton = thisB.makeButton(thisB.chains[mm].srcTag, 'Browse datasources mapped from ' + thisB.chains[mm].srcTag);
@@ -125,7 +125,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             groupedDefaults[g] = [s];
         }
     }
-    
+
 
     var makeHubButton = function(tdb) {
         var hub = tdb.hub;
@@ -137,7 +137,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         var hubButton = thisB.makeButton(hbContent, hub.longLabel);
         hubButton.hub = tdb;
         addModeButtons.push(hubButton);
-        
+
         hubButton.addEventListener('click', function(ev) {
             ev.preventDefault(); ev.stopPropagation();
             activateButton(addModeButtons, hubButton);
@@ -156,14 +156,14 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (err) {
                     console.log(err);
                 }
-                
+
                 makeHubStab(tracks);
             });
         }, false);
 
         hubMenuButton.addEventListener('click', function(ev) {
             ev.preventDefault(); ev.stopPropagation();
-            
+
             var removeHubItem = makeElement('li', makeElement('a', 'Remove hub'));
             var allOnItem = makeElement('li',  makeElement('a', 'Enable all'));
             var allOffItem = makeElement('li',  makeElement('a', 'Disable all'));
@@ -216,7 +216,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     if (err) {
                         console.log(err);
                     }
-                    
+
                     for (var ti = 0; ti < tracks.length; ++ti) {
                         var ds = tracks[ti].toDallianceSource();
                         if (!thisB.currentlyActive(ds)) {
@@ -231,7 +231,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     if (err) {
                         console.log(err);
                     }
-                    
+
                     for (var ti = 0; ti < tracks.length; ++ti) {
                         var ds = tracks[ti].toDallianceSource();
                         if (thisB.currentlyActive(ds)) {
@@ -262,7 +262,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 firstDefSources = ds;
             }
         })(g, groupedDefaults[g]);
-    }   
+    }
     var custButton = this.makeButton('DAS', 'Add data using the DAS protocol');
     addModeButtons.push(custButton);
     var binButton = this.makeButton('Files', 'Add data from files on disk or the web');
@@ -280,7 +280,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     var modeButtonHolder = makeElement('ul', addModeButtons, {className: 'nav nav-tabs'}, {marginBottom: '0px'});
     popup.appendChild(modeButtonHolder);
-    
+
     var custURL, custName, custCS, custQuant, custFile, custUser, custPass;
     var customMode = false;
     var dataToFinalize = null;
@@ -290,7 +290,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             ev.stopPropagation(); ev.preventDefault();
             doAdd();
             return false;
-    }, true); 
+    }, true);
     var stabHolder = makeElement('div');
     stabHolder.style.position = 'relative';
     stabHolder.style.overflow = 'scroll';
@@ -321,16 +321,16 @@ Browser.prototype.showTrackAdder = function(ev) {
             stabHolder.appendChild(makeElement('p', 'Dalliance was unable to retrieve data source information from the DAS registry, please try again later'));
             return;
         }
-        
+
         var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'}, {width: '100%'});
-        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
+        var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'});
         var idx = 0;
 
         var sources = [];
         for (var i = 0; i < msources.length; ++i) {
             sources.push(msources[i]);
         }
-        
+
         sources.sort(function(a, b) {
             return a.name.toLowerCase().trim().localeCompare(b.name.toLowerCase().trim());
         });
@@ -400,7 +400,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
         customMode = false;
         removeChildren(stabHolder);
-        
+
         let buttonIdSeed = 0;
 
         var ttab = makeElement('div', null, {}, {width: '100%'});
@@ -408,14 +408,14 @@ Browser.prototype.showTrackAdder = function(ev) {
         for (var i = 0; i < tracks.length; ++i) {
             sources.push(tracks[i]);
         }
-        
+
         sources.sort(function(a, b) {
             return a.shortLabel.toLowerCase().trim().localeCompare(b.shortLabel.toLowerCase().trim());
         });
 
         var groups = [];
         var tops = [];
-        
+
         for (var ti = 0; ti < sources.length; ++ti) {
             var track = sources[ti];
             if (track.children && track.children.length > 0 && track.container != 'multiWig') {
@@ -432,7 +432,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         }
 
         groups.sort(THUB_COMPARE);
-        
+
         var buttons = [];
         for (var gi = 0; gi < groups.length; ++gi) {
             var group = groups[gi];
@@ -452,7 +452,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 var dimX = dprops.dimX, dimY = dprops.dimY;
                 var sgX = dg.subgroups[dimX];
                 var sgY = dg.subgroups[dimY];
-                
+
                 var trks = {};
                 for (var ci = 0; ci < group.children.length; ++ci) {
                     var child = group.children[ci];
@@ -467,9 +467,9 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var header = makeElement('tr');
                     header.appendChild(makeElement('th', null, {}, {width: '150px', height: '100px'}));   // blank corner element
                     for (var si = 0; si < sgX.titles.length; ++si) {
-                        var h = makeElement('th', makeElement('div', sgX.titles[si], {}, {transform: 'rotate(-60deg)', 
-                                                                       transformOrigin: '0% 100%', 
-                                                                       webkitTransform: 'rotate(-60deg) translate(20px,10px)', 
+                        var h = makeElement('th', makeElement('div', sgX.titles[si], {}, {transform: 'rotate(-60deg)',
+                                                                       transformOrigin: '0% 100%',
+                                                                       webkitTransform: 'rotate(-60deg) translate(20px,10px)',
                                                                        webkitTransformOrigin: '0% 100%',
                                                                        textAlign: 'left'}), {}, {width: '35px',
                                                                                                  height: '100px',
@@ -484,7 +484,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var vY = sgY.tags[yi];
                     var row = makeElement('tr');
                     row.appendChild(makeElement('th', sgY.titles[yi]), {});
-                    
+
                     for (var xi = 0; xi < sgX.titles.length; ++xi) {
                         var vX = sgX.tags[xi];
                         var cell = makeElement('td');
@@ -493,11 +493,11 @@ Browser.prototype.showTrackAdder = function(ev) {
                             var ds = track.toDallianceSource();
                             if (!ds)
                                 continue;
-                            
+
                             var r = makeElement('tr');
                             var bd = makeElement('td');
                             bd.style.textAlign = 'center';
-                            
+
                             var b = makeElement('input');
                             b.type = 'checkbox';
                             b.dalliance_source = ds;
@@ -516,16 +516,16 @@ Browser.prototype.showTrackAdder = function(ev) {
 
                         }
                         row.appendChild(cell);
-                    } 
+                    }
                     mbody.appendChild(row);
                 }
                 matrix.appendChild(mbody);
-                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, thisB.noDefaultHubGroupShow ? false : gi==0 ));
             } else {
                 var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'}); 
+                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%', tableLayout: 'fixed'});
                 var idx = 0;
-            
+
                 group.children.sort(THUB_COMPARE);
                 for (var i = 0; i < group.children.length; ++i) {
                     const buttonId = 'hb' + (++buttonIdSeed);
@@ -538,7 +538,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var r = makeElement('tr');
                     var bd = makeElement('td', null, {}, {width: '30px'});
                     bd.style.textAlign = 'center';
-                    
+
                     var b = makeElement('input');
                     b.type = 'checkbox';
                     b.dalliance_source = ds;
@@ -572,7 +572,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 } else {
                     ttab.appendChild(stab);
                 }
-                
+
             }
         }
 
@@ -592,7 +592,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         thisB.addTierListener(function(l) {
             setChecks();
         });
-        
+
         stabHolder.appendChild(ttab);
     }
 
@@ -603,7 +603,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             makeStab(thisB.availableSources);
         }, false);
     }
- 
+
     binButton.addEventListener('click', function(ev) {
         ev.preventDefault(); ev.stopPropagation();
         switchToBinMode();
@@ -631,14 +631,14 @@ Browser.prototype.showTrackAdder = function(ev) {
         pageHolder.appendChild(document.createTextNode('URL: '));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.biodalliance.org/datasets/ensGene.bb'}, {width: '100%'});
         pageHolder.appendChild(custURL);
-        
+
         pageHolder.appendChild(makeElement('br'));
         pageHolder.appendChild(makeElement('b', '- or -'));
         pageHolder.appendChild(makeElement('br'));
         pageHolder.appendChild(document.createTextNode('File: '));
         custFile = makeElement('input', null, {type: 'file', multiple: 'multiple'});
         pageHolder.appendChild(custFile);
-        
+
         pageHolder.appendChild(makeElement('p', 'Clicking the "Add" button below will initiate a series of test queries.'));
 
         stabHolder.appendChild(pageHolder);
@@ -659,12 +659,12 @@ Browser.prototype.showTrackAdder = function(ev) {
         var pageHolder = makeElement('div', null, {}, {paddingLeft: '10px', paddingRight: '10px'});
         pageHolder.appendChild(makeElement('h3', 'Connect to a track hub.'));
         pageHolder.appendChild(makeElement('p', ['Enter the top-level URL (usually points to a file called "hub.txt") of a UCSC-style track hub']));
-        
+
         custURL = makeElement('input', '', {size: 120, value: 'http://www.biodalliance.org/datasets/testhub/hub.txt'}, {width: '100%'});
         pageHolder.appendChild(custURL);
-        
+
         stabHolder.appendChild(pageHolder);
-        
+
         custURL.focus();
     }
 
@@ -686,7 +686,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         var customForm = makeElement('div', null, {},  {paddingLeft: '10px', paddingRight: '10px'});
         customForm.appendChild(makeElement('h3', 'Add custom DAS data'));
         customForm.appendChild(makeElement('p', 'This interface is intended for adding custom or lab-specific data.  Public data can be added more easily via the registry interface.'));
-                
+
         customForm.appendChild(document.createTextNode('URL: '));
         customForm.appendChild(makeElement('br'));
         custURL = makeElement('input', '', {size: 80, value: 'http://www.derkholm.net:8080/das/medipseq_reads/'}, {width: '100%'});
@@ -728,7 +728,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                     var source = {uri: curi};
                     var lcuri = curi.toLowerCase();
                     if (lcuri.indexOf("https://www.encodeproject.org/") == 0 &&
-                        lcuri.indexOf("@@download") >= 0) 
+                        lcuri.indexOf("@@download") >= 0)
                     {
                         source.transport = 'encode';
                     }
@@ -737,7 +737,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             } else if (customMode === 'reset') {
                 switchToCustomMode();
             } else if (customMode === 'reset-bin') {
-                switchToBinMode(); 
+                switchToBinMode();
             } else if (customMode === 'reset-hub') {
                 switchToHubConnectMode();
             } else if (customMode === 'prompt-bai') {
@@ -784,7 +784,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 if (!/^.+:\/\//.exec(curi)) {
                     curi = 'http://' + curi;
                 }
-                
+
                 tryAddHub(curi);
             } else if (customMode === 'multiple') {
                 for (var mi = 0; mi < multipleSet.length; ++mi) {
@@ -831,7 +831,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             }
 
         }
-        
+
         connectTrackHub(curi, function(hub, err) {
             if (err) {
                 if (!retry) {
@@ -871,7 +871,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                         }
                         thisB.hubs.push(hc);
                         thisB.hubObjects.push(hub.genomes[genome]);
-                        
+
                         var hubButton = makeHubButton(hub.genomes[genome]);
                         modeButtonHolder.appendChild(hubButton);
 
@@ -952,7 +952,7 @@ Browser.prototype.showTrackAdder = function(ev) {
             function(sources) {
                 if (!sources || sources.length == 0) {
                     return sqfail();
-                } 
+                }
 
                 var fs = null;
                 if (sources.length == 1) {
@@ -979,7 +979,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                         nds.capabilities = fs.capabilities;
                     }
                     quantDetermined = true
-                    
+
                     if (fs.coords && fs.coords.length == 1) {
                         var coords = fs.coords[0];
                         if (coordsMatch(coords, thisB.coordSystem)) {
@@ -993,7 +993,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                             }
                         }
                     }
-                    
+
                 }
                 return addDasCompletionPage(nds, coordsDetermined, quantDetermined);
             },
@@ -1007,7 +1007,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         var nds = {name: s.name};
         if (s.credentials)
             nds.credentials = s.credentials;
-        
+
         if (s.mapping && s.mapping != '__default__')
             nds.mapping = s.mapping;
 
@@ -1124,7 +1124,7 @@ Browser.prototype.showTrackAdder = function(ev) {
 
     function completeBAM(nds) {
         var indexF;
-        if (nds.baiBlob) 
+        if (nds.baiBlob)
             indexF = new BlobFetchable(nds.baiBlob);
         else if (nds.transport == 'encode')
             indexF = new EncodeFetchable(nds.bamURI + '.bai');
@@ -1185,7 +1185,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         customMode = 'reset-bin';
         return;
     }
-                     
+
     var addDasCompletionPage = function(nds, coordsDetermined, quantDetermined, quantIrrelevant) {
         refreshButton.style.display = 'none';
         addButton.style.display = 'inline';
@@ -1204,7 +1204,7 @@ Browser.prototype.showTrackAdder = function(ev) {
         //stabHolder.appendChild(document.createTextNode('Pass: '));
         custPass = makeElement('input', '');
         // stabHolder.appendChild(custPass);
-        
+
 
         stabHolder.appendChild(makeElement('br'));
         stabHolder.appendChild(makeElement('br'));
