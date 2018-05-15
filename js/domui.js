@@ -158,7 +158,7 @@ function makeTreeTableSection(title, content, visible) {
 
     ttButton.addEventListener('click', showHide, false);
 
-    var heading = makeElement('h6', [ttButton, ' ', title], {}, {display: 'block', background: 'gray', color: 'white', width: '100%', padding: '5px 2px', margin: '0px'});
+    var heading = makeElement('h6', [ttButton, ' ', title], {}, {display: 'block', background: 'gray', color: 'white', width: '100%', padding: '5px 2px', margin: '0px', cursor: 'pointer'});
     heading.addEventListener('click', showHide, false);
 
     return makeElement('div', [heading, content], {});
