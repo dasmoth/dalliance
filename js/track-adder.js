@@ -568,7 +568,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                 }
 
                 if (groups.length > 1 || group.shortLabel !== 'Others') {
-                    ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+                    ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, thisB.noDefaultHubGroupShow ? false : gi==0));
                 } else {
                     ttab.appendChild(stab);
                 }
