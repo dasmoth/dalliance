@@ -205,8 +205,8 @@ BigWigView.prototype.readWigDataById = function(chr, min, max, callback) {
 
     var cirFobRecur2 = function(cirBlockData, offset, level) {
         var ba = new Uint8Array(cirBlockData);
-        var sa = new Int16Array(cirBlockData);
-        var la = new Int32Array(cirBlockData);
+        var sa = new Int16Array(cirBlockData, 0, cirBlockData.byteLength >> 1);
+        var la = new Int32Array(cirBlockData, 0, cirBlockData.byteLength >> 2);
 
         var isLeaf = ba[offset];
         var cnt = sa[offset/2 + 1];
