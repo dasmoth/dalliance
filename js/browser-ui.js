@@ -57,7 +57,7 @@ Browser.prototype.initUI = function(holder, genomePanel) {
     }
 
     holder.classList.add('dalliance');
-    var toolbar = b.toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'});
+    var toolbar = b.toolbar = makeElement('div', null, {className: 'btn-toolbar toolbar'}, {display: 'block'});
 
     var title = b.coordSystem.speciesName + ' ' + b.nameForCoordSystem(b.coordSystem);
     if (this.setDocumentTitle) {
