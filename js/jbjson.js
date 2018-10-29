@@ -38,7 +38,7 @@ function jbori(strand) {
 JBrowseStore.prototype.features = function(segment, opts, callback) {
     opts = opts || {};
 
-    url = this.base + '/features/' + segment.name;
+    var url = this.base + '/features/' + segment.name;
 
     var filters = [];
     if (this.query) {
@@ -60,7 +60,7 @@ JBrowseStore.prototype.features = function(segment, opts, callback) {
 	    } else {
 		var jf = JSON.parse(req.response)['features'];
 		var features = [];
-		for (fi = 0; fi < jf.length; ++fi) {
+		for (var fi = 0; fi < jf.length; ++fi) {
 		    var j = jf[fi];
 		    
 		    var f = new DASFeature();
