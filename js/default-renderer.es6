@@ -533,6 +533,7 @@ function prepareSubtiers(tier, canvas, y=0, grid=true) {
 
         superGroup.forEach(glyphs => {
             let gGlyphs = groupGlyphs[glyphs];
+            groupGlyphs[glyphs] = null;
             if (gGlyphs) {
                 sgGlyphs.push(gGlyphs);
                 sgMin = Math.min(sgMin, gGlyphs.min());
@@ -545,7 +546,14 @@ function prepareSubtiers(tier, canvas, y=0, grid=true) {
         });
     }, tier.superGroups);
 
-    R.map(glyph => glyphs.push(glyph), groupGlyphs);
+    R.map(
+        glyph => {
+            if (glyph) {
+                glyphs.push(glyph)
+            }
+        },
+        groupGlyphs
+    );
 
     let [subtiers, subtiersExceeded] = bumpSubtiers(tier, glyphs, grid, y);
 
