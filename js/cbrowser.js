@@ -179,14 +179,39 @@ function Browser(opts) {
     if (opts.baseColors) {
         this.baseColors = opts.baseColors
     } else {
-        this.baseColors = {
-            A: 'green',
-            C: 'blue',
-            G: 'orange',
-            T: 'red',
-            '-' : 'hotpink', // deletion
-            'I' : 'red' // insertion
-        };
+        if (opts.aminoAcids) {
+            this.baseColors = {
+                F: 'rgb(182, 201, 237)',
+                L: 'rgb(213, 236, 213)',
+                I: 'rgb(239, 213, 211)',
+                M: 'rgb(255, 23, 0)',
+                V: 'rgb(255, 172, 0)',
+                S: 'rgb(255, 244, 19)',
+                P: 'rgb(138, 189, 67)',
+                T: 'rgb(36, 153, 57)',
+                A: 'rgb(0, 166, 236)',
+                Y: 'rgb(0, 101, 178)',
+                H: 'rgb(215, 206, 182)',
+                Q: 'rgb(252, 176, 124)',
+                N: 'rgb(159, 148, 186)',
+                K: 'rgb(133, 117, 67)',
+                D: 'rgb(108, 242, 51)',
+                E: 'rgb(0, 253, 255)',
+                C: 'rgb(248, 129, 51)',
+                W: 'rgb(243, 68, 252)',
+                R: 'rgb(207, 207, 207)',
+                G: 'rgb(166, 213, 227)'
+            };
+        } else {
+            this.baseColors = {
+                A: 'green',
+                C: 'blue',
+                G: 'orange',
+                T: 'red',
+                '-' : 'hotpink', // deletion
+                'I' : 'red' // insertion
+            };
+        }
     }
 
     if (opts.viewStart !== undefined && typeof(opts.viewStart) !== 'number') {
@@ -2647,6 +2672,7 @@ if (typeof(module) !== 'undefined') {
     var sa = require('./sourceadapters');
     var TwoBitSequenceSource = sa.TwoBitSequenceSource;
     var EnsemblSequenceSource = sa.EnsemblSequenceSource;
+    var EnsemblProteinSequenceSource = sa.EnsemblProteinSequenceSource;
     var DASSequenceSource = sa.DASSequenceSource;
 
     var KnownSpace = require('./kspace').KnownSpace;

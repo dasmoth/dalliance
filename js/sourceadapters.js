@@ -1,4 +1,4 @@
-/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+//* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 // 
 // Dalliance Genome Explorer
@@ -108,7 +108,11 @@ Browser.prototype.createSources = function(config) {
         if (config.twoBitURI || config.twoBitBlob) {
             ss = new TwoBitSequenceSource(config);
         } else if (config.ensemblURI) {
-            ss = new EnsemblSequenceSource(config);
+            if (config.aminoAcids) {
+                ss = new EnsemblProteinSequenceSource(config);
+            } else {
+                ss = new EnsemblSequenceSource(config);
+            }
         } else {
             ss = new DASSequenceSource(config);
         }
@@ -590,9 +594,7 @@ TwoBitSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
 };
 
 function EnsemblSequenceSource(source) {
-    this.source = source;
-    // http://data.gramene.org/ensembl/info/assembly/triticum_aestivum/2B?content-type=application/json
-    // http://data.gramene.org/ensembl/sequence/region/triticum_aestivum/2B:8001..18000:1?content-type=application/json
+  this.source = source;
 }
 
 EnsemblSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
@@ -641,6 +643,55 @@ EnsemblSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
   req.responseType = 'text';
   req.send();
 };
+
+function EnsemblProteinSequenceSource(source) {
+  this.source = source;
+}
+
+EnsemblProteinSequenceSource.prototype.fetch = function(chr, min, max, pool, callback) {
+  var url = this.source.ensemblURI + '/sequence/id/' + chr + '?type=protein&content-type=application/json';
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+  	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+        var err = 'Error code ' + req.status;
+        try {
+          var jr = JSON.parse(req.response);
+          if (jr.error) {
+            err = jr.error;
+          }
+        } catch (ex) {};
+
+		    callback(err, null);
+	    } else {
+    		var jr = JSON.parse(req.response);
+        var sequence = new DASSequence(chr, 1, jr.seq.length + 1, 'PEP', jr.seq);
+        return callback(null, sequence);
+      }
+    }
+  }
+  req.open('GET', url, true);
+  req.responseType = 'text';
+  req.send('');
+}
+
+EnsemblProteinSequenceSource.prototype.getSeqInfo = function(chr, cnt) {
+  var url = this.source.ensemblURI + '/sequence/id/' + chr + '?type=protein&content-type=application/json';
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+	  if (req.readyState == 4) {
+      if (req.status >= 300) {
+	      cnt();
+      } else {
+  		  var jr = JSON.parse(req.response);
+        cnt({length:jr.seq.length});
+      }
+    }
+  }
+  req.open('GET', url, true);
+  req.responseType = 'text';
+  req.send('');
+}
 
 DASFeatureSource.prototype.getScales = function() {
     return [];
@@ -1753,6 +1804,7 @@ if (typeof(module) !== 'undefined') {
 
         TwoBitSequenceSource: TwoBitSequenceSource,
         EnsemblSequenceSource: EnsemblSequenceSource,
+        EnsemblProteinSequenceSource: EnsemblProteinSequenceSource,
         DASSequenceSource: DASSequenceSource,
         MappedFeatureSource: MappedFeatureSource,
         CachingFeatureSource: CachingFeatureSource,
