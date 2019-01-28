@@ -38,6 +38,7 @@
     "watchify": "~3.6.1"
   },
   "files": [
+    "js",
     "lib",
     "css",
     "fonts",
