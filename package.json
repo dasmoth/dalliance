@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "es6-promise": "~3.0.2",
-    "jszlib": "dasmoth/jszlib",
+    "jszlib": "github:dasmoth/jszlib",
     "ramda": "^0.21.0"
   },
   "devDependencies": {
@@ -37,7 +37,14 @@
     "vinyl-source-stream": "1.1.0",
     "watchify": "~3.6.1"
   },
-  "files": ["js", "css", "fonts", "help", "img", "build/worker-all.js"],
+  "files": [
+    "lib",
+    "css",
+    "fonts",
+    "help",
+    "img",
+    "build/worker-all.js"
+  ],
   "scripts": {
     "compile": "babel js -d lib && gulp compile-worker"
   }
