@@ -43,7 +43,8 @@
     "fonts",
     "help",
     "img",
-    "build/worker-all.js"
+    "build/worker-all.js",
+    "index.js"
   ],
   "scripts": {
     "compile": "babel js -d lib && gulp compile-worker"
