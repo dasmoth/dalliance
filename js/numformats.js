@@ -4,7 +4,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2014
 //
-// memstore.js
+// numformats.js
 //
 
 function formatLongInt(n) {
