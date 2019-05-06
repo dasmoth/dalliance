@@ -1,9 +1,9 @@
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2010
 //
-// chainset.js: liftover support
+// cigar.js: liftover support
 //
 
 var CIGAR_REGEXP = new RegExp('([0-9]*)([MIDS])', 'g');

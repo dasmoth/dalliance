@@ -1,10 +1,10 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// 
+//
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2011
 //
-// bin.js general binary data support
+// search.js general binary data support
 //
 
 "use strict";
@@ -36,7 +36,7 @@ Browser.prototype.search = function(g, statusCallback, opts) {
     var thisB = this;
     opts = opts || {};
     var srPadding = opts.padding || this.defaultSearchRegionPadding;
-    
+
     var m = REGION_PATTERN.exec(g);
 
     if (m) {
@@ -69,7 +69,7 @@ Browser.prototype.search = function(g, statusCallback, opts) {
             var nchr = null;
             for (var fi = 0; fi < found.length; ++fi) {
                 var f = found[fi];
-            
+
                 if (nchr == null) {
                     nchr = f.segment;
                 }
@@ -160,7 +160,7 @@ Browser.prototype.doDasSearch = function(source, g, searchCallback) {
         var found2 = [];
         for (var fi = 0; fi < found.length; ++fi) {
             var f = found[fi];
-            
+
             if (f.label.toLowerCase() != g.toLowerCase()) {
                 // ...because Dazzle can return spurious overlapping features.
                 continue;

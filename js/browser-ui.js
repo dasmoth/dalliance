@@ -4,7 +4,7 @@
 // Dalliance Genome Explorer
 // (c) Thomas Down 2006-2013
 //
-// browser-us.js: standard UI wiring
+// browser-ui.js: standard UI wiring
 //
 
 "use strict";
