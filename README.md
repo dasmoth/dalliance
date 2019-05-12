@@ -29,6 +29,14 @@ To build:
 ...then open any of the HTML files in the `example-browsers` directory
 to test.
 
+Electron app
+------------
+
+To run as an electron app, do:
+
+```
+npm start
+```
 
 Documentation
 -------------

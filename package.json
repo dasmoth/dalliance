@@ -20,6 +20,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "12.0.1",
+    "electron": "1.7.6",
     "eslint": "^2.13.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.3",
@@ -47,6 +48,8 @@
   ],
   "main": "lib/module-exports.js",
   "scripts": {
-    "compile": "babel js -d lib && gulp compile-worker"
+    "compile": "babel js -d lib && gulp compile-worker",
+    "start": "electron main.js"
   }
+
 }
