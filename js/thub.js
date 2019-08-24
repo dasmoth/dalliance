@@ -26,6 +26,18 @@ var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
 
 var THUB_PENNANT_PREFIX = 'http://genome.ucsc.edu/images/';
 
+
+function resolveHubURL(base, relURL, forceProtocol) {
+    var url = relativeURL(base, relURL);
+    if (forceProtocol && url.startsWith(forceProtocol + ':') !== 0) {
+        const protocolIdx = url.indexOf(':');
+        if (protocolIdx > 0) {
+            url = forceProtocol + url.substring(protocolIdx);
+        }
+    }
+    return url;
+}
+
 function TrackHub(url) {
     this.genomes = {};
     this.url = url;
@@ -41,8 +53,20 @@ TrackHubTrack.prototype.get = function(k) {
         return this._parent.get(k);
 }
 
-function TrackHubDB(hub) {
+function TrackHubDB(hub, opts) {
     this.hub = hub;
+
+    opts = opts || {};
+    if (opts.credentials) {
+        this.credentials = opts.credentials;
+    }
+    if (opts.forceProtocol) {
+        this.forceProtocol = opts.forceProtocol;
+    }
+}
+
+TrackHubDB.prototype.dataURL = function(relURL) {
+    return resolveHubURL(this.absURL, relURL, this.forceProtocol);
 }
 
 TrackHubDB.prototype.getTracks = function(callback) {
@@ -171,7 +195,7 @@ function connectTrackHub(hubURL, callback, opts) {
         
         
         if (hub.genomesFile) {
-            var genURL = relativeURL(hubURL, hub.genomesFile);
+            var genURL = resolveHubURL(hubURL, hub.genomesFile, opts.forceProtocol);
             textXHR(genURL, function(genFile, err) {
                 if (err) {
                     return callback(null, err);
@@ -180,21 +204,21 @@ function connectTrackHub(hubURL, callback, opts) {
                 var stanzas = genFile.split(THUB_STANZA_REGEXP);
                 for (var s = 0; s < stanzas.length; ++s) {
                     var toks = stanzas[s].split(THUB_PARSE_REGEXP);
-                    var gprops = new TrackHubDB(hub);
-                    if (opts.credentials) {
-                        gprops.credentials = opts.credentials;
-                    }
+                    var gprops = new TrackHubDB(hub, opts);
+                    // if (opts.credentials) {
+                    //    gprops.credentials = opts.credentials;
+                    //}
 
                     for (var l = 0; l < toks.length - 2; l += 3) {
                         gprops[toks[l+1]] = toks[l+2];
                     }
 
                     if (gprops.twoBitPath) {
-                        gprops.twoBitPath = relativeURL(genURL, gprops.twoBitPath);
+                        gprops.twoBitPath = resolveHubURL(genURL, gprops.twoBitPath, opts.forceProtocol);
                     }
 
                     if (gprops.genome && gprops.trackDb) {
-                        gprops.absURL = relativeURL(genURL, gprops.trackDb);
+                        gprops.absURL = resolveHubURL(genURL, gprops.trackDb, opts.forceProtocol);
                         hub.genomes[gprops.genome] = gprops;
                     }
                 }
@@ -226,7 +250,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 
     var searchTrix = this.get('searchTrix');
     if (searchTrix) {
-        source.trixURI = relativeURL(this._db.absURL, searchTrix);
+        source.trixURI = this._db.dataURL(searchTrix);
     }
 
     if (this.container == 'multiWig') {
@@ -268,7 +292,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
             var bedTokens = typeToks[1]|0
             var bedPlus = typeToks[2] == '+';
 
-            source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
+            source.bwgURI = this._db.dataURL(this.bigDataUrl);
             source.style = this.bigbedStyles();
             if (this._db.credentials) {
                 source.credentials = true;
@@ -277,7 +301,7 @@ TrackHubTrack.prototype.toDallianceSource = function() {
                 source.collapseSuperGroups = true;
             return source;
         } else if (typeToks[0] == 'bigWig' && this.bigDataUrl) {
-            source.bwgURI = relativeURL(this._db.absURL, this.bigDataUrl);
+            source.bwgURI = this._db.dataURL(this.bigDataUrl);
             source.style = this.bigwigStyles();
             source.noDownsample = true;     // FIXME seems like a blunt instrument...
             
@@ -291,13 +315,13 @@ TrackHubTrack.prototype.toDallianceSource = function() {
 
             return source;
         } else if (typeToks[0] == 'bam'  && this.bigDataUrl) {
-            source.bamURI = relativeURL(this._db.absURL, this.bigDataUrl);
+            source.bamURI = this._db.dataURL(this.bigDataUrl);
             if (this._db.credentials) {
                 source.credentials = true;
             }
             return source;
         } else if (typeToks[0] == 'vcfTabix' && this.bigDataUrl) {
-            source.uri = relativeURL(this._db.absURL, this.bigDataUrl);
+            source.uri = this._db.dataURL(this.bigDataUrl);
             source.tier_type = 'tabix';
             source.payload = 'vcf';
             if (this._db.credentials) {

@@ -386,7 +386,7 @@ function textXHR(url, callback, opts) {
 function relativeURL(base, rel) {
     // FIXME quite naive -- good enough for trackhubs?
 
-    if (rel.indexOf('http:') == 0 || rel.indexOf('https:') == 0) {
+    if (rel.indexOf('http:') === 0 || rel.indexOf('https:') === 0 || rel.indexOf('ftp:') === 0) {
         return rel;
     }
 
