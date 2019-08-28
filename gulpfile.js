@@ -13,7 +13,7 @@ var eslint = require('gulp-eslint');
 
 
 gulp.task('build-worker', function() {
-    browserify({
+    return browserify({
         entries: 'js/fetchworker.js',
         extensions: ['.js', '.es6'],
         debug: true,
@@ -29,9 +29,8 @@ gulp.task('build-worker', function() {
         .pipe(gulp.dest('build/'));
 });
 
-
 gulp.task('build-main', function() {
-    browserify({
+    return browserify({
         entries: 'js/exports.js',
         extensions: ['.js', '.es6'],
         debug: true,
@@ -42,12 +41,13 @@ gulp.task('build-main', function() {
         .bundle()
         .pipe(source('dalliance-all.js'))
         .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('build/'));
 });
 
 gulp.task('compile-worker', function() {
-    browserify({
+    return browserify({
         entries: 'js/fetchworker.js',
         extensions: ['.js', '.es6'],
         debug: true,
@@ -65,7 +65,7 @@ gulp.task('compile-worker', function() {
 });
 
 gulp.task('compile-main', function() {
-    browserify({
+    return browserify({
         entries: 'js/exports.js',
         extensions: ['.js', '.es6'],
         debug: true,
@@ -86,8 +86,8 @@ gulp.task('watch', function() {
   gulp.watch('js/*.js', ['default']);
 });
 
-gulp.task('default', ['build-main', 'build-worker']);
-gulp.task('compile', ['compile-main', 'compile-worker']);
+gulp.task('default', gulp.series('build-main', 'build-worker'));
+gulp.task('compile', gulp.series('compile-main', 'compile-worker'));
 
 gulp.task('lint-es6', function() {
     return gulp.src('js/*.es6')
